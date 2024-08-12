@@ -9,10 +9,10 @@ export const getters = {
 }
 
 export const actions = {
-  async fetchServices({ commit }, page ){
+  async fetchServices({ commit } ){
     try {
-      const { data } = await this.$axios.get('http://127.0.0.1:8000/api/services')
-      commit('setServices', data.category.data);
+      const  data  = await this.$axios.get('http://127.0.0.1:8000/api/services')
+      commit('setServices', data);
       return true
     }catch (err){
       // commit('setErrorMessages', err.response.data)

@@ -4,7 +4,7 @@
 
 <template>
   <div>
-    <h1>services</h1>
+    <h1>Examples</h1>
   </div>
 </template>
 

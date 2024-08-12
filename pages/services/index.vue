@@ -1,9 +1,11 @@
-<script setup>
+<script>
 
 </script>
 
 <template>
-  $END$
+  <div>
+    <h1>services</h1>
+  </div>
 </template>
 
 <style scoped>

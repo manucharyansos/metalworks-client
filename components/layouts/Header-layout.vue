@@ -1,78 +1,80 @@
 <template>
-  <header class="container-fluid justify-center">
-    <nav class="bg-white border-gray-200 px-4 py-2.5 dark:bg-gray-800">
-      <div class="flex flex-wrap justify-between">
-        <div class="flex items-center lg:order-2">
+  <header class="justify-center">
+    <nav class="bg-white dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
+      <div class="max-w-screen-3xl flex flex-wrap items-center mx-auto p-4">
+        <NuxtLink to="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+          <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo">
+          <span class="self-center text-xl font-semibold italic font-sans whitespace-nowrap dark:text-white">Metalwork's</span>
+        </NuxtLink>
+        <div class="flex items-center ml-auto justify-content-between lg:order-2 space-x-8 lg:space-x-4 rtl:space-x-reverse">
+          <form-base-input
+            type="text"
+            placeholder="Search"
+            label_class="mb-2 text-sm font-medium text-gray-900 sr-only"
+            classes="search_input focus:outline-none focus:border-neutral-50 block w-full ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          >
+            <template v-slot:label_svg>
+              <svg class="w-5 h-5 text-gray-900 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
+              </svg>
+            </template>
+          </form-base-input>
 
-          <div class="flex justify-content-around items-center">
+          <NuxtLink to="#" class="get_started_button flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">GET STARTED</NuxtLink>
+          <NuxtLink to="/login" class="login_button flex items-center justify-content-center text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">LOGIN</NuxtLink>
 
-            <form class="max-w-md mx-auto">
-              <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-              <div class="relative">
-                <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                  <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                  </svg>
-                </div>
-                <input
-                  type="search"
-                  id="default-search"
-                  class="search_input focus:outline-none focus:border-neutral-50 block w-full ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  placeholder="Search."
-                  required />
-               </div>
-            </form>
-
-            <a href="#" class="get_started_button text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">GET STARTED</a>
-            <a href="#" class="login_button text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">LOGIN</a>
-
-          </div>
-
-          <a href="#" class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-4 lg:px-5 py-2 lg:py-2.5 mr-2 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">Get started</a>
-          <button data-collapse-toggle="mobile-menu-2" type="button" class="inline-flex items-center p-2 ml-1 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="mobile-menu-2" aria-expanded="false">
+          <button data-collapse-toggle="navbar-sticky" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-sticky" aria-expanded="false">
             <span class="sr-only">Open main menu</span>
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
-            <svg class="hidden w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
+            </svg>
           </button>
         </div>
-        <div class="hidden justify-between items-center w-full lg:flex lg:w-auto lg:order-1" id="mobile-menu-2">
-          <a href="/" class="flex items-center">
-            <img src="https://flowbite.com/docs/images/logo.svg" class="mr-3 h-6 sm:h-9" alt="Metalwork's" />
-            <span class="self-center text-xl font-semibold italic font-sans whitespace-nowrap dark:text-white">Metalwork's</span>
-          </a>
-          <ul class="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0">
+        <div class="items-center justify-between ml-5 hidden w-full lg:flex lg:w-auto lg:order-1" id="navbar-sticky">
+          <ul class="flex flex-col p-4 lg:p-2 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 lg:space-x-4 rtl:space-x-reverse lg:flex-row lg:mt-0 lg:border-0 lg:bg-white dark:bg-gray-800 lg:dark:bg-gray-900 dark:border-gray-700">
             <li>
-              <a href="#" class="block text-base font-bold py-2 pr-4 pl-3 text-white rounded bg-primary-700 lg:bg-transparent lg:text-primary-700 lg:p-0 dark:text-white" aria-current="page">Materials</a>
+              <NuxtLink exact-active-class="active-link" class="block uppercase xl:text-base text-sm font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700" to="/materials">
+                Materials
+              </NuxtLink>
             </li>
             <li>
-              <a href="#" class="block text-base font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">Services</a>
+              <NuxtLink exact-active-class="active-link" class="block uppercase xl:text-base text-sm font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700" to="/services">
+                Services
+              </NuxtLink>
             </li>
             <li>
-              <a href="#" class="block text-base font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">Resources</a>
+              <NuxtLink exact-active-class="active-link" class="block uppercase xl:text-base text-sm font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700" to="/resources">
+                Resources
+              </NuxtLink>
             </li>
             <li>
-              <a href="#" class="block text-base font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">Examples</a>
+              <NuxtLink exact-active-class="active-link" class="block uppercase xl:text-base text-sm font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700" to="/examples">
+                Examples
+              </NuxtLink>
             </li>
             <li>
-              <a href="#" class="block text-base font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">Contact</a>
+              <NuxtLink exact-active-class="active-link" class="block uppercase xl:text-base text-sm font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700" to="/contact">
+                Contact
+              </NuxtLink>
             </li>
           </ul>
         </div>
       </div>
     </nav>
+
   </header>
 </template>
 <script>
 export default {
-  // name: "header-layout"
+  name: "header-layout"
 }
 </script>
 <style >
 .login_button {
-  box-shadow: rgba(143, 23, 23, 0.04) 0 0 1px 0, rgba(185, 19, 19, 0.87) 0 5px 8px 0;
+  box-shadow: rgba(103, 29, 29, 0.04) 0 0 1px 0, rgba(96, 10, 10, 0.87) 0 5px 8px 0;
 }
 .get_started_button {
-  box-shadow: rgba(143, 23, 23, 0.04) 0 0 1px 0, rgba(185, 19, 19, 0.87) 0 5px 8px 0;
+  box-shadow: rgba(80, 20, 20, 0.04) 0 0 1px 0, rgba(105, 10, 10, 0.87) 0 5px 8px 0;
 }
 .search_input:focus {
   outline: none;
@@ -85,5 +87,7 @@ input:focus {
   -moz-box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); /* Optional shadow */
   box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); /* Optional shadow */
 }
+
+
 
 </style>
