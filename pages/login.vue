@@ -1,15 +1,14 @@
 
 <template>
   <div>Login
-    <form-base-input label="Email" placeholder="Email" v-model="form.email" type="email"></form-base-input>
-    <form-base-input label="Password" placeholder="password" v-model="form.password" type="email"></form-base-input>
+    <form-base-input v-model="form.email" label="Email" placeholder="Email" type="email"></form-base-input>
+    <form-base-input v-model="form.password" label="Password" placeholder="password" type="email"></form-base-input>
 
-    <button @click="send">Login</button>
+    <button @click="sendLogin">Login</button>
   </div>
 </template>
 
 <script>
-import { mapActions } from "vuex";
 
 export default {
   data () {
@@ -21,9 +20,13 @@ export default {
     }
   },
   methods: {
-    ...mapActions('auth', ["login"]),
-    send () {
-      // this.login({ commit }, this.form)
+    sendLogin () {
+      this.$auth.loginWith('laravelSanctum', {
+        data: {
+          email: this.form.email,
+          password: this.form.password,
+        }
+      })
     }
   }
 }

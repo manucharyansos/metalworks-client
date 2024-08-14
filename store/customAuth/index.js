@@ -24,15 +24,19 @@ export const actions = {
     }
   },
 
-  async registerUser({ commit }, credentials) {
-    try {
-      const { data } = await this.$axios.post('/register', credentials);
-      commit('SET_TOKEN', data.token);
-      this.$axios.setToken(data.token, 'Bearer');
-      await this.fetchUser();
-    } catch (error) {
-      console.error('Register error:', error);
-    }
+  // async register({ commit }, credentials) {
+  //   try {
+  //     const { data } = await this.$axios.post('/register', credentials);
+  //     commit('SET_TOKEN', data.token);
+  //     this.$axios.setToken(data.token, 'Bearer');
+  //     await this.fetchUser();
+  //   } catch (error) {
+  //     console.error('Register error:', error);
+  //   }
+  // },
+
+  async registerUser({ commit }, userData) {
+    await this.$axios.post('/register', userData)
   },
 
   async logout({ commit }) {

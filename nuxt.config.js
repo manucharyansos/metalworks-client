@@ -29,12 +29,12 @@ export default {
           user: { url: '/api/user', method: 'get' }
           // getProducts: { url: '/api/products', method: 'get'}
         },
-        // redirect: {
-        //   login: '/login',
-        //   logout: '/',
-        //   callback: '/login',
-        //   home: '/'
-        // },
+        redirect: {
+          login: '/login',
+          logout: '/',
+          callback: '/login',
+          home: '/'
+        },
         cookie: {
           name: 'XSRF-TOKEN'
         },
@@ -64,10 +64,10 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/axios
+    '@nuxtjs/auth-next',
     '@nuxtjs/axios',
     // https://go.nuxtjs.dev/pwa
-    '@nuxtjs/pwa',
-    '@nuxtjs/auth'
+    '@nuxtjs/pwa'
   ],
 
   postcss: {
