@@ -3,11 +3,11 @@
     <nav class="bg-white dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
       <div class="max-w-screen-3xl flex flex-wrap items-center mx-auto p-4">
         <NuxtLink to="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-          <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo">
+          <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flow bite Logo">
           <span class="self-center text-xl font-semibold italic font-sans whitespace-nowrap dark:text-white">Metalwork's</span>
         </NuxtLink>
         <div class="flex items-center ml-auto justify-content-between lg:order-2 space-x-8 lg:space-x-4 rtl:space-x-reverse">
-          <form-base-input
+          <input-with-labels
             type="text"
             placeholder="Search"
             label_class="mb-2 text-sm font-medium text-gray-900 sr-only"
@@ -18,7 +18,7 @@
                 <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
               </svg>
             </template>
-          </form-base-input>
+          </input-with-labels>
 
           <NuxtLink to="#" class="get_started_button flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">GET STARTED</NuxtLink>
           <NuxtLink v-if="!$auth.loggedIn" to="/login" class="login_button flex items-center justify-content-center text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">LOGIN</NuxtLink>
@@ -32,7 +32,7 @@
             </svg>
           </button>
         </div>
-        <div class="items-center justify-between ml-5 hidden w-full lg:flex lg:w-auto lg:order-1" id="navbar-sticky">
+        <div id="navbar-sticky" class="items-center justify-between ml-5 hidden w-full lg:flex lg:w-auto lg:order-1">
           <ul class="flex flex-col p-4 lg:p-2 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 lg:space-x-4 rtl:space-x-reverse lg:flex-row lg:mt-0 lg:border-0 lg:bg-white dark:bg-gray-800 lg:dark:bg-gray-900 dark:border-gray-700">
             <li>
               <NuxtLink exact-active-class="active-link" class="block uppercase xl:text-base text-sm font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700" to="/materials">
@@ -69,12 +69,13 @@
 <script>
 // import { initFlowbite } from 'flowbite'
 import { useFlowbite } from "~/composables/useFlowbite";
-import auth from '~/middleware/auth'
+import InputWithLabels from "~/components/form/InputWithLabel.vue";
 export default {
   name: "HeaderLayout",
-  methods: { auth },
+  components: {InputWithLabels},
   mounted() {
     useFlowbite();
+    // initFlowbite()
   },
 }
 </script>
@@ -85,17 +86,8 @@ export default {
 .get_started_button {
   box-shadow: rgba(80, 20, 20, 0.04) 0 0 1px 0, rgba(105, 10, 10, 0.87) 0 5px 8px 0;
 }
-.search_input:focus {
-  outline: none;
 
-}
-input:focus {
-  outline: none; /* Remove default outline */
-  border: 2px solid #3498db; /* Custom border */
-  -webkit-box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); /* Optional shadow */
-  -moz-box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); /* Optional shadow */
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2); /* Optional shadow */
-}
+
 
 
 
