@@ -1,61 +1,51 @@
 export const state = () => ({
-  token: null,
-  user: null,
-});
+  resMessage: false,
+  user: []
+})
+
+export const getters = {
+  getErrorMessage(state){
+    return state.resMessage
+  },
+  getUser(state){
+    return state.user
+  }
+}
 
 export const mutations = {
-  SET_TOKEN(state, token) {
-    state.token = token;
+  setErrorMessage(state, err){
+    state.resMessage = err
   },
-  SET_USER(state, user) {
-    state.user = user;
-  },
-};
+  setUser(state, user){
+    state.user = user
+  }
+}
 
 export const actions = {
-  async login({ commit }, credentials) {
+  async fetchUser({commit}){
     try {
-      const { data } = await this.$axios.post('/login', credentials);
-      commit('SET_TOKEN', data.token);
-      this.$axios.setToken(data.token, 'Bearer');
-      await this.fetchUser();
+      const res = await this.$axios.get('/user')
+      commit('setUser', res.data)
     } catch (error) {
-      console.error('Login error:', error);
+      console.error(error);
     }
   },
-
-  // async register({ commit }, credentials) {
-  //   try {
-  //     const { data } = await this.$axios.post('/register', credentials);
-  //     commit('SET_TOKEN', data.token);
-  //     this.$axios.setToken(data.token, 'Bearer');
-  //     await this.fetchUser();
-  //   } catch (error) {
-  //     console.error('Register error:', error);
-  //   }
-  // },
-
-  async registerUser({ commit }, userData) {
-    await this.$axios.post('/register', userData)
-  },
-
-  async logout({ commit }) {
+  async loginUser({commit}, userData){
     try {
-      await this.$axios.post('/logout');
-      commit('SET_TOKEN', null);
-      commit('SET_USER', null);
-      this.$axios.setToken(false);
-    } catch (error) {
-      console.error('Logout error:', error);
+      await this.$auth.loginWith('laravelSanctum', userData)
+      return true
+    }
+    catch (err){
+      commit('setErrorMessage', err.response.data)
+      return false
     }
   },
-
-  async fetchUser({ commit }) {
+  async registerUser({commit}, userData){
     try {
-      const { data } = await this.$axios.get('/user');
-      commit('SET_USER', data);
-    } catch (error) {
-      console.error('Fetch user error:', error);
+      await this.$axios.post('/register', userData)
     }
-  },
-};
+    catch (err){
+      commit('setErrorMessage', err.response.data.errors)
+    }
+  }
+}

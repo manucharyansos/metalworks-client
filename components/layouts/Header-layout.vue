@@ -21,8 +21,10 @@
           </form-base-input>
 
           <NuxtLink to="#" class="get_started_button flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">GET STARTED</NuxtLink>
-          <NuxtLink to="/login" class="login_button flex items-center justify-content-center text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">LOGIN</NuxtLink>
-
+          <NuxtLink v-if="!$auth.loggedIn" to="/login" class="login_button flex items-center justify-content-center text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">LOGIN</NuxtLink>
+          <div v-else>
+            <img class="w-10 h-10 rounded-full" src="static/profile-picture-5.jpg" alt="Rounded avatar">
+          </div>
           <button data-collapse-toggle="navbar-sticky" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-sticky" aria-expanded="false">
             <span class="sr-only">Open main menu</span>
             <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
@@ -67,8 +69,10 @@
 <script>
 // import { initFlowbite } from 'flowbite'
 import { useFlowbite } from "~/composables/useFlowbite";
+import auth from '~/middleware/auth'
 export default {
   name: "HeaderLayout",
+  methods: { auth },
   mounted() {
     useFlowbite();
   },
