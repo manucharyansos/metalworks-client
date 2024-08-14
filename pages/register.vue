@@ -4,7 +4,7 @@
     <form-base-input v-model="email" type="email" placeholder="Email" label="Email"></form-base-input>
     <form-base-input v-model="password" type="email" placeholder="Password" label="Password"></form-base-input>
     <form-base-input v-model="password_confirm" type="email" placeholder="Password Confirm" label="Password confirm"></form-base-input>
-    <button @click="reg">Reg</button>
+    <button @click="register">Reg</button>
   </div>
 </template>
 <script>
@@ -21,16 +21,19 @@ export default {
   },
   methods: {
     ...mapActions('customAuth', ['registerUser']),
-    reg () {
-      this.registerUser({
-          data: {
-            name: this.name,
-            email: this.email,
-            password: this.password,
-            password_confirm: this.password_confirm,
-          }
-      })
+    async register() {
+      try {
+        await this.$axios.post('/register', {
+          email: this.email,
+          password: this.password
+        },
+        );
+        this.$router.push('/login');
+      } catch (error) {
+        console.error('Registration failed:', error);
+      }
     }
+  }
 
     // async reg({ commit }, credentials) {
     //   await this.registerUser({
@@ -40,6 +43,6 @@ export default {
     //     password_confirmation: this.password_confirm
     //   }, credentials)
     // }
-  }
+
 }
 </script>

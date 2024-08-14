@@ -10,7 +10,7 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-      { rel: 'stylesheet', href: '/https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css' }
+      // { rel: 'stylesheet', href: '/https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css' }
     ]
   },
 
@@ -21,12 +21,12 @@ export default {
     strategies: {
       'laravelSanctum': {
         provider: 'laravel/sanctum',
-        url: 'http://localhost:8000',
+        url: 'http://localhost:8000/api',
         endpoints: {
-          login: { url: '/api/login', propertyName: "access_token" },
-          logout: { url: '/api/logout', method: 'post' },
-          register: { url: '/api/register', method: 'post' },
-          user: { url: '/api/user', method: 'get' }
+          login: { url: '/login', propertyName: "access_token" },
+          logout: { url: '/logout', method: 'post' },
+          register: { url: '/register', method: 'post' },
+          user: { url: '/user', method: 'get' }
           // getProducts: { url: '/api/products', method: 'get'}
         },
         redirect: {
@@ -48,7 +48,7 @@ export default {
   },
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [],
+  plugins: ['~/plugins/axios.js'],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -79,7 +79,7 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
-    baseURL: 'http://localhost/api',
+    baseURL: 'http://localhost:8000/api',
     credentials: true
   },
 
