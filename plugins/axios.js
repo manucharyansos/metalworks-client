@@ -1,5 +1,4 @@
 export default function ({ $axios }) {
-  $axios.onRequest(async () => {
-    await $axios.get('/sanctum/csrf-cookie');
-  });
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  $axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
 }

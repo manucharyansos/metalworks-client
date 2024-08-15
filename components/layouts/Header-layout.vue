@@ -21,10 +21,46 @@
           </input-with-labels>
 
           <NuxtLink to="#" class="get_started_button flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">GET STARTED</NuxtLink>
-          <NuxtLink v-if="!$auth.loggedIn" to="/login" class="login_button flex items-center justify-content-center text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">LOGIN</NuxtLink>
-          <div v-else>
-            <img class="w-10 h-10 rounded-full" src="static/profile-picture-5.jpg" alt="Rounded avatar">
+
+<!--          <div v-if="$auth.loggedIn">-->
+<!--            <img class="w-10 h-10 rounded-full" src="static/profile-picture-5.jpg" alt="Rounded avatar">-->
+<!--          </div>-->
+          <div v-if="$auth.loggedIn" class="flex items-center gap-4 relative">
+
+            <img
+              type="button"
+              src="~/static/profile-picture-5.jpg"
+              class="w-10 h-10 rounded-full cursor-pointer" alt="User dropdown"
+              @click="openDropdown = !openDropdown">
+
+            <!-- Dropdown menu -->
+            <div v-if="openDropdown" class="absolute top-14 right-2 z-10 bg-neutral-100 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
+              <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                <div>{{ $auth.user.name }}</div>
+                <div class="font-medium truncate">{{ $auth.user.email }}</div>
+              </div>
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
+                <li>
+                  <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
+                </li>
+                <li>
+                  <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
+                </li>
+                <li>
+                  <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a>
+                </li>
+              </ul>
+              <div class="py-1">
+                <button
+                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                  @click="$auth.logout()">
+                  Sign out</button>
+              </div>
+            </div>
+
           </div>
+          <NuxtLink v-else to="/login" class="login_button flex items-center justify-content-center text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">LOGIN</NuxtLink>
+
           <button data-collapse-toggle="navbar-sticky" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-sticky" aria-expanded="false">
             <span class="sr-only">Open main menu</span>
             <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
@@ -73,10 +109,14 @@ import InputWithLabels from "~/components/form/InputWithLabel.vue";
 export default {
   name: "HeaderLayout",
   components: {InputWithLabels},
+  data () {
+    return {
+      openDropdown: false
+    }
+  },
   mounted() {
     useFlowbite();
-    // initFlowbite()
-  },
+  }
 }
 </script>
 <style >

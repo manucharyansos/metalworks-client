@@ -1,5 +1,6 @@
-export default function ({ store, redirect }) {
-  if (!store.state.auth.token) {
-    return redirect('/login');
+export default function ({ app, redirect, next }) {
+  if (!app.$auth.loggedIn) {
+    return redirect('/login')
   }
+
 }

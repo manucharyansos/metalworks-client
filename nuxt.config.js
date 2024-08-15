@@ -6,7 +6,8 @@ export default {
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { hid: 'description', name: 'description', content: '' },
-      { name: 'format-detection', content: 'telephone=no' }
+      { name: 'format-detection', content: 'telephone=no' },
+      { name: "csrf-token", content: "{{ csrf_token() }}" }
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
@@ -16,6 +17,10 @@ export default {
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ['~/assets/css/main.css'],
+
+  router: {
+    middleware: ['auth']
+  },
 
   auth: {
     strategies: {
@@ -27,14 +32,14 @@ export default {
           logout: { url: '/api/logout', method: 'post' },
           register: { url: '/api/register', method: 'post' },
           user: { url: '/api/user', method: 'get' },
-          getProducts: { url: '/api/products', method: 'get'}
+          // getProducts: { url: '/api/products', method: 'get'}
         },
         redirect: {
           login: '/login',
-          register: '/register',
+          register: '/',
           logout: '/',
           callback: '/login',
-          home: '/'
+          // home: '/'
         },
         cookie: {
           name: 'XSRF-TOKEN'
@@ -58,9 +63,9 @@ export default {
   ],
 
   modules: [
-    '@nuxtjs/auth-next',
+    '@nuxtjs/pwa',
     '@nuxtjs/axios',
-    '@nuxtjs/pwa'
+    '@nuxtjs/auth-next'
   ],
 
   postcss: {
@@ -71,11 +76,8 @@ export default {
   },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: 'http://localhost:8000/api',
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest'
-    },
-    credentials: true,
+    baseURL: "http://localhost:8000",
+    credentials: true
   },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa

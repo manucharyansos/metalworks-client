@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>input + {{search}}</p>
+
   </div>
 </template>
 
@@ -8,6 +8,7 @@
 import { mapActions } from 'vuex'
 export default {
   name: 'IndexPage',
+  auth: 'guest',
   // middleware: 'auth',
   data () {
     return {
@@ -15,7 +16,7 @@ export default {
     }
   },
   mounted() {
-    this.fetchServices()
+    // this.fetchServices()
   },
   methods: {
     ...mapActions("services", ["fetchServices"]),
