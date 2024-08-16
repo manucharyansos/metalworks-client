@@ -6,7 +6,7 @@
           <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flow bite Logo">
           <span class="self-center text-xl font-semibold italic font-sans whitespace-nowrap dark:text-white">Metalwork's</span>
         </NuxtLink>
-        <div class="flex items-center ml-auto justify-content-between lg:order-2 space-x-8 lg:space-x-4 rtl:space-x-reverse">
+        <div class="flex items-center ml-auto justify-content-between lg:order-2 space-x-4 lg:space-x-3 rtl:space-x-reverse">
           <input-with-labels
             type="text"
             placeholder="Search"
@@ -22,9 +22,6 @@
 
           <NuxtLink to="#" class="get_started_button flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">GET STARTED</NuxtLink>
 
-<!--          <div v-if="$auth.loggedIn">-->
-<!--            <img class="w-10 h-10 rounded-full" src="static/profile-picture-5.jpg" alt="Rounded avatar">-->
-<!--          </div>-->
           <div v-if="$auth.loggedIn" class="flex items-center gap-4 relative">
 
             <img
@@ -69,7 +66,7 @@
           </button>
         </div>
         <div id="navbar-sticky" class="items-center justify-between ml-5 hidden w-full lg:flex lg:w-auto lg:order-1">
-          <ul class="flex flex-col p-4 lg:p-2 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 lg:space-x-4 rtl:space-x-reverse lg:flex-row lg:mt-0 lg:border-0 lg:bg-white dark:bg-gray-800 lg:dark:bg-gray-900 dark:border-gray-700">
+          <ul class="flex flex-col p-4 lg:p-2 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 lg:space-x-3 rtl:space-x-reverse lg:flex-row lg:mt-0 lg:border-0 lg:bg-white dark:bg-gray-800 lg:dark:bg-gray-900 dark:border-gray-700">
             <li>
               <NuxtLink exact-active-class="active-link" class="block uppercase xl:text-base text-sm font-bold py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700" to="/materials">
                 Materials
@@ -127,8 +124,8 @@ export default {
   box-shadow: rgba(80, 20, 20, 0.04) 0 0 1px 0, rgba(105, 10, 10, 0.87) 0 5px 8px 0;
 }
 
-
-
-
+input:focus-visible {
+  outline-style: none;
+}
 
 </style>
