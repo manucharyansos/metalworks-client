@@ -5,7 +5,6 @@
         <slot name="label_svg"></slot>
       </div>
       <input
-        id="input-group-1"
         :type="type"
         :class="classes"
         :value="value"

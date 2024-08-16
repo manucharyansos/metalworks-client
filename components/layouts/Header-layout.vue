@@ -7,7 +7,7 @@
           <span class="self-center text-xl font-semibold italic font-sans whitespace-nowrap dark:text-white">Metalwork's</span>
         </NuxtLink>
         <div class="flex items-center ml-auto justify-content-between lg:order-2 space-x-4 lg:space-x-3 rtl:space-x-reverse">
-          <input-with-labels
+          <input-with-icon
             type="text"
             placeholder="Search"
             label_class="mb-2 text-sm font-medium text-gray-900 sr-only"
@@ -18,7 +18,7 @@
                 <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
               </svg>
             </template>
-          </input-with-labels>
+          </input-with-icon>
 
           <NuxtLink to="#" class="get_started_button flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl  hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3">GET STARTED</NuxtLink>
 
@@ -102,10 +102,10 @@
 <script>
 // import { initFlowbite } from 'flowbite'
 import { useFlowbite } from "~/composables/useFlowbite";
-import InputWithLabels from "~/components/form/InputWithLabel.vue";
+import InputWithIcon from "~/components/form/InputWithIcon.vue";
 export default {
   name: "HeaderLayout",
-  components: {InputWithLabels},
+  components: {InputWithIcon},
   data () {
     return {
       openDropdown: false
