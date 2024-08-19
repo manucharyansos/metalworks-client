@@ -1,9 +1,8 @@
 <template>
   <div class="register_page flex w-full items-center justify-center lg:p-0 p-6">
-    <div
-      class="flex flex-col md:flex-row items-center justify-center w-full mx-auto font-roboto bg-white rounded-3xl dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0"
-    >
-      <div class="absolute top-12 right-12">
+    <div class="flex flex-col md:flex-row items-center justify-center w-full mx-auto font-roboto bg-white rounded-3xl dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0">
+      <!-- Close Button -->
+      <div class="absolute top-4 right-4 md:top-12 md:right-12">
         <NuxtLink to="/">
           <svg
             class="w-6 h-6 text-white dark:text-gray-800"
@@ -24,12 +23,14 @@
           </svg>
         </NuxtLink>
       </div>
-      <div
-        class="flex flex-col items-center justify-center dark:bg-gray-800 mx-auto md:p-7 p-3 w-full"
-      >
+
+      <!-- Form Container -->
+      <div class="flex flex-col items-center justify-center dark:bg-gray-800 mx-auto md:p-7 p-3 w-full md:order-1 order-2">
         <h2 class="text-black font-bold text-2xl">Sign up</h2>
-        <div class="md:mb-6 mb-2 w-full">
-          <div class="relative z-0 w-full md:mb-6 mb-2 group">
+
+        <!-- Name Input -->
+        <div class="md:mb-6 mb-4 w-full">
+          <div class="relative z-0 w-full group">
             <input-with-label-icon
               v-model="name"
               type="text"
@@ -44,8 +45,10 @@
             <p class="text-red-500 text-xs italic">Please enter your name</p>
           </template>
         </div>
-        <div class="md:mb-6 mb-2 w-full">
-          <div class="relative z-0 w-full md:mb-6 mb-2 group">
+
+        <!-- Email Input -->
+        <div class="md:mb-6 mb-4 w-full">
+          <div class="relative z-0 w-full group">
             <input-with-label-icon
               v-model="email"
               type="email"
@@ -58,12 +61,15 @@
               label_class="label"
             />
           </div>
-          <!--             <template v-if="fieldEmail">-->
-          <!--               <p class="text-red-500 text-xs italic">Please choose a email address.</p>-->
-          <!--             </template>-->
+          <!-- Uncomment if email validation message is needed -->
+          <!-- <template v-if="fieldEmail">
+            <p class="text-red-500 text-xs italic">Please choose an email address.</p>
+          </template> -->
         </div>
-        <div class="md:mb-6 mb-2 w-full">
-          <div class="relative z-0 w-full md:mb-6 mb-2 group">
+
+        <!-- Password Input -->
+        <div class="md:mb-6 mb-4 w-full">
+          <div class="relative z-0 w-full group">
             <input-with-label-icon
               v-model="password"
               type="password"
@@ -78,7 +84,7 @@
           <template v-if="fieldPassword">
             <p class="text-red-500 text-xs italic">Please choose a password.</p>
           </template>
-          <template v-for="error of errorMessage">
+          <template v-for="error of errorMessages">
             <p
               v-if="getErrorMessage"
               :key="error"
@@ -88,22 +94,24 @@
             </p>
           </template>
         </div>
-        <div class="md:mb-6 mb-2 w-full">
-          <div class="relative z-0 w-full md:mb-6 mb-2 group">
+
+        <!-- Confirm Password Input -->
+        <div class="md:mb-6 mb-4 w-full">
+          <div class="relative z-0 w-full group">
             <input-with-label-icon
               v-model="password_confirmation"
               type="password"
               name="password_confirmation"
               :class="{ active: fieldConfirmPassword }"
-              label="Password"
+              label="Confirm Password"
               label_-id="password_confirmation"
               for_-l-abel="password_confirmation"
             />
           </div>
           <template v-if="fieldConfirmPassword">
-            <p class="text-red-500 text-xs italic">Please choose a password.</p>
+            <p class="text-red-500 text-xs italic">Please confirm your password.</p>
           </template>
-          <template v-for="error of errorMessage">
+          <template v-for="error of errorMessages">
             <p
               v-if="getErrorMessage"
               :key="error"
@@ -113,53 +121,45 @@
             </p>
           </template>
         </div>
+
+        <!-- Submit Button and Links -->
         <div class="flex flex-col w-full items-center justify-between">
           <button
-            class="w-full bg-red-600 rounded-2xl hover:bg-red-800 text-white font-bold py-1.5 px-4 md:my-10 my-3 focus:outline-none focus:shadow-outline"
+            class="w-full bg-red-600 rounded-2xl hover:bg-red-800 text-white font-bold py-2 px-4 md:my-10 my-4 focus:outline-none focus:shadow-outline"
             @click="sendRegister"
           >
             Sign Up
           </button>
           <div class="flex flex-col items-center justify-center md:mt-4 mt-2">
-            <span
-              class="font-roboto text-lg m-2 md:mt-4 mt-2 text-gray-800 font-mono dark:text-indigo-50"
-              >Already have an account?</span
-            >
+          <span class="font-roboto text-lg m-2 md:mt-4 mt-2 text-gray-800 font-mono dark:text-indigo-50">
+            Already have an account?
+          </span>
             <nuxt-link
               to="/login"
-              class="sign_in_here text-xl font-bold font-sans italic m-2 text-cyan-800 dark:text-indigo-300"
+              class="text-xl font-bold font-sans italic m-2 text-cyan-800 dark:text-indigo-300"
             >
               Sign in
             </nuxt-link>
           </div>
         </div>
       </div>
-      <div
-        class="flex flex-col w-full h-full rounded-b-3xl md:rounded-r-3xl items-start justify-between py-0 md:py-40 bg-black px-6"
-      >
-        <div class="flex flex-col items-start">
-          <h2 class="text-2xl md:text-4xl font-bold text-stone-400">
-            We gotta
-          </h2>
-          <h2 class="hole text-white font-bold">hole</h2>
-          <h2 class="text-stone-500 md:text-4xl text-2xl font-bold">
-            lotta options
-          </h2>
+
+      <!-- Side Banner -->
+      <div class="flex flex-col w-full h-full md:order-2 order-1 rounded-b-3xl md:rounded-r-3xl items-start justify-between py-6 md:py-40 bg-black px-6 md:order-2 order-1">
+        <div class="flex flex-col items-start mb-6">
+          <h2 class="text-2xl md:text-4xl font-bold text-stone-400">We gotta</h2>
+          <h2 class="text-white font-bold text-4xl">hole</h2>
+          <h2 class="text-stone-500 md:text-4xl text-2xl font-bold">lotta options</h2>
         </div>
         <div class="flex flex-col items-start">
-          <h2 class="text-white md:text-2xl text-base my-2 font-bold">
-            COUNTERS
-          </h2>
-          <h2 class="text-white md:text-2xl text-base my-2 font-bold">
-            HARDWARE INSERTION
-          </h2>
-          <h2 class="text-white md:text-2xl text-base my-2 font-bold">
-            TAPPING
-          </h2>
+          <h2 class="text-white text-base md:text-2xl my-2 font-bold">COUNTERS</h2>
+          <h2 class="text-white text-base md:text-2xl my-2 font-bold">HARDWARE INSERTION</h2>
+          <h2 class="text-white text-base md:text-2xl my-2 font-bold">TAPPING</h2>
         </div>
       </div>
     </div>
   </div>
+
 </template>
 
 <script>
