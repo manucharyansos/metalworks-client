@@ -217,11 +217,11 @@ export default {
 <style>
 .login_button {
   box-shadow: rgba(103, 29, 29, 0.04) 0 0 1px 0,
-    rgba(65, 7, 7, 0.87) 0 5px 8px 0;
+  rgba(166, 21, 21, 0.87) 0 5px 8px 0;
 }
 .login_button:hover {
   box-shadow: rgba(103, 29, 29, 0.04) 0 0 1px 0,
-    rgba(61, 7, 7, 0.87) 0 2px 4px 0;
+  rgba(148, 20, 20, 0.87) 0 2px 4px 0;
 }
 .get_started_button {
   box-shadow: rgba(80, 20, 20, 0.04) 0 0 1px 0, rgba(66, 6, 6, 0.87) 0 5px 8px 0;
