@@ -145,7 +145,7 @@
       </div>
 
       <!-- Side Banner -->
-      <div class="flex flex-col w-full h-full md:order-2 order-1 rounded-b-3xl md:rounded-r-3xl items-start justify-between py-6 md:py-40 bg-black px-6 md:order-2 order-1">
+      <div class="flex flex-col w-full h-full rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl items-start justify-between py-6 md:py-40 bg-black px-6 md:order-2 order-1">
         <div class="flex flex-col items-start mb-6">
           <h2 class="text-2xl md:text-4xl font-bold text-stone-400">We gotta</h2>
           <h2 class="text-white font-bold text-4xl">hole</h2>

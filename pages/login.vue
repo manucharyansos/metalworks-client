@@ -101,13 +101,13 @@
       </div>
 
       <!-- Introduction Section -->
-      <div class="flex flex-col w-full md:w-1/2 items-center justify-center bg-neutral-200 md:rounded-r-3xl rounded-r-none md:rounded-t-none rounded-t-3xl md:py-12 py-6 md:order-2 order-1">
-        <div class="flex flex-col items-center justify-center border-4 border-red-600 rounded-2xl p-6 md:m-10">
+      <div class="flex flex-col w-full md:w-1/2 items-center justify-center bg-neutral-200 rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl md:py-12 py-6 md:order-2 order-1">
+        <div class="flex flex-col items-center justify-center border-4 border-red-600 rounded-2xl p-6 m-5 md:m-10">
           <img class="w-48 md:w-64 mb-4" src="~/static/dimples-1.png" alt="Dimples" />
           <p class="text-center text-xl md:text-2xl font-extrabold italic font-mono mb-4">
             for your sheet metal parts
           </p>
-          <img class="w-48 md:w-64 transform scale-110 mb-4" src="~/static/dimple-wide.webp" alt="Dimple Wide" />
+          <img class="transform scale-125 mb-4" src="~/static/dimple-wide.webp" alt="Dimple Wide" />
         </div>
       </div>
     </div>
