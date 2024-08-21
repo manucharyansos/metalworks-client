@@ -1,9 +1,12 @@
 <template>
   <div
-    class="home_component flex flex-col m-0 p-0 min-h-screen w-full h-full items-center justify-center"
-    :class="{ activeScroll: isActiveBg }"
+    class="flex flex-col m-0 p-0 min-h-screen w-full h-full items-center justify-center"
   >
-    <div class="flex items-center justify-center w-5/6 mt-48">
+    <div
+      class="home_component flex flex-col m-0 p-0 min-h-screen w-full h-full items-center justify-center"
+      :class="{ activeScroll: isActiveBg }"
+    ></div>
+    <div class="flex bg-none items-center justify-center w-5/6 mt-64">
       <div class="flex flex-col items-center justify-center">
         <h2
           class="2xl:text-7xl text-6xl text-neutral-700 z-10 font-sans font-extrabold italic mx-auto text-center leading-loose my-4"
@@ -12,7 +15,7 @@
           <span class="text-red-700">2 days</span>
         </h2>
         <div
-          class="flex flex-wrap lg:flex-nowrap items-center mx-auto z-10 xl:w-5/6 w-full my-10"
+          class="flex flex-wrap lg:flex-nowrap items-center mx-auto z-10 xl:w-5/6 w-full"
         >
           <p
             class="text-xl flex items-center justify-center w-full my-2 lg:my-12"
@@ -98,7 +101,9 @@
       </div>
     </div>
     <!--    section upload-->
-    <div class="bg-white flex flex-col items-center justify-center rounded-2xl">
+    <div
+      class="bg-white flex flex-col items-center justify-center rounded-3xl shadow-2xl z-10"
+    >
       <h2 class="text-xl text-neutral-700 font-bold font-sans italic m-8">
         Upload your STEP, DXF or EPS file for instant pricing!
       </h2>
@@ -142,6 +147,20 @@
         a <span class="font-bold">sketch</span>.
       </p>
     </div>
+
+    <!--    video-->
+    <div class="w-4/6 my-20 shadow-3xl rounded-3xl z-10">
+      <video
+        src="/new-home-vid.mp4"
+        autoplay
+        muted
+        loop
+        playsinline
+        class="video-player rounded-3xl"
+      >
+        Your browser does not support the video tag.
+      </video>
+    </div>
   </div>
 </template>
 
@@ -156,7 +175,7 @@ export default {
   },
   watch: {
     scrollY(val) {
-      if (val > 1200) {
+      if (val > 600) {
         this.isActiveBg = true
       } else {
         this.isActiveBg = false
@@ -183,6 +202,8 @@ export default {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  position: sticky;
+  top: 10px;
 }
 
 .get_started_button {
@@ -194,6 +215,6 @@ export default {
 
 .activeScroll {
   background: none;
-  transition-duration: 2s;
+  transition-delay: 3s;
 }
 </style>
