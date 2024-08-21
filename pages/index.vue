@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <home-component/>
+  <div class="p-0 m-0">
+    <home-component />
   </div>
 </template>
 
@@ -12,16 +12,16 @@ export default {
   components: { HomeComponent },
   auth: 'guest',
   // middleware: 'auth',
-  data () {
+  data() {
     return {
-      search: ""
+      search: '',
     }
   },
   mounted() {
     // this.fetchServices()
   },
   methods: {
-    ...mapActions("services", ["fetchServices"]),
-  }
+    ...mapActions('services', ['fetchServices']),
+  },
 }
 </script>

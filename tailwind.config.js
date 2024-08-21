@@ -1,19 +1,23 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./components/**/*.{js,vue,ts}",
-    "./layouts/**/*.vue",
-    "./pages/**/*.vue",
-    "./plugins/**/*.{js,ts}",
-    "./app.vue",
-    "./error.vue",
-    "./node_modules/flowbite/**/*.{js,ts}"
+    './components/**/*.{js,vue,ts}',
+    './layouts/**/*.vue',
+    './pages/**/*.vue',
+    './plugins/**/*.{js,ts}',
+    './app.vue',
+    './error.vue',
+    './node_modules/flowbite/**/*.{js,ts}',
   ],
   theme: {
     extend: {
       boxShadow: {
         '3xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
-      }
+      },
+      lineHeight: {
+        'extra-loose': '2.5',
+        12: '3rem',
+      },
     },
     fontWeight: {
       thin: '100',
@@ -26,10 +30,7 @@ module.exports = {
       bold: '700',
       extrabold: '800',
       black: '900',
-    }
+    },
   },
-  plugins: [
-    require('flowbite/plugin')
-  ],
+  plugins: [require('flowbite/plugin')],
 }
-
