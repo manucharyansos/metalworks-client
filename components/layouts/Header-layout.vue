@@ -216,19 +216,21 @@
                 Contact
               </NuxtLink>
             </li>
+            <li>
+              <div v-if="!$auth.loggedIn" class="lg:hidden flex flex-col">
+                <NuxtLink
+                  to="/register"
+                  class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white bg-black p-1.5 w-full my-2"
+                  >GET STARTED</NuxtLink
+                >
+                <NuxtLink
+                  to="/login"
+                  class="login_button text-sm xl:text-base flex items-center justify-content-center text-red-600 bg-white duration-300 p-1.5 w-full my-2"
+                  >LOGIN</NuxtLink
+                >
+              </div>
+            </li>
           </ul>
-          <div v-if="!$auth.loggedIn" class="lg:hidden flex flex-col">
-            <NuxtLink
-              to="/register"
-              class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white bg-black p-1.5 w-full mx-3 my-2"
-              >GET STARTED</NuxtLink
-            >
-            <NuxtLink
-              to="/login"
-              class="login_button text-sm xl:text-base flex items-center justify-content-center text-red-600 bg-white duration-300 p-1.5 w-full mx-3 my-2"
-              >LOGIN</NuxtLink
-            >
-          </div>
         </div>
       </div>
     </nav>

@@ -3,9 +3,7 @@
     <header>
       <HeaderLayout />
     </header>
-    <main
-      class="bg-white dark:bg-gray-700 h-screen flex items-center justify-center m-0 p-0"
-    >
+    <main>
       <Nuxt />
     </main>
   </div>
