@@ -173,83 +173,92 @@
           ></div>
         </div>
         <h2
-          class="text-7xl font-sans font-bold italic text-neutral-700 text-center w-2/3"
+          class="2xl:text-7xl lg:text-5xl md:text-4xl text-3xl font-sans font-bold italic text-neutral-700 text-center w-2/3"
         >
           Upload. Configure. Add to Cart.
           <span class="text-red-600">Done.</span>
         </h2>
-        <p class="text-xl text-neutral-700 text-center italic font-sans my-12">
+        <p
+          class="md:text-xl text-lg text-neutral-700 text-center italic font-sans my-12"
+        >
           From upload to purchase in a matter of minutes
         </p>
-        <div class="flex">
-          <div>
+        <div
+          class="flex flex-col lg:flex-row items-center justify-between w-5/6"
+        >
+          <div
+            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[510px] xl:h-[490px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+          >
+            <div class="p-6">
+              <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
+            </div>
             <div
-              class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light"
             >
-              <a href="#">
-                <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
-              </a>
-              <div class="p-5">
-                <a href="#">
-                  <h5
-                    class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                  >
-                    Upload your CAD file
-                  </h5>
-                </a>
-                <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                  No CAD? Customize a part template using our Parts Builder, or
-                  send a sketch to our Design Services team.
-                </p>
-              </div>
+              <p
+                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
+              >
+                Upload your
+                <span class="underline decoration-dotted">CAD file</span>
+              </p>
+              <p
+                class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
+              >
+                No CAD? Customize a part template using our
+                <span class="font-bold">Parts Builder</span>, or send a sketch
+                to our <span class="font-bold">Design Services</span> team.
+              </p>
             </div>
           </div>
-          <div>
+          <div
+            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[510px] xl:h-[490px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+          >
+            <div class="p-6">
+              <img class="rounded-t-lg" src="/quote-277x300.webp" alt="" />
+            </div>
             <div
-              class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light"
             >
-              <a href="#">
-                <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
-              </a>
-              <div class="p-5">
-                <a href="#">
-                  <h5
-                    class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                  >
-                    Get instant pricing
-                  </h5>
-                </a>
-                <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                  Prices start as low as $29. Free shipping in the USA, from $19
-                  to Canada.
-                </p>
-              </div>
+              <p
+                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
+              >
+                Get instant pricing
+              </p>
+              <p
+                class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
+              >
+                Prices start from less than $39.
+                <span class="font-bold"> Free shipping</span> in the USA, from
+                $19 to Canada.
+              </p>
             </div>
           </div>
-          <div>
+          <div
+            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[510px] xl:h-[490px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+          >
+            <div class="p-6">
+              <img
+                class="rounded-t-lg"
+                src="/larger-package-277x300.webp"
+                alt=""
+              />
+            </div>
             <div
-              class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light"
             >
-              <a href="#">
-                <img
-                  class="rounded-t-lg img-fluid"
-                  src="/larger-package-300x270.webp"
-                  alt=""
-                />
-              </a>
-              <div class="p-5">
-                <a href="#">
-                  <h5
-                    class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-                  >
-                    Parts at your doorstep in days
-                  </h5>
-                </a>
-                <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-                  Standard laser cutting orders are out the door in 2-4 days.
-                  Expect 1-3 day shipping anywhere in the USA.
-                </p>
-              </div>
+              <p
+                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
+              >
+                Parts at your doorstep in days
+              </p>
+              <p
+                class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
+              >
+                Standard laser cutting orders are out the door in
+                <span class="font-bold">2-4 days</span>. Expect
+                <span class="font-bold">1-3 day shipping</span>
+                anywhere in the USA.
+              </p>
             </div>
           </div>
         </div>
@@ -269,11 +278,7 @@ export default {
   },
   watch: {
     scrollY(val) {
-      if (val > 600) {
-        this.isActiveBg = true
-      } else {
-        this.isActiveBg = false
-      }
+      this.isActiveBg = val > 600
     },
   },
   mounted() {
