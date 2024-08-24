@@ -246,7 +246,30 @@ export default {
       openDropdown: false,
       openNavbar: false,
       openSearchInput: false,
+      scrollX: 0,
     }
+  },
+  watch: {
+    scrollX(val) {
+      if (val > 1024) {
+        this.openNavbar = true
+        this.openSearchInput = true
+      } else {
+        this.openNavbar = false
+        this.openSearchInput = false
+      }
+    },
+  },
+  mounted() {
+    window.addEventListener('resize', this.handleScroll)
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.handleScroll)
+  },
+  methods: {
+    handleScroll() {
+      this.scrollX = window.innerWidth
+    },
   },
 }
 </script>

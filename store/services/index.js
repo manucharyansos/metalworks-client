@@ -1,5 +1,5 @@
 export const state = () => ({
-  services: []
+  services: [],
 })
 
 export const getters = {
@@ -9,20 +9,19 @@ export const getters = {
 }
 
 export const actions = {
-  async fetchServices({ commit } ){
+  async fetchServices({ commit }) {
     try {
-      const  data  = await this.$axios.get('http://127.0.0.1:8000/api/services')
-      commit('setServices', data);
+      const data = await this.$axios.get('api/nav/services')
+      commit('setServices', data)
       return true
-    }catch (err){
-      // commit('setErrorMessages', err.response.data)
+    } catch (err) {
       return false
     }
   },
 }
 
 export const mutations = {
-  setServices(state, services){
+  setServices(state, services) {
     state.services = services
   },
 }

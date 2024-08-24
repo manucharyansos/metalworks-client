@@ -160,6 +160,100 @@
           Your browser does not support the video tag.
         </video>
       </div>
+      <!--      upload configure-->
+      <div
+        class="flex flex-col items-center justify-center w-full bg-gradient-to-b from-[#f5f5f5] mt-16"
+      >
+        <div class="flex w-full bg-white">
+          <div
+            class="w-full h-24 bg-gradient-to-b bg-[#f5f5f5] rounded-tr-3xl"
+          ></div>
+          <div
+            class="w-full h-24 bg-gradient-to-b bg-[#f5f5f5] rounded-tl-3xl"
+          ></div>
+        </div>
+        <h2
+          class="text-7xl font-sans font-bold italic text-neutral-700 text-center w-2/3"
+        >
+          Upload. Configure. Add to Cart.
+          <span class="text-red-600">Done.</span>
+        </h2>
+        <p class="text-xl text-neutral-700 text-center italic font-sans my-12">
+          From upload to purchase in a matter of minutes
+        </p>
+        <div class="flex">
+          <div>
+            <div
+              class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            >
+              <a href="#">
+                <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
+              </a>
+              <div class="p-5">
+                <a href="#">
+                  <h5
+                    class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                  >
+                    Upload your CAD file
+                  </h5>
+                </a>
+                <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                  No CAD? Customize a part template using our Parts Builder, or
+                  send a sketch to our Design Services team.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div
+              class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            >
+              <a href="#">
+                <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
+              </a>
+              <div class="p-5">
+                <a href="#">
+                  <h5
+                    class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                  >
+                    Get instant pricing
+                  </h5>
+                </a>
+                <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                  Prices start as low as $29. Free shipping in the USA, from $19
+                  to Canada.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div
+              class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            >
+              <a href="#">
+                <img
+                  class="rounded-t-lg img-fluid"
+                  src="/larger-package-300x270.webp"
+                  alt=""
+                />
+              </a>
+              <div class="p-5">
+                <a href="#">
+                  <h5
+                    class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+                  >
+                    Parts at your doorstep in days
+                  </h5>
+                </a>
+                <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                  Standard laser cutting orders are out the door in 2-4 days.
+                  Expect 1-3 day shipping anywhere in the USA.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
