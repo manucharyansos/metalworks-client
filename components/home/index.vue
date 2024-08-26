@@ -162,7 +162,7 @@
       </div>
       <!--      upload configure-->
       <div
-        class="flex flex-col items-center justify-center w-full bg-gradient-to-b from-[#f5f5f5] mt-16"
+        class="flex flex-col items-center justify-center w-full bg-gradient-to-b from-[#f5f5f5] my-16"
       >
         <div class="flex w-full bg-white">
           <div
@@ -263,11 +263,64 @@
           </div>
         </div>
       </div>
+
+      <!--      Materials -->
+      <div class="flex flex-col items-center justify-center my-10">
+        <h3
+          class="text-6xl font-bold font-sans leading-loose italic text-neutral-700"
+        >
+          <span class="text-red-600">165+</span> materials in stock
+        </h3>
+        <div class="flex flex-wrap items-center justify-center w-5/6">
+          <nuxt-link
+            exact-active-class="active-link"
+            to="/"
+            class="px-5 py-1 text-xs font-medium text-center text-indigo-400 hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
+          >
+            All
+          </nuxt-link>
+          <div
+            v-for="(material, index) in materials"
+            :key="index"
+            class="flex items-center justify-center my-10"
+          >
+            <button
+              class="px-3 py-1 text-xs text-center text-neutral-700 font-sans font-bold italic hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
+            >
+              {{ material.name }}
+            </button>
+          </div>
+          <div
+            v-for="(material, index) in materials"
+            :key="index"
+            class="flex items-center justify-center grid-rows-3 my-3 cursor-pointer"
+          >
+            <div
+              class="flex m-2 p-3 rounded-2xl border border-neutral-400 shadow-xl shadow-gray-400 dark:bg-neutral-800 dark:border-gray-800"
+            >
+              <div class="for_material_image w16 h-16">
+                <img
+                  class="w-full h-full rounded-xl"
+                  :src="getImage(material.image)"
+                  alt=""
+                />
+              </div>
+
+              <div class="flex flex-col items-center justify-start mx-2">
+                <p class="font-sans italic font-bold">{{ material.name }}</p>
+                <p class="font-sans italic">{{ material.title }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
+
 export default {
   name: 'HomeComponent',
   data() {
@@ -276,6 +329,14 @@ export default {
       scrollY: 0,
     }
   },
+
+  computed: {
+    ...mapGetters('materials', ['getMaterials']),
+
+    materials() {
+      return this.getMaterials
+    },
+  },
   watch: {
     scrollY(val) {
       this.isActiveBg = val > 600
@@ -283,13 +344,24 @@ export default {
   },
   mounted() {
     window.addEventListener('scroll', this.handleScroll)
+    if (this.getMaterials && this.getMaterials.length === 0) {
+      this.fetchMaterials()
+    }
   },
   beforeDestroy() {
     window.removeEventListener('scroll', this.handleScroll)
   },
   methods: {
+    ...mapActions('materials', ['fetchMaterials']),
     handleScroll() {
       this.scrollY = window.scrollY
+    },
+    getImage(image) {
+      if (image) {
+        return `http://127.0.0.1:8000/${image}`
+      } else {
+        return '/download.png'
+      }
     },
   },
 }

@@ -30,7 +30,7 @@
               type="text"
               placeholder="Search"
               label_class="mb-2 text-sm font-medium text-gray-900 sr-only"
-              classes="search_input focus:outline-none focus:border-neutral-50 block w-full ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              classes="search_input focus:outline-none block w-full ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
             >
               <template #label_svg>
                 <svg
@@ -250,18 +250,23 @@ export default {
     }
   },
   watch: {
-    scrollX(val) {
-      if (val > 1024) {
-        this.openNavbar = true
-        this.openSearchInput = true
-      } else {
-        this.openNavbar = false
-        this.openSearchInput = false
-      }
+    scrollX: {
+      immediate: true,
+      deep: true,
+      handler(val) {
+        if (val > 1024) {
+          this.openNavbar = true
+          this.openSearchInput = true
+        } else {
+          this.openNavbar = false
+          this.openSearchInput = false
+        }
+      },
     },
   },
   mounted() {
     window.addEventListener('resize', this.handleScroll)
+    this.handleScroll()
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.handleScroll)
