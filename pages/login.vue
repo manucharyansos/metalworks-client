@@ -1,7 +1,10 @@
 <template>
-  <div class="login_page flex w-full items-center justify-center lg:p-0 p-6 min-h-screen">
-    <div class="flex flex-col md:flex-row items-center justify-center w-full mx-auto font-roboto bg-white rounded-3xl dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0 relative">
-
+  <div
+    class="login_page flex w-full items-center justify-center lg:p-0 p-6 min-h-screen"
+  >
+    <div
+      class="flex flex-col md:flex-row items-center justify-center w-full mx-auto font-roboto bg-white rounded-3xl dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0 relative"
+    >
       <!-- Close Button -->
       <div class="absolute top-4 right-4 md:top-12 md:right-12 z-10">
         <NuxtLink to="/">
@@ -26,7 +29,9 @@
       </div>
 
       <!-- Form Container -->
-      <div class="flex flex-col items-center justify-center dark:bg-gray-800 mx-auto md:p-7 p-4 w-full md:w-1/2 md:order-1 order-2">
+      <div
+        class="flex flex-col items-center justify-center dark:bg-gray-800 mx-auto md:p-7 p-4 w-full md:w-1/2 md:order-1 order-2"
+      >
         <h2 class="text-black font-bold text-2xl md:text-3xl">Login</h2>
 
         <!-- Email Input -->
@@ -87,9 +92,11 @@
             Sign In
           </button>
           <div class="flex flex-col items-center justify-center md:mt-4 mt-2">
-          <span class="font-roboto text-lg m-2 md:mt-4 mt-2 text-gray-800 font-mono dark:text-indigo-50">
-            Don’t have an account yet?
-          </span>
+            <span
+              class="font-roboto text-lg m-2 md:mt-4 mt-2 text-gray-800 font-mono dark:text-indigo-50"
+            >
+              Don’t have an account yet?
+            </span>
             <nuxt-link
               to="/register"
               class="text-xl font-bold font-sans italic m-2 text-cyan-800 dark:text-indigo-300"
@@ -101,18 +108,31 @@
       </div>
 
       <!-- Introduction Section -->
-      <div class="flex flex-col w-full md:w-1/2 items-center justify-center bg-neutral-200 rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl md:py-12 py-6 md:order-2 order-1">
-        <div class="flex flex-col items-center justify-center border-4 border-red-600 rounded-2xl p-6 m-5 md:m-10">
-          <img class="w-48 md:w-64 mb-4" src="~/static/dimples-1.png" alt="Dimples" />
-          <p class="text-center text-xl md:text-2xl font-extrabold italic font-mono mb-4">
+      <div
+        class="flex flex-col w-full md:w-1/2 items-center justify-center bg-neutral-200 rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl md:py-12 py-6 md:order-2 order-1"
+      >
+        <div
+          class="flex flex-col items-center justify-center border-4 border-red-600 rounded-2xl p-6 m-5 md:m-10"
+        >
+          <img
+            class="w-48 md:w-64 mb-4"
+            src="~/static/dimples-1.png"
+            alt="Dimples"
+          />
+          <p
+            class="text-center text-xl md:text-2xl font-extrabold italic font-mono mb-4"
+          >
             for your sheet metal parts
           </p>
-          <img class="transform scale-125 mb-4" src="~/static/dimple-wide.webp" alt="Dimple Wide" />
+          <img
+            class="transform scale-125 mb-4"
+            src="~/static/dimple-wide.webp"
+            alt="Dimple Wide"
+          />
         </div>
       </div>
     </div>
   </div>
-
 </template>
 
 <script>
@@ -124,8 +144,8 @@ export default {
   layout: 'authLayout',
   data() {
     return {
-      email: 'admin@gmail.com',
-      password: '123456',
+      email: 'admin@example.com',
+      password: 'password',
       // email: '',
       // password: '',
       fieldEmail: false,

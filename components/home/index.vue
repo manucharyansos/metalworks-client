@@ -22,7 +22,6 @@
               <svg
                 id="Layer_1"
                 xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
                 x="0px"
                 y="0px"
                 viewBox="0 0 64 64"
@@ -42,7 +41,6 @@
               <svg
                 id="Layer_1"
                 xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
                 x="0px"
                 y="0px"
                 viewBox="0 0 64 64"
@@ -78,7 +76,6 @@
               <svg
                 id="Layer_1"
                 xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
                 class="w-7 h-7 mx-4"
                 x="0px"
                 y="0px"
@@ -280,8 +277,8 @@
             All
           </nuxt-link>
           <div
-            v-for="(material, index) in materials"
-            :key="index"
+            v-for="material in materials"
+            :key="material.id"
             class="flex items-center justify-center my-10"
           >
             <button
@@ -296,7 +293,7 @@
             class="flex items-center justify-center grid-rows-3 my-3 cursor-pointer"
           >
             <div
-              class="flex m-2 p-3 rounded-2xl border border-neutral-400 shadow-xl shadow-gray-400 dark:bg-neutral-800 dark:border-gray-800"
+              class="materials flex m-2 p-3 rounded-2xl border border-neutral-400 dark:bg-neutral-800 dark:border-gray-800"
             >
               <div class="for_material_image w16 h-16">
                 <img
@@ -377,6 +374,14 @@ export default {
 }
 .get_started_button:hover {
   box-shadow: rgba(80, 20, 20, 0.04) 0 0 1px 0, rgba(72, 7, 7, 0.87) 0 2px 4px 0;
+}
+.materials {
+  box-shadow: rgba(63, 33, 33, 0.04) 0 0 1px 0,
+    rgba(131, 118, 118, 0.87) 0 5px 8px 0;
+}
+.materials:hover {
+  box-shadow: rgba(73, 67, 67, 0.04) 0 0 1px 0,
+    rgba(73, 66, 66, 0.87) 0 2px 4px 0;
 }
 
 .activeScroll {

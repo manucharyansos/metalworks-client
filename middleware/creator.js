@@ -1,5 +1,5 @@
 export default function ({ $auth, redirect }) {
-  if (!$auth.loggedIn || $auth.user.role.name !== 'admin') {
+  if (!$auth.loggedIn || $auth.user.role.name !== 'creator') {
     return redirect('/')
   }
 }

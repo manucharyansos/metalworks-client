@@ -1,18 +1,17 @@
 export const state = () => ({
-  materials: [],
+  creator: [],
 })
 
 export const getters = {
   getMaterials(state) {
-    return state.materials
+    return state.creator
   },
 }
 
 export const actions = {
-  async fetchMaterials({ commit }) {
+  async createRole({ commit }, data) {
     try {
-      const { data } = await this.$axios.get('api/materials')
-      commit('setMaterials', data.materials)
+      await this.$axios.post('api/role', data)
       return true
     } catch (err) {
       return false

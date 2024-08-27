@@ -30,7 +30,7 @@
               type="text"
               placeholder="Search"
               label_class="mb-2 text-sm font-medium text-gray-900 sr-only"
-              classes="search_input focus:outline-none block w-full ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+              classes="search_input focus:outline-none block w-full ps-8 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
             >
               <template #label_svg>
                 <svg
