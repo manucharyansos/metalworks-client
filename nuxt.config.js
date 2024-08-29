@@ -20,7 +20,10 @@ export default {
         type: 'image/png',
         href: '/WhatsApp Image 2024-08-24 at 13.01.26_24d3ab90.jpg',
       },
-      // { rel: 'stylesheet', href: '/https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css' }
+      {
+        rel: 'stylesheet',
+        href: '/https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css',
+      },
     ],
   },
 
@@ -28,7 +31,7 @@ export default {
   css: ['~/assets/css/main.css'],
 
   router: {
-    middleware: ['auth'],
+    // middleware: ['auth'],
   },
 
   auth: {
@@ -60,7 +63,7 @@ export default {
     },
   },
 
-  // plugins: ['~/plugins/axios.js'],
+  plugins: [{ src: '~/plugins/flowbite.js', mode: 'client' }],
 
   components: true,
 
