@@ -11,7 +11,16 @@ export const getters = {
 export const actions = {
   async createRole({ commit }, data) {
     try {
-      await this.$axios.post('api/role', data)
+      await this.$axios.post('api/creator/role', data)
+      return true
+    } catch (err) {
+      return false
+    }
+  },
+
+  async createTask({ commit }, data) {
+    try {
+      await this.$axios.post('/api/creator/tasks', data)
       return true
     } catch (err) {
       return false

@@ -20,10 +20,6 @@ export default {
         type: 'image/png',
         href: '/WhatsApp Image 2024-08-24 at 13.01.26_24d3ab90.jpg',
       },
-      {
-        rel: 'stylesheet',
-        href: '/https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css',
-      },
     ],
   },
 

@@ -9,7 +9,7 @@
             data-drawer-target="drawer-navigation"
             data-drawer-toggle="drawer-navigation"
             aria-controls="drawer-navigation"
-            class="p-2 mr-2 text-gray-600 rounded-lg cursor-pointer md:hidden hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700 focus:ring-2 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            class="p-2 mr-2 text-gray-600 rounded-lg cursor-pointer xl:hidden hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700 focus:ring-2 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
           >
             <svg
               aria-hidden="true"
@@ -56,7 +56,7 @@
             type="button"
             data-drawer-toggle="drawer-navigation"
             aria-controls="drawer-navigation"
-            class="p-2 mr-1 text-gray-500 rounded-lg md:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+            class="p-2 mr-1 text-gray-500 rounded-lg xl:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
           >
             <span class="sr-only">Toggle search</span>
             <svg
@@ -76,7 +76,7 @@
           <!-- Dropdown menu -->
           <div
             id="dropdown"
-            class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
+            class="hidden z-50 my-4 w-56 text-base list-none bg-white divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
           >
             <div class="py-3 px-4">
               <span
@@ -208,56 +208,147 @@
       </div>
     </aside>
 
-    <main>
+    <main class="creator relative">
       <!--      create dropdown-->
-      <div
-        v-if="openTaskDrawer"
-        class="w-full flex flex-col items-center justify-between"
-      >
-        <div class="my-2">
-          <input-with-labels
-            v-model="task.title"
-            classes="block py-2.5 ps-6 pe-10 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none peer"
-            placeholder="Title"
-          ></input-with-labels>
-        </div>
-        <div class="my-2">
-          <input-with-labels
-            v-model="task.description"
-            classes="block py-2.5 ps-6 pe-10 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none peer"
-            placeholder="Description"
-          ></input-with-labels>
-        </div>
-
-        <button
-          class="py-1.5 px-8 rounded-2xl bg-green-600 hover:bg-green-800 text-white my-2"
+      <div>
+        <create-modal
+          :open-modal="openTaskDrawer"
+          @closeModal="closeModal"
+          @addButton="addTask"
         >
-          Add
-        </button>
+          <template #title>
+            <input-with-labels
+              v-model="task.name"
+              type="text"
+              placeholder="Title"
+              classes="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            />
+          </template>
+          <template #description>
+            <input-with-labels
+              v-model="task.description"
+              type="text"
+              placeholder="Description"
+              classes="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            />
+          </template>
+          <template #check>
+            <h3 class="mb-4 font-semibold text-gray-900 dark:text-white">
+              Factory
+            </h3>
+            <ul
+              class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+              <li
+                class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600"
+              >
+                <div class="flex items-center ps-3">
+                  <input
+                    id="laser"
+                    v-model="task.role_ids"
+                    type="checkbox"
+                    :value="1"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                  />
+                  <label
+                    for="laser"
+                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                    >Laser</label
+                  >
+                </div>
+              </li>
+              <li
+                class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600"
+              >
+                <div class="flex items-center ps-3">
+                  <input
+                    id="bend"
+                    v-model="task.role_ids"
+                    type="checkbox"
+                    :value="2"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                  />
+                  <label
+                    for="bend"
+                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                    >Bend</label
+                  >
+                </div>
+              </li>
+              <li
+                class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600"
+              >
+                <div class="flex items-center ps-3">
+                  <input
+                    id="cutting"
+                    v-model="task.role_ids"
+                    type="checkbox"
+                    :value="3"
+                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                  />
+                  <label
+                    for="cutting"
+                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                    >Cutting</label
+                  >
+                </div>
+              </li>
+            </ul>
+          </template>
+        </create-modal>
       </div>
     </main>
   </div>
 </template>
 <script>
 import { mapActions } from 'vuex'
+import CreateModal from '~/components/modals/CreateModal.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 
 export default {
   name: 'CreatorPage',
-  components: { InputWithLabels },
+  components: { InputWithLabels, CreateModal },
   layout: 'authLayout',
   middleware: 'creator',
   data() {
     return {
       openTaskDrawer: false,
       task: {
-        title: '',
-        descriptor: '',
+        name: '',
+        description: '',
+        role_ids: [], // Array to store selected role IDs
       },
+      // options: [
+      //   { text: 'Laser', value: 'laser' },
+      //   { text: 'Bend', value: 'bend' },
+      //   { text: 'Powder coating', value: 'powder_coating' },
+      // ],
     }
   },
   methods: {
-    ...mapActions('creator', ['createRole']),
+    ...mapActions('creator', ['createRole', 'createTask']),
+    handleSelect(value) {
+      this.selectedOption = value
+    },
+    closeModal(val) {
+      this.openTaskDrawer = false
+    },
+    addTask() {
+      this.createTask({
+        name: this.task.name,
+        description: this.task.description,
+        role_ids: this.task.role_ids,
+      })
+    },
   },
 }
 </script>
+
+<style scoped>
+.creator {
+  background-image: url('/WhatsApp Image 2024-08-24 at 13.01.26_24d3ab90.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+</style>
