@@ -1,140 +1,118 @@
 <template>
   <div class="antialiased bg-gray-50 dark:bg-gray-900">
-    <nav
-      class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50"
-    >
+    <nav class="bg-transparent px-4 py-2.5 fixed left-0 right-0 top-0 z-50">
       <div class="flex flex-wrap justify-between items-center">
-        <div class="flex justify-start items-center">
-          <button
-            data-drawer-target="drawer-navigation"
-            data-drawer-toggle="drawer-navigation"
-            aria-controls="drawer-navigation"
-            class="p-2 mr-2 text-gray-600 rounded-lg cursor-pointer xl:hidden hover:text-gray-900 hover:bg-gray-100 focus:bg-gray-100 dark:focus:bg-gray-700 focus:ring-2 focus:ring-gray-100 dark:focus:ring-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+        <NuxtLink
+          to="/"
+          class="flex items-center space-x-3 rtl:space-x-reverse"
+        >
+          <img
+            src="/WhatsApp%20Image%202024-08-24%20at%2013.01.26_24d3ab90.jpg"
+            class="h-8 w-8 rounded-full"
+            alt="Flow bite Logo"
+          />
+          <span
+            class="self-center text-lg lg:text-xl font-semibold italic font-sans whitespace-nowrap text-white"
+            >Metalwork's</span
           >
-            <svg
-              aria-hidden="true"
-              class="w-6 h-6"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-            <svg
-              aria-hidden="true"
-              class="hidden w-6 h-6"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-            <span class="sr-only">Toggle sidebar</span>
-          </button>
-          <nuxt-link to="/" class="flex items-center justify-between mr-4">
+        </NuxtLink>
+        <div
+          class="flex items-center ml-auto justify-content-between lg:order-2 space-x-4 lg:space-x-3 rtl:space-x-reverse"
+        >
+          <div class="flex items-center gap-4 relative">
             <img
-              src="/WhatsApp%20Image%202024-08-24%20at%2013.01.26_24d3ab90.jpg"
-              class="mr-3 h-8 rounded-2xl"
-              alt="Metalworks Logo"
+              type="button"
+              src="~/static/profile-picture-5.jpg"
+              class="w-10 h-10 rounded-full cursor-pointer"
+              alt="User dropdown"
+              @click="openDropdown = !openDropdown"
             />
-            <span
-              class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
-              >Metalworks</span
+
+            <!-- Dropdown menu -->
+            <div
+              v-if="openDropdown"
+              class="absolute bg-neutral-500 top-14 right-2 z-10 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
             >
-          </nuxt-link>
-        </div>
-        <div class="flex items-center lg:order-2">
-          <button
-            type="button"
-            data-drawer-toggle="drawer-navigation"
-            aria-controls="drawer-navigation"
-            class="p-2 mr-1 text-gray-500 rounded-lg xl:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-          >
-            <span class="sr-only">Toggle search</span>
-            <svg
-              class="w-6 h-6"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                clip-rule="evenodd"
-                fill-rule="evenodd"
-                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-              ></path>
-            </svg>
-          </button>
-          <!-- Dropdown menu -->
-          <div
-            id="dropdown"
-            class="hidden z-50 my-4 w-56 text-base list-none bg-white divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
-          >
-            <div class="py-3 px-4">
-              <span
-                class="block text-sm font-semibold text-gray-900 dark:text-white"
-                >{{ $auth.user.name }}</span
+              <div class="px-4 py-3 text-sm text-white">
+                <div>{{ $auth.user.name }}</div>
+                <div class="font-medium truncate">{{ $auth.user.email }}</div>
+              </div>
+              <ul
+                class="py-2 text-sm text-gray-200"
+                aria-labelledby="avatarButton"
               >
-              <span
-                class="block text-sm text-gray-900 truncate dark:text-white"
-                >{{ $auth.user.email }}</span
-              >
-            </div>
-            <ul
-              class="py-1 text-gray-700 dark:text-gray-300"
-              aria-labelledby="dropdown"
-            >
-              <li>
-                <nuxt-link
-                  to="#"
-                  class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
-                  >My profile</nuxt-link
-                >
-              </li>
-            </ul>
-            <ul
-              class="py-1 text-gray-700 dark:text-gray-300"
-              aria-labelledby="dropdown"
-            ></ul>
-            <ul
-              class="py-1 text-gray-700 dark:text-gray-300"
-              aria-labelledby="dropdown"
-            >
-              <li>
+                <li>
+                  <a
+                    href="#"
+                    class="block px-4 py-2 hover:bg-gray-600 text-white"
+                    >Dashboard</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="block px-4 py-2 hover:bg-gray-600 text-white"
+                    >Settings</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="block px-4 py-2 hover:bg-gray-600 text-white"
+                    >Earnings</a
+                  >
+                </li>
+              </ul>
+              <div class="py-1">
                 <button
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                  class="block w-full px-4 py-2 text-sm hover:bg-gray-600 text-white"
                   @click="$auth.logout()"
                 >
                   Sign out
                 </button>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
+
+          <button
+            type="button"
+            class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+            @click="openNavbar = !openNavbar"
+          >
+            <svg
+              class="w-5 h-5"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 17 14"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M1 1h15M1 7h15M1 13h15"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     </nav>
-
     <!-- Sidebar -->
 
     <aside
       id="drawer-navigation"
-      class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+      class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-transparent border-r border-neutral-700 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
       aria-label="Sidenav"
     >
-      <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
+      <div
+        class="overflow-y-auto py-5 px-3 h-full bg-transparent dark:bg-gray-800"
+      >
         <ul class="space-y-2">
           <li>
             <button
               type="button"
-              class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-700 dark:text-white dark:hover:bg-gray-700"
               aria-controls="dropdown-pages"
               data-collapse-toggle="dropdown-pages"
             >
@@ -151,7 +129,7 @@
                   clip-rule="evenodd"
                 ></path>
               </svg>
-              <span class="flex-1 ml-3 text-left whitespace-nowrap"
+              <span class="flex-1 ml-3 text-left whitespace-nowrap text-white"
                 >Create</span
               >
               <svg
@@ -168,9 +146,9 @@
                 ></path>
               </svg>
             </button>
-            <ul id="dropdown-pages" class="hidden py-2 space-y-2">
+            <ul id="dropdown-pages" class="hidden py-2 space-y-2 text-white">
               <li
-                class="cursor-pointer mx-6"
+                class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
                 @click="openTaskDrawer = !openTaskDrawer"
               >
                 Task
@@ -180,7 +158,7 @@
           <li>
             <a
               href="#"
-              class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
+              class="flex items-center p-2 text-base font-medium text-white rounded-lg hover:bg-gray-700 group"
             >
               <svg
                 aria-hidden="true"
@@ -208,9 +186,13 @@
       </div>
     </aside>
 
-    <main class="creator relative">
+    <main
+      class="creator p-6 flex items-center justify-center fixed top-20 left-0 right-0 z-10 w-full overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full"
+    >
       <!--      create dropdown-->
-      <div>
+      <div
+        class="relative bg-transparent w-full h-full max-w-md md:h-auto z-20"
+      >
         <create-modal
           :open-modal="openTaskDrawer"
           @closeModal="closeModal"
@@ -225,12 +207,7 @@
             />
           </template>
           <template #description>
-            <input-with-labels
-              v-model="task.description"
-              type="text"
-              placeholder="Description"
-              classes="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-            />
+            <textarea-with-label v-model="task.description" />
           </template>
           <template #check>
             <h3 class="mb-4 font-semibold text-gray-900 dark:text-white">
@@ -304,12 +281,13 @@
 import { mapActions } from 'vuex'
 import CreateModal from '~/components/modals/CreateModal.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
+import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 
 export default {
   name: 'CreatorPage',
-  components: { InputWithLabels, CreateModal },
+  components: { TextareaWithLabel, InputWithLabels, CreateModal },
   layout: 'authLayout',
-  middleware: 'creator',
+  middleware: 'auth',
   data() {
     return {
       openTaskDrawer: false,
@@ -318,17 +296,35 @@ export default {
         description: '',
         role_ids: [], // Array to store selected role IDs
       },
-      // options: [
-      //   { text: 'Laser', value: 'laser' },
-      //   { text: 'Bend', value: 'bend' },
-      //   { text: 'Powder coating', value: 'powder_coating' },
-      // ],
+      openDropdown: false,
+      openNavbar: false,
+      scrollX: 0,
     }
   },
+  watch: {
+    scrollX: {
+      immediate: true,
+      deep: true,
+      handler(val) {
+        this.openNavbar = val > 1024
+      },
+    },
+  },
+  // computed: {
+  //   this.
+  // },
+  mounted() {
+    window.addEventListener('resize', this.handleScroll)
+    this.handleScroll()
+    this.fetchOrders()
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.handleScroll)
+  },
   methods: {
-    ...mapActions('creator', ['createRole', 'createTask']),
-    handleSelect(value) {
-      this.selectedOption = value
+    ...mapActions('creator', ['fetchOrders', 'createTask']),
+    handleScroll() {
+      this.scrollX = window.innerWidth
     },
     closeModal(val) {
       this.openTaskDrawer = false
@@ -350,5 +346,6 @@ export default {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  object-fit: cover;
 }
 </style>

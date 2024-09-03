@@ -27,7 +27,7 @@ export default {
   css: ['~/assets/css/main.css'],
 
   router: {
-    // middleware: ['auth'],
+    middleware: ['auth'],
   },
 
   auth: {
@@ -45,7 +45,7 @@ export default {
           login: '/login',
           logout: '/',
           callback: '/login',
-          // home: '/'
+          home: '/',
         },
         cookie: {
           name: 'XSRF-TOKEN',
@@ -57,6 +57,12 @@ export default {
         tokenType: 'bearer',
       },
     },
+  },
+
+  publicRuntimeConfig: {
+    creatorRole: process.env.CREATOR_ROLE || 'creator',
+    adminRole: process.env.ADMIN_ROLE || 'admin',
+    laserRole: process.env.LASER_ROLE || 'laser',
   },
 
   plugins: [{ src: '~/plugins/flowbite.js', mode: 'client' }],

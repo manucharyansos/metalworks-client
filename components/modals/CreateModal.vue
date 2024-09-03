@@ -5,9 +5,7 @@
   >
     <div class="relative p-4 w-full max-w-2xl h-auto">
       <!-- Modal content -->
-      <div
-        class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5"
-      >
+      <div class="relative bg-neutral-500 p-4 rounded-lg shadow sm:p-5">
         <!-- Modal header -->
         <div
           class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600"
@@ -36,7 +34,7 @@
           </button>
         </div>
         <!-- Modal body -->
-        <div class="grid gap-4 mb-4 sm:grid-cols-2 w-full">
+        <div class="grid bg-transparent gap-4 mb-4 sm:grid-cols-2 w-full">
           <slot name="title"></slot>
           <slot name="description"></slot>
           <slot name="select"></slot>

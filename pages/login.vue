@@ -74,7 +74,7 @@
           </template>
           <template v-for="error of errorMessage">
             <p
-              v-if="getErrorMessage"
+              v-if="getErrorMessages"
               :key="error"
               class="text-red-500 text-xs italic"
             >
@@ -180,7 +180,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('authCustom', ['getErrorMessage']),
+    ...mapGetters('authCustom', ['getErrors', 'getErrorMessages']),
   },
   watch: {
     email(val) {
@@ -196,26 +196,23 @@ export default {
   },
   methods: {
     ...mapActions('authCustom', ['loginUser']),
-    async login({ commit }, userData) {
+    async login() {
       this.loading = true
 
       try {
         if (this.email && this.password) {
-          const response = await this.loginUser(
-            {
-              data: {
-                email: this.email,
-                password: this.password,
-              },
+          const response = await this.loginUser({
+            data: {
+              email: this.email,
+              password: this.password,
             },
-            userData
-          )
+          })
 
           if (response) {
             this.email = ''
             this.password = ''
           } else {
-            this.errorMessage = this.getErrorMessage
+            this.errorMessage = this.getErrorMessages
           }
         } else {
           if (!this.email) {

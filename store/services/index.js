@@ -9,15 +9,15 @@ export const getters = {
 }
 
 export const actions = {
-  async fetchServices({ commit }) {
-    try {
-      const data = await this.$axios.get('api/nav/services')
-      commit('setServices', data)
-      return true
-    } catch (err) {
-      return false
-    }
-  },
+  // async fetchServices({ commit }) {
+  //   try {
+  //     const data = await this.$axios.get('api/nav/services')
+  //     commit('setServices', data)
+  //     return true
+  //   } catch (err) {
+  //     return false
+  //   }
+  // },
 }
 
 export const mutations = {

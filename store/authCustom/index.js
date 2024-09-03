@@ -17,18 +17,6 @@ export const getters = {
   },
 }
 
-export const mutations = {
-  setErrorMessageErrors(state, error) {
-    state.resMessage = error
-  },
-  setErrorMessageMessages(state, messages) {
-    state.resMessage = messages
-  },
-  setUser(state, user) {
-    state.user = user
-  },
-}
-
 export const actions = {
   async fetchUser({ commit }) {
     try {
@@ -41,22 +29,13 @@ export const actions = {
   async loginUser({ commit }, userData) {
     try {
       await this.$auth.loginWith('laravelSanctum', userData)
-      const creatorRole = process.env.CREATOR_ROLE
-      const adminRole = process.env.ADMIN_ROLE
-      if (this.$auth.user.role.name === creatorRole) {
-        await this.$router.push('/creator')
-      }
-      if (this.$auth.user.role.name === adminRole) {
-        await this.$router.push('/admin')
-      } else {
-        await this.$router.push('/')
-      }
       return true
     } catch (err) {
-      commit('setErrorMessage', err.response.data)
+      commit('setErrorMessage', err.response.data.message)
       return false
     }
   },
+
   async registerUser({ commit }, userData) {
     try {
       await this.$axios.post('/api/register', userData)
@@ -67,5 +46,17 @@ export const actions = {
       commit('setErrorMessageMessages', res.response.data.message)
       return false
     }
+  },
+}
+
+export const mutations = {
+  setErrorMessageErrors(state, error) {
+    state.error = error
+  },
+  setErrorMessage(state, messages) {
+    state.errorMessage = messages
+  },
+  setUser(state, user) {
+    state.user = user
   },
 }

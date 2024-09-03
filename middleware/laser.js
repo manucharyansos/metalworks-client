@@ -3,10 +3,10 @@ export default function ({ app, redirect }) {
     return redirect('/login')
   }
 
-  const adminRole = app.$config.adminRole
+  const laserRole = app.$config.laserRole
   const userRole = app.$auth.user.role.name
 
-  if (userRole !== adminRole) {
+  if (userRole !== laserRole) {
     return redirect('/')
   }
 }

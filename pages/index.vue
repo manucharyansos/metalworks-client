@@ -11,7 +11,6 @@ export default {
   name: 'IndexPage',
   components: { HomeComponent },
   auth: 'guest',
-  // middleware: 'auth',
   data() {
     return {
       search: '',
@@ -19,9 +18,9 @@ export default {
   },
   computed: {
     ...mapGetters('services', ['getServices']),
-    allServices() {
-      return this.getServices
-    },
+    // allServices() {
+    //   // return this.getServices
+    // },
   },
   mounted() {
     this.fetchServices()

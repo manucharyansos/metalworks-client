@@ -40,6 +40,7 @@
               type="text"
               name="name"
               :class="{ active: fieldName }"
+              label_class="err"
               label="Name"
               label_-id="name-label"
               for_-l-abel="name-label"
@@ -90,7 +91,7 @@
           </template>
           <template v-for="error of errorMessages">
             <p
-              v-if="getErrorMessage"
+              v-if="getErrorMessages"
               :key="error"
               class="text-red-500 text-xs italic"
             >
@@ -119,7 +120,7 @@
           </template>
           <template v-for="error of errorMessages">
             <p
-              v-if="getErrorMessage"
+              v-if="getErrorMessages"
               :key="error"
               class="text-red-500 text-xs italic"
             >
@@ -269,40 +270,46 @@ export default {
   },
   methods: {
     ...mapActions('authCustom', ['registerUser']),
-    async sendRegister({ commit }, userData) {
+    async sendRegister() {
+      this.fieldName = !this.name
+      this.fieldEmail = !this.email
+      this.fieldPassword = !this.password
+      this.fieldConfirmPassword = !this.password_confirmation
+
+      // Check if passwords match
+      if (this.password !== this.password_confirmation) {
+        this.fieldConfirmPassword = true
+        this.errorMessages.password_confirmation = 'Passwords do not match'
+      } else {
+        this.errorMessages.password_confirmation = ''
+      }
+
+      if (
+        this.fieldName ||
+        this.fieldEmail ||
+        this.fieldPassword ||
+        this.fieldConfirmPassword
+      ) {
+        return
+      }
+
       this.loading = true
       try {
-        if (
-          this.name &&
-          this.email &&
-          this.password &&
-          this.password === this.password_confirmation
-        ) {
-          const response = await this.registerUser({
-            name: this.name,
-            email: this.email,
-            password: this.password,
-            password_confirmation: this.password_confirmation,
-          })
+        const response = await this.registerUser({
+          name: this.name,
+          email: this.email,
+          password: this.password,
+          password_confirmation: this.password_confirmation,
+        })
 
-          if (response) {
-            this.name = ''
-            this.email = ''
-            this.password = ''
-            this.password_confirmation = ''
-            await this.$router.push('/login')
-          } else {
-            this.errorMessages = this.getErrors
-          }
+        if (response) {
+          this.name = ''
+          this.email = ''
+          this.password = ''
+          this.password_confirmation = ''
+          await this.$router.push('/login')
         } else {
-          this.fieldName = !this.name
-          this.fieldEmail = !this.email
-          this.fieldPassword = !this.password
-          this.fieldConfirmPassword = !this.password_confirmation
-
-          if (this.password !== this.password_confirmation) {
-            this.errorMessages = 'Passwords do not match'
-          }
+          this.errorMessages = this.getErrors
         }
       } catch (error) {
         this.errorMessages =
@@ -317,28 +324,16 @@ export default {
 
 <style scoped>
 .active {
-  border-bottom: 1px solid red;
+  border: none;
+  border-bottom: 2px solid red;
 }
-.label {
+
+.err {
   color: red;
-}
-a.sign_in_here {
-  /*color: #1a202c !important;*/
 }
 
 .register_page {
   background: rgba(64, 64, 64, 1);
   height: 100vh;
-}
-
-.hole {
-  font-size: 170px;
-  line-height: 130px;
-}
-@media screen and (max-width: 768px) {
-  .hole {
-    font-size: 100px;
-    line-height: 100px;
-  }
 }
 </style>

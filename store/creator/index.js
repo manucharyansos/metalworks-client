@@ -1,5 +1,6 @@
 export const state = () => ({
   creator: [],
+  orders: [],
 })
 
 export const getters = {
@@ -9,9 +10,10 @@ export const getters = {
 }
 
 export const actions = {
-  async createRole({ commit }, data) {
+  async fetchOrders({ commit }) {
     try {
-      await this.$axios.post('api/creator/role', data)
+      const res = await this.$axios.get('api/orders/order')
+      commit('setOrders', res.data.orders)
       return true
     } catch (err) {
       return false
@@ -31,5 +33,8 @@ export const actions = {
 export const mutations = {
   setMaterials(state, materials) {
     state.materials = materials
+  },
+  setOrders(state, orders) {
+    state.orders = orders
   },
 }
