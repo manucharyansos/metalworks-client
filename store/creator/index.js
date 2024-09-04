@@ -10,16 +10,6 @@ export const getters = {
 }
 
 export const actions = {
-  async fetchOrders({ commit }) {
-    try {
-      const res = await this.$axios.get('api/orders/order')
-      commit('setOrders', res.data.orders)
-      return true
-    } catch (err) {
-      return false
-    }
-  },
-
   async createTask({ commit }, data) {
     try {
       await this.$axios.post('/api/creator/tasks', data)
