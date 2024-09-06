@@ -196,7 +196,7 @@ export default {
   },
   methods: {
     ...mapActions('authCustom', ['loginUser']),
-    async login() {
+    async login({ commit }, userData) {
       this.loading = true
 
       try {

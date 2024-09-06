@@ -287,7 +287,7 @@ export default {
   name: 'CreatorPage',
   components: { TextareaWithLabel, InputWithLabels, CreateModal },
   layout: 'authLayout',
-  middleware: 'auth',
+  middleware: 'creator',
   data() {
     return {
       openTaskDrawer: false,

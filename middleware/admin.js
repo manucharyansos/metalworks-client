@@ -6,7 +6,9 @@ export default function ({ app, redirect }) {
   const adminRole = app.$config.adminRole
   const userRole = app.$auth.user.role.name
 
-  if (userRole !== adminRole) {
-    return redirect('/')
+  if (userRole) {
+    if (userRole !== adminRole) {
+      return redirect('/')
+    }
   }
 }
