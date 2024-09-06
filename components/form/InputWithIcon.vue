@@ -1,7 +1,9 @@
 <template>
-  <div class="flex items-center justify-between">
+  <div>
     <div class="relative">
-      <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+      <div
+        class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none"
+      >
         <slot name="label_svg"></slot>
       </div>
       <input
@@ -10,9 +12,8 @@
         :value="value"
         :placeholder="placeholder"
         @input="$emit('input', $event.target.value)"
-      >
+      />
     </div>
-
   </div>
 </template>
 
@@ -22,24 +23,22 @@ export default {
   props: {
     type: {
       type: String,
-      default: ''
+      default: '',
     },
     value: {
       type: String,
-      default: ''
+      default: '',
     },
     placeholder: {
       type: String,
-      default: ''
+      default: '',
     },
     classes: {
       type: String,
-      default: ''
+      default: '',
     },
-  }
+  },
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

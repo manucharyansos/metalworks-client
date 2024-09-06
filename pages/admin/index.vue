@@ -6,8 +6,8 @@
       <div
         class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
       >
+        <p><span class="font-bold">Start:</span> {{ order.created_at }}</p>
         <nuxt-link :to="`/admin/${order.id}`">
-          <p><span class="font-bold">Start:</span> {{ order.created_at }}</p>
           <div>
             <div
               v-for="detail in order.details"
@@ -20,17 +20,18 @@
               <p>Details: {{ detail.description }}</p>
             </div>
           </div>
-          <p>
-            <span class="font-bold">Order number:</span>
-            {{ order.order_number.number }}
-          </p>
-          <a
-            target="_blank"
-            :href="order.store_link.url"
-            class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-            >Read more</a
-          >
         </nuxt-link>
+        <p>
+          <span class="font-bold">Order number:</span>
+          {{ order.order_number.number }}
+        </p>
+        <a
+          v-if="order.store_link"
+          target="_blank"
+          :href="order.store_link.url"
+          class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+          >Read more</a
+        >
       </div>
     </div>
   </main>

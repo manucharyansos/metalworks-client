@@ -113,8 +113,7 @@
             <button
               type="button"
               class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-700 dark:text-white dark:hover:bg-gray-700"
-              aria-controls="dropdown-pages"
-              data-collapse-toggle="dropdown-pages"
+              @click="openDrawer = !openDrawer"
             >
               <svg
                 aria-hidden="true"
@@ -146,10 +145,14 @@
                 ></path>
               </svg>
             </button>
-            <ul id="dropdown-pages" class="hidden py-2 space-y-2 text-white">
+            <ul
+              v-if="openDrawer"
+              id="dropdown-pages"
+              class="py-2 space-y-2 text-white"
+            >
               <li
                 class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
-                @click="openTaskDrawer = !openTaskDrawer"
+                @click="openOrderDrawer = !openOrderDrawer"
               >
                 Task
               </li>
@@ -193,108 +196,77 @@
       <div
         class="relative bg-transparent w-full h-full max-w-md md:h-auto z-20"
       >
-        <create-modal
-          :open-modal="openTaskDrawer"
-          @closeModal="closeModal"
+        <create-order
+          :open-modal="openOrderDrawer"
+          @closeOrderDrawer="closeOrderDrawer"
           @addButton="addTask"
         >
-          <template #title>
+          <template #detailsType>
             <input-with-labels
-              v-model="task.name"
+              v-model="order.details.type"
               type="text"
-              placeholder="Title"
-              classes="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-            />
+              placeholder="Type"
+              classes="bg-neutral-400 my-2 w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            ></input-with-labels>
           </template>
-          <template #description>
-            <textarea-with-label v-model="task.description" />
+          <template #detailsQuantity>
+            <input-with-labels
+              v-model="order.details.quantity"
+              type="number"
+              placeholder="Quantity"
+              classes="bg-neutral-400 border my-2 w-full border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            ></input-with-labels>
           </template>
-          <template #check>
-            <h3 class="mb-4 font-semibold text-gray-900 dark:text-white">
-              Factory
-            </h3>
-            <ul
-              class="w-48 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            >
-              <li
-                class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600"
-              >
-                <div class="flex items-center ps-3">
-                  <input
-                    id="laser"
-                    v-model="task.role_ids"
-                    type="checkbox"
-                    :value="1"
-                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    for="laser"
-                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                    >Laser</label
-                  >
-                </div>
-              </li>
-              <li
-                class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600"
-              >
-                <div class="flex items-center ps-3">
-                  <input
-                    id="bend"
-                    v-model="task.role_ids"
-                    type="checkbox"
-                    :value="2"
-                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    for="bend"
-                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                    >Bend</label
-                  >
-                </div>
-              </li>
-              <li
-                class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600"
-              >
-                <div class="flex items-center ps-3">
-                  <input
-                    id="cutting"
-                    v-model="task.role_ids"
-                    type="checkbox"
-                    :value="3"
-                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                  <label
-                    for="cutting"
-                    class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                    >Cutting</label
-                  >
-                </div>
-              </li>
-            </ul>
+          <template #link>
+            <input-with-labels
+              v-model="order.store_link.url"
+              type="url"
+              placeholder="Quantity"
+              classes="bg-neutral-400 border my-2 w-full border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+            ></input-with-labels>
           </template>
-        </create-modal>
+          <template #detailsDesc>
+            <textarea-with-label
+              v-model="order.details.description"
+              placeholder="Description"
+              class="w-full my-2 bg-neutral-500"
+            ></textarea-with-label>
+          </template>
+        </create-order>
       </div>
     </main>
   </div>
 </template>
 <script>
 import { mapActions } from 'vuex'
-import CreateModal from '~/components/modals/CreateModal.vue'
+import CreateOrder from '~/components/modals/create/CreateOrder.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 
 export default {
   name: 'CreatorPage',
-  components: { TextareaWithLabel, InputWithLabels, CreateModal },
+  components: { TextareaWithLabel, InputWithLabels, CreateOrder },
   layout: 'authLayout',
   middleware: 'creator',
   data() {
     return {
       openTaskDrawer: false,
-      task: {
-        name: '',
-        description: '',
-        role_ids: [], // Array to store selected role IDs
+      openOrderDrawer: false,
+      openDrawer: false,
+      order: {
+        user_id: '',
+        order_number: '',
+        details: [
+          {
+            description: '',
+            quantity: '',
+            type: '',
+          },
+        ],
+        store_link: {
+          url: '',
+        },
+        status_id: null,
       },
       openDropdown: false,
       openNavbar: false,
@@ -310,31 +282,45 @@ export default {
       },
     },
   },
-  // computed: {
-  //   this.
-  // },
   mounted() {
     window.addEventListener('resize', this.handleScroll)
     this.handleScroll()
-    this.fetchOrders()
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.handleScroll)
   },
   methods: {
-    ...mapActions('creator', ['fetchOrders', 'createTask']),
+    ...mapActions('orders', ['createOrder']),
     handleScroll() {
       this.scrollX = window.innerWidth
     },
     closeModal(val) {
       this.openTaskDrawer = false
     },
-    addTask() {
-      this.createTask({
-        name: this.task.name,
-        description: this.task.description,
-        role_ids: this.task.role_ids,
-      })
+    closeOrderDrawer(val) {
+      this.openOrderDrawer = false
+    },
+    async addTask() {
+      const orderData = {
+        user_id: this.$auth.user.id,
+        details: [
+          {
+            description: this.order.details.description,
+            quantity: this.order.details.quantity,
+            type: this.order.details.type,
+          },
+        ],
+        store_link: {
+          url: this.order.store_link.url,
+        },
+        status_id: this.order.status_id,
+      }
+
+      try {
+        await this.createOrder(orderData)
+      } catch (error) {
+        console.error('Error creating order:', error.response.data)
+      }
     },
   },
 }
