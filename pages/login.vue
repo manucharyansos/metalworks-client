@@ -10,7 +10,6 @@
         <NuxtLink to="/">
           <svg
             class="w-6 h-6 text-white dark:text-gray-800"
-            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
@@ -72,13 +71,9 @@
           <template v-if="fieldPassword">
             <p class="text-red-500 text-xs italic">Please choose a password.</p>
           </template>
-          <template v-for="error of errorMessage">
-            <p
-              v-if="getErrorMessages"
-              :key="error"
-              class="text-red-500 text-xs italic"
-            >
-              {{ error }}
+          <template>
+            <p v-if="errors" class="text-red-500 text-xs italic">
+              {{ errors }}
             </p>
           </template>
         </div>
@@ -181,6 +176,9 @@ export default {
   },
   computed: {
     ...mapGetters('authCustom', ['getErrors', 'getErrorMessages']),
+    errors() {
+      return this.getErrorMessages
+    },
   },
   watch: {
     email(val) {
@@ -196,9 +194,8 @@ export default {
   },
   methods: {
     ...mapActions('authCustom', ['loginUser']),
-    async login({ commit }, userData) {
+    async login() {
       this.loading = true
-
       try {
         if (this.email && this.password) {
           const response = await this.loginUser({

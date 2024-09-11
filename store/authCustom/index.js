@@ -31,7 +31,7 @@ export const actions = {
       await this.$auth.loginWith('laravelSanctum', userData)
       return true
     } catch (err) {
-      commit('setErrorMessage', err.response.data.message)
+      commit('setErrorMessage', err.response.data.error)
       return false
     }
   },
