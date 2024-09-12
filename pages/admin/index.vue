@@ -6,13 +6,28 @@
       <div
         class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
       >
-        <p><span class="font-bold">Start:</span> {{ order.created_at }}</p>
-        <nuxt-link :to="`/admin/${order.id}`">
+        <p v-if="order.created_at">
+          <span class="font-bold">Start:</span> {{ order.created_at }}
+        </p>
+        <div @click="editOrder(order)">
           <div>
+            <div>
+              <p
+                v-if="order.status.status === 'in_process'"
+                class="bg-blue-700"
+              >
+                <span class="font-sans font-bold italic">Status: </span>
+                {{ order.status.status }}
+              </p>
+              <p v-if="order.status.status === 'waiting'" class="bg-yellow-700">
+                <span class="font-sans font-bold italic">Status: </span>
+                {{ order.status.status }}
+              </p>
+            </div>
             <div
               v-for="detail in order.details"
               :key="detail.id"
-              class="flex flex-col items-center justify-center"
+              class="flex flex-col items-start justify-start"
             >
               <span class="font-bold">Description</span>
               <p>Title: {{ detail.type }}</p>
@@ -20,7 +35,7 @@
               <p>Details: {{ detail.description }}</p>
             </div>
           </div>
-        </nuxt-link>
+        </div>
         <p>
           <span class="font-bold">Order number:</span>
           {{ order.order_number.number }}
@@ -81,6 +96,9 @@ export default {
         )
       }
       return this.orders
+    },
+    editOrder(order) {
+      this.$router.push(`/admin/${order.id}`)
     },
   },
 }

@@ -1,18 +1,18 @@
 export const state = () => ({
-  tasks: [],
+  factory: null,
 })
 
 export const getters = {
-  getTasks(state) {
-    return state.tasks
+  getFactory(state) {
+    return state.factory
   },
 }
 
 export const actions = {
-  async fetchTasks({ commit }, data) {
+  async fetchFactory({ commit }, data) {
     try {
-      const res = await this.$axios.get('/api/creator/tasks', data)
-      commit('setTasks', res.data)
+      const res = await this.$axios.get('/api/factory', data)
+      commit('SET_FACTORY', res.data)
       return true
     } catch (err) {
       return false
@@ -21,7 +21,7 @@ export const actions = {
 }
 
 export const mutations = {
-  setTasks(state, tasks) {
-    state.tasks = tasks
+  SET_FACTORY(state, factory) {
+    state.factory = factory
   },
 }

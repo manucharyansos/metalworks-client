@@ -46,7 +46,7 @@ export default {
       VAT_payer: false,
       clients: [
         { id: 1, value: '', type: 'text', placeholder: 'Անուն' },
-        { id: 2, value: '', type: 'number', placeholder: 'Հեռ․ համար' },
+        { id: 2, value: '', type: 'tel', placeholder: 'Հեռ․ համար' },
         { id: 3, value: '', type: 'email', placeholder: 'Էլ․ փոստ' },
         { id: 4, value: '', type: 'text', placeholder: 'ՀՎՀՀ' },
         { id: 5, value: '', type: 'text', placeholder: 'Խումբ' },

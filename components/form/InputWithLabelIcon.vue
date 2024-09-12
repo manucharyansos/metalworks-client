@@ -45,7 +45,7 @@ export default {
       default: '',
     },
     value: {
-      type: String,
+      type: [String, Array],
       default: '',
     },
     placeholder: {

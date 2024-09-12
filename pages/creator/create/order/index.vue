@@ -1,10 +1,10 @@
 <template>
   <div class="bg-neutral-400 grid grid-cols-2 gap-2 w-full h-full p-6">
-    <div class="mt-10 w-1/3 mx-auto">
+    <div class="mt-10 w-1/3 ml-auto mr-4">
       <select-with-label
         id="client-select"
         v-model="selectedOption"
-        :dates="allClients"
+        :dates="clients"
         label="Select Client"
       ></select-with-label>
     </div>
@@ -88,6 +88,9 @@ export default {
   },
   computed: {
     ...mapGetters('clients', ['allClients']),
+    clients() {
+      return this.allClients
+    },
   },
   mounted() {
     this.fetchClients()

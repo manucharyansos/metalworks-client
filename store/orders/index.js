@@ -1,6 +1,6 @@
 export const state = () => ({
   orders: [],
-  order: [],
+  order: null,
 })
 
 export const mutations = {
@@ -26,13 +26,37 @@ export const actions = {
     }
   },
   async fetchOrder({ commit }, id) {
-    const response = await this.$axios.get(`/api/admin/order/${id}`)
-    commit('SET_ORDER', response.data)
-    return true
+    try {
+      const response = await this.$axios.get(`/api/admin/order/${id}`)
+      commit('SET_ORDER', response.data)
+      return true
+    } catch (err) {
+      return false
+    }
   },
   async createOrder({ commit }, orderData) {
     const response = await this.$axios.post('/api/orders/order', orderData)
     commit('ADD_ORDER', response.data.order)
+    if (response) {
+      this.$router.push('/creator')
+    }
+    return true
+  },
+
+  async updateOrder({ commit }, orderData) {
+    try {
+      const response = await this.$axios.$put(
+        `/api/admin/order/${orderData.id}`,
+        orderData
+      )
+      commit('SET_ORDER', response.data)
+      if (response) {
+        this.$router.push('/admin')
+      }
+      return true
+    } catch (err) {
+      return false
+    }
   },
 }
 
