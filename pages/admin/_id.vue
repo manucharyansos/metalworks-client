@@ -82,8 +82,8 @@
             class="flex flex-row justify-between items-center"
           >
             <input-with-label-icon
-              v-model="orderData.factories"
-              :value="manyFactory.name"
+              v-model="factories"
+              :value="manyFactory.id"
               type="checkbox"
               label="manyFactory.name"
               classes="rounded-md w-6 h-6 border-2"
@@ -203,10 +203,11 @@ export default {
     ...mapGetters('orders', ['order']),
     ...mapGetters('factory', ['getFactory']),
     getOrder() {
-      return JSON.parse(JSON.stringify(this.order))
+      return this.order ? JSON.parse(JSON.stringify(this.order)) : {}
     },
     factories() {
-      return JSON.parse(JSON.stringify(this.getFactory))
+      return this.getFactory ? JSON.parse(JSON.stringify(this.getFactory)) : []
+      // return this.getOrder.factories || []
     },
   },
   mounted() {
@@ -223,7 +224,7 @@ export default {
       const updatedOrder = {
         ...this.getOrder,
         status: 'in_process',
-        factories: this.orderData.factories,
+        factories: this.factories,
       }
       this.updateOrder(updatedOrder)
     },
