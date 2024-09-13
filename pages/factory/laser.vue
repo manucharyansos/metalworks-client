@@ -1,45 +1,73 @@
 <template>
-  <div
-    class="mt-36 flex flex-row flex-wrap items-center justify-between w-full"
+  <main
+    class="flex flex-row flex-wrap items-center justify-center p-4 md:ml-64 h-auto pt-20"
   >
-    <div v-for="task in tasks" :key="task.id">
+    <div v-for="order in orders" :key="order.id" class="m-3">
       <div
-        class="block w-64 cursor-pointer p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+        class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
       >
-        <h5
-          class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
-        >
-          {{ task.name }}
-        </h5>
-        <p class="font-normal text-gray-700 dark:text-gray-400">
-          {{ task.description }}
+        <p v-if="order.created_at">
+          <span class="font-bold">Start:</span> {{ order.created_at }}
         </p>
+        <div>
+          <div>
+            <div>
+              <p
+                v-if="order.status.status === 'in_process'"
+                class="bg-blue-700"
+              >
+                <span class="font-sans font-bold italic">Status: </span>
+                {{ order.status.status }}
+              </p>
+              <p v-if="order.status.status === 'waiting'" class="bg-yellow-700">
+                <span class="font-sans font-bold italic">Status: </span>
+                {{ order.status.status }}
+              </p>
+            </div>
+            <div
+              v-for="detail in order.details"
+              :key="detail.id"
+              class="flex flex-col items-start justify-start"
+            >
+              <span class="font-bold">Description</span>
+              <p>Title: {{ detail.type }}</p>
+              <p>Type: {{ detail.quantity }}</p>
+              <p>Details: {{ detail.description }}</p>
+            </div>
+          </div>
+        </div>
+        <p>
+          <span class="font-bold">Order number:</span>
+          {{ order.order_number.number }}
+        </p>
+        <a
+          v-if="order.store_link"
+          target="_blank"
+          :href="order.store_link.url"
+          class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+          >Read more</a
+        >
       </div>
     </div>
-  </div>
+  </main>
 </template>
-
 <script>
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
-  middleware: 'laser',
-  data() {
-    return {
-      // tasks: []
-    }
-  },
+  layout: 'FactoryLayout',
+  middleware: 'roleRedirect',
   computed: {
-    ...mapGetters('factory', ['getTasks']),
-    tasks() {
-      return this.getTasks
+    ...mapGetters('factory', ['getOrderByFactories']),
+    orders() {
+      return this.getOrderByFactories
     },
   },
   mounted() {
-    this.fetchTasks()
+    this.fetchOrdersByFactory(3)
   },
   methods: {
-    ...mapActions('factory', ['fetchTasks']),
+    ...mapActions('factory', ['fetchOrdersByFactory']),
   },
 }
 </script>

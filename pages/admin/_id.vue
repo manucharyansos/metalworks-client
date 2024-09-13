@@ -81,11 +81,12 @@
             :key="manyFactory.id"
             class="flex flex-row justify-between items-center"
           >
+            {{ manyFactory.name }}
             <input-with-label-icon
               v-model="factories"
               :value="manyFactory.id"
+              :label="manyFactory.name"
               type="checkbox"
-              label="manyFactory.name"
               classes="rounded-md w-6 h-6 border-2"
             ></input-with-label-icon>
           </div>

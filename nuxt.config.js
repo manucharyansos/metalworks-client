@@ -63,6 +63,7 @@ export default {
     creatorRole: process.env.CREATOR_ROLE || 'creator',
     adminRole: process.env.ADMIN_ROLE || 'admin',
     laserRole: process.env.LASER_ROLE || 'laser',
+    bendRole: process.env.BEND_ROLE || 'bend',
   },
 
   plugins: [{ src: '~/plugins/flowbite.js', mode: 'client' }],
