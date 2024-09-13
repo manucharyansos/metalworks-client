@@ -64,7 +64,7 @@ export default {
     },
   },
   mounted() {
-    this.fetchOrdersByFactory(1)
+    this.fetchOrdersByFactory(2)
   },
   methods: {
     ...mapActions('factory', ['fetchOrdersByFactory']),

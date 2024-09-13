@@ -81,14 +81,14 @@
             :key="manyFactory.id"
             class="flex flex-row justify-between items-center"
           >
-            {{ manyFactory.name }}
-            <input-with-label-icon
-              v-model="factories"
+            <label :for="manyFactory.id">{{ manyFactory.name }}</label>
+            <input
+              :id="'factory-' + manyFactory.id"
+              v-model="selectedFactories" 
+              type="checkbox" 
               :value="manyFactory.id"
-              :label="manyFactory.name"
-              type="checkbox"
-              classes="rounded-md w-6 h-6 border-2"
-            ></input-with-label-icon>
+              class="rounded-md w-6 h-6 border-2"
+              >
           </div>
         </div>
       </div>
@@ -168,10 +168,10 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+// import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 
 export default {
-  components: { InputWithLabelIcon },
+  // components: { InputWithLabelIcon },
   layout: 'adminLayout',
   middleware: 'admin',
   data() {
@@ -182,7 +182,7 @@ export default {
         bend: false,
         powder_cutting: false,
       },
-
+      selectedFactories: [],
       orderData: {
         type: '',
         details: [
@@ -196,7 +196,6 @@ export default {
           url: '',
         },
         status_id: null,
-        factories: [],
       },
     }
   },
@@ -208,7 +207,6 @@ export default {
     },
     factories() {
       return this.getFactory ? JSON.parse(JSON.stringify(this.getFactory)) : []
-      // return this.getOrder.factories || []
     },
   },
   mounted() {
@@ -221,14 +219,17 @@ export default {
   methods: {
     ...mapActions('orders', ['fetchOrder', 'updateOrder']),
     ...mapActions('factory', ['fetchFactory']),
-    doneOrder({ commit }, orderData) {
-      const updatedOrder = {
-        ...this.getOrder,
-        status: 'in_process',
-        factories: this.factories,
-      }
-      this.updateOrder(updatedOrder)
-    },
+    doneOrder() {
+    const formattedFactories = this.selectedFactories.map(id => ({ id }));
+
+    const updatedOrder = {
+      ...this.getOrder,
+      status: 'in_process',
+      factories: formattedFactories,
+    };
+
+    this.updateOrder(updatedOrder);
+  }
   },
 }
 </script>
