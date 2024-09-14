@@ -4,7 +4,7 @@
   >
     <div v-for="order in orders" :key="order.id" class="m-3">
       <div
-        class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
+        class="border-2 border-dashed bg-neutral-400 border-neutral-500 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
       >
         <p v-if="order.created_at">
           <span class="font-bold">Start:</span> {{ order.created_at }}
@@ -14,14 +14,14 @@
             <div>
               <p
                 v-if="order.status.status === 'in_process'"
-                class="bg-blue-700"
-              >
-                <span class="font-sans font-bold italic">Status: </span>
-                {{ order.status.status }}
+              ><span class="font-bold">Status:</span> 
+                <span class="bg-blue-700 font-sans italic">{{ order.status.status }} </span>
+                
               </p>
-              <p v-if="order.status.status === 'waiting'" class="bg-yellow-700">
-                <span class="font-sans font-bold italic">Status: </span>
-                {{ order.status.status }}
+              <p v-if="order.status.status === 'waiting'">
+                <span class="font-bold">Status:</span> 
+                <span class="bg-yellow-700 font-sans italic"> {{ order.status.status }}</span>
+                
               </p>
             </div>
             <div

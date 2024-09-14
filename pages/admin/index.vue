@@ -3,6 +3,7 @@
     class="flex flex-row flex-wrap items-center justify-center p-4 md:ml-64 h-auto pt-20"
   >
     <div v-for="order in allOrders" :key="order.id" class="m-3">
+      <stepper-component/>
       <div
         class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
       >

@@ -22,6 +22,7 @@
       <span class="sr-only">Loading...</span>
     </div>
 
+    <stepper-component :data-stepper="stepperData"/>
     <div v-if="getOrder">
       <div class="grid gap-4 mb-4 sm:grid-cols-2">
         <div v-if="getOrder.created_at">
@@ -81,13 +82,14 @@
             :key="manyFactory.id"
             class="flex flex-row justify-between items-center"
           >
-            <label :for="manyFactory.id">{{ manyFactory.name }}</label>
+            <label :for="'factory-' + manyFactory.id">{{ manyFactory.name }}</label>
             <input
               :id="'factory-' + manyFactory.id"
               v-model="selectedFactories" 
               type="checkbox" 
               :value="manyFactory.id"
               class="rounded-md w-6 h-6 border-2"
+              @change="add(manyFactory)"
               >
           </div>
         </div>
@@ -168,20 +170,15 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-// import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+import StepperComponent from '@/components/stepper'
 
 export default {
-  // components: { InputWithLabelIcon },
+  components: { StepperComponent },
   layout: 'adminLayout',
   middleware: 'admin',
   data() {
     return {
-      factory: {
-        solidWorks: false,
-        laser: false,
-        bend: false,
-        powder_cutting: false,
-      },
+      stepperData: [],
       selectedFactories: [],
       orderData: {
         type: '',
@@ -209,6 +206,11 @@ export default {
       return this.getFactory ? JSON.parse(JSON.stringify(this.getFactory)) : []
     },
   },
+  watch: {
+    stepperData(value){
+      
+    }
+  },
   mounted() {
     this.fetchOrder(this.id)
     this.fetchFactory()
@@ -219,6 +221,16 @@ export default {
   methods: {
     ...mapActions('orders', ['fetchOrder', 'updateOrder']),
     ...mapActions('factory', ['fetchFactory']),
+    add(value) {
+      const exists = this.stepperData.some((i) => i.id === value.id);
+
+      if (!exists) {
+        this.stepperData.push({ id: value.id, name: value.name });
+      } else {
+        this.stepperData.slice({ id: value.id, name: value.name });
+      }
+      
+    },
     doneOrder() {
     const formattedFactories = this.selectedFactories.map(id => ({ id }));
 
