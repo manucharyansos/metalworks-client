@@ -1,5 +1,7 @@
 <template>
-  <div class="register_page flex w-full items-center justify-center lg:p-0 p-6">
+  <div
+    class="register_page flex w-full h-full items-center justify-center lg:p-0 p-6"
+  >
     <div
       class="flex flex-col md:flex-row items-center justify-center w-full mx-auto font-roboto bg-white rounded-3xl dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0"
     >
@@ -334,6 +336,6 @@ export default {
 
 .register_page {
   background: rgba(64, 64, 64, 1);
-  height: 100vh;
+  //height: 100vh;
 }
 </style>

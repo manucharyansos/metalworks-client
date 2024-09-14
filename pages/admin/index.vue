@@ -2,8 +2,8 @@
   <main
     class="flex flex-row flex-wrap items-center justify-center p-4 md:ml-64 h-auto pt-20"
   >
-    <div v-for="order in allOrders" :key="order.id" class="m-3">
-      <stepper-component/>
+    <input v-model="searchable" type="text" />
+    <div v-for="order in searchFilter" :key="order.id" class="m-3">
       <div
         class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
       >
@@ -69,35 +69,45 @@ export default {
     allOrders() {
       return this.orders
     },
+    searchFilter() {
+      const searchTerm = this.searchable.trim().toLowerCase()
+      if (searchTerm === '') {
+        return this.allOrders
+      }
+      return this.allOrders.filter((order) => {
+        const orderNumber =
+          order.order_number && typeof order.order_number.number === 'string'
+            ? order.order_number.number.toLowerCase()
+            : ''
+        const descriptionName =
+          order.details &&
+          order.details.length > 0 &&
+          typeof order.details[0].description === 'string'
+            ? order.details[0].description.toLowerCase()
+            : ''
+        return (
+          orderNumber.includes(searchTerm) ||
+          descriptionName.includes(searchTerm)
+        )
+      })
+    },
   },
   watch: {
-    // searchable(val) {
-    //   if (val.length > 2) {
-    //     setTimeout(() => {
-    //       this.isSearch = true
-    //     }, 2000)
-    //   } else {
-    //     this.isSearch = false
-    //   }
-    // },
+    searchable(val) {
+      if (val.length > 2) {
+        setTimeout(() => {
+          this.isSearch = true
+        }, 2000)
+      } else {
+        this.isSearch = false
+      }
+    },
   },
   created() {
     this.fetchOrders()
-    // console.log(this.searchFilter())
   },
   methods: {
     ...mapActions('orders', ['fetchOrders']),
-    searchFilter() {
-      if (this.searchable !== '') {
-        return this.orders.filter(
-          (order) =>
-            order.order_number.includes(this.searchable) ||
-            (order.description?.name &&
-              order.description.name.includes(this.searchable))
-        )
-      }
-      return this.orders
-    },
     editOrder(order) {
       this.$router.push(`/admin/${order.id}`)
     },
