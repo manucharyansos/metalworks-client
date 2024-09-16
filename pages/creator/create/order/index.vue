@@ -12,9 +12,9 @@
       <create-order @addButton="addTask">
         <template #detailsType>
           <input-with-labels
-            v-model="order.details.type"
+            v-model="order.details.name"
             type="text"
-            placeholder="Type"
+            placeholder="Name"
             classes=" my-2 w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           ></input-with-labels>
         </template>
@@ -74,7 +74,7 @@ export default {
           {
             description: '',
             quantity: '',
-            type: '',
+            name: '',
           },
         ],
         store_link: {
@@ -105,7 +105,7 @@ export default {
           {
             description: this.order.details.description,
             quantity: this.order.details.quantity,
-            type: this.order.details.type,
+            name: this.order.details.name,
           },
         ],
         store_link: {

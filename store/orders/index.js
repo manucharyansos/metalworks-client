@@ -58,6 +58,17 @@ export const actions = {
       return false
     }
   },
+  orderDelete({ commit }, orderId) {
+    try {
+      const res = this.$axios.delete(`api/admin/order/${orderId} `)
+      if (res) {
+        this.$router.push('/admin')
+        return true
+      }
+    } catch (err) {
+      return false
+    }
+  },
 }
 
 export const getters = {

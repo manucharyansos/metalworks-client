@@ -151,7 +151,6 @@
         <button
           type="button"
           class="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
-          @click="deleteOrder(order.id)"
         >
           <svg
             class="mr-1 -ml-1 w-5 h-5"
@@ -171,79 +170,16 @@
     </div>
   </div>
 </template>
+
 <script>
-import { mapActions, mapGetters } from 'vuex'
-import StepperComponent from '@/components/stepper'
+import StepperComponent from '~/components/stepper/index.vue'
 
 export default {
   components: { StepperComponent },
-  layout: 'adminLayout',
-  middleware: 'admin',
   data() {
-    return {
-      stepperData: [],
-      selectedFactories: [],
-      orderData: {
-        type: '',
-        details: [
-          {
-            description: '',
-            quantity: '',
-            type: '',
-          },
-        ],
-        store_link: {
-          url: '',
-        },
-        status_id: null,
-      },
-    }
-  },
-  computed: {
-    ...mapGetters('orders', ['order']),
-    ...mapGetters('factory', ['getFactory']),
-    getOrder() {
-      return this.order ? JSON.parse(JSON.stringify(this.order)) : {}
-    },
-    factories() {
-      return this.getFactory ? JSON.parse(JSON.stringify(this.getFactory)) : []
-    },
-  },
-  watch: {
-    stepperData(value) {},
-  },
-  mounted() {
-    this.fetchOrder(this.id)
-    this.fetchFactory()
-  },
-  created() {
-    this.id = this.$route.params.id
-  },
-  methods: {
-    ...mapActions('orders', ['fetchOrder', 'updateOrder', 'orderDelete']),
-    ...mapActions('factory', ['fetchFactory']),
-    add(value) {
-      const exists = this.stepperData.some((i) => i.id === value.id)
-
-      if (!exists) {
-        this.stepperData.push({ id: value.id, name: value.name })
-      } else {
-        this.stepperData.slice({ id: value.id, name: value.name })
-      }
-    },
-    doneOrder() {
-      const formattedFactories = this.selectedFactories.map((id) => ({ id }))
-
-      const updatedOrder = {
-        ...this.getOrder,
-        status: 'in_process',
-        factories: formattedFactories,
-      }
-      this.updateOrder(updatedOrder)
-    },
-    async deleteOrder(id) {
-      await this.orderDelete(id)
-    },
+    return {}
   },
 }
 </script>
+
+<style scoped></style>

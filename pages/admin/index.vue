@@ -13,16 +13,17 @@
         <div @click="editOrder(order)">
           <div>
             <div>
-              <p
-                v-if="order.status.status === 'in_process'"
-                class="bg-blue-700"
-              >
-                <span class="font-sans font-bold italic">Status: </span>
-                {{ order.status.status }}
+              <p v-if="order.status.status === 'in_process'">
+                <span class="font-bold">Status:</span>
+                <span class="bg-blue-700 font-sans italic"
+                  >{{ order.status.status }}
+                </span>
               </p>
-              <p v-if="order.status.status === 'waiting'" class="bg-yellow-700">
-                <span class="font-sans font-bold italic">Status: </span>
-                {{ order.status.status }}
+              <p v-if="order.status.status === 'waiting'">
+                <span class="font-bold">Status:</span>
+                <span class="bg-yellow-700 font-sans italic">
+                  {{ order.status.status }}</span
+                >
               </p>
             </div>
             <div
@@ -31,9 +32,9 @@
               class="flex flex-col items-start justify-start"
             >
               <span class="font-bold">Description</span>
-              <p>Title: {{ detail.type }}</p>
+              <p>Title: {{ detail.name }}</p>
               <p>Type: {{ detail.quantity }}</p>
-              <p>Details: {{ detail.description }}</p>
+              <p class="will-change-auto">Details: {{ detail.description }}</p>
             </div>
           </div>
         </div>

@@ -1,10 +1,10 @@
 <template>
   <main
-    class="flex flex-row flex-wrap items-center justify-center p-4 md:ml-64 h-auto pt-20"
+    class="flex flex-row flex-wrap items-start justify-start p-4 md:ml-64 h-auto pt-20"
   >
     <div v-for="order in orders" :key="order.id" class="m-3">
       <div
-        class="border-2 border-dashed bg-neutral-400 border-neutral-500 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
+        class="border-2 border-dashed bg-neutral-700 border-neutral-700 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
       >
         <p v-if="order.created_at">
           <span class="font-bold">Start:</span> {{ order.created_at }}
@@ -12,16 +12,17 @@
         <div>
           <div>
             <div>
-              <p
-                v-if="order.status.status === 'in_process'"
-              ><span class="font-bold">Status:</span> 
-                <span class="bg-blue-700 font-sans italic">{{ order.status.status }} </span>
-                
+              <p v-if="order.status.status === 'in_process'">
+                <span class="font-bold">Status:</span>
+                <span class="bg-blue-700 font-sans italic"
+                  >{{ order.status.status }}
+                </span>
               </p>
               <p v-if="order.status.status === 'waiting'">
-                <span class="font-bold">Status:</span> 
-                <span class="bg-yellow-700 font-sans italic"> {{ order.status.status }}</span>
-                
+                <span class="font-bold">Status:</span>
+                <span class="bg-yellow-700 font-sans italic">
+                  {{ order.status.status }}</span
+                >
               </p>
             </div>
             <div
