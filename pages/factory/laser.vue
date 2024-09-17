@@ -8,6 +8,7 @@
       >
         <p v-if="order.created_at">
           <span class="font-bold">Start:</span> {{ order.created_at }}
+          <span class="font-bold">Finish:</span> {{ order.dates.finish_date }}
         </p>
         <div>
           <div>

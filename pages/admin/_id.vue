@@ -27,33 +27,45 @@
       <div class="grid gap-4 mb-4 sm:grid-cols-2">
         <div v-if="getOrder.created_at">
           <label
-            for="name"
+            for="start"
             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >Start</label
           >
           <input
-            id="name"
+            id="start"
             v-model="getOrder.created_at"
             disabled
             type="text"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+          />
+        </div>
+        <div>
+          <label
+            for="finish"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >Finish</label
+          >
+          <input
+            id="finish"
+            v-model="finishData"
+            type="date"
             name="name"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
           />
         </div>
         <div>
           <label
-            for="brand"
+            for="number"
             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
             >Number</label
           >
           <input
             v-if="getOrder.order_number"
-            id="brand"
+            id="number"
             v-model="getOrder.order_number.number"
+            disabled
             type="text"
-            name="brand"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-            placeholder="Ex. Apple"
           />
         </div>
         <div>
@@ -64,7 +76,7 @@
           >
           <input
             v-if="getOrder.status"
-            id="price"
+            id="status"
             v-model="getOrder.status.status"
             type="text"
             name="status"
@@ -193,6 +205,7 @@ export default {
     return {
       stepperData: [],
       selectedFactories: [],
+      finishData: [],
       orderData: {
         type: '',
         details: [
@@ -247,6 +260,7 @@ export default {
         ...this.getOrder,
         status: 'in_process',
         factories: formattedFactories,
+        finish_date: this.finishData,
       }
       const res = await this.updateOrder(updatedOrder)
       if (res) {
