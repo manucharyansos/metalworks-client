@@ -3,6 +3,11 @@
     <admin />
   </div>
 </template>
-<script setup lang="ts">
+<script>
 import Admin from '~/components/layouts/Admin.vue'
+export default {
+  components: {
+    Admin,
+  },
+}
 </script>

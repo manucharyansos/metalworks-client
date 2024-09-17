@@ -77,6 +77,15 @@
           >
             Factory
           </div>
+          <template v-if="getOrder.factories">
+            <div
+              v-for="actualFactory in getOrder.factories"
+              :key="actualFactory.id"
+              class="flex flex-row items-center justify-center"
+            >
+              {{ actualFactory.name }}
+            </div>
+          </template>
           <div
             v-for="manyFactory in factories"
             :key="manyFactory.id"
@@ -102,15 +111,14 @@
         class="grid gap-6 mb-4 sm:grid-cols-2"
       >
         <label
-          for="price"
+          for="name"
           class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >Type</label
+          >Name</label
         >
         <input
-          id="price"
-          v-model="detail.type"
+          id="name"
+          v-model="detail.name"
           type="text"
-          name="price"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
         />
         <label
@@ -119,7 +127,7 @@
           >Quantity</label
         >
         <input
-          id="price"
+          id="quantity"
           v-model="detail.quantity"
           type="text"
           name="quantity"
@@ -228,21 +236,28 @@ export default {
       if (!exists) {
         this.stepperData.push({ id: value.id, name: value.name })
       } else {
-        this.stepperData.slice({ id: value.id, name: value.name })
+        this.stepperData = this.stepperData.filter((i) => i.id !== value.id)
       }
     },
     doneOrder() {
-      const formattedFactories = this.selectedFactories.map((id) => ({ id }))
-
-      const updatedOrder = {
-        ...this.getOrder,
-        status: 'in_process',
-        factories: formattedFactories,
+      try {
+        const formattedFactories = this.selectedFactories.map((id) => ({ id }))
+        const updatedOrder = {
+          ...this.getOrder,
+          status: 'in_process',
+          factories: formattedFactories,
+        }
+        this.updateOrder(updatedOrder)
+      } catch (err) {
+        return false
       }
-      this.updateOrder(updatedOrder)
     },
     async deleteOrder(id) {
-      await this.orderDelete(id)
+      try {
+        await this.orderDelete(id)
+      } catch (err) {
+        return false
+      }
     },
   },
 }

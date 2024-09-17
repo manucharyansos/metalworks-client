@@ -32,8 +32,8 @@
               class="flex flex-col items-start justify-start"
             >
               <span class="font-bold">Description</span>
-              <p>Title: {{ detail.name }}</p>
-              <p>Type: {{ detail.quantity }}</p>
+              <p>Name: {{ detail.name }}</p>
+              <p>Quantity: {{ detail.quantity }}</p>
               <p class="will-change-auto">Details: {{ detail.description }}</p>
             </div>
           </div>
@@ -80,6 +80,12 @@ export default {
           order.order_number && typeof order.order_number.number === 'string'
             ? order.order_number.number.toLowerCase()
             : ''
+        const detailsName =
+          order.details &&
+          order.details.length > 0 &&
+          typeof order.details[0].name === 'string'
+            ? order.details[0].name.toLowerCase()
+            : ''
         const descriptionName =
           order.details &&
           order.details.length > 0 &&
@@ -88,7 +94,8 @@ export default {
             : ''
         return (
           orderNumber.includes(searchTerm) ||
-          descriptionName.includes(searchTerm)
+          descriptionName.includes(searchTerm) ||
+          detailsName.includes(searchTerm)
         )
       })
     },
