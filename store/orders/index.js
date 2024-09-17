@@ -1,6 +1,7 @@
 export const state = () => ({
   orders: [],
   order: null,
+  errorMessage: null,
 })
 
 export const mutations = {
@@ -12,6 +13,9 @@ export const mutations = {
   },
   ADD_ORDER(state, order) {
     state.orders.push(order)
+  },
+  ERROR(state, error) {
+    state.errorMessage = error
   },
 }
 
@@ -55,6 +59,7 @@ export const actions = {
       }
       return true
     } catch (err) {
+      commit('ERROR', err.response.data)
       return false
     }
   },
@@ -66,6 +71,7 @@ export const actions = {
         return true
       }
     } catch (err) {
+      commit('ERROR', err.response.data)
       return false
     }
   },
@@ -74,4 +80,5 @@ export const actions = {
 export const getters = {
   orders: (state) => state.orders,
   order: (state) => state.order,
+  errorMessage: (state) => state.errorMessage,
 }

@@ -66,7 +66,11 @@ export default {
     bendRole: process.env.BEND_ROLE || 'bend',
   },
 
-  plugins: [{ src: '~/plugins/flowbite.js', mode: 'client' }],
+  plugins: [
+    { src: '~/plugins/flowbite.js', mode: 'client' },
+    { src: '~/plugins/notifications-ssr', ssr: true },
+    { src: '~/plugins/notifications-client', ssr: false },
+  ],
 
   components: true,
 

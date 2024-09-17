@@ -2,7 +2,29 @@
   <main
     class="flex flex-row flex-wrap items-center justify-center p-4 md:ml-64 h-auto pt-20"
   >
-    <input v-model="searchable" type="text" />
+    <header-component class="ml-auto">
+      <template #searchInput>
+        <input-with-label-icon v-model="searchable" type="text" label="Search">
+          <template #label_svg>
+            <svg
+              class="w-4 h-4 text-gray-500 dark:text-gray-400"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 20 20"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+              />
+            </svg>
+          </template>
+        </input-with-label-icon>
+      </template>
+    </header-component>
     <div v-for="order in searchFilter" :key="order.id" class="m-3">
       <div
         class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
@@ -55,9 +77,11 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 
 export default {
   name: 'AdminPage',
+  components: { InputWithLabelIcon },
   layout: 'adminLayout',
   middleware: 'admin',
   data() {
@@ -98,17 +122,6 @@ export default {
           detailsName.includes(searchTerm)
         )
       })
-    },
-  },
-  watch: {
-    searchable(val) {
-      if (val.length > 2) {
-        setTimeout(() => {
-          this.isSearch = true
-        }, 2000)
-      } else {
-        this.isSearch = false
-      }
     },
   },
   created() {

@@ -176,6 +176,8 @@
           Delete
         </button>
       </div>
+
+      <notifications />
     </div>
   </div>
 </template>
@@ -208,7 +210,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('orders', ['order']),
+    ...mapGetters('orders', ['order', 'errorMessage']),
     ...mapGetters('factory', ['getFactory']),
     getOrder() {
       return this.order ? JSON.parse(JSON.stringify(this.order)) : {}
@@ -239,23 +241,54 @@ export default {
         this.stepperData = this.stepperData.filter((i) => i.id !== value.id)
       }
     },
-    doneOrder() {
-      try {
-        const formattedFactories = this.selectedFactories.map((id) => ({ id }))
-        const updatedOrder = {
-          ...this.getOrder,
-          status: 'in_process',
-          factories: formattedFactories,
-        }
-        this.updateOrder(updatedOrder)
-      } catch (err) {
-        return false
+    async doneOrder() {
+      const formattedFactories = this.selectedFactories.map((id) => ({ id }))
+      const updatedOrder = {
+        ...this.getOrder,
+        status: 'in_process',
+        factories: formattedFactories,
+      }
+      const res = await this.updateOrder(updatedOrder)
+      if (res) {
+        this.$notify({
+          text: `Product updated successfully`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'success',
+        })
+      } else {
+        const error = this.errorMessage
+        this.$notify({
+          text: error.message,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
       }
     },
     async deleteOrder(id) {
       try {
-        await this.orderDelete(id)
+        const res = await this.orderDelete(id)
+        if (res) {
+          this.$notify({
+            text: `Product updated successfully`,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'success',
+          })
+        }
       } catch (err) {
+        const error = this.errorMessage
+        this.$notify({
+          text: error.message,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'success',
+        })
         return false
       }
     },
