@@ -170,6 +170,7 @@ export default {
     ...mapActions('factory', ['fetchOrdersByFactory', 'doneFinishedOrder']),
     updateOrder(order) {
       this.isModal = true
+      this.selectedOrder.id = order.id
       this.selectedOrder.status = order.status.status
       this.selectedOrder.created_at = order.created_at
       this.selectedOrder.finish_date = order.dates.finish_date
@@ -182,11 +183,11 @@ export default {
     },
     doneOrder() {
       const updatedOrder = {
-        ...this.selectedOrder,
+        id: this.selectedOrder.id,
         status: 'finished',
       }
-
       this.doneFinishedOrder(updatedOrder)
+      this.closeModal()
     },
   },
 }

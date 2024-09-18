@@ -1,6 +1,7 @@
 export const state = () => ({
   factory: null,
   orderByFactory: null,
+  finishedOrder: null,
 })
 
 export const getters = {
@@ -9,6 +10,9 @@ export const getters = {
   },
   getOrderByFactories(state) {
     return state.orderByFactory
+  },
+  getFinishedOrder(state) {
+    return state.finishedOrder
   },
 }
 
@@ -35,8 +39,10 @@ export const actions = {
 
   async doneFinishedOrder({ commit }, order) {
     console.log(order)
-    await this.$axios.put(`api/factories/updateOrder/${order.id}`)
-    // commit('SET_ORDER', res.data)
+    const res = await this.$axios.put(`api/factories/updateOrder/${order.id}`, {
+      status: order.status,
+    })
+    commit('SET_ORDER', res.data)
   },
 }
 
@@ -46,5 +52,8 @@ export const mutations = {
   },
   SET_FACTORIES(state, orderByFactory) {
     state.orderByFactory = orderByFactory
+  },
+  SET_ORDER(state, finishedOrder) {
+    state.finishedOrder = finishedOrder
   },
 }
