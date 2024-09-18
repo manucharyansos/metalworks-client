@@ -24,16 +24,18 @@ export const actions = {
   },
   async fetchOrdersByFactory({ commit }, factoryIds) {
     try {
-      // const query = factoryIds.join(',')
       const res = await this.$axios.get('/api/factories/getOrdersByFactories', {
         params: { factory_ids: factoryIds },
       })
-
       commit('SET_FACTORIES', res.data)
     } catch (err) {
-      console.error(err)
       return false
     }
+  },
+
+  async doneFinishedOrder({ commit }, order) {
+    await this.$axios.put(`api/factories/updateOrder/${order.id}`)
+    // commit('SET_ORDER', res.data)
   },
 }
 

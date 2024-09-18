@@ -8,20 +8,22 @@
       >
         <p v-if="order.created_at">
           <span class="font-bold">Start:</span> {{ order.created_at }}
+          <span class="font-bold">Finish:</span> {{ order.dates.finish_date }}
         </p>
         <div>
           <div>
             <div>
-              <p
-                v-if="order.status.status === 'in_process'"
-              ><span class="font-bold">Status:</span> 
-                <span class="bg-blue-700 font-sans italic">{{ order.status.status }} </span>
-                
+              <p v-if="order.status.status === 'in_process'">
+                <span class="font-bold">Status:</span>
+                <span class="bg-blue-700 font-sans italic"
+                  >{{ order.status.status }}
+                </span>
               </p>
               <p v-if="order.status.status === 'waiting'">
-                <span class="font-bold">Status:</span> 
-                <span class="bg-yellow-700 font-sans italic"> {{ order.status.status }}</span>
-                
+                <span class="font-bold">Status:</span>
+                <span class="bg-yellow-700 font-sans italic">
+                  {{ order.status.status }}</span
+                >
               </p>
             </div>
             <div

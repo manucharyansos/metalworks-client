@@ -25,7 +25,11 @@
         </input-with-label-icon>
       </template>
     </header-component>
-    <div v-for="order in searchFilter" :key="order.id" class="m-3">
+    <div
+      v-for="order in searchFilter"
+      :key="order.id"
+      class="m-3 flex items-start justify-between flex-wrap"
+    >
       <div
         class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
       >
@@ -78,10 +82,11 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+import HeaderComponent from '~/components/header/HeaderComponent.vue'
 
 export default {
   name: 'AdminPage',
-  components: { InputWithLabelIcon },
+  components: { HeaderComponent, InputWithLabelIcon },
   layout: 'adminLayout',
   middleware: 'admin',
   data() {
