@@ -92,7 +92,8 @@
           <!-- Modal body -->
           <div class="grid gap-4 mb-4 sm:grid-cols-2">
             <div>
-              <input-with-label-icon v-model="selectedOrder.status" />
+              <!--              <input-with-label-icon v-model="selectedOrder.status" />-->
+              <select-with-label v-model="selectedOption" :dates="status" />
             </div>
             <div>
               <input-with-label-icon
@@ -146,15 +147,22 @@
 import { mapActions, mapGetters } from 'vuex'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
+import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 
 export default {
-  components: { TextareaWithLabel, InputWithLabelIcon },
+  components: { SelectWithLabel, TextareaWithLabel, InputWithLabelIcon },
   layout: 'FactoryLayout',
   middleware: 'roleRedirect',
   data() {
     return {
       isModal: false,
       selectedOrder: {},
+      selectedOption: null,
+      status: [
+        { id: 1, name: 'in process', value: 'In process' },
+        { id: 2, name: 'waiting', value: 'Waiting' },
+        { id: 2, name: 'finished', value: 'Finished' },
+      ],
     }
   },
   computed: {
@@ -184,7 +192,7 @@ export default {
     doneOrder() {
       const updatedOrder = {
         id: this.selectedOrder.id,
-        status: 'finished',
+        status: this.selectedOption.name,
       }
       this.doneFinishedOrder(updatedOrder)
       this.closeModal()

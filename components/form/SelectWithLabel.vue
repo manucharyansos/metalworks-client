@@ -11,7 +11,7 @@
       aria-label="Select client"
       v-bind="$attrs"
     >
-      <option v-for="data in dates" :key="data.id" :value="data.id">
+      <option v-for="data in dates" :key="data.id" :value="data">
         {{ data.name }}
       </option>
     </select>

@@ -100,7 +100,7 @@ export default {
     ...mapActions('clients', ['fetchClients']),
     async addTask() {
       const orderData = {
-        client_id: this.selectedOption,
+        client_id: this.selectedOption.id,
         details: [
           {
             description: this.order.details.description,

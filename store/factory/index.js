@@ -38,7 +38,6 @@ export const actions = {
   },
 
   async doneFinishedOrder({ commit }, order) {
-    console.log(order)
     const res = await this.$axios.put(`api/factories/updateOrder/${order.id}`, {
       status: order.status,
     })
@@ -53,7 +52,7 @@ export const mutations = {
   SET_FACTORIES(state, orderByFactory) {
     state.orderByFactory = orderByFactory
   },
-  SET_ORDER(state, finishedOrder) {
-    state.finishedOrder = finishedOrder
+  SET_ORDER(state, order) {
+    state.finishedOrder = order
   },
 }
