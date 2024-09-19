@@ -353,6 +353,7 @@ export default {
       const updatedOrder = {
         id: this.selectedOrder.id,
         status: this.selectedOption.name,
+        details: this.selectedOrder.details,
       }
       if (
         this.selectedOption &&

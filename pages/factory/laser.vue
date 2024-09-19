@@ -1,5 +1,5 @@
 <template>
-  <main class="grid grid-cols-3 pt-40 p-4 md:ml-64">
+  <main class="grid grid-cols-3 pt-20 p-4 md:ml-64">
     <div class="flex flex-col items-start justify-start">
       <h2 class="text-2xl text-white font-bold italic">In process</h2>
       <div v-for="order in inProcess" :key="order.id" class="m-3">
@@ -353,6 +353,7 @@ export default {
       const updatedOrder = {
         id: this.selectedOrder.id,
         status: this.selectedOption.name,
+        details: this.selectedOrder.details,
       }
       if (
         this.selectedOption &&
