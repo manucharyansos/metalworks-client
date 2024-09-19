@@ -1,54 +1,213 @@
 <template>
-  <main
-    class="flex flex-row flex-wrap items-start justify-start p-4 md:ml-64 h-auto pt-20"
-  >
-    <div v-for="order in orders" :key="order.id" class="m-3">
-      <div
-        class="border-2 border-dashed bg-neutral-700 border-neutral-700 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
-      >
-        <p v-if="order.created_at">
-          <span class="font-bold">Start:</span> {{ order.created_at }}
-          <span class="font-bold">Finish:</span> {{ order.dates.finish_date }}
-        </p>
-        <div @click="updateOrder(order)">
-          <div>
-            <div>
-              <p v-if="order.status.status === 'in_process'">
-                <span class="font-bold">Status:</span>
-                <span class="bg-blue-700 font-sans italic"
-                  >{{ order.status.status }}
-                </span>
-              </p>
-              <p v-if="order.status.status === 'waiting'">
-                <span class="font-bold">Status:</span>
-                <span class="bg-yellow-700 font-sans italic">
-                  {{ order.status.status }}</span
+  <main class="grid grid-cols-3 pt-40 p-4 md:ml-64">
+    <div class="flex flex-col items-start justify-start">
+      <h2 class="text-2xl text-white font-bold italic">In process</h2>
+      <div v-for="order in inProcess" :key="order.id" class="m-3">
+        <div v-if="order.status || order.status.status === 'waiting'">
+          <div
+            class="border-2 border-dashed bg-neutral-700 border-neutral-700 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
+          >
+            <p v-if="order.created_at">
+              <span class="font-bold">Start:</span> {{ order.created_at }}
+              <span class="font-bold">Finish:</span>
+              {{ order.dates.finish_date }}
+            </p>
+            <div @click="updateOrder(order)">
+              <div>
+                <div>
+                  <div
+                    v-if="order.status.status === 'in process'"
+                    class="flex flex-row items-start"
+                  >
+                    <span class="font-bold">Status:</span>
+                    <div class="bg-blue-700 font-sans italic mx-2">
+                      {{ order.status.status }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="order.status.status === 'waiting'"
+                    class="flex flex-row items-start"
+                  >
+                    <span class="font-bold">Status:</span>
+                    <div class="bg-yellow-700 font-sans italic mx-2">
+                      {{ order.status.status }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="order.status.status === 'finished'"
+                    class="flex flex-row items-start"
+                  >
+                    <span class="font-bold">Status:</span>
+                    <div class="bg-green-700 font-sans italic mx-2">
+                      {{ order.status.status }}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  v-for="detail in order.details"
+                  :key="detail.id"
+                  class="flex flex-col items-start justify-start"
                 >
-              </p>
+                  <span class="font-bold">Description</span>
+                  <p>Title: {{ detail.type }}</p>
+                  <p>Type: {{ detail.quantity }}</p>
+                  <p>Details: {{ detail.description }}</p>
+                </div>
+              </div>
             </div>
-            <div
-              v-for="detail in order.details"
-              :key="detail.id"
-              class="flex flex-col items-start justify-start"
+            <p>
+              <span class="font-bold">Order number:</span>
+              {{ order.order_number.number }}
+            </p>
+            <a
+              v-if="order.store_link"
+              target="_blank"
+              :href="order.store_link.url"
+              class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+              >Read more</a
             >
-              <span class="font-bold">Description</span>
-              <p>Title: {{ detail.type }}</p>
-              <p>Type: {{ detail.quantity }}</p>
-              <p>Details: {{ detail.description }}</p>
-            </div>
           </div>
         </div>
-        <p>
-          <span class="font-bold">Order number:</span>
-          {{ order.order_number.number }}
-        </p>
-        <a
-          v-if="order.store_link"
-          target="_blank"
-          :href="order.store_link.url"
-          class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-          >Read more</a
-        >
+      </div>
+    </div>
+    <div class="flex flex-col items-center justify-items-start">
+      <h2 class="text-2xl text-white font-bold italic">Waiting</h2>
+      <div v-for="order in waiting" :key="order.id" class="m-3">
+        <div v-if="order.status || order.status.status === 'waiting'">
+          <div
+            class="border-2 border-dashed bg-neutral-700 border-neutral-700 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
+          >
+            <p v-if="order.created_at">
+              <span class="font-bold">Start:</span> {{ order.created_at }}
+              <span class="font-bold">Finish:</span>
+              {{ order.dates.finish_date }}
+            </p>
+            <div @click="updateOrder(order)">
+              <div>
+                <div>
+                  <div
+                    v-if="order.status.status === 'in process'"
+                    class="flex flex-row items-start"
+                  >
+                    <span class="font-bold">Status:</span>
+                    <div class="bg-blue-700 font-sans italic mx-2">
+                      {{ order.status.status }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="order.status.status === 'waiting'"
+                    class="flex flex-row items-start"
+                  >
+                    <span class="font-bold">Status:</span>
+                    <div class="bg-yellow-700 font-sans italic mx-2">
+                      {{ order.status.status }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="order.status.status === 'finished'"
+                    class="flex flex-row items-start"
+                  >
+                    <span class="font-bold">Status:</span>
+                    <div class="bg-green-700 font-sans italic mx-2">
+                      {{ order.status.status }}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  v-for="detail in order.details"
+                  :key="detail.id"
+                  class="flex flex-col items-start justify-start"
+                >
+                  <span class="font-bold">Description</span>
+                  <p>Title: {{ detail.type }}</p>
+                  <p>Type: {{ detail.quantity }}</p>
+                  <p>Details: {{ detail.description }}</p>
+                </div>
+              </div>
+            </div>
+            <p>
+              <span class="font-bold">Order number:</span>
+              {{ order.order_number.number }}
+            </p>
+            <a
+              v-if="order.store_link"
+              target="_blank"
+              :href="order.store_link.url"
+              class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+              >Read more</a
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col items-center justify-items-start">
+      <h2 class="text-2xl text-white font-bold italic">Finished</h2>
+      <div v-for="order in finished" :key="order.id" class="m-3">
+        <div v-if="order.status || order.status.status === 'waiting'">
+          <div
+            class="border-2 border-dashed bg-neutral-700 border-neutral-700 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
+          >
+            <p v-if="order.created_at">
+              <span class="font-bold">Start:</span> {{ order.created_at }}
+              <span class="font-bold">Finish:</span>
+              {{ order.dates.finish_date }}
+            </p>
+            <div @click="updateOrder(order)">
+              <div>
+                <div>
+                  <div
+                    v-if="order.status.status === 'in process'"
+                    class="flex flex-row items-start"
+                  >
+                    <span class="font-bold">Status:</span>
+                    <div class="bg-blue-700 font-sans italic mx-2">
+                      {{ order.status.status }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="order.status.status === 'waiting'"
+                    class="flex flex-row items-start"
+                  >
+                    <span class="font-bold">Status:</span>
+                    <div class="bg-yellow-700 font-sans italic mx-2">
+                      {{ order.status.status }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="order.status.status === 'finished'"
+                    class="flex flex-row items-start"
+                  >
+                    <span class="font-bold">Status:</span>
+                    <div class="bg-green-700 font-sans italic mx-2">
+                      {{ order.status.status }}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  v-for="detail in order.details"
+                  :key="detail.id"
+                  class="flex flex-col items-start justify-start"
+                >
+                  <span class="font-bold">Description</span>
+                  <p>Title: {{ detail.type }}</p>
+                  <p>Type: {{ detail.quantity }}</p>
+                  <p>Details: {{ detail.description }}</p>
+                </div>
+              </div>
+            </div>
+            <p>
+              <span class="font-bold">Order number:</span>
+              {{ order.order_number.number }}
+            </p>
+            <a
+              v-if="order.store_link"
+              target="_blank"
+              :href="order.store_link.url"
+              class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+              >Read more</a
+            >
+          </div>
+        </div>
       </div>
     </div>
     <!-- Main modal -->
@@ -56,7 +215,9 @@
       v-if="isModal"
       class="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full"
     >
-      <div class="relative mx-auto p-4 w-full max-w-2xl h-full md:h-auto">
+      <div
+        class="flex items-center justify-center mx-auto p-4 w-full max-w-2xl h-full md:h-auto"
+      >
         <!-- Modal content -->
         <div
           class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5"
@@ -92,29 +253,7 @@
           <!-- Modal body -->
           <div class="grid gap-4 mb-4 sm:grid-cols-2">
             <div>
-              <!--              <input-with-label-icon v-model="selectedOrder.status" />-->
               <select-with-label v-model="selectedOption" :dates="status" />
-            </div>
-            <div>
-              <input-with-label-icon
-                v-model="selectedOrder.created_at"
-                disabled
-              />
-            </div>
-            <div>
-              <input-with-label-icon
-                v-model="selectedOrder.finish_date"
-                type="date"
-              />
-            </div>
-            <div>
-              <input-with-label-icon v-model="selectedOrder.name" type="text" />
-            </div>
-            <div>
-              <input-with-label-icon
-                v-model="selectedOrder.quantity"
-                type="number"
-              />
             </div>
             <div class="sm:col-span-2">
               <textarea-with-label v-model="selectedOrder.description" />
@@ -141,16 +280,16 @@
         </div>
       </div>
     </div>
+    <notifications />
   </main>
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 
 export default {
-  components: { SelectWithLabel, TextareaWithLabel, InputWithLabelIcon },
+  components: { SelectWithLabel, TextareaWithLabel },
   layout: 'FactoryLayout',
   middleware: 'roleRedirect',
   data() {
@@ -167,8 +306,29 @@ export default {
   },
   computed: {
     ...mapGetters('factory', ['getOrderByFactories']),
-    orders() {
-      return this.getOrderByFactories
+    inProcess() {
+      if (!this.getOrderByFactories) {
+        return null
+      }
+      return this.getOrderByFactories.filter(
+        (order) => order.status?.status === 'in process'
+      )
+    },
+    waiting() {
+      if (!this.getOrderByFactories) {
+        return []
+      }
+      return this.getOrderByFactories.filter(
+        (order) => order.status?.status === 'waiting'
+      )
+    },
+    finished() {
+      if (!this.getOrderByFactories) {
+        return []
+      }
+      return this.getOrderByFactories.filter(
+        (order) => order.status?.status === 'finished'
+      )
     },
   },
   mounted() {
@@ -189,13 +349,36 @@ export default {
     closeModal() {
       this.isModal = false
     },
-    doneOrder() {
+    async doneOrder() {
       const updatedOrder = {
         id: this.selectedOrder.id,
         status: this.selectedOption.name,
       }
-      this.doneFinishedOrder(updatedOrder)
-      this.closeModal()
+      if (
+        this.selectedOption &&
+        this.selectedOption.name &&
+        this.selectedOrder.status !== 'finished'
+      ) {
+        await this.doneFinishedOrder(updatedOrder)
+        await this.closeModal()
+        await this.fetchOrdersByFactory(3)
+        await this.$notify({
+          text: `Product status is already finished.`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'success',
+        })
+      } else {
+        this.$notify({
+          text: `Product status is already finished.`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'info',
+        })
+        this.closeModal()
+      }
     },
   },
 }

@@ -201,7 +201,7 @@
       </div>
     </aside>
     <main
-      class="creator bg-white dark:bg-gray-700 h-screen flex items-center justify-center"
+      class="creator bg-white dark:bg-gray-700 h-full flex items-center justify-center"
     >
       <Nuxt />
     </main>

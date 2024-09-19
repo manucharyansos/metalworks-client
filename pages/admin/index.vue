@@ -25,58 +25,62 @@
         </input-with-label-icon>
       </template>
     </header-component>
-    <div
-      v-for="order in searchFilter"
-      :key="order.id"
-      class="m-3 flex items-start justify-between flex-wrap"
-    >
+    <template v-if="searchFilter">
       <div
-        class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
+        v-for="(order, index) in searchFilter"
+        :key="index"
+        class="m-3 flex items-start justify-between flex-wrap"
       >
-        <p v-if="order.created_at">
-          <span class="font-bold">Start:</span> {{ order.created_at }}
-        </p>
-        <div @click="editOrder(order)">
-          <div>
+        <div
+          class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
+        >
+          <p v-if="order.created_at">
+            <span class="font-bold">Start:</span> {{ order.created_at }}
+          </p>
+          <div @click="editOrder(order)">
             <div>
-              <p v-if="order.status.status === 'in_process'">
-                <span class="font-bold">Status:</span>
-                <span class="bg-blue-700 font-sans italic"
-                  >{{ order.status.status }}
-                </span>
-              </p>
-              <p v-if="order.status.status === 'waiting'">
-                <span class="font-bold">Status:</span>
-                <span class="bg-yellow-700 font-sans italic">
-                  {{ order.status.status }}</span
-                >
-              </p>
-            </div>
-            <div
-              v-for="detail in order.details"
-              :key="detail.id"
-              class="flex flex-col items-start justify-start"
-            >
-              <span class="font-bold">Description</span>
-              <p>Name: {{ detail.name }}</p>
-              <p>Quantity: {{ detail.quantity }}</p>
-              <p class="will-change-auto">Details: {{ detail.description }}</p>
+              <div>
+                <p v-if="order.status.status === 'in_process'">
+                  <span class="font-bold">Status:</span>
+                  <span class="bg-blue-700 font-sans italic"
+                    >{{ order.status.status }}
+                  </span>
+                </p>
+                <p v-if="order.status.status === 'waiting'">
+                  <span class="font-bold">Status:</span>
+                  <span class="bg-yellow-700 font-sans italic">
+                    {{ order.status.status }}</span
+                  >
+                </p>
+              </div>
+              <div
+                v-for="detail in order.details"
+                :key="detail.id"
+                class="flex flex-col items-start justify-start"
+              >
+                <span class="font-bold">Description</span>
+                <p>Name: {{ detail.name }}</p>
+                <p>Quantity: {{ detail.quantity }}</p>
+                <p class="will-change-auto">
+                  Details: {{ detail.description }}
+                </p>
+              </div>
             </div>
           </div>
+          <p>
+            <span class="font-bold">Order number:</span>
+            {{ order.order_number.number }}
+          </p>
+          <a
+            v-if="order.store_link"
+            target="_blank"
+            :href="order.store_link.url"
+            class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+            >Read more</a
+          >
         </div>
-        <p>
-          <span class="font-bold">Order number:</span>
-          {{ order.order_number.number }}
-        </p>
-        <a
-          v-if="order.store_link"
-          target="_blank"
-          :href="order.store_link.url"
-          class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-          >Read more</a
-        >
       </div>
-    </div>
+    </template>
   </main>
 </template>
 <script>

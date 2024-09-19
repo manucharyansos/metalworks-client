@@ -258,7 +258,7 @@ export default {
       const formattedFactories = this.selectedFactories.map((id) => ({ id }))
       const updatedOrder = {
         ...this.getOrder,
-        status: 'in_process',
+        status: 'in process',
         factories: formattedFactories,
         finish_date: this.finishData,
       }
