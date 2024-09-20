@@ -1,8 +1,7 @@
 <template>
   <div class="bg-neutral-400 grid grid-cols-2 gap-2 w-full h-full p-6">
-    <div class="mt-10 w-1/3 ml-auto mr-4">
+    <div v-if="clients && clients.length > 0" class="mt-10 w-1/3 ml-auto mr-4">
       <select-with-label
-        id="client-select"
         v-model="selectedOption"
         :dates="clients"
         label="Select Client"
@@ -99,25 +98,27 @@ export default {
     ...mapActions('orders', ['createOrder']),
     ...mapActions('clients', ['fetchClients']),
     async addTask() {
-      const orderData = {
-        client_id: this.selectedOption.id,
-        details: [
-          {
-            description: this.order.details.description,
-            quantity: this.order.details.quantity,
-            name: this.order.details.name,
+      if (this.selectedOption && this.selectedOption.id) {
+        const orderData = {
+          client_id: this.selectedOption.id,
+          details: [
+            {
+              description: this.order.details.description,
+              quantity: this.order.details.quantity,
+              name: this.order.details.name,
+            },
+          ],
+          store_link: {
+            url: this.order.store_link.url,
           },
-        ],
-        store_link: {
-          url: this.order.store_link.url,
-        },
-        status_id: this.order.status_id,
-      }
+          status_id: this.order.status_id,
+        }
 
-      try {
-        await this.createOrder(orderData)
-      } catch (error) {
-        console.error('Error creating order:', error.response.data)
+        try {
+          await this.createOrder(orderData)
+        } catch (error) {
+          console.error('Error creating order:', error.response.data)
+        }
       }
     },
   },

@@ -1,7 +1,5 @@
 <template>
-  <main
-    class="flex flex-row flex-wrap items-center justify-center p-4 md:ml-64 h-auto pt-20"
-  >
+  <main class="flex flex-row flex-wrap p-4 md:ml-64 h-auto pt-20">
     <header-component class="ml-auto">
       <template #searchInput>
         <input-with-label-icon v-model="searchable" type="text" label="Search">
@@ -125,10 +123,15 @@ export default {
           typeof order.details[0].description === 'string'
             ? order.details[0].description.toLowerCase()
             : ''
+        const prefixCode =
+          order.prefix_code && typeof order.prefix_code.code === 'string'
+            ? order.prefix_code.code.toLowerCase()
+            : ''
         return (
           orderNumber.includes(searchTerm) ||
           descriptionName.includes(searchTerm) ||
-          detailsName.includes(searchTerm)
+          detailsName.includes(searchTerm) ||
+          prefixCode.includes(searchTerm)
         )
       })
     },
