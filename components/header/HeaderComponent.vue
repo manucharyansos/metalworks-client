@@ -53,7 +53,7 @@
           <slot name="searchInput"></slot>
         </div>
       </div>
-      <div class="flex items-center lg:order-2">
+      <div class="relative flex items-center lg:order-2">
         <button
           type="button"
           data-drawer-toggle="drawer-navigation"
@@ -284,11 +284,9 @@
           </div>
         </div>
         <button
-          id="user-menu-button"
           type="button"
           class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-          aria-expanded="false"
-          data-dropdown-toggle="dropdown"
+          @click="isOpenUserDrover = !isOpenUserDrover"
         >
           <span class="sr-only">Open user menu</span>
           <img
@@ -299,8 +297,8 @@
         </button>
         <!-- Dropdown menu -->
         <div
-          id="dropdown"
-          class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
+          v-if="isOpenUserDrover"
+          class="dropdown absolute top-10 right-0 z-50 my-4 w-56 text-base list-none bg-white divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600 rounded-xl"
         >
           <div class="py-3 px-4">
             <span
@@ -347,6 +345,14 @@
   </nav>
 </template>
 
-<script setup></script>
+<script>
+export default {
+  data() {
+    return {
+      isOpenUserDrover: false,
+    }
+  },
+}
+</script>
 
 <style scoped></style>

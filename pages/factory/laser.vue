@@ -353,8 +353,16 @@ export default {
       const updatedOrder = {
         id: this.selectedOrder.id,
         status: this.selectedOption.name,
-        details: this.selectedOrder.details,
+        factory_id: 3,
+        details: [
+          {
+            description: this.selectedOrder.description,
+            quantity: this.selectedOrder.quantity,
+            name: this.selectedOrder.name,
+          },
+        ],
       }
+
       if (
         this.selectedOption &&
         this.selectedOption.name &&
@@ -364,7 +372,7 @@ export default {
         await this.closeModal()
         await this.fetchOrdersByFactory(3)
         await this.$notify({
-          text: `Product status is already finished.`,
+          text: `Product status updated successfully.`,
           duration: 3000,
           speed: 1000,
           position: 'top',

@@ -38,7 +38,7 @@
           <div @click="editOrder(order)">
             <div>
               <div>
-                <p v-if="order.status.status === 'in_process'">
+                <p v-if="order.status.status === 'in process'">
                   <span class="font-bold">Status:</span>
                   <span class="bg-blue-700 font-sans italic"
                     >{{ order.status.status }}

@@ -72,7 +72,7 @@
               <td v-if="order.created_at" class="px-6 py-4">
                 {{ order.created_at }}
               </td>
-              <td v-if="order.finish_date" class="px-6 py-4">
+              <td class="px-6 py-4">
                 {{ order.dates.finish_date ? order.dates.finish_date : 'null' }}
               </td>
               <td v-if="order.order_number" class="px-6 py-4">

@@ -40,6 +40,8 @@ export const actions = {
   async doneFinishedOrder({ commit }, order) {
     const res = await this.$axios.put(`api/factories/updateOrder/${order.id}`, {
       status: order.status,
+      factory_id: order.factory_id,
+      details: order.details,
     })
     commit('SET_ORDER', res.data)
   },
