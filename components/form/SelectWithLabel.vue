@@ -11,7 +11,7 @@
       aria-label="Select client"
       v-bind="$attrs"
     >
-      <option v-for="data in dates" :key="data.id" :value="data">
+      <option v-for="(data, index) in dates" :key="index" :value="data">
         {{ data.name }}
       </option>
     </select>
@@ -26,7 +26,7 @@ export default {
       default: '',
     },
     value: {
-      type: Number,
+      type: [Number, Object],
       default: null,
     },
     name: {
