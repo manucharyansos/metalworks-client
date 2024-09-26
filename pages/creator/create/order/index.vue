@@ -74,7 +74,6 @@ export default {
       openTaskDrawer: false,
       openOrderDrawer: false,
       order: {
-        user_id: '',
         order_number: '',
         details: [
           {
@@ -124,7 +123,13 @@ export default {
         try {
           await this.createOrder(orderData)
         } catch (error) {
-          console.error('Error creating order:', error.response.data)
+          this.$notify({
+            text: error.response.data,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'error',
+          })
         }
       }
     },

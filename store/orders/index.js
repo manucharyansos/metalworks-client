@@ -42,7 +42,8 @@ export const actions = {
     const response = await this.$axios.post('/api/orders/order', orderData)
     commit('ADD_ORDER', response.data.order)
     if (response) {
-      this.$router.push('/creator')
+      await this.$router.push('/creator')
+      return true
     }
     return true
   },
@@ -55,7 +56,7 @@ export const actions = {
       )
       commit('SET_ORDER', response.data)
       if (response) {
-        this.$router.push('/admin')
+        await this.$router.push('/admin')
       }
       return true
     } catch (err) {

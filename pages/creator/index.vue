@@ -34,7 +34,7 @@
       <!--      table-->
 
       <div
-        v-if="orders"
+        v-if="orders.length > 0"
         class="relative overflow-x-auto shadow-md sm:rounded-lg ml-20"
       >
         <table
@@ -205,37 +205,19 @@ export default {
     },
     searchFilter() {
       const searchTerm = this.searchable.trim().toLowerCase()
-      if (searchTerm === '') {
-        return this.allOrders
-      }
-      return this.allOrders.filter((order) => {
-        const orderNumber =
-          order.order_number && typeof order.order_number.number === 'string'
-            ? order.order_number.number.toLowerCase()
-            : ''
-        const detailsName =
-          order.details &&
-          order.details.length > 0 &&
-          typeof order.details[0].name === 'string'
-            ? order.details[0].name.toLowerCase()
-            : ''
-        const descriptionName =
-          order.details &&
-          order.details.length > 0 &&
-          typeof order.details[0].description === 'string'
-            ? order.details[0].description.toLowerCase()
-            : ''
-        const prefixCode =
-          order.prefix_code && typeof order.prefix_code.code === 'string'
-            ? order.prefix_code.code.toLowerCase()
-            : ''
-        return (
-          orderNumber.includes(searchTerm) ||
-          descriptionName.includes(searchTerm) ||
-          detailsName.includes(searchTerm) ||
-          prefixCode.includes(searchTerm)
-        )
-      })
+      return this.allOrders.filter(
+        (order) =>
+          order &&
+          (((order.order_number && order.order_number.number) || '')
+            .toLowerCase()
+            .includes(searchTerm) ||
+            ((order.details && order.details[0] && order.details[0].name) || '')
+              .toLowerCase()
+              .includes(searchTerm) ||
+            ((order.prefix_code && order.prefix_code.code) || '')
+              .toLowerCase()
+              .includes(searchTerm))
+      )
     },
   },
   created() {
@@ -243,9 +225,9 @@ export default {
   },
   methods: {
     ...mapActions('orders', ['fetchOrders', 'orderDelete']),
-    editOrder(order) {
-      console.log(order)
-    },
+    // editOrder(order) {
+    //   console.log(order)
+    // },
     openDeleteModal(order) {
       if (order && order.id) {
         this.selectedOrder = order
