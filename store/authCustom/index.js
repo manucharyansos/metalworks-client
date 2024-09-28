@@ -38,12 +38,19 @@ export const actions = {
 
   async registerUser({ commit }, userData) {
     try {
-      await this.$axios.post('/api/register', userData)
-      await this.router.push('/login')
-      return true
-    } catch (res) {
-      commit('setErrorMessageErrors', res.response.data.error)
-      commit('setErrorMessageMessages', res.response.data.message)
+      const response = await this.$axios.post('/api/register', userData)
+      if (response.status === 201 || response.status === 200) {
+        await this.$router.push('/login')
+        return true
+      }
+
+      return false
+    } catch (error) {
+      commit('setErrorMessageErrors', error.response?.data?.error || 'Error')
+      commit(
+        'setErrorMessageMessages',
+        error.response?.data?.message || 'Error occurred'
+      )
       return false
     }
   },

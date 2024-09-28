@@ -205,6 +205,8 @@
         </div>
       </div>
     </div>
+    <!--      notifications-->
+    <notifications />
   </div>
 </template>
 
@@ -278,7 +280,6 @@ export default {
       this.fieldPassword = !this.password
       this.fieldConfirmPassword = !this.password_confirmation
 
-      // Check if passwords match
       if (this.password !== this.password_confirmation) {
         this.fieldConfirmPassword = true
         this.errorMessages.password_confirmation = 'Passwords do not match'
@@ -309,7 +310,13 @@ export default {
           this.email = ''
           this.password = ''
           this.password_confirmation = ''
-          await this.$router.push('/login')
+          this.$notify({
+            text: `Registration successful! You will be redirected to the login page.`,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'success',
+          })
         } else {
           this.errorMessages = this.getErrors
         }

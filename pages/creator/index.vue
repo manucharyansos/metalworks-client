@@ -38,7 +38,7 @@
         class="relative overflow-x-auto shadow-md sm:rounded-lg ml-20"
       >
         <table
-          v-if="!isOpenDeleteModal"
+          v-if="!isOpenDeleteModal && !openEditModal"
           class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
         >
           <thead
@@ -175,6 +175,10 @@
           </div>
         </div>
       </div>
+
+      <!--      edit modal-->
+      <edit-modal :data="showOrder" :is-open="openEditModal" />
+
       <!--      notifications-->
       <notifications />
     </main>
@@ -184,10 +188,11 @@
 import { mapActions, mapGetters } from 'vuex'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import HeaderComponent from '~/components/header/HeaderComponent.vue'
+import EditModal from '~/components/pages/creator/EditModal.vue'
 
 export default {
   name: 'CreatorPage',
-  components: { HeaderComponent, InputWithLabelIcon },
+  components: { EditModal, HeaderComponent, InputWithLabelIcon },
   layout: 'creatorLayout',
   middleware: 'creator',
   data() {
@@ -195,7 +200,9 @@ export default {
       searchable: '',
       isDetails: false,
       isOpenDeleteModal: false,
+      openEditModal: false,
       selectedOrder: null,
+      showOrder: null,
     }
   },
   computed: {
@@ -225,9 +232,10 @@ export default {
   },
   methods: {
     ...mapActions('orders', ['fetchOrders', 'orderDelete']),
-    // editOrder(order) {
-    //   console.log(order)
-    // },
+    editOrder(order) {
+      this.openEditModal = true
+      this.showOrder = order
+    },
     openDeleteModal(order) {
       if (order && order.id) {
         this.selectedOrder = order

@@ -165,6 +165,7 @@ export default {
     return {
       email: 'creator@example.com',
       password: 'password',
+      middleware: 'redirectIfAuthenticated',
       fieldEmail: false,
       fieldPassword: false,
       errorMessage: {
