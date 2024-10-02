@@ -10,6 +10,7 @@
       :class="classes"
       :value="value"
       :placeholder="placeholder"
+      :disabled="disabled"
       @input="$emit('input', $event.target.value)"
     />
     <label
@@ -30,12 +31,10 @@ export default {
       type: String,
       default: '',
     },
-    // eslint-disable-next-line vue/prop-name-casing
     label_Id: {
       type: String,
       default: '',
     },
-    // eslint-disable-next-line vue/prop-name-casing
     for_LAbel: {
       type: String,
       default: '',
@@ -56,10 +55,13 @@ export default {
       type: String,
       default: '',
     },
-    // eslint-disable-next-line vue/prop-name-casing
     label_class: {
       type: String,
       default: '',
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
     },
   },
 }
