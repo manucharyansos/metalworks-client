@@ -41,7 +41,7 @@ export const actions = {
     const res = await this.$axios.put(`api/factories/updateOrder/${order.id}`, {
       factory_order_statuses: order.factory_order_statuses,
       factory_id: order.factory_id,
-      details: order.details,
+      // description: order.description,
     })
     commit('SET_ORDER', res.data)
   },

@@ -1,5 +1,5 @@
 <template>
-  <div class="antialiased bg-gray-50 dark:bg-gray-900">
+  <div class="bg-gray-50 dark:bg-gray-900">
     <main
       class="creator p-6 flex items-center justify-center fixed top-20 left-0 right-0 z-10 w-full overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full"
     >
@@ -177,7 +177,11 @@
       </div>
 
       <!--      edit modal-->
-      <edit-modal :data="showOrder" :is-open="openEditModal" />
+      <edit-modal
+        :data="showOrder"
+        :is-open="openEditModal"
+        @closeModal="closeEditeModal"
+      />
 
       <!--      notifications-->
       <notifications />
@@ -244,6 +248,9 @@ export default {
     },
     closeDeleteModal() {
       this.isOpenDeleteModal = false
+    },
+    closeEditeModal() {
+      this.editOrder = false
     },
     async deleteSelectedOrder() {
       if (!this.selectedOrder || !this.selectedOrder.id) {

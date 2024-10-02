@@ -108,9 +108,9 @@
       </div>
     </template>
     <div class="grid grid-cols-3 pt-20 p-4 md:ml-64">
-      <div class="flex flex-col items-start justify-start">
-        <h2 class="text-2xl text-white font-bold italic">In process</h2>
-        <div v-for="order in inProcess" :key="order.id" class="m-3">
+      <div class="flex flex-col items-center justify-items-start">
+        <h2 class="text-2xl text-white font-bold italic">Waiting</h2>
+        <div v-for="order in waiting" :key="order.id" class="m-3">
           <div v-if="order.status || order.status.status === 'waiting'">
             <div
               class="border-2 border-dashed bg-neutral-700 border-neutral-700 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
@@ -178,9 +178,9 @@
           </div>
         </div>
       </div>
-      <div class="flex flex-col items-center justify-items-start">
-        <h2 class="text-2xl text-white font-bold italic">Waiting</h2>
-        <div v-for="order in waiting" :key="order.id" class="m-3">
+      <div class="flex flex-col items-start justify-start">
+        <h2 class="text-2xl text-white font-bold italic">In process</h2>
+        <div v-for="order in inProcess" :key="order.id" class="m-3">
           <div v-if="order.status || order.status.status === 'waiting'">
             <div
               class="border-2 border-dashed bg-neutral-700 border-neutral-700 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"

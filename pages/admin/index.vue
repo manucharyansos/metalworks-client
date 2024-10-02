@@ -23,6 +23,8 @@
         </input-with-label-icon>
       </template>
     </header-component>
+    <!--    New orders section-->
+
     <template v-if="searchFilter">
       <div
         v-for="(order, index) in searchFilter"
