@@ -1,7 +1,7 @@
 <template>
   <div class="bg-gray-50 dark:bg-gray-900">
     <main
-      class="creator p-6 flex items-center justify-center fixed top-20 left-0 right-0 z-10 w-full overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full"
+      class="creator p-6 flex items-start justify-center mt-12 fixed top-30 left-30 right-0 z-10 w-full overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full"
     >
       <header-component class="ml-auto bg-transparent">
         <template #searchInput>
@@ -35,7 +35,7 @@
 
       <div
         v-if="orders.length > 0"
-        class="relative overflow-x-auto shadow-md sm:rounded-lg ml-20"
+        class="relative overflow-x-auto shadow-md sm:rounded-lg ml-28"
       >
         <table
           v-if="!isOpenDeleteModal && !openEditModal"
@@ -195,7 +195,7 @@
         <template #storageLink>
           <div>
             <a
-              class="border-b-2 border-b-gray-300 pb-5"
+              class="border-b-2 border-b-gray-300 pb-3"
               :href="showOrder.store_link.url"
               >Store link</a
             >

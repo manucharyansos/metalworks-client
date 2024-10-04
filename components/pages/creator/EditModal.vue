@@ -40,7 +40,7 @@
         <!-- Modal body -->
         <div>
           <div class="grid gap-6 mb-4 sm:grid-cols-2">
-            <div class="grid gap-4 mb-4 sm:grid-cols-2">
+            <div class="grid gap-4 mb-4 sm:grid-cols-2 items-center">
               <slot name="orderId"></slot>
               <slot name="storageLink"></slot>
             </div>
