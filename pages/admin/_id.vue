@@ -32,7 +32,7 @@
               >
               <input
                 id="finish"
-                v-model="finishData"
+                v-model="getOrder.dates.finish_date"
                 type="date"
                 name="name"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
@@ -99,6 +99,21 @@
                   class="rounded-md w-6 h-6 border-2"
                   @change="add(manyFactory)"
                 />
+              </div>
+            </div>
+            <!--      Factory order status-->
+            <div>
+              <p>Factories</p>
+              <div
+                v-for="factoriesStatus in getOrder.factory_order_statuses"
+                :key="factoriesStatus.id"
+              >
+                <div>
+                  <div class="flex items-center space-x-4">
+                    <p>Factory: {{ factoriesStatus.factory.name }}</p>
+                    <p>Status: {{ factoriesStatus.status }}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -182,10 +197,6 @@
           <spinner-component />
         </div>
       </template>
-<!--      Factory order status-->
-      <div >
-
-      </div>
     </div>
   </div>
 </template>
@@ -202,28 +213,16 @@ export default {
     return {
       stepperData: [],
       selectedFactories: [],
-      finishData: [],
-      orderData: {
-        type: '',
-        details: [
-          {
-            description: '',
-            quantity: '',
-            type: '',
-          },
-        ],
-        store_link: {
-          url: '',
-        },
-        status_id: null,
-      },
+      statusesByFactories: [],
     }
   },
   computed: {
     ...mapGetters('orders', ['order', 'errorMessage']),
     ...mapGetters('factory', ['getFactory']),
     getOrder() {
-      return this.order ? JSON.parse(JSON.stringify(this.order)) : {}
+      const order = this.order ? JSON.parse(JSON.stringify(this.order)) : {}
+      order.dates = order.dates || { finish_date: null }
+      return order
     },
     factories() {
       return this.getFactory ? JSON.parse(JSON.stringify(this.getFactory)) : []
@@ -257,12 +256,27 @@ export default {
         ...this.getOrder,
         status: 'in process',
         factories: formattedFactories,
-        finish_date: this.finishData,
+        finish_date: this.getOrder.dates?.finish_date,
       }
+
+      const currentDate = new Date()
+      const finishDate = new Date(this.getOrder.dates?.finish_date)
+
+      if (finishDate <= currentDate) {
+        this.$notify({
+          text: 'Finish date must be greater than the current date.',
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
+        return
+      }
+
       const res = await this.updateOrder(updatedOrder)
       if (res) {
         this.$notify({
-          text: `Product updated successfully`,
+          text: 'Product updated successfully',
           duration: 3000,
           speed: 1000,
           position: 'top',
@@ -279,6 +293,7 @@ export default {
         })
       }
     },
+
     async deleteOrder(id) {
       try {
         const res = await this.orderDelete(id)
