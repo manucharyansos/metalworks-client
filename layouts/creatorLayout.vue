@@ -6,7 +6,7 @@
       aria-label="Sidenav"
     >
       <div
-        class="overflow-y-auto py-5 px-3 h-full bg-transparent dark:bg-gray-800"
+        class="overflow-y-auto py-5 px-3 h-screen bg-transparent dark:bg-gray-800"
       >
         <ul class="space-y-2">
           <li>
@@ -101,7 +101,7 @@
       </div>
     </aside>
     <main
-      class="creator bg-white dark:bg-gray-700 w-full h-full flex items-start justify-start"
+      class="creator bg-white dark:bg-gray-700 w-full h-screen flex items-start justify-start"
     >
       <Nuxt />
     </main>
@@ -146,7 +146,7 @@ export default {
   background-repeat: no-repeat;
   background-size: cover;
   object-fit: cover;
-  width: 100%;
-  height: 100%;
+  //width: 100%;
+  //height: 100%;
 }
 </style>
