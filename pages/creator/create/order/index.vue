@@ -46,7 +46,11 @@
         </div>
       </div>
     </template>
-    <template v-else> <spinner-component /> </template>
+    <template v-else>
+      <div class="flex items-center justify-center w-full h-screen">
+        <spinner-component />
+      </div>
+    </template>
   </div>
 </template>
 

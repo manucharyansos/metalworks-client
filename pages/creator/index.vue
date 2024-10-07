@@ -35,7 +35,7 @@
 
       <div
         v-if="orders.length > 0"
-        class="relative overflow-x-auto shadow-md sm:rounded-lg ml-28"
+        class="relative overflow-x-auto shadow-md sm:rounded-lg ml-28 my-16"
       >
         <table
           v-if="!isOpenDeleteModal && !openEditModal"
