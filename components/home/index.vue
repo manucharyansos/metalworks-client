@@ -9,8 +9,8 @@
           <h2
             class="xl:text-7xl lg:text-7xl md:text-6xl sm:text-5xl text-4xl text-neutral-700 z-10 font-sans font-extrabold italic mx-auto text-center my-4"
           >
-            Custom sheet metal parts in as little as
-            <span class="text-red-700">2 days</span>
+            Պատվերով թիթեղյա մասերը ընդամենը
+            <span class="text-red-700">2 օրում</span>
           </h2>
 
           <div
@@ -33,7 +33,7 @@
                   d="M63.6,34.6c0.3-0.4,0.4-0.9,0.4-1.4c0-0.5-0.1-1-0.4-1.4l0.1-0.1l-0.3-0.2c-0.2-0.3-0.5-0.6-0.9-0.7l-5.4-4.6l5.3-2.8 c0.5-0.3,0.9-0.7,1.1-1.1c0.3-0.5,0.4-0.9,0.4-1.4c0-0.6-0.1-1.1-0.4-1.5c-0.3-0.5-0.7-0.8-1.1-0.9L47.1,10 c-2.5-5.6-8.1-9.5-14.7-9.5c-6.5,0-12.1,3.9-14.6,9.4l-16.1,9c-0.5,0.2-0.9,0.6-1.1,1.1c-0.3,0.5-0.4,1-0.4,1.5 c0,0.6,0.1,1.1,0.4,1.5c0.3,0.5,0.7,0.8,1.1,0.9L7,26.7l-6,5c0,0,0,0,0,0l0,0l0,0c-0.2,0.2-0.3,0.4-0.5,0.6c-0.3,0.5-0.4,1-0.4,1.5 c0,0.6,0.1,1.1,0.4,1.5c0.3,0.4,0.7,0.8,1.1,1L7,39l-5.8,4.8l0,0c-0.3,0.3-0.5,0.5-0.7,0.8c-0.3,0.5-0.4,0.9-0.4,1.4 c0,0.6,0.1,1.1,0.4,1.6c0.3,0.4,0.7,0.8,1.1,1l28.1,14.5c0.4,0.2,0.7,0.4,1.1,0.5c0.4,0.1,0.8,0.2,1.2,0.2c0.4,0,0.8-0.1,1.2-0.2 c0.4-0.1,0.8-0.3,1.1-0.5l28.1-15.1c0.5-0.2,0.9-0.5,1.1-0.9c0.3-0.5,0.4-1,0.4-1.5c0-0.6-0.1-1.1-0.4-1.6c0,0-0.1-0.1-0.1-0.1 l0-0.1l-0.4-0.3c-0.1-0.1-0.1-0.1-0.2-0.2l-5.8-4.8l5.2-2.8C62.9,35.4,63.3,35,63.6,34.6z M25,18.8c-1.3,0-2.3-1-2.3-2.3 s1-2.3,2.3-2.3h5.1v-5c0-1.3,1-2.3,2.3-2.3c1.3,0,2.3,1,2.3,2.3v5.1h5.1c1.3,0,2.3,1,2.3,2.3c-0.1,1.2-1.1,2.2-2.3,2.2h-5.1v5.2 c0,1.3-1,2.3-2.3,2.3c-1.3,0-2.3-1-2.3-2.3v-5.2H25z M2.1,21.8c0-0.2-0.1-0.3-0.1-0.4c0-0.1,0-0.3,0.1-0.4c0-0.2,0.2-0.3,0.5-0.5 l14.2-7.9c-0.3,1.3-0.5,2.6-0.5,4c0,8.9,7.2,16.1,16.1,16.1c8.9,0,16.1-7.2,16.1-16.1c0-1.4-0.2-2.7-0.5-3.9l13.5,7.2 c0.3,0.2,0.5,0.4,0.5,0.6c0,0.2,0.1,0.3,0.1,0.4c0,0.1,0,0.3-0.1,0.4c0,0.2-0.2,0.3-0.5,0.5L33.4,36.9c-0.2,0.1-0.4,0.2-0.6,0.2 c-0.3,0.1-0.5,0.1-0.7,0.1s-0.4,0-0.7-0.1c-0.3-0.1-0.5-0.2-0.6-0.2L2.7,22.2C2.3,22.1,2.2,21.9,2.1,21.8z M61.3,44.6 c0,0.1,0.1,0.1,0.1,0.2c0.2,0.1,0.4,0.2,0.5,0.5c0.1,0.2,0.2,0.4,0.2,0.5c0,0.1,0,0.2-0.1,0.4c0,0.2-0.2,0.4-0.5,0.6L33.4,61.9 C33,62,32.6,62.1,32,62.1c-0.5,0-1-0.1-1.3-0.2L2.7,47.1c-0.3-0.2-0.5-0.3-0.5-0.5c0-0.2-0.1-0.3-0.1-0.5c0-0.1,0-0.2,0.1-0.4 c0-0.1,0.2-0.3,0.3-0.4l0,0L8.9,40l20.9,10.8c0.4,0.2,0.7,0.4,1.1,0.5c0.4,0.1,0.8,0.2,1.2,0.2c0.4,0,0.8,0,1.2-0.2 c0.4-0.1,0.8-0.3,1.1-0.5l20.9-11.2L61.3,44.6z M62,33.6c0,0.2-0.2,0.4-0.5,0.6L33.4,49.3c-0.4,0.2-0.8,0.2-1.3,0.2 c-0.5,0-1-0.1-1.3-0.2L2.7,34.5c-0.3-0.1-0.5-0.2-0.5-0.4c0-0.2-0.1-0.3-0.1-0.4c0-0.1,0-0.3,0.1-0.5c0-0.1,0.1-0.1,0.1-0.2l0.1,0.1 l6.6-5.6l20.8,10.8c0.4,0.2,0.7,0.4,1.1,0.5C31.3,39,31.6,39,32,39c0.4,0,0.8,0,1.2-0.2c0.4-0.1,0.8-0.3,1.1-0.5l20.9-11.2l6.8,5.7 c0,0.1,0,0.2,0,0.3C62,33.3,62,33.4,62,33.6z"
                 ></path>
               </svg>
-              No minimum quantities
+              Նվազագույն քանակություններ չկան
             </p>
             <p
               class="lg:text-xl text-lg font-mono italic flex items-center justify-center font-bold w-full my-2 lg:my-12"
@@ -68,7 +68,7 @@
                     d="M53.5,48.1c-0.2,0.2-0.3,0.5-0.3,0.7c0,0.1,0,0.3,0.1,0.4c0.1,0.1,0.1,0.2,0.2,0.3c0.1,0.1,0.2,0.2,0.3,0.2  c0.1,0,0.3,0.1,0.4,0.1c0.3,0,0.5-0.1,0.7-0.3c0.1-0.1,0.2-0.2,0.2-0.3c0.1-0.1,0.1-0.3,0.1-0.4c0-0.3-0.1-0.5-0.3-0.7  C54.6,47.7,53.9,47.7,53.5,48.1z"
                   ></path>
                 </g></svg
-              >Free shipping
+              >Առաքում
             </p>
             <p
               class="lg:text-xl text-lg font-mono italic flex items-center justify-center font-bold w-full my-2 lg:my-12"
@@ -91,7 +91,7 @@
                     d="M101.9,94.3l-19-2.7l-8.5-17.1c-0.8-1.6-2.5-2.7-4.5-2.7c-2.1,0-3.9,1-4.7,2.7l-8.3,17.1l-19,2.7c-1.9,0.3-3.6,1.7-4.1,3.6  c-0.6,1.9-0.1,3.9,1.3,5.2l13.6,13.3l-3.3,18.8c-0.3,1.9,0.5,3.8,2,5c0.9,0.7,2,1,3,1c0.8,0,1.6-0.2,2.4-0.6l16.9-8.9l17,8.9  c0.7,0.4,1.6,0.6,2.4,0.6c1,0,2-0.3,3-1c1.6-1.1,2.4-3.1,2-5.1l-3.3-18.8l13.7-13.3c1.4-1.3,1.9-3.4,1.4-5.3  C105.5,96,103.9,94.6,101.9,94.3z M56,116.7c0.3-1.7-0.3-3.4-1.5-4.5l-11.5-11.4l16-2.3l0,0c1.6-0.3,3.1-1.3,3.9-2.8L70,81.2  l7.1,14.5c0.8,1.5,2.2,2.6,3.8,2.8l16,2.4l-11.5,11.2c-1.3,1.2-1.8,2.9-1.5,4.6l2.7,15.9l-14.3-7.5c-1.5-0.8-3.2-0.8-4.8,0  l-14.3,7.5L56,116.7z"
                   ></path>
                 </g></svg
-              >Made in the USA
+              >Արտադրված է Հայաստանում
             </p>
           </div>
         </div>
@@ -101,46 +101,46 @@
         class="bg-white hidden sm:flex flex-col items-center justify-center rounded-3xl shadow-2xl z-10"
       >
         <h2 class="text-xl text-neutral-700 font-bold font-sans italic m-8">
-          Upload your STEP, DXF or EPS file for instant pricing!
+          Վերբեռնեք ձեր STEP, DXF կամ EPS ֆայլը ակնթարթային գնի համար!
         </h2>
         <button
           class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-2 px-7 my-4"
         >
-          GET STARTED
+          ՍԿՍԵԼ
         </button>
 
-        <div class="flex items-center justify-center my-4 shadow-gray-400">
-          <div class="flex -space-x-4 rtl:space-x-reverse">
-            <img
-              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
-              src="/profile-picture-5.jpg"
-              alt=""
-            />
-            <img
-              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
-              src="/picture2.jpg"
-              alt=""
-            />
-            <img
-              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
-              src="/profile-picture-3.jpg"
-              alt=""
-            />
-            <img
-              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"
-              src="/profile-picture-4.jpg"
-              alt=""
-            />
-          </div>
-          <div>
-            <p class="text-neutral-700 text-xl font-bold font-sans italic">
-              JOIN 100,000+ Customers
-            </p>
-          </div>
-        </div>
+        <!--        <div class="flex items-center justify-center my-4 shadow-gray-400">-->
+        <!--          <div class="flex -space-x-4 rtl:space-x-reverse">-->
+        <!--            <img-->
+        <!--              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"-->
+        <!--              src="/profile-picture-5.jpg"-->
+        <!--              alt=""-->
+        <!--            />-->
+        <!--            <img-->
+        <!--              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"-->
+        <!--              src="/picture2.jpg"-->
+        <!--              alt=""-->
+        <!--            />-->
+        <!--            <img-->
+        <!--              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"-->
+        <!--              src="/profile-picture-3.jpg"-->
+        <!--              alt=""-->
+        <!--            />-->
+        <!--            <img-->
+        <!--              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"-->
+        <!--              src="/profile-picture-4.jpg"-->
+        <!--              alt=""-->
+        <!--            />-->
+        <!--          </div>-->
+        <!--          <div>-->
+        <!--            <p class="text-neutral-700 text-xl font-bold font-sans italic">-->
+        <!--              JOIN 100,000+ Customers-->
+        <!--            </p>-->
+        <!--          </div>-->
+        <!--        </div>-->
         <p class="text-base font-sans italic my-4">
-          No CAD? Start with a <span class="font-bold">template</span> or send
-          us a <span class="font-bold">sketch</span>.
+          CAD չկա՞ Սկսեք ձևանմուշից <span class="font-bold">template</span> կամ
+          ուղարկեք մեզ <span class="font-bold">ուրվագիծ</span>.
         </p>
       </div>
 
@@ -172,19 +172,19 @@
         <h2
           class="2xl:text-7xl lg:text-5xl md:text-4xl text-3xl font-sans font-bold italic text-neutral-700 text-center w-2/3"
         >
-          Upload. Configure. Add to Cart.
-          <span class="text-red-600">Done.</span>
+          Վերբեռնել. Կարգավորել. Ավելացնել զամբյուղի մեջ.
+          <span class="text-red-600">Կատարված է:</span>
         </h2>
         <p
           class="md:text-xl text-lg text-neutral-700 text-center italic font-sans my-12"
         >
-          From upload to purchase in a matter of minutes
+          Վերբեռնումից մինչև գնում հաշված րոպեների ընթացքում
         </p>
         <div
           class="flex flex-col lg:flex-row items-center justify-between w-5/6"
         >
           <div
-            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[510px] xl:h-[490px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[650px] xl:h-[550px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
           >
             <div class="p-6">
               <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
@@ -195,20 +195,21 @@
               <p
                 class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
               >
-                Upload your
-                <span class="underline decoration-dotted">CAD file</span>
+                Վերբեռնեք ձեր
+                <span class="underline decoration-dotted">CAD ֆայլ</span>
               </p>
               <p
                 class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
               >
-                No CAD? Customize a part template using our
-                <span class="font-bold">Parts Builder</span>, or send a sketch
-                to our <span class="font-bold">Design Services</span> team.
+                CAD չկա՞ Անհատականացրեք ձեր ձևանմուշը՝ օգտագործելով մեր
+                <span class="font-bold">Մասերի կառուցող</span>, կամ ուղարկել
+                էսքիզ մեր
+                <span class="font-bold">Դիզայնի ծառայություններ</span> թիմին։
               </p>
             </div>
           </div>
           <div
-            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[510px] xl:h-[490px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[650px] xl:h-[550px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
           >
             <div class="p-6">
               <img class="rounded-t-lg" src="/quote-277x300.webp" alt="" />
@@ -219,19 +220,18 @@
               <p
                 class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
               >
-                Get instant pricing
+                Ստացեք ակնթարթային գներ
               </p>
               <p
                 class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
               >
-                Prices start from less than $39.
-                <span class="font-bold"> Free shipping</span> in the USA, from
-                $19 to Canada.
+                Գները սկսվում են $39-ից պակասից։
+                <span class="font-bold"> Ունենք առաքում</span>
               </p>
             </div>
           </div>
           <div
-            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[510px] xl:h-[490px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[650px] xl:h-[550px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
           >
             <div class="p-6">
               <img
@@ -246,15 +246,15 @@
               <p
                 class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
               >
-                Parts at your doorstep in days
+                Պահեստամասերը ձեր դռան մոտ օրերի ընթացքում
               </p>
               <p
                 class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
               >
-                Standard laser cutting orders are out the door in
-                <span class="font-bold">2-4 days</span>. Expect
+                Ստանդարտ լազերային կտրման պատվերները դուրս են գալիս
+                <span class="font-bold">2-4 օրվա ընթացքում:</span>. Սպասվում է
                 <span class="font-bold">1-3 day shipping</span>
-                anywhere in the USA.
+                1-3 օրվա առաքում Հայաստանի ցանկացած վայր
               </p>
             </div>
           </div>
@@ -266,50 +266,50 @@
         <h3
           class="text-6xl font-bold font-sans leading-loose italic text-neutral-700"
         >
-          <span class="text-red-600">165+</span> materials in stock
+          <span class="text-red-600">165+</span> նյութեր պահեստում
         </h3>
-        <div class="flex flex-wrap items-center justify-center w-5/6">
-          <nuxt-link
-            exact-active-class="active-link"
-            to="/"
-            class="px-5 py-1 text-xs font-medium text-center text-indigo-400 hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
-          >
-            All
-          </nuxt-link>
-          <div
-            v-for="material in materials"
-            :key="material.id"
-            class="flex items-center justify-center my-10"
-          >
-            <button
-              class="px-3 py-1 text-xs text-center text-neutral-700 font-sans font-bold italic hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
-            >
-              {{ material.name }}
-            </button>
-          </div>
-          <div
-            v-for="(material, index) in materials"
-            :key="index"
-            class="flex items-center justify-center grid-rows-3 my-3 cursor-pointer"
-          >
-            <div
-              class="materials flex m-2 p-3 rounded-2xl border border-neutral-400 dark:bg-neutral-800 dark:border-gray-800"
-            >
-              <div class="for_material_image w16 h-16">
-                <img
-                  class="w-full h-full rounded-xl"
-                  :src="getImage(material.image)"
-                  alt=""
-                />
-              </div>
+        <!--        <div class="flex flex-wrap items-center justify-center w-5/6">-->
+        <!--          <nuxt-link-->
+        <!--            exact-active-class="active-link"-->
+        <!--            to="/"-->
+        <!--            class="px-5 py-1 text-xs font-medium text-center text-indigo-400 hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"-->
+        <!--          >-->
+        <!--            All-->
+        <!--          </nuxt-link>-->
+        <!--          <div-->
+        <!--            v-for="material in materials"-->
+        <!--            :key="material.id"-->
+        <!--            class="flex items-center justify-center my-10"-->
+        <!--          >-->
+        <!--            <button-->
+        <!--              class="px-3 py-1 text-xs text-center text-neutral-700 font-sans font-bold italic hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"-->
+        <!--            >-->
+        <!--              {{ material.name }}-->
+        <!--            </button>-->
+        <!--          </div>-->
+        <!--          <div-->
+        <!--            v-for="(material, index) in materials"-->
+        <!--            :key="index"-->
+        <!--            class="flex items-center justify-center grid-rows-3 my-3 cursor-pointer"-->
+        <!--          >-->
+        <!--            <div-->
+        <!--              class="materials flex m-2 p-3 rounded-2xl border border-neutral-400 dark:bg-neutral-800 dark:border-gray-800"-->
+        <!--            >-->
+        <!--              <div class="for_material_image w16 h-16">-->
+        <!--                <img-->
+        <!--                  class="w-full h-full rounded-xl"-->
+        <!--                  :src="getImage(material.image)"-->
+        <!--                  alt=""-->
+        <!--                />-->
+        <!--              </div>-->
 
-              <div class="flex flex-col items-center justify-start mx-2">
-                <p class="font-sans italic font-bold">{{ material.name }}</p>
-                <p class="font-sans italic">{{ material.title }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!--              <div class="flex flex-col items-center justify-start mx-2">-->
+        <!--                <p class="font-sans italic font-bold">{{ material.name }}</p>-->
+        <!--                <p class="font-sans italic">{{ material.title }}</p>-->
+        <!--              </div>-->
+        <!--            </div>-->
+        <!--          </div>-->
+        <!--        </div>-->
       </div>
     </div>
   </div>

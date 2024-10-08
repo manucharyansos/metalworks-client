@@ -28,7 +28,7 @@
           >
             <input-with-icon
               type="text"
-              placeholder="Search"
+              placeholder="Փնտրել"
               label_class="mb-2 text-sm font-medium text-gray-900 sr-only"
               classes="search_input ps-6 focus:outline-none block w-full ps-8 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
             >
@@ -124,7 +124,7 @@
                   class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
                   @click="$auth.logout()"
                 >
-                  Sign out
+                  Դուրս գալ
                 </button>
               </div>
             </div>
@@ -133,12 +133,12 @@
             <NuxtLink
               to="/register"
               class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3"
-              >GET STARTED</NuxtLink
+              >ՍԿՍԵԼ</NuxtLink
             >
             <NuxtLink
               to="/login"
               class="login_button text-sm xl:text-base flex items-center justify-content-center text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3"
-              >LOGIN</NuxtLink
+              >ՄՈՒՏՔ</NuxtLink
             >
           </div>
 
@@ -171,49 +171,49 @@
           <ul
             class="flex flex-col p-4 lg:p-2 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 lg:space-x-3 rtl:space-x-reverse lg:flex-row lg:mt-0 lg:border-0 lg:bg-white dark:bg-gray-800 lg:dark:bg-gray-900 dark:border-gray-700"
           >
-            <li>
-              <NuxtLink
-                exact-active-class="active-link"
-                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
-                to="/materials"
-              >
-                Materials
-              </NuxtLink>
-            </li>
-            <li>
-              <NuxtLink
-                exact-active-class="active-link"
-                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
-                to="/services"
-              >
-                Services
-              </NuxtLink>
-            </li>
-            <li>
-              <NuxtLink
-                exact-active-class="active-link"
-                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
-                to="/resources"
-              >
-                Resources
-              </NuxtLink>
-            </li>
-            <li>
-              <NuxtLink
-                exact-active-class="active-link"
-                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
-                to="/examples"
-              >
-                Examples
-              </NuxtLink>
-            </li>
+            <!--            <li>-->
+            <!--              <NuxtLink-->
+            <!--                exact-active-class="active-link"-->
+            <!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
+            <!--                to="/materials"-->
+            <!--              >-->
+            <!--                Materials-->
+            <!--              </NuxtLink>-->
+            <!--            </li>-->
+            <!--            <li>-->
+            <!--              <NuxtLink-->
+            <!--                exact-active-class="active-link"-->
+            <!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
+            <!--                to="/services"-->
+            <!--              >-->
+            <!--                Services-->
+            <!--              </NuxtLink>-->
+            <!--            </li>-->
+            <!--            <li>-->
+            <!--              <NuxtLink-->
+            <!--                exact-active-class="active-link"-->
+            <!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
+            <!--                to="/resources"-->
+            <!--              >-->
+            <!--                Resources-->
+            <!--              </NuxtLink>-->
+            <!--            </li>-->
+            <!--            <li>-->
+            <!--              <NuxtLink-->
+            <!--                exact-active-class="active-link"-->
+            <!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
+            <!--                to="/examples"-->
+            <!--              >-->
+            <!--                Examples-->
+            <!--              </NuxtLink>-->
+            <!--            </li>-->
             <li>
               <NuxtLink
                 exact-active-class="active-link"
                 class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
                 to="/contact"
               >
-                Contact
+                Կոնտակտ
               </NuxtLink>
             </li>
             <li>
@@ -221,12 +221,12 @@
                 <NuxtLink
                   to="/register"
                   class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white bg-black p-1.5 w-full my-2"
-                  >GET STARTED</NuxtLink
+                  >ՍԿՍԵԼ</NuxtLink
                 >
                 <NuxtLink
                   to="/login"
                   class="login_button text-sm xl:text-base flex items-center justify-content-center text-red-600 bg-white duration-300 p-1.5 w-full my-2"
-                  >LOGIN</NuxtLink
+                  >ՄՈՒՏՔ</NuxtLink
                 >
               </div>
             </li>
