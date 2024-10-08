@@ -24,7 +24,7 @@ export default {
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css', 'leaflet/dist/leaflet.css'],
 
   router: {
     middleware: ['auth'],
@@ -70,6 +70,7 @@ export default {
     { src: '~/plugins/flowbite.js', mode: 'client' },
     { src: '~/plugins/notifications-ssr', ssr: true },
     { src: '~/plugins/notifications-client', ssr: false },
+    { src: '~/plugins/leaflet.js', mode: 'client' },
   ],
 
   components: true,

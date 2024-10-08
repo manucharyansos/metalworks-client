@@ -253,7 +253,7 @@
               >
                 Ստանդարտ լազերային կտրման պատվերները դուրս են գալիս
                 <span class="font-bold">2-4 օրվա ընթացքում:</span>. Սպասվում է
-                <span class="font-bold">1-3 day shipping</span>
+                <span class="font-bold">1-3 օր առաքում</span>
                 1-3 օրվա առաքում Հայաստանի ցանկացած վայր
               </p>
             </div>
@@ -264,7 +264,7 @@
       <!--      Materials -->
       <div class="flex flex-col items-center justify-center my-10">
         <h3
-          class="text-6xl font-bold font-sans leading-loose italic text-neutral-700"
+          class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700"
         >
           <span class="text-red-600">165+</span> նյութեր պահեստում
         </h3>
