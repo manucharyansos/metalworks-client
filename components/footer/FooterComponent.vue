@@ -2,7 +2,7 @@
   <footer class="bg-white dark:bg-gray-900">
     <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
       <div class="md:flex md:justify-between">
-        <div class="">
+        <div class="z-10">
           <MapComponent />
         </div>
         <div class="grid grid-cols-2 my-4 gap-8 sm:gap-6 sm:grid-cols-2">
@@ -157,8 +157,11 @@
 </template>
 
 <script>
+import MapComponent from '~/components/map/MapComponent.vue'
+
 export default {
   name: 'FooterComponent',
+  components: { MapComponent },
 }
 </script>
 
