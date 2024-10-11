@@ -42,6 +42,11 @@
                 class="w-full my-2 opacity-100"
               ></textarea-with-label>
             </template>
+            <template #uploadFile>
+              <div>
+                <input type="file" @change="handleFileUpload" multiple />
+              </div>
+            </template>
           </create-order>
         </div>
       </div>
@@ -77,6 +82,7 @@ export default {
       selectedOption: null,
       openTaskDrawer: false,
       openOrderDrawer: false,
+      selectedFiles: [],
       order: {
         order_number: '',
         details: [
@@ -107,34 +113,42 @@ export default {
   methods: {
     ...mapActions('orders', ['createOrder']),
     ...mapActions('clients', ['fetchClients']),
+    handleFileUpload(event) {
+      this.selectedFiles = Array.from(event.target.files)
+    },
     async addTask() {
-      if (this.selectedOption && this.selectedOption.id) {
-        const orderData = {
-          client_id: this.selectedOption.id,
-          details: [
-            {
-              description: this.order.details.description,
-              quantity: this.order.details.quantity,
-              name: this.order.details.name,
-            },
-          ],
-          store_link: {
-            url: this.order.store_link.url,
-          },
-          status_id: this.order.status_id,
-        }
+      const formData = new FormData()
+      formData.append('client_id', this.selectedOption.id)
+      formData.append('status_id', this.order.status_id)
+      formData.append('store_link', JSON.stringify(this.order.store_link))
 
-        try {
-          await this.createOrder(orderData)
-        } catch (error) {
-          this.$notify({
-            text: error.response.data,
-            duration: 3000,
-            speed: 1000,
-            position: 'top',
-            type: 'error',
-          })
-        }
+      if (this.order.details && this.order.details.length > 0) {
+        this.order.details.forEach((detail, index) => {
+          formData.append(
+            `details[${index}][description]`,
+            detail.description || ''
+          )
+          formData.append(`details[${index}][quantity]`, detail.quantity || '')
+          formData.append(`details[${index}][name]`, detail.name || '')
+        })
+      }
+
+      if (this.selectedFiles.length > 0) {
+        this.selectedFiles.forEach((file, index) => {
+          formData.append(`files[${index}]`, file)
+        })
+      }
+
+      try {
+        await this.createOrder(formData)
+      } catch (error) {
+        this.$notify({
+          text: error.response.data,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
       }
     },
   },

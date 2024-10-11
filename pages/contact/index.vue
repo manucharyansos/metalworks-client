@@ -25,8 +25,8 @@
       >
         <div class="w-12 h-12">
           <svg
-            xmlns="http://www.w3.org/2000/svg"
             id="Layer_1"
+            xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             x="0px"
             y="0px"
@@ -99,14 +99,14 @@
 
     <div
       v-if="!isMessage"
-      class="fixed bottom-44 left-12 border shadow-md rounded-2xl z-50"
+      class="fixed bottom-44 left-12 border shadow rounded-2xl z-50 transition-opacity duration-300 delay-700 ease-in"
     >
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-xl font-semibold mb-4">Get in Touch</h2>
+        <h2 class="text-xl font-semibold mb-4">Կապվեք</h2>
         <div>
           <div class="mb-4">
             <label for="name" class="block text-sm font-medium text-gray-700"
-              >Name</label
+              >Անուն</label
             >
             <input
               id="name"
@@ -118,7 +118,7 @@
           </div>
           <div class="mb-4">
             <label for="email" class="block text-sm font-medium text-gray-700"
-              >Email</label
+              >Էլ․ փոստ</label
             >
             <input
               id="email"
@@ -130,7 +130,7 @@
           </div>
           <div class="mb-4">
             <label for="message" class="block text-sm font-medium text-gray-700"
-              >Message</label
+              >Հաղորդագրություն</label
             >
             <textarea
               id="message"
@@ -145,7 +145,7 @@
             class="w-full bg-blue-500 text-white font-semibold py-2 rounded-md hover:bg-blue-600"
             @click="sendMessage"
           >
-            Send Message
+            Ուղարկել
           </button>
         </div>
       </div>

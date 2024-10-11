@@ -39,7 +39,9 @@ export const actions = {
     }
   },
   async createOrder({ commit }, orderData) {
-    const response = await this.$axios.post('/api/orders/order', orderData)
+    const response = await this.$axios.post('/api/orders/order', orderData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     commit('ADD_ORDER', response.data.order)
     if (response) {
       await this.$router.push('/creator')
