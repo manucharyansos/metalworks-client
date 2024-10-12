@@ -21,7 +21,7 @@ export default {
       this.$leaflet
         .marker([40.17161, 44.429071])
         .addTo(map)
-        .bindPopup("Metalwork's")
+        .bindPopup('Րաֆֆու 111 ')
         .openPopup()
     },
   },

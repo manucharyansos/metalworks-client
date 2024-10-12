@@ -1,18 +1,17 @@
 <template>
-  <div>
+  <div class="flex h-screen">
+    <!-- Sidebar (aside) -->
     <aside
       id="drawer-navigation"
-      class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 transition-transform -translate-x-full bg-transparent border-r border-neutral-700 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+      class="w-64 h-full pt-14 transition-transform bg-gray-900 dark:bg-gray-800 border-r border-neutral-700"
       aria-label="Sidenav"
     >
-      <div
-        class="overflow-y-auto py-5 px-3 h-screen bg-transparent dark:bg-gray-800"
-      >
-        <ul class="space-y-2">
+      <div class="overflow-y-auto py-5 px-3 h-full">
+        <ul class="space-y-2 z-10">
           <li>
             <button
               type="button"
-              class="flex items-center p-2 w-full text-base font-medium text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-700 dark:text-white dark:hover:bg-gray-700"
+              class="flex items-center p-2 w-full text-base font-medium cursor-pointer text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-700 dark:text-white dark:hover:bg-gray-700"
               @click="openDrawer = !openDrawer"
             >
               <svg
@@ -100,53 +99,60 @@
         </ul>
       </div>
     </aside>
-    <main
-      class="creator bg-white dark:bg-gray-700 w-full h-screen flex items-start justify-start"
-    >
+
+    <!-- Main content (Nuxt component) -->
+    <main class="container flex-1 bg-white dark:bg-gray-700">
       <Nuxt />
     </main>
   </div>
 </template>
+
 <script>
 export default {
   data() {
     return {
-      openDropdown: false,
-      openNavbar: false,
       openDrawer: false,
     }
   },
-  watch: {
-    scrollX: {
-      immediate: true,
-      deep: true,
-      handler(val) {
-        this.openNavbar = val > 1024
-      },
-    },
-  },
   mounted() {
-    window.addEventListener('resize', this.handleScroll)
-    this.handleScroll()
+    window.addEventListener('resize', this.handleResize)
+    this.handleResize()
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.handleScroll)
+    window.removeEventListener('resize', this.handleResize)
   },
   methods: {
-    handleScroll() {
+    handleResize() {
       this.scrollX = window.innerWidth
     },
   },
 }
 </script>
+
 <style scoped>
+/* Ensure full height layout and side-by-side structure */
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 10px;
+}
+
+#drawer-navigation {
+  /* Sidebar occupies fixed width on the left */
+  flex-shrink: 0;
+}
+
+main {
+  /* Main content takes the rest of the available width */
+  flex-grow: 1;
+}
+
 .creator {
   background-image: url('/WhatsApp Image 2024-08-24 at 13.01.26_24d3ab90.jpg');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  object-fit: cover;
-  //width: 100%;
-  //height: 100%;
 }
 </style>
