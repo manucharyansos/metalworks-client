@@ -7,7 +7,7 @@
       aria-label="Sidenav"
     >
       <div class="overflow-y-auto py-5 px-3 h-full">
-        <ul class="space-y-2 z-10">
+        <ul class="space-y-2 z-50">
           <li>
             <button
               type="button"
@@ -101,7 +101,7 @@
     </aside>
 
     <!-- Main content (Nuxt component) -->
-    <main class="container flex-1 bg-white dark:bg-gray-700">
+    <main class="flex-1 bg-white dark:bg-gray-700">
       <Nuxt />
     </main>
   </div>

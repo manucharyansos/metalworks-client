@@ -1,30 +1,65 @@
 <template>
-  <div class="bg-neutral-400 flex items-center justify-center w-full h-full">
+  <div class="bg-neutral-100 flex items-center justify-center w-full h-full">
+    <header-component class="ml-auto bg-transparent mb-8" />
     <template v-if="clients && clients.length > 0">
-      <div class="grid grid-cols-2 gap-2 p-6 w-full h-full">
-        <div class="mt-10 w-1/3 ml-auto mr-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-12 w-full mt-20">
+        <div
+          class="w-full h-full ml-auto mr-4 p-6 bg-white rounded-xl shadow-lg"
+        >
           <select-with-label
             v-model="selectedOption"
             :dates="clients"
-            label="Select Client"
+            label="Ընտրել հաճախորդ"
           ></select-with-label>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
+            <input-with-labels
+              id="name"
+              :value="selectedOption?.name"
+              label="Անուն"
+              type="text"
+              class="shadow-md rounded-lg p-5"
+            ></input-with-labels>
+            <input-with-labels
+              id="name"
+              :value="selectedOption?.number"
+              label="Հեռախոսահամար"
+              type="text"
+              class="shadow-md rounded-lg p-5"
+            ></input-with-labels>
+            <input-with-labels
+              id="name"
+              :value="selectedOption?.email_address"
+              label="Էլ․ փոստ"
+              type="text"
+              class="shadow-md rounded-lg p-5"
+            ></input-with-labels>
+            <input-with-labels
+              id="name"
+              :value="selectedOption?.legal_address"
+              label="Հասցե"
+              type="text"
+              class="shadow-md rounded-lg p-5"
+            ></input-with-labels>
+          </div>
         </div>
-        <div class="w-3/4">
+        <div class="w-full">
           <create-order @addButton="addTask">
             <template #detailsType>
               <input-with-labels
-                v-model="order.details.name"
+                id="name"
+                v-model="order.name"
+                label="Անուն"
                 type="text"
-                placeholder="Name"
-                classes=" my-2 w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                class="shadow-md rounded-lg p-3"
               ></input-with-labels>
             </template>
             <template #detailsQuantity>
               <input-with-labels
-                v-model="order.details.quantity"
+                id="quantity"
+                v-model="order.quantity"
+                label="Քանակ"
                 type="number"
-                placeholder="Quantity"
-                classes="border my-2 w-full border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                class="shadow-md rounded-lg p-3"
               ></input-with-labels>
             </template>
             <template #link>
@@ -32,19 +67,24 @@
                 v-model="order.store_link.url"
                 type="url"
                 placeholder="Store link"
-                classes="border my-2 w-full border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                classes="my-2 w-full border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 p-3"
               ></input-with-labels>
             </template>
             <template #detailsDesc>
               <textarea-with-label
-                v-model="order.details.description"
+                v-model="order.description"
                 placeholder="Description"
-                class="w-full my-2 opacity-100"
+                class="w-full my-2 p-3 border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600"
               ></textarea-with-label>
             </template>
             <template #uploadFile>
-              <div>
-                <input type="file" @change="handleFileUpload" multiple />
+              <div class="my-2">
+                <input
+                  type="file"
+                  multiple
+                  class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-gray-200 hover:file:bg-gray-300"
+                  @change="handleFileUpload"
+                />
               </div>
             </template>
           </create-order>
@@ -66,9 +106,11 @@ import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import SpinnerComponent from '~/components/spinner/index.vue'
+import HeaderComponent from '~/components/header/HeaderComponent.vue'
 
 export default {
   components: {
+    HeaderComponent,
     SpinnerComponent,
     SelectWithLabel,
     InputWithLabels,
@@ -85,17 +127,12 @@ export default {
       selectedFiles: [],
       order: {
         order_number: '',
-        details: [
-          {
-            description: '',
-            quantity: '',
-            name: '',
-          },
-        ],
+        description: '',
+        quantity: '',
+        name: '',
         store_link: {
           url: 'http://localhost:3000',
         },
-        status_id: null,
       },
       scrollX: 0,
       clientId: null,
@@ -119,19 +156,10 @@ export default {
     async addTask() {
       const formData = new FormData()
       formData.append('client_id', this.selectedOption.id)
-      formData.append('status_id', this.order.status_id)
-      formData.append('store_link', JSON.stringify(this.order.store_link))
-
-      if (this.order.details && this.order.details.length > 0) {
-        this.order.details.forEach((detail, index) => {
-          formData.append(
-            `details[${index}][description]`,
-            detail.description || ''
-          )
-          formData.append(`details[${index}][quantity]`, detail.quantity || '')
-          formData.append(`details[${index}][name]`, detail.name || '')
-        })
-      }
+      formData.append('store_link[url]', this.order.store_link.url)
+      formData.append('name', this.order.name)
+      formData.append('quantity', this.order.quantity)
+      formData.append('description', this.order.description)
 
       if (this.selectedFiles.length > 0) {
         this.selectedFiles.forEach((file, index) => {
@@ -143,7 +171,7 @@ export default {
         await this.createOrder(formData)
       } catch (error) {
         this.$notify({
-          text: error.response.data,
+          text: error.response.data.message || 'An error occurred.',
           duration: 3000,
           speed: 1000,
           position: 'top',
@@ -155,4 +183,10 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+@media (min-width: 1024px) {
+  .input-lg {
+    max-width: 80%;
+  }
+}
+</style>

@@ -43,7 +43,7 @@ export const actions = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     commit('ADD_ORDER', response.data.order)
-    if (response) {
+    if (response.status === 201) {
       await this.$router.push('/creator')
       return true
     }
