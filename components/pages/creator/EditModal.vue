@@ -71,6 +71,13 @@
             </div>
           </div>
         </div>
+        <template v-if="otherFiles.length > 0">
+          <div v-for="(file, index) in otherFiles" :key="index">
+            <a :href="getFileUrl(file.path)" target="_blank">{{
+              file.name || 'Download File'
+            }}</a>
+          </div>
+        </template>
       </div>
     </div>
   </div>
@@ -86,6 +93,15 @@ export default {
     data: {
       type: Object,
       default: () => {},
+    },
+    otherFiles: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  methods: {
+    getFileUrl(filePath) {
+      return `${'http://localhost:8000'}/storage/${filePath}`
     },
   },
 }

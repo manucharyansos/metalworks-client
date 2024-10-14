@@ -177,7 +177,9 @@
     <edit-modal
       :data="showOrder"
       :is-open="openEditModal"
+      :other-files="showOrder?.files"
       @closeModal="closeEditeModal"
+      @openFile="openFile"
     >
       <template #orderId>
         <input-with-label-icon
@@ -429,6 +431,15 @@ export default {
           type: 'error',
         })
       }
+    },
+    openFile() {
+      const fileUrl = '/uploads/example1.step'
+      fetch(fileUrl)
+        .then((response) => response.blob())
+        .then((blob) => {
+          const blobUrl = URL.createObjectURL(blob)
+          window.open(blobUrl)
+        })
     },
   },
 }

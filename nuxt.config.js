@@ -38,7 +38,6 @@ export default {
         endpoints: {
           login: { url: '/api/login', method: 'post' },
           logout: { url: '/api/logout', method: 'post' },
-          // register: { url: '/api/register', method: 'post' },
           user: { url: '/api/user', method: 'get' },
         },
         redirect: {

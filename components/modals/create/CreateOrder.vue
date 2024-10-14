@@ -3,7 +3,7 @@
     class="flex flex-col items-center w-full p-6 bg-white rounded-xl shadow-lg"
   >
     <h2 class="text-center text-neutral-700 text-2xl my-6 font-bold">
-      Order Details
+      Պատվերի մանրամասները
     </h2>
 
     <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-6">
