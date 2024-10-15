@@ -96,6 +96,8 @@
         <spinner-component />
       </div>
     </template>
+
+    <notifications />
   </div>
 </template>
 
@@ -183,10 +185,4 @@ export default {
 }
 </script>
 
-<style scoped>
-@media (min-width: 1024px) {
-  .input-lg {
-    max-width: 80%;
-  }
-}
-</style>
+<style scoped></style>

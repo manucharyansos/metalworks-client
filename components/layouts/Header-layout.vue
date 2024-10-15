@@ -30,7 +30,7 @@
               type="text"
               placeholder="Փնտրել"
               label_class="mb-2 text-sm font-medium text-gray-900 sr-only"
-              classes="search_input ps-6 focus:outline-none block w-full ps-8 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+              label="Փնտրել"
             >
               <template #label_svg>
                 <svg
@@ -39,7 +39,7 @@
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
-                  fill="none"
+                  fill="red"
                   viewBox="0 0 24 24"
                   :class="{ isActiveInputStyle: openSearchInput }"
                 >

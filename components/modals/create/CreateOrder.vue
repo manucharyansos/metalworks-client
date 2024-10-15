@@ -2,7 +2,9 @@
   <div
     class="flex flex-col items-center w-full p-6 bg-white rounded-xl shadow-lg"
   >
-    <h2 class="text-center text-neutral-700 text-2xl my-6 font-bold">
+    <h2
+      class="text-center text-neutral-700 font-sans italic text-xl my-6 font-bold"
+    >
       Պատվերի մանրամասները
     </h2>
 

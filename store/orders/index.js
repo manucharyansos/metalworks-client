@@ -44,7 +44,10 @@ export const actions = {
     })
     commit('ADD_ORDER', response.data.order)
     if (response.status === 201) {
-      await this.$router.push('/creator')
+      setTimeout(() => {
+        this.$router.push('/creator')
+      }, 2000)
+
       return true
     }
     return true

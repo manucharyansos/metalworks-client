@@ -28,7 +28,9 @@ export const actions = {
     const client = await this.$axios.$post('/api/clients/client', clientData)
     commit('ADD_CLIENT', client)
     if (client) {
-      this.$router.push('/creator')
+      setTimeout(() => {
+        this.$router.push('/creator')
+      }, 2000)
     }
   },
 }

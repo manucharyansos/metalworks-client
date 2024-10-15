@@ -53,16 +53,12 @@
                   >
                 </p>
               </div>
-              <div
-                v-for="detail in order.details"
-                :key="detail.id"
-                class="flex flex-col items-start justify-start"
-              >
-                <span class="font-bold">Description</span>
-                <p>Name: {{ detail.name }}</p>
-                <p>Quantity: {{ detail.quantity }}</p>
+              <div class="flex flex-col items-start justify-start">
+                <span class="font-bold">Մանրամասներ</span>
+                <p>Անուն: {{ order.name }}</p>
+                <p>Քանակ: {{ order.quantity }}</p>
                 <p class="will-change-auto">
-                  Details: {{ detail.description }}
+                  Նկարագրություն: {{ order.description }}
                 </p>
               </div>
             </div>
@@ -113,17 +109,13 @@ export default {
           order.order_number && typeof order.order_number.number === 'string'
             ? order.order_number.number.toLowerCase()
             : ''
-        const detailsName =
-          order.details &&
-          order.details.length > 0 &&
-          typeof order.details[0].name === 'string'
-            ? order.details[0].name.toLowerCase()
+        const name =
+          order.name && typeof order.name === 'string'
+            ? order.name.toLowerCase()
             : ''
-        const descriptionName =
-          order.details &&
-          order.details.length > 0 &&
-          typeof order.details[0].description === 'string'
-            ? order.details[0].description.toLowerCase()
+        const description =
+          order.details && typeof order.description === 'string'
+            ? order.description.toLowerCase()
             : ''
         const prefixCode =
           order.prefix_code && typeof order.prefix_code.code === 'string'
@@ -131,8 +123,8 @@ export default {
             : ''
         return (
           orderNumber.includes(searchTerm) ||
-          descriptionName.includes(searchTerm) ||
-          detailsName.includes(searchTerm) ||
+          description.includes(searchTerm) ||
+          name.includes(searchTerm) ||
           prefixCode.includes(searchTerm)
         )
       })

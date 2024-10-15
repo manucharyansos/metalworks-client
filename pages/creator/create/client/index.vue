@@ -149,21 +149,22 @@
             Ավելացված արժեքի հարկ վճարող
           </label>
           <input
-            type="checkbox"
             id="VAT_payer"
             v-model="client.VAT_payer"
+            type="checkbox"
             class="shadow-md rounded-lg"
           />
         </div>
       </div>
 
       <button
-        @click="addNewClient"
         class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        @click="addNewClient"
       >
         Ստեղծել նոր հաճախորդ
       </button>
     </div>
+    <notifications />
   </div>
 </template>
 
@@ -206,10 +207,22 @@ export default {
       const clientData = { ...this.client }
       try {
         await this.addClient(clientData)
-        alert('Հաճախորդը հաջողությամբ ստեղծվեց')
+        this.$notify({
+          text: 'Հաճախորդը հաջողությամբ ստեղծվեց',
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'success',
+        })
       } catch (error) {
-        console.error('Սխալ հաճախորդի ստեղծման ժամանակ:', error)
-        alert('Սխալ հաճախորդի ստեղծման ժամանակ')
+        this.$notify({
+          text:
+            error.response.data.message || 'Սխալ հաճախորդի ստեղծման ժամանակ:',
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
       }
     },
   },

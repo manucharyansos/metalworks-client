@@ -53,7 +53,7 @@
           </div>
           <div class="grid gap-6 mb-4 sm:grid-cols-2 mt-4">
             <div>
-              <slot name="orderNumber"></slot>
+              <slot name="number"></slot>
             </div>
             <div>
               <slot name="prefixCode"></slot>

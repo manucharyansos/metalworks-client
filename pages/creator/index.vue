@@ -31,11 +31,10 @@
     <!--      table-->
 
     <div
-      v-if="orders.length > 0"
-      class="relative overflow-x-auto overflow-y-auto max-h-screen shadow-md sm:rounded-lg p-6 my-16"
+      v-if="orders.length > 0 && !isOpenDeleteModal && !openEditModal"
+      class="relative overflow-x-auto overflow-y-auto max-h-screen shadow-md sm:rounded-lg p-6 py-24"
     >
       <table
-        v-if="!isOpenDeleteModal && !openEditModal"
         class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
       >
         <thead
@@ -48,6 +47,8 @@
             <th scope="col" class="px-3 py-3">Order number</th>
             <th scope="col" class="px-3 py-3">Prefix code</th>
             <th scope="col" class="px-3 py-3">Status</th>
+            <th scope="col" class="px-3 py-3">Name</th>
+            <th scope="col" class="px-3 py-3">Quantity</th>
             <th scope="col" class="px-3 py-3">Storage link</th>
             <th scope="col" class="px-3 py-3"></th>
             <th scope="col" class="px-3 py-3"></th>
@@ -81,8 +82,14 @@
             <td v-if="order.status" class="px-6 py-4">
               {{ order.status }}
             </td>
+            <td v-if="order.name" class="px-6 py-4">
+              {{ order.name }}
+            </td>
+            <td v-if="order.quantity" class="px-6 py-4">
+              {{ order.quantity }}
+            </td>
             <td v-if="order.store_link" class="px-12">
-              <a class="hover:!text-blue-700" :href="order.store_link.url"
+              <a class="hover:!text-blue-700" :href="order.store_link?.url"
                 >Link</a
               >
             </td>
@@ -178,6 +185,7 @@
       :data="showOrder"
       :is-open="openEditModal"
       :other-files="showOrder?.files"
+      class="py-20"
       @closeModal="closeEditeModal"
       @openFile="openFile"
     >
@@ -195,7 +203,7 @@
         <div>
           <a
             class="border-b-2 border-b-gray-300 pb-3"
-            :href="showOrder.store_link.url"
+            :href="showOrder.store_link?.url"
             >Store link</a
           >
         </div>
@@ -255,34 +263,32 @@
         </div>
       </template>
       <template #details>
-        <div v-for="detail in showOrder.details" :key="detail.id">
-          <div class="grid gap-6 grid-cols-2 justify-between my-2">
-            <input-with-label-icon
-              v-model="detail.name"
-              type="text"
-              label="Order name"
-              label_class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-              classes="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-              :disabled="true"
-            />
-            <input-with-label-icon
-              v-model="detail.quantity"
-              label="Order quantity"
-              label_class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-              classes="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-              :disabled="true"
-            />
-          </div>
-          <textarea-with-label
-            v-model="detail.description"
-            label="Order description"
+        <div class="grid grid-cols-2 gap-8">
+          <input-with-label-icon
+            v-model="showOrder.name"
+            type="text"
+            label="Order name"
             label_class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-            classes="block my-2 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+            classes="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+            :disabled="true"
+          />
+          <input-with-label-icon
+            v-model="showOrder.quantity"
+            label="Order quantity"
+            label_class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+            classes="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
             :disabled="true"
           />
         </div>
+        <textarea-with-label
+          v-model="showOrder.description"
+          label="Order description"
+          label_class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
+          classes="block my-2 px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+          :disabled="true"
+        />
       </template>
-      <template #orderNumber>
+      <template #number>
         <input-with-label-icon
           v-model="showOrder.order_number.number"
           label="Order number"
@@ -302,7 +308,7 @@
       </template>
       <template #orderStatus>
         <input-with-label-icon
-          v-model="showOrder.status.status"
+          v-model="showOrder.status"
           label_class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
           classes="block px-2.5 pb-2.5 pt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
           :disabled="true"

@@ -1,199 +1,214 @@
 <template>
   <div
-    class="page flex mt-20 flex-col items-center justify-center bg-white dark:bg-gray-800"
+    class="flex flex-col overflow-y-auto items-center justify-center bg-gray-50 dark:bg-gray-800"
   >
-    <div class="flex flex-row items-center justify-center">
+    <header-component />
+    <div class="w-full p-16 bg-white rounded-lg shadow-md dark:bg-gray-900">
       <div v-if="getOrder && getFactory">
-        <div class="h-26 my-3">
+        <div class="my-5">
           <stepper-component :data-stepper="stepperData" />
         </div>
 
-        <div>
-          <div class="grid gap-4 mb-4 sm:grid-cols-2">
-            <div v-if="getOrder.created_at">
-              <label
-                for="start"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >Start</label
-              >
-              <input
-                id="start"
-                v-model="getOrder.created_at"
-                disabled
-                type="text"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              />
-            </div>
-            <div>
-              <label
-                for="finish"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >Finish</label
-              >
-              <input
-                id="finish"
-                v-model="getOrder.dates.finish_date"
-                type="date"
-                name="name"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              />
-            </div>
-            <div>
-              <label
-                for="number"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >Number</label
-              >
-              <input
-                v-if="getOrder.order_number"
-                id="number"
-                v-model="getOrder.order_number.number"
-                disabled
-                type="text"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              />
-            </div>
-            <div>
-              <label
-                for="status"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >Status</label
-              >
-              <input
-                v-if="getOrder.status"
-                id="status"
-                v-model="getOrder.status.status"
-                type="text"
-                name="status"
-                class="bg-yellow-400 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              />
-            </div>
-            <div>
+        <div class="grid gap-6 sm:grid-cols-3 mb-6">
+          <!-- Start Date -->
+          <div v-if="getOrder.created_at">
+            <label
+              for="start"
+              class="block text-sm font-medium text-gray-900 dark:text-white"
+              >Start</label
+            >
+            <input
+              id="start"
+              v-model="getOrder.created_at"
+              disabled
+              type="text"
+              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <!-- Finish Date -->
+          <div>
+            <label
+              for="finish"
+              class="block text-sm font-medium text-gray-900 dark:text-white"
+              >Finish</label
+            >
+            <input
+              id="finish"
+              v-model="getOrder.dates.finish_date"
+              type="date"
+              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <!-- Order Number -->
+          <div v-if="getOrder.order_number">
+            <label
+              for="number"
+              class="block text-sm font-medium text-gray-900 dark:text-white"
+              >Number</label
+            >
+            <input
+              id="number"
+              v-model="getOrder.order_number.number"
+              disabled
+              type="text"
+              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <!-- Status -->
+          <div>
+            <label
+              for="status"
+              class="block text-sm font-medium text-gray-900 dark:text-white"
+              >Status</label
+            >
+            <input
+              id="status"
+              v-model="getOrder.status"
+              type="text"
+              class="block w-full mt-1 rounded-md bg-yellow-50 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+            />
+          </div>
+
+          <!-- Factory Selection -->
+          <div>
+            <label
+              class="block text-sm font-medium text-gray-900 dark:text-white"
+              >Factory</label
+            >
+            <template v-if="getOrder.factories">
               <div
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                v-for="actualFactory in getOrder.factories"
+                :key="actualFactory.id"
+                class="mt-2 text-gray-700 dark:text-gray-300"
               >
-                Factory
+                {{ actualFactory.name }}
               </div>
-              <template v-if="getOrder.factories">
-                <div
-                  v-for="actualFactory in getOrder.factories"
-                  :key="actualFactory.id"
-                  class="flex flex-row items-center justify-center"
-                >
-                  {{ actualFactory.name }}
-                </div>
-              </template>
-              <div
-                v-for="manyFactory in factories"
-                :key="manyFactory.id"
-                class="flex flex-row justify-between items-center"
+            </template>
+            <div
+              v-for="manyFactory in factories"
+              :key="manyFactory.id"
+              class="flex justify-between items-center mt-2"
+            >
+              <label
+                :for="'factory-' + manyFactory.id"
+                class="text-sm text-gray-600 dark:text-gray-400"
+                >{{ manyFactory.name }}</label
               >
-                <label :for="'factory-' + manyFactory.id">{{
-                  manyFactory.name
-                }}</label>
-                <input
-                  :id="'factory-' + manyFactory.id"
-                  v-model="selectedFactories"
-                  type="checkbox"
-                  :value="manyFactory.id"
-                  class="rounded-md w-6 h-6 border-2"
-                  @change="add(manyFactory)"
-                />
-              </div>
+              <input
+                :id="'factory-' + manyFactory.id"
+                v-model="selectedFactories"
+                type="checkbox"
+                :value="manyFactory.id"
+                class="rounded-md border-gray-300 focus:ring-indigo-500 h-5 w-5 text-indigo-600"
+                @change="add(manyFactory)"
+              />
             </div>
-            <!--      Factory order status-->
-            <div>
-              <p>Factories</p>
+          </div>
+
+          <!-- Factory Order Status -->
+          <div>
+            <p class="text-sm font-medium text-gray-900 dark:text-white">
+              Factory Status
+            </p>
+            <div
+              v-for="factoriesStatus in getOrder.factory_order_statuses"
+              :key="factoriesStatus.id"
+              class="mt-2"
+            >
               <div
-                v-for="factoriesStatus in getOrder.factory_order_statuses"
-                :key="factoriesStatus.id"
+                class="flex items-center justify-between space-x-2 text-gray-700 dark:text-gray-300"
               >
-                <div>
-                  <div class="flex items-center space-x-4">
-                    <p>Factory: {{ factoriesStatus.factory.name }}</p>
-                    <p>Status: {{ factoriesStatus.status }}</p>
-                  </div>
-                </div>
+                <p>Factory: {{ factoriesStatus.factory.name }}</p>
+                <p>Status: {{ factoriesStatus.status }}</p>
               </div>
             </div>
           </div>
-          <div
-            v-for="detail in getOrder.details"
-            :key="detail.id"
-            class="grid gap-6 mb-4 sm:grid-cols-2"
-          >
+        </div>
+
+        <!-- Order Details -->
+        <div class="grid gap-6 sm:grid-cols-3 mb-6">
+          <div>
             <label
               for="name"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              class="block text-sm font-medium text-gray-900 dark:text-white"
               >Name</label
             >
             <input
               id="name"
-              v-model="detail.name"
+              v-model="getOrder.name"
               type="text"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
             />
+          </div>
+
+          <div>
             <label
               for="quantity"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+              class="block text-sm font-medium text-gray-900 dark:text-white"
               >Quantity</label
             >
             <input
               id="quantity"
-              v-model="detail.quantity"
+              v-model="getOrder.quantity"
               type="text"
-              name="quantity"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
             />
-
-            <div class="sm:col-span-4">
-              <label
-                for="description"
-                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                >Description</label
-              >
-              <textarea
-                id="description"
-                v-model="detail.description"
-                rows="5"
-                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              ></textarea>
-            </div>
           </div>
-          <div class="flex items-center space-x-4">
-            <button
-              type="submit"
-              class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-              @click="doneOrder"
+          <div>
+            <label
+              for="file"
+              class="block text-sm font-medium text-gray-900 dark:text-white"
+              >File</label
             >
-              Done
-            </button>
-            <button
-              type="button"
-              class="text-red-600 inline-flex items-center hover:text-white border border-red-600 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:border-red-500 dark:text-red-500 dark:hover:text-white dark:hover:bg-red-600 dark:focus:ring-red-900"
-              @click="deleteOrder(order.id)"
-            >
-              <svg
-                class="mr-1 -ml-1 w-5 h-5"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
-              Delete
-            </button>
+            <input
+              type="file"
+              multiple
+              class="block w-full mt-1"
+              @change="handleFileUpload"
+            />
           </div>
 
-          <notifications />
+          <div class="sm:col-span-2">
+            <label
+              for="description"
+              class="block text-sm font-medium text-gray-900 dark:text-white"
+              >Description</label
+            >
+            <textarea
+              id="description"
+              v-model="getOrder.description"
+              rows="4"
+              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
+            ></textarea>
+          </div>
         </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center space-x-4">
+          <button
+            type="button"
+            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            @click="doneOrder"
+          >
+            Done
+          </button>
+          <button
+            type="button"
+            class="inline-flex justify-center py-2 px-4 border border-red-600 shadow-sm text-sm font-medium rounded-md text-red-600 hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            @click="deleteOrder(getOrder.id)"
+          >
+            Delete
+          </button>
+        </div>
+
+        <notifications />
       </div>
+
       <template v-else>
-        <div class="flex items-center justify-center">
+        <div class="flex justify-center items-center">
           <spinner-component />
         </div>
       </template>
@@ -204,9 +219,10 @@
 import { mapActions, mapGetters } from 'vuex'
 import StepperComponent from '@/components/stepper'
 import SpinnerComponent from '~/components/spinner/index.vue'
+import HeaderComponent from '~/components/header/HeaderComponent.vue'
 
 export default {
-  components: { StepperComponent, SpinnerComponent },
+  components: { HeaderComponent, StepperComponent, SpinnerComponent },
   layout: 'adminLayout',
   middleware: 'admin',
   data() {
@@ -241,6 +257,9 @@ export default {
   methods: {
     ...mapActions('orders', ['fetchOrder', 'updateOrder', 'orderDelete']),
     ...mapActions('factory', ['fetchFactory']),
+    handleFileUpload(event) {
+      this.getOrder.files = Array.from(event.target.files)
+    },
     add(value) {
       const exists = this.stepperData.some((i) => i.id === value.id)
 
@@ -252,11 +271,24 @@ export default {
     },
     async doneOrder() {
       const formattedFactories = this.selectedFactories.map((id) => ({ id }))
-      const updatedOrder = {
-        ...this.getOrder,
-        status: 'in process',
-        factories: formattedFactories,
-        finish_date: this.getOrder.dates?.finish_date,
+
+      const formData = new FormData()
+
+      formData.append('id', this.getOrder.id)
+      formData.append('description', this.getOrder.description)
+      formData.append('quantity', this.getOrder.quantity)
+      formData.append('name', this.getOrder.name)
+      formData.append('status', 'in process')
+      formData.append('finish_date', this.getOrder.dates?.finish_date)
+
+      formattedFactories.forEach((factory, index) => {
+        formData.append(`factories[${index}][id]`, factory.id)
+      })
+
+      if (this.getOrder.files) {
+        this.getOrder.files.forEach((file, index) => {
+          formData.append(`files[${index}]`, file)
+        })
       }
 
       const currentDate = new Date()
@@ -273,7 +305,8 @@ export default {
         return
       }
 
-      const res = await this.updateOrder(updatedOrder)
+      const res = await this.updateOrder(formData)
+
       if (res) {
         this.$notify({
           text: 'Product updated successfully',
