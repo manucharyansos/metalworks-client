@@ -26,6 +26,7 @@ export const actions = {
       commit('SET_ORDERS', response.data)
       return true
     } catch (err) {
+      commit('ERROR', err.response?.data || 'Failed to fetch orders')
       return false
     }
   },
@@ -35,49 +36,48 @@ export const actions = {
       commit('SET_ORDER', response.data)
       return true
     } catch (err) {
+      commit('ERROR', err.response?.data || 'Failed to fetch order')
       return false
     }
   },
   async createOrder({ commit }, orderData) {
-    const response = await this.$axios.post('/api/orders/order', orderData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-    commit('ADD_ORDER', response.data.order)
-    if (response.status === 201) {
-      setTimeout(() => {
-        this.$router.push('/creator')
-      }, 2000)
-
-      return true
-    }
-    return true
-  },
-
-  async updateOrder({ commit }, orderData) {
     try {
-      const response = await this.$axios.$put(
-        `/api/admin/order/${orderData.id}`,
-        orderData
-      )
-      commit('SET_ORDER', response.data)
-      if (response) {
-        await this.$router.push('/admin')
+      const response = await this.$axios.post('/api/orders/order', orderData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      commit('ADD_ORDER', response.data.order)
+      if (response.status === 201) {
+        return response.data.order
       }
-      return true
-    } catch (err) {
-      commit('ERROR', err.response.data)
+    } catch (error) {
+      commit('ERROR', error.response?.data || 'Failed to create order')
       return false
     }
   },
-  orderDelete({ commit }, orderId) {
+  async updateOrder({ commit }, { id, payload }) {
     try {
-      const res = this.$axios.delete(`api/admin/order/${orderId} `)
-      if (res) {
-        this.$router.push('/admin')
-        return true
-      }
+      const response = await this.$axios.put(
+        `/api/admin/order/${id}`,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      )
+      commit('SET_ORDER', response.data)
+      return response.data
+    } catch (error) {
+      commit('ERROR', error.response?.data || 'Failed to update order')
+      throw error
+    }
+  },
+  async orderDelete({ commit }, orderId) {
+    try {
+      await this.$axios.delete(`/api/admin/order/${orderId}`)
+      return true
     } catch (err) {
-      commit('ERROR', err.response.data)
+      commit('ERROR', err.response?.data || 'Failed to delete order')
       return false
     }
   },

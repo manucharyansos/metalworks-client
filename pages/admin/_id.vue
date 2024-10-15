@@ -5,6 +5,7 @@
     <header-component />
     <div class="w-full p-16 bg-white rounded-lg shadow-md dark:bg-gray-900">
       <div v-if="getOrder && getFactory">
+        <!-- Stepper Component -->
         <div class="my-5">
           <stepper-component :data-stepper="stepperData" />
         </div>
@@ -103,7 +104,7 @@
                 type="checkbox"
                 :value="manyFactory.id"
                 class="rounded-md border-gray-300 focus:ring-indigo-500 h-5 w-5 text-indigo-600"
-                @change="add(manyFactory)"
+                @change="addFactory(manyFactory)"
               />
             </div>
           </div>
@@ -157,6 +158,7 @@
               class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
             />
           </div>
+
           <div>
             <label
               for="file"
@@ -169,6 +171,43 @@
               class="block w-full mt-1"
               @change="handleFileUpload"
             />
+
+            <!-- Ֆայլերի ցուցադրում -->
+            <div v-if="getOrder.files && getOrder.files.length">
+              <h3
+                class="mt-4 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Uploaded Files:
+              </h3>
+              <ul class="list-disc list-inside mt-2">
+                <li
+                  v-for="(file, index) in getOrder.files"
+                  :key="index"
+                  class="flex items-center justify-between"
+                >
+                  <a :href="getFileUrl(file.path)" target="_blank">
+                    {{ file.name || 'Download File' }}
+                  </a>
+                  <button
+                    type="button"
+                    class="ml-2 text-red-600 hover:text-red-800"
+                    aria-label="Delete File"
+                    @click="deleteFile(index)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M10 9a1 1 0 100 2 1 1 0 000-2zm0 4a1 1 0 100 2 1 1 0 000-2zm-7-7a1 1 0 011-1h12a1 1 0 011 1v1H3V6zm1 2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V10a2 2 0 012-2zm1 2v10h12V10H5z"
+                      />
+                    </svg>
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <div class="sm:col-span-2">
@@ -215,6 +254,7 @@
     </div>
   </div>
 </template>
+
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import StepperComponent from '@/components/stepper'
@@ -229,7 +269,6 @@ export default {
     return {
       stepperData: [],
       selectedFactories: [],
-      statusesByFactories: [],
     }
   },
   computed: {
@@ -244,9 +283,6 @@ export default {
       return this.getFactory ? JSON.parse(JSON.stringify(this.getFactory)) : []
     },
   },
-  watch: {
-    stepperData(value) {},
-  },
   mounted() {
     this.fetchOrder(this.id)
     this.fetchFactory()
@@ -260,95 +296,107 @@ export default {
     handleFileUpload(event) {
       this.getOrder.files = Array.from(event.target.files)
     },
-    add(value) {
-      const exists = this.stepperData.some((i) => i.id === value.id)
-
-      if (!exists) {
-        this.stepperData.push({ id: value.id, name: value.name })
+    getFileUrl(filePath) {
+      return `${'http://localhost:8000'}/storage/${filePath}`
+    },
+    deleteFile(index) {
+      this.getOrder.files.splice(index, 1)
+      this.fetchOrder(this.id)
+      this.$notify({
+        text: 'File deleted successfully',
+        duration: 3000,
+        speed: 1000,
+        position: 'top',
+        type: 'success',
+      })
+    },
+    addFactory(value) {
+      const exists = this.selectedFactories.includes(value.id)
+      if (exists) {
+        this.selectedFactories = this.selectedFactories.filter(
+          (id) => id !== value.id
+        )
       } else {
-        this.stepperData = this.stepperData.filter((i) => i.id !== value.id)
+        this.selectedFactories.push(value.id)
       }
     },
     async doneOrder() {
-      const formattedFactories = this.selectedFactories.map((id) => ({ id }))
+      try {
+        const formData = new FormData()
 
-      const formData = new FormData()
+        if (this.getOrder.files && Array.isArray(this.getOrder.files)) {
+          this.getOrder.files.forEach((file) => {
+            formData.append('files[]', file)
+          })
+        }
+        const payload = {
+          description: this.getOrder.description,
+          quantity: this.getOrder.quantity,
+          name: this.getOrder.name,
+          status: 'in process',
+        }
 
-      formData.append('id', this.getOrder.id)
-      formData.append('description', this.getOrder.description)
-      formData.append('quantity', this.getOrder.quantity)
-      formData.append('name', this.getOrder.name)
-      formData.append('status', 'in process')
-      formData.append('finish_date', this.getOrder.dates?.finish_date)
+        if (this.getOrder.store_link && this.getOrder.store_link.url) {
+          payload.store_link = {
+            url: this.getOrder.store_link.url,
+          }
+        }
 
-      formattedFactories.forEach((factory, index) => {
-        formData.append(`factories[${index}][id]`, factory.id)
-      })
+        if (this.getOrder.factories && Array.isArray(this.getOrder.factories)) {
+          payload.factories = this.getOrder.factories.map((factory) => ({
+            id: factory.id,
+            status: factory.status,
+          }))
+        } else {
+          console.warn('No factories available to append.')
+        }
 
-      if (this.getOrder.files) {
-        this.getOrder.files.forEach((file, index) => {
-          formData.append(`files[${index}]`, file)
+        if (this.getOrder.finish_date) {
+          payload.finish_date = this.getOrder.finish_date
+        }
+        const combinedFormData = new FormData()
+
+        // Append regular fields to FormData
+        Object.keys(payload).forEach((key) => {
+          if (Array.isArray(payload[key])) {
+            payload[key].forEach((item) => {
+              combinedFormData.append(`${key}[]`, JSON.stringify(item)) // Append each array item as a JSON string
+            })
+          } else {
+            combinedFormData.append(key, payload[key]) // Append the field directly
+          }
         })
-      }
 
-      const currentDate = new Date()
-      const finishDate = new Date(this.getOrder.dates?.finish_date)
+        if (this.getOrder.files) {
+          this.getOrder.files.forEach((file) => {
+            combinedFormData.append('files[]', file)
+          })
+        }
 
-      if (finishDate <= currentDate) {
+        await this.updateOrder({ id: this.id, payload: combinedFormData })
+
+        this.$notify({ type: 'success', title: 'Order updated successfully' })
+      } catch (error) {
+        console.error('Error updating order:', error) // Log error for debugging
         this.$notify({
-          text: 'Finish date must be greater than the current date.',
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
           type: 'error',
-        })
-        return
-      }
-
-      const res = await this.updateOrder(formData)
-
-      if (res) {
-        this.$notify({
-          text: 'Product updated successfully',
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
-          type: 'success',
-        })
-      } else {
-        const error = this.errorMessage
-        this.$notify({
-          text: error.message,
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
-          type: 'error',
+          title: 'Error updating order',
+          text: error.response?.data?.message || error.message,
         })
       }
     },
 
     async deleteOrder(id) {
       try {
-        const res = await this.orderDelete(id)
-        if (res) {
-          this.$notify({
-            text: `Product updated successfully`,
-            duration: 3000,
-            speed: 1000,
-            position: 'top',
-            type: 'success',
-          })
-        }
-      } catch (err) {
-        const error = this.errorMessage
+        await this.orderDelete(id)
+        this.$notify({ type: 'success', title: 'Order deleted successfully' })
+        this.$router.push('/admin/orders')
+      } catch (error) {
         this.$notify({
+          type: 'error',
+          title: 'Error deleting order',
           text: error.message,
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
-          type: 'success',
         })
-        return false
       }
     },
   },
