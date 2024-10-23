@@ -323,13 +323,10 @@ export default {
     getFormDataEntries(formData) {
       const entries = {}
       for (const [key, value] of formData.entries()) {
-        // Check if the key already exists in the entries object
         if (entries[key]) {
-          // If it's already an array, push the new value
           if (Array.isArray(entries[key])) {
             entries[key].push(value)
           } else {
-            // Convert it to an array if it was a single value
             entries[key] = [entries[key], value]
           }
         } else {
@@ -341,8 +338,6 @@ export default {
     async doneOrder() {
       try {
         const formData = new FormData()
-
-        // Add files if they exist
         if (this.getOrder.files && Array.isArray(this.getOrder.files)) {
           this.getOrder.files.forEach((file) => {
             if (file instanceof File) {
@@ -350,41 +345,21 @@ export default {
             }
           })
         }
-
-        // Add other order data
         formData.append('description', this.getOrder.description)
         formData.append('quantity', this.getOrder.quantity)
         formData.append('name', this.getOrder.name)
         formData.append('status', 'in process')
-
-        // Add store_link if it exists
         if (this.getOrder.store_link && this.getOrder.store_link.url) {
           formData.append('store_link[url]', this.getOrder.store_link.url)
         }
-
-        // Ensure factories are added correctly
         if (this.getOrder.factories && Array.isArray(this.getOrder.factories)) {
           this.getOrder.factories.forEach((factory) => {
-            // Each factory is appended as a separate key
-            formData.append(
-              'factories[]',
-              JSON.stringify({
-                id: factory.id,
-                status: factory.status || 'waiting',
-              })
-            )
+            formData.append('factories[]', JSON.stringify(factory))
           })
         }
-
-        // Add finish date if it exists
         if (this.getOrder.finish_date) {
           formData.append('finish_date', this.getOrder.finish_date)
         }
-
-        // Log the FormData entries for debugging
-        console.log(this.getFormDataEntries(formData)) // Inspecting FormData
-
-        // Send the form data
         await this.updateOrder({ id: this.id, payload: formData })
 
         this.$notify({ type: 'success', title: 'Order updated successfully' })

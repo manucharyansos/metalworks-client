@@ -18,6 +18,9 @@ export const actions = {
       return false
     }
   },
+  async createMaterials({ commit }, data) {
+    await this.$axios.post('/api/materials', data)
+  },
 }
 
 export const mutations = {

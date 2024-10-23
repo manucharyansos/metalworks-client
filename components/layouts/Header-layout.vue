@@ -180,15 +180,15 @@
             <!--                Materials-->
             <!--              </NuxtLink>-->
             <!--            </li>-->
-            <!--            <li>-->
-            <!--              <NuxtLink-->
-            <!--                exact-active-class="active-link"-->
-            <!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
-            <!--                to="/services"-->
-            <!--              >-->
-            <!--                Services-->
-            <!--              </NuxtLink>-->
-            <!--            </li>-->
+            <li>
+              <NuxtLink
+                exact-active-class="active-link"
+                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
+                to="/services"
+              >
+                Ծառաըություններ
+              </NuxtLink>
+            </li>
             <!--            <li>-->
             <!--              <NuxtLink-->
             <!--                exact-active-class="active-link"-->

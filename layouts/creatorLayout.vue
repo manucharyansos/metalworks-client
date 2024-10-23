@@ -67,6 +67,15 @@
                   >Orders</nuxt-link
                 >
               </li>
+              <li
+                class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
+              >
+                <nuxt-link
+                  to="/creator/create/materials"
+                  class="flex items-center space-x-3 rtl:space-x-reverse"
+                  >Materials</nuxt-link
+                >
+              </li>
             </ul>
           </li>
           <li>

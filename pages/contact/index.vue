@@ -67,7 +67,7 @@
             <h3 class="text-lg font-semibold mt-4">Հետևեկ մեզ</h3>
             <div class="flex space-x-4 mt-2">
               <a
-                href="#"
+                href="https://www.facebook.com/profile.php?id=61558844766402"
                 class="text-blue-600 hover:underline hover:animate-pulse"
               >
                 <svg
@@ -100,7 +100,7 @@
                 </svg>
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/metalworks_co"
                 class="text-blue-600 hover:underline hover:animate-pulse"
                 ><svg
                   xmlns="http://www.w3.org/2000/svg"
