@@ -19,7 +19,12 @@ export const actions = {
     }
   },
   async createMaterials({ commit }, data) {
-    await this.$axios.post('/api/materials', data)
+    const response = await this.$axios.post('/api/materials', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    if (response) {
+      this.$router.push('/creator')
+    }
   },
 }
 

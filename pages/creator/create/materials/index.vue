@@ -33,11 +33,11 @@
           label="Արժեք"
           class="shadow-md rounded-lg p-3"
         ></input-with-labels>
-        <input-with-labels
+        <FileInputWithLabel
           id="image"
-          type="file"
+          label="Ներբեռնել Նյութի Պատկերը"
           class="shadow-md rounded-lg p-3"
-          @change="handleFileUpload"
+          @file-uploaded="handleFileUpload"
         />
       </div>
       <textarea-with-label
@@ -56,15 +56,18 @@
     </div>
   </div>
 </template>
+
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import HeaderComponent from '~/components/header/HeaderComponent.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
+import FileInputWithLabel from '~/components/form/FileInputWithLabel.vue'
 
 export default {
   components: {
+    FileInputWithLabel,
     TextareaWithLabel,
     SelectWithLabel,
     InputWithLabels,
@@ -79,7 +82,7 @@ export default {
         name: '',
         description: '',
         size: '',
-        image: null,
+        image: null, // Correct initialization of image
         price: '',
       },
     }
@@ -96,17 +99,18 @@ export default {
   methods: {
     ...mapActions('categories', ['fetchCategories']),
     ...mapActions('materials', ['createMaterials']),
-    handleFileUpload(event) {
-      const file = event.target.files[0]
+
+    handleFileUpload(file) {
       if (file) {
-        this.materials.image = file
-        console.log('File selected:', file)
+        this.materials.image = file // Store the file
       } else {
         this.materials.image = null
       }
     },
-    addNewMaterial() {
+
+    async addNewMaterial() {
       const formData = new FormData()
+
       if (!this.selectedOption) {
         alert('Please select a category first')
         return
@@ -119,13 +123,17 @@ export default {
       formData.append('price', this.materials.price)
 
       if (this.materials.image) {
-        formData.append('image', this.materials.image)
+        formData.append('image', this.materials.image) // Ensure this is a File object
       } else {
         alert('Please upload an image')
         return
       }
 
-      this.createMaterials(formData)
+      try {
+        await this.createMaterials(formData)
+      } catch (error) {
+        console.error('Error creating material:', error.response.data)
+      }
     },
   },
 }
