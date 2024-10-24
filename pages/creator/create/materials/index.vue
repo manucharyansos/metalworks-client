@@ -45,7 +45,7 @@
         v-model="materials.description"
         label="Նկարագրություն"
         type="text"
-        class="shadow-md rounded-lg p-3 w-full my-6"
+        class="shadow-md border-gray-300 rounded-lg p-3 w-full my-6"
       ></textarea-with-label>
       <button
         class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -54,6 +54,10 @@
         Ստեղծել նոր նյութ
       </button>
     </div>
+
+    <!--    notification-->
+
+    <notifications />
   </div>
 </template>
 
@@ -102,7 +106,7 @@ export default {
 
     handleFileUpload(file) {
       if (file) {
-        this.materials.image = file // Store the file
+        this.materials.image = file
       } else {
         this.materials.image = null
       }
@@ -123,7 +127,7 @@ export default {
       formData.append('price', this.materials.price)
 
       if (this.materials.image) {
-        formData.append('image', this.materials.image) // Ensure this is a File object
+        formData.append('image', this.materials.image)
       } else {
         alert('Please upload an image')
         return
@@ -132,7 +136,11 @@ export default {
       try {
         await this.createMaterials(formData)
       } catch (error) {
-        console.error('Error creating material:', error.response.data)
+        this.$notify({
+          type: 'error',
+          title: 'Error updating order',
+          text: error.response?.data || error.message,
+        })
       }
     },
   },

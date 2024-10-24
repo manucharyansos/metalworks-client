@@ -28,6 +28,74 @@
         </input-with-label-icon>
       </template>
     </header-component>
+    <div class="grid md:grid-cols-3 grid-cols-1 gap-8 px-4 mt-28">
+      <div class="shadow-lg rounded-lg">
+        <a href="#" class="grid grid-cols-2 gap-4">
+          <img
+            class="object-cover w-full rounded-t-lg md:rounded-none md:rounded-s-lg"
+            src="alyumin.jpg"
+            alt=""
+          />
+          <div class="flex flex-col justify-between p-4 leading-normal">
+            <h5
+              class="mb-2 text-2xl italic font-sans font-bold tracking-tight text-gray-900 dark:text-white"
+            >
+              Նյութեր
+            </h5>
+            <p
+              class="mb-3 font-light text-2xl italic font-sans text-gray-700 dark:text-gray-400"
+            >
+              Քանակ։ {{ materials.length }}
+            </p>
+          </div>
+        </a>
+      </div>
+
+      <div class="shadow-lg rounded-lg">
+        <a href="#" class="grid grid-cols-2 gap-4">
+          <img
+            class="object-cover w-full rounded-t-lg md:rounded-none md:rounded-s-lg"
+            src="Без%20названия.png"
+            alt=""
+          />
+
+          <div class="flex flex-col justify-between p-4 leading-normal">
+            <h5
+              class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+            >
+              Գրանցվաշ օգտատերեր
+            </h5>
+            <p
+              v-if="users"
+              class="mb-3 font-normal text-gray-700 dark:text-gray-400"
+            >
+              Օգտատերեր։ {{ users.length }}
+            </p>
+          </div>
+        </a>
+      </div>
+
+      <div class="shadow-lg rounded-lg">
+        <a href="#" class="grid grid-cols-2 gap-4">
+          <img
+            class="object-cover my-auto w-full rounded-t-lg md:rounded-none md:rounded-s-lg"
+            src="orders.png"
+            alt=""
+          />
+          <div class="flex flex-col justify-between p-4 leading-normal">
+            <h5
+              class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+            >
+              Պատվերներ
+            </h5>
+            <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+              Պատվերների քանակ։ {{ allOrders.length }}
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+
     <!--      table-->
 
     <div
@@ -368,8 +436,16 @@ export default {
   },
   computed: {
     ...mapGetters('orders', ['orders']),
+    ...mapGetters('materials', ['getMaterials']),
+    ...mapGetters('users', ['getUsers']),
     allOrders() {
       return this.orders
+    },
+    materials() {
+      return this.getMaterials
+    },
+    users() {
+      return this.getUsers
     },
     searchFilter() {
       const searchTerm = this.searchable.trim().toLowerCase()
@@ -390,9 +466,13 @@ export default {
   },
   created() {
     this.fetchOrders()
+    this.fetchMaterials()
+    this.fetchUsers()
   },
   methods: {
     ...mapActions('orders', ['fetchOrders', 'orderDelete']),
+    ...mapActions('materials', ['fetchMaterials']),
+    ...mapActions('users', ['fetchUsers']),
     editOrder(order) {
       this.openEditModal = true
       this.showOrder = order

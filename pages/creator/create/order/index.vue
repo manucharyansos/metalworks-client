@@ -153,7 +153,31 @@ export default {
     ...mapActions('orders', ['createOrder']),
     ...mapActions('clients', ['fetchClients']),
     handleFileUpload(event) {
-      this.selectedFiles = Array.from(event.target.files)
+      const allowedTypes = [
+        'application/pdf',
+        'image/png',
+        'image/jpeg',
+        'image/jpg',
+        'image/eps',
+        'application/octet-stream',
+      ] // Add other MIME types here
+      const selectedFiles = event.target.files
+      this.selectedFiles = []
+
+      for (let i = 0; i < selectedFiles.length; i++) {
+        if (allowedTypes.includes(selectedFiles[i].type)) {
+          this.selectedFiles.push(selectedFiles[i])
+        } else {
+          console.error(`Invalid file type: ${selectedFiles[i].name}`)
+          this.$notify({
+            text: `File type not allowed: ${selectedFiles[i].name}`,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'error',
+          })
+        }
+      }
     },
     async addTask() {
       const formData = new FormData()
