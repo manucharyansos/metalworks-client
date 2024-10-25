@@ -61,13 +61,13 @@
 
           <div class="flex flex-col justify-between p-4 leading-normal">
             <h5
-              class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+              class="mb-2 text-2xl italic font-sans font-bold tracking-tight text-gray-900 dark:text-white"
             >
               Գրանցվաշ օգտատերեր
             </h5>
             <p
               v-if="users"
-              class="mb-3 font-normal text-gray-700 dark:text-gray-400"
+              class="mb-3 font-light text-2xl italic font-sans text-gray-700 dark:text-gray-400"
             >
               Օգտատերեր։ {{ users.length }}
             </p>
@@ -78,17 +78,19 @@
       <div class="shadow-lg rounded-lg">
         <a href="#" class="grid grid-cols-2 gap-4">
           <img
-            class="object-cover my-auto w-full rounded-t-lg md:rounded-none md:rounded-s-lg"
+            class="object-cover my-auto w-full h-full rounded-t-lg md:rounded-none md:rounded-s-lg"
             src="orders.png"
             alt=""
           />
           <div class="flex flex-col justify-between p-4 leading-normal">
             <h5
-              class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+              class="mb-2 text-2xl italic font-sans font-bold tracking-tight text-gray-900 dark:text-white"
             >
               Պատվերներ
             </h5>
-            <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
+            <p
+              class="mb-3 font-light text-2xl italic font-sans text-gray-700 dark:text-gray-400"
+            >
               Պատվերների քանակ։ {{ allOrders.length }}
             </p>
           </div>

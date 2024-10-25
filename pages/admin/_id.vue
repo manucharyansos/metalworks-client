@@ -311,15 +311,23 @@ export default {
       })
     },
     addFactory(value) {
-      const exists = this.selectedFactories.includes(value.id)
+      const factoryId = value.id // Extract the factory ID from the value
+      const exists = this.selectedFactories.includes(factoryId)
+
       if (exists) {
+        // Remove the factory ID if it already exists
         this.selectedFactories = this.selectedFactories.filter(
-          (id) => id !== value.id
+          (id) => id !== factoryId,
+          this.selectedFactories.push(factoryId)
         )
       } else {
-        this.selectedFactories.push(value.id)
+        // Add the factory ID if it doesn't exist
+        this.selectedFactories.push(factoryId)
       }
+
+      console.log('Selected Factories:', this.selectedFactories) // Optional: for debugging
     },
+
     getFormDataEntries(formData) {
       const entries = {}
       for (const [key, value] of formData.entries()) {
@@ -345,23 +353,23 @@ export default {
             }
           })
         }
-        formData.append('description', this.getOrder.description)
-        formData.append('quantity', this.getOrder.quantity)
-        formData.append('name', this.getOrder.name)
-        formData.append('status', 'in process')
+        formData.append('description', this.getOrder.description || '')
+        formData.append('quantity', this.getOrder.quantity || '')
+        formData.append('name', this.getOrder.name || '')
+        formData.append('status', this.getOrder.status || 'in process')
         if (this.getOrder.store_link && this.getOrder.store_link.url) {
           formData.append('store_link[url]', this.getOrder.store_link.url)
         }
-        if (this.getOrder.factories && Array.isArray(this.getOrder.factories)) {
-          this.getOrder.factories.forEach((factory) => {
-            formData.append('factories[]', JSON.stringify(factory))
+        console.log(this.selectedFactories)
+        if (this.selectedFactories.length) {
+          this.selectedFactories.forEach((factoryId) => {
+            formData.append('factories[]', factoryId)
           })
         }
-        if (this.getOrder.finish_date) {
-          formData.append('finish_date', this.getOrder.finish_date)
+        if (this.getOrder.dates && this.getOrder.dates.finish_date) {
+          formData.append('finish_date', this.getOrder.dates.finish_date)
         }
         await this.updateOrder({ id: this.id, payload: formData })
-
         this.$notify({ type: 'success', title: 'Order updated successfully' })
       } catch (error) {
         this.$notify({
@@ -371,6 +379,7 @@ export default {
         })
       }
     },
+
     async deleteOrder(id) {
       try {
         await this.orderDelete(id)
