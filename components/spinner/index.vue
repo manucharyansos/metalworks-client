@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full flex items-center justify-center">
+  <div class="relative w-full flex items-center justify-center h-screen">
     <div class="spinner absolute top-1/2">
       <svg
         aria-hidden="true"

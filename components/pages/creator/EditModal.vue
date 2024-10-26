@@ -4,7 +4,7 @@
     id="updateProductModal"
     class="overflow-y-auto mx-auto z-50 flex justify-center items-center w-full md:inset-0 h-modal md:h-full"
   >
-    <div class="relative p-4 w-full max-w-2xl h-full md:h-auto">
+    <div class="relative p-4 w-full max-w-4xl h-full md:h-auto">
       <!-- Modal content -->
       <div
         class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5"

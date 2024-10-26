@@ -255,7 +255,7 @@
       :data="showOrder"
       :is-open="openEditModal"
       :other-files="showOrder?.files"
-      class="py-20"
+      class="py-20 absolute top-10"
       @closeModal="closeEditeModal"
       @openFile="openFile"
     >

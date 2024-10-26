@@ -43,7 +43,7 @@
               <th scope="col" class="px-3 py-3">Finish Date</th>
               <th scope="col" class="px-3 py-3">Order number</th>
               <th scope="col" class="px-3 py-3">Prefix code</th>
-              <th scope="col" class="px-3 py-3">Details</th>
+              <th scope="col" class="px-3 py-3">Description</th>
               <th scope="col" class="px-3 py-3 text-center">Status</th>
               <th scope="col" class="px-3 py-3">Storage link</th>
               <th scope="col" class="px-3 py-3"></th>
@@ -76,20 +76,18 @@
                 {{ order.prefix_code.code }}
               </td>
               <td
-                v-if="order.details"
+                v-if="order.description"
                 class="px-6 py-4 cursor-pointer relative"
                 @click="toggleDetails(order.id)"
               >
-                Details
+                Description
                 <template v-if="isOpenDetails(order.id)">
                   <ul
-                    v-for="detail in order.details"
-                    :key="detail.id"
                     class="absolute top-10 right-0 border-neutral-400 shadow-neutral-700 bg-neutral-400 rounded-2xl p-4"
                   >
-                    <li>Name: {{ detail.name }}</li>
-                    <li>Quantity: {{ detail.quantity }}</li>
-                    <li>Description: {{ detail.description }}</li>
+                    <li>Name: {{ order.name }}</li>
+                    <li>Quantity: {{ order.quantity }}</li>
+                    <li>Description: {{ order.description }}</li>
                   </ul>
                 </template>
               </td>
@@ -122,215 +120,31 @@
           </tbody>
         </table>
       </div>
-      <div class="grid grid-cols-3 pt-20 p-4 md:ml-64">
+      <div class="grid grid-cols-3 gap-4 pt-20 p-4">
         <div class="flex flex-col items-center justify-items-start">
-          <h2 class="text-2xl text-white font-bold italic">Waiting</h2>
+          <h2 class="text-2xl text-white font-bold italic text-center">
+            Waiting
+          </h2>
           <div v-for="order in waiting" :key="order.id" class="m-3">
-            <div v-if="order.status || order.status.status === 'waiting'">
-              <div
-                class="border-2 border-dashed bg-neutral-700 border-neutral-700 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
-              >
-                <p v-if="order.created_at">
-                  <span class="font-bold">Start:</span> {{ order.created_at }}
-                  <span class="font-bold">Finish:</span>
-                  {{ order.dates.finish_date }}
-                </p>
-                <div @click="updateOrder(order)">
-                  <div>
-                    <div>
-                      <div
-                        v-if="order.status.status === 'in process'"
-                        class="flex flex-row items-start"
-                      >
-                        <span class="font-bold">Status:</span>
-                        <div class="bg-blue-700 font-sans italic mx-2">
-                          {{ order.status.status }}
-                        </div>
-                      </div>
-                      <div
-                        v-if="order.status.status === 'waiting'"
-                        class="flex flex-row items-start"
-                      >
-                        <span class="font-bold">Status:</span>
-                        <div class="bg-yellow-700 font-sans italic mx-2">
-                          {{ order.status.status }}
-                        </div>
-                      </div>
-                      <div
-                        v-if="order.status.status === 'finished'"
-                        class="flex flex-row items-start"
-                      >
-                        <span class="font-bold">Status:</span>
-                        <div class="bg-green-700 font-sans italic mx-2">
-                          {{ order.status.status }}
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      v-for="detail in order.details"
-                      :key="detail.id"
-                      class="flex flex-col items-start justify-start"
-                    >
-                      <span class="font-bold">Description</span>
-                      <p>Title: {{ detail.type }}</p>
-                      <p>Type: {{ detail.quantity }}</p>
-                      <p>Details: {{ detail.description }}</p>
-                    </div>
-                  </div>
-                </div>
-                <p>
-                  <span class="font-bold">Order number:</span>
-                  {{ order.order_number.number }}
-                </p>
-                <a
-                  v-if="order.store_link"
-                  target="_blank"
-                  :href="order.store_link.url"
-                  class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                  >Read more</a
-                >
-              </div>
-            </div>
+            <OrderCard :order="order" :update-order="updateOrder" />
           </div>
         </div>
-        <div class="flex flex-col items-start justify-start">
-          <h2 class="text-2xl text-white font-bold italic">In process</h2>
+
+        <div class="flex flex-col items-center justify-start">
+          <h2 class="text-2xl text-white font-bold italic text-center">
+            In process
+          </h2>
           <div v-for="order in inProcess" :key="order.id" class="m-3">
-            <div v-if="order.status || order.status.status === 'waiting'">
-              <div
-                class="border-2 border-dashed bg-neutral-700 border-neutral-700 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
-              >
-                <p v-if="order.created_at">
-                  <span class="font-bold">Start:</span> {{ order.created_at }}
-                  <span class="font-bold">Finish:</span>
-                  {{ order.dates.finish_date }}
-                </p>
-                <div @click="updateOrder(order)">
-                  <div>
-                    <div>
-                      <div
-                        v-if="order.status.status === 'in process'"
-                        class="flex flex-row items-start"
-                      >
-                        <span class="font-bold">Status:</span>
-                        <div class="bg-blue-700 font-sans italic mx-2">
-                          {{ order.status.status }}
-                        </div>
-                      </div>
-                      <div
-                        v-if="order.status.status === 'waiting'"
-                        class="flex flex-row items-start"
-                      >
-                        <span class="font-bold">Status:</span>
-                        <div class="bg-yellow-700 font-sans italic mx-2">
-                          {{ order.status.status }}
-                        </div>
-                      </div>
-                      <div
-                        v-if="order.status.status === 'finished'"
-                        class="flex flex-row items-start"
-                      >
-                        <span class="font-bold">Status:</span>
-                        <div class="bg-green-700 font-sans italic mx-2">
-                          {{ order.status.status }}
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      v-for="detail in order.details"
-                      :key="detail.id"
-                      class="flex flex-col items-start justify-start"
-                    >
-                      <span class="font-bold">Description</span>
-                      <p>Title: {{ detail.type }}</p>
-                      <p>Type: {{ detail.quantity }}</p>
-                      <p>Details: {{ detail.description }}</p>
-                    </div>
-                  </div>
-                </div>
-                <p>
-                  <span class="font-bold">Order number:</span>
-                  {{ order.order_number.number }}
-                </p>
-                <a
-                  v-if="order.store_link"
-                  target="_blank"
-                  :href="order.store_link.url"
-                  class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                  >Read more</a
-                >
-              </div>
-            </div>
+            <OrderCard :order="order" :update-order="updateOrder" />
           </div>
         </div>
+
         <div class="flex flex-col items-center justify-items-start">
-          <h2 class="text-2xl text-white font-bold italic">Finished</h2>
+          <h2 class="text-2xl text-white font-bold italic text-center">
+            Finished
+          </h2>
           <div v-for="order in finished" :key="order.id" class="m-3">
-            <div v-if="order.status || order.status.status === 'waiting'">
-              <div
-                class="border-2 border-dashed bg-neutral-700 border-neutral-700 text-white rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
-              >
-                <p v-if="order.created_at">
-                  <span class="font-bold">Start:</span> {{ order.created_at }}
-                  <span class="font-bold">Finish:</span>
-                  {{ order.dates.finish_date }}
-                </p>
-                <div @click="updateOrder(order)">
-                  <div>
-                    <div>
-                      <div
-                        v-if="order.status.status === 'in process'"
-                        class="flex flex-row items-start"
-                      >
-                        <span class="font-bold">Status:</span>
-                        <div class="bg-blue-700 font-sans italic mx-2">
-                          {{ order.status.status }}
-                        </div>
-                      </div>
-                      <div
-                        v-if="order.status.status === 'waiting'"
-                        class="flex flex-row items-start"
-                      >
-                        <span class="font-bold">Status:</span>
-                        <div class="bg-yellow-700 font-sans italic mx-2">
-                          {{ order.status.status }}
-                        </div>
-                      </div>
-                      <div
-                        v-if="order.status.status === 'finished'"
-                        class="flex flex-row items-start"
-                      >
-                        <span class="font-bold">Status:</span>
-                        <div class="bg-green-700 font-sans italic mx-2">
-                          {{ order.status.status }}
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      v-for="detail in order.details"
-                      :key="detail.id"
-                      class="flex flex-col items-start justify-start"
-                    >
-                      <span class="font-bold">Description</span>
-                      <p>Title: {{ detail.type }}</p>
-                      <p>Type: {{ detail.quantity }}</p>
-                      <p>Details: {{ detail.description }}</p>
-                    </div>
-                  </div>
-                </div>
-                <p>
-                  <span class="font-bold">Order number:</span>
-                  {{ order.order_number.number }}
-                </p>
-                <a
-                  v-if="order.store_link"
-                  target="_blank"
-                  :href="order.store_link.url"
-                  class="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                  >Read more</a
-                >
-              </div>
-            </div>
+            <OrderCard :order="order" :update-order="updateOrder" />
           </div>
         </div>
       </div>
@@ -377,12 +191,18 @@
           <!-- Modal body -->
           <div class="grid mb-4 sm:grid-cols-2 w-full">
             <div>
-              <select-with-label v-model="selectedOption" :dates="status" />
+              <select-with-label
+                v-model="selectedOption"
+                :dates="status"
+                label="Ընտրել կարգավիճակը"
+              ></select-with-label>
             </div>
             <div class="sm:col-span-2">
               <textarea-with-label
                 v-model="selectedOrder.factory_order_statuses.description"
-              />
+                placeholder="Description"
+                class="w-full my-2 p-3 border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600"
+              ></textarea-with-label>
             </div>
           </div>
           <button
@@ -415,9 +235,11 @@ import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import HeaderComponent from '~/components/header/HeaderComponent.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+import OrderCard from '~/components/card/OrderCard.vue'
 
 export default {
   components: {
+    OrderCard,
     InputWithLabelIcon,
     HeaderComponent,
     SelectWithLabel,
@@ -441,6 +263,18 @@ export default {
   },
   computed: {
     ...mapGetters('factory', ['getOrderByFactories']),
+    inProcess() {
+      return this.filterOrdersByStatus('in process')
+    },
+
+    waiting() {
+      return this.filterOrdersByStatus('waiting')
+    },
+
+    finished() {
+      return this.filterOrdersByStatus('finished')
+    },
+
     searchFilter() {
       const searchTerm = this.searchable.trim().toLowerCase()
       if (searchTerm === '') {
@@ -451,17 +285,15 @@ export default {
           order.order_number && typeof order.order_number.number === 'string'
             ? order.order_number.number.toLowerCase()
             : ''
-        const detailsName =
-          order.details &&
-          order.details.length > 0 &&
-          typeof order.details[0].name === 'string'
-            ? order.details[0].name.toLowerCase()
+        const name =
+          order.name && order.name.length > 0 && typeof order.name === 'string'
+            ? order.name.toLowerCase()
             : ''
-        const descriptionName =
-          order.details &&
-          order.details.length > 0 &&
-          typeof order.details[0].description === 'string'
-            ? order.details[0].description.toLowerCase()
+        const description =
+          order.description &&
+          order.description.length > 0 &&
+          typeof order.description === 'string'
+            ? order.description.toLowerCase()
             : ''
         const prefixCode =
           order.prefix_code && typeof order.prefix_code.code === 'string'
@@ -469,51 +301,9 @@ export default {
             : ''
         return (
           orderNumber.includes(searchTerm) ||
-          descriptionName.includes(searchTerm) ||
-          detailsName.includes(searchTerm) ||
+          description.includes(searchTerm) ||
+          name.includes(searchTerm) ||
           prefixCode.includes(searchTerm)
-        )
-      })
-    },
-    inProcess() {
-      if (!this.getOrderByFactories) {
-        return null
-      }
-
-      return this.getOrderByFactories.filter((order) => {
-        return (
-          order.factory_order_statuses &&
-          order.factory_order_statuses.some(
-            (status) => status.status === 'in process'
-          )
-        )
-      })
-    },
-    waiting() {
-      if (!this.getOrderByFactories) {
-        return null
-      }
-
-      return this.getOrderByFactories.filter((order) => {
-        return (
-          order.factory_order_statuses &&
-          order.factory_order_statuses.some(
-            (status) => status.status === 'waiting'
-          )
-        )
-      })
-    },
-    finished() {
-      if (!this.getOrderByFactories) {
-        return null
-      }
-
-      return this.getOrderByFactories.filter((order) => {
-        return (
-          order.factory_order_statuses &&
-          order.factory_order_statuses.some(
-            (status) => status.status === 'finished'
-          )
         )
       })
     },
@@ -523,6 +313,21 @@ export default {
   },
   methods: {
     ...mapActions('factory', ['fetchOrdersByFactory', 'doneFinishedOrder']),
+    filterOrdersByStatus(status) {
+      if (!this.getOrderByFactories) {
+        return null
+      }
+
+      return this.getOrderByFactories.filter((order) => {
+        return (
+          order.factory_order_statuses &&
+          order.factory_order_statuses.some(
+            (factoryStatus) => factoryStatus.status === status
+          )
+        )
+      })
+    },
+
     updateOrder(order) {
       this.isModal = true
       this.selectedOrder.id = order.id
@@ -540,11 +345,9 @@ export default {
           description: '',
         }
       }
-      if (order.details.length > 0) {
-        this.selectedOrder.name = order.details[0].name
-        this.selectedOrder.quantity = order.details[0].quantity
-        this.selectedOrder.description = order.details[0].description
-      }
+      this.selectedOrder.name = order.name
+      this.selectedOrder.quantity = order.quantity
+      this.selectedOrder.description = order.description
     },
     closeModal() {
       this.isModal = false

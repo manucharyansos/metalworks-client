@@ -311,21 +311,16 @@ export default {
       })
     },
     addFactory(value) {
-      const factoryId = value.id // Extract the factory ID from the value
-      const exists = this.selectedFactories.includes(factoryId)
+      const factoryId = value.id
+      const exists = this.stepperData.some((item) => item.id === factoryId)
 
       if (exists) {
-        // Remove the factory ID if it already exists
-        this.selectedFactories = this.selectedFactories.filter(
-          (id) => id !== factoryId,
-          this.selectedFactories.push(factoryId)
+        this.stepperData = this.stepperData.filter(
+          (item) => item.id !== factoryId
         )
       } else {
-        // Add the factory ID if it doesn't exist
-        this.selectedFactories.push(factoryId)
+        this.stepperData.push(value)
       }
-
-      console.log('Selected Factories:', this.selectedFactories) // Optional: for debugging
     },
 
     getFormDataEntries(formData) {
@@ -360,10 +355,9 @@ export default {
         if (this.getOrder.store_link && this.getOrder.store_link.url) {
           formData.append('store_link[url]', this.getOrder.store_link.url)
         }
-        console.log(this.selectedFactories)
         if (this.selectedFactories.length) {
-          this.selectedFactories.forEach((factoryId) => {
-            formData.append('factories[]', factoryId)
+          this.selectedFactories.forEach((factoryId, index) => {
+            formData.append(`factories[${index}][id]`, factoryId)
           })
         }
         if (this.getOrder.dates && this.getOrder.dates.finish_date) {
