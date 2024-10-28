@@ -1,11 +1,12 @@
 <template>
   <div class="bg-gray-50 dark:bg-gray-900">
-    <header-component class="ml-auto bg-transparent">
+    <header-component class="bg-gray-900">
       <template #searchInput>
         <input-with-label-icon
           v-model="searchable"
           type="text"
           label="Search"
+          label_class=" text-amber-50"
           class="ml-24"
         >
           <template #label_svg>
@@ -28,73 +29,73 @@
         </input-with-label-icon>
       </template>
     </header-component>
-    <div class="grid md:grid-cols-3 grid-cols-1 gap-8 px-4 mt-28">
-      <div class="shadow-lg rounded-lg">
-        <a href="#" class="grid grid-cols-2 gap-4">
+    <div class="grid md:grid-cols-3 grid-cols-1 gap-8 mt-28">
+      <div class="grid grid-cols-2 shadow-lg rounded-lg">
+        <div class="flex items-center justify-center">
           <img
-            class="object-cover w-full rounded-t-lg md:rounded-none md:rounded-s-lg"
+            class="object-cover w-full rounded-t-lg md:rounded-lg"
             src="alyumin.jpg"
             alt=""
           />
-          <div class="flex flex-col justify-between p-4 leading-normal">
-            <h5
-              class="mb-2 text-2xl italic font-sans font-bold tracking-tight text-gray-900 dark:text-white"
-            >
-              Նյութեր
-            </h5>
-            <p
-              class="mb-3 font-light text-2xl italic font-sans text-gray-700 dark:text-gray-400"
-            >
-              Քանակ։ {{ materials.length }}
-            </p>
-          </div>
-        </a>
+        </div>
+        <div class="flex flex-col justify-between p-4 leading-normal">
+          <h5
+            class="mb-2 text-2xl italic font-sans font-bold tracking-tight text-gray-900 dark:text-white"
+          >
+            Նյութեր
+          </h5>
+          <p
+            class="mb-3 font-light text-2xl italic font-sans text-gray-700 dark:text-gray-400"
+          >
+            Քանակ։ {{ materials.length }}
+          </p>
+        </div>
       </div>
 
-      <div class="shadow-lg rounded-lg">
-        <a href="#" class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-2 shadow-lg rounded-lg">
+        <div class="flex items-center justify-center">
           <img
-            class="object-cover w-full rounded-t-lg md:rounded-none md:rounded-s-lg"
+            class="object-cover w-full rounded-t-lg md:rounded-lg"
             src="Без%20названия.png"
             alt=""
           />
+        </div>
 
-          <div class="flex flex-col justify-between p-4 leading-normal">
-            <h5
-              class="mb-2 text-2xl italic font-sans font-bold tracking-tight text-gray-900 dark:text-white"
-            >
-              Գրանցվաշ օգտատերեր
-            </h5>
-            <p
-              v-if="users"
-              class="mb-3 font-light text-2xl italic font-sans text-gray-700 dark:text-gray-400"
-            >
-              Օգտատերեր։ {{ users.length }}
-            </p>
-          </div>
-        </a>
+        <div class="flex flex-col justify-between p-4 leading-normal">
+          <h5
+            class="mb-2 text-2xl italic font-sans font-bold tracking-tight text-gray-900 dark:text-white"
+          >
+            Գրանցվաշ օգտատերեր
+          </h5>
+          <p
+            v-if="users"
+            class="mb-3 font-light text-2xl italic font-sans text-gray-700 dark:text-gray-400"
+          >
+            Օգտատերեր։ {{ users.length }}
+          </p>
+        </div>
       </div>
 
-      <div class="shadow-lg rounded-lg">
-        <a href="#" class="grid grid-cols-2 gap-4">
+      <div class="grid grid-cols-2 shadow-lg rounded-lg">
+        <div class="flex items-center justify-center">
           <img
-            class="object-cover my-auto w-full h-full rounded-t-lg md:rounded-none md:rounded-s-lg"
+            class="object-cover w-full rounded-t-lg md:rounded-lg"
             src="orders.png"
             alt=""
           />
-          <div class="flex flex-col justify-between p-4 leading-normal">
-            <h5
-              class="mb-2 text-2xl italic font-sans font-bold tracking-tight text-gray-900 dark:text-white"
-            >
-              Պատվերներ
-            </h5>
-            <p
-              class="mb-3 font-light text-2xl italic font-sans text-gray-700 dark:text-gray-400"
-            >
-              Պատվերների քանակ։ {{ allOrders.length }}
-            </p>
-          </div>
-        </a>
+        </div>
+        <div class="flex flex-col justify-between p-4 leading-normal">
+          <h5
+            class="mb-2 text-2xl italic font-sans font-bold tracking-tight text-gray-900 dark:text-white"
+          >
+            Պատվերներ
+          </h5>
+          <p
+            class="mb-3 font-light text-2xl italic font-sans text-gray-700 dark:text-gray-400"
+          >
+            Պատվերների քանակ։ {{ allOrders.length }}
+          </p>
+        </div>
       </div>
     </div>
 

@@ -100,7 +100,7 @@
     </nav>
     <!-- Sidebar -->
     <main
-      class="creator bg-white dark:bg-gray-700 h-full flex items-center justify-center"
+      class="creator bg-white p-4 md:ml-64 h-auto pt-20 flex items-center justify-center overflow-y-auto"
     >
       <Nuxt />
     </main>

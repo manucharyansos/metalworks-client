@@ -3,7 +3,7 @@
     <!-- Sidebar (aside) -->
     <aside
       id="drawer-navigation"
-      class="w-64 h-full pt-14 transition-transform bg-gray-900 dark:bg-gray-800 border-r border-neutral-700"
+      class="fixed top-0 left-0 z-40 w-64 h-screen pt-14 bg-gray-900 transition-transform -translate-x-full border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
       aria-label="Sidenav"
     >
       <div class="overflow-y-auto py-5 px-3 h-full">
@@ -110,7 +110,7 @@
     </aside>
 
     <!-- Main content (Nuxt component) -->
-    <main class="flex-1 bg-white dark:bg-gray-700">
+    <main class="p-4 md:ml-64 h-auto pt-20">
       <Nuxt />
     </main>
   </div>

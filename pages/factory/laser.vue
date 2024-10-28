@@ -1,5 +1,5 @@
 <template>
-  <main>
+  <main class="min-h-screen">
     <template v-if="getOrderByFactories && !isModal">
       <header-component class="ml-auto bg-transparent">
         <template #searchInput>
@@ -121,20 +121,20 @@
         </table>
       </div>
       <div class="grid grid-cols-3 gap-4 pt-20 p-4">
-        <div class="flex flex-col items-center justify-items-start">
-          <h2 class="text-2xl text-white font-bold italic text-center">
-            Waiting
-          </h2>
-          <div v-for="order in waiting" :key="order.id" class="m-3">
-            <OrderCard :order="order" :update-order="updateOrder" />
-          </div>
-        </div>
-
         <div class="flex flex-col items-center justify-start">
           <h2 class="text-2xl text-white font-bold italic text-center">
             In process
           </h2>
           <div v-for="order in inProcess" :key="order.id" class="m-3">
+            <OrderCard :order="order" :update-order="updateOrder" />
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center justify-items-start">
+          <h2 class="text-2xl text-white font-bold italic text-center">
+            Waiting
+          </h2>
+          <div v-for="order in waiting" :key="order.id" class="m-3">
             <OrderCard :order="order" :update-order="updateOrder" />
           </div>
         </div>

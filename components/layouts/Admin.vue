@@ -101,7 +101,7 @@
     </aside>
 
     <!-- Main content (Nuxt component) -->
-    <main class="flex-1 bg-white dark:bg-gray-700">
+    <main class="flex-1 overflow-y-auto bg-white dark:bg-gray-700">
       <Nuxt />
     </main>
   </div>
