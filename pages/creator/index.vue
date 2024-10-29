@@ -1,6 +1,9 @@
 <template>
   <div class="bg-gray-50 dark:bg-gray-900">
-    <div class="grid md:grid-cols-3 grid-cols-1 gap-4 mt-12">
+    <div
+      v-if="!isOpenDeleteModal && !openEditModal"
+      class="grid md:grid-cols-3 grid-cols-1 gap-4 mt-12"
+    >
       <div class="grid grid-cols-2 shadow-lg rounded-lg">
         <div class="flex items-center justify-center">
           <img
