@@ -1,6 +1,6 @@
 <template>
   <main class="flex flex-row flex-wrap p-4 md:ml-64 h-auto pt-20">
-    <header-component class="ml-auto">
+    <header-component class="ml-auto bg-gray-900">
       <template #searchInput>
         <input-with-label-icon v-model="searchable" type="text" label="Search">
           <template #label_svg>

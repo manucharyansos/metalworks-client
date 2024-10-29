@@ -1,8 +1,7 @@
 <template>
   <div class="bg-neutral-100 flex items-center justify-center w-full h-full">
-    <header-component class="ml-auto bg-transparent mb-8" />
     <template v-if="clients && clients.length > 0">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-12 w-full mt-20">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-12 w-full mt-12">
         <div
           class="w-full h-full ml-auto mr-4 p-6 bg-white rounded-xl shadow-lg"
         >
@@ -108,11 +107,9 @@ import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import SpinnerComponent from '~/components/spinner/index.vue'
-import HeaderComponent from '~/components/header/HeaderComponent.vue'
 
 export default {
   components: {
-    HeaderComponent,
     SpinnerComponent,
     SelectWithLabel,
     InputWithLabels,

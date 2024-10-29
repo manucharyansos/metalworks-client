@@ -1,7 +1,7 @@
 <template>
   <div class="w-full h-screen bg-gray-100 dark:bg-gray-800 overflow-y-auto">
-    <header-component class="ml-auto bg-transparent mb-8" />
-    <div class="flex flex-col items-center py-12 mt-24">
+    <!--    <header-component class="ml-auto bg-transparent mb-8" />-->
+    <div class="flex flex-col items-center py-12 mt-12">
       <p class="text-gray-800 dark:text-white font-bold italic mb-8 text-2xl">
         Ստեղծել նոր հաճախորդ
       </p>
@@ -171,10 +171,9 @@
 <script>
 import { mapActions } from 'vuex'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
-import HeaderComponent from '~/components/header/HeaderComponent.vue'
 
 export default {
-  components: { HeaderComponent, InputWithLabels },
+  components: { InputWithLabels },
   layout: 'creatorLayout',
   middleware: 'creator',
   data() {

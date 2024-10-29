@@ -1,13 +1,14 @@
 <template>
   <main class="min-h-screen">
     <template v-if="getOrderByFactories && !isModal">
-      <header-component class="ml-auto bg-transparent">
+      <header-component class="ml-auto bg-gray-900">
         <template #searchInput>
           <input-with-label-icon
             v-model="searchable"
             type="text"
             label="Search"
             class="ml-24"
+            label_class="text-gray-50"
           >
             <template #label_svg>
               <svg

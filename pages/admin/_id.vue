@@ -2,8 +2,8 @@
   <div
     class="flex flex-col overflow-y-auto items-center justify-center bg-gray-50 dark:bg-gray-800"
   >
-    <header-component />
-    <div class="w-full p-16 bg-white rounded-lg shadow-md dark:bg-gray-900">
+    <header-component class="bg-gray-900" />
+    <div class="w-full p-16 rounded-lg shadow-md dark:bg-gray-900">
       <div v-if="getOrder && getFactory">
         <!-- Stepper Component -->
         <div class="my-5">
