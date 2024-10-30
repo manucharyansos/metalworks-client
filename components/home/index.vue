@@ -316,6 +316,89 @@
           </div>
         </div>
       </div>
+
+      <!--      services-->
+      <div class="container flex items-center justify-center flex-col my-12">
+        <div class="flex flex-col items-center justify-center">
+          <h2
+            class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700 md:mx-32 mx-4 text-center"
+          >
+            Կռում, փոշի ծածկույթ, PEM սարքավորում և այլն
+          </h2>
+          <p
+            class="md:text-xl text-lg text-neutral-700 text-center italic font-sans my-12"
+          >
+            Այն չի ավարտվում լազերային կտրված մասերով: Մենք առաջարկում ենք մի
+            շարք հետմշակման ծառայություններ:
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <div>
+              <div
+                class="services cursor-pointer grid gap-6 grid-cols-2 size-20 border border-neutral-700 rounded-lg hover:border-blue-700 scale-75 w-full"
+              >
+                <div class="flex flex-col items-center justify-center">
+                  <h2>Ճշգրիտ կտրման մեթոդներ</h2>
+                  <p>2-4 օր ստանդարտ արտադրություն</p>
+                </div>
+                <div class="flex flex-col items-center justify-center">39$</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div
+                class="services cursor-pointer flex flex-col items-start p-4 justify-center size-20 border border-neutral-700 rounded-lg hover:border-blue-700 scale-75 w-full"
+              >
+                <h2>Կռում</h2>
+                <p>+1-2 օր</p>
+              </div>
+              <div
+                class="services cursor-pointer flex flex-col items-start p-4 justify-center size-20 border border-neutral-700 rounded-lg hover:border-blue-700 scale-75 w-full"
+              >
+                <h2>Հակափակում</h2>
+                <p>+1-3 օր</p>
+              </div>
+              <div
+                class="services cursor-pointer flex flex-col items-start p-4 justify-center size-20 border border-neutral-700 rounded-lg hover:border-blue-700 scale-75 w-full"
+              >
+                <h2>Փորվածքների ձևավորում</h2>
+                <p>+1-3 օր</p>
+              </div>
+              <div
+                class="services cursor-pointer flex flex-col items-start p-4 justify-center size-20 border border-neutral-700 rounded-lg hover:border-blue-700 scale-75 w-full"
+              >
+                <h2>Սարքավորումների տեղադրում</h2>
+                <p>+1-3 օր</p>
+              </div>
+              <div
+                class="services cursor-pointer flex flex-col items-start p-4 justify-center size-20 border border-neutral-700 rounded-lg hover:border-blue-700 scale-75 w-full"
+                @mouseover="isTakel = true"
+                @mouseleave="isTakel = false"
+              >
+                <h2>Թակել</h2>
+                <p>+1-3 օր</p>
+              </div>
+              <div
+                class="services cursor-pointer flex flex-col items-start p-4 justify-center size-20 border border-neutral-700 rounded-lg hover:border-blue-700 scale-75 w-full"
+                @mouseover="isAnot = true"
+                @mouseleave="isAnot = false"
+              >
+                <h2>Անոդացում</h2>
+                <p>+1-3 օր</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <!--            images-->
+            <div class="hidden w-full h-full" :class="{ anot: isAnot }">
+              <img src="alyumin.jpg" alt="" />
+            </div>
+            <div class="hidden w-full h-full" :class="{ takel: isTakel }">
+              <img src="/materials/cut-home-img.webp" alt="" />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -328,6 +411,8 @@ export default {
   data() {
     return {
       isActiveBg: false,
+      isAnot: false,
+      isTakel: false,
       scrollY: 0,
     }
   },
@@ -391,7 +476,15 @@ export default {
   box-shadow: rgba(63, 33, 33, 0.04) 0 0 1px 0,
     rgba(131, 118, 118, 0.87) 0 5px 8px 0;
 }
+.services {
+  box-shadow: rgba(63, 33, 33, 0.04) 0 0 1px 0,
+    rgba(131, 118, 118, 0.87) 0 5px 8px 0;
+}
 .materials:hover {
+  box-shadow: rgba(73, 67, 67, 0.04) 0 0 1px 0,
+    rgba(73, 66, 66, 0.87) 0 2px 4px 0;
+}
+.services:hover {
   box-shadow: rgba(73, 67, 67, 0.04) 0 0 1px 0,
     rgba(73, 66, 66, 0.87) 0 2px 4px 0;
 }
@@ -399,5 +492,15 @@ export default {
 .activeScroll {
   background-color: white;
   transition-duration: 3s;
+}
+.anot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.takel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
