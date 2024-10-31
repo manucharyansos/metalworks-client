@@ -16,40 +16,40 @@
 export default {
   props: {
     value: {
-      type: [String, Number],
-      required: true
+      type: [String, Number, Boolean],
+      required: true,
     },
     label: {
       type: String,
-      required: true
+      required: true,
     },
     modelValue: {
       type: Array,
-      default: () => [] // Ensure it's an empty array by default
+      default: () => [],
     },
     id: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     handleChange(event) {
-      const isChecked = event.target.checked;
-      const newSelectedFactories = [...this.modelValue];
+      const isChecked = event.target.checked
+      const newSelectedFactories = [...this.modelValue]
 
       if (isChecked) {
         if (!newSelectedFactories.includes(this.value)) {
-          newSelectedFactories.push(this.value);
+          newSelectedFactories.push(this.value)
         }
       } else {
-        const index = newSelectedFactories.indexOf(this.value);
+        const index = newSelectedFactories.indexOf(this.value)
         if (index > -1) {
-          newSelectedFactories.splice(index, 1);
+          newSelectedFactories.splice(index, 1)
         }
       }
 
-      this.$emit('update:modelValue', newSelectedFactories);
-    }
-  }
+      this.$emit('update:modelValue', newSelectedFactories)
+    },
+  },
 }
 </script>
