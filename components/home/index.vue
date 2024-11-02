@@ -14,10 +14,10 @@
           </h2>
 
           <div
-            class="flex flex-wrap lg:flex-nowrap items-center justify-center mx-auto z-10 xl:w-5/6 w-full"
+            class="flex flex-wrap lg:flex-nowrap items-center justify-center mx-auto z-10 w-full my-12"
           >
             <p
-              class="lg:text-xl text-lg font-sans italic flex items-center justify-center font-bold w-full my-2 lg:my-12"
+              class="lg:text-xl text-lg font-mono italic flex items-center justify-center font-bold w-full"
             >
               <svg
                 id="Layer_1"
@@ -263,7 +263,7 @@
 
       <!--      Materials -->
       <div
-        class="container flex flex-col items-center justify-center mx-auto my-10"
+        class="container mx-auto ld:px-0 px-24 flex flex-col items-center justify-center my-10"
       >
         <h3
           class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700"
@@ -332,7 +332,7 @@
             շարք հետմշակման ծառայություններ:
           </p>
         </div>
-        <div class="container mx-auto ld:px-0 px-24 grid grid-cols-2 gap-2">
+        <div class="container mx-auto px-4 2xl:px-24 grid grid-cols-2 gap-2">
           <div class="grid gap-6">
             <div
               class="services cursor-pointer flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
@@ -345,7 +345,7 @@
               </div>
               <div class="flex flex-col items-center justify-center">39$</div>
             </div>
-            <div class="grid md:grid-cols-2 grid-cols-1 gap-6">
+            <div class="grid lg:grid-cols-2 grid-cols-1 gap-6">
               <div
                 class="services cursor-pointer grid gap-6 grid-cols-2 size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
                 @mouseover="isBending = true"
@@ -396,7 +396,7 @@
               </div>
             </div>
           </div>
-          <div class="flex items-center justify-between">
+          <div class="flex md:hidden items-center justify-between">
             <!--            images-->
             <div
               v-if="isPrecisionCutting"
