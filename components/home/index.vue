@@ -332,10 +332,10 @@
             շարք հետմշակման ծառայություններ:
           </p>
         </div>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="container mx-auto ld:px-0 px-24 grid grid-cols-2 gap-2">
           <div class="grid gap-6">
             <div
-              class="services cursor-pointer grid gap-6 grid-cols-2 size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
+              class="services cursor-pointer flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
               @mouseover="isPrecisionCutting = true"
               @mouseleave="isPrecisionCutting = false"
             >
@@ -345,7 +345,7 @@
               </div>
               <div class="flex flex-col items-center justify-center">39$</div>
             </div>
-            <div class="grid grid-cols-2 gap-6">
+            <div class="grid md:grid-cols-2 grid-cols-1 gap-6">
               <div
                 class="services cursor-pointer grid gap-6 grid-cols-2 size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
                 @mouseover="isBending = true"
