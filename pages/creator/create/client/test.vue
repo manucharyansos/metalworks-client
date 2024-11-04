@@ -1,95 +1,148 @@
 <template>
   <div class="w-full h-screen bg-gray-100 dark:bg-gray-800 overflow-y-auto">
-    <div class="flex flex-col items-center py-12 mt-12">
-      <p class="text-gray-800 dark:text-white font-bold italic mb-8 text-2xl">
+
+      <p class="text-gray-800 dark:text-white font-bold font-sans italic my-8 text-2xl text-center">
         Ստեղծել նոր հաճախորդ
       </p>
-      <div class="container relative px-12">
-        <button
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          type="button"
-          @click="openPersonsType = !openPersonsType"
-        >
-          Կարգավիճակ
-          <svg
-            class="w-2.5 h-2.5 ms-2.5"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="m1 1 4 4 4-4"
-            />
-          </svg>
-        </button>
-
-        <!-- Dropdown menu -->
-        <div
-          v-if="openPersonsType"
-          class="z-10 absolute top-30 left-0 bg-white divide-y divide-gray-100 rounded-lg shadow w-60 dark:bg-gray-700 dark:divide-gray-600"
-        >
-          <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200">
-            <li>
-              <div
-                class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600"
-              >
-                <div class="flex items-center h-5">
-                  <input
-                    id="fiz"
-                    v-model="personType"
-                    value="physPerson"
-                    name="helper-radio"
-                    type="radio"
-                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
+      <div class="grid grid-cols-2 py-12 mt-12 gap-6">
+        <div id="accordion-collapse" data-accordion="collapse">
+          <h2 id="accordion-collapse-heading-1">
+            <button type="button" class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3" data-accordion-target="#accordion-collapse-body-1" aria-expanded="true" aria-controls="accordion-collapse-body-1">
+              <span>Կարգավիճակ</span>
+              <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+              </svg>
+            </button>
+          </h2>
+          <div id="accordion-collapse-body-1" class="hidden" aria-labelledby="accordion-collapse-heading-1">
+            <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200">
+              <li>
+                <div
+                  class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600"
+                >
+                  <div class="flex items-center h-5">
+                    <input
+                      id="fiz"
+                      v-model="personType"
+                      value="physPerson"
+                      name="helper-radio"
+                      type="radio"
+                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                    />
+                  </div>
+                  <div class="ms-2 text-sm">
+                    <label
+                      for="fiz"
+                      class="font-medium text-gray-900 dark:text-gray-300"
+                    >
+                      Ֆիզ․ անձ
+                    </label>
+                  </div>
                 </div>
-                <div class="ms-2 text-sm">
-                  <label
-                    for="fiz"
-                    class="font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    Ֆիզ․ անձ
-                  </label>
+              </li>
+              <li>
+                <div
+                  class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600"
+                >
+                  <div class="flex items-center h-5">
+                    <input
+                      id="legalEntity"
+                      v-model="personType"
+                      value="legalEntity"
+                      name="helper-radio"
+                      type="radio"
+                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
+                    />
+                  </div>
+                  <div class="ms-2 text-sm">
+                    <label
+                      for="legalEntity"
+                      class="font-medium text-gray-900 dark:text-gray-300"
+                    >
+                      Իրավաբանական անձ
+                    </label>
+                  </div>
                 </div>
-              </div>
-            </li>
-            <li>
-              <div
-                class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600"
-              >
-                <div class="flex items-center h-5">
-                  <input
-                    id="legalEntity"
-                    v-model="personType"
-                    value="legalEntity"
-                    name="helper-radio"
-                    type="radio"
-                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                  />
-                </div>
-                <div class="ms-2 text-sm">
-                  <label
-                    for="legalEntity"
-                    class="font-medium text-gray-900 dark:text-gray-300"
-                  >
-                    Իրավաբանական անձ
-                  </label>
-                </div>
-              </div>
-            </li>
-          </ul>
+              </li>
+            </ul>
+          </div>
+          <div id="accordion-collapse-heading-2">
+            <button type="button" class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3" data-accordion-target="#accordion-collapse-body-2" aria-expanded="false" aria-controls="accordion-collapse-body-2">
+              <span>Օգտատեր</span>
+              <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+              </svg>
+            </button>
+          </div>
+          <div v-if="getUsers" id="accordion-collapse-body-2" class="hidden" aria-labelledby="accordion-collapse-heading-2">
+            <div
+              v-for="(user, index) in users"
+              :key="index"
+              class="p-3 border border-b-0 border-gray-200 dark:border-gray-700 hover:bg-neutral-300 cursor-pointer"
+              @click="selectUser(user)">
+              <p class="text-base italic font-sans leading-3 my-2"><span class="font-bold">Անուն։</span> {{ user.name }},</p>
+              <p class="text-base italic font-sans leading-3 my-2"><span class="font-bold">էլ․ փոստ։ </span> {{ user.email }}</p>
+            </div>
+          </div>
         </div>
-      </div>
-      <div
-        v-if="isPhysPerson"
-        class="flex flex-col items-center justify-center"
-      >
-        <div class="grid grid-cols-2 gap-4 float-left">
+
+        <div
+          v-if="isPhysPerson"
+          class="flex flex-col items-center justify-center"
+        >
+          <div class="grid grid-cols-2 gap-4 float-left">
+            <input-with-labels
+              id="name"
+              v-model="pysPersonData.name"
+              label="Անուն"
+              type="text"
+              class="shadow-md rounded-lg p-3"
+            ></input-with-labels>
+            <input-with-labels
+              id="lastName"
+              v-model="pysPersonData.lastName"
+              label="Ազգանուն"
+              type="text"
+              class="shadow-md rounded-lg p-3"
+            ></input-with-labels>
+            <input-with-labels
+              id="phone"
+              v-model="pysPersonData.phone"
+              type="phone"
+              label="Հեռախոս"
+              class="shadow-md rounded-lg p-3"
+            ></input-with-labels>
+            <input-with-labels
+              id="secondPhone"
+              v-model="pysPersonData.secondPhone"
+              type="phone"
+              label="Երկրորդ Հեռախոս"
+              class="shadow-md rounded-lg p-3"
+            ></input-with-labels>
+            <input-with-labels
+              id="address"
+              v-model="pysPersonData.address"
+              type="text"
+              label="Հասցե"
+              class="shadow-md rounded-lg p-3"
+            ></input-with-labels>
+            <input-with-labels
+              id="address"
+              v-model="pysPersonData.userEmail"
+              type="email"
+              label="Էլ․ փոստ"
+              class="shadow-md rounded-lg p-3"
+            ></input-with-labels>
+          </div>
+          <button
+            class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            @click="addNewClient"
+          >
+            Ստեղծել նոր հաճախորդ
+          </button>
+        </div>
+        <div v-if="isLegalEntity" class="grid grid-cols-2 gap-4 float-left">
+          <!-- Additional fields for legal entity -->
           <input-with-labels
             id="name"
             v-model="pysPersonData.name"
@@ -99,7 +152,7 @@
           ></input-with-labels>
           <input-with-labels
             id="lastName"
-            v-model="pysPersonData.lastName"
+            v-model="pysPersonData.last_name"
             label="Ազգանուն"
             type="text"
             class="shadow-md rounded-lg p-3"
@@ -107,49 +160,73 @@
           <input-with-labels
             id="phone"
             v-model="pysPersonData.phone"
-            type="phone"
             label="Հեռախոս"
+            type="phone"
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
           <input-with-labels
-            id="secondPhone"
+            id="nextPhone"
             v-model="pysPersonData.secondPhone"
-            type="phone"
-            label="Երկրորդ Հեռախոս"
+            label="Այլ հեռախոս"
+            type="text"
+            class="shadow-md rounded-lg p-3"
+          ></input-with-labels>
+          <input-with-labels
+            id="userEmail"
+            v-model="pysPersonData.userEmail"
+            label="Էլ․ փոստ"
+            type="text"
+            class="shadow-md rounded-lg p-3"
+          ></input-with-labels>
+          <input-with-labels
+            id="passportNumber"
+            v-model="pysPersonData.passportNumber"
+            label="Անձնագրի համար"
+            type="text"
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
           <input-with-labels
             id="address"
-            v-model="pysPersonData.address"
-            type="text"
+            v-model="pysPersonData.legal_address"
             label="Հասցե"
+            type="text"
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
+          <input-with-labels
+            id="companyName"
+            v-model="pysPersonData.company_name"
+            label="Կազմակերպության հասցե"
+            type="text"
+            class="shadow-md rounded-lg p-3"
+          ></input-with-labels>
+          <input-with-labels
+            id="avc"
+            v-model="pysPersonData.AVC"
+            label="ՀՎՀՀ"
+            type="text"
+            class="shadow-md rounded-lg p-3"
+          ></input-with-labels>
+          <input-with-labels
+            id="accountant"
+            v-model="pysPersonData.accountant"
+            label="Հաշվապահ"
+            type="text"
+            class="shadow-md rounded-lg p-3"
+          ></input-with-labels>
+          <button
+            class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            @click="addNewClient"
+          >
+            Ստեղծել նոր հաճախորդ
+          </button>
         </div>
-        <button
-          class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          @click="addNewClient"
-        >
-          Ստեղծել նոր հաճախորդ
-        </button>
       </div>
-
-      <div v-if="isLegalEntity" class="grid grid-cols-2 gap-4 float-left">
-        <!-- Additional fields for legal entity -->
-        <button
-          class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          @click="addNewClient"
-        >
-          Ստեղծել նոր հաճախորդ
-        </button>
-      </div>
-    </div>
     <notifications />
   </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 
 export default {
@@ -160,32 +237,19 @@ export default {
     return {
       personType: '',
       openPersonsType: false,
+      openUsers: false,
       pysPersonData: {
         name: '',
         lastName: '',
         phone: '',
         secondPhone: '',
         address: '',
-      },
-      client: {
-        name: '',
-        number: '',
+        userEmail: '',
+        company_name: '',
         AVC: '',
-        group: '',
-        VAT_payer: false,
+        accountant: '',
         legal_address: '',
-        valid_address: '',
-        VAT_of_the_manager: '',
-        leadership_position: '',
-        accountants_VAT: '',
-        accountant_position: '',
-        registration_of_the_individual: '',
-        type_of_ID_card: '',
-        passport_number: '',
-        contract: '',
-        contract_date: '',
-        sales_discount_percentage: '',
-        email_address: '',
+        passportNumber: '',
       },
     }
   },
@@ -196,11 +260,54 @@ export default {
     isLegalEntity() {
       return this.personType === 'legalEntity'
     },
+    ...mapGetters('users', ['getUsers']),
+    users() {
+      return this.getUsers
+    }
+  },
+  mounted() {
+    this.fetchUsers()
   },
   methods: {
     ...mapActions('clients', ['addClient']),
-    addNewClient() {
-      console.log(this.physPerson, 'person')
+    ...mapActions('users', ['fetchUsers']),
+    selectUser(user) {
+      this.pysPersonData.userEmail = user.email
+      this.pysPersonData.user_id = user.id
+    },
+    async addNewClient() {
+      let clientData;
+      if (this.isPhysPerson) {
+        clientData = {
+          user_id: this.pysPersonData.user_id,
+          type: 'physPerson',
+          name: this.pysPersonData.name,
+          last_name: this.pysPersonData.lastName,
+          phone: this.pysPersonData.phone,
+          second_phone: this.pysPersonData.secondPhone,
+          address: this.pysPersonData.address,
+        };
+      } else if (this.isLegalEntity) {
+        // eslint-disable-next-line no-unused-vars
+        clientData = {
+          user_id: this.pysPersonData.user_id,
+          type: 'legalEntity',
+          name: this.pysPersonData.name,
+          phone: this.pysPersonData.phone,
+          secondPhone: this.pysPersonData.secondPhone,
+          address: this.pysPersonData.legal_address,
+          passport_number: this.pysPersonData.passportNumber,
+          company_name: this.pysPersonData.company_name,
+          AVC: this.pysPersonData.AVC,
+          accountant: this.pysPersonData.accountant,
+        };
+      }
+      try {
+        await this.addClient(clientData);
+        this.$notify({ type: 'success', text: 'Հաճախորդը հաջողությամբ ստեղծվել է' });
+      } catch (error) {
+        this.$notify({ type: 'error', text: 'Սխալ է տեղի ունեցել հաճախորդի ստեղծման ժամանակ' });
+      }
     },
   },
 }

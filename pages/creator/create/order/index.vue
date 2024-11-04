@@ -165,7 +165,6 @@ export default {
         if (allowedTypes.includes(selectedFiles[i].type)) {
           this.selectedFiles.push(selectedFiles[i])
         } else {
-          console.error(`Invalid file type: ${selectedFiles[i].name}`)
           this.$notify({
             text: `File type not allowed: ${selectedFiles[i].name}`,
             duration: 3000,
