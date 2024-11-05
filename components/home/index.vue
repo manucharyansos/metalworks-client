@@ -184,9 +184,9 @@
           class="flex flex-col lg:flex-row items-center justify-between w-5/6"
         >
           <div
-            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[650px] xl:h-[550px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            class="grid grid-cols-1 md:grid-col-2 items-center justify-center w-full mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
           >
-            <div class="p-6">
+            <div class="p-6 mx-auto">
               <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
             </div>
             <div
@@ -209,9 +209,9 @@
             </div>
           </div>
           <div
-            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[650px] xl:h-[550px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            class="grid grid-cols-1 md:grid-col-2 items-center justify-center w-full mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
           >
-            <div class="p-6">
+            <div class="p-6 mx-auto">
               <img class="rounded-t-lg" src="/quote-277x300.webp" alt="" />
             </div>
             <div
@@ -231,9 +231,9 @@
             </div>
           </div>
           <div
-            class="flex flex-row lg:flex-col items-center justify-center w-full h-full 2xl:h-[650px] xl:h-[550px] lg:h-[474px] mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+            class="grid grid-cols-1 md:grid-col-2 items-center justify-center w-full mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
           >
-            <div class="p-6">
+            <div class="p-6 mx-auto">
               <img
                 class="rounded-t-lg"
                 src="/larger-package-277x300.webp"
@@ -270,7 +270,7 @@
         >
           <span class="text-red-600">165+</span> նյութեր պահեստում
         </h3>
-        <div class="flex flex-wrap items-center justify-center my-10 w-5/6">
+        <div v-if="categories.length > 0" class="flex flex-wrap items-center justify-center my-10 w-5/6">
           <nuxt-link
             exact-active-class="active-link"
             to="/"
@@ -326,7 +326,7 @@
             Կռում, փոշի ծածկույթ, PEM սարքավորում և այլն
           </h2>
           <p
-            class="md:text-xl text-lg text-neutral-700 text-center italic font-sans my-12"
+            class="md:text-xl text-lg text-neutral-700 text-center italic font-sans my-12 px-12"
           >
             Այն չի ավարտվում լազերային կտրված մասերով: Մենք առաջարկում ենք մի
             շարք հետմշակման ծառայություններ:

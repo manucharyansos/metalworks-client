@@ -46,7 +46,7 @@
       />
       <div class="sm:flex sm:items-center sm:justify-between">
         <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400"
-          >© 2023 <a href="/" class="hover:underline">Metalwork's™</a>. All
+          >© 2024 <a href="/" class="hover:underline">Metalwork's™</a>. All
           Բոլոր իրավունքները պաշտպանված են:
         </span>
         <div class="flex mt-4 sm:justify-center sm:mt-0">
