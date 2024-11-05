@@ -136,7 +136,7 @@
           </div>
           <button
             class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            @click="addNewClient"
+            @click="createOrUpdateUser"
           >
             Ստեղծել նոր հաճախորդ
           </button>
@@ -152,7 +152,7 @@
           ></input-with-labels>
           <input-with-labels
             id="lastName"
-            v-model="pysPersonData.last_name"
+            v-model="pysPersonData.lastName"
             label="Ազգանուն"
             type="text"
             class="shadow-md rounded-lg p-3"
@@ -215,7 +215,7 @@
           ></input-with-labels>
           <button
             class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            @click="addNewClient"
+            @click="createOrUpdateUser"
           >
             Ստեղծել նոր հաճախորդ
           </button>
@@ -238,6 +238,7 @@ export default {
       personType: '',
       openPersonsType: false,
       openUsers: false,
+      id: '',
       pysPersonData: {
         name: '',
         lastName: '',
@@ -270,15 +271,17 @@ export default {
   },
   methods: {
     ...mapActions('clients', ['addClient']),
-    ...mapActions('users', ['fetchUsers']),
+    ...mapActions('users', ['fetchUsers', 'updateUser']),
     selectUser(user) {
       this.pysPersonData.userEmail = user.email
+      this.pysPersonData.name = user.name
       this.pysPersonData.user_id = user.id
+      this.id = user.id
     },
-    async addNewClient() {
-      let clientData;
+    async createOrUpdateUser() {
+      let userData;
       if (this.isPhysPerson) {
-        clientData = {
+        userData = {
           user_id: this.pysPersonData.user_id,
           type: 'physPerson',
           name: this.pysPersonData.name,
@@ -289,10 +292,11 @@ export default {
         };
       } else if (this.isLegalEntity) {
         // eslint-disable-next-line no-unused-vars
-        clientData = {
+        userData = {
           user_id: this.pysPersonData.user_id,
           type: 'legalEntity',
           name: this.pysPersonData.name,
+          last_name: this.pysPersonData.lastName,
           phone: this.pysPersonData.phone,
           secondPhone: this.pysPersonData.secondPhone,
           address: this.pysPersonData.legal_address,
@@ -303,7 +307,7 @@ export default {
         };
       }
       try {
-        await this.addClient(clientData);
+        await this.updateUser({ id: this.id, userData });
         this.$notify({ type: 'success', text: 'Հաճախորդը հաջողությամբ ստեղծվել է' });
       } catch (error) {
         this.$notify({ type: 'error', text: 'Սխալ է տեղի ունեցել հաճախորդի ստեղծման ժամանակ' });
