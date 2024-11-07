@@ -10,15 +10,15 @@ export default {
       { name: 'csrf-token', content: '{{ csrf_token() }}' },
       {
         rel: 'icon',
-        type: 'image/png',
-        href: '~/WhatsApp Image 2024-08-24 at 13.01.26_24d3ab90.jpg',
+        type: 'image/ico',
+        href: '~/favico.ico',
       },
     ],
     link: [
       {
         rel: 'icon',
-        type: 'image/png',
-        href: '/WhatsApp Image 2024-08-24 at 13.01.26_24d3ab90.jpg',
+        type: 'image/ico',
+        href: '~/favico.ico',
       },
     ],
   },
