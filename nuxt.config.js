@@ -10,15 +10,15 @@ export default {
       { name: 'csrf-token', content: '{{ csrf_token() }}' },
       {
         rel: 'icon',
-        type: 'image/ico',
-        href: '~/favico.ico',
+        type: 'image/x-icon',
+        href: '/favicon.ico',
       },
     ],
     link: [
       {
         rel: 'icon',
-        type: 'image/ico',
-        href: '~/favico.ico',
+        type: 'image/x-icon',
+        href: '/favicon.ico',
       },
     ],
   },
