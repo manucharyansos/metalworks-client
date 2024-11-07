@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto py-24 px-6">
     <h1 class="text-5xl font-sans italic text-center mb-12 text-gray-800">
-      Մեր Ծառայությունները
+      Մեր Ծառ...
     </h1>
 
     <div
