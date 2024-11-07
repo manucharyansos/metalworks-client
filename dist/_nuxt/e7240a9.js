@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[34],{418:function(t,e,n){"use strict";n.r(e);var c={auth:"guest"},r=n(9),component=Object(r.a)(c,(function(){this._self._c;return this._m(0)}),[function(){var t=this._self._c;return t("div",[t("h1",[this._v("Resources")])])}],!1,null,"e70bcc20",null);e.default=component.exports}}]);
