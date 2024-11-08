@@ -281,7 +281,9 @@ export default {
       this.scrollX = window.innerWidth
     },
     closeNav() {
-      this.openNavbar = false
+      if (this.scrollX < 1024) {
+        this.openNavbar = false
+      }
     }
   },
 }
