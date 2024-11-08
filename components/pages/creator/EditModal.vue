@@ -101,7 +101,7 @@ export default {
   },
   methods: {
     getFileUrl(filePath) {
-      return `${'http://localhost:8000'}/storage/${filePath}`
+      return `${'https://api.metalworks.am'}/storage/${filePath}`
     },
   },
 }

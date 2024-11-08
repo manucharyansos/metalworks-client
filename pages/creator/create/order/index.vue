@@ -130,7 +130,7 @@ export default {
         quantity: '',
         name: '',
         store_link: {
-          url: 'http://localhost:3000',
+          url: 'https://api.metalworks.am',
         },
       },
       scrollX: 0,

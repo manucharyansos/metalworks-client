@@ -297,7 +297,7 @@ export default {
       this.getOrder.files = Array.from(event.target.files)
     },
     getFileUrl(filePath) {
-      return `${'http://localhost:8000'}/storage/${filePath}`
+      return `${'https://api.metalworks.am'}/storage/${filePath}`
     },
     deleteFile(index) {
       this.getOrder.files.splice(index, 1)
