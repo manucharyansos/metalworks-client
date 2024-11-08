@@ -14,10 +14,10 @@
           </h2>
 
           <div
-            class="flex flex-wrap lg:flex-nowrap items-center justify-center mx-auto z-10 w-full my-12"
+            class="flex flex-wrap lg:flex-nowrap sm:items-center justify-center items-start mx-auto z-10 w-full my-12"
           >
             <p
-              class="lg:text-xl text-lg font-mono italic flex items-center justify-center font-bold w-full"
+              class="lg:text-xl text-base font-mono italic flex items-center justify-center font-bold w-full"
             >
               <svg
                 id="Layer_1"
@@ -36,7 +36,7 @@
               Նվազագույն քանակ չկա
             </p>
             <p
-              class="lg:text-xl text-lg font-mono italic flex items-center justify-center font-bold w-full my-2 lg:my-12"
+              class="lg:text-xl text-base font-mono italic flex items-center justify-center font-bold w-full my-2 lg:my-12"
             >
               <svg
                 id="Layer_1"
@@ -71,7 +71,7 @@
               >Առաքում
             </p>
             <p
-              class="lg:text-xl text-lg font-mono italic flex items-center justify-center font-bold w-full my-2 lg:my-12"
+              class="lg:text-xl text-base font-mono italic flex items-center justify-center font-bold w-full my-2 lg:my-12"
             >
               <svg
                 id="Layer_1"
@@ -241,7 +241,7 @@
         >
           <span class="text-red-600">165+</span> նյութեր պահեստում
         </h3>
-        <div v-if="categories.length > 0" class="flex flex-wrap items-center justify-center my-10 w-5/6">
+        <div v-if="categories.length > 0" class="flex flex-row flex-wrap items-center justify-center my-10 w-5/6">
           <nuxt-link
             exact-active-class="active-link"
             to="/"
@@ -369,52 +369,67 @@
           </div>
           <div class="md:flex hidden items-center justify-between">
             <!--            images-->
-            <div
+            <template
               v-if="isPrecisionCutting"
-              class="w-full h-full flex items-center justify-center"
             >
-              <img src="/materials/cut-home-img.webp" alt="" />
-            </div>
-            <div
+              <div
+                class="w-full h-full flex items-center justify-center">
+                <img src="/materials/cut-home-img.webp" alt="" />
+              </div>
+
+            </template>
+            <template
               v-if="isBending"
-              class="w-full h-full flex flex-col items-center justify-between"
             >
-              <img src="/materials/bend-home-img-1.webp" alt="" />
+              <div
+                class="w-full h-full flex flex-col items-center justify-center">
+                <img src="/materials/bend-home-img-1.webp" alt="" />
+              </div>
               <div>
                 <h2>CNC կռում և ձևավորում</h2>
-                <p>Available for 9 metals and 1 plastic</p>
+                <p>Հասանելի է 9 մետաղի և 1 պլաստիկի համար</p>
               </div>
-            </div>
-            <div
-              v-if="isPowderCoating"
-              class="w-full h-full flex items-center justify-center"
-            >
-              <img src="/materials/pow-home-img-1.webp" alt="" />
-            </div>
-            <div
-              v-if="isDimpleForming"
-              class="w-full h-full flex items-center justify-center"
-            >
-              <img src="/materials/dimple-home-img-1.jpg" alt="" />
-            </div>
-            <div
-              v-if="isHdwInserting"
-              class="w-full h-full flex items-center justify-center"
-            >
-              <img src="/materials/hdw-home-img-2.webp" alt="" />
-            </div>
-            <div
-              v-if="isAnodizing"
-              class="w-full h-full flex items-center justify-center"
-            >
-              <img src="/materials/ano-home-img-1.webp" alt="" />
-            </div>
-            <div
-              v-if="isTapping"
-              class="w-full h-full flex items-center justify-center"
-            >
-              <img src="/materials/tap-home-img-2.webp" alt="" />
-            </div>
+            </template>
+            <template
+              v-if="isPowderCoating">
+              <div
+                class="w-full h-full flex items-center justify-center"
+              >
+                <img src="/materials/pow-home-img-1.webp" alt="" />
+              </div>
+            </template>
+            <template
+              v-if="isDimpleForming">
+              <div
+                class="w-full h-full flex items-center justify-center"
+              >
+                <img src="/materials/dimple-home-img-1.jpg" alt="" />
+              </div>
+            </template>
+            <template
+              v-if="isHdwInserting">
+              <div
+                class="w-full h-full flex items-center justify-center"
+              >
+                <img src="/materials/hdw-home-img-2.webp" alt="" />
+              </div>
+            </template>
+            <template
+              v-if="isAnodizing">
+              <div
+                class="w-full h-full flex items-center justify-center"
+              >
+                <img src="/materials/ano-home-img-1.webp" alt="" />
+              </div>
+            </template>
+            <template
+              v-if="isTapping">
+              <div
+                class="w-full h-full flex items-center justify-center"
+              >
+                <img src="/materials/tap-home-img-2.webp" alt="" />
+              </div>
+            </template>
           </div>
         </div>
       </div>
