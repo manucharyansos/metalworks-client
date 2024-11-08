@@ -1,6 +1,6 @@
 <template>
-  <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8 mt-28">
-    <div class="flex items-center justify-between my-8">
+  <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8 mt-12">
+    <div class="flex md:flex-row flex-col items-center justify-between my-8">
       <div
         class="flex flex-col items-start justify-start text-neutral-600 leading-loose p-4 font-serif italic"
       >
