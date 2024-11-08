@@ -33,7 +33,7 @@
                   d="M63.6,34.6c0.3-0.4,0.4-0.9,0.4-1.4c0-0.5-0.1-1-0.4-1.4l0.1-0.1l-0.3-0.2c-0.2-0.3-0.5-0.6-0.9-0.7l-5.4-4.6l5.3-2.8 c0.5-0.3,0.9-0.7,1.1-1.1c0.3-0.5,0.4-0.9,0.4-1.4c0-0.6-0.1-1.1-0.4-1.5c-0.3-0.5-0.7-0.8-1.1-0.9L47.1,10 c-2.5-5.6-8.1-9.5-14.7-9.5c-6.5,0-12.1,3.9-14.6,9.4l-16.1,9c-0.5,0.2-0.9,0.6-1.1,1.1c-0.3,0.5-0.4,1-0.4,1.5 c0,0.6,0.1,1.1,0.4,1.5c0.3,0.5,0.7,0.8,1.1,0.9L7,26.7l-6,5c0,0,0,0,0,0l0,0l0,0c-0.2,0.2-0.3,0.4-0.5,0.6c-0.3,0.5-0.4,1-0.4,1.5 c0,0.6,0.1,1.1,0.4,1.5c0.3,0.4,0.7,0.8,1.1,1L7,39l-5.8,4.8l0,0c-0.3,0.3-0.5,0.5-0.7,0.8c-0.3,0.5-0.4,0.9-0.4,1.4 c0,0.6,0.1,1.1,0.4,1.6c0.3,0.4,0.7,0.8,1.1,1l28.1,14.5c0.4,0.2,0.7,0.4,1.1,0.5c0.4,0.1,0.8,0.2,1.2,0.2c0.4,0,0.8-0.1,1.2-0.2 c0.4-0.1,0.8-0.3,1.1-0.5l28.1-15.1c0.5-0.2,0.9-0.5,1.1-0.9c0.3-0.5,0.4-1,0.4-1.5c0-0.6-0.1-1.1-0.4-1.6c0,0-0.1-0.1-0.1-0.1 l0-0.1l-0.4-0.3c-0.1-0.1-0.1-0.1-0.2-0.2l-5.8-4.8l5.2-2.8C62.9,35.4,63.3,35,63.6,34.6z M25,18.8c-1.3,0-2.3-1-2.3-2.3 s1-2.3,2.3-2.3h5.1v-5c0-1.3,1-2.3,2.3-2.3c1.3,0,2.3,1,2.3,2.3v5.1h5.1c1.3,0,2.3,1,2.3,2.3c-0.1,1.2-1.1,2.2-2.3,2.2h-5.1v5.2 c0,1.3-1,2.3-2.3,2.3c-1.3,0-2.3-1-2.3-2.3v-5.2H25z M2.1,21.8c0-0.2-0.1-0.3-0.1-0.4c0-0.1,0-0.3,0.1-0.4c0-0.2,0.2-0.3,0.5-0.5 l14.2-7.9c-0.3,1.3-0.5,2.6-0.5,4c0,8.9,7.2,16.1,16.1,16.1c8.9,0,16.1-7.2,16.1-16.1c0-1.4-0.2-2.7-0.5-3.9l13.5,7.2 c0.3,0.2,0.5,0.4,0.5,0.6c0,0.2,0.1,0.3,0.1,0.4c0,0.1,0,0.3-0.1,0.4c0,0.2-0.2,0.3-0.5,0.5L33.4,36.9c-0.2,0.1-0.4,0.2-0.6,0.2 c-0.3,0.1-0.5,0.1-0.7,0.1s-0.4,0-0.7-0.1c-0.3-0.1-0.5-0.2-0.6-0.2L2.7,22.2C2.3,22.1,2.2,21.9,2.1,21.8z M61.3,44.6 c0,0.1,0.1,0.1,0.1,0.2c0.2,0.1,0.4,0.2,0.5,0.5c0.1,0.2,0.2,0.4,0.2,0.5c0,0.1,0,0.2-0.1,0.4c0,0.2-0.2,0.4-0.5,0.6L33.4,61.9 C33,62,32.6,62.1,32,62.1c-0.5,0-1-0.1-1.3-0.2L2.7,47.1c-0.3-0.2-0.5-0.3-0.5-0.5c0-0.2-0.1-0.3-0.1-0.5c0-0.1,0-0.2,0.1-0.4 c0-0.1,0.2-0.3,0.3-0.4l0,0L8.9,40l20.9,10.8c0.4,0.2,0.7,0.4,1.1,0.5c0.4,0.1,0.8,0.2,1.2,0.2c0.4,0,0.8,0,1.2-0.2 c0.4-0.1,0.8-0.3,1.1-0.5l20.9-11.2L61.3,44.6z M62,33.6c0,0.2-0.2,0.4-0.5,0.6L33.4,49.3c-0.4,0.2-0.8,0.2-1.3,0.2 c-0.5,0-1-0.1-1.3-0.2L2.7,34.5c-0.3-0.1-0.5-0.2-0.5-0.4c0-0.2-0.1-0.3-0.1-0.4c0-0.1,0-0.3,0.1-0.5c0-0.1,0.1-0.1,0.1-0.2l0.1,0.1 l6.6-5.6l20.8,10.8c0.4,0.2,0.7,0.4,1.1,0.5C31.3,39,31.6,39,32,39c0.4,0,0.8,0,1.2-0.2c0.4-0.1,0.8-0.3,1.1-0.5l20.9-11.2l6.8,5.7 c0,0.1,0,0.2,0,0.3C62,33.3,62,33.4,62,33.6z"
                 ></path>
               </svg>
-              Նվազագույն քանակ չկան
+              Նվազագույն քանակ չկա
             </p>
             <p
               class="lg:text-xl text-lg font-mono italic flex items-center justify-center font-bold w-full my-2 lg:my-12"
@@ -180,85 +180,56 @@
         >
           Վերբեռնումից մինչև գնում հաշված րոպեների ընթացքում
         </p>
-        <div
-          class="flex flex-col lg:flex-row items-center justify-between w-5/6"
-        >
-          <div
-            class="grid grid-cols-1 md:grid-col-2 items-center justify-center w-full mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-          >
+        <div class="flex flex-col lg:flex-row items-stretch justify-between w-5/6 space-y-5 lg:space-y-0 lg:space-x-5">
+          <div class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
             <div class="p-6 mx-auto">
               <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
             </div>
-            <div
-              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light"
-            >
-              <p
-                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
-              >
+            <div class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center">
+              <p class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white">
                 Վերբեռնեք ձեր
                 <span class="underline decoration-dotted">CAD ֆայլ</span>
               </p>
-              <p
-                class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
-              >
+              <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light">
                 CAD չկա՞ Անհատականացրեք ձեր ձևանմուշը՝ օգտագործելով մեր
-                <span class="font-bold">Մասերի կառուցող</span>, կամ ուղարկել
-                էսքիզ մեր
+                <span class="font-bold">Մասերի կառուցող</span>, կամ ուղարկել էսքիզ մեր
                 <span class="font-bold">Դիզայնի ծառայություններ</span> թիմին։
               </p>
             </div>
           </div>
-          <div
-            class="grid grid-cols-1 md:grid-col-2 items-center justify-center w-full mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-          >
+
+          <div class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
             <div class="p-6 mx-auto">
               <img class="rounded-t-lg" src="/quote-277x300.webp" alt="" />
             </div>
-            <div
-              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light"
-            >
-              <p
-                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
-              >
+            <div class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center">
+              <p class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white">
                 Ստացեք ակնթարթային գներ
               </p>
-              <p
-                class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
-              >
-                Գները սկսվում են $39-ից պակասից։
-                <span class="font-bold"> Ունենք առաքում</span>
+              <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light">
+                Գները սկսվում են $39-ից պակասից։ <span class="font-bold">Ունենք առաքում</span>
               </p>
             </div>
           </div>
-          <div
-            class="grid grid-cols-1 md:grid-col-2 items-center justify-center w-full mx-5 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-          >
+
+          <div class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
             <div class="p-6 mx-auto">
-              <img
-                class="rounded-t-lg"
-                src="/larger-package-277x300.webp"
-                alt=""
-              />
+              <img class="rounded-t-lg" src="/larger-package-277x300.webp" alt="" />
             </div>
-            <div
-              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light"
-            >
-              <p
-                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
-              >
+            <div class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center">
+              <p class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white">
                 Պահեստամասերը ձեր դռան մոտ օրերի ընթացքում
               </p>
-              <p
-                class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
-              >
+              <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light">
                 Ստանդարտ լազերային կտրման պատվերները դուրս են գալիս
                 <span class="font-bold">2-4 օրվա ընթացքում:</span>. Սպասվում է
                 <span class="font-bold">1-3 օր առաքում</span>
-                1-3 օրվա առաքում Հայաստանի ցանկացած վայր
+                Հայաստանի ցանկացած վայր
               </p>
             </div>
           </div>
         </div>
+
       </div>
 
       <!--      Materials -->

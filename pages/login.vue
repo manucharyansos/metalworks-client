@@ -31,7 +31,7 @@
       <div
         class="flex flex-col items-center justify-center dark:bg-gray-800 mx-auto md:p-7 p-4 w-full md:w-1/2 md:order-1 order-2"
       >
-        <h2 class="text-black font-bold text-2xl md:text-3xl">Login</h2>
+        <h2 class="text-black font-bold text-2xl md:text-3xl">Մուտք գործել</h2>
 
         <!-- Email Input -->
         <div class="md:mb-6 mb-4 w-full">
@@ -42,14 +42,14 @@
               name="email"
               placeholder=" "
               :class="{ active: fieldEmail }"
-              label="Email Address"
+              label="Էլ․ փոստ"
               label_-id="email-label"
               for_-l-abel="email-label"
             />
           </div>
           <template v-if="fieldEmail">
             <p class="text-red-500 text-xs italic">
-              Please choose an email address.
+              Խնդրում ենք մուտքագրեկ էլփոստի հասցե:
             </p>
           </template>
         </div>
@@ -69,7 +69,7 @@
             />
           </div>
           <template v-if="fieldPassword">
-            <p class="text-red-500 text-xs italic">Please choose a password.</p>
+            <p class="text-red-500 text-xs italic">Խնդրում ենք մուտքագրեկ գաղտնաբառ:</p>
           </template>
           <template>
             <p v-if="errors" class="text-red-500 text-xs italic">
@@ -85,7 +85,7 @@
             class="w-full bg-red-600 rounded-2xl hover:bg-red-800 text-white font-bold py-2 px-4 md:my-8 my-4 focus:outline-none focus:shadow-outline"
             @click="login"
           >
-            Sign In
+            Մուտք գործեք
           </button>
           <button
             v-if="loading"
@@ -108,19 +108,19 @@
                 fill="#1C64F2"
               />
             </svg>
-            Loading...
+            Բեռնվում է...
           </button>
           <div class="flex flex-col items-center justify-center md:mt-4 mt-2">
             <span
               class="font-roboto text-lg m-2 md:mt-4 mt-2 text-gray-800 font-mono dark:text-indigo-50"
             >
-              Don’t have an account yet?
+              Դեռ չունե՞ք հաշիվ:
             </span>
             <nuxt-link
               to="/register"
               class="text-xl font-bold font-sans italic m-2 text-cyan-800 dark:text-indigo-300"
             >
-              Sign up
+              Գրանցվեք
             </nuxt-link>
           </div>
         </div>
@@ -163,9 +163,8 @@ export default {
   layout: 'authLayout',
   data() {
     return {
-      email: 'creator@example.com',
-      password: 'password',
-      middleware: 'redirectIfAuthenticated',
+      email: '',
+      password: '',
       fieldEmail: false,
       fieldPassword: false,
       errorMessage: {
@@ -183,52 +182,46 @@ export default {
   },
   watch: {
     email(val) {
-      if (val) {
-        this.fieldEmail = false
-      }
+      this.fieldEmail = !val;
+      this.errorMessage.email = val ? '' : "Էլ․ հասցեն պարտադիր է։";
     },
     password(val) {
-      if (`${val.length}` >= 6) {
-        this.fieldPassword = false
-      }
+      this.fieldPassword = val.length < 6;
+      this.errorMessage.password = val.length >= 6 ? '' : 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ:';
     },
   },
   methods: {
     ...mapActions('authCustom', ['loginUser']),
     async login() {
-      this.loading = true
+      this.loading = true;
       try {
-        if (this.email && this.password) {
+        if (this.email && this.password.length >= 6) {
           const response = await this.loginUser({
             data: {
               email: this.email,
               password: this.password,
             },
-          })
+          });
 
           if (response) {
-            this.email = ''
-            this.password = ''
+            this.email = '';
+            this.password = '';
           } else {
-            this.errorMessage = this.getErrorMessages
+            this.errorMessage = this.getErrorMessages;
           }
         } else {
-          if (!this.email) {
-            this.fieldEmail = true
-          }
-
-          if (!this.password) {
-            this.fieldPassword = true
-          }
+          this.fieldEmail = !this.email;
+          this.fieldPassword = this.password.length < 6;
         }
       } catch (error) {
-        this.errorMessage = 'An error occurred during login. Please try again.'
+        this.errorMessage.general = 'Մուտք գործելու ժամանակ սխալ է տեղի ունեցել: Խնդրում ենք կրկին փորձել:';
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
   },
 }
+
 </script>
 
 <style scoped>
