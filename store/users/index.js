@@ -20,7 +20,7 @@ export const actions = {
   },
   async updateUser({ commit }, data) {
     try {
-      await this.$axios.$put(`api/users/${data.id}`, data.userData)
+      await this.$axios.$put(`api/clients/client/${data.id}`, data.userData)
       // commit('setUsers', user.data)
       return true
     } catch (err) {
