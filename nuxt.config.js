@@ -97,7 +97,7 @@ export default {
   },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: 'https://api.metalworks.am/',
+    baseURL: 'https://api.metalworks.am',
     credentials: true,
   },
 
