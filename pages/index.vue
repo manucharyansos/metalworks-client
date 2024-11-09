@@ -24,7 +24,7 @@ export default {
     },
   },
   mounted() {
-    this.fetchServices()
+    // this.fetchServices()
   },
   methods: {
     ...mapActions('services', ['fetchServices']),
