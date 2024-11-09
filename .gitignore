@@ -43,7 +43,7 @@ typings/
 
 # Optional npm cache directory
 .npm
-nuxt.config.js
+#nuxt.config.js
 # Optional eslint cache
 .eslintcache
 
