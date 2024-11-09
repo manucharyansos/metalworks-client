@@ -8,7 +8,7 @@
         <div class="flex items-center justify-center">
           <img
             class="size-28 rounded-t-lg md:rounded-lg"
-            src="alyumin.jpg"
+            src="/alyumin.jpg"
             alt=""
           />
         </div>
@@ -30,7 +30,7 @@
         <div class="flex items-center justify-center">
           <img
             class="size-28 rounded-t-lg md:rounded-lg"
-            src="Без%20названия.png"
+            src="/Без%20названия.png"
             alt=""
           />
         </div>
@@ -54,7 +54,7 @@
         <div class="flex items-center justify-center">
           <img
             class="size-28 rounded-t-lg md:rounded-lg"
-            src="orders.png"
+            src="/orders.png"
             alt=""
           />
         </div>
