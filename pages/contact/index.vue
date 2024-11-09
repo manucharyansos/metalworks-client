@@ -62,7 +62,7 @@
           <h2 class="text-xl font-semibold mb-4">Կոնտակտային տվյալներ</h2>
           <div>
             <p class="mb-2"><strong>Էլ փոստ:</strong> info@metalworks.am</p>
-            <p class="mb-2"><strong>Հեռախոս:</strong> 098 025 044</p>
+            <a href="tel:+37498025044" class="mb-2"><strong>Հեռախոս:</strong> 098 025 044</a>
             <p class="mb-2"><strong>Հասցե:</strong> Ռաֆֆու 111</p>
             <h3 class="text-lg font-semibold mt-4">Հետևեկ մեզ</h3>
             <div class="flex space-x-4 mt-2">
