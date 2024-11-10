@@ -20,11 +20,7 @@ export const getters = {
 export const actions = {
   async fetchUser({ commit }) {
     try {
-      const res = await this.$axios.get('/api/me', {
-        headers: {
-          Accept: 'application/json',
-        },
-      })
+      const res = await this.$axios.get('/api/user')
       commit('setUser', res.data)
     } catch (error) {
       commit('setError', error.response.data)
