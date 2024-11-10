@@ -49,7 +49,7 @@ export default {
         endpoints: {
           login: { url: '/api/login', method: 'post' },
           logout: { url: '/api/logout', method: 'post' },
-          user: { url: '/me', method: 'get' },
+          user: { url: '/api/me', method: 'get' },
         },
         redirect: {
           login: '/login',
