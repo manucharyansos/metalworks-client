@@ -17,7 +17,7 @@ export default {
       { property: 'og:type', content: 'website' },
       { property: 'og:title', content: 'Metalworks - Փորձագիտական մետաղների պատրաստում Հայաստանում' },
       { property: 'og:description', content: 'Մետաղագործության պրոֆեսիոնալ ծառայություններ Հայաստանում՝ մասնագիտացված լազերային եռակցման, փոշու ծածկույթի և ծռման մեջ։\n' },
-      { property: 'og:url', content: 'ttps://www.facebook.com/people/Metal-Works/61558844766402/' },
+      { property: 'og:url', content: 'https://www.facebook.com/people/Metal-Works/61558844766402/' },
       { property: 'og:type', content: 'website' },
       {
         rel: 'icon',

@@ -1,9 +1,14 @@
-export default function ({ app, redirect, route, next }) {
+export default function ({ app, redirect, route }) {
   if (!app.$auth.loggedIn) {
     if (route.name !== 'login' && route.name !== 'register') {
       return redirect('/login');
     }
   } else {
+    if (['contact', 'services'].includes(route.name)) {
+      return;
+    }
+
+    // Role-based redirection for other pages
     const user = app.$auth.user;
     const creatorRole = app.$config.creatorRole;
     const adminRole = app.$config.adminRole;
@@ -13,24 +18,18 @@ export default function ({ app, redirect, route, next }) {
 
     let targetRoute = '/';
 
-    if (route.name === 'contact' || route.name === 'services') {
-      return next;
+    if (userRole === creatorRole) {
+      targetRoute = '/creator';
+    } else if (userRole === adminRole) {
+      targetRoute = '/admin';
+    } else if (userRole === laserRole) {
+      targetRoute = '/factory/laser';
+    } else if (userRole === bendRole) {
+      targetRoute = '/factory/bend';
     }
 
-    if (userRole) {
-      if (userRole === creatorRole) {
-        targetRoute = '/creator';
-      } else if (userRole === adminRole) {
-        targetRoute = '/admin';
-      } else if (userRole === laserRole) {
-        targetRoute = '/factory/laser';
-      } else if (userRole === bendRole) {
-        targetRoute = '/factory/bend';
-      }
-
-      if (route.path !== targetRoute) {
-        return redirect(targetRoute);
-      }
+    if (route.path !== targetRoute) {
+      return redirect(targetRoute);
     }
   }
 }

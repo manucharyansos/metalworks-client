@@ -192,7 +192,7 @@ export default {
   },
   methods: {
     ...mapActions('authCustom', ['loginUser']),
-    async login() {
+    async login({ commit }, userData) {
       this.loading = true;
       try {
         if (this.email && this.password.length >= 6) {
@@ -201,7 +201,7 @@ export default {
               email: this.email,
               password: this.password,
             },
-          });
+          }, userData);
 
           if (response) {
             this.email = '';
