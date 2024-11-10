@@ -1,4 +1,4 @@
-export default function ({ app, redirect, route }) {
+export default function ({ app, redirect, route, next }) {
   if (!app.$auth.loggedIn) {
     if (route.name !== 'login' && route.name !== 'register') {
       return redirect('/login');
@@ -14,7 +14,7 @@ export default function ({ app, redirect, route }) {
     let targetRoute = '/';
 
     if (route.name === 'contact' || route.name === 'services') {
-      return;
+      return next;
     }
 
     if (userRole) {

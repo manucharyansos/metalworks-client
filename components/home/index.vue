@@ -491,7 +491,7 @@ export default {
     },
     getImage(image) {
       if (image) {
-        return `http://127.0.0.1:8000/${image}`
+        return `https://api.metalworks.am/${image}`
       } else {
         return '/download.png'
       }
