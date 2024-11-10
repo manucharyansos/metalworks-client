@@ -206,8 +206,10 @@ export default {
           if (response) {
             this.email = '';
             this.password = '';
+          } else if (typeof this.getErrorMessages === 'string') {
+            this.errorMessage.general = this.getErrorMessages;
           } else {
-            this.errorMessage = this.getErrorMessages;
+            this.errorMessage = { ...this.getErrorMessages };
           }
         } else {
           this.fieldEmail = !this.email;
@@ -220,6 +222,7 @@ export default {
       }
     },
   },
+
 }
 
 </script>

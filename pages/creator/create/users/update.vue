@@ -7,14 +7,20 @@
       <div class="grid grid-cols-2 py-12 mt-12 gap-6">
         <div id="accordion-collapse" data-accordion="collapse">
           <h2 id="accordion-collapse-heading-1">
-            <button type="button" class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3" data-accordion-target="#accordion-collapse-body-1" aria-expanded="true" aria-controls="accordion-collapse-body-1">
+            <button
+              type="button"
+              class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 rounded-t-xl focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
+              data-accordion-target="#accordion-collapse-body-1"
+              aria-expanded="true"
+              aria-controls="accordion-collapse-body-1"
+              @click="isAccordionType = !isAccordionType">
               <span>Կարգավիճակ</span>
               <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
               </svg>
             </button>
           </h2>
-          <div id="accordion-collapse-body-1" class="hidden" aria-labelledby="accordion-collapse-heading-1">
+          <div v-if="isAccordionType" id="accordion-collapse-body-1" :class="{'transition delay-2000': isAccordionType}" aria-labelledby="accordion-collapse-heading-1">
             <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200">
               <li>
                 <div
@@ -67,22 +73,31 @@
             </ul>
           </div>
           <div id="accordion-collapse-heading-2">
-            <button type="button" class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3" data-accordion-target="#accordion-collapse-body-2" aria-expanded="false" aria-controls="accordion-collapse-body-2">
+            <button
+              type="button"
+              class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3"
+              data-accordion-target="#accordion-collapse-body-2"
+              aria-expanded="false"
+              aria-controls="accordion-collapse-body-2"
+              @click="isUserAccordion = !isUserAccordion">
               <span>Օգտատեր</span>
               <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
               </svg>
             </button>
           </div>
-          <div v-if="getUsers" id="accordion-collapse-body-2" class="hidden" aria-labelledby="accordion-collapse-heading-2">
-            <div
-              v-for="(user, index) in users"
-              :key="index"
-              class="p-3 border border-b-0 border-gray-200 dark:border-gray-700 hover:bg-neutral-300 cursor-pointer"
-              @click="selectUser(user)">
-              <p class="text-base italic font-sans leading-3 my-2"><span class="font-bold">Անուն։</span> {{ user.name }},</p>
-              <p class="text-base italic font-sans leading-3 my-2"><span class="font-bold">էլ․ փոստ։ </span> {{ user.email }}</p>
-            </div>
+          <div v-if="isUserAccordion" id="accordion-collapse-body-2" aria-labelledby="accordion-collapse-heading-2">
+            <template v-if="getUsers">
+              <div
+                v-for="(user, index) in users"
+                :key="index"
+                class="p-3 border border-b-0 border-gray-200 dark:border-gray-700 hover:bg-neutral-300 cursor-pointer"
+                @click="selectUser(user)">
+                <p class="text-base italic font-sans leading-3 my-2"><span class="font-bold">Անուն։</span> {{ user.name }},</p>
+                <p class="text-base italic font-sans leading-3 my-2"><span class="font-bold">էլ․ փոստ։ </span> {{ user.email }}</p>
+              </div>
+            </template>
+
           </div>
         </div>
 
@@ -128,7 +143,7 @@
             ></input-with-labels>
             <input-with-labels
               id="address"
-              v-model="pysPersonData.userEmail"
+              v-model="pysPersonData.email"
               type="email"
               label="Էլ․ փոստ"
               class="shadow-md rounded-lg p-3"
@@ -172,8 +187,15 @@
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
           <input-with-labels
+            id="address"
+            v-model="pysPersonData.legal_address"
+            label="Հասցե"
+            type="text"
+            class="shadow-md rounded-lg p-3"
+          ></input-with-labels>
+          <input-with-labels
             id="userEmail"
-            v-model="pysPersonData.userEmail"
+            v-model="pysPersonData.email"
             label="Էլ․ փոստ"
             type="text"
             class="shadow-md rounded-lg p-3"
@@ -182,13 +204,6 @@
             id="passportNumber"
             v-model="pysPersonData.passportNumber"
             label="Անձնագրի համար"
-            type="text"
-            class="shadow-md rounded-lg p-3"
-          ></input-with-labels>
-          <input-with-labels
-            id="address"
-            v-model="pysPersonData.legal_address"
-            label="Հասցե"
             type="text"
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
@@ -238,14 +253,19 @@ export default {
       personType: '',
       openPersonsType: false,
       openUsers: false,
-      id: '',
+      isAccordionType: false,
+      isUserAccordion: false,
+      isPasswordVisible: false,
+      isConfirmPasswordVisible: false,
       pysPersonData: {
         name: '',
         lastName: '',
         phone: '',
         secondPhone: '',
         address: '',
-        userEmail: '',
+        email: '',
+        password: '',
+        confirm_password: '',
         company_name: '',
         AVC: '',
         accountant: '',
@@ -271,30 +291,37 @@ export default {
   },
   methods: {
     ...mapActions('clients', ['addClient']),
-    ...mapActions('users', ['fetchUsers', 'updateUser']),
+    ...mapActions('users', ['fetchUsers', 'createUser', 'updateUser']),
     selectUser(user) {
-      this.pysPersonData.userEmail = user.email
+      console.log(user)
+      this.pysPersonData.email = user.email
       this.pysPersonData.name = user.name
       this.pysPersonData.user_id = user.id
       this.id = user.id
+    },
+    togglePasswordVisibility() {
+      this.isPasswordVisible = !this.isPasswordVisible;
+    },
+    toggleConfirmPasswordVisibility() {
+      this.isConfirmPasswordVisible = !this.isConfirmPasswordVisible;
     },
     async createOrUpdateUser() {
       let userData;
       if (this.isPhysPerson) {
         userData = {
-          user_id: this.pysPersonData.user_id,
           type: 'physPerson',
+          user_id: this.pysPersonData.user_id,
           name: this.pysPersonData.name,
           last_name: this.pysPersonData.lastName,
           phone: this.pysPersonData.phone,
           second_phone: this.pysPersonData.secondPhone,
-          address: this.pysPersonData.address,
+          address: this.pysPersonData.address
         };
       } else if (this.isLegalEntity) {
         // eslint-disable-next-line no-unused-vars
         userData = {
-          user_id: this.pysPersonData.user_id,
           type: 'legalEntity',
+          user_id: this.pysPersonData.user_id,
           name: this.pysPersonData.name,
           last_name: this.pysPersonData.lastName,
           phone: this.pysPersonData.phone,

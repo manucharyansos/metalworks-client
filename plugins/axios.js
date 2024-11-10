@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 const axiosInstance = axios.create({
-  baseURL: 'https://api.metalworks.am', // Replace with your API base URL
-  timeout: 10000, // Request timeout
+  baseURL: 'https://api.metalworks.am',
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken') // Or any other method to get your token
+    const token = localStorage.getItem('authToken')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }

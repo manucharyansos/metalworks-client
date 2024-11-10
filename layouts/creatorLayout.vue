@@ -74,7 +74,7 @@
                 ></path>
               </svg>
               <span class="flex-1 ml-3 text-left whitespace-nowrap text-white"
-                >Create</span
+                >Ստեղշել</span
               >
               <svg
                 aria-hidden="true"
@@ -99,18 +99,9 @@
                 class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
               >
                 <nuxt-link
-                  to="/creator/create/client"
-                  class="flex items-center space-x-3 rtl:space-x-reverse"
-                  >Clients</nuxt-link
-                >
-              </li>
-              <li
-                class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
-              >
-                <nuxt-link
                   to="/creator/create/order"
                   class="flex items-center space-x-3 rtl:space-x-reverse"
-                  >Orders</nuxt-link
+                  >Պատվեր</nuxt-link
                 >
               </li>
               <li
@@ -119,7 +110,7 @@
                 <nuxt-link
                   to="/creator/create/materials"
                   class="flex items-center space-x-3 rtl:space-x-reverse"
-                  >Materials</nuxt-link
+                  >Մատերիալներ</nuxt-link
                 >
               </li>
             </ul>
@@ -144,7 +135,7 @@
                 ></path>
               </svg>
               <span class="flex-1 ml-3 text-left whitespace-nowrap text-white"
-                >Users</span
+                >Օգտատերեր</span
               >
               <svg
                 aria-hidden="true"
@@ -169,18 +160,18 @@
                 class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
               >
                 <nuxt-link
-                  to="/creator/create/client"
+                  to="/creator/users"
                   class="flex items-center space-x-3 rtl:space-x-reverse"
-                  >Users</nuxt-link
+                  >Օգտատերեր</nuxt-link
                 >
               </li>
               <li
                 class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
               >
                 <nuxt-link
-                  to="/creator/create/order"
+                  to="/creator/users/update"
                   class="flex items-center space-x-3 rtl:space-x-reverse"
-                  >Create Users</nuxt-link
+                  >Օգտատերի թարմացում</nuxt-link
                 >
               </li>
             </ul>

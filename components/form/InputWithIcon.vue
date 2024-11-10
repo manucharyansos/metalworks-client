@@ -17,6 +17,9 @@
     >
       {{ label }}
     </label>
+    <span class="absolute end-2 bottom-4 text-gray-500 dark:text-gray-400">
+      <slot name="label_back"></slot>
+    </span>
   </div>
 </template>
 
