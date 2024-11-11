@@ -779,7 +779,7 @@ import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 export default {
   components: { SelectWithLabel, TextareaWithLabel },
   layout: 'FactoryLayout',
-  middleware: 'roleRedirect',
+  middleware: 'auth',
   data() {
     return {
       isModal: false,
