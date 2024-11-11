@@ -43,7 +43,7 @@ export default {
   components: {
     ServiceCard,
   },
-  middleware: 'roleRedirect',
+  middleware: 'auth',
 }
 </script>
 

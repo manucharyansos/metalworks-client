@@ -38,7 +38,7 @@ export default {
   css: ['~/assets/css/main.css', 'leaflet/dist/leaflet.css'],
 
   router: {
-    middleware: ['auth'],
+    middleware: 'auth'
   },
 
   auth: {
