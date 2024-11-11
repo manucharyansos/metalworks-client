@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-screen bg-gray-100 dark:bg-gray-800 overflow-y-auto">
+  <div class="w-full h-screen bg-gray-100 dark:bg-gray-800">
     <div class="flex flex-col items-center py-12 px-12 mt-12">
       <p class="text-gray-800 dark:text-white font-bold italic mb-8 text-2xl">
         Նոր նյութի ստեղծում
