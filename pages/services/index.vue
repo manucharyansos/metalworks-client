@@ -43,7 +43,7 @@ export default {
   components: {
     ServiceCard,
   },
-  // middleware: 'auth',
+  middleware: 'auth',
 }
 </script>
 
