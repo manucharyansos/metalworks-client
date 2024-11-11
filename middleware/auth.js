@@ -1,5 +1,9 @@
 export default function ({ app, redirect, route }) {
-  const user = app.$auth.user;
+  const accessiblePages = ['/', '/contact', '/services'];
+
+  if (accessiblePages.includes(route.path)) {
+    return;
+  }
 
   if (!app.$auth.loggedIn) {
     if (route.path !== '/login') {
@@ -10,11 +14,8 @@ export default function ({ app, redirect, route }) {
     return redirect('/');
   }
 
-  const userRole = user.role.name;
-  const creatorRole = app.$config.creatorRole;
-  const adminRole = app.$config.adminRole;
-  const laserRole = app.$config.laserRole;
-  const bendRole = app.$config.bendRole;
+  const userRole = app.$auth.user.role.name;
+  const { creatorRole, adminRole, laserRole, bendRole } = app.$config;
 
   let targetRoute = '/';
 
