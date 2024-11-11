@@ -407,7 +407,7 @@ export default {
     TextareaWithLabel,
   },
   layout: 'FactoryLayout',
-  middleware: 'auth',
+  middleware: 'roleRedirect',
   data() {
     return {
       searchable: '',

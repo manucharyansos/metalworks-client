@@ -11,7 +11,7 @@ export default {
   name: 'IndexPage',
   components: { HomeComponent },
   auth: 'guest',
-  middleware: 'auth',
+  middleware: 'roleRedirect',
   data() {
     return {
       search: '',
