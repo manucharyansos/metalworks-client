@@ -42,8 +42,8 @@ export default {
     strategies: {
       laravelSanctum: {
         provider: 'laravel/sanctum',
-        // url: 'https://api.metalworks.am',
-        url: 'http://localhost:8000',
+        url: 'https://api.metalworks.am',
+        // url: 'http://localhost:8000',
         endpoints: {
           login: { url: '/api/login', method: 'post' },
           logout: { url: '/api/logout', method: 'post' },
@@ -93,16 +93,10 @@ export default {
 
   modules: ['@nuxtjs/pwa', '@nuxtjs/axios', '@nuxtjs/auth-next'],
 
-  // postcss: {
-  //   plugins: {
-  //     tailwindcss: {},
-  //     autoprefixer: {},
-  //   },
-  // },
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    // baseURL: 'https://api.metalworks.am',
-    baseURL: "http://localhost:8000",
+    baseURL: 'https://api.metalworks.am',
+    // baseURL: "http://localhost:8000",
 
     credentials: true,
   },
