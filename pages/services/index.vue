@@ -40,7 +40,6 @@
 import ServiceCard from '~/components/pages/services/ServiceCard.vue'
 
 export default {
-  auth: 'guest',
   components: {
     ServiceCard,
   },

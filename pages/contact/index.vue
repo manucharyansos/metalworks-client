@@ -305,7 +305,7 @@
 import { mapActions } from 'vuex'
 
 export default {
-  auth: 'guest',
+  middleware: 'roleRedirect',
   data() {
     return {
       form: {
