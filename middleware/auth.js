@@ -7,8 +7,6 @@ export default function ({ app, redirect, route }) {
     if (['contact', 'services'].includes(route.name)) {
       return;
     }
-
-    // Role-based redirection for other pages
     const user = app.$auth.user;
     const creatorRole = app.$config.creatorRole;
     const adminRole = app.$config.adminRole;

@@ -86,6 +86,7 @@
 
             <!-- Dropdown menu -->
             <div
+              v-if="openDropdown"
               class="absolute top-14 right-2 z-10 bg-neutral-100 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
             >
               <div class="px-4 py-3 text-sm text-gray-900 dark:text-white">
