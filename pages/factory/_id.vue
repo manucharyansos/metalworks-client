@@ -176,7 +176,7 @@ import StepperComponent from '~/components/stepper/index.vue'
 
 export default {
   components: { StepperComponent },
-  middleware: ['laser', 'bend'],
+  middleware: ['auth', 'roleRedirect'],
   data() {
     return {}
   },

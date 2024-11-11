@@ -264,7 +264,7 @@ import HeaderComponent from '~/components/header/HeaderComponent.vue'
 export default {
   components: { HeaderComponent, StepperComponent, SpinnerComponent },
   layout: 'adminLayout',
-  middleware: 'admin',
+  middleware: ['auth', 'roleRedirect'],
   data() {
     return {
       stepperData: [],

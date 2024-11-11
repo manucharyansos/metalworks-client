@@ -37,9 +37,6 @@ export default {
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ['~/assets/css/main.css', 'leaflet/dist/leaflet.css'],
 
-  router: {
-    middleware: 'auth'
-  },
 
   auth: {
     strategies: {
@@ -75,6 +72,12 @@ export default {
     adminRole: process.env.ADMIN_ROLE || 'admin',
     laserRole: process.env.LASER_ROLE || 'laser',
     bendRole: process.env.BEND_ROLE || 'bend',
+    dashboards: {
+      creator: '/creator',
+      admin: '/admin',
+      laser: '/factory/laser',
+      bend: '/factory/bend',
+    }
   },
 
   plugins: [

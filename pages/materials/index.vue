@@ -1,6 +1,6 @@
 <script>
 export default {
-  auth: 'guest',
+  middleware: ['publicPage']
 }
 </script>
 

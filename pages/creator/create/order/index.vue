@@ -117,7 +117,7 @@ export default {
     CreateOrder,
   },
   layout: 'creatorLayout',
-  middleware: 'creator',
+  middleware: ['auth', 'roleRedirect'],
   data() {
     return {
       selectedOption: null,

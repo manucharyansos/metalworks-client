@@ -346,7 +346,7 @@ import InputWithLabels from '~/components/form/InputWithIcon.vue'
 export default {
   components: { InputWithLabels },
   layout: 'creatorLayout',
-  middleware: 'creator',
+  middleware: ['auth', 'roleRedirect'],
   data() {
     return {
       personType: '',

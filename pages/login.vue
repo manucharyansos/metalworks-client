@@ -161,6 +161,7 @@ export default {
   name: 'Login',
   components: { inputWithLabelIcon },
   layout: 'authLayout',
+  middleware: ['guest'],
   data() {
     return {
       email: '',

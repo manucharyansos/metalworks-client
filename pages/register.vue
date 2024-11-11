@@ -167,7 +167,7 @@ export default {
   name: 'Register',
   components: { inputWithLabelIcon },
   layout: 'authLayout',
-  auth: 'guest',
+  middleware: ['guest'],
   data() {
     return {
       name: '',
