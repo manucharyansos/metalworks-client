@@ -385,7 +385,6 @@ export default {
     this.fetchUsers()
   },
   methods: {
-    ...mapActions('clients', ['addClient']),
     ...mapActions('users', ['fetchUsers', 'createUser', 'updateUser']),
     togglePasswordVisibility() {
       this.isPasswordVisible = !this.isPasswordVisible;

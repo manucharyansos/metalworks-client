@@ -1,13 +1,13 @@
 <template>
   <div class="bg-neutral-100 flex items-center justify-center w-full h-full">
-    <template v-if="clients && clients.length > 0">
+    <template v-if="users && users.length > 0">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-12 w-full mt-12">
         <div
           class="w-full h-full ml-auto mr-4 p-6 bg-white rounded-xl shadow-lg"
         >
           <select-with-label
             v-model="selectedOption"
-            :dates="clients"
+            :dates="users"
             label="Ընտրել հաճախորդ"
           ></select-with-label>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
@@ -16,28 +16,32 @@
               :value="selectedOption?.name"
               label="Անուն"
               type="text"
+              :disabled="true"
               class="shadow-md rounded-lg p-5"
             ></input-with-labels>
             <input-with-labels
               id="name"
-              :value="selectedOption?.number"
+              :value="selectedOption?.client?.phone"
               label="Հեռախոսահամար"
               type="text"
+              :disabled="true"
               class="shadow-md rounded-lg p-5"
             ></input-with-labels>
             <input-with-labels
               id="name"
-              :value="selectedOption?.email_address"
+              :value="selectedOption?.email"
               label="Էլ․ փոստ"
               type="text"
+              :disabled="true"
               class="shadow-md rounded-lg p-5"
             ></input-with-labels>
             <input-with-labels
               id="name"
-              :value="selectedOption?.legal_address"
+              :value="selectedOption?.client?.address"
               label="Հասցե"
               type="text"
               class="shadow-md rounded-lg p-5"
+              :disabled="true"
             ></input-with-labels>
           </div>
         </div>
@@ -138,17 +142,17 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('clients', ['allClients']),
-    clients() {
-      return this.allClients
+    ...mapGetters('users', ['getUsers']),
+    users() {
+      return this.getUsers
     },
   },
   mounted() {
-    this.fetchClients()
+    this.fetchUsers()
   },
   methods: {
     ...mapActions('orders', ['createOrder']),
-    ...mapActions('clients', ['fetchClients']),
+    ...mapActions('users', ['fetchUsers']),
     handleFileUpload(event) {
       const allowedTypes = [
         'application/pdf',
