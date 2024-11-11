@@ -1,12 +1,7 @@
   export default function ({ app, redirect, route }) {
-    if (!app.$auth.loggedIn) {
-      if (route.name !== 'login' && route.name !== 'register') {
-        return redirect('/login');
-      }
-    } else {
-      if (['contact', 'services'].includes(route.name)) {
-        return;
-      }
+    if (['/contact', '/services'].includes(route.path)) {
+      return;
+    }
       const user = app.$auth.user;
       const creatorRole = app.$config.creatorRole;
       const adminRole = app.$config.adminRole;
@@ -29,5 +24,4 @@
       if (route.path !== targetRoute) {
         return redirect(targetRoute);
       }
-    }
   }
