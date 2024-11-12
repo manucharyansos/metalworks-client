@@ -134,7 +134,7 @@ export default {
         quantity: '',
         name: '',
         store_link: {
-          url: 'https://api.metalworks.am',
+          url: '',
         },
       },
       scrollX: 0,
@@ -181,7 +181,7 @@ export default {
     },
     async addTask() {
       const formData = new FormData()
-      formData.append('client_id', this.selectedOption.id)
+      formData.append('user_id', this.selectedOption.id)
       formData.append('store_link[url]', this.order.store_link.url)
       formData.append('name', this.order.name)
       formData.append('quantity', this.order.quantity)
