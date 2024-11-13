@@ -75,7 +75,7 @@ export default {
     InputWithLabels,
   },
   layout: 'creatorLayout',
-  middleware: ['auth', 'roleRedirect'],
+  middleware: ['creator', 'roleRedirect'],
   data() {
     return {
       selectedOption: null,

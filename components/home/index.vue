@@ -296,7 +296,7 @@
           <h2
             class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700 md:mx-32 mx-4 text-center"
           >
-            Կռում, փոշի ծածկույթ, PEM սարքավորում և այլն
+            Ճկում, փոշի ծածկույթ, PEM սարքավորում և այլն
           </h2>
           <p
             class="md:text-xl text-lg text-neutral-700 text-center italic font-sans my-12 px-12"
@@ -324,7 +324,7 @@
                 @mouseover="isBending = true"
                 @mouseleave="isBending = false"
               >
-                <h2>Կռում</h2>
+                <h2>Ճկում</h2>
                 <p>+1-2 օր</p>
               </div>
               <div
@@ -388,7 +388,7 @@
                 <img src="/materials/bend-home-img-1.webp" alt="" />
               </div>
               <div>
-                <h2>CNC կռում և ձևավորում</h2>
+                <h2>CNC Ճկում և ձևավորում</h2>
                 <p>Հասանելի է 9 մետաղի և 1 պլաստիկի համար</p>
               </div>
             </template>

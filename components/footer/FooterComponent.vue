@@ -26,7 +26,7 @@
                 <a href="#" class="hover:underline">Զոդում</a>
               </li>
               <li>
-                <a href="#" class="hover:underline">Կռում</a>
+                <a href="#" class="hover:underline">Ճկում</a>
               </li>
             </ul>
           </div>
