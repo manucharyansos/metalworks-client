@@ -28,7 +28,7 @@
         image="servicesImg/79241895.webp"
       />
       <ServiceCard
-        title="Solidworks"
+        title="Ինժիներական նախագծում"
         description="Solidworks ծրագրային փաթեթը ապահովում է ինժեներական դիզայնի արդյունավետություն։"
         image="servicesImg/images.jfif"
       />
