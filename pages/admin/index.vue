@@ -88,7 +88,7 @@ export default {
   name: 'AdminPage',
   components: { HeaderComponent, InputWithLabelIcon },
   layout: 'adminLayout',
-  middleware: ['auth', 'roleRedirect'],
+  middleware: ['admin', 'roleRedirect'],
   data() {
     return {
       searchable: '',

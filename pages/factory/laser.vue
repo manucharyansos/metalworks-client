@@ -247,7 +247,7 @@ export default {
     TextareaWithLabel,
   },
   layout: 'FactoryLayout',
-  middleware: ['auth', 'roleRedirect'],
+  middleware: ['laser', 'roleRedirect'],
   data() {
     return {
       searchable: '',

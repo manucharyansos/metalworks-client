@@ -398,7 +398,7 @@ export default {
     InputWithLabelIcon,
   },
   layout: 'creatorLayout',
-  middleware: ['auth', 'roleRedirect'],
+  middleware: ['creator', 'roleRedirect'],
   data() {
     return {
       searchable: '',

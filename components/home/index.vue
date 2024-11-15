@@ -6,12 +6,12 @@
     >
       <div class="flex bg-none items-center justify-center w-5/6 mt-44">
         <div class="flex flex-col items-center justify-center">
-          <h2
+          <h1
             class="xl:text-7xl lg:text-7xl md:text-6xl sm:text-5xl text-4xl text-neutral-700 z-10 font-sans font-extrabold italic mx-auto text-center my-4"
           >
             Պատվերով թիթեղյա մասերը ընդամենը
             <span class="text-red-700">2 օրում</span>
-          </h2>
+          </h1>
 
           <div
             class="flex flex-wrap lg:flex-nowrap sm:items-center justify-center items-start mx-auto z-10 w-full my-12"
@@ -296,7 +296,7 @@
           <h2
             class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700 md:mx-32 mx-4 text-center"
           >
-            Կռում, փոշի ծածկույթ, PEM սարքավորում և այլն
+            Ճկում, փոշի ծածկույթ, PEM սարքավորում և այլն
           </h2>
           <p
             class="md:text-xl text-lg text-neutral-700 text-center italic font-sans my-12 px-12"
@@ -305,13 +305,16 @@
             շարք հետմշակման ծառայություններ:
           </p>
         </div>
-        <div class="container mx-auto px-4 2xl:px-24 grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div class="container mx-auto px-4 2xl:px-24 grid grid-cols-1 md:grid-cols-2 gap-2 font-sans italic font-light">
           <div class="grid gap-6">
             <div
-              class="services cursor-pointer flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
+              class="services cursor-pointer isPrecisionCutting flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
               @mouseover="isPrecisionCutting = true"
               @mouseleave="isPrecisionCutting = false"
             >
+              <div class="size-16 md:hidden flex items-center justify-center">
+                <img src="/materials/cut-home-img.webp" alt="" />
+              </div>
               <div class="flex flex-col items-start justify-center">
                 <h2>Ճշգրիտ կտրման մեթոդներ</h2>
                 <p>2-4 օր ստանդարտ արտադրություն</p>
@@ -320,118 +323,127 @@
             </div>
             <div class="grid lg:grid-cols-2 grid-cols-1 gap-6">
               <div
-                class="services cursor-pointer grid gap-6 grid-cols-2 size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
+                class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
                 @mouseover="isBending = true"
                 @mouseleave="isBending = false"
               >
-                <h2>Կռում</h2>
+                <div class="size-16 md:hidden flex items-center">
+                  <img src="/materials/bend-home-img-1.webp" alt="" />
+                </div>
+                <h2>Ճկում</h2>
                 <p>+1-2 օր</p>
               </div>
               <div
-                class="services cursor-pointer grid gap-6 grid-cols-2 size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
+                class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
                 @mouseover="isPowderCoating = true"
                 @mouseleave="isPowderCoating = false"
               >
+                <div class="size-16 md:hidden flex items-center">
+                  <img src="/materials/pow-home-img-1.webp" alt="" />
+                </div>
                 <h2>Փոշի ծածկույթ</h2>
                 <p>+1-3 օր</p>
               </div>
               <div
-                class="services cursor-pointer grid gap-6 grid-cols-2 size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
+                class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
                 @mouseover="isDimpleForming = true"
                 @mouseleave="isDimpleForming = false"
               >
+                <div class="size-16 md:hidden flex items-center">
+                  <img src="/materials/dimple-home-img-1.jpg" alt="" />
+                </div>
                 <h2>Փորվածքների ձևավորում</h2>
                 <p>+1-3 օր</p>
               </div>
               <div
-                class="services cursor-pointer grid gap-6 grid-cols-2 size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
+                class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
                 @mouseover="isHdwInserting = true"
                 @mouseleave="isHdwInserting = false"
               >
+                <div class="size-16 md:hidden flex items-center">
+                  <img src="/materials/hdw-home-img-2.webp" alt="" />
+                </div>
                 <h2>Սարքավորումների տեղադրում</h2>
                 <p>+1-3 օր</p>
               </div>
               <div
-                class="services cursor-pointer grid gap-6 grid-cols-2 size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
+                class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
                 @mouseover="isTapping = true"
                 @mouseleave="isTapping = false"
               >
+                <div class="size-16 md:hidden flex items-center">
+                  <img src="/materials/tap-home-img-2.webp" alt="" />
+                </div>
                 <h2>Թակել</h2>
                 <p>+1-3 օր</p>
               </div>
               <div
-                class="services cursor-pointer grid gap-6 grid-cols-2 size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
+                class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
                 @mouseover="isAnodizing = true"
                 @mouseleave="isAnodizing = false"
               >
+                <div class="size-16 md:hidden flex items-center">
+                  <img src="/materials/ano-home-img-1.webp" alt="" />
+                </div>
                 <h2>Անոդացում</h2>
                 <p>+1-3 օր</p>
               </div>
             </div>
           </div>
-          <div class="md:flex hidden items-center justify-between">
+          <div class="md:flex hidden items-center justify-between relative overflow-y-hidden">
             <!--            images-->
-            <template
-              v-if="isPrecisionCutting"
             >
-              <div
-                class="w-full h-full flex items-center justify-center">
-                <img src="/materials/cut-home-img.webp" alt="" />
-              </div>
-
-            </template>
-            <template
-              v-if="isBending"
-            >
-              <div
-                class="w-full h-full flex flex-col items-center justify-center">
-                <img src="/materials/bend-home-img-1.webp" alt="" />
-              </div>
+            <div
+              class="w-full h-full flex items-center justify-center precision_image"
+              :class="{ 'show_precision_image': isPrecisionCutting }">
+              <img src="/materials/cut-home-img.webp" alt="" />
+            </div>
+            <div
+              class="w-full h-full flex flex-col items-center justify-center bending_image"
+              :class="{ 'show_bending_image': isBending }">
+              <img src="/materials/bend-home-img-1.webp" alt="" />
               <div>
-                <h2>CNC կռում և ձևավորում</h2>
+                <h2>CNC Ճկում և ձևավորում</h2>
                 <p>Հասանելի է 9 մետաղի և 1 պլաստիկի համար</p>
               </div>
-            </template>
-            <template
-              v-if="isPowderCoating">
-              <div
-                class="w-full h-full flex items-center justify-center"
-              >
-                <img src="/materials/pow-home-img-1.webp" alt="" />
+            </div>
+            <div
+              class="w-full h-full flex flex-col items-center justify-center powder_cutting"
+              :class="{ 'show_powder_cutting': isPowderCoating }">
+              <img src="/materials/pow-home-img-1.webp" alt="" />
+              <div>
+                <h2>Փոշի ծածկույթ</h2>
+                <p>Հասանելի է 9 մետաղի և 1 պլաստիկի համար</p>
               </div>
-            </template>
-            <template
-              v-if="isDimpleForming">
-              <div
-                class="w-full h-full flex items-center justify-center"
-              >
-                <img src="/materials/dimple-home-img-1.jpg" alt="" />
+            </div>
+            <div
+              class="w-full h-full flex flex-col items-center justify-center dimple_forming"
+              :class="{ 'show_dimple_forming': isDimpleForming }">
+              <img src="/materials/dimple-home-img-1.jpg" alt="" />
+              <div>
+                <h2>Փորվածքների ձևավորում</h2>
+                <p>Հասանելի է 7 մետաղների համար</p>
               </div>
-            </template>
-            <template
-              v-if="isHdwInserting">
-              <div
-                class="w-full h-full flex items-center justify-center"
-              >
-                <img src="/materials/hdw-home-img-2.webp" alt="" />
+            </div>
+            <div
+              class="w-full h-full flex items-center justify-center hdw_inserting"
+              :class="{ 'show_hdw_inserting': isHdwInserting }">
+              <img src="/materials/hdw-home-img-2.webp" alt="" />
+            </div>
+            <div
+              class="w-full h-full flex flex-col items-center justify-center anodizing"
+              :class="{ 'show_anodizing': isAnodizing }">
+              <img src="/materials/ano-home-img-1.webp" alt="" />
+              <div>
+                <h2>Սարքավորումների տեղադրում</h2>
+<!--                 <p>Հասանելի է 9 մետաղի և 1 պլաստիկի համար</p>-->
               </div>
-            </template>
-            <template
-              v-if="isAnodizing">
-              <div
-                class="w-full h-full flex items-center justify-center"
-              >
-                <img src="/materials/ano-home-img-1.webp" alt="" />
-              </div>
-            </template>
-            <template
-              v-if="isTapping">
-              <div
-                class="w-full h-full flex items-center justify-center"
-              >
-                <img src="/materials/tap-home-img-2.webp" alt="" />
-              </div>
-            </template>
+            </div>
+            <div
+              class="w-full h-full flex items-center justify-center tapping"
+              :class="{ 'show_tapping': isTapping }">
+              <img src="/materials/tap-home-img-2.webp" alt="" />
+            </div>
           </div>
         </div>
       </div>
@@ -533,5 +545,89 @@ export default {
 .activeScroll {
   background-color: white;
   transition-duration: 3s;
+}
+
+.precision_image {
+  position: absolute;
+  bottom: -300px;
+  opacity: 0;
+  transition: bottom 0.5s ease, opacity 0.5s ease;
+}
+
+.show_precision_image {
+  bottom: 0;
+  opacity: 1;
+}
+
+.bending_image {
+  position: absolute;
+  bottom: -300px;
+  opacity: 0;
+  transition: bottom 0.5s ease, opacity 0.5s ease;
+}
+
+.show_bending_image {
+  bottom: 0;
+  opacity: 1;
+}
+
+.powder_cutting {
+  position: absolute;
+  bottom: -300px;
+  opacity: 0;
+  transition: bottom 0.5s ease, opacity 0.5s ease;
+}
+
+.show_powder_cutting {
+  bottom: 0;
+  opacity: 1;
+}
+
+.dimple_forming {
+  position: absolute;
+  bottom: -300px;
+  opacity: 0;
+  transition: bottom 0.5s ease, opacity 0.5s ease;
+}
+
+.show_dimple_forming {
+  bottom: 0;
+  opacity: 1;
+}
+
+.hdw_inserting {
+  position: absolute;
+  bottom: -300px;
+  opacity: 0;
+  transition: bottom 0.5s ease, opacity 0.5s ease;
+}
+
+.show_hdw_inserting {
+  bottom: 0;
+  opacity: 1;
+}
+
+.anodizing {
+  position: absolute;
+  bottom: -300px;
+  opacity: 0;
+  transition: bottom 0.5s ease, opacity 0.5s ease;
+}
+
+.show_anodizing{
+  bottom: 0;
+  opacity: 1;
+}
+
+.tapping {
+  position: absolute;
+  bottom: -300px;
+  opacity: 0;
+  transition: bottom 0.5s ease, opacity 0.5s ease;
+}
+
+.show_tapping{
+  bottom: 0;
+  opacity: 1;
 }
 </style>
