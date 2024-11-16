@@ -34,59 +34,29 @@
     >
       <div class="flex w-full bg-white">
         <div
-          class="w-full h-24 bg-gradient-to-b bg-[#f5f5f5] rounded-tr-3xl"
+          class="w-full md:h-24 h-12 bg-gradient-to-b bg-[#f5f5f5] rounded-tr-3xl"
         ></div>
         <div
-          class="w-full h-24 bg-gradient-to-b bg-[#f5f5f5] rounded-tl-3xl"
+          class="w-full md:h-24 h-12 bg-gradient-to-b bg-[#f5f5f5] rounded-tl-3xl"
         ></div>
       </div>
 
       <div class="w-full bg-gradient-to-b bg-[#f5f5f5] flex items-center justify-center mx-auto">
         <div class="container flex flex-col items-center justify-center">
-          <h2 class="md:text-5xl text-xl font-sans italic font-bold leading-10 text-center mb-12 text-gray-800 mt-12">
+          <h2 class="md:text-5xl text-xl font-sans italic font-bold leading-10 text-center mb-12 text-gray-800 md:mt-12">
             Մետաղական թիթեղների պատրաստում, ներառյալ հակահարվածումը, փորվածքների ձևավորումը և սարքավորումը
           </h2>
-          <div class="flex flex-row flex-wrap">
-
+          <div class="flex flex-row flex-wrap items-center justify-center md:my-24 my-12">
+            <service-card title="Խորացումներ" image="servicesImg/countersink-parts-300x193.webp" description="Հնարավորություն տվեք հարմարանքներին տեղադրվել ձեր մասերի վրա այնպես, որ դրանք դառնան հարթ՝ մաշվածությունն ու վնասվածքները նվազեցնելու համար։"></service-card>
+            <service-card title="Փորվածքների ձևավորում" image="servicesImg/dimple-hero-300x206.jpg" description="Ամրացրեք նյութը՝ ավելացնելով էսթետիկ գեղեցիկ խոռոչներ։"></service-card>
+            <service-card title="Տեղադրում" image="servicesImg/powder-hardware-top-300x193.webp" description="Ընտրեք մեր PEM մամլիչ հարմարանքների կատալոգից՝ ձեր մասերին ընկույզներ, շպիլկաներ և բաժանարարներ ավելացնելու համար։"></service-card>
+            <service-card title="Թելատում" image="servicesImg/tap-tile-white-300x180.webp" description="Արագ և հեշտ կերպով ավելացրեք թելավորումներ՝ ձեր մասերին հարմարանքներ միացնելու համար։"></service-card>
           </div>
         </div>
 
       </div>
 
 
-    </div>
-
-
-
-
-    <div
-      class="grid grid-cols-1 font-sans italic md:grid-cols-2 lg:grid-cols-3 gap-12"
-    >
-      <ServiceCard
-        title="Հղկում"
-        description="Մեր հղկման ծառայությունները ապահովում են մակերևույթի գերազանց հարթություն։"
-        image="servicesImg/79241893.webp"
-      />
-      <ServiceCard
-        title="Զոդում"
-        description="Մենք մատուցում ենք բարձր որակի զոդման ծառայություններ մետաղական կոնստրուկցիաների համար։"
-        image="servicesImg/GMAW.welding.af.ncs.jpg"
-      />
-      <ServiceCard
-        title="Փոշեներկում"
-        description="Փոշեներկման տեխնոլոգիան տալիս է երկարակյաց և գեղեցիկ արդյունքներ։"
-        image="servicesImg/79256924.webp"
-      />
-      <ServiceCard
-        title="Լազերային կտրում"
-        description="Լազերային կտրումը թույլ է տալիս իրականացնել ճշգրիտ և բարդ կտրումներ։"
-        image="servicesImg/79241895.webp"
-      />
-      <ServiceCard
-        title="Solidworks"
-        description="Solidworks ծրագրային փաթեթը ապահովում է ինժեներական դիզայնի արդյունավետություն։"
-        image="servicesImg/images.jfif"
-      />
     </div>
   </div>
 </template>

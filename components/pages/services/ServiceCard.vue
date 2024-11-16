@@ -1,19 +1,16 @@
 <template>
   <div
-    class="relative bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 ease-in-out overflow-hidden"
+    class="relative grid grid-cols-2 md:grid-cols-1 bg-white md:min-h-96 h-full rounded-lg shadow-md hover:shadow-xl hover:translate-y-2 transition-shadow duration-300 overflow-hidden w-full md:max-w-80 m-4"
   >
-    <img
-      :src="image"
-      alt="service image"
-      class="w-full h-52 object-cover hover:scale-105 transition-transform duration-300 ease-in-out"
-    />
-    <div class="p-6">
-      <h2 class="text-2xl font-sans italic mb-3 text-gray-800">{{ title }}</h2>
-      <p class="text-gray-600 font-sans italic leading-relaxed">{{ description }}</p>
+      <img
+        :src="image"
+        alt="service image"
+        class="object-cover h-full md:h-32 p-4 mx-auto"
+      />
+    <div class="p-6 md:h-64">
+      <h2 class="text-base md:text-2xl font-sans italic md:mb-3 text-gray-800 text-center md:text-start m-2">{{ title }}</h2>
+      <p class="hidden md:flex text-gray-600 font-sans italic leading-relaxed">{{ description }}</p>
     </div>
-    <div
-      class="absolute inset-0 bg-gradient-to-t from-gray-900 opacity-0 hover:opacity-50 transition-opacity duration-300 ease-in-out"
-    ></div>
   </div>
 </template>
 

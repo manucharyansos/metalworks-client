@@ -4,20 +4,20 @@
       class="home_component flex flex-col m-0 p-0 min-h-screen w-full h-full items-center"
       :class="{ activeScroll: isActiveBg }"
     >
-      <div class="flex bg-none items-center justify-center w-5/6 mt-44">
+      <div class="container flex bg-none items-center justify-center md:mt-44 mt-24 px-4">
         <div class="flex flex-col items-center justify-center">
           <h1
-            class="xl:text-7xl lg:text-7xl md:text-6xl sm:text-5xl text-4xl text-neutral-700 z-10 font-sans font-extrabold italic mx-auto text-center my-4"
+            class="xl:text-7xl lg:text-7xl md:text-6xl sm:text-5xl text-2xl text-neutral-700 z-10 leading-loose font-sans font-bold italic mx-auto text-center my-4"
           >
             Պատվերով թիթեղյա մասերը ընդամենը
             <span class="text-red-700">2 օրում</span>
           </h1>
 
           <div
-            class="flex flex-wrap lg:flex-nowrap sm:items-center justify-center items-start mx-auto z-10 w-full my-12"
+            class="flex flex-row flex-wrap lg:flex-nowrap items-center justify-center mx-auto z-10 w-full my-12"
           >
             <p
-              class="lg:text-xl text-base font-mono italic flex items-center justify-center font-bold w-full"
+              class="lg:text-xl text-base font-mono italic flex font-bold mx-4"
             >
               <svg
                 id="Layer_1"
@@ -33,10 +33,10 @@
                   d="M63.6,34.6c0.3-0.4,0.4-0.9,0.4-1.4c0-0.5-0.1-1-0.4-1.4l0.1-0.1l-0.3-0.2c-0.2-0.3-0.5-0.6-0.9-0.7l-5.4-4.6l5.3-2.8 c0.5-0.3,0.9-0.7,1.1-1.1c0.3-0.5,0.4-0.9,0.4-1.4c0-0.6-0.1-1.1-0.4-1.5c-0.3-0.5-0.7-0.8-1.1-0.9L47.1,10 c-2.5-5.6-8.1-9.5-14.7-9.5c-6.5,0-12.1,3.9-14.6,9.4l-16.1,9c-0.5,0.2-0.9,0.6-1.1,1.1c-0.3,0.5-0.4,1-0.4,1.5 c0,0.6,0.1,1.1,0.4,1.5c0.3,0.5,0.7,0.8,1.1,0.9L7,26.7l-6,5c0,0,0,0,0,0l0,0l0,0c-0.2,0.2-0.3,0.4-0.5,0.6c-0.3,0.5-0.4,1-0.4,1.5 c0,0.6,0.1,1.1,0.4,1.5c0.3,0.4,0.7,0.8,1.1,1L7,39l-5.8,4.8l0,0c-0.3,0.3-0.5,0.5-0.7,0.8c-0.3,0.5-0.4,0.9-0.4,1.4 c0,0.6,0.1,1.1,0.4,1.6c0.3,0.4,0.7,0.8,1.1,1l28.1,14.5c0.4,0.2,0.7,0.4,1.1,0.5c0.4,0.1,0.8,0.2,1.2,0.2c0.4,0,0.8-0.1,1.2-0.2 c0.4-0.1,0.8-0.3,1.1-0.5l28.1-15.1c0.5-0.2,0.9-0.5,1.1-0.9c0.3-0.5,0.4-1,0.4-1.5c0-0.6-0.1-1.1-0.4-1.6c0,0-0.1-0.1-0.1-0.1 l0-0.1l-0.4-0.3c-0.1-0.1-0.1-0.1-0.2-0.2l-5.8-4.8l5.2-2.8C62.9,35.4,63.3,35,63.6,34.6z M25,18.8c-1.3,0-2.3-1-2.3-2.3 s1-2.3,2.3-2.3h5.1v-5c0-1.3,1-2.3,2.3-2.3c1.3,0,2.3,1,2.3,2.3v5.1h5.1c1.3,0,2.3,1,2.3,2.3c-0.1,1.2-1.1,2.2-2.3,2.2h-5.1v5.2 c0,1.3-1,2.3-2.3,2.3c-1.3,0-2.3-1-2.3-2.3v-5.2H25z M2.1,21.8c0-0.2-0.1-0.3-0.1-0.4c0-0.1,0-0.3,0.1-0.4c0-0.2,0.2-0.3,0.5-0.5 l14.2-7.9c-0.3,1.3-0.5,2.6-0.5,4c0,8.9,7.2,16.1,16.1,16.1c8.9,0,16.1-7.2,16.1-16.1c0-1.4-0.2-2.7-0.5-3.9l13.5,7.2 c0.3,0.2,0.5,0.4,0.5,0.6c0,0.2,0.1,0.3,0.1,0.4c0,0.1,0,0.3-0.1,0.4c0,0.2-0.2,0.3-0.5,0.5L33.4,36.9c-0.2,0.1-0.4,0.2-0.6,0.2 c-0.3,0.1-0.5,0.1-0.7,0.1s-0.4,0-0.7-0.1c-0.3-0.1-0.5-0.2-0.6-0.2L2.7,22.2C2.3,22.1,2.2,21.9,2.1,21.8z M61.3,44.6 c0,0.1,0.1,0.1,0.1,0.2c0.2,0.1,0.4,0.2,0.5,0.5c0.1,0.2,0.2,0.4,0.2,0.5c0,0.1,0,0.2-0.1,0.4c0,0.2-0.2,0.4-0.5,0.6L33.4,61.9 C33,62,32.6,62.1,32,62.1c-0.5,0-1-0.1-1.3-0.2L2.7,47.1c-0.3-0.2-0.5-0.3-0.5-0.5c0-0.2-0.1-0.3-0.1-0.5c0-0.1,0-0.2,0.1-0.4 c0-0.1,0.2-0.3,0.3-0.4l0,0L8.9,40l20.9,10.8c0.4,0.2,0.7,0.4,1.1,0.5c0.4,0.1,0.8,0.2,1.2,0.2c0.4,0,0.8,0,1.2-0.2 c0.4-0.1,0.8-0.3,1.1-0.5l20.9-11.2L61.3,44.6z M62,33.6c0,0.2-0.2,0.4-0.5,0.6L33.4,49.3c-0.4,0.2-0.8,0.2-1.3,0.2 c-0.5,0-1-0.1-1.3-0.2L2.7,34.5c-0.3-0.1-0.5-0.2-0.5-0.4c0-0.2-0.1-0.3-0.1-0.4c0-0.1,0-0.3,0.1-0.5c0-0.1,0.1-0.1,0.1-0.2l0.1,0.1 l6.6-5.6l20.8,10.8c0.4,0.2,0.7,0.4,1.1,0.5C31.3,39,31.6,39,32,39c0.4,0,0.8,0,1.2-0.2c0.4-0.1,0.8-0.3,1.1-0.5l20.9-11.2l6.8,5.7 c0,0.1,0,0.2,0,0.3C62,33.3,62,33.4,62,33.6z"
                 ></path>
               </svg>
-              Նվազագույն քանակ չկա
+              Նվազագույն քանակություն չկա
             </p>
             <p
-              class="lg:text-xl text-base font-mono italic flex items-center justify-center font-bold w-full my-2 lg:my-12"
+              class="lg:text-xl text-base font-mono italic flex font-bold my-2 mx-4 lg:my-12"
             >
               <svg
                 id="Layer_1"
@@ -71,7 +71,7 @@
               >Առաքում
             </p>
             <p
-              class="lg:text-xl text-base font-mono italic flex items-center justify-center font-bold w-full my-2 lg:my-12"
+              class="lg:text-xl text-base font-mono italic flex font-bold my-2 mx-4"
             >
               <svg
                 id="Layer_1"
@@ -98,9 +98,9 @@
       </div>
       <!--    section upload-->
       <div
-        class="bg-white hidden sm:flex flex-col items-center justify-center rounded-3xl shadow-2xl z-10"
+        class="bg-white hidden md:flex flex-col items-center justify-center rounded-3xl shadow-2xl z-10"
       >
-        <h2 class="text-xl text-neutral-700 font-bold font-sans italic m-8">
+        <h2 class="text-xl text-neutral-700 font-bold font-sans italic m-8 w-2/3">
           Վերբեռնեք ձեր STEP, DXF կամ EPS ֆայլը ակնթարթային գնի համար!
         </h2>
         <button
@@ -139,13 +139,13 @@
         <!--          </div>-->
         <!--        </div>-->
         <p class="text-base font-sans italic my-4">
-          CAD չկա՞ Սկսեք ձևանմուշից <span class="font-bold">template</span> կամ
+          CAD չկա՞ Սկսեք ձևանմուշից <span class="font-bold">կաղապար</span> կամ
           ուղարկեք մեզ <span class="font-bold">ուրվագիծ</span>.
         </p>
       </div>
 
       <!--    video-->
-      <div class="w-4/6 my-20 hidden sm:flex shadow-3xl rounded-3xl z-10">
+      <div class="my-20 hidden sm:flex shadow-3xl rounded-3xl z-10">
         <video
           src="/new-home-vid.mp4"
           autoplay
@@ -159,28 +159,28 @@
       </div>
       <!--      upload configure-->
       <div
-        class="flex flex-col items-center justify-center w-full bg-gradient-to-b from-[#f5f5f5] my-16"
+        class="flex flex-col items-center justify-center w-full bg-gradient-to-b from-[#f5f5f5] md:my-16"
       >
         <div class="flex w-full bg-white">
           <div
-            class="w-full h-24 bg-gradient-to-b bg-[#f5f5f5] rounded-tr-3xl"
+            class="w-full md:h-24 h-8 bg-gradient-to-b bg-[#f5f5f5] rounded-tr-3xl"
           ></div>
           <div
-            class="w-full h-24 bg-gradient-to-b bg-[#f5f5f5] rounded-tl-3xl"
+            class="w-full md:h-24 h-8 bg-gradient-to-b bg-[#f5f5f5] rounded-tl-3xl"
           ></div>
         </div>
         <h2
-          class="2xl:text-7xl lg:text-5xl md:text-4xl text-3xl font-sans font-bold italic text-neutral-700 text-center w-2/3"
+          class="2xl:text-7xl lg:text-5xl md:text-4xl text-2xl font-sans font-bold italic text-neutral-700 text-center md:w-2/3"
         >
           Վերբեռնել. Կարգավորել. Ավելացնել զամբյուղի մեջ.
           <span class="text-red-600">Կատարված է:</span>
         </h2>
         <p
-          class="md:text-xl text-lg text-neutral-700 text-center italic font-sans my-12"
+          class="md:text-xl text-lg text-neutral-700 text-center italic font-sans m-12 leading-loose"
         >
           Վերբեռնումից մինչև գնում հաշված րոպեների ընթացքում
         </p>
-        <div class="flex flex-col lg:flex-row items-stretch justify-between w-5/6 space-y-5 lg:space-y-0 lg:space-x-5">
+        <div class="container flex flex-col lg:flex-row items-stretch justify-between w-5/6 space-y-5 lg:space-y-0 lg:space-x-5">
           <div class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
             <div class="p-6 mx-auto">
               <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
@@ -234,13 +234,13 @@
 
       <!--      Materials -->
       <div
-        class="container mx-auto ld:px-0 px-24 flex flex-col items-center justify-center my-10"
+        class="container mx-auto ld:px-0 flex flex-col items-center justify-center my-10"
       >
-        <h3
+        <h2
           class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700"
         >
           <span class="text-red-600">165+</span> նյութեր պահեստում
-        </h3>
+        </h2>
         <div v-if="categories.length > 0" class="flex flex-row flex-wrap items-center justify-center my-10 w-5/6">
           <nuxt-link
             exact-active-class="active-link"
@@ -263,7 +263,7 @@
           </div>
         </div>
         <div
-          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 place-items-center gap-4"
+          class="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 place-items-center gap-4"
         >
           <div
             v-for="(material, index) in materials"
@@ -305,21 +305,21 @@
             շարք հետմշակման ծառայություններ:
           </p>
         </div>
-        <div class="container mx-auto px-4 2xl:px-24 grid grid-cols-1 md:grid-cols-2 gap-2 font-sans italic font-light">
+        <div class="container mx-auto px-4 2xl:px-24 grid grid-cols-1 md:grid-cols-2 gap-2 font-sans italic font-light md:text-base text-sm">
           <div class="grid gap-6">
             <div
               class="services cursor-pointer isPrecisionCutting flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
               @mouseover="isPrecisionCutting = true"
               @mouseleave="isPrecisionCutting = false"
             >
-              <div class="size-16 md:hidden flex items-center justify-center">
+              <div class="size-16 md:hidden flex items-center justify-center w-1/5">
                 <img src="/materials/cut-home-img.webp" alt="" />
               </div>
-              <div class="flex flex-col items-start justify-center">
+              <div class="flex flex-col md:items-start items-center justify-center w-3/5 mx-2 text-center">
                 <h2>Ճշգրիտ կտրման մեթոդներ</h2>
                 <p>2-4 օր ստանդարտ արտադրություն</p>
               </div>
-              <div class="flex flex-col items-center justify-center">39$</div>
+              <div class="flex flex-col items-center justify-center w-1/5">39$</div>
             </div>
             <div class="grid lg:grid-cols-2 grid-cols-1 gap-6">
               <div
@@ -392,7 +392,6 @@
           </div>
           <div class="md:flex hidden items-center justify-between relative overflow-y-hidden">
             <!--            images-->
-            >
             <div
               class="w-full h-full flex items-center justify-center precision_image"
               :class="{ 'show_precision_image': isPrecisionCutting }">
