@@ -1,28 +1,28 @@
 <template>
   <main class="flex flex-row flex-wrap p-4 md:ml-64 h-auto pt-20">
-    <header-component class="ml-auto bg-gray-900">
-      <template #searchInput>
-        <input-with-label-icon v-model="searchable" type="text" label="Search">
-          <template #label_svg>
-            <svg
-              class="w-4 h-4 text-gray-500 dark:text-gray-400"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 20 20"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-              />
-            </svg>
-          </template>
-        </input-with-label-icon>
-      </template>
-    </header-component>
+    <!--    <header-component class="ml-auto bg-gray-900">-->
+    <!--      <template #searchInput>-->
+    <!--        <input-with-label-icon v-model="searchable" type="text" label="Search">-->
+    <!--          <template #label_svg>-->
+    <!--            <svg-->
+    <!--              class="w-4 h-4 text-gray-500 dark:text-gray-400"-->
+    <!--              aria-hidden="true"-->
+    <!--              xmlns="http://www.w3.org/2000/svg"-->
+    <!--              fill="none"-->
+    <!--              viewBox="0 0 20 20"-->
+    <!--            >-->
+    <!--              <path-->
+    <!--                stroke="currentColor"-->
+    <!--                stroke-linecap="round"-->
+    <!--                stroke-linejoin="round"-->
+    <!--                stroke-width="2"-->
+    <!--                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"-->
+    <!--              />-->
+    <!--            </svg>-->
+    <!--          </template>-->
+    <!--        </input-with-label-icon>-->
+    <!--      </template>-->
+    <!--    </header-component>-->
     <!--    New orders section-->
 
     <template v-if="searchFilter">
@@ -81,12 +81,12 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
-import HeaderComponent from '~/components/header/HeaderComponent.vue'
+// import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+// import HeaderComponent from '~/components/header/HeaderComponent.vue'
 
 export default {
   name: 'AdminPage',
-  components: { HeaderComponent, InputWithLabelIcon },
+  // components: { HeaderComponent, InputWithLabelIcon },
   layout: 'adminLayout',
   middleware: ['admin', 'roleRedirect'],
   data() {
