@@ -1,37 +1,37 @@
 <template>
   <main class="min-h-screen">
     <template v-if="getOrderByFactories && !isModal">
-      <header-component class="ml-auto bg-gray-900">
-        <template #searchInput>
-          <input-with-label-icon
-            v-model="searchable"
-            type="text"
-            label="Search"
-            class="ml-24"
-            label_class="text-gray-50"
-          >
-            <template #label_svg>
-              <svg
-                class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                />
-              </svg>
-            </template>
-          </input-with-label-icon>
-        </template>
-      </header-component>
+      <!--      <header-component class="ml-auto bg-gray-900">-->
+      <!--        <template #searchInput>-->
+      <!--          <input-with-label-icon-->
+      <!--            v-model="searchable"-->
+      <!--            type="text"-->
+      <!--            label="Search"-->
+      <!--            class="ml-24"-->
+      <!--            label_class="text-gray-50"-->
+      <!--          >-->
+      <!--            <template #label_svg>-->
+      <!--              <svg-->
+      <!--                class="w-4 h-4 text-gray-500 dark:text-gray-400"-->
+      <!--                aria-hidden="true"-->
+      <!--                xmlns="http://www.w3.org/2000/svg"-->
+      <!--                fill="none"-->
+      <!--                viewBox="0 0 20 20"-->
+      <!--              >-->
+      <!--                <path-->
+      <!--                  stroke="currentColor"-->
+      <!--                  stroke-linecap="round"-->
+      <!--                  stroke-linejoin="round"-->
+      <!--                  stroke-width="2"-->
+      <!--                  d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"-->
+      <!--                />-->
+      <!--              </svg>-->
+      <!--            </template>-->
+      <!--          </input-with-label-icon>-->
+      <!--        </template>-->
+      <!--      </header-component>-->
       <!--      table-->
-      <div class="relative overflow-x-auto shadow-md sm:rounded-lg ml-20 mt-36">
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-36">
         <table
           class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
         >
@@ -101,7 +101,7 @@
                   :key="item.id"
                   class="px-6 py-4 text-center"
                 >
-                  <div v-if="item.factory_id === 3" class="text-center">
+                  <div v-if="item.factory_id === '3'" class="text-center">
                     {{ item.status }}
                   </div>
                 </div>
@@ -234,15 +234,11 @@
 import { mapActions, mapGetters } from 'vuex'
 import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
-import HeaderComponent from '~/components/header/HeaderComponent.vue'
-import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import OrderCard from '~/components/card/OrderCard.vue'
 
 export default {
   components: {
     OrderCard,
-    InputWithLabelIcon,
-    HeaderComponent,
     SelectWithLabel,
     TextareaWithLabel,
   },
