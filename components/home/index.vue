@@ -4,13 +4,17 @@
       class="home_component flex flex-col m-0 p-0 min-h-screen w-full h-full items-center"
       :class="{ activeScroll: isActiveBg }"
     >
-      <div class="container flex bg-none items-center justify-center md:mt-44 mt-24 px-4">
+      <div
+        class="container flex bg-none items-center justify-center md:mt-44 mt-24 px-4"
+      >
         <div class="flex flex-col items-center justify-center">
           <h1
             class="xl:text-7xl lg:text-7xl md:text-6xl sm:text-5xl text-2xl text-neutral-700 z-10 leading-loose font-sans font-bold italic mx-auto text-center my-4"
           >
-            Պատվերով թիթեղյա մասերը ընդամենը
-            <span class="text-red-700">2 օրում</span>
+            Պատվերով թիթեղյա մասեր
+            <!--            ը ընդամենը-->
+
+            <!--            <span class="text-red-700">2 օրում</span>-->
           </h1>
 
           <div
@@ -100,7 +104,9 @@
       <div
         class="bg-white hidden md:flex flex-col items-center justify-center rounded-3xl shadow-2xl z-10"
       >
-        <h2 class="text-xl text-neutral-700 font-bold font-sans italic m-8 w-2/3">
+        <h2
+          class="text-xl text-neutral-700 font-bold font-sans italic m-8 w-2/3"
+        >
           Վերբեռնեք ձեր STEP, DXF կամ EPS ֆայլը ակնթարթային գնի համար!
         </h2>
         <button
@@ -180,47 +186,79 @@
         >
           Վերբեռնումից մինչև գնում հաշված րոպեների ընթացքում
         </p>
-        <div class="container flex flex-col lg:flex-row items-stretch justify-between w-5/6 space-y-5 lg:space-y-0 lg:space-x-5">
-          <div class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+        <div
+          class="container flex flex-col lg:flex-row items-stretch justify-between w-5/6 space-y-5 lg:space-y-0 lg:space-x-5"
+        >
+          <div
+            class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+          >
             <div class="p-6 mx-auto">
               <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
             </div>
-            <div class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center">
-              <p class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white">
+            <div
+              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center"
+            >
+              <p
+                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
+              >
                 Վերբեռնեք ձեր
                 <span class="underline decoration-dotted">CAD ֆայլ</span>
               </p>
-              <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light">
+              <p
+                class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
+              >
                 CAD չկա՞ Անհատականացրեք ձեր ձևանմուշը՝ օգտագործելով մեր
-                <span class="font-bold">Մասերի կառուցող</span>, կամ ուղարկել էսքիզ մեր
+                <span class="font-bold">Մասերի կառուցող</span>, կամ ուղարկել
+                էսքիզ մեր
                 <span class="font-bold">Դիզայնի ծառայություններ</span> թիմին։
               </p>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+          <div
+            class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+          >
             <div class="p-6 mx-auto">
               <img class="rounded-t-lg" src="/quote-277x300.webp" alt="" />
             </div>
-            <div class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center">
-              <p class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white">
+            <div
+              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center"
+            >
+              <p
+                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
+              >
                 Ստացեք ակնթարթային գներ
               </p>
-              <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light">
-                Գները սկսվում են $39-ից պակասից։ <span class="font-bold">Ունենք առաքում</span>
+              <p
+                class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
+              >
+                Գները սկսվում են $39-ից պակասից։
+                <span class="font-bold">Ունենք առաքում</span>
               </p>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+          <div
+            class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
+          >
             <div class="p-6 mx-auto">
-              <img class="rounded-t-lg" src="/larger-package-277x300.webp" alt="" />
+              <img
+                class="rounded-t-lg"
+                src="/larger-package-277x300.webp"
+                alt=""
+              />
             </div>
-            <div class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center">
-              <p class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white">
+            <div
+              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center"
+            >
+              <p
+                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
+              >
                 Պահեստամասերը ձեր դռան մոտ օրերի ընթացքում
               </p>
-              <p class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light">
+              <p
+                class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
+              >
                 Ստանդարտ լազերային կտրման պատվերները դուրս են գալիս
                 <span class="font-bold">2-4 օրվա ընթացքում:</span>. Սպասվում է
                 <span class="font-bold">1-3 օր առաքում</span>
@@ -229,7 +267,6 @@
             </div>
           </div>
         </div>
-
       </div>
 
       <!--      Materials -->
@@ -241,7 +278,10 @@
         >
           <span class="text-red-600">165+</span> նյութեր պահեստում
         </h2>
-        <div v-if="categories.length > 0" class="flex flex-row flex-wrap items-center justify-center my-10 w-5/6">
+        <div
+          v-if="categories.length > 0"
+          class="flex flex-row flex-wrap items-center justify-center my-10 w-5/6"
+        >
           <nuxt-link
             exact-active-class="active-link"
             to="/"
@@ -305,21 +345,29 @@
             շարք հետմշակման ծառայություններ:
           </p>
         </div>
-        <div class="container mx-auto px-4 2xl:px-24 grid grid-cols-1 md:grid-cols-2 gap-2 font-sans italic font-light md:text-base text-sm">
+        <div
+          class="container mx-auto px-4 2xl:px-24 grid grid-cols-1 md:grid-cols-2 gap-2 font-sans italic font-light md:text-base text-sm"
+        >
           <div class="grid gap-6">
             <div
               class="services cursor-pointer isPrecisionCutting flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
               @mouseover="isPrecisionCutting = true"
               @mouseleave="isPrecisionCutting = false"
             >
-              <div class="size-16 md:hidden flex items-center justify-center w-1/5">
+              <div
+                class="size-16 md:hidden flex items-center justify-center w-1/5"
+              >
                 <img src="/materials/cut-home-img.webp" alt="" />
               </div>
-              <div class="flex flex-col md:items-start items-center justify-center w-3/5 mx-2 text-center">
+              <div
+                class="flex flex-col md:items-start items-center justify-center w-3/5 mx-2 text-center"
+              >
                 <h2>Ճշգրիտ կտրման մեթոդներ</h2>
                 <p>2-4 օր ստանդարտ արտադրություն</p>
               </div>
-              <div class="flex flex-col items-center justify-center w-1/5">39$</div>
+              <div class="flex flex-col items-center justify-center w-1/5">
+                39$
+              </div>
             </div>
             <div class="grid lg:grid-cols-2 grid-cols-1 gap-6">
               <div
@@ -390,16 +438,20 @@
               </div>
             </div>
           </div>
-          <div class="md:flex hidden items-center justify-between relative overflow-y-hidden">
+          <div
+            class="md:flex hidden items-center justify-between relative overflow-y-hidden"
+          >
             <!--            images-->
             <div
               class="w-full h-full flex items-center justify-center precision_image"
-              :class="{ 'show_precision_image': isPrecisionCutting }">
+              :class="{ show_precision_image: isPrecisionCutting }"
+            >
               <img src="/materials/cut-home-img.webp" alt="" />
             </div>
             <div
               class="w-full h-full flex flex-col items-center justify-center bending_image"
-              :class="{ 'show_bending_image': isBending }">
+              :class="{ show_bending_image: isBending }"
+            >
               <img src="/materials/bend-home-img-1.webp" alt="" />
               <div>
                 <h2>CNC Ճկում և ձևավորում</h2>
@@ -408,7 +460,8 @@
             </div>
             <div
               class="w-full h-full flex flex-col items-center justify-center powder_cutting"
-              :class="{ 'show_powder_cutting': isPowderCoating }">
+              :class="{ show_powder_cutting: isPowderCoating }"
+            >
               <img src="/materials/pow-home-img-1.webp" alt="" />
               <div>
                 <h2>Փոշի ծածկույթ</h2>
@@ -417,7 +470,8 @@
             </div>
             <div
               class="w-full h-full flex flex-col items-center justify-center dimple_forming"
-              :class="{ 'show_dimple_forming': isDimpleForming }">
+              :class="{ show_dimple_forming: isDimpleForming }"
+            >
               <img src="/materials/dimple-home-img-1.jpg" alt="" />
               <div>
                 <h2>Փորվածքների ձևավորում</h2>
@@ -426,21 +480,24 @@
             </div>
             <div
               class="w-full h-full flex items-center justify-center hdw_inserting"
-              :class="{ 'show_hdw_inserting': isHdwInserting }">
+              :class="{ show_hdw_inserting: isHdwInserting }"
+            >
               <img src="/materials/hdw-home-img-2.webp" alt="" />
             </div>
             <div
               class="w-full h-full flex flex-col items-center justify-center anodizing"
-              :class="{ 'show_anodizing': isAnodizing }">
+              :class="{ show_anodizing: isAnodizing }"
+            >
               <img src="/materials/ano-home-img-1.webp" alt="" />
               <div>
                 <h2>Սարքավորումների տեղադրում</h2>
-<!--                 <p>Հասանելի է 9 մետաղի և 1 պլաստիկի համար</p>-->
+                <!--                 <p>Հասանելի է 9 մետաղի և 1 պլաստիկի համար</p>-->
               </div>
             </div>
             <div
               class="w-full h-full flex items-center justify-center tapping"
-              :class="{ 'show_tapping': isTapping }">
+              :class="{ show_tapping: isTapping }"
+            >
               <img src="/materials/tap-home-img-2.webp" alt="" />
             </div>
           </div>
@@ -613,7 +670,7 @@ export default {
   transition: bottom 0.5s ease, opacity 0.5s ease;
 }
 
-.show_anodizing{
+.show_anodizing {
   bottom: 0;
   opacity: 1;
 }
@@ -625,7 +682,7 @@ export default {
   transition: bottom 0.5s ease, opacity 0.5s ease;
 }
 
-.show_tapping{
+.show_tapping {
   bottom: 0;
   opacity: 1;
 }

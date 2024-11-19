@@ -357,7 +357,12 @@ export default {
           this.selectedFactories.forEach((factoryId, index) => {
             formData.append(`factories[${index}][id]`, factoryId)
           })
+        } else {
+          this.getOrder.factories.forEach((factory, index) => {
+            formData.append(`factories[${index}][id]`, factory.id)
+          })
         }
+
         if (this.getOrder.dates && this.getOrder.dates.finish_date) {
           formData.append('finish_date', this.getOrder.dates.finish_date)
         }

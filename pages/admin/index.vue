@@ -32,7 +32,7 @@
         class="m-3 flex items-start justify-between flex-wrap"
       >
         <div
-          class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-32 md:h-64 cursor-pointer"
+          class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-64 cursor-pointer"
         >
           <p v-if="order.created_at">
             <span class="font-bold">Start:</span> {{ order.created_at }}

@@ -122,7 +122,7 @@
               </svg>
 
               <span class="flex-1 ml-3 text-left whitespace-nowrap text-white"
-                >Ստեղշել</span
+                >Ստեղծել</span
               >
               <svg
                 aria-hidden="true"
