@@ -2,7 +2,6 @@
   <div
     class="flex flex-col overflow-y-auto items-center justify-center bg-gray-50 dark:bg-gray-800"
   >
-    <header-component class="bg-gray-900" />
     <div class="w-full p-16 rounded-lg shadow-md dark:bg-gray-900">
       <div v-if="getOrder && getFactory">
         <!-- Stepper Component -->
@@ -259,10 +258,9 @@
 import { mapActions, mapGetters } from 'vuex'
 import StepperComponent from '@/components/stepper'
 import SpinnerComponent from '~/components/spinner/index.vue'
-import HeaderComponent from '~/components/header/HeaderComponent.vue'
 
 export default {
-  components: { HeaderComponent, StepperComponent, SpinnerComponent },
+  components: { StepperComponent, SpinnerComponent },
   layout: 'adminLayout',
   middleware: ['admin', 'roleRedirect'],
   data() {

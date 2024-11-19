@@ -7,7 +7,7 @@
       <div class="grid grid-cols-2 shadow-lg rounded-lg">
         <div class="flex items-center justify-center">
           <img
-            class="size-28 rounded-t-lg md:rounded-lg"
+            class="size-20 rounded-t-lg md:rounded-lg"
             src="/alyumin.jpg"
             alt=""
           />
@@ -29,7 +29,7 @@
       <div class="grid grid-cols-2 shadow-lg rounded-lg">
         <div class="flex items-center justify-center">
           <img
-            class="size-28 rounded-t-lg md:rounded-lg"
+            class="size-20 rounded-t-lg md:rounded-lg"
             src="/Без%20названия.png"
             alt=""
           />
@@ -53,7 +53,7 @@
       <div class="grid grid-cols-2 shadow-lg rounded-lg">
         <div class="flex items-center justify-center">
           <img
-            class="size-28 rounded-t-lg md:rounded-lg"
+            class="size-20 rounded-t-lg md:rounded-lg"
             src="/orders.png"
             alt=""
           />

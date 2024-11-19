@@ -66,22 +66,22 @@
           >
             <service-card
               title="Խորացումներ"
-              image="servicesImg/countersink-parts-300x193.webp"
+              image="/servicesImg/countersink-parts-300x193.webp"
               description="Հնարավորություն տվեք հարմարանքներին տեղադրվել ձեր մասերի վրա այնպես, որ դրանք դառնան հարթ՝ մաշվածությունն ու վնասվածքները նվազեցնելու համար։"
             ></service-card>
             <service-card
               title="Փորվածքների ձևավորում"
-              image="servicesImg/dimple-hero-300x206.jpg"
+              image="/servicesImg/dimple-hero-300x206.jpg"
               description="Ամրացրեք նյութը՝ ավելացնելով էսթետիկ գեղեցիկ խոռոչներ։"
             ></service-card>
             <service-card
               title="Տեղադրում"
-              image="servicesImg/powder-hardware-top-300x193.webp"
+              image="/servicesImg/powder-hardware-top-300x193.webp"
               description="Ընտրեք մեր PEM մամլիչ հարմարանքների կատալոգից՝ ձեր մասերին ընկույզներ, շպիլկաներ և բաժանարարներ ավելացնելու համար։"
             ></service-card>
             <service-card
               title="Թելատում"
-              image="servicesImg/tap-tile-white-300x180.webp"
+              image="/servicesImg/tap-tile-white-300x180.webp"
               description="Արագ և հեշտ կերպով ավելացրեք թելավորումներ՝ ձեր մասերին հարմարանքներ միացնելու համար։"
             ></service-card>
           </div>

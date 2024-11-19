@@ -30,7 +30,7 @@
     >
       <button
         type="button"
-        class="p-2 mt-2 ms-3 float-right text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
+        class="mt-2 ms-3 p-4 float-right text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
         :aria-expanded="isSidebarOpen"
         @click="toggleSidebar"
       >
@@ -77,17 +77,19 @@
           ></rect>
         </svg>
       </button>
-      <div class="h-full px-3 py-4 overflow-y-auto">
+      <div class="relative h-full px-3 py-4 overflow-y-auto">
         <ul class="mt-6 space-y-2">
           <li>
             <nuxt-link
               to="/creator"
               class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
+              @click="closeSidebar"
             >
               <svg
-                class="w-5 h-5"
+                class="w-8 h-8"
                 xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 22 21"
+                viewBox="0 0 24 24"
+                fill="white"
               >
                 <path
                   d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"
@@ -102,22 +104,42 @@
           <li class="text-white">
             <button
               type="button"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
+              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700 w-full"
               @click="toggleDrawer"
             >
               <svg
-                class="w-5 h-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
+                class="h-8 w-8 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
                 <path
-                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
                 />
               </svg>
-              <span class="ms-3">Ստեղշել</span>
+
+              <span class="flex-1 ml-3 text-left whitespace-nowrap text-white"
+                >Ստեղշել</span
+              >
+              <svg
+                aria-hidden="true"
+                class="w-6 h-6 float-right"
+                fill="white"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
             </button>
             <ul v-if="isDrawerOpen" class="pl-6 mt-2 space-y-2">
-              <li>
+              <li @click="closeSidebar">
                 <nuxt-link
                   to="/creator/create/order"
                   class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"
@@ -125,7 +147,7 @@
                   Պատվեր
                 </nuxt-link>
               </li>
-              <li>
+              <li @click="closeSidebar">
                 <nuxt-link
                   to="/creator/create/materials"
                   class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"
@@ -142,17 +164,21 @@
               @click="openUserDrawer = !openUserDrawer"
             >
               <svg
-                aria-hidden="true"
-                class="flex-shrink-0 w-6 h-6 text-gray-500 transition duration-75 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
+                class="h-8 w-8 text-white"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
               >
-                <path
-                  fill-rule="evenodd"
-                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                  clip-rule="evenodd"
-                ></path>
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
               </svg>
               <span class="flex-1 ml-3 text-left whitespace-nowrap text-white"
                 >Օգտատերեր</span
@@ -160,7 +186,7 @@
               <svg
                 aria-hidden="true"
                 class="w-6 h-6"
-                fill="currentColor"
+                fill="white"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
               >
@@ -178,6 +204,7 @@
             >
               <li
                 class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
+                @click="closeSidebar"
               >
                 <nuxt-link
                   to="/creator/create/users"
@@ -187,6 +214,7 @@
               </li>
               <li
                 class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
+                @click="closeSidebar"
               >
                 <nuxt-link
                   to="/creator/update/users"
@@ -196,28 +224,31 @@
               </li>
             </ul>
           </li>
-          <li>
-            <button
-              type="button"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
-              @click="logout"
-            >
-              <svg
-                class="w-5 h-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  d="M5 5V.13a2.96 2.96 0 0 0-1.293.749L.879 3.707A2.96 2.96 0 0 0 .13 5H5Z"
-                />
-                <path
-                  d="M6.737 11.061a2.961 2.961 0 0 1 .81-1.515l6.117-6.116A4.839 4.839 0 0 1 16 2.141V2a1.97 1.97 0 0 0-1.933-2H7v5a2 2 0 0 1-2 2H0v11a1.969 1.969 0 0 0 1.933 2h12.134A1.97 1.97 0 0 0 16 18v-3.093l-1.546 1.546c-.413.413-.94.695-1.513.81l-3.4.679a2.947 2.947 0 0 1-1.85-.227 2.96 2.96 0 0 1-1.635-3.257l.681-3.397Z"
-                />
-              </svg>
-              <span class="ms-3">Log out</span>
-            </button>
-          </li>
         </ul>
+        <button
+          type="button"
+          class="absolute bottom-6 left-6 flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
+          @click="logout"
+        >
+          <svg
+            class="h-8 w-8 text-red-500"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" />
+            <path
+              d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
+            />
+            <path d="M7 12h14l-3 -3m0 6l3 -3" />
+          </svg>
+          <span class="ms-3">Log out</span>
+        </button>
       </div>
     </aside>
 
@@ -241,9 +272,9 @@ export default {
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen
     },
-    // closeSidebar() {
-    //   this.isSidebarOpen = false
-    // },
+    closeSidebar() {
+      this.isSidebarOpen = false
+    },
     toggleDrawer() {
       this.isDrawerOpen = !this.isDrawerOpen
     },
