@@ -351,8 +351,7 @@
           <div class="grid gap-6">
             <div
               class="services cursor-pointer isPrecisionCutting flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
-              @mouseover="isPrecisionCutting = true"
-              @mouseleave="isPrecisionCutting = false"
+              @mouseover="activateService('PrecisionCutting')"
             >
               <div
                 class="size-16 md:hidden flex items-center justify-center w-1/5"
@@ -372,8 +371,7 @@
             <div class="grid lg:grid-cols-2 grid-cols-1 gap-6">
               <div
                 class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
-                @mouseover="isBending = true"
-                @mouseleave="isBending = false"
+                @mouseover="activateService('Bending')"
               >
                 <div class="size-16 md:hidden flex items-center">
                   <img src="/materials/bend-home-img-1.webp" alt="" />
@@ -383,8 +381,7 @@
               </div>
               <div
                 class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
-                @mouseover="isPowderCoating = true"
-                @mouseleave="isPowderCoating = false"
+                @mouseover="activateService('PowderCoating')"
               >
                 <div class="size-16 md:hidden flex items-center">
                   <img src="/materials/pow-home-img-1.webp" alt="" />
@@ -394,8 +391,7 @@
               </div>
               <div
                 class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
-                @mouseover="isDimpleForming = true"
-                @mouseleave="isDimpleForming = false"
+                @mouseover="activateService('DimpleForming')"
               >
                 <div class="size-16 md:hidden flex items-center">
                   <img src="/materials/dimple-home-img-1.jpg" alt="" />
@@ -405,8 +401,7 @@
               </div>
               <div
                 class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
-                @mouseover="isHdwInserting = true"
-                @mouseleave="isHdwInserting = false"
+                @mouseover="activateService('HdwInserting')"
               >
                 <div class="size-16 md:hidden flex items-center">
                   <img src="/materials/hdw-home-img-2.webp" alt="" />
@@ -416,8 +411,7 @@
               </div>
               <div
                 class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
-                @mouseover="isTapping = true"
-                @mouseleave="isTapping = false"
+                @mouseover="activateService('Tapping')"
               >
                 <div class="size-16 md:hidden flex items-center">
                   <img src="/materials/tap-home-img-2.webp" alt="" />
@@ -427,8 +421,7 @@
               </div>
               <div
                 class="services cursor-pointer flex items-center justify-between size-20 p-4 border border-gray-200 rounded-lg hover:border-blue-200 w-full"
-                @mouseover="isAnodizing = true"
-                @mouseleave="isAnodizing = false"
+                @mouseover="activateService('Anodizing')"
               >
                 <div class="size-16 md:hidden flex items-center">
                   <img src="/materials/ano-home-img-1.webp" alt="" />
@@ -444,13 +437,15 @@
             <!--            images-->
             <div
               class="w-full h-full flex items-center justify-center precision_image"
-              :class="{ show_precision_image: isPrecisionCutting }"
+              :class="{
+                show_precision_image: activeService === 'PrecisionCutting',
+              }"
             >
               <img src="/materials/cut-home-img.webp" alt="" />
             </div>
             <div
               class="w-full h-full flex flex-col items-center justify-center bending_image"
-              :class="{ show_bending_image: isBending }"
+              :class="{ show_bending_image: activeService === 'Bending' }"
             >
               <img src="/materials/bend-home-img-1.webp" alt="" />
               <div>
@@ -460,7 +455,9 @@
             </div>
             <div
               class="w-full h-full flex flex-col items-center justify-center powder_cutting"
-              :class="{ show_powder_cutting: isPowderCoating }"
+              :class="{
+                show_powder_cutting: activeService === 'PowderCoating',
+              }"
             >
               <img src="/materials/pow-home-img-1.webp" alt="" />
               <div>
@@ -470,7 +467,9 @@
             </div>
             <div
               class="w-full h-full flex flex-col items-center justify-center dimple_forming"
-              :class="{ show_dimple_forming: isDimpleForming }"
+              :class="{
+                show_dimple_forming: activeService === 'DimpleForming',
+              }"
             >
               <img src="/materials/dimple-home-img-1.jpg" alt="" />
               <div>
@@ -480,13 +479,13 @@
             </div>
             <div
               class="w-full h-full flex items-center justify-center hdw_inserting"
-              :class="{ show_hdw_inserting: isHdwInserting }"
+              :class="{ show_hdw_inserting: activeService === 'HdwInserting' }"
             >
               <img src="/materials/hdw-home-img-2.webp" alt="" />
             </div>
             <div
               class="w-full h-full flex flex-col items-center justify-center anodizing"
-              :class="{ show_anodizing: isAnodizing }"
+              :class="{ show_anodizing: activeService === 'Anodizing' }"
             >
               <img src="/materials/ano-home-img-1.webp" alt="" />
               <div>
@@ -496,7 +495,7 @@
             </div>
             <div
               class="w-full h-full flex items-center justify-center tapping"
-              :class="{ show_tapping: isTapping }"
+              :class="{ show_tapping: activeService === 'Tapping' }"
             >
               <img src="/materials/tap-home-img-2.webp" alt="" />
             </div>
@@ -523,6 +522,7 @@ export default {
       isAnodizing: false,
       isTapping: false,
       scrollY: 0,
+      activeService: 'PrecisionCutting',
     }
   },
 
@@ -556,6 +556,9 @@ export default {
   methods: {
     ...mapActions('materials', ['fetchMaterials']),
     ...mapActions('categories', ['fetchCategories']),
+    activateService(service) {
+      this.activeService = service
+    },
     handleScroll() {
       this.scrollY = window.scrollY
     },
