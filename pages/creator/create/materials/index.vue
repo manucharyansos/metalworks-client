@@ -83,7 +83,7 @@ export default {
         name: '',
         description: '',
         size: '',
-        image: null, // Correct initialization of image
+        image: null,
         price: '',
       },
     }

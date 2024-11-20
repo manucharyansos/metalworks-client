@@ -108,21 +108,18 @@
               @click="toggleDrawer"
             >
               <svg
-                class="h-8 w-8 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                class="w-8 h-8 fill-white"
+                viewBox="0 0 384 512"
+                xmlns="http://www.w3.org/2000/svg"
               >
+                <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
                 <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
-                />
+                  d="M192 0c-41.8 0-77.4 26.7-90.5 64H64C28.7 64 0 92.7 0 128V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V128c0-35.3-28.7-64-64-64H282.5C269.4 26.7 233.8 0 192 0zm0 64a32 32 0 1 1 0 64 32 32 0 1 1 0-64zM72 272a24 24 0 1 1 48 0 24 24 0 1 1 -48 0zm104-16H304c8.8 0 16 7.2 16 16s-7.2 16-16 16H176c-8.8 0-16-7.2-16-16s7.2-16 16-16zM72 368a24 24 0 1 1 48 0 24 24 0 1 1 -48 0zm88 0c0-8.8 7.2-16 16-16H304c8.8 0 16 7.2 16 16s-7.2 16-16 16H176c-8.8 0-16-7.2-16-16z"
+                ></path>
               </svg>
 
               <span class="flex-1 ml-3 text-left whitespace-nowrap text-white"
-                >Ստեղծել</span
+                >Պատվերներ</span
               >
               <svg
                 aria-hidden="true"
@@ -141,18 +138,26 @@
             <ul v-if="isDrawerOpen" class="pl-6 mt-2 space-y-2">
               <li @click="closeSidebar">
                 <nuxt-link
-                  to="/creator/create/order"
+                  to="/creator/orders"
                   class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"
                 >
-                  Պատվեր
+                  Պատվերը
                 </nuxt-link>
               </li>
               <li @click="closeSidebar">
                 <nuxt-link
-                  to="/creator/create/materials"
+                  to="/creator/create/order"
                   class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"
                 >
-                  Մատերիալներ
+                  Նոր Պատվեր
+                </nuxt-link>
+              </li>
+              <li @click="closeSidebar">
+                <nuxt-link
+                  to="/creator/update/order"
+                  class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"
+                >
+                  Թարմացնել Պատվերը
                 </nuxt-link>
               </li>
             </ul>
@@ -207,9 +212,19 @@
                 @click="closeSidebar"
               >
                 <nuxt-link
-                  to="/creator/create/users"
+                  to="/creator/users"
                   class="flex items-center space-x-3 rtl:space-x-reverse"
                   >Օգտատերեր</nuxt-link
+                >
+              </li>
+              <li
+                class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
+                @click="closeSidebar"
+              >
+                <nuxt-link
+                  to="/creator/create/users"
+                  class="flex items-center space-x-3 rtl:space-x-reverse"
+                  >Նոր Օգտատերեր</nuxt-link
                 >
               </li>
               <li
