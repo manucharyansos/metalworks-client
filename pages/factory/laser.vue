@@ -101,7 +101,17 @@
                   :key="item.id"
                   class="px-6 py-4 text-center"
                 >
-                  <div v-if="item.factory_id === '3'" class="text-center">
+                  <div
+                    v-if="item.factory_id === 3 || item.factory_id === '3'"
+                    class="text-center"
+                    :class="
+                      item.status === 'in process'
+                        ? 'bg-green-500 text-white'
+                        : item.status === 'waiting'
+                        ? 'bg-orange-500 text-white'
+                        : 'text-gray-500'
+                    "
+                  >
                     {{ item.status }}
                   </div>
                 </div>
