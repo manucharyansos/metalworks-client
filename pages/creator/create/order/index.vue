@@ -1,7 +1,7 @@
 <template>
   <div class="bg-neutral-100 flex items-center justify-center w-full h-full">
     <template v-if="users && users.length > 0">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-12 w-full mt-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12">
         <div
           class="w-full h-full ml-auto mr-4 p-6 bg-white rounded-xl shadow-lg"
         >

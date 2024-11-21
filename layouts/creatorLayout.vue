@@ -79,11 +79,10 @@
       </button>
       <div class="relative h-full px-3 py-4 overflow-y-auto">
         <ul class="mt-6 space-y-2">
-          <li>
+          <li @click="closeSidebar">
             <nuxt-link
               to="/creator"
               class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
-              @click="closeSidebar"
             >
               <svg
                 class="w-8 h-8"

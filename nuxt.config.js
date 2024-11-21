@@ -61,6 +61,14 @@ export default {
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ['~/assets/css/main.css', 'leaflet/dist/leaflet.css'],
 
+  // Axios module configuration: https://go.nuxtjs.dev/config-axios
+  axios: {
+    baseURL: 'https://api.metalworks.am',
+    // baseURL: 'http://localhost:8000',
+
+    credentials: true,
+  },
+
   auth: {
     strategies: {
       laravelSanctum: {
@@ -115,14 +123,6 @@ export default {
   buildModules: ['@nuxtjs/eslint-module', '@nuxtjs/tailwindcss'],
 
   modules: ['@nuxtjs/pwa', '@nuxtjs/axios', '@nuxtjs/auth-next'],
-
-  // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {
-    baseURL: 'https://api.metalworks.am',
-    // baseURL: 'http://localhost:8000',
-
-    credentials: true,
-  },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {
