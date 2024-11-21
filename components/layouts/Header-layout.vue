@@ -89,7 +89,10 @@
               v-if="openDropdown"
               class="absolute top-14 right-2 z-10 bg-neutral-100 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
             >
-              <div v-if="$auth.user" class="px-4 py-3 text-sm text-gray-900 dark:text-white">
+              <div
+                v-if="$auth.user"
+                class="px-4 py-3 text-sm text-gray-900 dark:text-white"
+              >
                 <div>{{ $auth.user.name }}</div>
                 <div class="font-medium truncate">{{ $auth.user.email }}</div>
               </div>
@@ -166,7 +169,7 @@
         </div>
         <div
           v-if="openNavbar"
-          class="items-center duration-700 ease-in-out justify-between ml-5 w-full lg:flex lg:w-auto lg:order-1"
+          class="items-center duration-700 justify-between w-full lg:flex lg:w-auto lg:order-1 z-50"
         >
           <ul
             class="flex flex-col p-4 lg:p-2 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 lg:space-x-3 rtl:space-x-reverse lg:flex-row lg:mt-0 lg:border-0 lg:bg-white dark:bg-gray-800 lg:dark:bg-gray-900 dark:border-gray-700"
@@ -180,8 +183,7 @@
             <!--                Materials-->
             <!--              </NuxtLink>-->
             <!--            </li>-->
-            <li
-              @click="closeNav">
+            <li @click="closeNav">
               <NuxtLink
                 exact-active-class="active-link"
                 class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
@@ -208,8 +210,7 @@
             <!--                Examples-->
             <!--              </NuxtLink>-->
             <!--            </li>-->
-            <li
-              @click="closeNav">
+            <li @click="closeNav">
               <NuxtLink
                 exact-active-class="active-link"
                 class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
@@ -222,7 +223,8 @@
               <div
                 v-if="!$auth.loggedIn"
                 class="lg:hidden flex flex-col"
-                @click="closeNav">
+                @click="closeNav"
+              >
                 <NuxtLink
                   to="/register"
                   class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white bg-black p-1.5 w-full my-2"
@@ -284,11 +286,11 @@ export default {
       if (this.scrollX < 1024) {
         this.openNavbar = false
       }
-    }
+    },
   },
 }
 </script>
-<style scoped>
+<style>
 .login_button {
   box-shadow: rgba(103, 29, 29, 0.04) 0 0 1px 0,
     rgba(166, 21, 21, 0.87) 0 5px 8px 0;

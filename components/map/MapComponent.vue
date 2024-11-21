@@ -32,6 +32,7 @@ export default {
 #map {
   height: 200px;
   width: 600px;
+  z-index: 0;
 }
 @media screen and (max-width: 1280px) {
   #map {

@@ -1,8 +1,8 @@
 <template>
-  <footer class="bg-white dark:bg-gray-900">
+  <footer class="bg-white dark:bg-gray-900 z-0">
     <div class="mx-auto w-full p-4 py-6 lg:py-8">
       <div class="md:flex md:justify-between">
-        <div class="z-10">
+        <div class="z-0">
           <MapComponent />
         </div>
         <div class="grid grid-cols-2 my-4 gap-8 sm:gap-6 sm:grid-cols-2">

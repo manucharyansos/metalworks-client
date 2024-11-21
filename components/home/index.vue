@@ -187,23 +187,18 @@
           Վերբեռնումից մինչև գնում հաշված րոպեների ընթացքում
         </p>
         <div
-          class="container flex flex-col lg:flex-row items-stretch justify-between w-5/6 space-y-5 lg:space-y-0 lg:space-x-5"
+          class="container flex flex-col lg:flex-row flex-wrap items-center justify-center"
         >
-          <div
-            class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-          >
-            <div class="p-6 mx-auto">
-              <img class="rounded-t-lg" src="/upload-277x300.webp" alt="" />
-            </div>
-            <div
-              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center"
-            >
+          <UploadConfigure image="/upload-277x300.webp">
+            <template #title>
               <p
-                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
+                class="mb-2 xl:text-2xl lg:text-xl text-sm font-normal tracking-tight text-gray-900 dark:text-white"
               >
                 Վերբեռնեք ձեր
                 <span class="underline decoration-dotted">CAD ֆայլ</span>
               </p>
+            </template>
+            <template #description>
               <p
                 class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
               >
@@ -212,50 +207,36 @@
                 էսքիզ մեր
                 <span class="font-bold">Դիզայնի ծառայություններ</span> թիմին։
               </p>
-            </div>
-          </div>
+            </template>
+          </UploadConfigure>
 
-          <div
-            class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-          >
-            <div class="p-6 mx-auto">
-              <img class="rounded-t-lg" src="/quote-277x300.webp" alt="" />
-            </div>
-            <div
-              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center"
-            >
+          <UploadConfigure image="/quote-277x300.webp">
+            <template #title>
               <p
-                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
+                class="mb-2 xl:text-2xl lg:text-xl text-sm font-normal tracking-tight text-gray-900 dark:text-white"
               >
                 Ստացեք ակնթարթային գներ
               </p>
+            </template>
+            <template #description>
               <p
                 class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
               >
                 Գները սկսվում են $39-ից պակասից։
                 <span class="font-bold">Ունենք առաքում</span>
               </p>
-            </div>
-          </div>
+            </template>
+          </UploadConfigure>
 
-          <div
-            class="grid grid-cols-1 items-center justify-center w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700"
-          >
-            <div class="p-6 mx-auto">
-              <img
-                class="rounded-t-lg"
-                src="/larger-package-277x300.webp"
-                alt=""
-              />
-            </div>
-            <div
-              class="m-6 flex flex-col items-center justify-center text-neutral-700 font-sans italic font-light text-center"
-            >
+          <UploadConfigure image="/larger-package-277x300.webp">
+            <template #title>
               <p
-                class="mb-2 xl:text-2xl text-xl font-normal tracking-tight text-gray-900 dark:text-white"
+                class="mb-2 xl:text-2xl lg:text-xl text-sm font-normal tracking-tight text-gray-900 dark:text-white"
               >
                 Պահեստամասերը ձեր դռան մոտ օրերի ընթացքում
               </p>
+            </template>
+            <template #description>
               <p
                 class="mb-3 text-sm text-gray-700 dark:text-gray-400 font-light"
               >
@@ -264,8 +245,8 @@
                 <span class="font-bold">1-3 օր առաքում</span>
                 Հայաստանի ցանկացած վայր
               </p>
-            </div>
-          </div>
+            </template>
+          </UploadConfigure>
         </div>
       </div>
 
@@ -508,9 +489,11 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import UploadConfigure from '~/components/pages/home/UploadConfigure.vue'
 
 export default {
   name: 'HomeComponent',
+  components: { UploadConfigure },
   data() {
     return {
       isActiveBg: false,
