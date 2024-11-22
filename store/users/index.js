@@ -21,17 +21,20 @@ export const actions = {
   async createUser({ commit }, data) {
     try {
       await this.$axios.post('api/clients/client', data)
+      await this.$router.push('/creator/users')
       return true
     } catch (err) {
       return false
     }
   },
-  async updateUser({ commit }, data) {
+  async updateUser({ commit }, { id, data }) {
     try {
-      await this.$axios.post('api/clients/client', data)
-      return true
+      const response = await this.$axios.put(`api/clients/client/${id}`, data)
+      await this.$router.push('/creator/users')
+      return response.data
     } catch (err) {
-      return false
+      console.error('Error updating user:', err)
+      throw err
     }
   },
 }

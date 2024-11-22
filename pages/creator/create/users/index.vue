@@ -1,10 +1,11 @@
 <template>
   <div class="w-full h-screen bg-gray-100 dark:bg-gray-800 overflow-y-auto">
-
-    <p class="text-gray-800 dark:text-white font-bold font-sans italic my-8 text-2xl text-center">
+    <p
+      class="text-gray-800 dark:text-white font-bold font-sans italic my-8 text-2xl text-center"
+    >
       Ստեղծել նոր հաճախորդ
     </p>
-    <div class="grid grid-cols-2 py-12 mt-12 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12 p-4">
       <div id="accordion-collapse" data-accordion="collapse">
         <h2 id="accordion-collapse-heading-1">
           <button
@@ -13,14 +14,33 @@
             data-accordion-target="#accordion-collapse-body-1"
             aria-expanded="true"
             aria-controls="accordion-collapse-body-1"
-            @click="isAccordionType = !isAccordionType">
+            @click="isAccordionType = !isAccordionType"
+          >
             <span>Կարգավիճակ</span>
-            <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>
+            <svg
+              data-accordion-icon
+              class="w-3 h-3 rotate-180 shrink-0"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 10 6"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5 5 1 1 5"
+              />
             </svg>
           </button>
         </h2>
-        <div v-if="isAccordionType" id="accordion-collapse-body-1" :class="{'transition delay-2000': isAccordionType}" aria-labelledby="accordion-collapse-heading-1">
+        <div
+          v-if="isAccordionType"
+          id="accordion-collapse-body-1"
+          :class="{ 'transition delay-2000': isAccordionType }"
+          aria-labelledby="accordion-collapse-heading-1"
+        >
           <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200">
             <li>
               <div
@@ -96,7 +116,7 @@
         v-if="isPhysPerson"
         class="flex flex-col items-center justify-center"
       >
-        <div class="grid grid-cols-2 gap-4 float-left">
+        <div class="grid grid-cols-2 gap-4 float-left w-full">
           <input-with-labels
             id="name"
             v-model="pysPersonData.name"
@@ -152,17 +172,46 @@
                 class="text-gray-500"
                 @click="togglePasswordVisibility"
               >
-                 <span v-if="isPasswordVisible">
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.984 9.984 0 012.223-3.592M6.07 6.07a10.05 10.05 0 015.93-1.07c4.478 0 8.268 2.943 9.542 7a9.984 9.984 0 01-4.992 5.645M15 12a3 3 0 01-4.242 4.243M17.657 17.657L6.343 6.343" />
-                   </svg>
-                 </span>
+                <span v-if="isPasswordVisible">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    width="24"
+                    height="24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.984 9.984 0 012.223-3.592M6.07 6.07a10.05 10.05 0 015.93-1.07c4.478 0 8.268 2.943 9.542 7a9.984 9.984 0 01-4.992 5.645M15 12a3 3 0 01-4.242 4.243M17.657 17.657L6.343 6.343"
+                    />
+                  </svg>
+                </span>
                 <span v-else>
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                   </svg>
-                 </span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    width="24"
+                    height="24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                </span>
               </button>
             </template>
           </input-with-labels>
@@ -179,29 +228,61 @@
                 class="text-gray-500"
                 @click="toggleConfirmPasswordVisibility"
               >
-                 <span v-if="isConfirmPasswordVisible">
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.984 9.984 0 012.223-3.592M6.07 6.07a10.05 10.05 0 015.93-1.07c4.478 0 8.268 2.943 9.542 7a9.984 9.984 0 01-4.992 5.645M15 12a3 3 0 01-4.242 4.243M17.657 17.657L6.343 6.343" />
-                   </svg>
-                 </span>
+                <span v-if="isConfirmPasswordVisible">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    width="24"
+                    height="24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.984 9.984 0 012.223-3.592M6.07 6.07a10.05 10.05 0 015.93-1.07c4.478 0 8.268 2.943 9.542 7a9.984 9.984 0 01-4.992 5.645M15 12a3 3 0 01-4.242 4.243M17.657 17.657L6.343 6.343"
+                    />
+                  </svg>
+                </span>
                 <span v-else>
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                   </svg>
-                 </span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    width="24"
+                    height="24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                </span>
               </button>
             </template>
           </input-with-labels>
         </div>
         <button
           class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          @click="createOrUpdateUser"
+          @click="createNewUser"
         >
           Ստեղծել նոր հաճախորդ
         </button>
       </div>
-      <div v-if="isLegalEntity" class="grid grid-cols-2 gap-4 float-left">
+      <div
+        v-if="isLegalEntity"
+        class="grid grid-cols-2 gap-4 float-left w-full"
+      >
         <!-- Additional fields for legal entity -->
         <input-with-labels
           id="name"
@@ -258,17 +339,46 @@
               class="text-gray-500"
               @click="togglePasswordVisibility"
             >
-                 <span v-if="isPasswordVisible">
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.984 9.984 0 012.223-3.592M6.07 6.07a10.05 10.05 0 015.93-1.07c4.478 0 8.268 2.943 9.542 7a9.984 9.984 0 01-4.992 5.645M15 12a3 3 0 01-4.242 4.243M17.657 17.657L6.343 6.343" />
-                   </svg>
-                 </span>
+              <span v-if="isPasswordVisible">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  width="24"
+                  height="24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.984 9.984 0 012.223-3.592M6.07 6.07a10.05 10.05 0 015.93-1.07c4.478 0 8.268 2.943 9.542 7a9.984 9.984 0 01-4.992 5.645M15 12a3 3 0 01-4.242 4.243M17.657 17.657L6.343 6.343"
+                  />
+                </svg>
+              </span>
               <span v-else>
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                   </svg>
-                 </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  width="24"
+                  height="24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+              </span>
             </button>
           </template>
         </input-with-labels>
@@ -285,17 +395,46 @@
               class="text-gray-500"
               @click="toggleConfirmPasswordVisibility"
             >
-                 <span v-if="isConfirmPasswordVisible">
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.984 9.984 0 012.223-3.592M6.07 6.07a10.05 10.05 0 015.93-1.07c4.478 0 8.268 2.943 9.542 7a9.984 9.984 0 01-4.992 5.645M15 12a3 3 0 01-4.242 4.243M17.657 17.657L6.343 6.343" />
-                   </svg>
-                 </span>
+              <span v-if="isConfirmPasswordVisible">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  width="24"
+                  height="24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.984 9.984 0 012.223-3.592M6.07 6.07a10.05 10.05 0 015.93-1.07c4.478 0 8.268 2.943 9.542 7a9.984 9.984 0 01-4.992 5.645M15 12a3 3 0 01-4.242 4.243M17.657 17.657L6.343 6.343"
+                  />
+                </svg>
+              </span>
               <span v-else>
-                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
-                   </svg>
-                 </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  width="24"
+                  height="24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+              </span>
             </button>
           </template>
         </input-with-labels>
@@ -329,7 +468,7 @@
         ></input-with-labels>
         <button
           class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          @click="createOrUpdateUser"
+          @click="createNewUser"
         >
           Ստեղծել նոր հաճախորդ
         </button>
@@ -387,13 +526,13 @@ export default {
   methods: {
     ...mapActions('users', ['fetchUsers', 'createUser', 'updateUser']),
     togglePasswordVisibility() {
-      this.isPasswordVisible = !this.isPasswordVisible;
+      this.isPasswordVisible = !this.isPasswordVisible
     },
     toggleConfirmPasswordVisibility() {
-      this.isConfirmPasswordVisible = !this.isConfirmPasswordVisible;
+      this.isConfirmPasswordVisible = !this.isConfirmPasswordVisible
     },
-    async createOrUpdateUser() {
-      let userData;
+    async createNewUser() {
+      let userData
       if (this.isPhysPerson) {
         userData = {
           type: 'physPerson',
@@ -404,8 +543,8 @@ export default {
           address: this.pysPersonData.address,
           email: this.pysPersonData.email,
           password: this.pysPersonData.password,
-          password_confirmation: this.pysPersonData.confirm_password
-        };
+          password_confirmation: this.pysPersonData.confirm_password,
+        }
       } else if (this.isLegalEntity) {
         userData = {
           type: 'legalEntity',
@@ -421,13 +560,19 @@ export default {
           company_name: this.pysPersonData.company_name,
           AVC: this.pysPersonData.AVC,
           accountant: this.pysPersonData.accountant,
-        };
+        }
       }
       try {
-        await this.createUser( userData );
-        this.$notify({ type: 'success', text: 'Հաճախորդը հաջողությամբ ստեղծվել է' });
+        await this.createUser(userData)
+        this.$notify({
+          type: 'success',
+          text: 'Հաճախորդը հաջողությամբ ստեղծվել է',
+        })
       } catch (error) {
-        this.$notify({ type: 'error', text: 'Սխալ է տեղի ունեցել հաճախորդի ստեղծման ժամանակ' });
+        this.$notify({
+          type: 'error',
+          text: 'Սխալ է տեղի ունեցել հաճախորդի ստեղծման ժամանակ',
+        })
       }
     },
   },

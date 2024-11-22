@@ -5,7 +5,7 @@
     >
       Հաճախորդ տվյալնեիր թարմացում
     </p>
-    <div class="grid grid-cols-2 py-12 mt-12 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12 p-4">
       <div id="accordion-collapse" data-accordion="collapse">
         <h2 id="accordion-collapse-heading-2">
           <button
@@ -147,7 +147,7 @@
         v-if="isPhysPerson"
         class="flex flex-col items-center justify-center"
       >
-        <div class="grid grid-cols-2 gap-4 float-left">
+        <div class="grid grid-cols-2 gap-4 float-left w-full">
           <input-with-labels
             id="name"
             v-model="pysPersonData.name"
@@ -157,28 +157,28 @@
           ></input-with-labels>
           <input-with-labels
             id="lastName"
-            v-model="pysPersonData.lastName"
+            v-model="pysPersonClientData.last_name"
             label="Ազգանուն"
             type="text"
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
           <input-with-labels
             id="phone"
-            v-model="pysPersonData.phone"
+            v-model="pysPersonClientData.phone"
             type="phone"
             label="Հեռախոս"
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
           <input-with-labels
             id="secondPhone"
-            v-model="pysPersonData.secondPhone"
+            v-model="pysPersonClientData.second_phone"
             type="phone"
             label="Երկրորդ Հեռախոս"
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
           <input-with-labels
             id="address"
-            v-model="pysPersonData.address"
+            v-model="pysPersonClientData.address"
             type="text"
             label="Հասցե"
             class="shadow-md rounded-lg p-3"
@@ -198,7 +198,10 @@
           Ստեղծել նոր հաճախորդ
         </button>
       </div>
-      <div v-if="isLegalEntity" class="grid grid-cols-2 gap-4 float-left">
+      <div
+        v-if="isLegalEntity"
+        class="grid grid-cols-2 gap-4 float-left w-full"
+      >
         <!-- Additional fields for legal entity -->
         <input-with-labels
           id="name"
@@ -209,28 +212,28 @@
         ></input-with-labels>
         <input-with-labels
           id="lastName"
-          v-model="pysPersonData.lastName"
+          v-model="pysPersonClientData.last_name"
           label="Ազգանուն"
           type="text"
           class="shadow-md rounded-lg p-3"
         ></input-with-labels>
         <input-with-labels
           id="phone"
-          v-model="pysPersonData.phone"
+          v-model="pysPersonClientData.phone"
           label="Հեռախոս"
           type="phone"
           class="shadow-md rounded-lg p-3"
         ></input-with-labels>
         <input-with-labels
           id="nextPhone"
-          v-model="pysPersonData.secondPhone"
+          v-model="pysPersonClientData.second_phone"
           label="Այլ հեռախոս"
           type="text"
           class="shadow-md rounded-lg p-3"
         ></input-with-labels>
         <input-with-labels
           id="address"
-          v-model="pysPersonData.legal_address"
+          v-model="pysPersonClientData.legal_address"
           label="Հասցե"
           type="text"
           class="shadow-md rounded-lg p-3"
@@ -244,28 +247,28 @@
         ></input-with-labels>
         <input-with-labels
           id="passportNumber"
-          v-model="pysPersonData.passportNumber"
+          v-model="pysPersonClientData.passportNumber"
           label="Անձնագրի համար"
           type="text"
           class="shadow-md rounded-lg p-3"
         ></input-with-labels>
         <input-with-labels
           id="companyName"
-          v-model="pysPersonData.company_name"
+          v-model="pysPersonClientData.company_name"
           label="Կազմակերպության հասցե"
           type="text"
           class="shadow-md rounded-lg p-3"
         ></input-with-labels>
         <input-with-labels
           id="avc"
-          v-model="pysPersonData.AVC"
+          v-model="pysPersonClientData.AVC"
           label="ՀՎՀՀ"
           type="text"
           class="shadow-md rounded-lg p-3"
         ></input-with-labels>
         <input-with-labels
           id="accountant"
-          v-model="pysPersonData.accountant"
+          v-model="pysPersonClientData.accountant"
           label="Հաշվապահ"
           type="text"
           class="shadow-md rounded-lg p-3"
@@ -274,7 +277,7 @@
           class="mt-10 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           @click="createOrUpdateUser"
         >
-          Ստեղծել նոր հաճախորդ
+          Փոխել
         </button>
       </div>
     </div>
@@ -299,21 +302,8 @@ export default {
       isUserAccordion: false,
       isPasswordVisible: false,
       isConfirmPasswordVisible: false,
-      pysPersonData: {
-        name: '',
-        lastName: '',
-        phone: '',
-        secondPhone: '',
-        address: '',
-        email: '',
-        password: '',
-        confirm_password: '',
-        company_name: '',
-        AVC: '',
-        accountant: '',
-        legal_address: '',
-        passportNumber: '',
-      },
+      pysPersonData: {},
+      pysPersonClientData: {},
     }
   },
   computed: {
@@ -335,56 +325,39 @@ export default {
     ...mapActions('clients', ['addClient']),
     ...mapActions('users', ['fetchUsers', 'createUser', 'updateUser']),
     selectUser(user) {
-      console.log(user)
       this.pysPersonData.email = user.email
       this.pysPersonData.name = user.name
       this.pysPersonData.user_id = user.id
       this.id = user.id
-    },
-    togglePasswordVisibility() {
-      this.isPasswordVisible = !this.isPasswordVisible
-    },
-    toggleConfirmPasswordVisibility() {
-      this.isConfirmPasswordVisible = !this.isConfirmPasswordVisible
+      this.pysPersonClientData = { ...user.client }
+      this.isUserAccordion = false
     },
     async createOrUpdateUser() {
-      let userData
-      if (this.isPhysPerson) {
-        userData = {
-          type: 'physPerson',
-          user_id: this.pysPersonData.user_id,
-          name: this.pysPersonData.name,
-          last_name: this.pysPersonData.lastName,
-          phone: this.pysPersonData.phone,
-          second_phone: this.pysPersonData.secondPhone,
-          address: this.pysPersonData.address,
-        }
-      } else if (this.isLegalEntity) {
-        // eslint-disable-next-line no-unused-vars
-        userData = {
-          type: 'legalEntity',
-          user_id: this.pysPersonData.user_id,
-          name: this.pysPersonData.name,
-          last_name: this.pysPersonData.lastName,
-          phone: this.pysPersonData.phone,
-          secondPhone: this.pysPersonData.secondPhone,
-          address: this.pysPersonData.legal_address,
-          passport_number: this.pysPersonData.passportNumber,
-          company_name: this.pysPersonData.company_name,
-          AVC: this.pysPersonData.AVC,
-          accountant: this.pysPersonData.accountant,
-        }
+      const clientData = { ...this.pysPersonClientData }
+      const userData = {
+        ...this.pysPersonData,
+        ...clientData,
+        type: this.personType,
       }
+
       try {
-        await this.updateUser({ id: this.id, userData })
-        this.$notify({
-          type: 'success',
-          text: 'Հաճախորդը հաջողությամբ ստեղծվել է',
-        })
+        if (this.id) {
+          await this.updateUser({ id: this.id, data: userData })
+          this.$notify({
+            type: 'success',
+            text: 'Հաճախորդը հաջողությամբ թարմացվեց',
+          })
+        } else {
+          await this.createUser(userData)
+          this.$notify({
+            type: 'success',
+            text: 'Հաճախորդը հաջողությամբ ստեղծվեց',
+          })
+        }
       } catch (error) {
         this.$notify({
           type: 'error',
-          text: 'Սխալ է տեղի ունեցել հաճախորդի ստեղծման ժամանակ',
+          text: 'Սխալ է տեղի ունեցել հաճախորդի ստեղծման/թարմացման ժամանակ',
         })
       }
     },
