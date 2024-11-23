@@ -73,7 +73,9 @@
       </div>
     </div>
 
-    <!--      table-->
+    <!--    visitors-->
+
+    <DeviceStatsChart />
 
     <div
       v-if="orders.length > 0 && !isOpenDeleteModal && !openEditModal"
@@ -413,6 +415,7 @@ export default {
     ...mapGetters('orders', ['orders']),
     ...mapGetters('materials', ['getMaterials']),
     ...mapGetters('users', ['getUsers']),
+    ...mapGetters('visitors', ['getVisitors']),
     allOrders() {
       return this.orders
     },
@@ -439,15 +442,28 @@ export default {
       )
     },
   },
+  async mounted() {
+    try {
+      const response = await this.$axios.get('/api/visitor-stats')
+      const data = response.data
+      console.log(data) // Check the response data
+
+      // Use the data to update your chart or components
+    } catch (error) {
+      console.error('Error fetching device stats:', error)
+    }
+  },
   created() {
     this.fetchOrders()
-    this.fetchMaterials()
+    // this.fetchMaterials()
     this.fetchUsers()
+    this.fetchVisitors()
   },
   methods: {
     ...mapActions('orders', ['fetchOrders', 'orderDelete']),
     ...mapActions('materials', ['fetchMaterials']),
     ...mapActions('users', ['fetchUsers']),
+    ...mapActions('visitors', ['fetchVisitors']),
     editOrder(order) {
       this.openEditModal = true
       this.showOrder = order

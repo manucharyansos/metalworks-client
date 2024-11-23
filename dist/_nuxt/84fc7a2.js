@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[29],{435:function(e,r,t){"use strict";t.r(r);var n={layout:"creatorLayout",middleware:["creator","roleRedirect"]},o=t(11),component=Object(o.a)(n,(function(){return(0,this._self._c)("div",[this._v("Orders")])}),[],!1,null,null,null);r.default=component.exports}}]);
