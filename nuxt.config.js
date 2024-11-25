@@ -17,11 +17,11 @@ export default {
       {
         name: 'keywords',
         content:
-          'metalworks, լազերային եռակցում, փոշեմատտացնող ծածկույթ, թեքում, մետաղամշակում',
+          'metalworks, MetalWorks, լազերային եռակցում, փոշեմատտացնող ծածկույթ, թեքում, մետաղամշակում',
       },
       { name: 'robots', content: 'index, follow' },
-      { name: 'author', content: 'Metalworks' },
-      { property: 'og:title', content: 'Metalworks - Մետաղի աշխատանքներ' },
+      { name: 'author', content: 'MetalWorks' },
+      { property: 'og:title', content: 'MetalWorks - Մետաղի աշխատանքներ' },
       {
         property: 'og:description',
         content:
@@ -40,7 +40,7 @@ export default {
       },
       {
         property: 'og:url',
-        content: 'ttps://www.facebook.com/people/Metal-Works/61558844766402/',
+        content: 'https://www.facebook.com/people/Metal-Works/61558844766402/',
       },
       { property: 'og:type', content: 'website' },
       {

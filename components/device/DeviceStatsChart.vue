@@ -1,38 +1,18 @@
 <template>
   <div class="device-stats">
-    <div class="device-stat">
-      <h3>Desktop</h3>
-      <div
-        class="progress-circle"
-        :style="{
-          background: `conic-gradient(#42b883 ${desktopPercentage}%, #ddd ${desktopPercentage}% 100%)`,
-        }"
-      >
-        <span>{{ desktopPercentage }}%</span>
-      </div>
+    <!-- Circle Chart -->
+    <div class="progress-circle" :style="circleStyle">
+      <div class="circle-center">{{ totalVisitors }} Total</div>
     </div>
 
-    <div class="device-stat">
-      <h3>Mobile</h3>
-      <div
-        class="progress-circle"
-        :style="{
-          background: `conic-gradient(#ff6666 ${mobilePercentage}%, #ddd ${mobilePercentage}% 100%)`,
-        }"
-      >
-        <span>{{ mobilePercentage }}%</span>
-      </div>
-    </div>
-
-    <div class="device-stat">
-      <h3>Tablet</h3>
-      <div
-        class="progress-circle"
-        :style="{
-          background: `conic-gradient(#ffc107 ${tabletPercentage}%, #ddd ${tabletPercentage}% 100%)`,
-        }"
-      >
-        <span>{{ tabletPercentage }}%</span>
+    <!-- Device Counts Below the Circle -->
+    <div class="stats-info">
+      <div v-for="(device, type) in deviceData" :key="type" class="stats-item">
+        <span class="device-label" :style="{ color: device.color }"
+          >{{ type }}:</span
+        >
+        <span class="device-count">{{ device.count }}</span>
+        <span class="device-percentage">({{ device.percentage }}%)</span>
       </div>
     </div>
   </div>
@@ -42,10 +22,30 @@
 export default {
   data() {
     return {
-      desktopPercentage: 0,
-      mobilePercentage: 0,
-      tabletPercentage: 0,
+      totalVisitors: 0,
+      deviceData: {
+        desktop: { percentage: 0, count: 0, color: '#42b883' },
+        mobile: { percentage: 0, count: 0, color: '#ff6666' },
+        tablet: { percentage: 0, count: 0, color: '#ffc107' },
+      },
     }
+  },
+  computed: {
+    circleStyle() {
+      // Generate a conic-gradient using the percentages and colors from deviceData
+      const gradients = Object.values(this.deviceData)
+        .map(({ percentage, color }, index, arr) => {
+          const start = arr
+            .slice(0, index)
+            .reduce((sum, { percentage }) => sum + percentage, 0)
+          const end = start + percentage
+          return `${color} ${start}% ${end}%`
+        })
+        .join(', ')
+      return {
+        background: `conic-gradient(${gradients})`,
+      }
+    },
   },
   mounted() {
     this.fetchDeviceStats()
@@ -54,14 +54,24 @@ export default {
     async fetchDeviceStats() {
       try {
         const response = await this.$axios.get('/api/visitor-stats')
-        const { desktop, mobile, tablet } = response.data
+        const { total, desktop, mobile, tablet } = response.data
 
-        const total = desktop + mobile + tablet
-        this.desktopPercentage = total
-          ? ((desktop / total) * 100).toFixed(0)
-          : 0
-        this.mobilePercentage = total ? ((mobile / total) * 100).toFixed(0) : 0
-        this.tabletPercentage = total ? ((tablet / total) * 100).toFixed(0) : 0
+        this.totalVisitors = total
+        this.deviceData.desktop = {
+          percentage: desktop.percentage.toFixed(1),
+          count: desktop.count,
+          color: '#42b883',
+        }
+        this.deviceData.mobile = {
+          percentage: mobile.percentage.toFixed(1),
+          count: mobile.count,
+          color: '#ff6666',
+        }
+        this.deviceData.tablet = {
+          percentage: tablet.percentage.toFixed(1),
+          count: tablet.count,
+          color: '#ffc107',
+        }
       } catch (error) {
         console.error('Error fetching device stats:', error)
       }
@@ -73,34 +83,56 @@ export default {
 <style scoped>
 .device-stats {
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
   align-items: center;
   margin-top: 50px;
 }
 
-.device-stat {
-  text-align: center;
-}
-
 .progress-circle {
-  width: 150px;
-  height: 150px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.5em;
-  color: #fff;
-  background: conic-gradient(
-    #42b883 75%,
-    /* Desktop color fills 75% of the circle */ #ddd 75% 100%
-      /* The remaining part of the circle is gray */
-  );
-  margin-top: 20px;
   position: relative;
+  margin-bottom: 30px;
 }
 
-.progress-circle span {
+.circle-center {
   position: absolute;
+  font-size: 1.2em;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+}
+
+.stats-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.stats-item {
+  display: flex;
+  justify-content: space-between;
+  width: 250px;
+  margin: 5px 0;
+  font-size: 1em;
+}
+
+.device-label {
+  font-weight: bold;
+}
+
+.device-count {
+  margin-left: auto;
+  color: #333;
+}
+
+.device-percentage {
+  margin-left: 10px;
+  color: gray;
 }
 </style>

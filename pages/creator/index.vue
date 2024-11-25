@@ -442,17 +442,6 @@ export default {
       )
     },
   },
-  async mounted() {
-    try {
-      const response = await this.$axios.get('/api/visitor-stats')
-      const data = response.data
-      console.log(data) // Check the response data
-
-      // Use the data to update your chart or components
-    } catch (error) {
-      console.error('Error fetching device stats:', error)
-    }
-  },
   created() {
     this.fetchOrders()
     // this.fetchMaterials()
