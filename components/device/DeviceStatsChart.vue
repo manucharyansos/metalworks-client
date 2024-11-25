@@ -1,12 +1,12 @@
 <template>
-  <div class="device-stats">
+  <div class="device-stats flex flex-col md:items-start items-center m-8 mt-12">
     <!-- Circle Chart -->
     <div class="progress-circle" :style="circleStyle">
       <div class="circle-center">{{ totalVisitors }} Total</div>
     </div>
 
     <!-- Device Counts Below the Circle -->
-    <div class="stats-info">
+    <div class="stats-info flex flex-col items-center justify-center">
       <div v-for="(device, type) in deviceData" :key="type" class="stats-item">
         <span class="device-label" :style="{ color: device.color }"
           >{{ type }}:</span
@@ -32,13 +32,12 @@ export default {
   },
   computed: {
     circleStyle() {
-      // Generate a conic-gradient using the percentages and colors from deviceData
       const gradients = Object.values(this.deviceData)
         .map(({ percentage, color }, index, arr) => {
           const start = arr
             .slice(0, index)
-            .reduce((sum, { percentage }) => sum + percentage, 0)
-          const end = start + percentage
+            .reduce((sum, { percentage }) => sum + parseFloat(percentage), 0) // հաշվում է սկիզբը
+          const end = start + parseFloat(percentage) // հաշվում է ավարտը
           return `${color} ${start}% ${end}%`
         })
         .join(', ')
@@ -47,6 +46,7 @@ export default {
       }
     },
   },
+
   mounted() {
     this.fetchDeviceStats()
   },
@@ -81,13 +81,6 @@ export default {
 </script>
 
 <style scoped>
-.device-stats {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 50px;
-}
-
 .progress-circle {
   width: 200px;
   height: 200px;
@@ -105,13 +98,6 @@ export default {
   color: #333;
   font-weight: bold;
   text-align: center;
-}
-
-.stats-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
 }
 
 .stats-item {
