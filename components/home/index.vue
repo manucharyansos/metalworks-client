@@ -284,7 +284,7 @@
           </div>
         </div>
         <div
-          class="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 place-items-center gap-4"
+          class="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:px-8 px-2 place-items-center gap-4"
         >
           <div
             v-for="(material, index) in materials"
@@ -547,8 +547,8 @@ export default {
     },
     getImage(image) {
       if (image) {
-        return `https://api.metalworks.am/${image}`
-        // return `http://localhost:8000/${image}`
+        return `https://api.metalworks.am/storage/${image}`
+        // return `http://localhost:8000/storage/${image}`
       } else {
         return '/download.png'
       }
