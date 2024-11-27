@@ -260,7 +260,7 @@
           <span class="text-red-600">165+</span> նյութեր պահեստում
         </h2>
         <div
-          v-if="categories.length > 0"
+          v-if="categories?.length > 0"
           class="flex flex-row flex-wrap items-center justify-center my-10 w-5/6"
         >
           <nuxt-link
@@ -511,12 +511,12 @@ export default {
 
   computed: {
     ...mapGetters('materials', ['getMaterials']),
-    ...mapGetters('categories', ['allCategories']),
+    ...mapGetters('categories', ['allMaterialTypes']),
     materials() {
       return this.getMaterials
     },
     categories() {
-      return this.allCategories
+      return this.allMaterialTypes
     },
   },
   watch: {
@@ -526,11 +526,11 @@ export default {
   },
   mounted() {
     window.addEventListener('scroll', this.handleScroll)
-    if (this.getMaterials && this.getMaterials.length === 0) {
+    if (this.getMaterials && this.getMaterials?.length === 0) {
       this.fetchMaterials()
     }
-    if (this.allCategories && this.allCategories.length === 0) {
-      this.fetchCategories()
+    if (this.allMaterialTypes && this.allMaterialTypes?.length === 0) {
+      this.fetchMaterialTypes()
     }
   },
   beforeDestroy() {
@@ -538,7 +538,7 @@ export default {
   },
   methods: {
     ...mapActions('materials', ['fetchMaterials']),
-    ...mapActions('categories', ['fetchCategories']),
+    ...mapActions('categories', ['fetchMaterialTypes']),
     activateService(service) {
       this.activeService = service
     },
@@ -548,6 +548,7 @@ export default {
     getImage(image) {
       if (image) {
         return `https://api.metalworks.am/${image}`
+        // return `http://localhost:8000/${image}`
       } else {
         return '/download.png'
       }

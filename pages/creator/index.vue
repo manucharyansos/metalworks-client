@@ -442,6 +442,7 @@ export default {
     },
   },
   created() {
+    this.fetchMaterials()
     this.fetchOrders()
     this.fetchUsers()
   },

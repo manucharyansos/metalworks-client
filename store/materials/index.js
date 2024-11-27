@@ -11,8 +11,8 @@ export const getters = {
 export const actions = {
   async fetchMaterials({ commit }) {
     try {
-      const { data } = await this.$axios.get('api/materials')
-      commit('setMaterials', data.materials)
+      const response = await this.$axios.get('api/materials')
+      commit('setMaterials', response.data)
       return true
     } catch (err) {
       return false
