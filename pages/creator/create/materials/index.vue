@@ -9,22 +9,22 @@
     </p>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-6xl">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
         <!-- Նոր տեսակ -->
         <div
           class="bg-neutral-50 dark:bg-gray-700 rounded-xl p-6 shadow-md flex flex-col items-center space-y-4 relative"
         >
-          <template v-if="!isOpenMaterialCategoriesDrover || !isOpenMaterial">
+          <template v-if="!isOpenMaterial && !isOpenMaterialCategoriesDrover">
             <button
               class="w-full px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-800 transition-colors"
-              @click="isOpenTypeDrover = !isOpenTypeDrover"
+              @click="toggleTypeDrover"
             >
               Նոր տեսակ
             </button>
             <transition name="slide-down">
               <div
                 v-if="isOpenTypeDrover"
-                class="w-full space-y-4 absolute top-full left-0 bg-white p-4 rounded-lg shadow-lg"
+                class="w-full space-y-4 absolute top-full left-0 bg-white p-4 rounded-lg shadow-lg z-10"
               >
                 <input-with-label-icon
                   v-model="materialType"
@@ -51,23 +51,20 @@
         </div>
 
         <!-- Նոր Կատեգորիա -->
-
         <div
           class="bg-neutral-50 dark:bg-gray-700 rounded-xl p-6 shadow-md flex flex-col items-center space-y-4 relative"
         >
           <template v-if="!isOpenMaterial">
             <button
               class="w-full px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-800 transition-colors"
-              @click="
-                isOpenMaterialCategoriesDrover = !isOpenMaterialCategoriesDrover
-              "
+              @click="toggleCategoryDrover"
             >
               Նոր Կատեգորիա
             </button>
             <transition name="slide-down">
               <div
                 v-if="isOpenMaterialCategoriesDrover"
-                class="w-full space-y-4 absolute top-full left-0 bg-white p-4 rounded-lg shadow-lg"
+                class="w-full space-y-4 absolute top-full left-0 bg-white p-4 rounded-lg shadow-lg z-10"
               >
                 <input-with-label-icon
                   v-model="materialCategories"
@@ -94,54 +91,50 @@
         </div>
       </div>
 
+
       <!-- Նոր Նյութ -->
       <div
         class="bg-neutral-50 dark:bg-gray-700 rounded-xl p-6 shadow-md flex flex-col items-center space-y-4 relative"
       >
         <button
           class="w-full px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-800 transition-colors"
-          @click="openMaterialCategoriesDrover"
+          @click="toggleMaterialDrover"
         >
           Նոր Նյութ
         </button>
         <transition name="slide-down">
           <div
             v-if="isOpenMaterial"
-            class="w-full space-y-4 absolute top-full left-0 bg-white p-4 rounded-lg shadow-lg"
+            class="w-full space-y-4 absolute top-full left-0 bg-white p-4 rounded-lg shadow-lg z-10"
           >
             <input-with-label-icon
               v-model="materials.name"
-              label_class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-3 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-              classes="block px-2.5 py-5 mt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
               label="Անվանում"
               type="text"
+              class="w-full"
             />
             <input-with-label-icon
               v-model="materials.description"
-              label_class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-3 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-              classes="block px-2.5 py-5 mt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
               label="Նկարագրություն"
               type="text"
+              class="w-full"
             />
             <input-with-label-icon
               v-model="materials.size"
-              label_class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-3 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-              classes="block px-2.5 py-5 mt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
               label="Չափ"
               type="text"
+              class="w-full"
             />
             <input
               type="file"
-              accept="image/png, image/jpeg"
-              class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-              @change="handleFileUpload($event)"
+              class="w-full"
+              @change="handleFileUpload"
             />
             <input-with-label-icon
               v-model="materials.price"
               label="Արժեք"
               type="text"
-              label_class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-3 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1"
-              classes="block px-2.5 py-5 mt-4 w-full text-sm text-gray-900 bg-transparent border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+              class="w-full"
             />
             <button
               class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -149,12 +142,11 @@
             >
               Ավելացնել
             </button>
-          </div></transition
-        >
+          </div>
+        </transition>
       </div>
     </div>
 
-    <!-- Notification -->
     <notifications />
   </div>
 </template>
@@ -170,7 +162,6 @@ export default {
   middleware: ['creator', 'roleRedirect'],
   data() {
     return {
-      selectedOption: null,
       materialType: '',
       materialCategories: '',
       selectedType: null,
@@ -183,8 +174,8 @@ export default {
         price: '',
       },
       isOpenTypeDrover: false,
-      isOpenMaterial: false,
       isOpenMaterialCategoriesDrover: false,
+      isOpenMaterial: false,
     }
   },
   computed: {
@@ -216,17 +207,41 @@ export default {
       'fetchMaterialCategories',
     ]),
     ...mapActions('materials', ['createMaterials']),
-    openMaterialCategoriesDrover() {
-      this.isOpenMaterial = !this.isOpenMaterial
-      this.isOpenMaterialCategoriesDrover = !this.isOpenMaterialCategoriesDrover
-      this.isOpenTypeDrover = !this.isOpenTypeDrover
+    toggleTypeDrover() {
+      this.isOpenTypeDrover = !this.isOpenTypeDrover;
+      this.isOpenMaterialCategoriesDrover = false;
+      this.isOpenMaterial = false;
+    },
+    toggleCategoryDrover() {
+      this.isOpenMaterialCategoriesDrover = !this.isOpenMaterialCategoriesDrover;
+      this.isOpenTypeDrover = false;
+      this.isOpenMaterial = false;
+    },
+    toggleMaterialDrover() {
+      this.isOpenMaterial = !this.isOpenMaterial;
+      this.isOpenTypeDrover = false;
+      this.isOpenMaterialCategoriesDrover = false;
     },
     handleFileUpload(event) {
-      const file = event.target.files[0]
+      const file = event.target.files[0];
       if (file) {
-        this.materials.image = file
+        if (!file.type.startsWith('image/')) {
+          this.$notify({
+            text: 'Please upload a valid image file.',
+            type: 'error',
+          });
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          this.$notify({
+            text: 'File size is too large. Please upload a file smaller than 5MB.',
+            type: 'error',
+          });
+          return;
+        }
+        this.materials.image = file;
       } else {
-        this.materials.image = null
+        this.materials.image = null;
       }
     },
 
@@ -240,54 +255,75 @@ export default {
         const categoryData = {
           name: this.materialCategories,
           material_type_id: this.selectedType.id,
-        }
-        this.createMaterialsCategories(categoryData)
+        };
+        this.createMaterialsCategories(categoryData);
+        this.materialCategories = '';
+        this.selectedType = null;
       } else {
         this.$notify({
-          text: 'Բոլոր դաշտերը պարտադիր են: ',
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
+          text: 'Both the category and material type are required.',
           type: 'error',
-        })
+          duration: 3000,
+          position: 'top',
+        });
       }
     },
     async addNewMaterial() {
-      const formData = new FormData()
-      formData.append('material_category_id', this.selectedMaterialCategory?.id)
-      formData.append('name', this.materials.name)
-      formData.append('size', this.materials.size)
-      formData.append('description', this.materials.description)
-      formData.append('price', this.materials.price)
-      if (this.materials.image) formData.append('image', this.materials.image)
-      else return alert('Please upload an image')
+      if (!this.selectedMaterialCategory || !this.materials.name || !this.materials.price) {
+        this.$notify({
+          text: 'All fields must be filled in.',
+          type: 'error',
+          position: 'top',
+          duration: 3000,
+        });
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('material_category_id', this.selectedMaterialCategory.id);
+      formData.append('name', this.materials.name);
+      formData.append('size', this.materials.size);
+      formData.append('description', this.materials.description);
+      formData.append('price', this.materials.price);
+      if (this.materials.image) formData.append('image', this.materials.image);
+      else return alert('Please upload an image');
 
       try {
-        await this.createMaterials(formData)
+        await this.createMaterials(formData);
+        this.$notify({
+          text: 'Material successfully added.',
+          type: 'success',
+          position: 'top',
+        });
       } catch (error) {
         this.$notify({
-          type: 'error',
-          title: 'Error creating material',
           text: error.response?.data || error.message,
-        })
+          type: 'error',
+          position: 'top',
+        });
       }
     },
+    beforeEnter(el) {
+      el.style.height = 0;
+      el.style.opacity = 0;
+    },
+    enter(el, done) {
+      // eslint-disable-next-line no-unused-expressions
+      el.offsetHeight;
+      el.style.transition = "height 0.3s ease-out, opacity 0.3s ease-out";
+      el.style.height = `${el.scrollHeight}px`;
+      el.style.opacity = 1;
+      done();
+    },
+    leave(el, done) {
+      el.style.transition = "height 0.5s ease-in, opacity 0.5s ease-in";
+      el.style.height = 0;
+      el.style.opacity = 0;
+      done();
+    }
   },
 }
 </script>
 <style scoped>
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: max-height 0.3s ease, opacity 0.3s ease;
-}
-.slide-down-enter-from,
-.slide-down-leave-to {
-  max-height: 0;
-  opacity: 0;
-}
-.slide-down-enter-to,
-.slide-down-leave-from {
-  max-height: 200px; /* Կարող եք փոխել ըստ բովանդակության բարձրության */
-  opacity: 1;
-}
+
 </style>
