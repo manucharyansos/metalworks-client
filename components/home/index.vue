@@ -284,7 +284,7 @@
           </div>
         </div>
         <div
-          class="container grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:px-8 px-2 place-items-center gap-4"
+          class="container flex flex-row flex-wrap items-center justify-center md:px-8 px-2 place-items-center gap-4"
         >
           <div
             v-for="(material, index) in materials"
@@ -293,18 +293,18 @@
           >
             <div
               v-if="materials"
-              class="materials flex m-2 p-3 rounded-2xl border border-neutral-400 dark:bg-neutral-800 dark:border-gray-800"
+              class="materials flex m-2 p-3 w-80 rounded-2xl border border-neutral-400 dark:bg-neutral-800 dark:border-gray-800"
             >
-              <div class="for_material_image w16 h-16">
+              <div class="for_material_image size-16">
                 <img
-                  class="w-44 h-full rounded-xl"
+                  class="rounded-xl"
                   :src="getImage(material.image)"
                   alt=""
                 />
               </div>
-              <div class="w-24 flex flex-col items-center justify-start mx-2">
+              <div class="w-full flex flex-col items-start justify-start mx-2">
                 <p class="font-sans italic font-bold">{{ material.name }}</p>
-                <p class="font-sans italic">{{ material.title }}</p>
+                <p class="font-sans italic">{{ material.description }}</p>
               </div>
             </div>
           </div>

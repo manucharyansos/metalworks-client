@@ -30,23 +30,16 @@ export const actions = {
   },
   createMaterialsType({ commit }, material) {
     try {
-      const res = this.$axios.$post('/api/categories/materialType', material)
-      if (res.status === 200) {
-        return true
-      }
+      this.$axios.$post('/api/categories/materialType', material)
+      return true
     } catch (error) {
       return false
     }
   },
   createMaterialsCategories({ commit }, material) {
     try {
-      const response = this.$axios.$post(
-        '/api/categories/materialCategories',
-        material
-      )
-      if (response.status === 200) {
-        return true
-      }
+      this.$axios.$post('/api/categories/materialCategories', material)
+      return true
     } catch (error) {
       return false
     }
