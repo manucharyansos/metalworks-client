@@ -1,23 +1,26 @@
 <template>
   <div
-    class="login_page flex w-full items-center justify-center lg:p-0 p-6 min-h-screen"
+    class="login_page flex w-full h-full items-center justify-center lg:p-0 p-6"
   >
     <div
-      class="flex flex-col md:flex-row items-center justify-center w-full mx-auto font-roboto bg-white rounded-3xl dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0 relative"
+      class="grid grid-cols-1 md:grid-cols-2 items-center justify-center w-full mx-auto font-roboto dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0"
     >
       <!-- Close Button -->
-      <div class="absolute top-4 right-4 md:top-12 md:right-12 z-10">
-        <NuxtLink to="/">
+      <div class="absolute top-4 right-4 md:top-12 md:right-12">
+        <NuxtLink
+          to="/"
+          class="flex items-center justify-center rounded-full hover:border-2 border-red-400"
+        >
           <svg
             class="w-6 h-6 text-white dark:text-gray-800"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
-            fill="none"
+            fill="red"
             viewBox="0 0 24 24"
           >
             <path
-              stroke="currentColor"
+              stroke="red"
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
@@ -29,9 +32,9 @@
 
       <!-- Form Container -->
       <div
-        class="flex flex-col items-center justify-center dark:bg-gray-800 mx-auto md:p-7 p-4 w-full md:w-1/2 md:order-1 order-2"
+        class="flex flex-col items-center justify-center md:rounded-tl-3xl rounded-bl-3xl md:rounded-br-none rounded-br-3xl bg-white w-full h-full dark:bg-gray-800 mx-auto md:p-7 p-3 md:order-1 order-2"
       >
-        <h2 class="text-black font-bold text-2xl md:text-3xl">Մուտք գործել</h2>
+        <h2 class="text-black font-bold text-2xl">Մուտք գործել</h2>
 
         <!-- Email Input -->
         <div class="md:mb-6 mb-4 w-full">
@@ -69,7 +72,9 @@
             />
           </div>
           <template v-if="fieldPassword">
-            <p class="text-red-500 text-xs italic">Խնդրում ենք մուտքագրեկ գաղտնաբառ:</p>
+            <p class="text-red-500 text-xs italic">
+              Խնդրում ենք մուտքագրեկ գաղտնաբառ:
+            </p>
           </template>
           <template>
             <p v-if="errors" class="text-red-500 text-xs italic">
@@ -128,27 +133,27 @@
 
       <!-- Introduction Section -->
       <div
-        class="flex flex-col w-full md:w-1/2 items-center justify-center bg-neutral-200 rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl md:py-12 py-6 md:order-2 order-1"
+        class="introduction_section flex flex-col w-full md:h-full h-64 rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl items-start justify-between py-6 md:py-40 bg-black px-6 md:order-2 order-1"
       >
-        <div
-          class="flex flex-col items-center justify-center border-4 border-red-600 rounded-2xl p-6 m-5 md:m-10"
-        >
-          <img
-            class="w-48 md:w-64 mb-4"
-            src="~/static/dimples-1.png"
-            alt="Dimples"
-          />
-          <p
-            class="text-center text-xl md:text-2xl font-extrabold italic font-mono mb-4"
-          >
-            for your sheet metal parts
-          </p>
-          <img
-            class="transform scale-125 mb-4"
-            src="~/static/dimple-wide.webp"
-            alt="Dimple Wide"
-          />
-        </div>
+        <!--        <div-->
+        <!--          class="flex flex-col items-center justify-center border-4 border-red-600 rounded-2xl p-6 m-5 md:m-10"-->
+        <!--        >-->
+        <!--          <img-->
+        <!--            class="w-48 md:w-64 mb-4"-->
+        <!--            src="~/static/dimples-1.png"-->
+        <!--            alt="Dimples"-->
+        <!--          />-->
+        <!--          <p-->
+        <!--            class="text-center text-xl md:text-2xl font-extrabold italic font-mono mb-4"-->
+        <!--          >-->
+        <!--            for your sheet metal parts-->
+        <!--          </p>-->
+        <!--          <img-->
+        <!--            class="transform scale-125 mb-4"-->
+        <!--            src="~/static/dimple-wide.webp"-->
+        <!--            alt="Dimple Wide"-->
+        <!--          />-->
+        <!--        </div>-->
       </div>
     </div>
   </div>
@@ -183,57 +188,63 @@ export default {
   },
   watch: {
     email(val) {
-      this.fieldEmail = !val;
-      this.errorMessage.email = val ? '' : "Էլ․ հասցեն պարտադիր է։";
+      this.fieldEmail = !val
+      this.errorMessage.email = val ? '' : 'Էլ․ հասցեն պարտադիր է։'
     },
     password(val) {
-      this.fieldPassword = val.length < 6;
-      this.errorMessage.password = val.length >= 6 ? '' : 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ:';
+      this.fieldPassword = val.length < 6
+      this.errorMessage.password =
+        val.length >= 6 ? '' : 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ:'
     },
   },
   methods: {
     ...mapActions('authCustom', ['loginUser']),
     async login({ commit }, userData) {
-      this.loading = true;
+      this.loading = true
       try {
         if (this.email && this.password.length >= 6) {
-          const response = await this.loginUser({
-            data: {
-              email: this.email,
-              password: this.password,
+          const response = await this.loginUser(
+            {
+              data: {
+                email: this.email,
+                password: this.password,
+              },
             },
-          }, userData);
+            userData
+          )
 
           if (response) {
-            this.email = '';
-            this.password = '';
+            this.email = ''
+            this.password = ''
           } else if (typeof this.getErrorMessages === 'string') {
-            this.errorMessage.general = this.getErrorMessages;
+            this.errorMessage.general = this.getErrorMessages
           } else {
-            this.errorMessage = { ...this.getErrorMessages };
+            this.errorMessage = { ...this.getErrorMessages }
           }
         } else {
-          this.fieldEmail = !this.email;
-          this.fieldPassword = this.password.length < 6;
+          this.fieldEmail = !this.email
+          this.fieldPassword = this.password.length < 6
         }
       } catch (error) {
-        this.errorMessage.general = 'Մուտք գործելու ժամանակ սխալ է տեղի ունեցել: Խնդրում ենք կրկին փորձել:';
+        this.errorMessage.general =
+          'Մուտք գործելու ժամանակ սխալ է տեղի ունեցել: Խնդրում ենք կրկին փորձել:'
       } finally {
-        this.loading = false;
+        this.loading = false
       }
     },
   },
-
 }
-
 </script>
 
 <style scoped>
 .login_page {
-  background: rgba(64, 64, 64, 1);
-  height: 100vh;
+  background: rgb(226, 234, 238);
 }
-.active {
-  border-bottom: 1px solid red;
+.introduction_section {
+  background-color: #f5f5f5;
+  background-image: url('@/static/WhatsApp Image 2024-08-24 at 13.01.26_24d3ab90.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 </style>

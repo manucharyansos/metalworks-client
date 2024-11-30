@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[41],{429:function(e,n,t){"use strict";t.r(n);var c={middleware:["publicPage"]},r=t(11),component=Object(r.a)(c,(function(){this._self._c;return this._m(0)}),[function(){var e=this._self._c;return e("div",[e("h1",[this._v("Resources")])])}],!1,null,"16ce1e22",null);n.default=component.exports}}]);

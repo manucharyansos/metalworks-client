@@ -109,11 +109,12 @@
         >
           Վերբեռնեք ձեր STEP, DXF կամ EPS ֆայլը ակնթարթային գնի համար!
         </h2>
-        <button
+        <nuxt-link
+          to="/register"
           class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-2 px-7 my-4"
         >
           ՍԿՍԵԼ
-        </button>
+        </nuxt-link>
 
         <!--        <div class="flex items-center justify-center my-4 shadow-gray-400">-->
         <!--          <div class="flex -space-x-4 rtl:space-x-reverse">-->

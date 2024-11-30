@@ -233,6 +233,7 @@ export default {
       materialCategories: '',
       selectedType: null,
       selectedMaterialCategory: null,
+      selectedCategoryByType: null,
       materials: {
         name: '',
         description: '',
@@ -260,7 +261,7 @@ export default {
       if (!this.selectedType) {
         return this.materialsCategories
       }
-      return this.materialsType.categories
+      return this.selectedType.categories
     },
   },
   mounted() {

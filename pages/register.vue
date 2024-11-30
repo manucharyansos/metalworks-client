@@ -7,18 +7,21 @@
     >
       <!-- Close Button -->
       <div class="absolute top-4 right-4 md:top-12 md:right-12">
-        <NuxtLink to="/">
+        <NuxtLink
+          to="/"
+          class="flex items-center justify-center rounded-full hover:border-2 border-red-400"
+        >
           <svg
             class="w-6 h-6 text-white dark:text-gray-800"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             width="24"
             height="24"
-            fill="none"
+            fill="red"
             viewBox="0 0 24 24"
           >
             <path
-              stroke="currentColor"
+              stroke="red"
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
@@ -47,8 +50,9 @@
               label_-id="name-label"
               for_-l-abel="name-label"
             />
-            <p v-if="fieldErrors.name" class="text-red-500 text-xs italic">{{ fieldErrors.name }}</p>
-
+            <p v-if="fieldErrors.name" class="text-red-500 text-xs italic">
+              {{ fieldErrors.name }}
+            </p>
           </div>
         </div>
 
@@ -66,8 +70,9 @@
               for_-l-abel="email-label"
               label_class="label"
             />
-            <p v-if="fieldErrors.email" class="text-red-500 text-xs italic">{{ fieldErrors.email }}</p>
-
+            <p v-if="fieldErrors.email" class="text-red-500 text-xs italic">
+              {{ fieldErrors.email }}
+            </p>
           </div>
         </div>
 
@@ -84,7 +89,9 @@
               label_-id="password"
               for_-l-abel="password"
             />
-            <p v-if="fieldErrors.password" class="text-red-500 text-xs italic">{{ fieldErrors.password }}</p>
+            <p v-if="fieldErrors.password" class="text-red-500 text-xs italic">
+              {{ fieldErrors.password }}
+            </p>
           </div>
         </div>
 
@@ -100,7 +107,12 @@
               label_-id="password_confirmation"
               for_-l-abel="password_confirmation"
             />
-            <p v-if="fieldErrors.password_confirmation" class="text-red-500 text-xs italic">{{ fieldErrors.password_confirmation }}</p>
+            <p
+              v-if="fieldErrors.password_confirmation"
+              class="text-red-500 text-xs italic"
+            >
+              {{ fieldErrors.password_confirmation }}
+            </p>
           </div>
         </div>
 
@@ -117,7 +129,7 @@
             <span
               class="font-roboto text-lg m-2 md:mt-4 mt-2 text-gray-800 font-mono dark:text-indigo-50"
             >
-             Արդեն ունե՞ք հաշիվ:
+              Արդեն ունե՞ք հաշիվ:
             </span>
             <nuxt-link
               to="/login"
@@ -131,28 +143,28 @@
 
       <!-- Side Banner -->
       <div
-        class="flex flex-col w-full h-full rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl items-start justify-between py-6 md:py-40 bg-black px-6 md:order-2 order-1"
+        class="side_banner flex flex-col w-full md:h-full h-64 rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl items-start justify-between py-6 md:py-40 bg-black px-6 md:order-2 order-1"
       >
-        <div class="flex flex-col items-start mb-6">
-          <h2 class="text-2xl md:text-4xl font-bold text-stone-400">
-            We gotta
-          </h2>
-          <h2 class="text-white font-bold text-4xl">hole</h2>
-          <h2 class="text-stone-500 md:text-4xl text-2xl font-bold">
-            lotta options
-          </h2>
-        </div>
-        <div class="flex flex-col items-start">
-          <h2 class="text-white text-base md:text-2xl my-2 font-bold">
-            COUNTERS
-          </h2>
-          <h2 class="text-white text-base md:text-2xl my-2 font-bold">
-            HARDWARE INSERTION
-          </h2>
-          <h2 class="text-white text-base md:text-2xl my-2 font-bold">
-            TAPPING
-          </h2>
-        </div>
+        <!--        <div class="flex flex-col items-start mb-6">-->
+        <!--          <h2 class="text-2xl md:text-4xl font-bold text-stone-400">-->
+        <!--            We gotta-->
+        <!--          </h2>-->
+        <!--          <h2 class="text-white font-bold text-4xl">hole</h2>-->
+        <!--          <h2 class="text-stone-500 md:text-4xl text-2xl font-bold">-->
+        <!--            lotta options-->
+        <!--          </h2>-->
+        <!--        </div>-->
+        <!--        <div class="flex flex-col items-start">-->
+        <!--          <h2 class="text-white text-base md:text-2xl my-2 font-bold">-->
+        <!--            COUNTERS-->
+        <!--          </h2>-->
+        <!--          <h2 class="text-white text-base md:text-2xl my-2 font-bold">-->
+        <!--            HARDWARE INSERTION-->
+        <!--          </h2>-->
+        <!--          <h2 class="text-white text-base md:text-2xl my-2 font-bold">-->
+        <!--            TAPPING-->
+        <!--          </h2>-->
+        <!--        </div>-->
       </div>
     </div>
     <!--      notifications-->
@@ -225,9 +237,12 @@ export default {
       }
     },
     validateFields() {
-      if (!this.name) this.fieldErrors.name = 'Խնդրում ենք մուտքագրել ձեր անունը'
-      if (!this.email) this.fieldErrors.email = 'Խնդրում ենք մուտքագրել էլ․ փոստի հասցե'
-      if (this.password.length < 6) this.fieldErrors.password = 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ'
+      if (!this.name)
+        this.fieldErrors.name = 'Խնդրում ենք մուտքագրել ձեր անունը'
+      if (!this.email)
+        this.fieldErrors.email = 'Խնդրում ենք մուտքագրել էլ․ փոստի հասցե'
+      if (this.password.length < 6)
+        this.fieldErrors.password = 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ'
       if (this.password !== this.password_confirmation) {
         this.fieldErrors.password_confirmation = 'Գաղտնաբառերը չեն համընկնում'
       }
@@ -251,6 +266,14 @@ export default {
   color: red;
 }
 .register_page {
-  background: rgba(64, 64, 64, 1);
+  background: rgb(226, 234, 238);
+}
+
+.side_banner {
+  background-color: #f5f5f5;
+  background-image: url('@/static/WhatsApp Image 2024-08-24 at 13.01.26_24d3ab90.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 </style>
