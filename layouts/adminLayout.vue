@@ -132,7 +132,7 @@
     </aside>
 
     <!-- Main Content -->
-    <div class="p-4 lg:ml-64">
+    <div class="lg:ml-64">
       <Nuxt />
     </div>
   </div>

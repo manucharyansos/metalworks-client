@@ -10,7 +10,11 @@ export const mutations = {
 
 export const actions = {
   async addMessage({ commit }, message) {
-    const res = await this.$axios.$post('/api/contact', message)
+    await this.$axios.$post('/api/contacts', message)
+    // commit('SET_MESSAGE', res)
+  },
+  async fetchMessages({ commit }) {
+    const res = await this.$axios.$get('/api/contacts')
     commit('SET_MESSAGE', res)
   },
 }

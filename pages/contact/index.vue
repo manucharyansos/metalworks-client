@@ -44,7 +44,7 @@
             <circle cx="193.9" cy="122.8" r="16.5"></circle>
           </svg>
         </div>
-        <h2 class="text-2xl font-bold">Միացեք մեզ հետ</h2>
+        <h2 class="text-2xl font-bold">Միացեք մեզ</h2>
         <button class="text-blue-600 font-bold" @click="openMessage">
           Սեղմեք այստեղ՝ օգնություն ստանալու համար:
         </button>
@@ -62,7 +62,9 @@
           <h2 class="text-xl font-semibold mb-4">Կոնտակտային տվյալներ</h2>
           <div>
             <p class="mb-2"><strong>Էլ փոստ:</strong> info@metalworks.am</p>
-            <a href="tel:+37498025044" class="mb-2"><strong>Հեռախոս:</strong> 098 025 044</a>
+            <a href="tel:+37498025044" class="mb-2"
+              ><strong>Հեռախոս:</strong> 098 025 044</a
+            >
             <p class="mb-2"><strong>Հասցե:</strong> Ռաֆֆու 111</p>
             <h3 class="text-lg font-semibold mt-4">Հետևեկ մեզ</h3>
             <div class="flex space-x-4 mt-2">
