@@ -14,7 +14,7 @@
     />
     <label
       :for="id"
-      class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform scale-75 top-3 origin-[0] peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-focus:scale-75 peer-focus:-translate-y-6"
+      class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform scale-75 top-3 left-6 origin-[0] peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-focus:scale-75 peer-focus:-translate-y-6"
     >
       {{ label }}
     </label>

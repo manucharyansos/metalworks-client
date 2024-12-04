@@ -1,5 +1,6 @@
 <template>
   <div class="mx-auto py-24">
+    <header-layout />
     <div class="container mx-auto px-6">
       <div class="flex lg:hidden">
         <img src="/servicesImg/services-mobile-1-768x244.webp" alt="" />
@@ -93,9 +94,11 @@
 
 <script>
 import ServiceCard from '~/components/pages/services/ServiceCard.vue'
+import HeaderLayout from '~/components/layouts/Header-layout.vue'
 
 export default {
   components: {
+    HeaderLayout,
     ServiceCard,
   },
   middleware: ['publicPage'],

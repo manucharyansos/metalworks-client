@@ -1,9 +1,9 @@
 <template>
-  <div class="m-0 p-0">
+  <div class="m-0 p-0 relative">
     <!-- Sidebar Toggle Button -->
     <button
       type="button"
-      class="p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
+      class="fixed top-0 right-0 p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
       :aria-expanded="isSidebarOpen"
       @click="toggleSidebar"
     >

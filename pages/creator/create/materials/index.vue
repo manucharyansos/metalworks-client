@@ -91,10 +91,15 @@
                 class="w-full space-y-4 absolute top-full left-0 bg-white p-4 rounded-lg shadow-lg z-10"
               >
                 <input-with-label-icon
-                  v-model="materialCategories"
+                  v-model="categories.name"
                   class="w-full"
                   label="Կատեգորիա"
                   type="text"
+                />
+                <input
+                  type="file"
+                  class="w-full"
+                  @change="handleFileUploadCategoryImage"
                 />
                 <button
                   v-if="!categoryLoading"
@@ -155,30 +160,36 @@
             class="w-full space-y-4 absolute top-full left-0 bg-white p-4 rounded-lg shadow-lg z-10"
           >
             <input-with-label-icon
-              v-model="materials.name"
-              label="Անվանում"
-              type="text"
-              class="w-full"
-            />
-            <input-with-label-icon
               v-model="materials.description"
               label="Նկարագրություն"
               type="text"
               class="w-full"
             />
             <input-with-label-icon
-              v-model="materials.size"
-              label="Չափ"
-              type="text"
+              v-model="materials.width"
+              label="Լայնություն"
+              type="number"
+              class="w-full"
+            />
+            <input-with-label-icon
+              v-model="materials.height"
+              label="Բարձրություն"
+              type="number"
+              class="w-full"
+            />
+            <input-with-label-icon
+              v-model="materials.length"
+              label="Երկարություն"
+              type="number"
+              class="w-full"
+            />
+            <input-with-label-icon
+              v-model="materials.thickness"
+              label="Հաստություն"
+              type="number"
               class="w-full"
             />
             <input type="file" class="w-full" @change="handleFileUpload" />
-            <input-with-label-icon
-              v-model="materials.price"
-              label="Արժեք"
-              type="text"
-              class="w-full"
-            />
             <button
               v-if="!materialLoading"
               class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -230,6 +241,10 @@ export default {
   data() {
     return {
       materialType: '',
+      categories: {
+        name: '',
+        image: null,
+      },
       materialCategories: '',
       selectedType: null,
       selectedMaterialCategory: null,
@@ -239,7 +254,10 @@ export default {
         description: '',
         size: '',
         image: null,
-        price: '',
+        width: '',
+        height: '',
+        length: '',
+        thickness: '',
       },
       isOpenTypeDrover: false,
       isOpenMaterialCategoriesDrover: false,
@@ -313,6 +331,28 @@ export default {
         this.materials.image = null
       }
     },
+    handleFileUploadCategoryImage(event) {
+      const file = event.target.files[0]
+      if (file) {
+        if (!file.type.startsWith('image/')) {
+          this.$notify({
+            text: 'Please upload a valid image file.',
+            type: 'error',
+          })
+          return
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          this.$notify({
+            text: 'File size is too large. Please upload a file smaller than 5MB.',
+            type: 'error',
+          })
+          return
+        }
+        this.categories.image = file
+      } else {
+        this.categories.image = null
+      }
+    },
 
     async addNewType() {
       this.typeLoading = true
@@ -343,14 +383,21 @@ export default {
     },
     async addNewCategory() {
       this.categoryLoading = true
-      if (this.materialCategories !== '' && this.selectedType) {
-        const categoryData = {
-          name: this.materialCategories,
-          material_type_id: this.selectedType.id,
-        }
-        const response = await this.createMaterialsCategories(categoryData)
+      if (this.categories.name !== '' && this.selectedType) {
+        const formData = new FormData()
+        formData.append('name', this.categories.name)
+        formData.append('material_type_id', this.selectedType.id)
+        if (this.materials.image)
+          formData.append('image', this.categories.image)
+        this.$notify({
+          text: 'Please upload an image',
+          type: 'error',
+          position: 'top',
+        })
+        const response = await this.createMaterialsCategories(formData)
         if (response) {
-          this.materialCategories = ''
+          this.categories.name = ''
+          this.categories.image = ''
           this.selectedType = null
           await this.fetchMaterialTypes()
           await this.fetchMaterialCategories()
@@ -375,8 +422,10 @@ export default {
       this.materialLoading = true
       if (
         !this.selectedMaterialCategory ||
-        !this.materials.name ||
-        !this.materials.price
+        !this.materials.width ||
+        !this.materials.length ||
+        !this.materials.height ||
+        !this.materials.thickness
       ) {
         this.$notify({
           text: 'All fields must be filled in.',
@@ -388,10 +437,11 @@ export default {
       }
       const formData = new FormData()
       formData.append('material_category_id', this.selectedMaterialCategory.id)
-      formData.append('name', this.materials.name)
-      formData.append('size', this.materials.size)
+      formData.append('width', this.materials.width)
+      formData.append('length', this.materials.length)
+      formData.append('height', this.materials.height)
+      formData.append('thickness', this.materials.thickness)
       formData.append('description', this.materials.description)
-      formData.append('price', this.materials.price)
       if (this.materials.image) formData.append('image', this.materials.image)
       this.$notify({
         text: 'Please upload an image',
@@ -406,8 +456,10 @@ export default {
             type: 'success',
             position: 'top',
           })
-          this.materials.name = ''
-          this.materials.price = ''
+          this.materials.width = ''
+          this.materials.length = ''
+          this.materials.height = ''
+          this.materials.thickness = ''
           this.materials.image = null
           this.materials.description = ''
           this.materialLoading = false

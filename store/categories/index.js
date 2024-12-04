@@ -44,6 +44,7 @@ export const actions = {
       return false
     }
   },
+  findMaterialFromCategory({ commit }) {},
 }
 
 export const getters = {

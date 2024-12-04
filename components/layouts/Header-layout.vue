@@ -26,32 +26,7 @@
             class="hidden lg:flex"
             :class="{ activeInputStyle: openSearchInput }"
           >
-            <input-with-icon
-              type="text"
-              placeholder="Փնտրել"
-              label_class="mb-2 text-sm font-medium text-gray-900 sr-only"
-              label="Փնտրել"
-            >
-              <template #label_svg>
-                <svg
-                  class="w-5 h-5 text-gray-900 dark:text-white"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="red"
-                  viewBox="0 0 24 24"
-                  :class="{ isActiveInputStyle: openSearchInput }"
-                >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-width="2"
-                    d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-                  />
-                </svg>
-              </template>
-            </input-with-icon>
+            <slot name="searchInput"></slot>
           </div>
           <div
             class="lg:hidden flex cursor-pointer"
@@ -174,15 +149,15 @@
           <ul
             class="flex flex-col p-4 lg:p-2 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 lg:space-x-3 rtl:space-x-reverse lg:flex-row lg:mt-0 lg:border-0 lg:bg-white dark:bg-gray-800 lg:dark:bg-gray-900 dark:border-gray-700"
           >
-            <!--            <li>-->
-            <!--              <NuxtLink-->
-            <!--                exact-active-class="active-link"-->
-            <!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
-            <!--                to="/materials"-->
-            <!--              >-->
-            <!--                Materials-->
-            <!--              </NuxtLink>-->
-            <!--            </li>-->
+            <li>
+              <NuxtLink
+                exact-active-class="active-link"
+                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
+                to="/materials"
+              >
+                Materials
+              </NuxtLink>
+            </li>
             <li @click="closeNav">
               <NuxtLink
                 exact-active-class="active-link"
@@ -244,10 +219,8 @@
   </header>
 </template>
 <script>
-import InputWithIcon from '~/components/form/InputWithIcon.vue'
 export default {
   name: 'HeaderLayout',
-  components: { InputWithIcon },
   data() {
     return {
       openDropdown: false,
