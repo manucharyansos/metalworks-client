@@ -161,7 +161,11 @@ export default {
         'image/jpg',
         'image/eps',
         'application/octet-stream',
-      ] // Add other MIME types here
+        'SLDASM',
+        'SLDPRT',
+        'DXF',
+        'dxf',
+      ]
       const selectedFiles = event.target.files
       this.selectedFiles = []
 

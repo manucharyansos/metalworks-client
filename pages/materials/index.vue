@@ -49,7 +49,7 @@
             class="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-lg focus:outline-none"
             @click="toggleTypeDrover(index)"
           >
-            {{ materialType.name }}
+            {{ materialType.name }} {{ materialType?.categories.length }}
           </button>
           <!-- Dropdown Content -->
           <transition
@@ -60,7 +60,7 @@
           >
             <div
               v-if="openTypeIndex === index"
-              class="w-full space-y-4 absolute top-full left-0 bg-white p-4 rounded-lg shadow-lg z-10"
+              class="w-full space-y-4 top-full left-0 bg-white p-4 rounded-lg shadow-lg z-10"
             >
               <ul>
                 <li
@@ -171,12 +171,12 @@ export default {
       el.style.opacity = 0
     },
     enter(el) {
-      el.style.transition = 'height 0.3s ease-out, opacity 0.6s ease-out'
+      el.style.transition = 'height 0.5s ease-out, opacity 1s ease-out'
       el.style.height = `${el.scrollHeight}px`
       el.style.opacity = 1
     },
     leave(el) {
-      el.style.transition = 'height 0.3s ease-in, opacity 0.6s ease-in'
+      el.style.transition = 'height 0.3s ease-in, opacity 0.2s ease-in'
       el.style.height = 0
       el.style.opacity = 0
     },

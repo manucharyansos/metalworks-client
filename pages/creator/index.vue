@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-50 dark:bg-gray-900">
+  <div class="bg-gray-50 dark:bg-gray-900 h-screen">
     <div
       v-if="!isOpenDeleteModal && !openEditModal"
       class="grid md:grid-cols-3 grid-cols-1 gap-4 mt-12"
@@ -75,7 +75,7 @@
 
     <!--    visitors-->
 
-    <DeviceStatsChart />
+    <DeviceStatsChart v-if="!isOpenDeleteModal && !openEditModal" />
 
     <div
       v-if="orders.length > 0 && !isOpenDeleteModal && !openEditModal"
