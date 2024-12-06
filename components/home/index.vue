@@ -1,34 +1,34 @@
 <template>
   <div>
     <header-layout class="page-header">
-      <template #searchInput>
-        <input-with-icon
-          type="text"
-          placeholder="Փնտրել"
-          label_class="mb-2 text-sm font-medium text-gray-900 sr-only"
-          label="Փնտրել"
-        >
-          <template #label_svg>
-            <svg
-              class="w-5 h-5 text-gray-900 dark:text-white"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="white"
-              viewBox="0 0 24 24"
-              :class="{ isActiveInputStyle: openSearchInput }"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-width="2"
-                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
-              />
-            </svg>
-          </template>
-        </input-with-icon>
-      </template>
+<!--      <template #searchInput>-->
+<!--        <input-with-icon-->
+<!--          type="text"-->
+<!--          placeholder="Փնտրել"-->
+<!--          label_class="mb-2 text-sm font-medium text-gray-900 sr-only"-->
+<!--          label="Փնտրել"-->
+<!--        >-->
+<!--          <template #label_svg>-->
+<!--            <svg-->
+<!--              class="w-5 h-5 text-gray-900 dark:text-white"-->
+<!--              aria-hidden="true"-->
+<!--              xmlns="http://www.w3.org/2000/svg"-->
+<!--              width="24"-->
+<!--              height="24"-->
+<!--              fill="white"-->
+<!--              viewBox="0 0 24 24"-->
+<!--              :class="{ isActiveInputStyle: openSearchInput }"-->
+<!--            >-->
+<!--              <path-->
+<!--                stroke="currentColor"-->
+<!--                stroke-linecap="round"-->
+<!--                stroke-width="2"-->
+<!--                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"-->
+<!--              />-->
+<!--            </svg>-->
+<!--          </template>-->
+<!--        </input-with-icon>-->
+<!--      </template>-->
     </header-layout>
     <div
       class="home_component flex flex-col m-0 p-0 min-h-screen w-full h-full items-center"
@@ -522,11 +522,10 @@
 import { mapActions, mapGetters } from 'vuex'
 import UploadConfigure from '~/components/pages/home/UploadConfigure.vue'
 import HeaderLayout from '~/components/layouts/Header-layout.vue'
-import InputWithIcon from '~/components/form/InputWithIcon.vue'
 
 export default {
   name: 'HomeComponent',
-  components: { InputWithIcon, HeaderLayout, UploadConfigure },
+  components: { HeaderLayout, UploadConfigure },
   data() {
     return {
       isActiveBg: false,
@@ -544,12 +543,12 @@ export default {
 
   computed: {
     ...mapGetters('materials', ['getMaterials']),
-    ...mapGetters('categories', ['allMaterialTypes']),
+    ...mapGetters('categories', ['allMaterialGroups']),
     materials() {
       return this.getMaterials
     },
     categories() {
-      return this.allMaterialTypes
+      return this.allMaterialGroups
     },
   },
   watch: {
@@ -562,8 +561,8 @@ export default {
     if (this.getMaterials && this.getMaterials?.length === 0) {
       this.fetchMaterials()
     }
-    if (this.allMaterialTypes && this.allMaterialTypes?.length === 0) {
-      this.fetchMaterialTypes()
+    if (this.allMaterialGroups && this.allMaterialGroups?.length === 0) {
+      this.fetchMaterialGroups()
     }
   },
   beforeDestroy() {
@@ -571,7 +570,7 @@ export default {
   },
   methods: {
     ...mapActions('materials', ['fetchMaterials']),
-    ...mapActions('categories', ['fetchMaterialTypes']),
+    ...mapActions('categories', ['fetchMaterialGroups']),
     activateService(service) {
       this.activeService = service
     },

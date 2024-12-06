@@ -49,9 +49,9 @@
             >Metalwork's</span
           >
         </nuxt-link>
-        <div class="hidden md:block md:pl-2">
-          <slot name="searchInput"></slot>
-        </div>
+<!--        <div class="hidden md:block md:pl-2">-->
+<!--          <slot name="searchInput"></slot>-->
+<!--        </div>-->
       </div>
       <div class="relative flex items-center lg:order-2">
         <button
@@ -83,7 +83,7 @@
           <span class="sr-only">Open user menu</span>
           <img
             class="w-8 h-8 rounded-full"
-            src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/avatars/michael-gough.png"
+            src="/WhatsApp%20Image%202024-08-24%20at%2013.01.26_24d3ab90.jpg"
             alt="user photo"
           />
         </button>

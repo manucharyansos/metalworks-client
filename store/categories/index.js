@@ -1,11 +1,11 @@
 export const state = () => ({
-  materialTypes: [],
+  materialGroups: [],
   materialCategories: [],
 })
 
 export const mutations = {
-  SET_MATERIALS_TYPES(state, material) {
-    state.materialTypes = material
+  SET_MATERIALS_GROUPS(state, material) {
+    state.materialGroups = material
   },
   SET_MATERIALS_CATEGORIES(state, materialCategories) {
     state.materialCategories = materialCategories
@@ -13,11 +13,11 @@ export const mutations = {
 }
 
 export const actions = {
-  async fetchMaterialTypes({ commit }) {
-    const response = await this.$axios.$get('/api/categories/materialType', {
+  async fetchMaterialGroups({ commit }) {
+    const response = await this.$axios.$get('/api/categories/materialGroup', {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
-    commit('SET_MATERIALS_TYPES', response)
+    commit('SET_MATERIALS_GROUPS', response)
   },
   async fetchMaterialCategories({ commit }) {
     const response = await this.$axios.$get(
@@ -28,9 +28,9 @@ export const actions = {
     )
     commit('SET_MATERIALS_CATEGORIES', response)
   },
-  createMaterialsType({ commit }, material) {
+  createMaterialsGroup({ commit }, material) {
     try {
-      this.$axios.$post('/api/categories/materialType', material)
+      this.$axios.$post('/api/categories/materialGroup', material)
       return true
     } catch (error) {
       return false
@@ -48,8 +48,8 @@ export const actions = {
 }
 
 export const getters = {
-  allMaterialTypes(state) {
-    return state.materialTypes
+  allMaterialGroups(state) {
+    return state.materialGroups
   },
   allMaterialCategories(state) {
     return state.materialCategories

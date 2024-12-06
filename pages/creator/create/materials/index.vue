@@ -10,32 +10,37 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-6xl">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-        <!-- Նոր տեսակ -->
+        <!-- Նոր խումբ -->
         <div
           class="bg-neutral-50 dark:bg-gray-700 rounded-xl p-6 shadow-md flex flex-col items-center space-y-4 relative"
         >
           <template v-if="!isOpenMaterial && !isOpenMaterialCategoriesDrover">
             <button
               class="w-full px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-800 transition-colors"
-              @click="toggleTypeDrover"
+              @click="toggleGroupDrover"
             >
-              Նոր տեսակ
+              Նոր խումբ
             </button>
             <transition name="slide-down">
               <div
-                v-if="isOpenTypeDrover"
+                v-if="isOpenGroupDrover"
                 class="w-full space-y-4 absolute top-full left-0 bg-white p-4 rounded-lg shadow-lg z-10"
               >
                 <input-with-label-icon
-                  v-model="materialType"
+                  v-model="materialGroup.name"
                   class="w-full"
-                  label="Տեսակ"
+                  label="Խումբ"
                   type="text"
                 />
+                <input
+                  type="file"
+                  class="w-full"
+                  @change="handleFileUploadMaterialGroupImage"
+                />
                 <button
-                  v-if="!typeLoading"
+                  v-if="!groupLoading"
                   class="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  @click="addNewType"
+                  @click="addNewGroup"
                 >
                   Ավելացնել
                 </button>
@@ -67,8 +72,9 @@
           </template>
           <template v-else>
             <select-with-label
-              v-model="selectedType"
-              :dates="materialsType"
+              v-model="selectedGroup"
+              :dates="materialsGroup"
+              label="Նյութերի խումբ"
               class="w-full"
             />
           </template>
@@ -83,7 +89,7 @@
               class="w-full px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-800 transition-colors"
               @click="toggleCategoryDrover"
             >
-              Նոր Կատեգորիա
+              Նոր Մարկա
             </button>
             <transition name="slide-down">
               <div
@@ -93,13 +99,8 @@
                 <input-with-label-icon
                   v-model="categories.name"
                   class="w-full"
-                  label="Կատեգորիա"
+                  label="Մարկա"
                   type="text"
-                />
-                <input
-                  type="file"
-                  class="w-full"
-                  @change="handleFileUploadCategoryImage"
                 />
                 <button
                   v-if="!categoryLoading"
@@ -138,6 +139,7 @@
             <select-with-label
               v-model="selectedMaterialCategory"
               :dates="filteredCategories"
+              label="Նյութերի մարկա"
               class="w-full"
             />
           </template>
@@ -240,13 +242,15 @@ export default {
   middleware: ['creator', 'roleRedirect'],
   data() {
     return {
-      materialType: '',
-      categories: {
+      materialGroup: {
         name: '',
         image: null,
       },
+      categories: {
+        name: '',
+      },
       materialCategories: '',
-      selectedType: null,
+      selectedGroup: null,
       selectedMaterialCategory: null,
       selectedCategoryByType: null,
       materials: {
@@ -259,54 +263,54 @@ export default {
         length: '',
         thickness: '',
       },
-      isOpenTypeDrover: false,
+      isOpenGroupDrover: false,
       isOpenMaterialCategoriesDrover: false,
       isOpenMaterial: false,
-      typeLoading: false,
+      groupLoading: false,
       categoryLoading: false,
       materialLoading: false,
     }
   },
   computed: {
-    ...mapGetters('categories', ['allMaterialTypes', 'allMaterialCategories']),
-    materialsType() {
-      return this.allMaterialTypes
+    ...mapGetters('categories', ['allMaterialGroups', 'allMaterialCategories']),
+    materialsGroup() {
+      return this.allMaterialGroups
     },
     materialsCategories() {
       return this.allMaterialCategories
     },
     filteredCategories() {
-      if (!this.selectedType) {
+      if (!this.selectedGroup) {
         return this.materialsCategories
       }
-      return this.selectedType.categories
+      return this.selectedGroup.categories
     },
   },
   mounted() {
-    this.fetchMaterialTypes()
+    this.fetchMaterialGroups()
     this.fetchMaterialCategories()
   },
   methods: {
     ...mapActions('categories', [
-      'fetchMaterialTypes',
-      'createMaterialsType',
+      'fetchMaterialGroups',
+      'createMaterialsGroup',
       'createMaterialsCategories',
       'fetchMaterialCategories',
     ]),
     ...mapActions('materials', ['createMaterials']),
-    toggleTypeDrover() {
-      this.isOpenTypeDrover = !this.isOpenTypeDrover
+    toggleGroupDrover() {
+      this.isOpenGroupDrover = !this.isOpenGroupDrover
       this.isOpenMaterialCategoriesDrover = false
       this.isOpenMaterial = false
     },
     toggleCategoryDrover() {
       this.isOpenMaterialCategoriesDrover = !this.isOpenMaterialCategoriesDrover
-      this.isOpenTypeDrover = false
+      this.isOpenGroupDrover = false
       this.isOpenMaterial = false
     },
     toggleMaterialDrover() {
       this.isOpenMaterial = !this.isOpenMaterial
-      this.isOpenTypeDrover = false
+      this.isOpenGroupDrover = false
       this.isOpenMaterialCategoriesDrover = false
     },
     handleFileUpload(event) {
@@ -331,7 +335,7 @@ export default {
         this.materials.image = null
       }
     },
-    handleFileUploadCategoryImage(event) {
+    handleFileUploadMaterialGroupImage(event) {
       const file = event.target.files[0]
       if (file) {
         if (!file.type.startsWith('image/')) {
@@ -348,29 +352,32 @@ export default {
           })
           return
         }
-        this.categories.image = file
+        this.materialGroup.image = file
       } else {
-        this.categories.image = null
+        this.materialGroup.image = null
       }
     },
 
-    async addNewType() {
-      this.typeLoading = true
-      if (this.materialsType !== '') {
-        const response = await this.createMaterialsType({
-          name: this.materialType,
-        })
+    async addNewGroup() {
+      this.groupLoading = true
+      if (this.materialGroup.name !== '') {
+        const formData = new FormData()
+        formData.append('name', this.materialGroup.name)
+        if (this.materialGroup.image)
+          formData.append('image', this.materialGroup.image)
+
+        const response = await this.createMaterialsGroup(formData)
         if (response) {
-          this.materialType = ''
-          this.isOpenTypeDrover = false
-          await this.fetchMaterialTypes()
+          this.materialGroup = ''
+          this.isOpenGroupDrover = false
+          await this.fetchMaterialGroups()
           this.$notify({
             text: 'Հաջողությամբ ավելացել է',
             type: 'success',
             duration: 3000,
             position: 'top',
           })
-          this.typeLoading = false
+          this.groupLoading = false
         }
       } else {
         this.$notify({
@@ -383,23 +390,16 @@ export default {
     },
     async addNewCategory() {
       this.categoryLoading = true
-      if (this.categories.name !== '' && this.selectedType) {
-        const formData = new FormData()
-        formData.append('name', this.categories.name)
-        formData.append('material_type_id', this.selectedType.id)
-        if (this.materials.image)
-          formData.append('image', this.categories.image)
-        this.$notify({
-          text: 'Please upload an image',
-          type: 'error',
-          position: 'top',
-        })
-        const response = await this.createMaterialsCategories(formData)
+      if (this.categories.name !== '' && this.selectedGroup) {
+        const categoryData = {
+          name: this.categories.name,
+          material_group_id: this.selectedGroup.id
+        }
+        const response = await this.createMaterialsCategories(categoryData)
         if (response) {
           this.categories.name = ''
-          this.categories.image = ''
-          this.selectedType = null
-          await this.fetchMaterialTypes()
+          this.selectedGroup = null
+          await this.fetchMaterialGroups()
           await this.fetchMaterialCategories()
           this.$notify({
             text: 'Հաջողությամբ ավելացել է',

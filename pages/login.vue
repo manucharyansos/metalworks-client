@@ -119,7 +119,7 @@
             <span
               class="font-roboto text-lg m-2 md:mt-4 mt-2 text-gray-800 font-mono dark:text-indigo-50"
             >
-              Դեռ չունե՞ք հաշիվ:
+              Դեռ գրանցված չեկ՞:
             </span>
             <nuxt-link
               to="/register"

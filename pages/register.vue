@@ -35,7 +35,7 @@
       <div
         class="flex flex-col items-center justify-center md:rounded-tl-3xl rounded-bl-3xl md:rounded-br-none rounded-br-3xl bg-white w-full h-full dark:bg-gray-800 mx-auto md:p-7 p-3 md:order-1 order-2"
       >
-        <h2 class="text-black font-bold text-2xl">Մուտք գործել</h2>
+        <h2 class="text-black font-bold text-2xl">ԳՐԱՆՑՎԵԼ</h2>
 
         <!-- Name Input -->
         <div class="md:mb-6 mb-4 w-full">

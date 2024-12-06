@@ -53,7 +53,7 @@
           <div v-if="$auth.loggedIn" class="flex items-center gap-4 relative">
             <img
               type="button"
-              src="~/static/profile-picture-5.jpg"
+              src="/User-avatar.svg.png"
               class="w-10 h-10 rounded-full cursor-pointer"
               alt="User dropdown"
               @click="openDropdown = !openDropdown"
@@ -109,14 +109,14 @@
           </div>
           <div v-else class="lg:flex hidden">
             <NuxtLink
-              to="/register"
-              class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3"
-              >ՍԿՍԵԼ</NuxtLink
-            >
-            <NuxtLink
               to="/login"
               class="login_button text-sm xl:text-base flex items-center justify-content-center text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3"
-              >ՄՈՒՏՔ</NuxtLink
+            >ՄՈՒՏՔ</NuxtLink
+            >
+            <NuxtLink
+              to="/register"
+              class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3"
+              >ԳՐԱՆՑՎԵԼ</NuxtLink
             >
           </div>
 
@@ -150,13 +150,13 @@
             class="flex flex-col p-4 lg:p-2 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 lg:space-x-3 rtl:space-x-reverse lg:flex-row lg:mt-0 lg:border-0 lg:bg-white dark:bg-gray-800 lg:dark:bg-gray-900 dark:border-gray-700"
           >
             <li>
-              <NuxtLink
-                exact-active-class="active-link"
-                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
-                to="/materials"
-              >
-                Նյութեր
-              </NuxtLink>
+<!--              <NuxtLink-->
+<!--                exact-active-class="active-link"-->
+<!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
+<!--                to="/materials"-->
+<!--              >-->
+<!--                Նյութեր-->
+<!--              </NuxtLink>-->
             </li>
             <li @click="closeNav">
               <NuxtLink
@@ -203,7 +203,7 @@
                 <NuxtLink
                   to="/register"
                   class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white bg-black p-1.5 w-full my-2"
-                  >ՍԿՍԵԼ</NuxtLink
+                  >ԳՐԱՆՑՎԵԼ</NuxtLink
                 >
                 <NuxtLink
                   to="/login"

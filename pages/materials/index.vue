@@ -37,7 +37,7 @@
         class="fixed top-0 left-0 w-1/5 h-screen border-r-2 border-gray-200 pt-24 bg-white z-0"
       >
         <h1 class="flex flex-col font-sans italic text-xl text-center mb-12">
-          ԱՊՐԱՆՔՆԵՐԻ ԽՄԲԵՐ
+          ՆՅՈՒԹԵՐԻ ԽՄԲԵՐ
         </h1>
         <div
           v-for="(materialType, index) in materialsType"
@@ -84,7 +84,7 @@
       <!-- Content Section -->
       <div class="w-full ml-[40%] mt-12 p-8">
         <h2 class="text-2xl font-bold mb-4">
-          Բարի Գալուստ Ապրանքների Կառավարման Էջ
+          Բարի Գալուստ Ապրանքների Էջ
         </h2>
         <p class="text-gray-600">
           Ընտրեք ապրանքային խումբը ձախ մենյուից՝ մանրամասն տեղեկատվություն
@@ -99,14 +99,14 @@
             :key="material.id"
             class="flex flex-col items-start border border-neutral-300"
           >
-            <div class="border-2 p-2">
+            <div class="border-2 p-2 w-60">
               <h3>{{ material.name }}</h3>
               <img
                 :src="`http://localhost:8000/storage/${material.image}`"
                 alt="Material Image"
-                class="w-32 h-32 object-cover"
+                class="w-full h-32 object-cover"
               />
-              <p>Size: {{ material.size }}</p>
+              <p>Size: {{ formatNumber(material.width) }}*{{ formatNumber(material.height) }}*{{ formatNumber(material.thickness)}}</p>
               <p>Description: {{ material.description }}</p>
             </div>
           </div>
@@ -132,37 +132,50 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('categories', ['allMaterialTypes']),
+    ...mapGetters('categories', ['allMaterialGroups']),
     materialsType() {
-      return this.allMaterialTypes || []
+      return this.allMaterialGroups || []
     },
     filteredMaterials() {
       if (this.searchQuery) {
-        return this.allMaterials.filter((material) =>
-          material.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-        )
+        const query = this.searchQuery.toLowerCase();
+        return this.allMaterials.filter((material) => {
+          const width = material.width ? String(material.width).toLowerCase() : '';
+          const height = material.height ? String(material.height).toLowerCase() : '';
+          return width.includes(query) || height.includes(query);
+        });
       }
+
       if (this.selectedCategory) {
-        return this.selectedCategory.materials || []
+        return this.selectedCategory.materials || [];
       }
-      return this.allMaterials || []
+
+      return this.allMaterials || [];
     },
+
   },
   async mounted() {
-    await this.fetchMaterialTypes()
+    await this.fetchMaterialGroups()
     this.allMaterials = this.getAllMaterials()
   },
   methods: {
-    ...mapActions('categories', ['fetchMaterialTypes']),
+    ...mapActions('categories', ['fetchMaterialGroups']),
     toggleTypeDrover(index) {
       this.openTypeIndex = this.openTypeIndex === index ? null : index
+    },
+    formatNumber(value) {
+      if (value === 0) return 0
+      if (!value) return ''
+      value = Number(value)
+      if (isNaN(value)) return ''
+      return value % 1 === 0 ? parseInt(value, 10) : parseFloat(value.toFixed(2))
     },
     filterMaterialsByCategory(category) {
       this.selectedCategory = category
       this.searchQuery = ''
     },
     getAllMaterials() {
-      return this.allMaterialTypes.flatMap((type) =>
+      return this.allMaterialGroups.flatMap((type) =>
         type.categories.flatMap((category) => category.materials || [])
       )
     },
