@@ -45,6 +45,9 @@ export const actions = {
     })
     commit('SET_ORDER', res.data)
   },
+  async downloadUploadedFile({ commit }, file) {
+    await this.$axios.get(`/api/factories/download/${file}`)
+  },
 }
 
 export const mutations = {

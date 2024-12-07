@@ -73,7 +73,7 @@
         </div>
         <template v-if="otherFiles.length > 0">
           <div v-for="(file, index) in otherFiles" :key="index">
-            <a :href="getFileUrl(file.path)" target="_blank">{{
+            <a :href="fileUrl(file.path)" target="_blank">{{
               file.name || 'Download File'
             }}</a>
           </div>
@@ -100,8 +100,8 @@ export default {
     },
   },
   methods: {
-    getFileUrl(filePath) {
-      return `${'https://api.metalworks.am'}/storage/${filePath}`
+    fileUrl(filePath) {
+      return this.$getFileUrl(filePath);
     },
   },
 }

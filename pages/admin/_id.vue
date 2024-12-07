@@ -184,7 +184,7 @@
                   :key="index"
                   class="flex items-center justify-between"
                 >
-                  <a :href="getFileUrl(file.path)" target="_blank">
+                  <a :href="fileUrl(file.path)" target="_blank">
                     {{ file.name || 'Download File' }}
                   </a>
                   <button
@@ -294,8 +294,8 @@ export default {
     handleFileUpload(event) {
       this.getOrder.files = Array.from(event.target.files)
     },
-    getFileUrl(filePath) {
-      return `${'https://api.metalworks.am'}/storage/${filePath}`
+    fileUrl(filePath) {
+      return this.$getFileUrl(filePath);
     },
     deleteFile(index) {
       this.getOrder.files.splice(index, 1)

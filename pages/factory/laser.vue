@@ -1,36 +1,6 @@
 <template>
   <main class="min-h-screen">
     <template v-if="getOrderByFactories && !isModal">
-      <!--      <header-component class="ml-auto bg-gray-900">-->
-      <!--        <template #searchInput>-->
-      <!--          <input-with-label-icon-->
-      <!--            v-model="searchable"-->
-      <!--            type="text"-->
-      <!--            label="Search"-->
-      <!--            class="ml-24"-->
-      <!--            label_class="text-gray-50"-->
-      <!--          >-->
-      <!--            <template #label_svg>-->
-      <!--              <svg-->
-      <!--                class="w-4 h-4 text-gray-500 dark:text-gray-400"-->
-      <!--                aria-hidden="true"-->
-      <!--                xmlns="http://www.w3.org/2000/svg"-->
-      <!--                fill="none"-->
-      <!--                viewBox="0 0 20 20"-->
-      <!--              >-->
-      <!--                <path-->
-      <!--                  stroke="currentColor"-->
-      <!--                  stroke-linecap="round"-->
-      <!--                  stroke-linejoin="round"-->
-      <!--                  stroke-width="2"-->
-      <!--                  d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"-->
-      <!--                />-->
-      <!--              </svg>-->
-      <!--            </template>-->
-      <!--          </input-with-label-icon>-->
-      <!--        </template>-->
-      <!--      </header-component>-->
-      <!--      table-->
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-36">
         <table
           class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
@@ -39,16 +9,18 @@
             class="text-xs text-gray-700 bg-gray-300 uppercase dark:text-gray-400"
           >
             <tr class="border-b-neutral-700">
-              <th scope="col" class="px-3 py-3">Id</th>
-              <th scope="col" class="px-3 py-3">Start Date</th>
-              <th scope="col" class="px-3 py-3">Finish Date</th>
-              <th scope="col" class="px-3 py-3">Order number</th>
-              <th scope="col" class="px-3 py-3">Prefix code</th>
-              <th scope="col" class="px-3 py-3">Description</th>
-              <th scope="col" class="px-3 py-3 text-center">Status</th>
-              <th scope="col" class="px-3 py-3">Storage link</th>
-              <th scope="col" class="px-3 py-3"></th>
-              <th scope="col" class="px-3 py-3"></th>
+              <th scope="col" class="px-3 py-3 text-center">Հ/Հ</th>
+              <th scope="col" class="px-3 py-3 text-center">
+                Ստեղծման ամսաթիվ
+              </th>
+              <th scope="col" class="px-3 py-3 text-center">Ում կողմից</th>
+              <th scope="col" class="px-3 py-3 text-center">
+                Ավարտի անհրաժեշտ ժամկետ
+              </th>
+              <th scope="col" class="px-3 py-3 text-center">Նկարագրություն</th>
+              <th scope="col" class="px-3 py-3 text-center">Կարգավիճակ</th>
+              <th scope="col" class="px-3 py-3 text-center">Ավարտ</th>
+              <th scope="col" class="px-3 py-3 text-center"></th>
             </tr>
           </thead>
           <tbody
@@ -60,28 +32,25 @@
               <th
                 v-if="order.id"
                 scope="row"
-                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800"
+                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800 text-center"
               >
                 {{ order.id }}
               </th>
-              <td v-if="order.created_at" class="px-6 py-4">
-                {{ order.created_at }}
+              <td v-if="order.dates.created_at" class="px-6 py-4 text-center">
+                {{ order.dates.created_at }}
               </td>
-              <td class="px-6 py-4">
+              <td v-if="order.user_id" class="px-6 py-4 text-center">
+                {{ order.user.name }}
+              </td>
+              <td class="px-6 py-4 text-center">
                 {{ order.dates.finish_date ? order.dates.finish_date : 'null' }}
-              </td>
-              <td v-if="order.order_number" class="px-6 py-4">
-                {{ order.order_number.number }}
-              </td>
-              <td v-if="order.prefix_code" class="px-6 py-4">
-                {{ order.prefix_code.code }}
               </td>
               <td
                 v-if="order.description"
-                class="px-6 py-4 cursor-pointer relative"
+                class="px-6 py-4 cursor-pointer relative text-center hover:text-indigo-900"
                 @click="toggleDetails(order.id)"
               >
-                Description
+                Դիտել
                 <template v-if="isOpenDetails(order.id)">
                   <ul
                     class="absolute top-10 right-0 border-neutral-400 shadow-neutral-700 bg-neutral-400 rounded-2xl p-4"
@@ -116,16 +85,26 @@
                   </div>
                 </div>
               </td>
-              <td v-if="order.store_link" class="px-6">
-                <a class="hover:!text-blue-700" :href="order.store_link.url"
-                  >Link</a
-                >
+              <td class="px-6 text-center">
+                <div v-for="file in order.files" :key="file.id">
+                  <a
+                    class="hover:!text-blue-700"
+                    :href="fileUrl(file.path)"
+                    target="_blank"
+                    >Տեսնել ֆայլը</a
+                  >
+                </div>
+              </td>
+              <td class="px-6 text-center">
+                <div v-for="file in order.files" :key="file.id">
+                  <button @click="downloadFile(file.path)">Ներբեռնել</button>
+                </div>
               </td>
               <td
                 class="px-12 text-indigo-500 border-indigo-500 hover:bg-indigo-500 hover:text-indigo-50 cursor-pointer"
                 @click="updateOrder(order)"
               >
-                Update
+                Խմբագրել
               </td>
             </tr>
           </tbody>
@@ -176,7 +155,7 @@
             class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600"
           >
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              Update order
+              Խմբագրել առաջադրանքը
             </h3>
             <button
               type="button"
@@ -205,15 +184,17 @@
               <select-with-label
                 v-model="selectedOption"
                 :dates="status"
-                label="Ընտրել կարգավիճակը"
+                label="Գործողություն"
               ></select-with-label>
             </div>
             <div class="sm:col-span-2">
-              <textarea-with-label
-                v-model="selectedOrder.factory_order_statuses.description"
-                placeholder="Description"
-                class="w-full my-2 p-3 border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600"
-              ></textarea-with-label>
+              <template v-if="status.type === 'canceling'">
+                <select-with-label
+                  v-model="selectedOption"
+                  :dates="status"
+                  label="Գործողություն"
+                ></select-with-label>
+              </template>
             </div>
           </div>
           <button
@@ -242,7 +223,6 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import OrderCard from '~/components/card/OrderCard.vue'
 
@@ -250,7 +230,6 @@ export default {
   components: {
     OrderCard,
     SelectWithLabel,
-    TextareaWithLabel,
   },
   layout: 'FactoryLayout',
   middleware: ['laser', 'roleRedirect'],
@@ -262,9 +241,9 @@ export default {
       selectedOption: null,
       selectedOrderId: null,
       status: [
-        { id: 1, name: 'in process', value: 'In process' },
-        { id: 2, name: 'waiting', value: 'Waiting' },
-        { id: 2, name: 'finished', value: 'Finished' },
+        { id: 1, name: 'Հաստատել', value: 'confirmation' },
+        { id: 2, name: 'Մերժել', value: 'canceling', type: 'canceling' },
+        { id: 3, name: 'Կատարման ժամկետի փոխարինում', value: 'changeDate' },
       ],
     }
   },
@@ -319,7 +298,18 @@ export default {
     this.fetchOrdersByFactory(3)
   },
   methods: {
-    ...mapActions('factory', ['fetchOrdersByFactory', 'doneFinishedOrder']),
+    ...mapActions('factory', [
+      'fetchOrdersByFactory',
+      'doneFinishedOrder',
+      'downloadUploadedFile',
+    ]),
+    fileUrl(filePath) {
+      return this.$getFileUrl(filePath)
+    },
+    downloadFile(filePath) {
+      const fileUrl = `/factories/files/${filePath}`
+      window.location.href = fileUrl
+    },
     filterOrdersByStatus(status) {
       if (!this.getOrderByFactories) {
         return null
@@ -379,7 +369,7 @@ export default {
         await this.closeModal()
         await this.fetchOrdersByFactory(3)
         await this.$notify({
-          text: `Product status updated successfully.`,
+          text: `Product status updated successfully. `,
           duration: 3000,
           speed: 1000,
           position: 'top',

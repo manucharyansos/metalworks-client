@@ -112,7 +112,7 @@ export default {
   },
 
   plugins: [
-    { src: '~/plugins/flowbite.js', mode: 'client' },
+    { src: '~/plugins/url-helper.js', mode: 'client' },
     { src: '~/plugins/notifications-ssr', ssr: true },
     { src: '~/plugins/notifications-client', ssr: false },
     { src: '~/plugins/leaflet.js', mode: 'client' },

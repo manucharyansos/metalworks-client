@@ -154,35 +154,27 @@ export default {
     ...mapActions('orders', ['createOrder']),
     ...mapActions('users', ['fetchUsers']),
     handleFileUpload(event) {
-      const allowedTypes = [
-        'application/pdf',
-        'image/png',
-        'image/jpeg',
-        'image/jpg',
-        'image/eps',
-        'application/octet-stream',
-        'SLDASM',
-        'SLDPRT',
-        'DXF',
-        'dxf',
-      ]
-      const selectedFiles = event.target.files
-      this.selectedFiles = []
+      const allowedExtensions = ['pdf', 'png', 'jpeg', 'jpg', 'eps', 'step', 'sldprt', 'sldasm', 'dxf'];
+      const selectedFiles = event.target.files;
+      this.selectedFiles = [];
 
       for (let i = 0; i < selectedFiles.length; i++) {
-        if (allowedTypes.includes(selectedFiles[i].type)) {
-          this.selectedFiles.push(selectedFiles[i])
+        const file = selectedFiles[i];
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        if (allowedExtensions.includes(fileExtension)) {
+          this.selectedFiles.push(file);
         } else {
           this.$notify({
-            text: `File type not allowed: ${selectedFiles[i].name}`,
+            text: `File type not allowed: ${file.name}`,
             duration: 3000,
             speed: 1000,
             position: 'top',
             type: 'error',
-          })
+          });
         }
       }
     },
+
     async addTask() {
       const formData = new FormData()
       formData.append('user_id', this.selectedOption.id)
