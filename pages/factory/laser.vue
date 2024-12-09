@@ -19,8 +19,8 @@
               </th>
               <th scope="col" class="px-3 py-3 text-center">Նկարագրություն</th>
               <th scope="col" class="px-3 py-3 text-center">Կարգավիճակ</th>
-              <th scope="col" class="px-3 py-3 text-center">Ավարտ</th>
               <th scope="col" class="px-3 py-3 text-center"></th>
+              <!--              <th scope="col" class="px-3 py-3 text-center"></th>-->
             </tr>
           </thead>
           <tbody
@@ -47,17 +47,25 @@
               </td>
               <td
                 v-if="order.description"
-                class="px-6 py-4 cursor-pointer relative text-center hover:text-indigo-900"
+                class="px-6 py-4 cursor-pointer text-center hover:text-indigo-900"
                 @click="toggleDetails(order.id)"
               >
                 Դիտել
                 <template v-if="isOpenDetails(order.id)">
                   <ul
-                    class="absolute top-10 right-0 border-neutral-400 shadow-neutral-700 bg-neutral-400 rounded-2xl p-4"
+                    class="w-full h-screan border-neutral-400 shadow-neutral-400 bg-neutral-400 rounded-2xl p-4 text-start text-white"
                   >
-                    <li>Name: {{ order.name }}</li>
-                    <li>Quantity: {{ order.quantity }}</li>
-                    <li>Description: {{ order.description }}</li>
+                    <li>Անւն: {{ order.name }}</li>
+                    <li>Քանակ: {{ order.quantity }}</li>
+                    <li>Նկարագրություն: {{ order.description }}</li>
+                    <li v-for="file in order.files" :key="file.id">
+                      <a
+                        class="hover:!text-blue-700"
+                        :href="fileUrl(file.path)"
+                        target="_blank"
+                        >Տեսնել ֆայլը</a
+                      >
+                    </li>
                   </ul>
                 </template>
               </td>
@@ -68,36 +76,23 @@
                 <div
                   v-for="item in order.factory_order_statuses"
                   :key="item.id"
-                  class="px-6 py-4 text-center"
+                  class="px-6 py-4 text-center w-full"
+                  :class="
+                    item.status === 'Հաստատել'
+                      ? 'bg-green-500 text-white'
+                      : item.status === 'Մերժել'
+                      ? 'bg-red-500 text-white'
+                      : item.status === 'Կատարման ժամկետի փոխարինում'
+                      ? 'bg-orange-500 text-white'
+                      : 'text-gray-500'
+                  "
                 >
                   <div
                     v-if="item.factory_id === 3 || item.factory_id === '3'"
                     class="text-center"
-                    :class="
-                      item.status === 'in process'
-                        ? 'bg-green-500 text-white'
-                        : item.status === 'waiting'
-                        ? 'bg-orange-500 text-white'
-                        : 'text-gray-500'
-                    "
                   >
                     {{ item.status }}
                   </div>
-                </div>
-              </td>
-              <td class="px-6 text-center">
-                <div v-for="file in order.files" :key="file.id">
-                  <a
-                    class="hover:!text-blue-700"
-                    :href="fileUrl(file.path)"
-                    target="_blank"
-                    >Տեսնել ֆայլը</a
-                  >
-                </div>
-              </td>
-              <td class="px-6 text-center">
-                <div v-for="file in order.files" :key="file.id">
-                  <button @click="downloadFile(file.path)">Ներբեռնել</button>
                 </div>
               </td>
               <td
@@ -185,16 +180,28 @@
                 v-model="selectedOption"
                 :dates="status"
                 label="Գործողություն"
-              ></select-with-label>
-            </div>
-            <div class="sm:col-span-2">
-              <template v-if="status.type === 'canceling'">
+              >
+              </select-with-label>
+              <div
+                v-if="selectedOption && selectedOption.value === 'canceling'"
+                class="my-5"
+              >
                 <select-with-label
-                  v-model="selectedOption"
-                  :dates="status"
-                  label="Գործողություն"
+                  v-model="additionalOption"
+                  :dates="additionalOptions"
+                  label="Մերժման պատճառ"
                 ></select-with-label>
-              </template>
+              </div>
+              <div
+                v-if="selectedOption && selectedOption.value === 'changeDate'"
+                class="my-5"
+              >
+                <input-with-label-icon
+                  type="date"
+                  v-model="changeDate"
+                  format="dd-mm-yyyy"
+                />
+              </div>
             </div>
           </div>
           <button
@@ -225,9 +232,11 @@
 import { mapActions, mapGetters } from 'vuex'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import OrderCard from '~/components/card/OrderCard.vue'
+import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 
 export default {
   components: {
+    InputWithLabelIcon,
     OrderCard,
     SelectWithLabel,
   },
@@ -236,14 +245,21 @@ export default {
   data() {
     return {
       searchable: '',
+      changeDate: '',
       isModal: false,
       selectedOrder: {},
       selectedOption: null,
+      additionalOption: null,
       selectedOrderId: null,
       status: [
         { id: 1, name: 'Հաստատել', value: 'confirmation' },
-        { id: 2, name: 'Մերժել', value: 'canceling', type: 'canceling' },
+        { id: 2, name: 'Մերժել', value: 'canceling' },
         { id: 3, name: 'Կատարման ժամկետի փոխարինում', value: 'changeDate' },
+      ],
+      additionalOptions: [
+        { id: 1, name: 'Ոչ հստակ պատվեր', value: 'unclear' },
+        { id: 2, name: 'Սխալ տվյալներ', value: 'error' },
+        { id: 2, name: 'Նյութորի առկայության բացակայում', value: 'error' },
       ],
     }
   },
@@ -355,7 +371,8 @@ export default {
         id: this.selectedOrder.id,
         factory_order_statuses: {
           status: this.selectedOption.name,
-          description: this.selectedOrder.factory_order_statuses.description,
+          canceling: this.additionalOption?.name || null,
+          cancel_date: this.changeDate || '',
         },
         factory_id: 3,
       }
@@ -368,13 +385,6 @@ export default {
         await this.doneFinishedOrder(updatedOrder)
         await this.closeModal()
         await this.fetchOrdersByFactory(3)
-        await this.$notify({
-          text: `Product status updated successfully. `,
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
-          type: 'success',
-        })
       } else {
         this.$notify({
           text: `Product status is already finished.`,

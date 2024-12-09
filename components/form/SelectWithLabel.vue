@@ -1,20 +1,26 @@
 <template>
   <div>
     <label
-      for="countries"
+      v-if="label"
+      :for="name"
       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-      >{{ label }}</label
     >
+      {{ label }}
+    </label>
     <select
       v-model="selectValue"
+      :name="name"
+      :id="name"
       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      aria-label="Select client"
       v-bind="$attrs"
     >
       <option v-for="(data, index) in dates" :key="index" :value="data">
         {{ data.name }}
       </option>
     </select>
+    <p v-if="!dates || dates.length === 0" class="mt-2 text-sm text-red-500">
+      Տվյալներ չկան։
+    </p>
   </div>
 </template>
 
@@ -35,7 +41,7 @@ export default {
     },
     dates: {
       type: Array,
-      default: null,
+      default: () => [],
     },
   },
   data() {
@@ -50,5 +56,3 @@ export default {
   },
 }
 </script>
-
-<style scoped></style>
