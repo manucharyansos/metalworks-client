@@ -38,12 +38,17 @@ export const actions = {
   },
 
   async doneFinishedOrder({ commit }, order) {
-    const res = await this.$axios.put(`api/factories/updateOrder/${order.id}`, {
-      factory_order_statuses: order.factory_order_statuses,
-      factory_id: order.factory_id,
-      cancel_date: order.cancel_date,
-    })
-    commit('SET_ORDER', res.data)
+    try {
+      const res = await this.$axios.put(
+        `api/factories/updateOrder/${order.id}`,
+        order
+      )
+      commit('SET_ORDER', res.data)
+      return true
+    } catch (err) {
+      console.log(err)
+      return false
+    }
   },
   async downloadUploadedFile({ commit }, file) {
     await this.$axios.get(`/api/factories/download/${file}`)

@@ -1,7 +1,7 @@
 <template>
-  <main class="min-h-screen">
+  <main class="min-h-screen relative">
     <template v-if="getOrderByFactories && !isModal">
-      <div class="relative overflow-x-auto shadow-md sm:rounded-lg mt-36">
+      <div class="relative overflow-x-auto shadow-md sm:rounded-lg pt-36">
         <table
           class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
         >
@@ -28,7 +28,16 @@
             :key="index"
             class="bg-amber-50"
           >
-            <tr class="border-b border-gray-200 dark:border-gray-700">
+            <tr
+              class="border-b border-gray-200 dark:border-gray-700"
+              :class="
+                order.factory_order_statuses.some(
+                  (item) => item.status === 'Ավարտել'
+                )
+                  ? 'bg-green-500 text-white'
+                  : ''
+              "
+            >
               <th
                 v-if="order.id"
                 scope="row"
@@ -48,26 +57,9 @@
               <td
                 v-if="order.description"
                 class="px-6 py-4 cursor-pointer text-center hover:text-indigo-900"
-                @click="toggleDetails(order.id)"
+                @click="toggleDetails(order)"
               >
                 Դիտել
-                <template v-if="isOpenDetails(order.id)">
-                  <ul
-                    class="w-full h-screan border-neutral-400 shadow-neutral-400 bg-neutral-400 rounded-2xl p-4 text-start text-white"
-                  >
-                    <li>Անւն: {{ order.name }}</li>
-                    <li>Քանակ: {{ order.quantity }}</li>
-                    <li>Նկարագրություն: {{ order.description }}</li>
-                    <li v-for="file in order.files" :key="file.id">
-                      <a
-                        class="hover:!text-blue-700"
-                        :href="fileUrl(file.path)"
-                        target="_blank"
-                        >Տեսնել ֆայլը</a
-                      >
-                    </li>
-                  </ul>
-                </template>
               </td>
               <td
                 v-if="order.factory_order_statuses"
@@ -79,11 +71,13 @@
                   class="px-6 py-4 text-center w-full"
                   :class="
                     item.status === 'Հաստատել'
-                      ? 'bg-green-500 text-white'
+                      ? 'bg-green-300 text-white'
                       : item.status === 'Մերժել'
                       ? 'bg-red-500 text-white'
                       : item.status === 'Կատարման ժամկետի փոխարինում'
                       ? 'bg-orange-500 text-white'
+                      : item.status === 'Ավարտել'
+                      ? 'bg-green-500 text-white'
                       : 'text-gray-500'
                   "
                 >
@@ -104,34 +98,6 @@
             </tr>
           </tbody>
         </table>
-      </div>
-      <div class="grid grid-cols-3 gap-4 pt-20 p-4">
-        <div class="flex flex-col items-center justify-start">
-          <h2 class="text-2xl text-white font-bold italic text-center">
-            In process
-          </h2>
-          <div v-for="order in inProcess" :key="order.id" class="m-3">
-            <OrderCard :order="order" :update-order="updateOrder" />
-          </div>
-        </div>
-
-        <div class="flex flex-col items-center justify-items-start">
-          <h2 class="text-2xl text-white font-bold italic text-center">
-            Waiting
-          </h2>
-          <div v-for="order in waiting" :key="order.id" class="m-3">
-            <OrderCard :order="order" :update-order="updateOrder" />
-          </div>
-        </div>
-
-        <div class="flex flex-col items-center justify-items-start">
-          <h2 class="text-2xl text-white font-bold italic text-center">
-            Finished
-          </h2>
-          <div v-for="order in finished" :key="order.id" class="m-3">
-            <OrderCard :order="order" :update-order="updateOrder" />
-          </div>
-        </div>
       </div>
     </template>
 
@@ -197,8 +163,8 @@
                 class="my-5"
               >
                 <input-with-label-icon
-                  type="date"
                   v-model="changeDate"
+                  type="date"
                   format="dd-mm-yyyy"
                 />
               </div>
@@ -225,19 +191,81 @@
         </div>
       </div>
     </div>
+
+    <!--    details modal-->
+
+    <template v-if="isOpenDetails">
+      <div
+        class="absolute top-0 min-h-screen w-full flex items-center justify-center bg-gray-100 rounded p-4 text-gray-700"
+      >
+        <!-- Փակելու կոճակը -->
+        <button class="fixed top-10 right-20" @click="isOpenDetails = false">
+          <svg
+            class="w-6 h-6 text-gray-800"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="red"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke="red"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18 17.94 6M18 18 6.06 6"
+            />
+          </svg>
+        </button>
+
+        <!-- Մոդալի բովանդակությունը -->
+        <div class="bg-white p-6 rounded-lg shadow-md w-3/4">
+          <h3 class="text-lg font-bold mb-4">Առաջադրանքի մանրամասներ</h3>
+          <ul class="text-base font-medium leading-7">
+            <li>Անուն: {{ details.name }}</li>
+            <li>Քանակ: {{ details.quantity }}</li>
+            <li>Նկարագրություն: {{ details.description }}</li>
+          </ul>
+
+          <!-- Ֆայլերի ցուցակ -->
+          <h4 class="mt-6 text-md font-semibold border-b shadow-2xl p-5">
+            Ֆայլեր
+          </h4>
+          <ul class="mt-2 space-y-2">
+            <li
+              v-for="file in details.files"
+              :key="file.id"
+              class="flex justify-between items-center"
+            >
+              <embed
+                :src="fileUrl(file.path)"
+                type="application/pdf"
+                class="w-full min-h-96"
+              />
+              <span>{{ file.name }}</span>
+              <button class="btn-download" @click="downloadFile(file.path)">
+                Ներբեռնել
+              </button>
+              <!--              <a :href="$getFileUrl(file.path)" download target="_blank"-->
+              <!--                >Ներբեռնել DXF ֆայլը</a-->
+              <!--              >-->
+            </li>
+          </ul>
+        </div>
+      </div>
+    </template>
+
     <notifications />
   </main>
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
-import OrderCard from '~/components/card/OrderCard.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 
 export default {
   components: {
     InputWithLabelIcon,
-    OrderCard,
     SelectWithLabel,
   },
   layout: 'FactoryLayout',
@@ -247,14 +275,22 @@ export default {
       searchable: '',
       changeDate: '',
       isModal: false,
+      isOpenDetails: false,
       selectedOrder: {},
       selectedOption: null,
       additionalOption: null,
       selectedOrderId: null,
+      details: {
+        name: '',
+        quantity: 0,
+        description: '',
+        files: [],
+      },
       status: [
         { id: 1, name: 'Հաստատել', value: 'confirmation' },
         { id: 2, name: 'Մերժել', value: 'canceling' },
         { id: 3, name: 'Կատարման ժամկետի փոխարինում', value: 'changeDate' },
+        { id: 4, name: 'Ավարտել', value: 'finishing' },
       ],
       additionalOptions: [
         { id: 1, name: 'Ոչ հստակ պատվեր', value: 'unclear' },
@@ -265,17 +301,6 @@ export default {
   },
   computed: {
     ...mapGetters('factory', ['getOrderByFactories']),
-    inProcess() {
-      return this.filterOrdersByStatus('in process')
-    },
-
-    waiting() {
-      return this.filterOrdersByStatus('waiting')
-    },
-
-    finished() {
-      return this.filterOrdersByStatus('finished')
-    },
 
     searchFilter() {
       const searchTerm = this.searchable.trim().toLowerCase()
@@ -322,10 +347,11 @@ export default {
     fileUrl(filePath) {
       return this.$getFileUrl(filePath)
     },
+
     downloadFile(filePath) {
-      const fileUrl = `/factories/files/${filePath}`
-      window.location.href = fileUrl
+      window.location.href = `/api/download/${filePath}`
     },
+
     filterOrdersByStatus(status) {
       if (!this.getOrderByFactories) {
         return null
@@ -367,24 +393,35 @@ export default {
     },
     async doneOrder() {
       const updatedOrder = {
-        ...this.selectedOrder,
         id: this.selectedOrder.id,
         factory_order_statuses: {
-          status: this.selectedOption.name,
+          status: this.selectedOption?.name || null,
           canceling: this.additionalOption?.name || null,
-          cancel_date: this.changeDate || '',
+          cancel_date: this.changeDate || null,
         },
         factory_id: 3,
       }
 
       if (
-        this.selectedOption &&
-        this.selectedOption.name &&
+        this.selectedOption?.name &&
         this.selectedOrder.status !== 'finished'
       ) {
-        await this.doneFinishedOrder(updatedOrder)
-        await this.closeModal()
-        await this.fetchOrdersByFactory(3)
+        const res = await this.doneFinishedOrder(updatedOrder)
+        if (res) {
+          this.$notify({
+            text: `Order updated successfully.`,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'success',
+          })
+          this.selectedOption = null
+          this.additionalOption = null
+          this.changeDate = null
+
+          await this.closeModal()
+          await this.fetchOrdersByFactory(3)
+        }
       } else {
         this.$notify({
           text: `Product status is already finished.`,
@@ -396,15 +433,10 @@ export default {
         this.closeModal()
       }
     },
-    toggleDetails(orderId) {
-      if (this.selectedOrderId === orderId) {
-        this.selectedOrderId = null
-      } else {
-        this.selectedOrderId = orderId
-      }
-    },
-    isOpenDetails(orderId) {
-      return this.selectedOrderId === orderId
+
+    toggleDetails(order) {
+      this.isOpenDetails = !this.isOpenDetails
+      this.details = order
     },
   },
 }
