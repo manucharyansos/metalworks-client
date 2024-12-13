@@ -231,26 +231,27 @@
           <h4 class="mt-6 text-md font-semibold border-b shadow-2xl p-5">
             Ֆայլեր
           </h4>
-          <ul class="mt-2 space-y-2">
-            <li
-              v-for="file in details.files"
-              :key="file.id"
-              class="flex justify-between items-center"
-            >
-              <embed
-                :src="fileUrl(file.path)"
-                type="application/pdf"
-                class="w-full min-h-96"
-              />
-              <span>{{ file.name }}</span>
-              <button class="btn-download" @click="downloadFile(file.path)">
-                Ներբեռնել
-              </button>
-              <!--              <a :href="$getFileUrl(file.path)" download target="_blank"-->
-              <!--                >Ներբեռնել DXF ֆայլը</a-->
-              <!--              >-->
-            </li>
-          </ul>
+          <FileViewer :details="details.files" />
+          <!--          <ul class="mt-2 space-y-2">-->
+          <!--            <li-->
+          <!--              v-for="file in details.files"-->
+          <!--              :key="file.id"-->
+          <!--              class="flex justify-between items-center"-->
+          <!--            >-->
+          <!--              <embed-->
+          <!--                :src="fileUrl(file.path)"-->
+          <!--                type="application/pdf"-->
+          <!--                class="w-full min-h-96"-->
+          <!--              />-->
+          <!--              <span>{{ file.name }}</span>-->
+          <!--              <button class="btn-download" @click="downloadFile(file.path)">-->
+          <!--                Ներբեռնել-->
+          <!--              </button>-->
+          <!--              <a :href="$getFileUrl(file.path)" download target="_blank"-->
+          <!--                >Ներբեռնել DXF ֆայլը</a-->
+          <!--              >-->
+          <!--            </li>-->
+          <!--          </ul>-->
         </div>
       </div>
     </template>
@@ -262,9 +263,11 @@
 import { mapActions, mapGetters } from 'vuex'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+import FileViewer from '~/components/File/FileViewer.vue'
 
 export default {
   components: {
+    FileViewer,
     InputWithLabelIcon,
     SelectWithLabel,
   },

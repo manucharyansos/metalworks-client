@@ -51,7 +51,7 @@ export const actions = {
     }
   },
   async downloadUploadedFile({ commit }, file) {
-    await this.$axios.get(`/api/factories/download/${file}`)
+    await this.$axios.get(`/api/download/${file}`)
   },
 }
 
