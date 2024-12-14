@@ -50,8 +50,28 @@ export const actions = {
       return false
     }
   },
-  async downloadUploadedFile({ commit }, file) {
-    await this.$axios.get(`/api/download/${file}`)
+  async downloadUploadedFile({ commit }, filePath) {
+    try {
+      // if (typeof filePath !== 'string') {
+      //   throw new TypeError('Invalid filePath. Expected a string.')
+      // }
+
+      const encodedPath = encodeURIComponent(filePath)
+
+      const response = await this.$axios.get(`/api/download/${encodedPath}`, {
+        responseType: 'blob',
+      })
+
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', filePath.split('/').pop())
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (error) {
+      console.error('Error during file download:', error.message)
+    }
   },
 }
 

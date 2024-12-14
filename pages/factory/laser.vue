@@ -232,26 +232,6 @@
             Ֆայլեր
           </h4>
           <FileViewer :details="details.files" />
-          <!--          <ul class="mt-2 space-y-2">-->
-          <!--            <li-->
-          <!--              v-for="file in details.files"-->
-          <!--              :key="file.id"-->
-          <!--              class="flex justify-between items-center"-->
-          <!--            >-->
-          <!--              <embed-->
-          <!--                :src="fileUrl(file.path)"-->
-          <!--                type="application/pdf"-->
-          <!--                class="w-full min-h-96"-->
-          <!--              />-->
-          <!--              <span>{{ file.name }}</span>-->
-          <!--              <button class="btn-download" @click="downloadFile(file.path)">-->
-          <!--                Ներբեռնել-->
-          <!--              </button>-->
-          <!--              <a :href="$getFileUrl(file.path)" download target="_blank"-->
-          <!--                >Ներբեռնել DXF ֆայլը</a-->
-          <!--              >-->
-          <!--            </li>-->
-          <!--          </ul>-->
         </div>
       </div>
     </template>
