@@ -52,14 +52,20 @@ export const actions = {
   },
   async downloadUploadedFile({ commit }, filePath) {
     try {
-      // if (typeof filePath !== 'string') {
-      //   throw new TypeError('Invalid filePath. Expected a string.')
-      // }
+      console.log('File path for download:', filePath) // Log the file path
+      if (typeof filePath !== 'string') {
+        throw new TypeError('Invalid filePath. Expected a string.')
+      }
 
       const encodedPath = encodeURIComponent(filePath)
 
       const response = await this.$axios.get(`/api/download/${encodedPath}`, {
+        withCredentials: true,
         responseType: 'blob',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/octet-stream',
+        },
       })
 
       const url = window.URL.createObjectURL(new Blob([response.data]))

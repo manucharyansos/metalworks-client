@@ -33,13 +33,23 @@ export default {
   methods: {
     ...mapActions('factory', ['downloadUploadedFile']),
     downloadFile(file) {
-      if (file && typeof file.path === 'string') {
-        this.downloadUploadedFile(file.path)
-      }
+      // console.log('File object:', file)
+      // if (file && typeof file.path === 'string') {
+      //   const sanitizedPath = file.path.replace(/\\/g, '/')
+      //   this.downloadUploadedFile(sanitizedPath)
+      // } else {
+      //   console.error('File object is invalid:', file)
+      // }
+      this.downloadUploadedFile(file.path)
     },
 
     fileUrl(filePath) {
-      return `${this.$axios.defaults.baseURL}/storage/${filePath}`
+      if (!filePath || typeof filePath !== 'string') {
+        return null
+      }
+      const baseURL =
+        this.$axios.defaults.baseURL || 'https://api.metalworks.am'
+      return `${baseURL}/storage/${filePath}`
     },
   },
 }
