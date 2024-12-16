@@ -33,14 +33,12 @@ export default {
   methods: {
     ...mapActions('factory', ['downloadUploadedFile']),
     downloadFile(file) {
-      // console.log('File object:', file)
-      // if (file && typeof file.path === 'string') {
-      //   const sanitizedPath = file.path.replace(/\\/g, '/')
-      //   this.downloadUploadedFile(sanitizedPath)
-      // } else {
-      //   console.error('File object is invalid:', file)
-      // }
-      this.downloadUploadedFile(file.path)
+      if (file && typeof file.path === 'string') {
+        const sanitizedPath = file.path.replace(/\\/g, '/')
+        this.downloadUploadedFile(sanitizedPath)
+      } else {
+        console.error('File object is invalid:', file)
+      }
     },
 
     fileUrl(filePath) {
