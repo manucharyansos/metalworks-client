@@ -93,6 +93,7 @@ export default {
     { src: '~/plugins/notifications-ssr', ssr: true },
     { src: '~/plugins/notifications-client', ssr: false },
     { src: '~/plugins/leaflet.js', mode: 'client' },
+    { src: '~/plugins/formatDate' },
   ],
 
   components: true,

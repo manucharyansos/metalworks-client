@@ -52,7 +52,11 @@
                 {{ order.user.name }}
               </td>
               <td class="px-6 py-4 text-center">
-                {{ order.dates.finish_date ? order.dates.finish_date : 'null' }}
+                {{
+                  order.dates.finish_date
+                    ? $formatDate(order.dates.finish_date)
+                    : 'null'
+                }}
               </td>
               <td
                 v-if="order.description"
@@ -85,7 +89,11 @@
                     v-if="item.factory_id === 3 || item.factory_id === '3'"
                     class="text-center"
                   >
-                    {{ item.status }}
+                    {{
+                      item.operator_finish_date
+                        ? item.operator_finish_date
+                        : item.status
+                    }}
                   </div>
                 </div>
               </td>
@@ -159,6 +167,12 @@
                 ></select-with-label>
               </div>
               <div
+                v-if="selectedOption && selectedOption.value === 'finishing'"
+                class="my-5"
+              >
+                {{ finishDate }}
+              </div>
+              <div
                 v-if="selectedOption && selectedOption.value === 'changeDate'"
                 class="my-5"
               >
@@ -218,19 +232,18 @@
           </svg>
         </button>
 
-        <!-- Մոդալի բովանդակությունը -->
-        <div class="bg-white p-6 rounded-lg shadow-md w-3/4">
-          <h3 class="text-lg font-bold mb-4">Առաջադրանքի մանրամասներ</h3>
-          <ul class="text-base font-medium leading-7">
-            <li>Անուն: {{ details.name }}</li>
-            <li>Քանակ: {{ details.quantity }}</li>
-            <li>Նկարագրություն: {{ details.description }}</li>
-          </ul>
-
-          <!-- Ֆայլերի ցուցակ -->
-          <h4 class="mt-6 text-md font-semibold border-b shadow-2xl p-5">
-            Ֆայլեր
-          </h4>
+        <div
+          class="grid md:grid-cols-2 grid-cols-1 gap-2 bg-white p-6 rounded-lg shadow-md lg:w-3/4 w-full"
+        >
+          <div class="flex flex-col items-start justify-start mt-10">
+            <h3 class="text-lg font-bold mb-4">Առաջադրանքի մանրամասներ</h3>
+            <ul class="text-base font-medium leading-7">
+              <li>Անուն: {{ details.name }}</li>
+              <li>Քանակ: {{ details.quantity }}</li>
+              <li>Նկարագրություն: {{ details.description }}</li>
+            </ul>
+            <!-- Ֆայլերի ցուցակ -->
+          </div>
           <FileViewer :details="details.files" />
         </div>
       </div>
@@ -317,6 +330,11 @@ export default {
         )
       })
     },
+
+    finishDate() {
+      const date = new Date()
+      return this.$formatDate(date)
+    },
   },
   mounted() {
     this.fetchOrdersByFactory(3)
@@ -327,53 +345,29 @@ export default {
       'doneFinishedOrder',
       'downloadUploadedFile',
     ]),
-    fileUrl(filePath) {
-      return this.$getFileUrl(filePath)
-    },
-
-    downloadFile(filePath) {
-      window.location.href = `/api/download/${filePath}`
-    },
-
-    filterOrdersByStatus(status) {
-      if (!this.getOrderByFactories) {
-        return null
-      }
-
-      return this.getOrderByFactories.filter((order) => {
-        return (
-          order.factory_order_statuses &&
-          order.factory_order_statuses.some(
-            (factoryStatus) => factoryStatus.status === status
-          )
-        )
-      })
-    },
 
     updateOrder(order) {
       this.isModal = true
-      this.selectedOrder.id = order.id
-      this.selectedOrder.status = order.status.status
-      this.selectedOrder.created_at = order.created_at
-      this.selectedOrder.finish_date = order.dates.finish_date
-      if (order.factory_order_statuses) {
-        this.selectedOrder.factory_order_statuses = {
-          status: order.factory_order_statuses.status,
-          description: order.factory_order_statuses.description || '',
-        }
-      } else {
-        this.selectedOrder.factory_order_statuses = {
-          status: '',
-          description: '',
-        }
-      }
-      this.selectedOrder.name = order.name
-      this.selectedOrder.quantity = order.quantity
-      this.selectedOrder.description = order.description
+      this.selectedOrder = { ...order }
+      this.selectedOrder.factory_order_statuses = order.factory_order_statuses
+        ? {
+            ...order.factory_order_statuses,
+            cancel_date: order.factory_order_statuses.cancel_date || null,
+            canceling: order.factory_order_statuses.canceling || '',
+            finish_date: order.factory_order_statuses.finish_date || null,
+          }
+        : {
+            status: '',
+            cancel_date: null,
+            canceling: '',
+            finish_date: null,
+          }
     },
+
     closeModal() {
       this.isModal = false
     },
+
     async doneOrder() {
       const updatedOrder = {
         id: this.selectedOrder.id,
@@ -381,6 +375,10 @@ export default {
           status: this.selectedOption?.name || null,
           canceling: this.additionalOption?.name || null,
           cancel_date: this.changeDate || null,
+          operator_finish_date:
+            this.selectedOption?.value === 'finishing'
+              ? new Date().toISOString().replace('T', ' ').slice(0, 19)
+              : null,
         },
         factory_id: 3,
       }

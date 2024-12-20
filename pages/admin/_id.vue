@@ -9,94 +9,198 @@
           <stepper-component :data-stepper="stepperData" />
         </div>
 
-        <div class="grid gap-6 sm:grid-cols-3 mb-6">
-          <!-- Start Date -->
-          <div v-if="getOrder.created_at">
-            <label
-              for="start"
-              class="block text-sm font-medium text-gray-900 dark:text-white"
-              >Start</label
-            >
-            <input
-              id="start"
-              v-model="getOrder.created_at"
-              disabled
+        <!--order detail-->
+
+        <OrderDetail :order="getOrder">
+          <template #name>
+            <input-with-labels
+              id="name"
+              v-model="order.name"
+              label="Անուն"
               type="text"
-              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-            />
-          </div>
+              class="shadow-md rounded-lg p-3 pt-5"
+            ></input-with-labels>
+          </template>
 
-          <!-- Finish Date -->
-          <div>
-            <label
-              for="finish"
-              class="block text-sm font-medium text-gray-900 dark:text-white"
-              >Finish</label
-            >
-
-            <div class="relative max-w-sm">
-              <div
-                class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"
-              >
-                <svg
-                  class="w-4 h-4 text-gray-500 dark:text-gray-400"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"
-                  />
-                </svg>
-              </div>
-              <input
-                v-model="getOrder.dates.finish_date"
-                format="dd/mm/yyyy"
-                type="datetime-local"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Select date"
-              />
-            </div>
-          </div>
-
-          <!-- Order Number -->
-          <div v-if="getOrder.order_number">
-            <label
-              for="number"
-              class="block text-sm font-medium text-gray-900 dark:text-white"
-              >Number</label
-            >
-            <input
-              id="number"
+          <template #orderNumber>
+            <input-with-labels
+              id="orderNumber"
               v-model="getOrder.order_number.number"
+              label="Պատվերի համարը"
+              type="number"
+              class="shadow-md rounded-lg p-3 pt-5"
+            ></input-with-labels>
+          </template>
+
+          <template #quantity>
+            <input-with-labels
+              id="quantity"
+              v-model="order.quantity"
+              label="Քանակ"
+              type="number"
+              class="shadow-md rounded-lg p-3 pt-5"
+            ></input-with-labels>
+          </template>
+
+          <template #startDate>
+            <input-with-labels
+              id="startDate"
+              v-model="getOrder.created_at"
+              label="Ստեղծված ամսաթիվ"
+              type="date"
+              class="shadow-md rounded-lg p-3 pt-5"
               disabled
-              type="text"
-              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-            />
-          </div>
+            ></input-with-labels>
+          </template>
 
-          <!-- Status -->
-          <div>
-            <label
-              for="status"
-              class="block text-sm font-medium text-gray-900 dark:text-white"
-              >Status</label
-            >
-            <input
-              id="status"
-              v-model="getOrder.status"
-              type="text"
-              class="block w-full mt-1 rounded-md bg-yellow-50 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-            />
-          </div>
+          <template #finishDate>
+            <input-with-labels
+              id="finishDate"
+              v-model="getOrder.dates.finish_date"
+              type="date"
+              label="Անհաժեշտ ավարտի ամսաթիվ"
+              class="shadow-md rounded-lg p-3 pt-5"
+            ></input-with-labels>
+          </template>
 
-          <!-- Factory Selection -->
-          <div>
-            <label
-              class="block text-sm font-medium text-gray-900 dark:text-white"
-              >Factory</label
+          <template #files>
+            <div>
+              <label
+                for="file"
+                class="block text-sm font-medium text-gray-900 dark:text-white"
+                >File</label
+              >
+              <input
+                type="file"
+                multiple
+                class="block w-full mt-1"
+                @change="handleFileUpload"
+              />
+
+              <!-- Ֆայլերի ցուցադրում -->
+              <div v-if="order.files && order.files.length">
+                <h3
+                  class="mt-4 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Uploaded Files:
+                </h3>
+                <ul class="list-disc list-inside mt-2">
+                  <li
+                    v-for="(file, index) in order.files"
+                    :key="index"
+                    class="flex items-center justify-between"
+                  >
+                    <a :href="fileUrl(file.path)" target="_blank">
+                      {{ file.name || 'Download File' }}
+                    </a>
+                    <button
+                      type="button"
+                      class="ml-2 text-red-600 hover:text-red-800"
+                      aria-label="Delete File"
+                      @click="deleteFile(index)"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M10 9a1 1 0 100 2 1 1 0 000-2zm0 4a1 1 0 100 2 1 1 0 000-2zm-7-7a1 1 0 011-1h12a1 1 0 011 1v1H3V6zm1 2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V10a2 2 0 012-2zm1 2v10h12V10H5z"
+                        />
+                      </svg>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </template>
+
+          <template #description>
+            <textarea-with-label
+              v-model="order.description"
+              placeholder="Description"
+              class="w-full my-2 p-3 border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600"
+              required
+            ></textarea-with-label>
+          </template>
+          <template #buttons>
+            <button
+              type="button"
+              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              @click="doneOrder"
             >
+              Done
+            </button>
+            <button
+              type="button"
+              class="inline-flex justify-center py-2 px-4 border border-red-600 shadow-sm text-sm font-medium rounded-md text-red-600 hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              @click="deleteOrder(order.id)"
+            >
+              Delete
+            </button>
+          </template>
+
+          <!--          Factory order status-->
+          <template #factoryStatus>
+            <div class="my-6">
+              <p class="text-sm font-medium text-gray-900 dark:text-white">
+                Գործարանային կարգավիճակ
+              </p>
+              <div
+                v-for="factoriesStatus in getOrder.factory_order_statuses"
+                :key="factoriesStatus.id"
+                class="mt-2"
+              >
+                <div
+                  class="flex items-center justify-between space-x-2 text-gray-700 dark:text-gray-300"
+                  :class="
+                    factoriesStatus.status === 'Հաստատել'
+                      ? 'bg-green-300 text-white p-2 rounded'
+                      : factoriesStatus.status === 'Մերժել'
+                      ? 'bg-red-500 text-white p-2 rounded'
+                      : factoriesStatus.status === 'Կատարման ժամկետի փոխարինում'
+                      ? 'bg-orange-500 text-white p-2 rounded'
+                      : factoriesStatus.status === 'Ավարտել'
+                      ? 'bg-green-500 text-white p-2 rounded'
+                      : 'bg-gray-100 text-gray-500 p-2 rounded'
+                  "
+                >
+                  <div class="flex flex-col items-center justify-center">
+                    <p>Գործարաններ</p>
+                    <p>{{ factoriesStatus.factory.name }}</p>
+                  </div>
+
+                  <div class="flex flex-col items-center justify-center">
+                    <p>Կարգավիճակ</p>
+                    <p>
+                      {{ factoriesStatus.status }}
+
+                      <template v-if="factoriesStatus.canceling">
+                        {{ factoriesStatus?.canceling }}
+                      </template>
+                      <template v-if="factoriesStatus.cancel_date">
+                        {{ $formatDate(factoriesStatus?.cancel_date) }}
+                      </template>
+                      <template v-if="factoriesStatus.operator_finish_date">
+                        {{ $formatDate(factoriesStatus?.operator_finish_date) }}
+                      </template>
+                    </p>
+                    <template v-if="factoriesStatus.status === 'Ավարտել'">
+                      <button
+                        class="border border-green-800 rounded-xl bg-green-800 hover:bg-green-400 px-6 py-1 mt-2"
+                        @click="confirmStatus(factoriesStatus)"
+                      >
+                        Հաստատել
+                      </button>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template #factories>
             <template v-if="getOrder.factories">
               <div
                 v-for="actualFactory in getOrder.factories"
@@ -106,168 +210,34 @@
                 {{ actualFactory.name }}
               </div>
             </template>
-            <div
-              v-for="manyFactory in factories"
-              :key="manyFactory.id"
-              class="flex justify-between items-center mt-2"
-            >
-              <label
-                :for="'factory-' + manyFactory.id"
-                class="text-sm text-gray-600 dark:text-gray-400"
-                >{{ manyFactory.name }}</label
-              >
-              <input
-                :id="'factory-' + manyFactory.id"
-                v-model="selectedFactories"
-                type="checkbox"
-                :value="manyFactory.id"
-                class="rounded-md border-gray-300 focus:ring-indigo-500 h-5 w-5 text-indigo-600"
-                @change="addFactory(manyFactory)"
-              />
-            </div>
-          </div>
+          </template>
 
-          <!-- Factory Order Status -->
-          <div>
-            <p class="text-sm font-medium text-gray-900 dark:text-white">
-              Factory Status
-            </p>
-            <div
-              v-for="factoriesStatus in getOrder.factory_order_statuses"
-              :key="factoriesStatus.id"
-              class="mt-2"
-            >
+          <template #selectFactory>
+            <!-- Factory Selection -->
+            <div class="mt-6">
+              <p>Ընտրել գործարան</p>
               <div
-                class="flex items-center justify-between space-x-2 text-gray-700 dark:text-gray-300"
+                v-for="manyFactory in factories"
+                :key="manyFactory.id"
+                class="flex justify-between items-center mt-2 p-2"
               >
-                <p>Factory: {{ factoriesStatus.factory.name }}</p>
-                <div>
-                  <p>Status: {{ factoriesStatus.status }}</p>
-                  <p v-if="factoriesStatus.cancel_date">
-                    {{ factoriesStatus.cancel_date }}
-                  </p>
-                  <p v-if="factoriesStatus.canceling">
-                    {{ factoriesStatus.canceling }}
-                  </p>
-                </div>
+                <label
+                  :for="'factory-' + manyFactory.id"
+                  class="text-sm text-gray-600 dark:text-gray-400"
+                  >{{ manyFactory.name }}</label
+                >
+                <input
+                  :id="'factory-' + manyFactory.id"
+                  v-model="selectedFactories"
+                  type="checkbox"
+                  :value="manyFactory.id"
+                  class="rounded-md border-gray-300 focus:ring-indigo-500 h-5 w-5 text-indigo-600"
+                  @change="addFactory(manyFactory)"
+                />
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Order Details -->
-        <div class="grid gap-6 sm:grid-cols-3 mb-6">
-          <div>
-            <label
-              for="name"
-              class="block text-sm font-medium text-gray-900 dark:text-white"
-              >Name</label
-            >
-            <input
-              id="name"
-              v-model="getOrder.name"
-              type="text"
-              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label
-              for="quantity"
-              class="block text-sm font-medium text-gray-900 dark:text-white"
-              >Quantity</label
-            >
-            <input
-              id="quantity"
-              v-model="getOrder.quantity"
-              type="text"
-              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-
-          <div>
-            <label
-              for="file"
-              class="block text-sm font-medium text-gray-900 dark:text-white"
-              >File</label
-            >
-            <input
-              type="file"
-              multiple
-              class="block w-full mt-1"
-              @change="handleFileUpload"
-            />
-
-            <!-- Ֆայլերի ցուցադրում -->
-            <div v-if="getOrder.files && getOrder.files.length">
-              <h3
-                class="mt-4 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Uploaded Files:
-              </h3>
-              <ul class="list-disc list-inside mt-2">
-                <li
-                  v-for="(file, index) in getOrder.files"
-                  :key="index"
-                  class="flex items-center justify-between"
-                >
-                  <a :href="fileUrl(file.path)" target="_blank">
-                    {{ file.name || 'Download File' }}
-                  </a>
-                  <button
-                    type="button"
-                    class="ml-2 text-red-600 hover:text-red-800"
-                    aria-label="Delete File"
-                    @click="deleteFile(index)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        d="M10 9a1 1 0 100 2 1 1 0 000-2zm0 4a1 1 0 100 2 1 1 0 000-2zm-7-7a1 1 0 011-1h12a1 1 0 011 1v1H3V6zm1 2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V10a2 2 0 012-2zm1 2v10h12V10H5z"
-                      />
-                    </svg>
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="sm:col-span-2">
-            <label
-              for="description"
-              class="block text-sm font-medium text-gray-900 dark:text-white"
-              >Description</label
-            >
-            <textarea
-              id="description"
-              v-model="getOrder.description"
-              rows="4"
-              class="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-            ></textarea>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex items-center space-x-4">
-          <button
-            type="button"
-            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            @click="doneOrder"
-          >
-            Done
-          </button>
-          <button
-            type="button"
-            class="inline-flex justify-center py-2 px-4 border border-red-600 shadow-sm text-sm font-medium rounded-md text-red-600 hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            @click="deleteOrder(getOrder.id)"
-          >
-            Delete
-          </button>
-        </div>
+          </template>
+        </OrderDetail>
 
         <notifications />
       </div>
@@ -285,9 +255,18 @@
 import { mapActions, mapGetters } from 'vuex'
 import StepperComponent from '@/components/stepper'
 import SpinnerComponent from '~/components/spinner/index.vue'
+import OrderDetail from '~/components/modals/admin/OrderDetail.vue'
+import InputWithLabels from '~/components/form/InputWithIcon.vue'
+import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 
 export default {
-  components: { StepperComponent, SpinnerComponent },
+  components: {
+    TextareaWithLabel,
+    InputWithLabels,
+    OrderDetail,
+    StepperComponent,
+    SpinnerComponent,
+  },
   layout: 'adminLayout',
   middleware: ['admin', 'roleRedirect'],
   data() {
@@ -301,8 +280,6 @@ export default {
     ...mapGetters('factory', ['getFactory']),
     getOrder() {
       return this.order ? JSON.parse(JSON.stringify(this.order)) : {}
-      // order.dates = order.dates || { finish_date: null }
-      // return order
     },
     factories() {
       return this.getFactory ? JSON.parse(JSON.stringify(this.getFactory)) : []
@@ -317,7 +294,7 @@ export default {
   },
   methods: {
     ...mapActions('orders', ['fetchOrder', 'updateOrder', 'orderDelete']),
-    ...mapActions('factory', ['fetchFactory']),
+    ...mapActions('factory', ['fetchFactory', 'adminConfirmFactoryStatus']),
     handleFileUpload(event) {
       this.getOrder.files = Array.from(event.target.files)
     },
@@ -416,6 +393,13 @@ export default {
           text: error.message,
         })
       }
+    },
+    confirmStatus(factoryStatus) {
+      const confirmData = {
+        id: factoryStatus.order_id,
+        factory_id: factoryStatus.factory_id,
+      }
+      this.adminConfirmFactoryStatus(confirmData)
     },
   },
 }

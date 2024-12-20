@@ -50,6 +50,19 @@ export const actions = {
       return false
     }
   },
+  async adminConfirmFactoryStatus({ commit }, confirmData) {
+    try {
+      await this.$axios.put(
+        `api/factories/confirmOrderStatus/${confirmData.id}`,
+        { factory_id: confirmData.factory_id }
+      )
+      return true
+    } catch (err) {
+      console.error(err.response ? err.response.data : err)
+      return false
+    }
+  },
+
   async downloadUploadedFile({ commit }, filePath) {
     try {
       if (typeof filePath !== 'string') {

@@ -3,7 +3,7 @@
     <!-- Sidebar Toggle Button -->
     <button
       type="button"
-      class="fixed right-0 top-0 p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
+      class="fixed top-0 right-0 p-2 mt-2 ms-3 z-20 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
       :aria-expanded="isSidebarOpen"
       @click="toggleSidebar"
     >
@@ -30,7 +30,7 @@
     >
       <button
         type="button"
-        class="p-2 mt-2 ms-3 float-right text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
+        class="mt-2 ms-3 p-4 float-right text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
         :aria-expanded="isSidebarOpen"
         @click="toggleSidebar"
       >
