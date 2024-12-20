@@ -47,7 +47,7 @@ export const actions = {
       })
       commit('ADD_ORDER', response.data.order)
       if (response.status === 201) {
-        this.$router.push('/creator')
+        this.$router.push('/manager')
         return response.data.order
       }
     } catch (error) {
@@ -67,7 +67,7 @@ export const actions = {
         }
       )
       commit('SET_ORDER', response.data)
-      await this.$router.push('/creator')
+      await this.$router.push('/manager')
       return response.data
     } catch (error) {
       commit('ERROR', error.response?.data || 'Failed to update order')

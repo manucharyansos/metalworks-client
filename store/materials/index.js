@@ -23,7 +23,7 @@ export const actions = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     if (response) {
-      this.$router.push('/creator')
+      this.$router.push('/manager')
     }
   },
 }

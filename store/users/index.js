@@ -21,7 +21,7 @@ export const actions = {
   async createUser({ commit }, data) {
     try {
       await this.$axios.post('api/clients/client', data)
-      await this.$router.push('/creator/users')
+      await this.$router.push('/manager/users')
       return true
     } catch (err) {
       return false
@@ -30,7 +30,7 @@ export const actions = {
   async updateUser({ commit }, { id, data }) {
     try {
       const response = await this.$axios.put(`api/clients/client/${id}`, data)
-      await this.$router.push('/creator/users')
+      await this.$router.push('/manager/users')
       return response.data
     } catch (err) {
       console.error('Error updating user:', err)

@@ -29,7 +29,7 @@ export const actions = {
     commit('ADD_CLIENT', client)
     if (client) {
       setTimeout(() => {
-        this.$router.push('/creator')
+        this.$router.push('/manager')
       }, 2000)
     }
   },

@@ -30,8 +30,8 @@
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
-  layout: 'creatorLayout',
-  middleware: ['creator', 'roleRedirect'],
+  layout: 'ManagerLayout',
+  middleware: ['manager', 'roleRedirect'],
   data() {
     return {
       messages: null,

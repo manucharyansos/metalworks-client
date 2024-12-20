@@ -38,8 +38,8 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // baseURL: process.env.BASE_URL,
-    baseURL: 'https://api.metalworks.am',
-    // baseURL: 'http://localhost:8000',
+    // baseURL: 'https://api.metalworks.am',
+    baseURL: 'http://localhost:8000',
     credentials: true,
   },
 
@@ -48,8 +48,8 @@ export default {
       laravelSanctum: {
         provider: 'laravel/sanctum',
         // url: process.env.BASE_URL,
-        url: 'https://api.metalworks.am',
-        // url: 'http://localhost:8000',
+        // url: 'https://api.metalworks.am',
+        url: 'http://localhost:8000',
         endpoints: {
           login: { url: '/api/login', method: 'post' },
           logout: { url: '/api/logout', method: 'post' },
@@ -75,12 +75,12 @@ export default {
 
   publicRuntimeConfig: {
     baseURL: process.env.BASE_URL,
-    creatorRole: process.env.CREATOR_ROLE || 'creator',
+    managerRole: process.env.MANAGER_ROLE || 'manager',
     adminRole: process.env.ADMIN_ROLE || 'admin',
     laserRole: process.env.LASER_ROLE || 'laser',
     bendRole: process.env.BEND_ROLE || 'bend',
     dashboards: {
-      creator: process.env.CREATOR_DASHBOARD || '/creator',
+      manager: process.env.MANAGER_DASHBOARD || '/manager',
       admin: process.env.ADMIN_DASHBOARD || '/admin',
       laser: process.env.LASER_DASHBOARD || '/factory/laser',
       bend: process.env.BEND_DASHBOARD || '/factory/bend',
