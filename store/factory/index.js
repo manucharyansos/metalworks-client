@@ -63,7 +63,7 @@ export const actions = {
     }
   },
 
-  async downloadUploadedFile({ commit }, filePath) {
+  async downloadUploadedFile({ commit }, filePath, originalName) {
     try {
       if (typeof filePath !== 'string') {
         throw new TypeError('Invalid filePath. Expected a string.')
@@ -76,7 +76,9 @@ export const actions = {
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', filePath.split('/').pop())
+
+      // Use original file name when downloading
+      link.setAttribute('download', originalName || 'default-filename.pdf') // Default fallback
       document.body.appendChild(link)
       link.click()
       link.remove()

@@ -451,8 +451,8 @@ export default {
     ...mapActions('materials', ['fetchMaterials']),
     ...mapActions('users', ['fetchUsers']),
     getFileUrl(filePath) {
-      // return `${'https://api.metalworks.am'}/storage/${filePath}`
-      return `${'http://localhost:8000'}/storage/${filePath}`
+      return `${'https://api.metalworks.am'}/storage/${filePath}`
+      // return `${'http://localhost:8000'}/storage/${filePath}`
     },
     editOrder(order) {
       this.openEditModal = true

@@ -200,7 +200,7 @@
                 clip-rule="evenodd"
               ></path>
             </svg>
-            Done
+            Հաստատել
           </button>
         </div>
       </div>

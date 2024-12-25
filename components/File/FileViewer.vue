@@ -123,7 +123,8 @@ export default {
     downloadFile(file) {
       if (file && typeof file.path === 'string') {
         const sanitizedPath = file.path.replace(/\\/g, '/')
-        this.downloadUploadedFile(sanitizedPath)
+        const originalName = file.original_name || 'default-filename.pdf'
+        this.downloadUploadedFile(sanitizedPath, originalName)
       } else {
         console.error('File object is invalid:', file)
       }

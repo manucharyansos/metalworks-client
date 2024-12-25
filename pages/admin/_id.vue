@@ -15,7 +15,7 @@
           <template #name>
             <input-with-labels
               id="name"
-              v-model="order.name"
+              v-model="getOrder.name"
               label="Անուն"
               type="text"
               class="shadow-md rounded-lg p-3 pt-5"
@@ -27,15 +27,15 @@
               id="orderNumber"
               v-model="getOrder.order_number.number"
               label="Պատվերի համարը"
-              type="number"
               class="shadow-md rounded-lg p-3 pt-5"
+              disabled
             ></input-with-labels>
           </template>
 
           <template #quantity>
             <input-with-labels
               id="quantity"
-              v-model="order.quantity"
+              v-model="getOrder.quantity"
               label="Քանակ"
               type="number"
               class="shadow-md rounded-lg p-3 pt-5"
@@ -47,7 +47,6 @@
               id="startDate"
               v-model="getOrder.created_at"
               label="Ստեղծված ամսաթիվ"
-              type="date"
               class="shadow-md rounded-lg p-3 pt-5"
               disabled
             ></input-with-labels>
@@ -57,8 +56,8 @@
             <input-with-labels
               id="finishDate"
               v-model="getOrder.dates.finish_date"
-              type="date"
               label="Անհաժեշտ ավարտի ամսաթիվ"
+              type="datetime-local"
               class="shadow-md rounded-lg p-3 pt-5"
             ></input-with-labels>
           </template>
@@ -78,7 +77,7 @@
               />
 
               <!-- Ֆայլերի ցուցադրում -->
-              <div v-if="order.files && order.files.length">
+              <div v-if="getOrder.files && getOrder.files.length">
                 <h3
                   class="mt-4 text-sm font-medium text-gray-900 dark:text-white"
                 >
@@ -86,7 +85,7 @@
                 </h3>
                 <ul class="list-disc list-inside mt-2">
                   <li
-                    v-for="(file, index) in order.files"
+                    v-for="(file, index) in getOrder.files"
                     :key="index"
                     class="flex items-center justify-between"
                   >
@@ -118,7 +117,7 @@
 
           <template #description>
             <textarea-with-label
-              v-model="order.description"
+              v-model="getOrder.description"
               placeholder="Description"
               class="w-full my-2 p-3 border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600"
               required
@@ -130,14 +129,14 @@
               class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               @click="doneOrder"
             >
-              Done
+              Հաստատել
             </button>
             <button
               type="button"
               class="inline-flex justify-center py-2 px-4 border border-red-600 shadow-sm text-sm font-medium rounded-md text-red-600 hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               @click="deleteOrder(order.id)"
             >
-              Delete
+              Ջնջել
             </button>
           </template>
 
@@ -267,7 +266,7 @@ export default {
     StepperComponent,
     SpinnerComponent,
   },
-  layout: 'adminLayout',
+  layout: 'AdminLayout',
   middleware: ['admin', 'roleRedirect'],
   data() {
     return {
@@ -342,41 +341,68 @@ export default {
     },
     async doneOrder() {
       try {
-        const formData = new FormData()
-        if (this.getOrder.files && Array.isArray(this.getOrder.files)) {
-          this.getOrder.files.forEach((file) => {
-            if (file instanceof File) {
-              formData.append('files[]', file)
-            }
-          })
+        if (!this.getOrder.name) {
+          throw new Error('Անուն դաշտը պարտադիր է')
         }
-        formData.append('description', this.getOrder.description || '')
-        formData.append('quantity', this.getOrder.quantity || '')
-        formData.append('name', this.getOrder.name || '')
+        if (
+          !this.getOrder.quantity ||
+          isNaN(this.getOrder.quantity) ||
+          this.getOrder.quantity <= 0
+        ) {
+          throw new Error('Քանակը պարտադիր է և պետք է լինի դրական թիվ')
+        }
+        if (!this.getOrder.dates || !this.getOrder.dates.finish_date) {
+          throw new Error('Անհրաժեշտ ավարտի ամսաթիվը պարտադիր է')
+        }
+        if (!this.getOrder.description) {
+          throw new Error('Նկարագրությունը պարտադիր է')
+        }
+
+        if (this.getOrder.files && !Array.isArray(this.getOrder.files)) {
+          throw new Error('Ֆայլերը պետք է լինեն զանգվածի ձևով')
+        }
+
+        const formData = new FormData()
+        this.getOrder.files?.forEach((file) => {
+          if (file instanceof File) {
+            formData.append('files[]', file)
+          }
+        })
+        formData.append('name', this.getOrder.name)
+        formData.append('quantity', this.getOrder.quantity)
+        formData.append('description', this.getOrder.description)
         formData.append('status', this.getOrder.status || 'in process')
+        formData.append('finish_date', this.getOrder.dates.finish_date)
+
         if (this.getOrder.store_link && this.getOrder.store_link.url) {
           formData.append('store_link[url]', this.getOrder.store_link.url)
         }
+
         if (this.selectedFactories.length) {
           this.selectedFactories.forEach((factoryId, index) => {
             formData.append(`factories[${index}][id]`, factoryId)
           })
-        } else {
+        } else if (
+          this.getOrder.factories &&
+          Array.isArray(this.getOrder.factories)
+        ) {
           this.getOrder.factories.forEach((factory, index) => {
             formData.append(`factories[${index}][id]`, factory.id)
           })
+        } else {
+          throw new Error('Գոնե մեկ գործարան պետք է ընտրված լինի')
         }
 
-        if (this.getOrder.dates && this.getOrder.dates.finish_date) {
-          formData.append('finish_date', this.getOrder.dates.finish_date)
-        }
         await this.updateOrder({ id: this.id, payload: formData })
-        this.$notify({ type: 'success', title: 'Order updated successfully' })
+        this.$notify({
+          type: 'success',
+          title: 'Պատվերը հաջողությամբ թարմացվել է',
+        })
       } catch (error) {
         this.$notify({
           type: 'error',
-          title: 'Error updating order',
-          text: error.response?.data?.message || error.message,
+          title: 'Սխալ պատվերի թարմացման ընթացքում',
+          text: error.message,
         })
       }
     },

@@ -56,13 +56,10 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-// import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
-// import HeaderComponent from '~/components/header/HeaderComponent.vue'
 
 export default {
   name: 'AdminPage',
-  // components: { HeaderComponent, InputWithLabelIcon },
-  layout: 'adminLayout',
+  layout: 'AdminLayout',
   middleware: ['admin', 'roleRedirect'],
   data() {
     return {
