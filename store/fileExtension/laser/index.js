@@ -37,7 +37,7 @@ export const actions = {
         { extension }
       )
       if (response.status === 200) {
-        commit('UPDATE_LASER_EXTENSION', response.data.data) // Commit mutation to update state
+        commit('UPDATE_LASER_EXTENSION', response.data.data)
         return true
       }
     } catch (error) {
@@ -62,6 +62,9 @@ export const mutations = {
   },
   ADD_LASER_EXTENSION(state, extension) {
     state.laserFileExtensions.push(extension)
+  },
+  UPDATE_LASER_EXTENSION(state, extension) {
+    state.laserFileExtensions = extension
   },
   REMOVE_LASER_EXTENSION(state, id) {
     state.laserFileExtensions = state.laserFileExtensions.filter(

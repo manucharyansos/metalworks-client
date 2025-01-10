@@ -58,7 +58,7 @@ export const actions = {
   async updateOrder({ commit }, { id, payload }) {
     try {
       const response = await this.$axios.post(
-        `/api/admin/update/${id}`,
+        `/api/admin/orders/update/${id}`,
         payload,
         {
           headers: {

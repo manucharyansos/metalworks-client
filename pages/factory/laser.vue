@@ -60,7 +60,7 @@
               </td>
               <td
                 v-if="order.description"
-                class="px-6 py-4 cursor-pointer text-center hover:text-indigo-900"
+                class="px-6 py-4 cursor-pointer text-center hover:text-indigo-100 hover:bg-[#2557D6]/90"
                 @click="toggleDetails(order)"
               >
                 Դիտել

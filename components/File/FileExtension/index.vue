@@ -1,21 +1,23 @@
 <template>
   <div class="mx-2 h-full">
-    <h2 class="font-sans italic text-lg mb-4">
+    <h2 class="font-sans italic text-lg mb-4 h-12">
       {{ paragraph }}
     </h2>
-    <ul>
+    <ul class="h-56 overflow-y-auto">
       <li
         v-for="(extension, index) in extensions"
         :key="extension.id"
-        class="flex justify-between items-center"
+        class="flex justify-between items-center hover:bg-neutral-200"
       >
         <div
           v-if="editIndex !== index"
-          class="flex flex-row items-center justify-around cursor-pointer w-full"
+          class="grid grid-cols-2 gap-2 cursor-pointer w-full px-2"
         >
-          <p @click="startEditing(index)">{{ extension.extension }}</p>
+          <p class="mx-auto" @click="startEditing(index)">
+            {{ extension.extension }}
+          </p>
           <button
-            class="text-red-500 ml-2 float-right"
+            class="text-red-500 mx-auto"
             @click="deleteExtension(extension.id)"
           >
             <svg
@@ -31,25 +33,51 @@
             </svg>
           </button>
         </div>
-        <div v-else>
+        <div v-else class="flex flex-row items-center justify-between mx-auto">
           <input
             v-model="editedExtension"
             class="border rounded px-2 py-1"
             type="text"
             @input="onEditInput(editedExtension)"
           />
-          <button class="text-green-500 ml-2" @click="saveEdit(extension.id)">
-            Պահպանել
-          </button>
-          <button class="text-gray-500 ml-2" @click="cancelEdit">
-            Չեղարկել
-          </button>
+          <div class="flex items-center justify-between">
+            <button class="text-green-500 ml-2" @click="saveEdit(extension.id)">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                y="0px"
+                width="20"
+                height="20"
+                viewBox="0 0 48 48"
+                fill="green"
+              >
+                <path
+                  d="M 43.470703 8.9863281 A 1.50015 1.50015 0 0 0 42.439453 9.4394531 L 16.5 35.378906 L 5.5605469 24.439453 A 1.50015 1.50015 0 1 0 3.4394531 26.560547 L 15.439453 38.560547 A 1.50015 1.50015 0 0 0 17.560547 38.560547 L 44.560547 11.560547 A 1.50015 1.50015 0 0 0 43.470703 8.9863281 z"
+                ></path>
+              </svg>
+            </button>
+            <button class="text-gray-500 ml-2" @click="cancelEdit">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                x="0px"
+                y="0px"
+                width="20"
+                height="20"
+                viewBox="0 0 50 50"
+                fill="red"
+              >
+                <path
+                  d="M 25 2 C 12.309534 2 2 12.309534 2 25 C 2 37.690466 12.309534 48 25 48 C 37.690466 48 48 37.690466 48 25 C 48 12.309534 37.690466 2 25 2 z M 25 4 C 36.609534 4 46 13.390466 46 25 C 46 36.609534 36.609534 46 25 46 C 13.390466 46 4 36.609534 4 25 C 4 13.390466 13.390466 4 25 4 z M 32.990234 15.986328 A 1.0001 1.0001 0 0 0 32.292969 16.292969 L 25 23.585938 L 17.707031 16.292969 A 1.0001 1.0001 0 0 0 16.990234 15.990234 A 1.0001 1.0001 0 0 0 16.292969 17.707031 L 23.585938 25 L 16.292969 32.292969 A 1.0001 1.0001 0 1 0 17.707031 33.707031 L 25 26.414062 L 32.292969 33.707031 A 1.0001 1.0001 0 1 0 33.707031 32.292969 L 26.414062 25 L 33.707031 17.707031 A 1.0001 1.0001 0 0 0 32.990234 15.986328 z"
+                ></path>
+              </svg>
+            </button>
+          </div>
         </div>
       </li>
-      <li class="flex flex-row items-center justify-center mt-4">
-        <slot name="custom"></slot>
-      </li>
     </ul>
+    <div class="flex flex-row items-center justify-center mt-4">
+      <slot name="custom"></slot>
+    </div>
   </div>
 </template>
 
@@ -63,6 +91,7 @@ export default {
     },
     extensions: {
       type: Array,
+      Object,
       default: () => [],
     },
   },

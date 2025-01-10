@@ -31,6 +31,29 @@ export const actions = {
       throw error
     }
   },
+  async updateBendFileExtension({ commit }, { id, extension }) {
+    try {
+      const response = await this.$axios.put(
+        `/api/admin/bend-file-extension/${id}`,
+        { extension }
+      )
+      if (response.status === 200) {
+        commit('UPDATE_BEND_EXTENSION', response.data.data)
+        return true
+      }
+    } catch (error) {
+      console.error('Error updating bend extension:', error)
+      return false
+    }
+  },
+  async deleteBendFileExtension({ commit }, id) {
+    try {
+      await this.$axios.delete(`/api/admin/bend-file-extension/${id}`)
+      commit('REMOVE_BEND_EXTENSION', id)
+    } catch (error) {
+      console.error('Error deleting bend file extension:', error)
+    }
+  },
 }
 
 export const mutations = {
@@ -39,5 +62,13 @@ export const mutations = {
   },
   ADD_BEND_EXTENSION(state, bendFileExtensions) {
     state.bendFileExtensions.push(bendFileExtensions)
+  },
+  UPDATE_BEND_EXTENSION(state, bendFileExtensions) {
+    state.bendFileExtensions = bendFileExtensions
+  },
+  REMOVE_BEND_EXTENSION(state, id) {
+    state.bendFileExtensions = state.bendFileExtensions.filter(
+      (ext) => ext.id !== id
+    )
   },
 }

@@ -1,6 +1,7 @@
 export const state = () => ({
   materialGroups: [],
   materialCategories: [],
+  materialCategory: [],
 })
 
 export const mutations = {
@@ -8,6 +9,9 @@ export const mutations = {
     state.materialGroups = material
   },
   SET_MATERIALS_CATEGORIES(state, materialCategories) {
+    state.materialCategories = materialCategories
+  },
+  SET_MATERIALS_CATEGORY(state, materialCategories) {
     state.materialCategories = materialCategories
   },
 }
@@ -27,6 +31,15 @@ export const actions = {
       }
     )
     commit('SET_MATERIALS_CATEGORIES', response)
+  },
+  async fetchMaterialCategory({ commit }, id) {
+    const response = await this.$axios.$get(
+      `/api/categories/materialCategories/${id}`,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    )
+    commit('SET_MATERIALS_CATEGORY', response)
   },
   createMaterialsGroup({ commit }, material) {
     try {
@@ -53,5 +66,8 @@ export const getters = {
   },
   allMaterialCategories(state) {
     return state.materialCategories
+  },
+  getCategoryById(state) {
+    return state.materialCategory
   },
 }

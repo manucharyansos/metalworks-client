@@ -11,6 +11,7 @@
           data-dropdown-toggle="dropdownAction"
           class="inline-flex items-center mt-12 text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
           type="button"
+          @click="openAction"
         >
           Action
           <svg
@@ -31,39 +32,19 @@
         </button>
         <!-- Dropdown Menu -->
         <div
+          v-if="isOpenAction"
           id="dropdownAction"
-          class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
+          class="z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
         >
-          <ul class="py-1 text-sm text-gray-700 dark:text-gray-200">
-            <li>
-              <a
-                href="#"
-                class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                >Reward</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                >Promote</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                >Activate account</a
-              >
+          <ul
+            v-for="group in allMaterialGroups"
+            :key="group.id"
+            class="py-1 text-sm text-gray-700 dark:text-gray-200"
+          >
+            <li class="py-1 px-2 cursor-pointer" @click="selectCroup(group)">
+              {{ group.name }}
             </li>
           </ul>
-          <div class="py-1">
-            <a
-              href="#"
-              class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-              >Delete User</a
-            >
-          </div>
         </div>
       </div>
 
@@ -105,13 +86,11 @@
           class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
         >
           <tr>
-            <th scope="col" class="px-6 py-3">Name</th>
-            <th scope="col" class="px-6 py-3">Start Date</th>
-            <th scope="col" class="px-6 py-3">Status</th>
-            <th scope="col" class="px-6 py-3">Finish Date</th>
-            <th scope="col" class="px-6 py-3">ORDER NUMBER</th>
-            <th scope="col" class="px-6 py-3">PREFIX CODE</th>
-            <th scope="col" class="px-6 py-3">QUANTITY</th>
+            <th scope="col" class="px-6 py-3">Նկարագրություն</th>
+            <th scope="col" class="px-6 py-3">Լայնություն</th>
+            <th scope="col" class="px-6 py-3">Երկարություն</th>
+            <th scope="col" class="px-6 py-3">Բարձրություն</th>
+            <th scope="col" class="px-6 py-3">Հաստություն</th>
           </tr>
         </thead>
         <tbody>
@@ -121,13 +100,11 @@
             :key="material.id"
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
-            <td class="px-6 py-4">{{ material.name }}</td>
-            <!--          <td class="px-6 py-4">{{ order.date?.created_at || 'N/A' }}</td>-->
-            <!--          <td class="px-6 py-4">{{ order.status || 'Unknown' }}</td>-->
-            <!--          <td class="px-6 py-4">{{ order.dates?.finish_date || 'N/A' }}</td>-->
-            <!--          <td class="px-6 py-4">{{ order.order_number.number || 'N/A' }}</td>-->
-            <!--          <td class="px-6 py-4">{{ order.prefix_code.code || 'N/A' }}</td>-->
-            <!--          <td class="px-6 py-4">{{ order.quantity || 'N/A' }}</td>-->
+            <td class="px-6 py-4">{{ material.description }}</td>
+            <td class="px-6 py-4">{{ material.width }}</td>
+            <td class="px-6 py-4">{{ material.height }}</td>
+            <td class="px-6 py-4">{{ material.length }}</td>
+            <td class="px-6 py-4">{{ material.thickness }}</td>
           </tr>
         </tbody>
       </table>
@@ -146,35 +123,62 @@ export default {
   data() {
     return {
       searchable: null,
-      materialData: [],
+      selectedGroupId: null,
+      isOpenAction: false,
     }
   },
   computed: {
-    ...mapGetters('orders', ['orders']),
+    ...mapGetters('materials', ['getMaterials']),
+    ...mapGetters('categories', ['allMaterialGroups', 'getCategoryById']),
     filteredMaterials() {
-      if (!this.searchable) {
-        return this.materialData
+      if (this.selectedGroupId) {
+        return this.getMaterials.filter(
+          (material) => material.material_category_id === this.selectedGroupId
+        )
       }
-      const searchTerm = this.searchable.toLowerCase()
-      return this.materialData.filter((material) => {
-        return (material.name || '').toLowerCase().includes(searchTerm)
-      })
+
+      if (this.searchable) {
+        const searchTerm = this.searchable.toLowerCase()
+        return this.getMaterials.filter((material) => {
+          return (
+            (material.description || '').toLowerCase().includes(searchTerm) ||
+            (material.width || '').toLowerCase().includes(searchTerm) ||
+            (material.height || '').toLowerCase().includes(searchTerm) ||
+            (material.length || '').toLowerCase().includes(searchTerm) ||
+            (material.thickness || '').toLowerCase().includes(searchTerm)
+          )
+        })
+      }
+      return this.getMaterials
     },
   },
 
   watch: {
-    materials: {
-      handler(newMaterials) {
-        this.materialData = newMaterials
-      },
-      immediate: true,
-    },
+    // materials: {
+    //   handler(newMaterials) {
+    //     this.getMaterials = newMaterials
+    //   },
+    //   immediate: true,
+    // },
   },
   mounted() {
     this.fetchMaterials()
+    this.fetchMaterialGroups()
   },
   methods: {
     ...mapActions('materials', ['fetchMaterials']),
+    ...mapActions('categories', [
+      'fetchMaterialGroups',
+      'fetchMaterialCategory',
+    ]),
+    openAction() {
+      this.isOpenAction = !this.isOpenAction
+    },
+    selectCroup(group) {
+      this.selectedGroupId = group.id
+      this.fetchMaterialCategory(group.id)
+      this.isOpenAction = false
+    },
   },
 }
 </script>
