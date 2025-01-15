@@ -3,194 +3,219 @@
     <h1 class="text-2xl text-center font-sans italic w-full my-6">
       Ստեղծել նոր պատվեր
     </h1>
-    <template v-if="isUploadLaserFile">
-      <div class="text-start h-96 font-sans italic my-6 border border-gray-600 rounded-xl grid grid-cols-1 md:grid-cols-2">
-        <div class="flex items-center justify-around flex-col">
-          <p>Լազերաին ֆայլեր</p>
-          <input type="file" placeholder="Ներբեռնում" @change="handleUploadFile" />
-          <button
-            class="text-white bg-green-600 rounded-xl px-3 py-1"
-            @click="doneUploadLaserFile"
-          >
-            Առաջ
-          </button>
-        </div>
-        <div class="flex items-center justify-center">
-          <button
-            v-if="!isLaserExtension"
-            class="text-white bg-indigo-500 px-3 py-1 flex items-center rounded-xl"
-            @click="isLaserExtension = !isLaserExtension"
-          >Ֆայլերի տեսակներ
-          </button>
-          <template v-if="isLaserExtension">
-            <FileExtension
-            :extensions="laserExtensions"
-            paragraph="Հասանելի ֆայլերի տեսակները լազերայինի համար"
-            @update-extension="updateLaserExtension"
-            @delete-extension="deleteLaserExtension"
-          >
-            <template #custom>
-              <input-with-label-icon
-                :id="'extension'"
-                v-model="newLaserExtension"
-                type="text"
-                name="extension"
-                placeholder=" "
-                label="Ավելացնել նոր տեսակ"
-              />
-              <button
-                class="border-gray-500 rounded-2xl bg-indigo-600 text-white h-8 px-6 py-1.5 flex items-center"
-                @click="addLaserFileExtension"
-              >
-                Ավելացնել
-              </button>
-            </template>
-          </FileExtension>
-            <button
-              v-if="isLaserExtension"
-              class="rounded-full text-red-800 float-end"
-              @click="isLaserExtension = !isLaserExtension"
-            ><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 50 50" fill="red">
-              <path d="M 7.71875 6.28125 L 6.28125 7.71875 L 23.5625 25 L 6.28125 42.28125 L 7.71875 43.71875 L 25 26.4375 L 42.28125 43.71875 L 43.71875 42.28125 L 26.4375 25 L 43.71875 7.71875 L 42.28125 6.28125 L 25 23.5625 Z"></path>
-            </svg>
-            </button>
-          </template>
-        </div>
-
-
-      </div>
-    </template>
-    <template v-if="isUploadBendFile">
-      <div
-        class="text-start h-80 font-sans italic my-6 border border-gray-600 rounded-xl flex items-center justify-around flex-col"
+    <div>
+      <label
+        for="file"
+        class="block text-sm font-medium text-gray-900 dark:text-white"
+        >File</label
       >
-        <p>Կռման ֆայլեր</p>
-        <input type="file" placeholder="Ներբեռնում" />
-        <button
-          class="text-white bg-green-600 rounded-xl px-3 py-1"
-          @click="doneUploadBendFile"
-        >
-          Առաջ
-        </button>
+      <input
+        type="file"
+        multiple
+        class="block w-full mt-1"
+        @change="handleFileUpload"
+      />
+
+      <!-- Displaying the uploaded files -->
+      <div class="flex flex-col">
+        <div class="flex flex-row items-start justify-between px-4">
+          <div v-for="factory in getFactory" :key="factory.id">
+            <h2 class="cursor-pointer" @click="selectFactoryForFiles(factory)">
+              {{ factory.name }}
+            </h2>
+            <div v-if="factoryFiles.find((f) => f.id === factory.id)">
+              <ul>
+                <li
+                  v-for="file in factoryFiles.find((f) => f.id === factory.id)
+                    ?.files"
+                  :key="file"
+                  class="flex flex-row items-center justify-between my-1 hover:bg-indigo-300 px-3 py-2"
+                >
+                  <p class="w-32">
+                    {{ file.name || file.original_name || 'Unnamed File' }}
+                  </p>
+
+                  <button @click="removeFileFromFactory(factory.id, file)">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      x="0px"
+                      y="0px"
+                      width="20"
+                      height="20"
+                      fill="red"
+                      viewBox="0 0 30 30"
+                    >
+                      <path
+                        d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
+                      ></path>
+                    </svg>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div>
+          <button class="px-3 py-1 bg-green-400 rounded-xl" @click="addFiles">
+            Add files
+          </button>
+        </div>
       </div>
-    </template>
+    </div>
     <notifications />
   </div>
 </template>
 <script>
-import {mapActions, mapGetters} from "vuex";
-import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
-import FileExtension from '~/components/File/FileExtension/index.vue'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
-  components: { FileExtension, InputWithLabelIcon },
   layout: 'EngineerLayout',
   middleware: ['admin', 'roleRedirect'],
   data() {
     return {
-      isUploadLaserFile: true,
-      isUploadBendFile: false,
-      isLaserExtension: false,
-      newLaserExtension: '',
-      newBendExtension: '',
+      selectedFactory: null,
+      factoryFiles: [],
     }
   },
   computed: {
-    ...mapGetters('fileExtension/laser', ['getLaserExtensions']),
-    ...mapGetters('fileExtension/bend', ['getBendExtensions']),
-    laserExtensions() {
-      return this.getLaserExtensions
-    },
-    bendExtensions() {
-      return this.getBendExtensions || []
-    },
+    ...mapGetters('factoryFiles', ['getFactoryFiles']),
+    ...mapGetters('factory', ['getFactory']),
   },
   mounted() {
-    this.fetchLaserFileExtensions()
-    this.fetchBendFileExtensions()
+    this.fetchFactory()
   },
   methods: {
-    ...mapActions('fileExtension/laser', [
-      'fetchLaserFileExtensions',
-      'createLaserFileExtension',
-      'updateLaserFileExtension',
-      'deleteLaserFileExtension',
-    ]),
-    ...mapActions('fileExtension/bend', [
-      'fetchBendFileExtensions',
-      'createBendFileExtension',
-      'updateBendFileExtension',
-    ]),
-    async addLaserFileExtension() {
-      await this.createLaserFileExtension({ extension: this.newLaserExtension })
-      this.newLaserExtension = ''
-      await this.fetchLaserFileExtensions()
-      this.$notify({
-        text: `Ֆայլի ընդլայնումը հաջողությամբ ավելացվեց:`,
-        duration: 3000,
-        speed: 1000,
-        position: 'top',
-        type: 'success',
-      })
-    },
-    async addBendFileExtension() {
-      await this.createBendFileExtension({ extension: this.newBendExtension })
-      this.newBendExtension = ''
-      await this.fetchBendFileExtensions()
-      this.$notify({
-        text: `Ֆայլի ընդլայնումը հաջողությամբ թարմացվեց:`,
-        duration: 3000,
-        speed: 1000,
-        position: 'top',
-        type: 'success',
-      })
-    },
-    async updateLaserExtension({ id, value }) {
-      const success = await this.updateLaserFileExtension({
-        id,
-        extension: value,
-      })
-      if (success) {
-        await this.fetchLaserFileExtensions()
+    ...mapActions('factoryFiles', ['createFactoryFiles']),
+    ...mapActions('factory', ['fetchFactory']),
+    handleFileUpload(event) {
+      const files = Array.from(event.target.files)
+      if (this.selectedFactory) {
+        const factory = this.factoryFiles.find(
+          (f) => f.id === this.selectedFactory.id
+        )
+        if (factory) {
+          files.forEach((file) => {
+            if (!factory.files.some((f) => f.name === file.name)) {
+              factory.files.push(file)
+            } else {
+              this.$notify({
+                text: `File "${file.name}" is already added to the factory.`,
+                type: 'error',
+              })
+            }
+          })
+        } else {
+          this.factoryFiles.push({
+            id: this.selectedFactory.id,
+            name: this.selectedFactory.name,
+            files,
+          })
+        }
+      } else {
         this.$notify({
-          text: `Ֆայլի ընդլայնումը հաջողությամբ թարմացվեց:`,
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
-          type: 'success',
+          text: 'Please select a factory first',
+          type: 'error',
         })
       }
     },
-    async updateBendExtension({ id, value }) {
-      const success = await this.updateBendFileExtension({
-        id,
-        extension: value,
-      })
-      if (success) {
-        await this.fetchBendFileExtensions()
+    addFactory(value) {
+      const factoryId = value.id
+      const exists = this.stepperData.some((item) => item.id === factoryId)
+
+      if (exists) {
+        this.stepperData = this.stepperData.filter(
+          (item) => item.id !== factoryId
+        )
+      } else {
+        this.stepperData.push(value)
+      }
+    },
+    addFileForFactory(file) {
+      if (this.selectedFactory) {
+        const factory = this.factoryFiles.find(
+          (f) => f.id === this.selectedFactory.id
+        )
+        if (factory) {
+          if (!factory.files.includes(file)) {
+            factory.files.push(file)
+          } else {
+            this.$notify({
+              text: 'This file is already added to the factory',
+              type: 'error',
+            })
+          }
+        } else {
+          this.factoryFiles.push({
+            id: this.selectedFactory.id,
+            name: this.selectedFactory.name,
+            files: [file],
+          })
+        }
+      } else {
         this.$notify({
-          text: `Ֆայլի ընդլայնումը հաջողությամբ թարմացվեց:`,
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
-          type: 'success',
+          text: 'Please select a factory first',
+          type: 'error',
         })
       }
     },
-    async deleteLaserExtension(id) {
-      await this.deleteLaserFileExtension(id)
-      await this.fetchLaserFileExtensions()
+
+    addFiles() {
+      const formData = new FormData()
+
+      let factory = this.factoryFiles.find(
+        (f) => f.id === this.selectedFactory.id
+      )
+      if (!factory) {
+        factory = {
+          id: this.selectedFactory.id,
+          name: this.selectedFactory.name,
+          files: [],
+        }
+        this.factoryFiles.push(factory)
+      }
+
+      // Ավելացնում ենք ֆայլերը FormData-ում
+      factory.files.forEach((file) => {
+        // Երբ ֆայլը արդեն պահված է, ուղարկում ենք միայն տվյալները
+        if (file.path && file.original_name) {
+          formData.append('files[]', file.path) // Ուղարկում ենք ֆայլի ուղին
+          formData.append('original_name[]', file.original_name) // Վերադարձնում ենք ֆայլի անունը
+        } else {
+          formData.append('files[]', file) // Նոր ֆայլեր ուղարկելու դեպքում
+        }
+      })
+
+      // Չեմ մոռանում ավելացնել նաև factory_id և order_id
+      if (formData.has('files[]')) {
+        formData.append('factory_id', this.selectedFactory.id)
+        formData.append('order_id', this.getOrder.id)
+
+        // Աշխատանք API կոչի համար
+        this.createFactoryFiles(formData)
+      } else {
+        this.$notify({
+          text: 'Please add at least one file.',
+          type: 'error',
+        })
+      }
     },
-    async deleteBendExtension(id) {
-      await this.deleteBendFileExtension(id)
-      await this.fetchBendFileExtensions()
+
+    removeFileFromFactory(factoryId, file) {
+      const factory = this.factoryFiles.find((f) => f.id === factoryId)
+      if (factory) {
+        const fileIndex = factory.files.indexOf(file)
+        if (fileIndex !== -1) {
+          factory.files.splice(fileIndex, 1)
+        }
+      }
     },
-    doneUploadLaserFile() {
-      this.isUploadLaserFile = false
-      this.isUploadBendFile = true
-    },
-    doneUploadBendFile() {
-      this.isUploadBendFile = false
+
+    selectFactoryForFiles(factory) {
+      if (this.selectedFactory && this.selectedFactory.id === factory.id) {
+        this.selectedFactory = null
+      } else {
+        this.selectedFactory = factory
+      }
     },
   },
 }

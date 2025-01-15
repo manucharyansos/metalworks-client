@@ -125,8 +125,10 @@
             <td class="px-6 py-4">{{ order.date?.created_at || 'N/A' }}</td>
             <td class="px-6 py-4">{{ order.status || 'Unknown' }}</td>
             <td class="px-6 py-4">{{ order.dates?.finish_date || 'N/A' }}</td>
-            <td class="px-6 py-4">{{ order.order_number.number || 'N/A' }}</td>
-            <td class="px-6 py-4">{{ order.prefix_code.code || 'N/A' }}</td>
+            <td class="px-6 py-4">
+              {{ order?.order_number?.number || 'N/A' }}
+            </td>
+            <td class="px-6 py-4">{{ order?.prefix_code?.code || 'N/A' }}</td>
             <td class="px-6 py-4">{{ order.quantity || 'N/A' }}</td>
           </tr>
         </tbody>
@@ -158,8 +160,8 @@ export default {
       const searchTerm = this.searchable.toLowerCase()
       return this.orderData.filter((order) => {
         return (
-          (order.prefix_code?.code || '').toLowerCase().includes(searchTerm) ||
-          (order.order_fdnumber?.number || '')
+          (order?.prefix_code?.code || '').toLowerCase().includes(searchTerm) ||
+          (order.order_number?.number || '')
             .toLowerCase()
             .includes(searchTerm) ||
           (order.name || '').toLowerCase().includes(searchTerm) ||

@@ -8,8 +8,6 @@
         <slot name="quantity"></slot>
         <slot name="startDate"></slot>
         <slot name="finishDate"></slot>
-        <slot name="files"></slot>
-        <slot name="description"></slot>
       </div>
 
       <!-- Factory Status -->
@@ -28,6 +26,15 @@
 
       <div class="space-y-4">
         <slot name="factoryStatus"></slot>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1">
+      <div class="space-y-4">
+        <slot name="description"></slot>
+      </div>
+      <div class="space-y-4">
+        <slot name="files"></slot>
       </div>
     </div>
 

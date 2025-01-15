@@ -11,7 +11,7 @@
 
         <!--order detail-->
 
-        <OrderDetail :order="getOrder">
+        <OrderDetail>
           <template #name>
             <input-with-labels
               id="name"
@@ -60,59 +60,6 @@
               type="datetime-local"
               class="shadow-md rounded-lg p-3 pt-5"
             ></input-with-labels>
-          </template>
-
-          <template #files>
-            <div>
-              <label
-                for="file"
-                class="block text-sm font-medium text-gray-900 dark:text-white"
-                >File</label
-              >
-              <input
-                type="file"
-                multiple
-                class="block w-full mt-1"
-                @change="handleFileUpload"
-              />
-
-              <!-- Ֆայլերի ցուցադրում -->
-              <div v-if="getOrder.files && getOrder.files.length">
-                <h3
-                  class="mt-4 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Uploaded Files:
-                </h3>
-                <ul class="list-disc list-inside mt-2">
-                  <li
-                    v-for="(file, index) in getOrder.files"
-                    :key="index"
-                    class="flex items-center justify-between"
-                  >
-                    <a :href="fileUrl(file.path)" target="_blank">
-                      {{ file.name || 'Download File' }}
-                    </a>
-                    <button
-                      type="button"
-                      class="ml-2 text-red-600 hover:text-red-800"
-                      aria-label="Delete File"
-                      @click="deleteFile(index)"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-5 w-5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          d="M10 9a1 1 0 100 2 1 1 0 000-2zm0 4a1 1 0 100 2 1 1 0 000-2zm-7-7a1 1 0 011-1h12a1 1 0 011 1v1H3V6zm1 2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V10a2 2 0 012-2zm1 2v10h12V10H5z"
-                        />
-                      </svg>
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
           </template>
 
           <template #description>
@@ -236,6 +183,104 @@
               </div>
             </div>
           </template>
+
+          <template #files>
+            <div>
+              <label
+                for="file"
+                class="block text-sm font-medium text-gray-900 dark:text-white"
+                >File</label
+              >
+              <input
+                type="file"
+                multiple
+                class="block w-full mt-1"
+                @change="handleFileUpload"
+              />
+
+              <!-- Displaying the uploaded files -->
+              <div v-if="getOrder.files && getOrder.files.length">
+                <h3
+                  class="mt-4 text-sm font-medium text-gray-900 dark:text-white"
+                >
+                  Uploaded Files:
+                </h3>
+                <div class="grid gap-6 grid-cols-2 items-start justify-between">
+                  <div>
+                    <ul class="list-disc list-inside mt-2">
+                      <li v-for="(file, index) in getOrder.files" :key="index">
+                        <div>
+                          <!-- File Download Link -->
+                          <button
+                            :disabled="!selectedFactory"
+                            @click="addFileForFactory(file)"
+                          >
+                            {{ file.original_name || 'Download File' }}
+                          </button>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div
+                    class="flex flex-row flex-wrap items-start justify-between"
+                  >
+                    <div v-for="factory in getFactory" :key="factory.id">
+                      <h2
+                        class="cursor-pointer"
+                        @click="selectFactoryForFiles(factory)"
+                      >
+                        {{ factory.name }}
+                      </h2>
+                      <div v-if="factoryFiles.find((f) => f.id === factory.id)">
+                        <ul>
+                          <li
+                            v-for="file in factoryFiles.find(
+                              (f) => f.id === factory.id
+                            )?.files"
+                            :key="file"
+                            class="flex flex-row items-center justify-between my-1 hover:bg-indigo-300 px-3 py-2"
+                          >
+                            <p class="w-32">
+                              {{
+                                file.name ||
+                                file.original_name ||
+                                'Unnamed File'
+                              }}
+                            </p>
+
+                            <button
+                              @click="removeFileFromFactory(factory.id, file)"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                x="0px"
+                                y="0px"
+                                width="20"
+                                height="20"
+                                fill="red"
+                                viewBox="0 0 30 30"
+                              >
+                                <path
+                                  d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
+                                ></path>
+                              </svg>
+                            </button>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <button
+                      class="px-3 py-1 bg-green-400 rounded-xl"
+                      @click="addFiles"
+                    >
+                      Add files
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
         </OrderDetail>
 
         <notifications />
@@ -272,6 +317,8 @@ export default {
     return {
       stepperData: [],
       selectedFactories: [],
+      selectedFactory: null,
+      factoryFiles: [],
     }
   },
   computed: {
@@ -294,8 +341,37 @@ export default {
   methods: {
     ...mapActions('orders', ['fetchOrder', 'updateOrder', 'orderDelete']),
     ...mapActions('factory', ['fetchFactory', 'adminConfirmFactoryStatus']),
+    ...mapActions('factoryFiles', ['createFactoryFiles']),
     handleFileUpload(event) {
-      this.getOrder.files = Array.from(event.target.files)
+      const files = Array.from(event.target.files)
+      if (this.selectedFactory) {
+        const factory = this.factoryFiles.find(
+          (f) => f.id === this.selectedFactory.id
+        )
+        if (factory) {
+          files.forEach((file) => {
+            if (!factory.files.some((f) => f.name === file.name)) {
+              factory.files.push(file)
+            } else {
+              this.$notify({
+                text: `File "${file.name}" is already added to the factory.`,
+                type: 'error',
+              })
+            }
+          })
+        } else {
+          this.factoryFiles.push({
+            id: this.selectedFactory.id,
+            name: this.selectedFactory.name,
+            files,
+          })
+        }
+      } else {
+        this.$notify({
+          text: 'Please select a factory first',
+          type: 'error',
+        })
+      }
     },
     fileUrl(filePath) {
       return this.$getFileUrl(filePath)
@@ -338,6 +414,93 @@ export default {
         }
       }
       return entries
+    },
+    addFileForFactory(file) {
+      if (this.selectedFactory) {
+        const factory = this.factoryFiles.find(
+          (f) => f.id === this.selectedFactory.id
+        )
+        if (factory) {
+          if (!factory.files.includes(file)) {
+            factory.files.push(file)
+          } else {
+            this.$notify({
+              text: 'This file is already added to the factory',
+              type: 'error',
+            })
+          }
+        } else {
+          this.factoryFiles.push({
+            id: this.selectedFactory.id,
+            name: this.selectedFactory.name,
+            files: [file],
+          })
+        }
+      } else {
+        this.$notify({
+          text: 'Please select a factory first',
+          type: 'error',
+        })
+      }
+    },
+
+    addFiles() {
+      const formData = new FormData()
+
+      let factory = this.factoryFiles.find(
+        (f) => f.id === this.selectedFactory.id
+      )
+      if (!factory) {
+        factory = {
+          id: this.selectedFactory.id,
+          name: this.selectedFactory.name,
+          files: [],
+        }
+        this.factoryFiles.push(factory)
+      }
+
+      // Ավելացնում ենք ֆայլերը FormData-ում
+      factory.files.forEach((file) => {
+        // Երբ ֆայլը արդեն պահված է, ուղարկում ենք միայն տվյալները
+        if (file.path && file.original_name) {
+          formData.append('files[]', file.path) // Ուղարկում ենք ֆայլի ուղին
+          formData.append('original_name[]', file.original_name) // Վերադարձնում ենք ֆայլի անունը
+        } else {
+          formData.append('files[]', file) // Նոր ֆայլեր ուղարկելու դեպքում
+        }
+      })
+
+      // Չեմ մոռանում ավելացնել նաև factory_id և order_id
+      if (formData.has('files[]')) {
+        formData.append('factory_id', this.selectedFactory.id)
+        formData.append('order_id', this.getOrder.id)
+
+        // Աշխատանք API կոչի համար
+        this.createFactoryFiles(formData)
+      } else {
+        this.$notify({
+          text: 'Please add at least one file.',
+          type: 'error',
+        })
+      }
+    },
+
+    removeFileFromFactory(factoryId, file) {
+      const factory = this.factoryFiles.find((f) => f.id === factoryId)
+      if (factory) {
+        const fileIndex = factory.files.indexOf(file)
+        if (fileIndex !== -1) {
+          factory.files.splice(fileIndex, 1)
+        }
+      }
+    },
+
+    selectFactoryForFiles(factory) {
+      if (this.selectedFactory && this.selectedFactory.id === factory.id) {
+        this.selectedFactory = null
+      } else {
+        this.selectedFactory = factory
+      }
     },
     async doneOrder() {
       try {
