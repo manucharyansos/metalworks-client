@@ -24,6 +24,22 @@ export const actions = {
       console.error(error)
     }
   },
+  async createOrder({ commit }, formData) {
+    try {
+      const response = await this.$axios.post(
+        '/api/factories/storeWithFiles',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      )
+      commit('ADD_FACTORY_FILES', response.data)
+    } catch (error) {
+      console.error(error)
+    }
+  },
   async getFactoryFiles(factoryId, orderId) {
     try {
       const response = await this.$axios.get(

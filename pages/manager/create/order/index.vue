@@ -191,7 +191,7 @@ export default {
     },
 
     async addTask() {
-      this.formSubmitted = true // Set formSubmitted to true to show feedback
+      this.formSubmitted = true
 
       if (!this.selectedClient) {
         this.$notify({

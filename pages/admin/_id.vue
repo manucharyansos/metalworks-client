@@ -458,24 +458,18 @@ export default {
         }
         this.factoryFiles.push(factory)
       }
-
-      // Ավելացնում ենք ֆայլերը FormData-ում
       factory.files.forEach((file) => {
-        // Երբ ֆայլը արդեն պահված է, ուղարկում ենք միայն տվյալները
         if (file.path && file.original_name) {
-          formData.append('files[]', file.path) // Ուղարկում ենք ֆայլի ուղին
-          formData.append('original_name[]', file.original_name) // Վերադարձնում ենք ֆայլի անունը
+          formData.append('files[]', file.path)
+          formData.append('original_name[]', file.original_name)
         } else {
-          formData.append('files[]', file) // Նոր ֆայլեր ուղարկելու դեպքում
+          formData.append('files[]', file)
         }
       })
-
-      // Չեմ մոռանում ավելացնել նաև factory_id և order_id
       if (formData.has('files[]')) {
         formData.append('factory_id', this.selectedFactory.id)
         formData.append('order_id', this.getOrder.id)
 
-        // Աշխատանք API կոչի համար
         this.createFactoryFiles(formData)
       } else {
         this.$notify({
