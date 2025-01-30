@@ -2,7 +2,7 @@
   <div>
     <canvas
       ref="canvas"
-      class="line-color w-full h-96 flex items-center justify-center"
+      class="line-color w-full h-full flex items-center justify-center"
     ></canvas>
   </div>
 </template>
@@ -31,7 +31,6 @@ export default {
         const parser = new DxfParser()
         const dxf = parser.parseSync(dxfText)
 
-        // Three.js setup
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(
           75,
@@ -44,7 +43,6 @@ export default {
           antialias: true,
         })
 
-        // Set renderer background color to white
         renderer.setClearColor(0xffffff, 1)
 
         renderer.setSize(
@@ -52,10 +50,8 @@ export default {
           this.$refs.canvas.clientHeight
         )
 
-        // Create a group for all DXF entities
         const dxfGroup = new THREE.Group()
 
-        // Add DXF lines to the group
         dxf.entities.forEach((entity) => {
           if (entity.type === 'LINE') {
             const material = new THREE.LineBasicMaterial({ color: 0x000000 }) // Սև գույն
@@ -68,24 +64,20 @@ export default {
           }
         })
 
-        // Add the group to the scene
         scene.add(dxfGroup)
 
-        // Center the group and adjust the camera
         const box = new THREE.Box3().setFromObject(dxfGroup)
         const center = box.getCenter(new THREE.Vector3())
         const size = box.getSize(new THREE.Vector3())
         dxfGroup.position.set(-center.x, -center.y, 0)
 
-        // Adjust camera position based on DXF size
         const maxDim = Math.max(size.x, size.y)
         const fov = camera.fov * (Math.PI / 180)
         const cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2)))
 
-        camera.position.set(0, 0, cameraZ + 10) // Keep a little padding
+        camera.position.set(0, 0, cameraZ + 10)
         camera.lookAt(new THREE.Vector3(0, 0, 0))
 
-        // Render the scene
         renderer.render(scene, camera)
       } catch (error) {
         console.error('Failed to load DXF file:', error)

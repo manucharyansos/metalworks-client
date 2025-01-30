@@ -1,6 +1,9 @@
 <template>
   <div class="container flex flex-col">
-    <h1 class="text-3xl font-sans italic leading-6 my-6 text-center mx-auto">
+    <h1
+      v-if="isDoneDetails"
+      class="text-3xl font-sans italic leading-6 my-6 text-center mx-auto"
+    >
       Ստեղծել նոր պատվեր
     </h1>
 
@@ -94,57 +97,95 @@
 
     <div
       v-if="!isDoneDetails"
-      class="flex flex-row items-start justify-center gap-12"
+      class="flex flex-col items-center justify-center gap-12 border border-neutral-400 rounded-xl py-4"
     >
-      <div v-for="(factory, index) in getFactory" :key="index">
-        <button
-          :class="{
-            'border border-neutral-600 rounded-lg px-3 py-1 italic font-sans': true,
-            'bg-green-500 text-white': factories.ids.includes(factory.id),
-          }"
-          @click="selectFactory(factory)"
-        >
-          {{ factory.name }}
-        </button>
-      </div>
-    </div>
-
-    <div v-if="selectedFactoryId" class="container flex flex-col">
-      <div class="grid grid-cols-2 gap-8">
-        <!-- DXF Ֆայլի դիտման հատված -->
-        <div class="show_file_section">
-          <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
+      <div class="flex flex-row items-center justify-center gap-12">
+        <div v-for="(factory, index) in getFactory" :key="index">
+          <button
+            :class="{
+              'border border-neutral-600 rounded-lg px-3 py-1 italic font-sans': true,
+              'bg-gray-900 text-white': selectedFactoryId === factory.id,
+              'bg-gray-600 text-white':
+                factories.files[factory.id] &&
+                factories.files[factory.id].length > 0,
+            }"
+            @click="selectFactory(factory)"
+          >
+            {{ factory.name }}
+          </button>
         </div>
+      </div>
 
-        <!-- Ընտրած ֆայլերի ցուցակ -->
-        <div class="show_files_name">
-          <div class="w-full my-4">
-            <!-- Ֆայլերի ընտրության ինպուտ -->
-            <input type="file" multiple @change="handleFileChange" />
+      <div v-if="selectedFactoryId" class="container flex flex-col">
+        <div class="grid grid-cols-2 gap-8">
+          <!-- DXF Ֆայլի դիտման հատված -->
+          <div class="show_file_section h-96">
+            <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
           </div>
 
-          <!-- Ցուցադրում ենք ընտրված ֆայլերի անունները -->
-          <div v-if="factories.files[selectedFactoryId]?.length > 0">
-            <ul>
-              <li
-                v-for="(file, index) in factories.files[selectedFactoryId]"
-                :key="index"
-                class="cursor-pointer hover:bg-gray-200 p-2"
-                :class="{
-                  'border border-neutral-600 rounded-lg px-3 py-1 italic font-sans': true,
-                  'bg-gray-900 text-white': selectedFileIndex === index,
-                }"
-                @click="selectFile(index)"
-              >
-                {{ file.name }}
-              </li>
-            </ul>
-          </div>
+          <!-- Ընտրած ֆայլերի ցուցակ -->
+          <div class="show_files_name">
+            <div class="w-full my-4">
+              <!-- Ֆայլերի ընտրության ինպուտ -->
+              <input type="file" multiple @change="handleFileChange" />
+            </div>
 
-          <!-- Եթե ֆայլ չկա -->
-          <div v-else>
-            <p>Ֆայլ չկա ընտրված գործարանի համար:</p>
+            <!-- Ցուցադրում ենք ընտրված ֆայլերի անունները -->
+            <div v-if="factories.files[selectedFactoryId]?.length > 0">
+              <ol class="list-decimal px-3">
+                <li
+                  v-for="(file, index) in factories.files[selectedFactoryId]"
+                  :key="index"
+                >
+                  <div
+                    class="cursor-pointer grid grid-cols-2 justify-between"
+                    :class="{
+                      'border border-neutral-600 rounded-lg px-3 py-1 italic font-sans': true,
+                      'bg-gray-900 text-white': selectedFileIndex === index,
+                    }"
+                    @click="selectFile(index)"
+                  >
+                    <span>{{ file.name }}</span>
+
+                    <div class="ml-auto" @click="deleteFile(index)">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        x="0px"
+                        y="0px"
+                        width="20"
+                        height="20"
+                        fill="red"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M 10.806641 2 C 10.289641 2 9.7956875 2.2043125 9.4296875 2.5703125 L 9 3 L 4 3 A 1.0001 1.0001 0 1 0 4 5 L 20 5 A 1.0001 1.0001 0 1 0 20 3 L 15 3 L 14.570312 2.5703125 C 14.205312 2.2043125 13.710359 2 13.193359 2 L 10.806641 2 z M 4.3652344 7 L 5.8925781 20.263672 C 6.0245781 21.253672 6.877 22 7.875 22 L 16.123047 22 C 17.121047 22 17.974422 21.254859 18.107422 20.255859 L 19.634766 7 L 4.3652344 7 z"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                </li>
+              </ol>
+            </div>
+
+            <!-- Եթե ֆայլ չկա -->
+            <div v-else>
+              <p>Ֆայլ չկա ընտրված գործարանի համար:</p>
+            </div>
           </div>
+        </div>
+        <div
+          class="flex flex-row items-center justify-center gap-12 float-right my-3"
+        >
+          <button
+            class="border border-red-700 bg-red-600 text-white rounded-xl px-3 py-1"
+          >
+            Չեղարկել
+          </button>
+          <button
+            class="border border-green-700 bg-green-700 text-white rounded-xl px-3 py-1"
+          >
+            Շարունակել
+          </button>
         </div>
       </div>
     </div>
@@ -166,7 +207,7 @@ export default {
     TextareaWithLabel,
     SelectWithLabel,
   },
-  layout: 'ManagerLayout',
+  layout: 'EngineerLayout',
   middleware: ['admin', 'roleRedirect'],
   data() {
     return {
@@ -187,7 +228,7 @@ export default {
       fileNames: [],
       dxfUrl: '',
       files: [],
-      selectedFactoryId: null, // Ընտրված գործարանի ID-ն
+      selectedFactoryId: null,
       selectedFileIndex: null,
     }
   },
@@ -205,38 +246,59 @@ export default {
   methods: {
     ...mapActions('factory', ['fetchFactory']),
     ...mapActions('users', ['fetchUsers']),
+    deleteFile(index) {
+      if (
+        this.selectedFactoryId &&
+        this.factories.files[this.selectedFactoryId]
+      ) {
+        this.factories.files[this.selectedFactoryId].splice(index, 1)
+        if (this.factories.files[this.selectedFactoryId].length === 0) {
+          this.dxfUrl = ''
+          this.selectedFileIndex = null
+        } else {
+          this.selectedFileIndex = 0
+          this.loadFile(this.factories.files[this.selectedFactoryId][0])
+        }
+      }
+    },
 
     selectFactory(factory) {
       this.selectedFactoryId = factory.id
-
-      // Եթե գործարանը նոր է ընտրվում, ապա ավելացնում ենք `factories.ids`
       if (!this.factories.ids.includes(factory.id)) {
         this.factories.ids.push(factory.id)
       }
-
-      // Ստեղծում ենք ֆայլերի նոր ցուցակ, եթե չկա
       if (!this.factories.files[factory.id]) {
         this.factories.files[factory.id] = []
       }
-
-      // Զրոյացնում ենք ֆայլերի ընտրությունը
       this.selectedFileIndex = null
       this.dxfUrl = ''
       this.fileNames = []
     },
 
+    // handleFileChange(event) {
+    //   const files = Array.from(event.target.files)
+    //   if (this.selectedFactoryId) {
+    //     this.factories.files[this.selectedFactoryId] = files
+    //     this.fileNames = files.map((file) => file.name)
+    //     this.loadFile(files[0])
+    //   } else {
+    //     console.error('Գործարան ընտրված չէ')
+    //   }
+    // },
     handleFileChange(event) {
-      const files = Array.from(event.target.files)
-
-      // Ավելացնում ենք ֆայլերը ընտրված գործարանի ID-ի տակ
+      const newFiles = Array.from(event.target.files)
       if (this.selectedFactoryId) {
-        this.factories.files[this.selectedFactoryId] = files
-
-        // Թարմացնում ենք ֆայլերի անունները
-        this.fileNames = files.map((file) => file.name)
-
-        // Բեռնում ենք առաջին ֆայլը
-        this.loadFile(files[0])
+        if (!this.factories.files[this.selectedFactoryId]) {
+          this.factories.files[this.selectedFactoryId] = []
+        }
+        this.factories.files[this.selectedFactoryId] = [
+          ...this.factories.files[this.selectedFactoryId],
+          ...newFiles,
+        ]
+        this.fileNames = this.factories.files[this.selectedFactoryId].map(
+          (file) => file.name
+        )
+        this.loadFile(newFiles[0])
       } else {
         console.error('Գործարան ընտրված չէ')
       }
@@ -246,11 +308,9 @@ export default {
       const reader = new FileReader()
 
       reader.onload = (e) => {
-        // Ստեղծում ենք Blob URL
         const blob = new Blob([e.target.result], { type: 'application/dxf' })
         this.dxfUrl = URL.createObjectURL(blob)
       }
-
       reader.readAsArrayBuffer(file)
     },
 
@@ -265,13 +325,17 @@ export default {
     createOrder() {
       this.formSubmitted = true
       this.isDoneDetails = false
+      this.selectedFactoryId = 1
+      if (!this.factories.ids.includes(1)) {
+        this.factories.ids.push(1)
+      }
+      if (!this.factories.files[1]) {
+        this.factories.files[1] = []
+      }
+      this.selectedFileIndex = null
+      this.dxfUrl = ''
+      this.fileNames = []
     },
-
-    // selectFactory(factory) {
-    //   if (!this.factories.ids.includes(factory.id)) {
-    //     this.factories.ids.push(factory.id)
-    //   }
-    // },
   },
 }
 </script>
@@ -290,5 +354,8 @@ export default {
 }
 .cursor-pointer {
   cursor: pointer;
+}
+ol {
+  list-style-type: decimal;
 }
 </style>

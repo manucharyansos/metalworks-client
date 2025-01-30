@@ -30,7 +30,7 @@
       class="mt-8 py-3 px-10 bg-green-500 rounded-full text-white font-semibold hover:bg-green-600 transition-transform transform hover:scale-105"
       @click="$emit('addButton')"
     >
-      Add Order
+      {{ buttonText }}
     </button>
   </div>
 </template>
@@ -42,6 +42,10 @@ export default {
     openModal: {
       type: Boolean,
       default: false,
+    },
+    buttonText: {
+      type: String,
+      default: 'Շարունակել',
     },
   },
 }
