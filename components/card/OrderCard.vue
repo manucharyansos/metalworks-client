@@ -10,12 +10,12 @@
       <div>
         <div v-for="status in statuses" :key="status.label">
           <div
-            v-if="order.factory_order_statuses.status === status.value"
+            v-if="order.factory_order.status === status.value"
             class="flex flex-row items-start"
           >
             <span class="font-bold">Status:</span>
             <div :class="status.class" class="font-sans italic mx-2">
-              {{ order.factory_order_statuses.status }}
+              {{ order.factory_order.status }}
             </div>
           </div>
         </div>

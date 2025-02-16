@@ -53,17 +53,31 @@
         </div>
       </div>
       <div class="w-full">
-        <create-order @addButton="createOrder">
+        <create-order
+          button-text="Ստեղծել Պատվեր"
+          @doneButton="doneToFiles"
+          @addButton="createOrder"
+        >
           <template #detailsType>
-            <input-with-labels
-              id="name"
-              v-model="order.name"
-              label="Անուն"
-              type="text"
-              class="shadow-md rounded-lg p-3"
-              :class="{ 'border-red-500': !order.name && formSubmitted }"
-              required
-            ></input-with-labels>
+            <!--            <input-with-labels-->
+            <!--              id="name"-->
+            <!--              v-model="order.name"-->
+            <!--              label="Անուն"-->
+            <!--              type="text"-->
+            <!--              class="shadow-md rounded-lg p-3"-->
+            <!--              :class="{ 'border-red-500': !order.name && formSubmitted }"-->
+            <!--              required-->
+            <!--            ></input-with-labels>-->
+            <select-with-label
+              v-model="order.pnp_groupe"
+              :dates="pnpGroupe"
+              label="Ընտրել PNP տեսակը"
+            />
+            <select-with-label
+              v-model="order.pnp_name"
+              :dates="pnp_name"
+              label="Ընտրել Անունը"
+            />
           </template>
 
           <template #detailsQuantity>
@@ -97,21 +111,47 @@
 
     <div
       v-if="!isDoneDetails"
-      class="flex flex-col items-center justify-center gap-12 border border-neutral-400 rounded-xl py-4"
+      class="flex flex-col items-center justify-center gap-12 border border-neutral-400 shadow-xl rounded-xl py-4"
     >
-      <div class="flex flex-row items-center justify-center gap-12">
-        <div v-for="(factory, index) in getFactory" :key="index">
+      <div class="flex flex-row items-center gap-12">
+        <div class="flex flex-row items-center justify-center gap-12">
+          <div v-for="(factory, index) in getFactory" :key="index">
+            <button
+              :class="{
+                'border border-neutral-600 rounded-lg px-3 py-1 italic font-sans': true,
+                'bg-gray-900 text-white': selectedFactoryId === factory.id,
+                'bg-gray-600 text-white':
+                  factories.files[factory.id] &&
+                  factories.files[factory.id].length > 0,
+              }"
+              @click="selectFactory(factory)"
+            >
+              {{ factory.name }}
+            </button>
+          </div>
+        </div>
+        <div
+          class="flex flex-row items-center justify-center gap-12 text-right my-3"
+        >
+          <button @click="isDoneDetails = !isDoneDetails">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              x="0px"
+              y="0px"
+              width="25"
+              height="25"
+              fill="red"
+              viewBox="0 0 30 30"
+            >
+              <path
+                d="M15,3C8.373,3,3,8.373,3,15c0,6.627,5.373,12,12,12s12-5.373,12-12C27,8.373,21.627,3,15,3z M16.414,15 c0,0,3.139,3.139,3.293,3.293c0.391,0.391,0.391,1.024,0,1.414c-0.391,0.391-1.024,0.391-1.414,0C18.139,19.554,15,16.414,15,16.414 s-3.139,3.139-3.293,3.293c-0.391,0.391-1.024,0.391-1.414,0c-0.391-0.391-0.391-1.024,0-1.414C10.446,18.139,13.586,15,13.586,15 s-3.139-3.139-3.293-3.293c-0.391-0.391-0.391-1.024,0-1.414c0.391-0.391,1.024-0.391,1.414,0C11.861,10.446,15,13.586,15,13.586 s3.139-3.139,3.293-3.293c0.391-0.391,1.024-0.391,1.414,0c0.391,0.391,0.391,1.024,0,1.414C19.554,11.861,16.414,15,16.414,15z"
+              ></path>
+            </svg>
+          </button>
           <button
-            :class="{
-              'border border-neutral-600 rounded-lg px-3 py-1 italic font-sans': true,
-              'bg-gray-900 text-white': selectedFactoryId === factory.id,
-              'bg-gray-600 text-white':
-                factories.files[factory.id] &&
-                factories.files[factory.id].length > 0,
-            }"
-            @click="selectFactory(factory)"
+            class="border border-green-700 bg-green-700 text-white rounded-xl px-3 py-1"
           >
-            {{ factory.name }}
+            Շարունակել
           </button>
         </div>
       </div>
@@ -173,20 +213,20 @@
             </div>
           </div>
         </div>
-        <div
-          class="flex flex-row items-center justify-center gap-12 float-right my-3"
-        >
-          <button
-            class="border border-red-700 bg-red-600 text-white rounded-xl px-3 py-1"
-          >
-            Չեղարկել
-          </button>
-          <button
-            class="border border-green-700 bg-green-700 text-white rounded-xl px-3 py-1"
-          >
-            Շարունակել
-          </button>
-        </div>
+        <!--        <div-->
+        <!--          class="flex flex-row items-center justify-center gap-12 float-right my-3"-->
+        <!--        >-->
+        <!--          <button-->
+        <!--            class="border border-red-700 bg-red-600 text-white rounded-xl px-3 py-1"-->
+        <!--          >-->
+        <!--            Չեղարկել-->
+        <!--          </button>-->
+        <!--          <button-->
+        <!--            class="border border-green-700 bg-green-700 text-white rounded-xl px-3 py-1"-->
+        <!--          >-->
+        <!--            Շարունակել-->
+        <!--          </button>-->
+        <!--        </div>-->
       </div>
     </div>
   </div>
@@ -219,6 +259,8 @@ export default {
       selectedClient: null,
       order: {
         name: null,
+        pnp_groupe: null,
+        pnp_name: null,
         quantity: null,
         description: null,
       },
@@ -230,6 +272,23 @@ export default {
       files: [],
       selectedFactoryId: null,
       selectedFileIndex: null,
+      pnp_name: [
+        { name: '01' },
+        { name: '02' },
+        { name: '03' },
+        { name: '04' },
+        { name: '05' },
+        { name: '06' },
+        { name: '07' },
+      ],
+      pnpGroupe: [
+        { name: '001' },
+        { name: '002' },
+        { name: '003' },
+        { name: '004' },
+        { name: '005' },
+        { name: '006' },
+      ],
     }
   },
   computed: {
@@ -246,6 +305,7 @@ export default {
   methods: {
     ...mapActions('factory', ['fetchFactory']),
     ...mapActions('users', ['fetchUsers']),
+    ...mapActions('engineer', ['createNewOrder']),
     deleteFile(index) {
       if (
         this.selectedFactoryId &&
@@ -274,17 +334,6 @@ export default {
       this.dxfUrl = ''
       this.fileNames = []
     },
-
-    // handleFileChange(event) {
-    //   const files = Array.from(event.target.files)
-    //   if (this.selectedFactoryId) {
-    //     this.factories.files[this.selectedFactoryId] = files
-    //     this.fileNames = files.map((file) => file.name)
-    //     this.loadFile(files[0])
-    //   } else {
-    //     console.error('Գործարան ընտրված չէ')
-    //   }
-    // },
     handleFileChange(event) {
       const newFiles = Array.from(event.target.files)
       if (this.selectedFactoryId) {
@@ -322,7 +371,7 @@ export default {
       }
     },
 
-    createOrder() {
+    doneToFiles() {
       this.formSubmitted = true
       this.isDoneDetails = false
       this.selectedFactoryId = 1
@@ -335,6 +384,18 @@ export default {
       this.selectedFileIndex = null
       this.dxfUrl = ''
       this.fileNames = []
+    },
+
+    createOrder() {
+      const fullName =
+        this.order.pnp_groupe.name + '.' + this.order.pnp_name.name
+      const order = {
+        user_id: this.selectedClient.id,
+        name: fullName,
+        quantity: this.order.quantity,
+        description: this.order.description,
+      }
+      this.createNewOrder(order)
     },
   },
 }

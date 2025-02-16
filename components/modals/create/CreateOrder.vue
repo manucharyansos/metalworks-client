@@ -26,12 +26,20 @@
       <slot name="detailsDesc"></slot>
     </div>
 
-    <button
-      class="mt-8 py-3 px-10 bg-green-500 rounded-full text-white font-semibold hover:bg-green-600 transition-transform transform hover:scale-105"
-      @click="$emit('addButton')"
-    >
-      {{ buttonText }}
-    </button>
+    <div class="flex flex-row w-full gap-6 justify-end">
+      <button
+        class="mt-8 py-3 px-10 bg-green-500 rounded-full text-white font-semibold hover:bg-green-600 transition-transform transform hover:scale-105"
+        @click="$emit('addButton')"
+      >
+        {{ buttonText }}
+      </button>
+      <button
+        class="mt-8 py-3 px-10 bg-green-500 rounded-full text-white font-semibold hover:bg-green-600 transition-transform transform hover:scale-105"
+        @click="$emit('doneButton')"
+      >
+        {{ doneButton }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -44,6 +52,10 @@ export default {
       default: false,
     },
     buttonText: {
+      type: String,
+      default: 'Շարունակել',
+    },
+    doneButton: {
       type: String,
       default: 'Շարունակել',
     },

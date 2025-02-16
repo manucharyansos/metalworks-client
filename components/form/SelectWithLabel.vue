@@ -32,7 +32,7 @@ export default {
       default: '',
     },
     value: {
-      type: [Number, Object],
+      type: [Number, Object, String],
       default: null,
     },
     name: {

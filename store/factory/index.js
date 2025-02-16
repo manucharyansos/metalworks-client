@@ -26,11 +26,19 @@ export const actions = {
       return false
     }
   },
+  // async fetchOrdersByFactory({ commit }, factoryIds) {
+  //   try {
+  //     const res = await this.$axios.get('/api/factories/getOrdersByFactories', {
+  //       params: { factory_ids: factoryIds },
+  //     })
+  //     commit('SET_FACTORIES', res.data)
+  //   } catch (err) {
+  //     return false
+  //   }
+  // },
   async fetchOrdersByFactory({ commit }, factoryIds) {
     try {
-      const res = await this.$axios.get('/api/factories/getOrdersByFactories', {
-        params: { factory_ids: factoryIds },
-      })
+      const res = await this.$axios.get(`/api/factories/factory/${factoryIds}`)
       commit('SET_FACTORIES', res.data)
     } catch (err) {
       return false
@@ -63,12 +71,10 @@ export const actions = {
     }
   },
 
-  async downloadUploadedFile({ commit }, filePath, originalName) {
+  async downloadFile(filePath, fileName) {
     try {
-      if (typeof filePath !== 'string') {
-        throw new TypeError('Invalid filePath. Expected a string.')
-      }
-      const encodedPath = encodeURI(filePath)
+      const encodedPath = encodeURIComponent(filePath).replace(/%2F/g, '/') // Կոդավորում, բայց պահպանում / նշանը
+
       const response = await this.$axios.get(`/api/download/${encodedPath}`, {
         responseType: 'blob',
       })
@@ -76,14 +82,13 @@ export const actions = {
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
-
-      // Use original file name when downloading
-      link.setAttribute('download', originalName || 'default-filename.pdf') // Default fallback
+      link.setAttribute('download', fileName || 'downloaded_file.dxf')
       document.body.appendChild(link)
       link.click()
-      link.remove()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(link)
     } catch (error) {
-      console.error('Error during file download:', error.message)
+      console.error('File download failed:', error)
     }
   },
 }

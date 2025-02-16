@@ -31,9 +31,7 @@
             <tr
               class="border-b border-gray-200 dark:border-gray-700"
               :class="
-                order.factory_order_statuses.some(
-                  (item) => item.status === 'Ավարտել'
-                )
+                order.factory_order.some((item) => item.status === 'Ավարտել')
                   ? 'bg-green-500 text-white'
                   : ''
               "
@@ -66,11 +64,11 @@
                 Դիտել
               </td>
               <td
-                v-if="order.factory_order_statuses"
+                v-if="order.factory_order"
                 class="flex items-center justify-center text-center"
               >
                 <div
-                  v-for="item in order.factory_order_statuses"
+                  v-for="item in order.factory_order"
                   :key="item.id"
                   class="px-6 py-4 text-center w-full"
                   :class="
@@ -349,12 +347,12 @@ export default {
     updateOrder(order) {
       this.isModal = true
       this.selectedOrder = { ...order }
-      this.selectedOrder.factory_order_statuses = order.factory_order_statuses
+      this.selectedOrder.factory_order = order.factory_order
         ? {
-            ...order.factory_order_statuses,
-            cancel_date: order.factory_order_statuses.cancel_date || null,
-            canceling: order.factory_order_statuses.canceling || '',
-            finish_date: order.factory_order_statuses.finish_date || null,
+            ...order.factory_order,
+            cancel_date: order.factory_order.cancel_date || null,
+            canceling: order.factory_order.canceling || '',
+            finish_date: order.factory_order.finish_date || null,
           }
         : {
             status: '',
@@ -371,7 +369,7 @@ export default {
     async doneOrder() {
       const updatedOrder = {
         id: this.selectedOrder.id,
-        factory_order_statuses: {
+        factory_order: {
           status: this.selectedOption?.name || null,
           canceling: this.additionalOption?.name || null,
           cancel_date: this.changeDate || null,

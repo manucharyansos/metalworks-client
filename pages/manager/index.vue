@@ -371,9 +371,9 @@
           <p>Factory: {{ factory.name }}</p>
         </div>
       </template>
-      <template v-if="showOrder?.factory_order_statuses" #orderByFactoryStatus>
+      <template v-if="showOrder?.factory_order" #orderByFactoryStatus>
         <div
-          v-for="orderStatus in showOrder.factory_order_statuses"
+          v-for="orderStatus in showOrder.factory_order"
           :key="orderStatus.id"
           class="flex flex-col items-center justify-center"
         >

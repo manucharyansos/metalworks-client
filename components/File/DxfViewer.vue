@@ -2,7 +2,7 @@
   <div>
     <canvas
       ref="canvas"
-      class="line-color w-full h-full flex items-center justify-center"
+      class="line-color w-full flex items-center justify-center hover:scale-150"
     ></canvas>
   </div>
 </template>
@@ -96,6 +96,6 @@ canvas {
 }
 
 .line-color {
-  stroke: #000000; /* Սև գիծ */
+  stroke: #000000;
 }
 </style>

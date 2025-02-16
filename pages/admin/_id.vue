@@ -94,7 +94,7 @@
                 Գործարանային կարգավիճակ
               </p>
               <div
-                v-for="factoriesStatus in getOrder.factory_order_statuses"
+                v-for="factoriesStatus in getOrder.factory_order"
                 :key="factoriesStatus.id"
                 class="mt-2"
               >

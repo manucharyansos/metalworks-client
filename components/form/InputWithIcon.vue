@@ -10,6 +10,7 @@
       :class="classes"
       :value="value"
       :disabled="disabled"
+      :plaseholder="plaseholder"
       @input="$emit('input', $event.target.value)"
     />
     <label
@@ -49,6 +50,10 @@ export default {
       default: false,
     },
     classes: {
+      type: String,
+      default: '',
+    },
+    plaseholder: {
       type: String,
       default: '',
     },

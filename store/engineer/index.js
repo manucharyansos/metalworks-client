@@ -1,66 +1,57 @@
-// store/modules/engineer.js
 export const state = () => ({
+  orders: [],
+  order: [],
   laserFiles: [],
   bendFiles: [],
 })
 
 export const getters = {
-  getLaserFiles: (state) => state.laserFiles,
-  getBendFiles: (state) => state.bendFiles,
+  getOrderS(state) {
+    return state.orders
+  },
+  getOrder(state) {
+    return state.order
+  },
 }
 
 export const actions = {
-  async createLaserFile({ commit }, formData) {
+  async createNewOrder({ commit }, order) {
     try {
-      const response = await this.$axios.post('/api/laser-files', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      commit('ADD_LASER_FILE', response.data)
-    } catch (error) {
-      console.error(error)
+      const response = await this.$axios.post('/api/engineers/engineer', order)
+      commit('ADD_ORDERS', response.data)
+      await this.$router.push('/engineer')
+      return true
+    } catch (e) {
+      console.error(e)
+      return false
     }
   },
-  async createBendFile({ commit }, formData) {
+  async saveOrderFilesByFactory({ commit }, order) {
     try {
-      const response = await this.$axios.post('/api/bend-files', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      await this.$axios.post('/api/engineers/upload', order, {
+        headers: { 'Content-Type': 'application/json' },
       })
-      commit('ADD_BEND_FILE', response.data)
-    } catch (error) {
-      console.error(error)
+      return true
+    } catch (e) {
+      console.error(e)
+      return false
     }
   },
-  async submitOrder({ commit }) {
+  async fetchOrderDataById({ commit }, id) {
     try {
-      await this.$axios.post('/api/orders', {
-        laserFiles: state.laserFiles,
-        bendFiles: state.bendFiles,
-      })
-      commit('CLEAR_FILES')
-      this.$notify({
-        text: 'Պատվերը հաջողությամբ ուղարկվեց:',
-        type: 'success',
-        duration: 3000,
-      })
-    } catch (error) {
-      console.error(error)
+      const response = await this.$axios.get(`/api/admin/order/${id}`)
+      commit('SET_ORDER', response.data)
+    } catch (e) {
+      console.error(e)
     }
   },
 }
 
 export const mutations = {
-  ADD_LASER_FILE(state, file) {
-    state.laserFiles.push(file)
+  ADD_ORDERS(state, order) {
+    state.orders = order
   },
-  ADD_BEND_FILE(state, file) {
-    state.bendFiles.push(file)
-  },
-  CLEAR_FILES(state) {
-    state.laserFiles = []
-    state.bendFiles = []
+  SET_ORDER(state, order) {
+    state.order = order
   },
 }

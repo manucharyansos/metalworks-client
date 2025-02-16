@@ -73,6 +73,12 @@ export default {
     },
   },
 
+  runtimeConfig: {
+    public: {
+      apiBase: 'http://localhost:8000',
+    },
+  },
+
   publicRuntimeConfig: {
     baseURL: process.env.BASE_URL,
     managerRole: process.env.MANAGER_ROLE || 'manager',
