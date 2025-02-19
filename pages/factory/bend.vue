@@ -160,7 +160,7 @@
               >
                 <select-with-label
                   v-model="additionalOption"
-                  :dates="additionalOptions"
+                  :data-value="additionalOptions"
                   label="Մերժման պատճառ"
                 ></select-with-label>
               </div>

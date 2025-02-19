@@ -31,7 +31,7 @@ export default {
 <style>
 #map {
   height: 200px;
-  width: 600px;
+  width: 500px;
   z-index: 0;
 }
 @media screen and (max-width: 1280px) {

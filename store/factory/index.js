@@ -71,9 +71,9 @@ export const actions = {
     }
   },
 
-  async downloadFile(filePath, fileName) {
+  async downloadUploadedFile(filePath, fileName) {
     try {
-      const encodedPath = encodeURIComponent(filePath).replace(/%2F/g, '/') // Կոդավորում, բայց պահպանում / նշանը
+      const encodedPath = encodeURIComponent(filePath).replace(/%2F/g, '/')
 
       const response = await this.$axios.get(`/api/download/${encodedPath}`, {
         responseType: 'blob',

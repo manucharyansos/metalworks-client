@@ -69,10 +69,17 @@
     <div v-if="getPmp">
       {{ getPmp?.pmp?.group_name || 'Տվյալներ չկան' }}
     </div>
-    PMP_ {{ pmp.group }} {{ pmpFiles.factoryIds[0] }} {{ selectedRemoteNumber }}
+    <template v-if="isSelectPmp">
+      PMP_ {{ pmp.group }} ․ {{ selectedRemoteNumberValue }} /
+      {{ selectedFactory }}
+    </template>
+
     <div class="w-full flex flex-col items-center gap-12">
       <h2>Հերթական համար</h2>
-      <div class="flex flex-row items-center mx-auto gap-12">
+      <div
+        v-if="pmp.group && pmp.group_name"
+        class="flex flex-row items-center mx-auto gap-12"
+      >
         <div v-for="(pmp, index) in remoteNumberOptions" :key="index">
           <button
             :class="{
@@ -89,7 +96,10 @@
       </div>
     </div>
 
-    <div class="w-full flex flex-col items-center gap-12">
+    <div
+      v-if="pmp.group && pmp.group_name"
+      class="w-full flex flex-col items-center gap-12"
+    >
       <h2>Ընտրել այստեղ</h2>
       <div class="flex flex-row items-center mx-auto gap-12">
         <div v-for="(factory, index) in getFactory" :key="index">
@@ -177,11 +187,6 @@
         >
           Պահպանել Ֆայլերը
         </button>
-        <button
-          class="border border-green-700 bg-green-700 text-white rounded-xl px-3 py-1"
-        >
-          Շարունակել
-        </button>
       </div>
     </div>
     <notifications />
@@ -202,7 +207,10 @@ export default {
   data() {
     return {
       timeout: null,
+      isSelectPmp: false,
       selectedRemoteNumber: null,
+      selectedRemoteNumberValue: null,
+      selectedFactory: null,
       selectedFactoryId: null,
       pmp: {
         group: '',
@@ -230,7 +238,7 @@ export default {
     ...mapGetters('users', ['getUsers']),
     ...mapGetters('factory', ['getFactory']),
     ...mapGetters('engineer', ['getOrder']),
-    ...mapGetters('pmp', ['getPmp', 'getPmps']),
+    ...mapGetters('pmp', ['getPmp', 'getPmpes']),
     users() {
       return this.getUsers
     },
@@ -328,7 +336,7 @@ export default {
         this.pmp.group_name = this.getPmp?.pmp?.group_name || ''
       } else {
         console.log(this.pmp.group_name, 'group name not found')
-        // this.pmp.group_name = ''
+        this.pmp.group_name = ''
       }
     },
 
@@ -410,7 +418,9 @@ export default {
     },
 
     selectPmp(remoteNumber) {
+      this.isSelectPmp = true
       this.selectedRemoteNumber = remoteNumber.id
+      this.selectedRemoteNumberValue = remoteNumber.remote_number
       if (!this.pmpFiles.files[remoteNumber.id]) {
         this.pmpFiles.files[remoteNumber.id] = {}
       }
@@ -421,6 +431,7 @@ export default {
 
     selectFactory(factory) {
       this.selectedFactoryId = factory.id
+      this.selectedFactory = factory.value
       if (!this.pmpFiles.files[this.selectedRemoteNumber]) {
         this.pmpFiles.files[this.selectedRemoteNumber] = {}
       }

@@ -14,7 +14,7 @@
       <div class="w-full h-full ml-auto mr-4 p-6 bg-white rounded-xl shadow-lg">
         <select-with-label
           v-model="selectedClient"
-          :dates="users"
+          :data-value="users"
           label="Ընտրել հաճախորդ"
         ></select-with-label>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
@@ -59,23 +59,14 @@
           @addButton="createOrder"
         >
           <template #detailsType>
-            <!--            <input-with-labels-->
-            <!--              id="name"-->
-            <!--              v-model="order.name"-->
-            <!--              label="Անուն"-->
-            <!--              type="text"-->
-            <!--              class="shadow-md rounded-lg p-3"-->
-            <!--              :class="{ 'border-red-500': !order.name && formSubmitted }"-->
-            <!--              required-->
-            <!--            ></input-with-labels>-->
-            <select-with-label
-              v-model="order.pnp_groupe"
-              :dates="pnpGroupe"
+            <select-pmp
+              v-model="selectedPmp"
+              :dates="pnpGroup.pmp"
               label="Ընտրել PNP տեսակը"
             />
-            <select-with-label
-              v-model="order.pnp_name"
-              :dates="pnp_name"
+            <select-pmp
+              v-model="selectedPmpRemoteNumber"
+              :dates="pnpName"
               label="Ընտրել Անունը"
             />
           </template>
@@ -97,7 +88,7 @@
           <template #detailsDesc>
             <textarea-with-label
               v-model="order.description"
-              placeholder="Description"
+              placeholder="Նկարագրություն"
               class="w-full my-2 p-3 border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600"
               :class="{
                 'border-red-500': !order.description && formSubmitted,
@@ -238,9 +229,11 @@ import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 import CreateOrder from '~/components/modals/create/CreateOrder.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 import DxfViewer from '~/components/File/DxfViewer.vue'
+import SelectPmp from '~/components/form/SelectPmp.vue'
 
 export default {
   components: {
+    SelectPmp,
     DxfViewer,
     InputWithLabels,
     CreateOrder,
@@ -257,10 +250,12 @@ export default {
       },
       isDoneDetails: true,
       selectedClient: null,
+      selectedPmp: null,
+      selectedPmpRemoteNumber: null,
       order: {
         name: null,
-        pnp_groupe: null,
-        pnp_name: null,
+        // pnp_groupe: null,
+        // pnp_name: null,
         quantity: null,
         description: null,
       },
@@ -272,40 +267,44 @@ export default {
       files: [],
       selectedFactoryId: null,
       selectedFileIndex: null,
-      pnp_name: [
-        { name: '01' },
-        { name: '02' },
-        { name: '03' },
-        { name: '04' },
-        { name: '05' },
-        { name: '06' },
-        { name: '07' },
-      ],
-      pnpGroupe: [
-        { name: '001' },
-        { name: '002' },
-        { name: '003' },
-        { name: '004' },
-        { name: '005' },
-        { name: '006' },
-      ],
     }
   },
   computed: {
     ...mapGetters('factory', ['getFactory']),
     ...mapGetters('users', ['getUsers']),
+    ...mapGetters('pmp', ['getPmpes', 'getPmp']),
     users() {
       return this.getUsers
+    },
+    pnpGroup() {
+      return this.getPmpes || []
+    },
+    pnpName() {
+      if (!this.selectedPmp || !this.selectedPmp.remote_number) return []
+      const selectedPmpData = this.pnpGroup.pmp.find(
+        (pmp) => pmp.id === this.selectedPmp.id
+      )
+
+      return selectedPmpData
+        ? selectedPmpData.remote_number.map((p) => p.remote_number)
+        : []
     },
   },
   mounted() {
     this.fetchUsers()
     this.fetchFactory()
+    this.fetchPmps()
   },
   methods: {
     ...mapActions('factory', ['fetchFactory']),
     ...mapActions('users', ['fetchUsers']),
     ...mapActions('engineer', ['createNewOrder']),
+    ...mapActions('pmp', [
+      'checkIfGroupExists',
+      'fetchPmps',
+      'checkIfGroupNameExists',
+      'checkIfGroupExists',
+    ]),
     deleteFile(index) {
       if (
         this.selectedFactoryId &&
@@ -388,7 +387,8 @@ export default {
 
     createOrder() {
       const fullName =
-        this.order.pnp_groupe.name + '.' + this.order.pnp_name.name
+        this.selectedPmp.group + '.' + this.selectedPmpRemoteNumber
+      console.log(this.selectedPmp, 'asd')
       const order = {
         user_id: this.selectedClient.id,
         name: fullName,

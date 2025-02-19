@@ -56,7 +56,7 @@
               </td>
               <td
                 v-if="order.description"
-                class="px-6 py-4 cursor-pointer text-center hover:text-indigo-100 hover:bg-[#2557D6]/90"
+                class="px-6 py-4 cursor-pointer text-center bg-indigo-400 text-white hover:text-indigo-100 hover:bg-[#2557D6]/90"
                 @click="toggleDetails(order)"
               >
                 Դիտել
@@ -148,7 +148,7 @@
             <div>
               <select-with-label
                 v-model="selectedOption"
-                :dates="status"
+                :data-value="status"
                 label="Գործողություն"
               >
               </select-with-label>
@@ -158,7 +158,7 @@
               >
                 <select-with-label
                   v-model="additionalOption"
-                  :dates="additionalOptions"
+                  :data-value="additionalOptions"
                   label="Մերժման պատճառ"
                 ></select-with-label>
               </div>
@@ -208,7 +208,7 @@
       <div
         class="absolute top-0 min-h-screen w-full flex items-center justify-center bg-gray-100 rounded p-4 text-gray-700"
       >
-        <!-- Փակելու կոճակը -->
+        <!-- Close button -->
         <button class="fixed top-10 right-20" @click="isOpenDetails = false">
           <svg
             class="w-6 h-6 text-gray-800"
@@ -228,23 +228,6 @@
           </svg>
         </button>
 
-        <!--        <div-->
-        <!--          class="grid md:grid-cols-2 grid-cols-1 gap-2 bg-white p-6 rounded-lg shadow-md lg:w-3/4 w-full"-->
-        <!--        >-->
-        <!--          <div class="flex flex-col items-start justify-start mt-10">-->
-        <!--            <h3 class="text-lg font-bold mb-4">Առաջադրանքի մանրամասներ</h3>-->
-        <!--            <ul class="text-base font-medium leading-7">-->
-        <!--              <li>Անուն: {{ details.name }}</li>-->
-        <!--              <li>Քանակ: {{ details.quantity }}</li>-->
-        <!--              <li>Նկարագրություն: {{ details.description }}</li>-->
-        <!--            </ul>-->
-        <!--            &lt;!&ndash; Ֆայլերի ցուցակ &ndash;&gt;-->
-        <!--          </div>-->
-        <!--          <FileViewer :details="details.factory_order" />-->
-        <!--          <div class="show_file_section">-->
-        <!--            <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />-->
-        <!--          </div>-->
-        <!--        </div>-->
         <div
           class="grid md:grid-cols-2 grid-cols-1 gap-2 bg-white p-6 rounded-lg shadow-md lg:w-3/4 w-full"
         >
@@ -255,7 +238,7 @@
               <li>Քանակ: {{ details.quantity }}</li>
               <li>Նկարագրություն: {{ details.description }}</li>
             </ul>
-            <!-- Ֆայլերի ցուցակ -->
+            <!-- File list -->
             <div
               v-if="details.factory_orders && details.factory_orders.length > 0"
             >
@@ -275,7 +258,7 @@
                           class="text-green-500 hover:text-green-700"
                           @click="downloadFile(file.path, file.original_name)"
                         >
-                          Ներբեռնել
+                          Ներբեռնել {{ file.original_name }}
                         </button>
                       </div>
                     </div>
@@ -286,6 +269,12 @@
           </div>
           <div class="show_file_section">
             <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
+            <div>
+              <img
+                src="http://localhost:8000/storage/uploads/PMP_001.01_1/DXF/test_67b5f29269f94.png"
+                alt=""
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -389,7 +378,7 @@ export default {
       'downloadUploadedFile',
     ]),
     viewFile(filePath) {
-      this.dxfUrl = this.$getFileUrl(filePath)
+      this.dxfUrl = filePath
     },
     downloadFile(filePath, fileName) {
       this.downloadUploadedFile(filePath, fileName)

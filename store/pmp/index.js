@@ -88,7 +88,7 @@ export const actions = {
 }
 
 export const getters = {
-  getPmps: (state) => state.pmps,
+  getPmpes: (state) => state.pmps,
   getPmp: (state) => state.pmp,
   // errorMessage: (state) => state.errorMessage,
 }

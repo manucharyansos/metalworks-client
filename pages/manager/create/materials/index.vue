@@ -73,7 +73,7 @@
           <template v-else>
             <select-with-label
               v-model="selectedGroup"
-              :dates="materialsGroup"
+              :data-value="materialsGroup"
               label="Նյութերի խումբ"
               class="w-full"
             />
@@ -138,7 +138,7 @@
           <template v-else>
             <select-with-label
               v-model="selectedMaterialCategory"
-              :dates="filteredCategories"
+              :data-value="filteredCategories"
               label="Նյութերի մարկա"
               class="w-full"
             />

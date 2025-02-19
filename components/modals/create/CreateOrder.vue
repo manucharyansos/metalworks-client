@@ -8,7 +8,7 @@
       Պատվերի մանրամասները
     </h2>
 
-    <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
       <div class="flex flex-col">
         <slot name="detailsType"></slot>
       </div>

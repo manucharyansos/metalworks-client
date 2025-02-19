@@ -7,7 +7,7 @@
         >
           <select-with-label
             v-model="selectedClient"
-            :dates="users"
+            :data-value="users"
             label="Ընտրել հաճախորդ"
           ></select-with-label>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
