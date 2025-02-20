@@ -3,7 +3,7 @@
     <template v-if="getOrderByFactories && !isModal">
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg pt-36">
         <table
-          class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
+          class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400 box-content"
         >
           <thead
             class="text-xs text-gray-700 bg-gray-300 uppercase dark:text-gray-400"
@@ -62,11 +62,11 @@
                 Դիտել
               </td>
               <td
-                v-if="order.factory_order"
+                v-if="order.factory_orders"
                 class="flex items-center justify-center text-center"
               >
                 <div
-                  v-for="item in order.factory_order"
+                  v-for="item in order.factory_orders"
                   :key="item.id"
                   class="px-6 py-4 text-center w-full"
                   :class="
@@ -247,7 +247,7 @@
                 <li v-for="order in details.factory_orders" :key="order.id">
                   <div v-if="order.files && order.files.length > 0">
                     <div v-for="file in order.files" :key="file.id">
-                      <div class="flex items-center gap-2">
+                      <div class="flex items-center gap-4 justify-between">
                         <button
                           class="text-blue-500 hover:text-blue-700"
                           @click="viewFile(file.path)"
@@ -255,10 +255,14 @@
                           Դիտել
                         </button>
                         <button
-                          class="text-green-500 hover:text-green-700"
-                          @click="downloadFile(file.path, file.original_name)"
+                          class="text-green-500 hover:text-green-700 flex items-center gap-2 justify-between"
+                          :class="{
+                            'text-black': file.status === 'downloaded',
+                          }"
+                          @click="downloadFile(file)"
                         >
-                          Ներբեռնել {{ file.original_name }}
+                          {{ file.original_name }}
+                          <img class="w-8 h-8" src="/images/img.png" alt="" />
                         </button>
                       </div>
                     </div>
@@ -269,12 +273,6 @@
           </div>
           <div class="show_file_section">
             <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
-            <div>
-              <img
-                src="http://localhost:8000/storage/uploads/PMP_001.01_1/DXF/test_67b5f29269f94.png"
-                alt=""
-              />
-            </div>
           </div>
         </div>
       </div>
@@ -380,8 +378,9 @@ export default {
     viewFile(filePath) {
       this.dxfUrl = filePath
     },
-    downloadFile(filePath, fileName) {
-      this.downloadUploadedFile(filePath, fileName)
+    async downloadFile(file) {
+      await this.downloadUploadedFile(file)
+      file.status = 'downloaded'
     },
     loadFile(file) {
       if (!(file instanceof Blob)) {
@@ -473,4 +472,8 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+td {
+  width: 200px;
+}
+</style>

@@ -26,16 +26,6 @@ export const actions = {
       return false
     }
   },
-  // async fetchOrdersByFactory({ commit }, factoryIds) {
-  //   try {
-  //     const res = await this.$axios.get('/api/factories/getOrdersByFactories', {
-  //       params: { factory_ids: factoryIds },
-  //     })
-  //     commit('SET_FACTORIES', res.data)
-  //   } catch (err) {
-  //     return false
-  //   }
-  // },
   async fetchOrdersByFactory({ commit }, factoryIds) {
     try {
       const res = await this.$axios.get(`/api/factories/factory/${factoryIds}`)
@@ -71,22 +61,24 @@ export const actions = {
     }
   },
 
-  async downloadUploadedFile(filePath, fileName) {
+  async downloadUploadedFile({ commit }, file) {
     try {
-      const encodedPath = encodeURIComponent(filePath).replace(/%2F/g, '/')
-
-      const response = await this.$axios.get(`/api/download/${encodedPath}`, {
-        responseType: 'blob',
-      })
+      const response = await this.$axios.get(
+        `api/factories/download/${file.path}`,
+        {
+          responseType: 'blob',
+        }
+      )
 
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', fileName || 'downloaded_file.dxf')
+      link.setAttribute('download', file.original_name || 'downloaded_file.dxf')
       document.body.appendChild(link)
       link.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(link)
+      file.status = 'downloaded'
     } catch (error) {
       console.error('File download failed:', error)
     }

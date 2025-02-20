@@ -294,7 +294,7 @@ export default {
       reader.readAsArrayBuffer(file) // Կարդում ենք ֆայլը որպես ArrayBuffer
     },
 
-    saveFiles() {
+    async saveFiles() {
       if (!this.orderId) {
         console.error('Պատվերի ID չի գտնվել։')
         return
@@ -302,8 +302,6 @@ export default {
 
       const formData = new FormData()
       formData.append('order_id', this.orderId)
-
-      // Ավելացնել յուրաքանչյուր գործարանի ֆայլերը
       Object.keys(this.factories.files).forEach((factoryId) => {
         const files = this.factories.files[factoryId] || []
         if (files.length > 0) {
@@ -313,20 +311,11 @@ export default {
           })
         }
       })
-
-      // Ստուգել FormData-ի պարունակությունը
       for (const [key, value] of formData.entries()) {
         console.log(key, value)
       }
-
-      this.saveOrderFilesByFactory(formData)
-        .then(() => {
-          alert('Ֆայլերը հաջողությամբ պահպանված են։')
-        })
-        .catch((error) => {
-          console.error('Ֆայլերը պահպանելիս սխալ:', error)
-          alert('Ֆայլերը պահպանելիս սխալ։')
-        })
+      await this.saveOrderFilesByFactory(formData)
+      await this.$router.push('/engineer')
     },
 
     doneToFiles() {
