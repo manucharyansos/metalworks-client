@@ -104,39 +104,31 @@ export default {
     },
     async loadDxfFile() {
       try {
-        // Fetch the DXF file as JSON
         const response = await this.$axios.get(
           `/api/factories/getFile/${this.dxfUrl}`
         )
+        console.log('API Response:', response.data)
 
         if (response.status !== 200) {
           throw new Error(`HTTP error! Status: ${response.status}`)
         }
 
-        // Ստանալ JSON պատասխանը
         const fileData = response.data
-
-        // Base64-ից դեկոդավորել բովանդակությունը (եթե անհրաժեշտ է)
-        const dxfText = atob(fileData.content) // Base64 դեկոդավորում
-
-        // Parse the DXF file
+        const jsonData = atob(fileData.content)
+        const parsedData = JSON.parse(jsonData)
+        const dxfText = atob(parsedData.content)
         const parser = new DxfParser()
         const dxf = parser.parseSync(dxfText)
-
         if (!dxf || !dxf.entities) {
           throw new Error('Failed to parse DXF file or no entities found.')
         }
 
-        // Remove existing DXF group from the scene
         if (this.dxfGroup) {
           this.scene.remove(this.dxfGroup)
           this.dxfGroup = null
         }
-
-        // Create a new group for the DXF entities
         this.dxfGroup = new THREE.Group()
 
-        // Process DXF entities
         dxf.entities.forEach((entity) => {
           if (entity.type === 'LINE') {
             const material = new THREE.LineBasicMaterial({ color: 0x000000 })
@@ -147,13 +139,10 @@ export default {
             const line = new THREE.LineSegments(geometry, material)
             this.dxfGroup.add(line)
           }
-          // Add support for other entity types (e.g., CIRCLE, ARC, etc.) here
         })
 
-        // Add the DXF group to the scene
         this.scene.add(this.dxfGroup)
 
-        // Adjust camera to fit the DXF content
         const box = new THREE.Box3().setFromObject(this.dxfGroup)
         const center = box.getCenter(new THREE.Vector3())
         const size = box.getSize(new THREE.Vector3())
@@ -166,12 +155,10 @@ export default {
         this.camera.position.set(0, 0, cameraZ + 10)
         this.camera.lookAt(new THREE.Vector3(0, 0, 0))
 
-        // Render the scene
         this.renderer.render(this.scene, this.camera)
-        this.error = null // Clear any previous errors
+        this.error = null
       } catch (error) {
         console.error('Failed to load DXF file:', error)
-        this.error = error.message // Display error message
       }
     },
   },

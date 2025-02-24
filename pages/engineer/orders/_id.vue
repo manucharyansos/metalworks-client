@@ -3,6 +3,13 @@
     class="flex flex-col items-center justify-center gap-12 border border-neutral-400 shadow-xl rounded-xl py-4 m-6"
   >
     <div class="w-full flex flex-row items-center gap-12">
+      <input-with-labels
+        id="quantity"
+        v-model="quantity"
+        label="Քանակ"
+        type="number"
+        class="shadow-md rounded-lg p-5"
+      />
       <div class="flex flex-row items-center mx-auto gap-12">
         <div v-for="(factory, index) in getFactory" :key="index">
           <button
@@ -38,19 +45,15 @@
 
     <div v-if="selectedFactoryId" class="container flex flex-col">
       <div class="grid grid-cols-2 gap-8">
-        <!-- DXF Ֆայլի դիտման հատված -->
         <div class="show_file_section">
           <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
         </div>
 
-        <!-- Ընտրած ֆայլերի ցուցակ -->
         <div class="show_files_name min-h-96 max-h-[32rem] overflow-y-auto">
           <div class="w-full my-4">
-            <!-- Ֆայլերի ընտրության ինպուտ -->
-            <input type="file" multiple @change="handleFileChange" />
+            <input type="file" @change="handleFileChange" />
           </div>
 
-          <!-- Ցուցադրում ենք ընտրված ֆայլերի անունները -->
           <div v-if="factories.files[selectedFactoryId]?.length > 0">
             <ol class="list-decimal px-3">
               <li
@@ -66,22 +69,6 @@
                   @click="selectFile(index)"
                 >
                   <span>{{ file.name }}</span>
-
-                  <div class="ml-auto" @click="deleteFile(index)">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      x="0px"
-                      y="0px"
-                      width="20"
-                      height="20"
-                      fill="red"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M 10.806641 2 C 10.289641 2 9.7956875 2.2043125 9.4296875 2.5703125 L 9 3 L 4 3 A 1.0001 1.0001 0 1 0 4 5 L 20 5 A 1.0001 1.0001 0 1 0 20 3 L 15 3 L 14.570312 2.5703125 C 14.205312 2.2043125 13.710359 2 13.193359 2 L 10.806641 2 z M 4.3652344 7 L 5.8925781 20.263672 C 6.0245781 21.253672 6.877 22 7.875 22 L 16.123047 22 C 17.121047 22 17.974422 21.254859 18.107422 20.255859 L 19.634766 7 L 4.3652344 7 z"
-                      ></path>
-                    </svg>
-                  </div>
                 </div>
               </li>
             </ol>
@@ -114,15 +101,18 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import DxfViewer from '~/components/File/DxfViewer.vue'
+import InputWithLabels from '~/components/form/InputWithIcon.vue'
 
 export default {
   components: {
+    InputWithLabels,
     DxfViewer,
   },
   layout: 'EngineerLayout',
-  middleware: ['admin', 'roleRedirect'],
+  middleware: ['engineer', 'roleRedirect'],
   data() {
     return {
+      quantity: null,
       factories: {
         ids: [],
         files: {},
@@ -188,23 +178,32 @@ export default {
         for (const factoryOrder of order.factory_orders) {
           const factoryId = factoryOrder.factory_id
 
-          // Ստուգում ենք, արդյոք գործարանի համար ֆայլերի զանգված արդեն գոյություն ունի
+          // Initialize the files array for the factory if it doesn't exist
           if (!this.factories.files[factoryId]) {
             this.factories.files[factoryId] = []
           }
 
-          // Բեռնում ենք ֆայլերը բազայից
+          // Load files from the database
           for (const file of factoryOrder.files) {
             try {
-              const response = await fetch(`/${file.path}`)
-              const blob = await response.blob()
+              // Fetch the file from the backend using the file path
+              const response = await this.$axios.get(
+                `/api/factories/getFile/${file.path}`
+              )
+              const fileData = response.data
 
-              // Ստեղծում ենք File օբյեկտ
-              const fileObject = new File([blob], file.original_name, {
+              // Decode the Base64 content (if applicable)
+              const fileContent = atob(fileData.content)
+
+              // Create a Blob from the decoded content
+              const blob = new Blob([fileContent], { type: 'application/dxf' })
+
+              // Create a File object
+              const fileObject = new File([blob], fileData.original_name, {
                 type: 'application/dxf',
               })
 
-              // Ավելացնում ենք ֆայլը համապատասխան գործարանի ֆայլերի ցուցակում
+              // Add the file to the factory's files array
               this.factories.files[factoryId].push(fileObject)
             } catch (error) {
               console.error('Error loading file:', error)
@@ -213,21 +212,21 @@ export default {
         }
       }
     },
-    deleteFile(index) {
-      if (
-        this.selectedFactoryId &&
-        this.factories.files[this.selectedFactoryId]
-      ) {
-        this.factories.files[this.selectedFactoryId].splice(index, 1)
-        if (this.factories.files[this.selectedFactoryId].length === 0) {
-          this.dxfUrl = ''
-          this.selectedFileIndex = null
-        } else {
-          this.selectedFileIndex = 0
-          this.loadFile(this.factories.files[this.selectedFactoryId][0])
-        }
-      }
-    },
+    // deleteFile(index) {
+    //   if (
+    //     this.selectedFactoryId &&
+    //     this.factories.files[this.selectedFactoryId]
+    //   ) {
+    //     this.factories.files[this.selectedFactoryId].splice(index, 1)
+    //     if (this.factories.files[this.selectedFactoryId].length === 0) {
+    //       this.dxfUrl = ''
+    //       this.selectedFileIndex = null
+    //     } else {
+    //       this.selectedFileIndex = 0
+    //       this.loadFile(this.factories.files[this.selectedFactoryId][0])
+    //     }
+    //   }
+    // },
 
     selectFactory(factory) {
       this.selectedFactoryId = factory.id
@@ -275,25 +274,19 @@ export default {
     },
 
     loadFile(file) {
-      if (!(file instanceof Blob)) {
+      if (!(file instanceof File)) {
         console.error('Invalid file type')
         return
       }
 
+      // Create a URL for the file (only for local preview)
       const reader = new FileReader()
-
-      reader.onload = (e) => {
-        const blob = new Blob([e.target.result], { type: 'application/dxf' })
-        this.dxfUrl = URL.createObjectURL(blob) // Ստեղծում ենք URL ֆայլի համար
+      reader.onload = () => {
+        console.log('File content:', reader.result) // Log the file content
+        this.dxfUrl = URL.createObjectURL(file)
       }
-
-      reader.onerror = (error) => {
-        console.error('Error reading file:', error)
-      }
-
-      reader.readAsArrayBuffer(file) // Կարդում ենք ֆայլը որպես ArrayBuffer
+      reader.readAsText(file) // Read the file content
     },
-
     async saveFiles() {
       if (!this.orderId) {
         console.error('Պատվերի ID չի գտնվել։')

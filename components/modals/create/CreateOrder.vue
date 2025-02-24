@@ -10,16 +10,10 @@
 
     <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
       <div class="flex flex-col">
-        <slot name="detailsType"></slot>
+        <slot name="pmpGroup"></slot>
       </div>
       <div class="flex flex-col">
-        <slot name="detailsQuantity"></slot>
-      </div>
-      <div class="flex flex-col">
-        <slot name="link"></slot>
-      </div>
-      <div class="flex flex-col">
-        <slot name="uploadFile"></slot>
+        <slot name="pmpName"></slot>
       </div>
     </div>
     <div class="flex flex-col w-full">

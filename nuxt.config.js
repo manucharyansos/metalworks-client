@@ -37,9 +37,9 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    // baseURL: process.env.BASE_URL,
+    baseURL: process.env.BASE_URL,
     // baseURL: 'https://api.metalworks.am',
-    baseURL: 'http://localhost:8000',
+    // baseURL: 'http://localhost:8000',
     credentials: true,
   },
 
@@ -83,11 +83,13 @@ export default {
   publicRuntimeConfig: {
     baseURL: process.env.BASE_URL,
     managerRole: process.env.MANAGER_ROLE || 'manager',
+    engineerRole: process.env.ENGINEER_ROLE || 'engineer',
     adminRole: process.env.ADMIN_ROLE || 'admin',
     laserRole: process.env.LASER_ROLE || 'laser',
     bendRole: process.env.BEND_ROLE || 'bend',
     dashboards: {
       manager: process.env.MANAGER_DASHBOARD || '/manager',
+      engineer: process.env.ENGINEER_DASHBOARD || '/engineer',
       admin: process.env.ADMIN_DASHBOARD || '/admin',
       laser: process.env.LASER_DASHBOARD || '/factory/laser',
       bend: process.env.BEND_DASHBOARD || '/factory/bend',

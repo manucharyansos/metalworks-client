@@ -120,6 +120,35 @@
       </div>
     </div>
 
+    <div class="grid grid-cols-3 gap-12 mt-4">
+      <input-with-label-icon
+        id="quantity"
+        v-model="pmp.quantity"
+        type="number"
+        data-input-counter
+        class="w-44 text-center"
+        placeholder="Քանակ"
+        required
+      />
+      <input-with-label-icon
+        id="material_type"
+        v-model="pmp.material_type"
+        type="text"
+        data-input-counter
+        class="w-44 text-center"
+        placeholder="Մատերիալի տեսակը"
+        required
+      />
+      <input-with-label-icon
+        id="thickness"
+        v-model="pmp.thickness"
+        type="text"
+        data-input-counter
+        class="w-44 text-center"
+        placeholder="Հաստություն"
+        required
+      />
+    </div>
     <div v-if="selectedRemoteNumber" class="container flex flex-col">
       <div class="grid grid-cols-2 gap-8">
         <!-- DXF Ֆայլի դիտման հատված -->
@@ -130,11 +159,8 @@
         <!-- Ընտրած ֆայլերի ցուցակ -->
         <div class="show_files_name min-h-96 max-h-[32rem] overflow-y-auto">
           <div class="w-full my-4">
-            <!-- Ֆայլերի ընտրության ինպուտ -->
-            <input type="file" multiple @change="handleFileChange" />
+            <input type="file" @change="handleFileChange" />
           </div>
-
-          <!-- Ցուցադրում ենք ընտրված ֆայլերի անունները -->
           <div v-if="selectedRemoteNumber && selectedFactoryId">
             <ol class="list-decimal px-3">
               <li
@@ -203,7 +229,7 @@ export default {
     DxfViewer,
   },
   layout: 'EngineerLayout',
-  middleware: ['admin', 'roleRedirect'],
+  middleware: ['engineer', 'roleRedirect'],
   data() {
     return {
       timeout: null,
@@ -216,6 +242,9 @@ export default {
         group: '',
         group_name: '',
         remote_number: null,
+        quantity: null,
+        material_type: '',
+        thickness: '',
       },
       pmpFiles: {
         ids: [],
@@ -446,25 +475,14 @@ export default {
     handleFileChange(event) {
       const newFiles = Array.from(event.target.files)
       if (this.selectedRemoteNumber && this.selectedFactoryId) {
-        if (
-          !this.pmpFiles.files[this.selectedRemoteNumber][
-            this.selectedFactoryId
-          ]
-        ) {
-          this.pmpFiles.files[this.selectedRemoteNumber][
-            this.selectedFactoryId
-          ] = []
+        if (!this.pmpFiles.files[this.selectedRemoteNumber]) {
+          this.pmpFiles.files[this.selectedRemoteNumber] = {}
         }
         this.pmpFiles.files[this.selectedRemoteNumber][this.selectedFactoryId] =
-          [
-            ...this.pmpFiles.files[this.selectedRemoteNumber][
-              this.selectedFactoryId
-            ],
-            ...newFiles,
-          ]
+          newFiles.slice(-1)
         this.fileNames = this.pmpFiles.files[this.selectedRemoteNumber][
           this.selectedFactoryId
-        ].map((file) => file?.name)
+        ].map((file) => file.name)
         this.loadFile(newFiles[0])
       } else {
         console.error('Գործարան կամ հեռակա համար ընտրված չէ')
@@ -517,26 +535,32 @@ export default {
     saveFiles() {
       const formData = new FormData()
       formData.append('pmp_id', this.pmpId)
+      if (this.selectedRemoteNumber && this.selectedFactoryId) {
+        const files =
+          this.pmpFiles.files[this.selectedRemoteNumber][
+            this.selectedFactoryId
+          ] || []
+        if (files.length > 0) {
+          const file = files[0]
+          formData.append('file', file)
+          formData.append('remote_number_id', this.selectedRemoteNumber)
+          formData.append('factory_id', this.selectedFactoryId)
+          formData.append('quantity', this.pmp.quantity)
+          formData.append('material_type', this.pmp.material_type)
+          formData.append('thickness', this.pmp.thickness)
 
-      Object.keys(this.pmpFiles.files).forEach((remoteNumber) => {
-        Object.keys(this.pmpFiles.files[remoteNumber]).forEach((factoryId) => {
-          const files = this.pmpFiles.files[remoteNumber][factoryId] || []
-          files.forEach((file) => {
-            formData.append('files[]', file)
-            formData.append('remote_number_ids[]', remoteNumber)
-            formData.append('factory_ids[]', factoryId)
-          })
-        })
-      })
-
-      this.createPmpFilesByFactory(formData)
-        .then(() => {
-          alert('Ֆայլերը հաջողությամբ պահպանված են։')
-        })
-        .catch((error) => {
-          console.error('Ֆայլերը պահպանելիս սխալ:', error)
-          alert('Ֆայլերը պահպանելիս սխալ։')
-        })
+          this.createPmpFilesByFactory(formData)
+            .then(() => {
+              alert('Ֆայլը հաջողությամբ պահպանված է։')
+            })
+            .catch((error) => {
+              console.error('Ֆայլը պահպանելիս սխալ:', error)
+              alert('Ֆայլը պահպանելիս սխալ։')
+            })
+        }
+      } else {
+        console.error('Գործարան կամ հեռակա համար ընտրված չէ')
+      }
     },
   },
 }

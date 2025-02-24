@@ -1,6 +1,4 @@
-// middleware/authGuest.js
 export default function ({ $auth, $config, redirect }) {
-  // Ստուգել, արդյոք օգտատերը մուտք գործած է
   if ($auth.loggedIn) {
     const userRole = $auth.user.role.name
 
@@ -15,6 +13,9 @@ export default function ({ $auth, $config, redirect }) {
     }
     if (userRole === $config.bendRole) {
       return redirect($config.dashboards.bend)
+    }
+    if (userRole === $config.engineerRole) {
+      return redirect($config.dashboards.engineer)
     }
   }
 }

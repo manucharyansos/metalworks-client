@@ -27,7 +27,7 @@ export const actions = {
   async createOrder({ commit }, formData) {
     try {
       const response = await this.$axios.post(
-        '/api/factories/storeWithFiles',
+        '/api/engineers/storeWithFiles',
         formData,
         {
           headers: {

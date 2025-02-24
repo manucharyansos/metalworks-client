@@ -4,6 +4,9 @@ export default function ({ $config, $auth, redirect }) {
   if (userRole === $config.managerRole) {
     return redirect('/manager')
   }
+  if (userRole === $config.engineerRole) {
+    return redirect('/engineer')
+  }
   if (userRole === $config.adminRole) {
     return redirect('/admin')
   }

@@ -15,7 +15,6 @@
             <th scope="col" class="px-3 py-3">Prefix code</th>
             <th scope="col" class="px-3 py-3">Կարգավիճակ</th>
             <th scope="col" class="px-3 py-3">Անուն</th>
-            <th scope="col" class="px-3 py-3">Քանակ</th>
             <th scope="col" class="px-3 py-3"></th>
           </tr>
         </thead>
@@ -50,9 +49,6 @@
             <td v-if="order.name" class="px-6 py-4">
               {{ order.name }}
             </td>
-            <td v-if="order.quantity" class="px-6 py-4">
-              {{ order.quantity }}
-            </td>
             <td v-if="order.store_link" class="px-12">
               <a class="hover:!text-blue-700" :href="order.store_link?.url"
                 >Link</a
@@ -62,7 +58,7 @@
               class="px-12 text-indigo-500 border-indigo-500 hover:bg-indigo-500 hover:text-indigo-50 cursor-pointer"
               @click="editOrder(order)"
             >
-              Դիտել
+              Խմբագրել
             </td>
           </tr>
         </tbody>
@@ -74,9 +70,9 @@
 import { mapActions, mapGetters } from 'vuex'
 
 export default {
-  name: 'AdminPage',
+  name: 'EngineerPage',
   layout: 'EngineerLayout',
-  middleware: ['admin', 'roleRedirect'],
+  middleware: ['engineer', 'roleRedirect'],
   data() {
     return {
       searchable: '',

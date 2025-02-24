@@ -16,6 +16,7 @@
           v-model="selectedClient"
           :data-value="users"
           label="Ընտրել հաճախորդ"
+          :class="{ 'border-red-600': formSubmitted && !selectedClient }"
         ></select-with-label>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
           <input-with-labels
@@ -27,7 +28,7 @@
             class="shadow-md rounded-lg p-5"
           ></input-with-labels>
           <input-with-labels
-            id="name"
+            id="phone"
             :value="selectedClient?.client?.phone"
             label="Հեռախոսահամար"
             type="text"
@@ -35,7 +36,7 @@
             class="shadow-md rounded-lg p-5"
           ></input-with-labels>
           <input-with-labels
-            id="name"
+            id="email"
             :value="selectedClient?.email"
             label="Էլ․ փոստ"
             type="text"
@@ -43,7 +44,7 @@
             class="shadow-md rounded-lg p-5"
           ></input-with-labels>
           <input-with-labels
-            id="name"
+            id="address"
             :value="selectedClient?.client?.address"
             label="Հասցե"
             type="text"
@@ -54,35 +55,27 @@
       </div>
       <div class="w-full">
         <create-order
-          button-text="Ստեղծել Պատվեր"
+          done-button="PMP files"
           @doneButton="doneToFiles"
-          @addButton="createOrder"
+          @addButton="pmpFiles"
         >
-          <template #detailsType>
+          <template #pmpGroup>
             <select-pmp
               v-model="selectedPmp"
               :dates="pnpGroup.pmp"
               label="Ընտրել PNP տեսակը"
+              :class="{ 'border-red-600': formSubmitted && !selectedPmp }"
             />
+          </template>
+          <template #pmpName>
             <select-pmp
               v-model="selectedPmpRemoteNumber"
               :dates="pnpName"
               label="Ընտրել Անունը"
-            />
-          </template>
-
-          <template #detailsQuantity>
-            <input-with-labels
-              id="quantity"
-              v-model="order.quantity"
-              label="Քանակ"
-              type="number"
-              class="shadow-md rounded-lg p-3"
               :class="{
-                'border-red-500': !order.quantity && formSubmitted,
+                'border-red-600': formSubmitted && !selectedPmpRemoteNumber,
               }"
-              required
-            ></input-with-labels>
+            />
           </template>
 
           <template #detailsDesc>
@@ -154,14 +147,10 @@
             <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
           </div>
 
-          <!-- Ընտրած ֆայլերի ցուցակ -->
           <div class="show_files_name">
             <div class="w-full my-4">
-              <!-- Ֆայլերի ընտրության ինպուտ -->
               <input type="file" multiple @change="handleFileChange" />
             </div>
-
-            <!-- Ցուցադրում ենք ընտրված ֆայլերի անունները -->
             <div v-if="factories.files[selectedFactoryId]?.length > 0">
               <ol class="list-decimal px-3">
                 <li
@@ -197,29 +186,14 @@
                 </li>
               </ol>
             </div>
-
-            <!-- Եթե ֆայլ չկա -->
             <div v-else>
               <p>Ֆայլ չկա ընտրված գործարանի համար:</p>
             </div>
           </div>
         </div>
-        <!--        <div-->
-        <!--          class="flex flex-row items-center justify-center gap-12 float-right my-3"-->
-        <!--        >-->
-        <!--          <button-->
-        <!--            class="border border-red-700 bg-red-600 text-white rounded-xl px-3 py-1"-->
-        <!--          >-->
-        <!--            Չեղարկել-->
-        <!--          </button>-->
-        <!--          <button-->
-        <!--            class="border border-green-700 bg-green-700 text-white rounded-xl px-3 py-1"-->
-        <!--          >-->
-        <!--            Շարունակել-->
-        <!--          </button>-->
-        <!--        </div>-->
       </div>
     </div>
+    <notifications />
   </div>
 </template>
 <script>
@@ -241,9 +215,10 @@ export default {
     SelectWithLabel,
   },
   layout: 'EngineerLayout',
-  middleware: ['admin', 'roleRedirect'],
+  middleware: ['engineer', 'roleRedirect'],
   data() {
     return {
+      isSelectedClient: false,
       factories: {
         ids: [],
         files: {},
@@ -254,9 +229,6 @@ export default {
       selectedPmpRemoteNumber: null,
       order: {
         name: null,
-        // pnp_groupe: null,
-        // pnp_name: null,
-        quantity: null,
         description: null,
       },
       formSubmitted: false,
@@ -348,7 +320,13 @@ export default {
         )
         this.loadFile(newFiles[0])
       } else {
-        console.error('Գործարան ընտրված չէ')
+        this.$notify({
+          text: `Գործարան ընտրված չէ:`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'success',
+        })
       }
     },
 
@@ -371,31 +349,134 @@ export default {
     },
 
     doneToFiles() {
-      this.formSubmitted = true
-      this.isDoneDetails = false
-      this.selectedFactoryId = 1
-      if (!this.factories.ids.includes(1)) {
-        this.factories.ids.push(1)
-      }
-      if (!this.factories.files[1]) {
-        this.factories.files[1] = []
-      }
-      this.selectedFileIndex = null
-      this.dxfUrl = ''
-      this.fileNames = []
+      this.$router.push('/engineer/pmp.files')
     },
 
-    createOrder() {
-      const fullName =
-        this.selectedPmp.group + '.' + this.selectedPmpRemoteNumber
-      console.log(this.selectedPmp, 'asd')
-      const order = {
-        user_id: this.selectedClient.id,
-        name: fullName,
-        quantity: this.order.quantity,
-        description: this.order.description,
+    async fetchFile(filePath) {
+      try {
+        const response = await this.$axios.get(
+          `/api/factories/getFile/${encodeURIComponent(filePath)}`,
+          { responseType: 'blob' }
+        )
+        const blob = response.data
+        return new File([blob], filePath.split('/').pop(), { type: blob.type })
+      } catch (error) {
+        console.error(`Error fetching file ${filePath}:`, error)
+        return null
       }
-      this.createNewOrder(order)
+    },
+
+    async pmpFiles() {
+      this.formSubmitted = true
+      if (
+        !this.selectedClient ||
+        !this.selectedPmp ||
+        !this.selectedPmpRemoteNumber ||
+        !this.order.description
+      ) {
+        this.$notify({
+          text: `Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը։`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
+        return
+      }
+
+      const formData = new FormData()
+      formData.append('user_id', this.selectedClient.id)
+      formData.append(
+        'name',
+        `${this.selectedPmp.group}.${this.selectedPmpRemoteNumber}`
+      )
+      formData.append('description', this.order.description)
+      formData.append('status', this.order.status || 'pending')
+
+      if (this.selectedPmp.files.length > 0) {
+        const factoryFilesMap = {}
+        this.selectedPmp.files.forEach((file) => {
+          if (!factoryFilesMap[file.factory_id]) {
+            factoryFilesMap[file.factory_id] = []
+          }
+          factoryFilesMap[file.factory_id].push(file)
+        })
+
+        for (const factoryId of Object.keys(factoryFilesMap)) {
+          formData.append(`factories[${factoryId}][id]`, factoryId)
+
+          for (
+            let index = 0;
+            index < factoryFilesMap[factoryId].length;
+            index++
+          ) {
+            const file = factoryFilesMap[factoryId][index]
+            try {
+              const realFile = await this.fetchFile(file.path)
+              if (realFile) {
+                formData.append(
+                  `factories[${factoryId}][files][${index}]`,
+                  realFile
+                )
+                formData.append(
+                  `factories[${factoryId}][files][${index}][quantity]`,
+                  file.quantity
+                )
+                formData.append(
+                  `factories[${factoryId}][files][${index}][material_type]`,
+                  file.material_type
+                )
+                formData.append(
+                  `factories[${factoryId}][files][${index}][thickness]`,
+                  file.thickness
+                )
+              } else {
+                console.warn(`File ${file.path} not fetched`)
+              }
+            } catch (error) {
+              console.error(`Error fetching file ${file.path}:`, error)
+            }
+          }
+        }
+
+        try {
+          await this.createNewOrder(formData)
+          this.$notify({
+            text: `Ֆայլերը հաջողությամբ վերբեռնվեցին։`,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'success',
+          })
+          this.resetForm()
+        } catch (error) {
+          this.$notify({
+            text: `Ֆայլերի վերբեռնման սխալ՝ ${
+              error.response?.data || error.message
+            }`,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'error',
+          })
+        }
+      } else {
+        this.$notify({
+          text: `Ընտրված PMP ֆայլեր չունի։`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
+      }
+    },
+
+    resetForm() {
+      this.selectedClient = null
+      this.selectedPmp = null
+      this.selectedPmpRemoteNumber = null
+      this.order.description = ''
+      this.formSubmitted = false
     },
   },
 }

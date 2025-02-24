@@ -17,7 +17,15 @@ export const getters = {
 export const actions = {
   async createNewOrder({ commit }, order) {
     try {
-      const response = await this.$axios.post('/api/engineers/engineer', order)
+      const response = await this.$axios.post(
+        '/api/engineers/engineer',
+        order,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      )
       commit('ADD_ORDERS', response.data)
       await this.$router.push('/engineer')
       return true

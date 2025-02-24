@@ -15,7 +15,7 @@ export const mutations = {
 export const actions = {
   async createPmp({ commit }, pmp) {
     try {
-      const response = await this.$axios.post('/api/admin/pmps', pmp)
+      const response = await this.$axios.post('/api/engineers/pmps', pmp)
       commit('SET_PMP', response.data)
       return true
     } catch (error) {
@@ -26,7 +26,7 @@ export const actions = {
   async rememberNumberPmp({ commit }, pmp) {
     try {
       const response = await this.$axios.post(
-        `/api/admin/pmps/remoteNumber/${pmp.id}`,
+        `/api/engineers/pmps/remoteNumber/${pmp.id}`,
         pmp
       )
       commit('SET_PMP', response.data)
@@ -39,7 +39,7 @@ export const actions = {
 
   async fetchPmps({ commit }) {
     try {
-      const response = await this.$axios.get('/api/admin/pmps')
+      const response = await this.$axios.get('/api/engineers/pmps')
       commit('SET_PMPS', response.data)
       return true
     } catch (err) {
@@ -49,9 +49,12 @@ export const actions = {
   },
   async checkIfGroupExists({ commit }, data) {
     try {
-      const response = await this.$axios.post('/api/admin/pmps/check-group', {
-        group: data,
-      })
+      const response = await this.$axios.post(
+        '/api/engineers/pmps/check-group',
+        {
+          group: data,
+        }
+      )
       if (response.data.exists) {
         commit('SET_PMP', response.data)
         return response.data.exists
@@ -63,7 +66,7 @@ export const actions = {
   async checkIfGroupNameExists({ commit }, data) {
     try {
       const response = await this.$axios.post(
-        '/api/admin/pmps/check-group-name',
+        '/api/engineers/pmps/check-group-name',
         {
           group_name: data,
         }
@@ -76,7 +79,7 @@ export const actions = {
   },
   async createPmpFilesByFactory({ commit }, order) {
     try {
-      await this.$axios.post('/api/admin/upload', order, {
+      await this.$axios.post('/api/engineers/uploadPmpFile', order, {
         headers: { 'Content-Type': 'application/json' },
       })
       return true
