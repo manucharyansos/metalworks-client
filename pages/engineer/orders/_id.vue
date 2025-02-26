@@ -3,13 +3,6 @@
     class="flex flex-col items-center justify-center gap-12 border border-neutral-400 shadow-xl rounded-xl py-4 m-6"
   >
     <div class="w-full flex flex-row items-center gap-12">
-      <input-with-labels
-        id="quantity"
-        v-model="quantity"
-        label="Քանակ"
-        type="number"
-        class="shadow-md rounded-lg p-5"
-      />
       <div class="flex flex-row items-center mx-auto gap-12">
         <div v-for="(factory, index) in getFactory" :key="index">
           <button
@@ -50,25 +43,38 @@
         </div>
 
         <div class="show_files_name min-h-96 max-h-[32rem] overflow-y-auto">
-          <div class="w-full my-4">
-            <input type="file" @change="handleFileChange" />
-          </div>
-
           <div v-if="factories.files[selectedFactoryId]?.length > 0">
             <ol class="list-decimal px-3">
               <li
                 v-for="(file, index) in factories.files[selectedFactoryId]"
                 :key="index"
+                class="my-1"
               >
                 <div
-                  class="cursor-pointer grid grid-cols-2 justify-between"
+                  class="cursor-pointer grid grid-cols-2 justify-between items-center"
                   :class="{
                     'border border-neutral-600 rounded-lg px-3 py-1 italic font-sans': true,
                     'bg-gray-900 text-white': selectedFileIndex === index,
                   }"
-                  @click="selectFile(index)"
+                  @click="selectFile(file)"
                 >
                   <span>{{ file.name }}</span>
+                  <div class="text-center">
+                    <p
+                      v-if="expandedFileIndex !== index"
+                      @click.stop="toggleAddQuantity(index)"
+                    >
+                      Ավելացնել Քանակ
+                    </p>
+                    <input-with-labels
+                      v-if="expandedFileIndex === index"
+                      id="quantity"
+                      v-model="quantityMap[index]"
+                      label="Քանակ"
+                      type="number"
+                      class="shadow-md rounded-lg p-5"
+                    />
+                  </div>
                 </div>
               </li>
             </ol>
@@ -112,7 +118,8 @@ export default {
   middleware: ['engineer', 'roleRedirect'],
   data() {
     return {
-      quantity: null,
+      expandedFileIndex: null,
+      quantityMap: {},
       factories: {
         ids: [],
         files: {},
@@ -172,41 +179,35 @@ export default {
       'fetchOrderDataById',
       'saveOrderFilesByFactory',
     ]),
-    async initializeFiles() {
+    toggleAddQuantity(index) {
+      this.expandedFileIndex = this.expandedFileIndex === index ? null : index
+      if (!this.quantityMap[index]) {
+        this.quantityMap[index] = ''
+      }
+    },
+    initializeFiles() {
       const order = this.getOrder
       if (order && order.factory_orders) {
         for (const factoryOrder of order.factory_orders) {
           const factoryId = factoryOrder.factory_id
-
-          // Initialize the files array for the factory if it doesn't exist
           if (!this.factories.files[factoryId]) {
             this.factories.files[factoryId] = []
           }
-
-          // Load files from the database
           for (const file of factoryOrder.files) {
             try {
-              // Fetch the file from the backend using the file path
-              const response = await this.$axios.get(
-                `/api/factories/getFile/${file.path}`
-              )
-              const fileData = response.data
-
-              // Decode the Base64 content (if applicable)
-              const fileContent = atob(fileData.content)
-
-              // Create a Blob from the decoded content
-              const blob = new Blob([fileContent], { type: 'application/dxf' })
-
-              // Create a File object
-              const fileObject = new File([blob], fileData.original_name, {
-                type: 'application/dxf',
+              const fileUrl = file.path
+              this.factories.files[factoryId].push({
+                name: file.original_name,
+                path: fileUrl,
               })
-
-              // Add the file to the factory's files array
-              this.factories.files[factoryId].push(fileObject)
             } catch (error) {
-              console.error('Error loading file:', error)
+              this.$notify({
+                text: error,
+                duration: 3000,
+                speed: 1000,
+                position: 'top',
+                type: 'success',
+              })
             }
           }
         }
@@ -240,36 +241,12 @@ export default {
       this.dxfUrl = ''
       this.fileNames = []
     },
-    handleFileChange(event) {
-      const newFiles = Array.from(event.target.files)
-      if (this.selectedFactoryId) {
-        if (!this.factories.files[this.selectedFactoryId]) {
-          this.factories.files[this.selectedFactoryId] = []
-        }
-        this.factories.files[this.selectedFactoryId] = [
-          ...this.factories.files[this.selectedFactoryId],
-          ...newFiles,
-        ]
-        this.fileNames = this.factories.files[this.selectedFactoryId].map(
-          (file) => file.name
-        )
-        this.loadFile(newFiles[0])
-      } else {
-        console.error('Գործարան ընտրված չէ')
-      }
-    },
 
-    selectFile(index) {
-      if (this.selectedFactoryId) {
-        const selectedFile = this.factories.files[this.selectedFactoryId][index]
-        if (selectedFile) {
-          this.selectedFileIndex = index
-          this.loadFile(selectedFile) // Բեռնում ենք ընտրված ֆայլը
-        } else {
-          console.error('File not found')
-        }
+    selectFile(file) {
+      if (file && file.path) {
+        this.dxfUrl = file.path
       } else {
-        console.error('No factory selected')
+        console.error('Invalid file object')
       }
     },
 

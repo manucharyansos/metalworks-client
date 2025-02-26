@@ -356,10 +356,11 @@ export default {
       try {
         const response = await this.$axios.get(
           `/api/factories/getFile/${encodeURIComponent(filePath)}`,
-          { responseType: 'blob' }
+          { responseType: 'arraybuffer' } // Ափդեյթ արած responseType
         )
-        const blob = response.data
-        return new File([blob], filePath.split('/').pop(), { type: blob.type })
+        const fileType = 'application/x-dxf'
+        const blob = new Blob([response.data], { type: fileType })
+        return new File([blob], filePath.split('/').pop(), { type: fileType })
       } catch (error) {
         console.error(`Error fetching file ${filePath}:`, error)
         return null
@@ -419,15 +420,15 @@ export default {
                   realFile
                 )
                 formData.append(
-                  `factories[${factoryId}][files][${index}][quantity]`,
+                  `factories[${factoryId}][files_quantity][]`,
                   file.quantity
                 )
                 formData.append(
-                  `factories[${factoryId}][files][${index}][material_type]`,
+                  `factories[${factoryId}][files_material_type][]`,
                   file.material_type
                 )
                 formData.append(
-                  `factories[${factoryId}][files][${index}][thickness]`,
+                  `factories[${factoryId}][files_thickness][]`,
                   file.thickness
                 )
               } else {
@@ -470,7 +471,6 @@ export default {
         })
       }
     },
-
     resetForm() {
       this.selectedClient = null
       this.selectedPmp = null
