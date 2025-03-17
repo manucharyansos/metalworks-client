@@ -32,15 +32,15 @@
             ></input-with-labels>
           </template>
 
-          <template #quantity>
-            <input-with-labels
-              id="quantity"
-              v-model="getOrder.quantity"
-              label="Քանակ"
-              type="number"
-              class="shadow-md rounded-lg p-3 pt-5"
-            ></input-with-labels>
-          </template>
+          <!--          <template #quantity>-->
+          <!--            <input-with-labels-->
+          <!--              id="quantity"-->
+          <!--              v-model="getOrder.quantity"-->
+          <!--              label="Քանակ"-->
+          <!--              type="number"-->
+          <!--              class="shadow-md rounded-lg p-3 pt-5"-->
+          <!--            ></input-with-labels>-->
+          <!--          </template>-->
 
           <template #startDate>
             <input-with-labels
@@ -94,7 +94,7 @@
                 Գործարանային կարգավիճակ
               </p>
               <div
-                v-for="factoriesStatus in getOrder.factory_order"
+                v-for="factoriesStatus in getOrder.factory_orders"
                 :key="factoriesStatus.id"
                 class="mt-2"
               >
@@ -114,13 +114,13 @@
                 >
                   <div class="flex flex-col items-center justify-center">
                     <p>Գործարաններ</p>
-                    <p>{{ factoriesStatus.factory.name }}</p>
+                    <p>{{ factoriesStatus?.factory?.name }}</p>
                   </div>
 
                   <div class="flex flex-col items-center justify-center">
                     <p>Կարգավիճակ</p>
                     <p>
-                      {{ factoriesStatus.status }}
+                      {{ factoriesStatus?.status }}
 
                       <template v-if="factoriesStatus.canceling">
                         {{ factoriesStatus?.canceling }}
@@ -505,12 +505,13 @@ export default {
           !this.getOrder.quantity ||
           isNaN(this.getOrder.quantity) ||
           this.getOrder.quantity <= 0
-        ) {
-          throw new Error('Քանակը պարտադիր է և պետք է լինի դրական թիվ')
-        }
-        if (!this.getOrder.dates || !this.getOrder.dates.finish_date) {
-          throw new Error('Անհրաժեշտ ավարտի ամսաթիվը պարտադիր է')
-        }
+        )
+          if (!this.getOrder.dates || !this.getOrder.dates.finish_date) {
+            // {
+            //   throw new Error('Քանակը պարտադիր է և պետք է լինի դրական թիվ')
+            // }
+            throw new Error('Անհրաժեշտ ավարտի ամսաթիվը պարտադիր է')
+          }
         if (!this.getOrder.description) {
           throw new Error('Նկարագրությունը պարտադիր է')
         }
@@ -526,7 +527,7 @@ export default {
           }
         })
         formData.append('name', this.getOrder.name)
-        formData.append('quantity', this.getOrder.quantity)
+        // formData.append('quantity', this.getOrder.quantity)
         formData.append('description', this.getOrder.description)
         formData.append('status', this.getOrder.status || 'in process')
         formData.append('finish_date', this.getOrder.dates.finish_date)

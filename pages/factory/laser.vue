@@ -31,7 +31,11 @@
             <tr
               class="border-b border-gray-200 dark:border-gray-700"
               :class="
-                order?.factory_order?.some((item) => item.status === 'Ավարտել')
+                order?.factory_orders?.some(
+                  (item) =>
+                    item.status === 'Ավարտել' ||
+                    item.admin_confirmation_date !== null
+                )
                   ? 'bg-green-500 text-white'
                   : ''
               "
@@ -229,9 +233,14 @@
         </button>
 
         <div
-          class="grid md:grid-cols-2 grid-cols-1 gap-2 bg-white p-6 rounded-lg shadow-md lg:w-3/4 w-full"
+          class="grid lg:grid-cols-2 grid-cols-1 justify-between gap-2 bg-white p-6 rounded-lg shadow-slate-500 lg:w-5/6 w-full"
         >
-          <div class="flex flex-col items-start justify-start mt-10">
+          <div
+            class="flex items-center justify-center show_file_section mx-auto text-center"
+          >
+            <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
+          </div>
+          <div class="flex flex-col items-start justify-center">
             <h3 class="text-lg font-bold mb-4">Առաջադրանքի մանրամասներ</h3>
             <ul class="text-base font-medium leading-7">
               <li>Անուն: {{ details.name }}</li>
@@ -241,13 +250,18 @@
             <!-- File list -->
             <div
               v-if="details.factory_orders && details.factory_orders.length > 0"
+              class="flex flex-col items-center justify-center w-full"
             >
               <h4 class="text-lg font-bold mt-4">Ֆայլեր</h4>
-              <ul>
+              <ul class="w-full">
                 <li v-for="order in details.factory_orders" :key="order.id">
                   <div v-if="order.files && order.files.length > 0">
-                    <div v-for="file in order.files" :key="file.id">
-                      <div class="flex items-center gap-4 justify-between">
+                    <div
+                      v-for="file in order.files"
+                      :key="file.id"
+                      class="border border-gray-200 rounded-md my-1 shadow-slate-600 shadow-md rounded-b-lg w-full"
+                    >
+                      <div class="flex items-center gap-4 justify-between p-3">
                         <button
                           class="text-blue-500 hover:text-blue-700"
                           @click="viewFile(file.path)"
@@ -265,14 +279,31 @@
                           <img class="w-8 h-8" src="/images/img.png" alt="" />
                         </button>
                       </div>
+                      <div
+                        class="flex items-center justify-between gap-2 my-2 p-3"
+                      >
+                        <p class="flex flex-col items-center gap-2">
+                          <span class="italic font-sans font-bold">Քանակ։</span>
+                          {{ file?.quantity }}
+                        </p>
+                        <p class="flex flex-col items-center gap-2">
+                          <span class="italic font-sans font-bold"
+                            >Նյութի տեսակ։</span
+                          >
+                          {{ file?.material_type }}
+                        </p>
+                        <p class="flex flex-col items-center gap-2">
+                          <span class="italic font-sans font-bold"
+                            >Հաստություն։</span
+                          >
+                          {{ file?.thickness }}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </li>
               </ul>
             </div>
-          </div>
-          <div class="show_file_section">
-            <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
           </div>
         </div>
       </div>

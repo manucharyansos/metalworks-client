@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :width="width" :height="height">
     <canvas
       ref="canvas"
       class="line-color w-full h-full flex items-center justify-center"
@@ -17,6 +17,12 @@ export default {
     dxfUrl: {
       type: String,
       required: true,
+    },
+    width: {
+      type: String,
+    },
+    height: {
+      type: String,
     },
   },
   mounted() {

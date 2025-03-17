@@ -47,6 +47,16 @@ export const actions = {
       return false
     }
   },
+  async fetchPmp({ commit }, id) {
+    try {
+      const response = await this.$axios.get(`/api/engineers/pmps/${id}`)
+      commit('SET_PMP', response.data.pmp)
+      return true
+    } catch (err) {
+      commit('ERROR', err.response?.data || 'Failed to fetch orders')
+      return false
+    }
+  },
   async checkIfGroupExists({ commit }, data) {
     try {
       const response = await this.$axios.post(
@@ -54,6 +64,20 @@ export const actions = {
         {
           group: data,
         }
+      )
+      if (response.data.exists) {
+        commit('SET_PMP', response.data)
+        return response.data.exists
+      }
+    } catch (error) {
+      console.error('Սխալ տվյալների ստուգման ընթացքում', error)
+    }
+  },
+  async checkPmpByRemoteNumber({ commit }, data) {
+    try {
+      const response = await this.$axios.post(
+        '/api/engineers/pmps/check-pmp-by-remote-number',
+        data
       )
       if (response.data.exists) {
         commit('SET_PMP', response.data)

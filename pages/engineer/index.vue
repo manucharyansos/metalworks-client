@@ -1,69 +1,248 @@
 <template>
-  <main class="flex flex-row flex-wrap p-4 h-auto pt-20">
-    <template v-if="searchFilter">
-      <table
-        class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
+  <main class="flex flex-row flex-wrap p-4 h-screen">
+    <div
+      class="flex flex-col justify-between border w-full border-gray-200 rounded-md shadow-sm sm:rounded-md"
+    >
+      <div
+        class="pmp_section w-full grid grid-cols-4 gap-4 py-4 px-4 border-gray-200 rounded-md shadow-sm sm:rounded-md"
       >
-        <thead
-          class="text-xs text-gray-700 bg-gray-300 uppercase dark:text-gray-400"
-        >
-          <tr class="border-b-neutral-700">
-            <th scope="col" class="px-3 py-3">Id</th>
-            <th scope="col" class="px-3 py-3">Ստեղծման ամսաթիվը</th>
-            <th scope="col" class="px-3 py-3">Անհրաժեշտ ավարտի ժամանակը</th>
-            <th scope="col" class="px-3 py-3">Պատվերի համարը</th>
-            <th scope="col" class="px-3 py-3">Prefix code</th>
-            <th scope="col" class="px-3 py-3">Կարգավիճակ</th>
-            <th scope="col" class="px-3 py-3">Անուն</th>
-            <th scope="col" class="px-3 py-3"></th>
-          </tr>
-        </thead>
-        <tbody
-          v-for="(order, index) in searchFilter"
-          :key="index"
-          class="bg-amber-50"
-        >
-          <tr class="border-b border-gray-200 dark:border-gray-700">
-            <th
-              v-if="order.id"
-              scope="row"
-              class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800"
-            >
-              {{ order.id }}
-            </th>
-            <td v-if="order.created_at" class="px-6 py-4">
-              {{ order.created_at }}
-            </td>
-            <td class="px-6 py-4">
-              {{ order.dates?.finish_date ? order.dates?.finish_date : 'null' }}
-            </td>
-            <td v-if="order.order_number" class="px-6 py-4">
-              {{ order?.order_number?.number }}
-            </td>
-            <td v-if="order.prefix_code" class="px-6 py-4">
-              {{ order.prefix_code.code }}
-            </td>
-            <td v-if="order.status" class="px-6 py-4">
-              {{ order.status }}
-            </td>
-            <td v-if="order.name" class="px-6 py-4">
-              {{ order.name }}
-            </td>
-            <td v-if="order.store_link" class="px-12">
-              <a class="hover:!text-blue-700" :href="order.store_link?.url"
-                >Link</a
+        <div class="flex flex-row items-center gap-4">
+          <h1 class="my-auto">PMP</h1>
+          <div class="flex flex-col items-center gap-4 col-span-2">
+            <div class="relative">
+              <div
+                class="font-medium border-2 border-gray-200 px-3 rounded-lg text-sm text-center inline-flex items-center"
               >
-            </td>
-            <td
-              class="px-12 text-indigo-500 border-indigo-500 hover:bg-indigo-500 hover:text-indigo-50 cursor-pointer"
-              @click="editOrder(order)"
+                <input
+                  v-model="pmpGroup"
+                  type="text"
+                  class="border-none outline-0"
+                  placeholder="Ծածկագիր"
+                />
+                <button @click="openPmpGroup">
+                  <svg
+                    class="w-2.5 h-2.5 ms-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="black"
+                    viewBox="0 0 10 6"
+                    width="20"
+                    height="20"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Dropdown menu -->
+              <div
+                v-if="isSelectPmpGroup"
+                class="z-20 absolute top-10 right-0 left-0 bg-white divide-y border-gray-300 rounded-lg shadow-md w-72 dark:bg-gray-700 dark:divide-gray-600"
+              >
+                <ul
+                  v-for="pmp in filteredPmps"
+                  :key="pmp.id"
+                  class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                >
+                  <li
+                    class="cursor-pointer px-4 py-1"
+                    @click="selectPmpGroup(pmp)"
+                  >
+                    <div>
+                      {{ pmp.group }}
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="relative w-full">
+              <div
+                class="font-medium border-2 border-gray-200 px-3 rounded-lg text-sm text-center inline-flex items-center"
+              >
+                <input
+                  v-model="pmpGroupName"
+                  type="text"
+                  class="border-none outline-0"
+                  placeholder="Անվանում"
+                />
+                <button @click="openPmpGroupName">
+                  <svg
+                    class="w-2.5 h-2.5 ms-3"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="black"
+                    viewBox="0 0 10 6"
+                    width="20"
+                    height="20"
+                  >
+                    <path
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Dropdown menu -->
+              <div
+                v-if="isSelectPmpGroupName"
+                class="z-20 absolute top-10 right-0 left-0 bg-white divide-y border-gray-300 rounded-lg shadow-md w-72 dark:bg-gray-700 dark:divide-gray-600"
+              >
+                <ul
+                  v-for="pmp in filteredPmpNames"
+                  :key="pmp.id"
+                  class="py-2 text-sm text-gray-700 dark:text-gray-200"
+                >
+                  <li
+                    class="cursor-pointer px-4 py-1"
+                    @click="selectPmpGroupName(pmp)"
+                  >
+                    <div>
+                      {{ pmp.group_name }}
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col items-start gap-4 col-span-2 text-start">
+          <div class="relative">
+            <div
+              class="font-medium w-full border-2 border-gray-200 px-3 rounded-lg text-sm text-center inline-flex items-center"
             >
-              Խմբագրել
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </template>
+              <input
+                v-model="pmpRemoteNumber"
+                type="text"
+                class="border-none outline-0"
+              />
+              <button @click="openRemoteNumber">
+                <svg
+                  class="w-2.5 h-2.5 ms-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="black"
+                  viewBox="0 0 10 6"
+                  width="20"
+                  height="20"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 4 4 4-4"
+                  />
+                </svg>
+              </button>
+            </div>
+            <!-- Dropdown menu -->
+            <div
+              v-if="isPmpRemoteNumber"
+              class="z-20 absolute top-10 right-0 left-0 bg-white divide-y border-gray-300 rounded-lg shadow-md w-72 dark:bg-gray-700 dark:divide-gray-600"
+            >
+              <ul
+                v-for="pmp in pmpRemoteNumbers"
+                :key="pmp.id"
+                class="py-2 text-sm text-gray-700 dark:text-gray-200"
+              >
+                <li
+                  class="cursor-pointer px-4 py-1"
+                  @click="selectPmpRemoteNumber(pmp)"
+                >
+                  <div>
+                    {{ pmp.remote_number }}
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="relative w-full">
+            <div
+              class="font-medium w-full border-2 border-gray-200 px-3 rounded-lg text-sm text-center inline-flex items-center"
+            >
+              <input
+                v-model="pmpRemoteNumberName"
+                type="text"
+                class="border-none outline-0 w-full"
+              />
+              <button @click="openRemoteNumberName">
+                <svg
+                  class="w-2.5 h-2.5 ms-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="black"
+                  viewBox="0 0 10 6"
+                  width="20"
+                  height="20"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 4 4 4-4"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Dropdown menu -->
+            <div
+              v-if="isPmpRemoteNumberName"
+              class="z-20 absolute top-10 right-0 left-0 bg-white divide-y border-gray-300 rounded-lg shadow-md w-72 dark:bg-gray-700 dark:divide-gray-600"
+            >
+              <ul
+                v-for="pmp in pmpRemoteNumbers"
+                :key="pmp.id"
+                class="py-2 text-sm text-gray-700 dark:text-gray-200"
+              >
+                <li
+                  class="cursor-pointer px-4 py-1"
+                  @click="selectPmpRemoteNumberName(pmp)"
+                >
+                  <div>
+                    {{ pmp.remote_number_name }}
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col items-center justify-between gap-4">
+          <button
+            v-if="isCreatePmp"
+            class="flex items-center justify-center font-sans italic bg-green-600 text-white w-52 px-1.5 py-1.5 rounded-lg"
+            @click="addPmpGroup"
+          >
+            Ստեղծել
+          </button>
+          <button
+            v-if="isEditPmp"
+            class="flex items-center justify-center font-sans italic bg-indigo-600 text-white w-52 px-1.5 py-1.5 rounded-lg"
+            @click="editPmp"
+          >
+            Դիտել
+          </button>
+        </div>
+      </div>
+      <button
+        class="flex items-center justify-center font-sans italic bg-indigo-600 text-white w-52 px-1.5 py-1.5 rounded-lg mt-auto"
+        @click="updatePmp"
+      >
+        Խմբագրել
+      </button>
+    </div>
+    <notifications />
   </main>
 </template>
 <script>
@@ -75,53 +254,219 @@ export default {
   middleware: ['engineer', 'roleRedirect'],
   data() {
     return {
-      searchable: '',
+      pmpGroup: '',
+      pmpGroupName: '',
+      pmpRemoteNumber: '',
+      pmpRemoteNumberName: '',
+      isSelectPmpGroup: false,
+      isSelectPmpGroupName: false,
+      isPmpRemoteNumber: false,
+      isPmpRemoteNumberName: false,
+      isCreatePmp: false,
+      isEditPmp: false,
+      pmpRemoteNumbers: [],
+      remote_number_id: '',
     }
   },
   computed: {
-    ...mapGetters('orders', ['orders']),
-    allOrders() {
-      return this.orders
+    ...mapGetters('pmp', ['getPmpes']),
+    filteredPmps() {
+      if (!this.pmpGroup) return this.getPmpes?.pmp || []
+      return this.getPmpes?.pmp.filter((pmp) =>
+        pmp.group.startsWith(this.pmpGroup)
+      )
     },
-    searchFilter() {
-      const searchTerm = this.searchable.trim().toLowerCase()
-      if (searchTerm === '') {
-        return this.allOrders
+    filteredPmpNames() {
+      if (!this.pmpGroupName) return this.getPmpes?.pmp || []
+      return this.getPmpes?.pmp.filter((pmp) =>
+        pmp.group_name.toLowerCase().startsWith(this.pmpGroupName.toLowerCase())
+      )
+    },
+  },
+  watch: {
+    pmpGroup(val) {
+      if (val && val.length >= 3) {
+        if (this.getPmpes?.pmp && Array.isArray(this.getPmpes.pmp)) {
+          const isGroupExists = this.getPmpes.pmp.some(
+            (pmp) => String(pmp.group) === String(val)
+          )
+          if (isGroupExists) {
+            this.isCreatePmp = false
+            this.isEditPmp = true
+          } else {
+            this.isCreatePmp = true
+            this.isEditPmp = false
+          }
+        }
+      } else {
+        this.isCreatePmp = false
       }
-      return this.allOrders.filter((order) => {
-        const orderNumber =
-          order.order_number && typeof order.order_number.number === 'string'
-            ? order.order_number.number.toLowerCase()
-            : ''
-        const name =
-          order.name && typeof order.name === 'string'
-            ? order.name.toLowerCase()
-            : ''
-        const description =
-          order.details && typeof order.description === 'string'
-            ? order.description.toLowerCase()
-            : ''
-        const prefixCode =
-          order.prefix_code && typeof order.prefix_code.code === 'string'
-            ? order.prefix_code.code.toLowerCase()
-            : ''
-        return (
-          orderNumber.includes(searchTerm) ||
-          description.includes(searchTerm) ||
-          name.includes(searchTerm) ||
-          prefixCode.includes(searchTerm)
-        )
-      })
+      if (val) {
+        this.isSelectPmpGroup = true
+      } else {
+        this.isSelectPmpGroup = false
+      }
+    },
+    pmpGroupName(val) {
+      if (val) {
+        this.isSelectPmpGroupName = true
+        if (this.getPmpes?.pmp && Array.isArray(this.getPmpes.pmp)) {
+          const isGroupExists = this.getPmpes.pmp.some(
+            (pmp) => String(pmp.group_name) === String(val)
+          )
+          if (isGroupExists) {
+            this.isCreatePmp = false
+            this.isEditPmp = true
+          } else {
+            this.isCreatePmp = true
+            this.isEditPmp = true
+          }
+        }
+      } else {
+        this.isCreatePmp = false
+        this.isSelectPmpGroupName = false
+      }
     },
   },
   created() {
-    this.fetchOrders()
+    this.fetchPmps()
   },
   methods: {
-    ...mapActions('orders', ['fetchOrders']),
-    editOrder(order) {
-      this.$router.push(`/engineer/orders/${order.id}`)
+    ...mapActions('pmp', ['fetchPmps', 'createPmp', 'checkPmpByRemoteNumber']),
+
+    openPmpGroup() {
+      this.isSelectPmpGroup = !this.isSelectPmpGroup
+      this.isSelectPmpGroupName = false
+      this.isPmpRemoteNumber = false
+      this.isPmpRemoteNumberName = false
+    },
+    openRemoteNumber() {
+      this.isPmpRemoteNumber = !this.isPmpRemoteNumber
+      this.isSelectPmpGroup = false
+      this.isSelectPmpGroupName = false
+      this.isPmpRemoteNumberName = false
+    },
+    openPmpGroupName() {
+      this.isSelectPmpGroupName = !this.isSelectPmpGroupName
+      this.isSelectPmpGroup = false
+      this.isPmpRemoteNumber = false
+      this.isPmpRemoteNumberName = false
+    },
+    openRemoteNumberName() {
+      this.isPmpRemoteNumberName = !this.isPmpRemoteNumberName
+      this.isSelectPmpGroup = false
+      this.isPmpRemoteNumber = false
+      this.isSelectPmpGroupName = false
+    },
+    selectPmpGroup(pmp) {
+      this.isSelectPmpGroupName = false
+      this.pmpGroup = pmp.group
+      this.pmpGroupName = pmp.group_name
+      this.pmpRemoteNumbers = pmp.remote_number
+      this.pmpRemoteNumber = this.pmpRemoteNumbers[pmp.remote_number]
+      this.pmpRemoteNumberName = this.pmpRemoteNumbers[pmp.remote_number_name]
+      this.isSelectPmpGroup = false
+      this.isSelectPmpGroupName = false
+      const isGroupExists = this.getPmpes.pmp.some(
+        (pmp) => pmp.group === this.pmpGroup
+      )
+      if (!isGroupExists) {
+        this.isCreatePmp = true
+      }
+    },
+    selectPmpGroupName(pmp) {
+      this.pmpGroup = pmp.group
+      this.pmpGroupName = pmp.group_name
+      this.pmpRemoteNumbers = pmp.remote_number
+      this.pmpRemoteNumber = this.pmpRemoteNumbers[pmp.remote_number]
+      this.pmpRemoteNumberName = this.pmpRemoteNumbers[pmp.remote_number_name]
+      this.isSelectPmpGroupName = false
+      this.isSelectPmpGroup = false
+    },
+
+    selectPmpRemoteNumber(pmp) {
+      this.pmpRemoteNumberName = pmp.remote_number_name
+      this.pmpRemoteNumber = pmp.remote_number
+      this.isPmpRemoteNumber = false
+      this.remote_number_id = pmp.id
+    },
+
+    selectPmpRemoteNumberName(pmp) {
+      this.pmpRemoteNumberName = pmp.remote_number_name
+      this.pmpRemoteNumber = pmp.remote_number
+      this.isPmpRemoteNumberName = false
+    },
+
+    async addPmpGroup() {
+      if (
+        !this.pmpGroup ||
+        !this.pmpGroupName ||
+        !this.pmpRemoteNumber ||
+        !this.pmpRemoteNumberName
+      ) {
+        this.$notify({
+          text: `Group or Remote Number is missing:`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
+        return
+      }
+      const pmp = {
+        group: this.pmpGroup.padStart(3, '0'),
+        group_name: this.pmpGroupName,
+        remote_number: this.pmpRemoteNumber.padStart(2, '0'),
+        remote_number_name: this.pmpRemoteNumberName,
+        admin_confirmation: true,
+      }
+      const response = await this.createPmp(pmp)
+      if (response) {
+        await this.resetPmpData()
+        await this.fetchPmps()
+      }
+    },
+    resetPmpData() {
+      this.pmpGroup = ''
+      this.pmpGroupName = ''
+      this.pmpRemoteNumber = null
+      this.pmpRemoteNumberName = null
+    },
+    editPmp() {
+      this.$router.push(`engineer/pmp.files/${this.remote_number_id}`)
+    },
+    updatePmp() {
+      // if (!this.pmpGroup) {
+      //   this.$notify({
+      //     text: 'Խմբագրելու համար պետք է ընտրել PMP խումբ։',
+      //     duration: 3000,
+      //     speed: 1000,
+      //     position: 'top',
+      //     type: 'error',
+      //   })
+      //   return
+      // }
+
+      // const pmpData = {
+      //   id: this.pmpGroup,
+      //   group: this.pmpGroup,
+      //   group_name: this.pmpGroupName,
+      //   remote_number: this.pmpRemoteNumber,
+      //   remote_number_name: this.pmpRemoteNumberName,
+      // }
+
+      // this.checkPmpByRemoteNumber(pmpData)
+      this.$router.push(`test/${this.remote_number_id}`)
     },
   },
 }
 </script>
+<style scoped>
+input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: inherit !important;
+  color: inherit !important;
+}
+</style>
