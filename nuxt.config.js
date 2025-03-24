@@ -47,9 +47,9 @@ export default {
     strategies: {
       laravelSanctum: {
         provider: 'laravel/sanctum',
-        // url: process.env.BASE_URL,
+        url: process.env.BASE_URL,
         // url: 'https://api.metalworks.am',
-        url: 'http://localhost:8000',
+        // url: 'http://localhost:8000',
         endpoints: {
           login: { url: '/api/login', method: 'post' },
           logout: { url: '/api/logout', method: 'post' },

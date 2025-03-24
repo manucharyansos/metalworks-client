@@ -218,6 +218,7 @@
         </div>
       </div>
     </div>
+    <notifications />
   </main>
 </template>
 
@@ -334,18 +335,21 @@ export default {
 
     async addFile() {
       try {
-        // Ստուգում ենք, որ բոլոր պահանջվող դաշտերը լրացված են
         if (
           !this.fileData.file ||
           !this.fileData.quantity ||
           !this.fileData.material ||
           !this.fileData.thickness
         ) {
-          alert('Խնդրում ենք լրացնել բոլոր դաշտերը և ընտրել ֆայլ')
+          this.$notify({
+            text: `Խնդրում ենք լրացնել բոլոր դաշտերը և ընտրել ֆայլ:`,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'success',
+          })
           return
         }
-
-        // Ստեղծում ենք FormData օբյեկտ
         const formData = new FormData()
         formData.append('file', this.fileData.file)
         formData.append('pmp_id', this.id)
@@ -355,32 +359,36 @@ export default {
         formData.append('material_type', this.fileData.material)
         formData.append('thickness', this.fileData.thickness)
 
-        // Ուղարկում ենք սերվեր
         const response = await this.createPmpFilesByFactory(formData)
 
         if (response) {
-          // Հաջողության դեպքում
-          alert('Ֆայլը հաջողությամբ ավելացված է')
-
-          // Թարմացնում ենք տվյալները
+          this.$notify({
+            text: `Ֆայլը հաջողությամբ ավելացված է:`,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'success',
+          })
           await this.fetchPmp(this.id)
 
-          // Թարմացնում ենք ընթացիկ ֆայլերի ցանկը
           this.selectedFiles = this.getPmp.files.filter(
             (file) =>
               file.remote_number_id === this.selectedRemoteNumberId &&
               file.factory_id === this.selectedFactoryId
           )
 
-          // Փակում ենք մոդալը և ռեսետ անում դաշտերը
           this.openAddFileModal()
         }
       } catch (error) {
-        console.error('Ֆայլ ավելացնելիս սխալ:', error)
-        alert(
-          'Ֆայլ ավելացնելիս սխալ: ' +
-            (error.response?.data?.message || error.message)
-        )
+        this.$notify({
+          text:
+            'Ֆայլ ավելացնելիս սխալ: ' +
+            (error.response?.data?.message || error.message),
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
       }
     },
 
