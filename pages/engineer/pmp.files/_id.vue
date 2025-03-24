@@ -73,43 +73,149 @@
           </div>
         </div>
 
-        <div v-if="isOpen === 'factories'" class="flex flex-col gap-2">
-          <div v-for="factory in getFactory" :key="factory.id">
-            <button
-              class="border border-gray-300 rounded-lg w-64 p-2"
-              :class="{
-                'bg-gray-900 text-white': selectedFactoryId === factory.id,
-                'bg-gray-600 text-white': hasFiles(factory.id),
-              }"
-              @click="selectFactory(factory)"
-            >
-              {{ factory?.value }}
-            </button>
-          </div>
-        </div>
+        <div
+          v-if="isOpen === 'factories'"
+          class="flex flex-col items-start justify-center"
+        >
+          <div class="flex flex-col gap-2">
+            <div v-for="factory in getFactory" :key="factory.id">
+              <button
+                class="border border-gray-300 rounded-lg w-64 p-2"
+                :class="{
+                  'bg-gray-900 text-white': selectedFactoryId === factory.id,
+                  'bg-gray-600 text-white': hasFiles(factory.id),
+                }"
+                @click="selectFactory(factory)"
+              >
+                {{ factory?.value }}
+              </button>
+              <transition name="slide-down">
+                <div
+                  v-show="isOpenFiles === factory.id"
+                  class="flex flex-col gap-2 my-6"
+                >
+                  <div
+                    v-for="file in selectedFiles"
+                    :key="file.id"
+                    class="flex justify-between border border-gray-300 rounded-lg w-64 p-2 cursor-pointer truncate hover:!truncate"
+                    @mouseover="showButton(file.id)"
+                    @mouseleave="hideButton(file.id)"
+                  >
+                    <div
+                      class="w-44 truncate"
+                      @click="viewFile(file.path, file)"
+                    >
+                      {{ file.original_name }}
+                    </div>
+                    <div v-if="hoveredFileId === file.id" class="z-20">
+                      <svg
+                        v-if="!loading"
+                        xmlns="http://www.w3.org/2000/svg"
+                        x="0px"
+                        y="0px"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 30 30"
+                        fill="red"
+                        @click="isOpenModal = !isOpenModal"
+                      >
+                        <path
+                          d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
+                        ></path>
+                      </svg>
+                      <div v-else>
+                        <svg
+                          aria-hidden="true"
+                          role="status"
+                          class="inline w-4 h-4 me-3 text-gray-200 animate-spin dark:text-gray-600"
+                          viewBox="0 0 100 101"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                            fill="currentColor"
+                          />
+                          <path
+                            d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                            fill="#1C64F2"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                    <!--    Popup modal-->
+                    <PopupModal
+                      :is-open-modal="isOpenModal"
+                      text="Վստահ եկ որ ուզումեկ ջնջել՞"
+                      @closeModal="closeModal"
+                      @confirm="deleteDxfFile(file.id)"
+                    />
+                  </div>
+                  <div class="w-64 mt-12">
+                    <button
+                      class="bg-green-600 rounded-lg text-white w-full py-1.5"
+                      @click="openAddFileModal"
+                    >
+                      Ավելացնել ֆայլ
+                    </button>
 
-        <div v-if="isOpen === 'files_by_id'" class="flex flex-col gap-2">
-          <div
-            v-for="file in selectedFiles"
-            :key="file.id"
-            class="flex justify-between border border-gray-300 rounded-lg w-64 p-2 cursor-pointer truncate hover:!truncate"
-            @click="viewFile(file.path, file)"
-          >
-            {{ file.original_name }}
+                    <AddFileModal
+                      :is-open-modal="isOpenAddFileModal"
+                      :file="currentFile"
+                      @closeModal="openAddFileModal"
+                      @createFile="addFile"
+                    >
+                      <!-- Այստեղ տեղադրում ենք input-ը slot-ի միջոցով -->
+                      <template #file-input>
+                        <input
+                          type="file"
+                          class="hidden"
+                          @change="handleFileChange"
+                        />
+                      </template>
+
+                      <!-- Մնացած slot-ները մնում են նույնը -->
+                      <template #quantity>
+                        <input-with-label-icon v-model="fileData.quantity" />
+                      </template>
+                      <template #materialType>
+                        <input-with-label-icon v-model="fileData.material" />
+                      </template>
+                      <template #thickness>
+                        <input-with-label-icon v-model="fileData.thickness" />
+                      </template>
+                    </AddFileModal>
+                  </div>
+                </div>
+              </transition>
+            </div>
           </div>
         </div>
       </div>
-      <div
-        v-if="dxfUrl && isOpen === 'files_by_id'"
-        class="flex items-center justify-center"
-      >
-        <DxfViewer
+      <div class="w-full">
+        <!--        description_section-->
+        <div
+          v-if="selectedFile"
+          class="description_section flex flex-col items-start justify-between border border-gray-300 rounded-md h-28 px-4 my-6"
+        >
+          <div>Քանակ։ {{ selectedFile.quantity }}</div>
+          <div>Մատերիալի տեսակ։ {{ selectedFile.material_type }}</div>
+          <div>Հաստություն։ {{ selectedFile.thickness }}</div>
+        </div>
+        <div
           v-if="dxfUrl"
-          :key="dxfUrl"
-          :dxf-url="dxfUrl"
-          width="500px"
-          style="width: 800px"
-        />
+          class="flex flex-col items-center justify-center mt-20"
+        >
+          <p v-if="selectedFile" class="my-6">
+            {{ selectedFile.original_name }}
+          </p>
+          <DxfViewer
+            v-if="dxfUrl"
+            :key="dxfUrl"
+            :dxf-url="dxfUrl"
+            style="width: 700px"
+          />
+        </div>
       </div>
     </div>
   </main>
@@ -118,21 +224,40 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import DxfViewer from '~/components/File/DxfViewer.vue'
+import PopupModal from '~/components/modals/popup-modal/Popup-Modal.vue'
+import AddFileModal from '~/components/modals/add-file/AddFile.vue'
+import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 
 export default {
-  components: { DxfViewer },
+  components: { InputWithLabelIcon, AddFileModal, PopupModal, DxfViewer },
   layout: 'EngineerLayout',
   middleware: ['engineer', 'roleRedirect'],
   data() {
     return {
       isOpen: 'remote_number',
+      isOpenFiles: 'files_by_id',
       id: '',
       dxfUrl: '',
       selectedFactoryId: null,
       selectedRemoteNumber: null,
+      selectedRemoteNumberId: null,
       selectedFiles: [],
+      selectedFile: null,
       breadcrumb: [],
-      test: null,
+      hoveredFileId: null,
+      loading: false,
+      isOpenModal: false,
+      isOpenAddFileModal: false,
+      fileData: {
+        quantity: null,
+        material: '',
+        thickness: '',
+        file: null,
+      },
+      currentFile: {
+        name: '',
+        size: 0,
+      },
     }
   },
   computed: {
@@ -150,13 +275,22 @@ export default {
     },
   },
   methods: {
-    ...mapActions('pmp', ['fetchPmp']),
+    ...mapActions('pmp', ['fetchPmp', 'deleteFile', 'createPmpFilesByFactory']),
     ...mapActions('factory', ['fetchFactory']),
+
+    showButton(fileId) {
+      this.hoveredFileId = fileId
+    },
+    hideButton(fileId) {
+      if (this.hoveredFileId === fileId) {
+        this.hoveredFileId = null
+      }
+    },
 
     showFiles(number) {
       this.isOpen = 'factories'
-      this.test = number
-      this.selectedRemoteNumber = number.id
+      this.selectedRemoteNumber = number
+      this.selectedRemoteNumberId = number.id
       this.selectedFiles = this.getPmp.files.filter(
         (f) => f.remote_number_id === number.id
       )
@@ -164,12 +298,90 @@ export default {
     },
 
     selectFactory(factory) {
-      this.isOpen = 'files_by_id'
+      if (this.isOpenFiles === factory.id) {
+        this.isOpenFiles = null
+      } else {
+        this.isOpenFiles = factory.id
+      }
+
       this.selectedFactoryId = factory.id
       this.selectedFiles = this.getPmp.files.filter(
         (file) => file.factory_id === factory.id
       )
-      this.updateBreadcrumb(factory.name)
+      if (this.breadcrumb.length > 1) {
+        this.breadcrumb.splice(1, 1, factory.value)
+      } else {
+        this.breadcrumb.push(factory.value)
+      }
+    },
+
+    handleFileChange(event) {
+      const file = event.target.files[0]
+      if (file) {
+        this.currentFile = {
+          name: file.name,
+          size: file.size,
+        }
+        this.fileData.file = file
+      } else {
+        this.currentFile = {
+          name: '',
+          size: 0,
+        }
+        this.fileData.file = null
+      }
+    },
+
+    async addFile() {
+      try {
+        // Ստուգում ենք, որ բոլոր պահանջվող դաշտերը լրացված են
+        if (
+          !this.fileData.file ||
+          !this.fileData.quantity ||
+          !this.fileData.material ||
+          !this.fileData.thickness
+        ) {
+          alert('Խնդրում ենք լրացնել բոլոր դաշտերը և ընտրել ֆայլ')
+          return
+        }
+
+        // Ստեղծում ենք FormData օբյեկտ
+        const formData = new FormData()
+        formData.append('file', this.fileData.file)
+        formData.append('pmp_id', this.id)
+        formData.append('remote_number_id', this.selectedRemoteNumberId)
+        formData.append('factory_id', this.selectedFactoryId)
+        formData.append('quantity', this.fileData.quantity)
+        formData.append('material_type', this.fileData.material)
+        formData.append('thickness', this.fileData.thickness)
+
+        // Ուղարկում ենք սերվեր
+        const response = await this.createPmpFilesByFactory(formData)
+
+        if (response) {
+          // Հաջողության դեպքում
+          alert('Ֆայլը հաջողությամբ ավելացված է')
+
+          // Թարմացնում ենք տվյալները
+          await this.fetchPmp(this.id)
+
+          // Թարմացնում ենք ընթացիկ ֆայլերի ցանկը
+          this.selectedFiles = this.getPmp.files.filter(
+            (file) =>
+              file.remote_number_id === this.selectedRemoteNumberId &&
+              file.factory_id === this.selectedFactoryId
+          )
+
+          // Փակում ենք մոդալը և ռեսետ անում դաշտերը
+          this.openAddFileModal()
+        }
+      } catch (error) {
+        console.error('Ֆայլ ավելացնելիս սխալ:', error)
+        alert(
+          'Ֆայլ ավելացնելիս սխալ: ' +
+            (error.response?.data?.message || error.message)
+        )
+      }
     },
 
     viewFile(filePath, file) {
@@ -179,34 +391,90 @@ export default {
         }
         this.breadcrumb.push(file.original_name)
       }
+      this.selectedFile = file
       this.dxfUrl = filePath
+      this.isOpenFiles = file.factory_id
+    },
+
+    async deleteDxfFile(fileId) {
+      this.loading = true
+      const res = await this.deleteFile(fileId)
+      if (res) {
+        await this.fetchPmp(this.id)
+        this.updateBreadcrumb(this.selectedRemoteNumberId)
+        if (this.selectedFile && this.selectedFile.id === fileId) {
+          this.selectedFile = null
+          this.dxfUrl = ''
+        }
+        this.selectedFiles = this.selectedFiles.filter(
+          (file) => file.id !== fileId
+        )
+        this.loading = false
+      }
+    },
+
+    openAddFileModal() {
+      this.isOpenAddFileModal = !this.isOpenAddFileModal
+
+      if (!this.isOpenAddFileModal) {
+        this.resetFileFields()
+      }
+    },
+
+    resetFileFields() {
+      this.file = {
+        quantity: null,
+        material_type: '',
+        thickness: '',
+        uploadedFile: null,
+      }
+    },
+
+    closeModal() {
+      this.isOpenModal = false
     },
 
     selectBreadcrumb(index) {
       this.breadcrumb = this.breadcrumb.slice(0, index + 1)
+
       if (index === 0) {
         this.isOpen = 'remote_number'
         this.selectedFactoryId = null
-        this.selectedRemoteNumber = null
+        this.selectedRemoteNumberId = null
         this.dxfUrl = null
         this.selectedFiles = []
       } else if (index === 1) {
         this.isOpen = 'factories'
-        this.selectedRemoteNumber = null
         this.dxfUrl = null
-        this.selectedFiles = this.getPmp.files.filter(
-          (f) => f.remote_number_id === this.selectedRemoteNumber
+
+        const selectedRemoteNumberName = this.breadcrumb[1]
+        const selectedRemoteNumberId = this.getPmp.remote_number.find(
+          (number) => number.remote_number_name === selectedRemoteNumberName
         )
+
+        if (selectedRemoteNumberId) {
+          this.selectedRemoteNumberId = selectedRemoteNumberId.id
+          this.selectedFiles = this.getPmp.files.filter(
+            (f) => f.remote_number_id === this.selectedRemoteNumberId
+          )
+        }
       } else if (index === 2) {
         this.isOpen = 'files_by_id'
-        this.selectedFiles = this.getPmp.files.filter(
-          (f) => f.factory_id === this.selectedFactoryId
+        const selectedFactoryName = this.breadcrumb[2]
+        const selectedFactory = this.getFactory.find(
+          (factory) => factory.value === selectedFactoryName
         )
+        if (selectedFactory) {
+          this.selectedFactoryId = selectedFactory.id
+          this.selectedFiles = this.getPmp.files.filter(
+            (f) => f.factory_id === this.selectedFactoryId
+          )
+        }
       }
     },
 
     hasFiles(factoryId) {
-      return this.selectedFiles.some((f) => f.factory_id === factoryId)
+      return this.getPmp.files.some((f) => f.factory_id === factoryId)
     },
 
     updateBreadcrumb(item) {
@@ -217,3 +485,16 @@ export default {
   },
 }
 </script>
+<style scoped>
+.slide-down-enter-active {
+  transition: all 1.5s ease-in-out;
+}
+
+.slide-down-enter-from {
+  transition: all 1.5s ease-in-out;
+}
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+</style>

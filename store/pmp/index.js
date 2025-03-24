@@ -112,6 +112,19 @@ export const actions = {
       return false
     }
   },
+  async deleteFile({ commit }, fileId) {
+    try {
+      const responce = await this.$axios.delete(
+        `/api/engineers/pmpFiles/${fileId}`
+      )
+      if (responce.status === 200) {
+        return true
+      }
+    } catch (e) {
+      console.log(e)
+      return false
+    }
+  },
 }
 
 export const getters = {
