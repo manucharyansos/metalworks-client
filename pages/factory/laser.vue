@@ -244,7 +244,7 @@
             <h3 class="text-lg font-bold mb-4">Առաջադրանքի մանրամասներ</h3>
             <ul class="text-base font-medium leading-7">
               <li>Անուն: {{ details.name }}</li>
-              <li>Քանակ: {{ details.quantity }}</li>
+              <!--              <li>Քանակ: {{ details.quantity }}</li>-->
               <li>Նկարագրություն: {{ details.description }}</li>
             </ul>
             <!-- File list -->

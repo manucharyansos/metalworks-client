@@ -265,6 +265,83 @@
             <button
               type="button"
               class="flex items-center p-2 w-full text-base font-medium cursor-pointer text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-700 dark:text-white dark:hover:bg-gray-700"
+              @click="openWorkersDrawer = !openWorkersDrawer"
+            >
+              <svg
+                class="h-8 w-8 text-white"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="currentColor"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
+              </svg>
+              <span class="flex-1 ml-3 text-left whitespace-nowrap text-white"
+                >Աշխատակիցներ</span
+              >
+              <svg
+                aria-hidden="true"
+                class="w-6 h-6"
+                fill="white"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
+            <ul
+              v-if="openWorkersDrawer"
+              id="dropdown-pages"
+              class="py-2 space-y-2 text-white"
+            >
+              <li
+                class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
+                @click="closeSidebar"
+              >
+                <nuxt-link
+                  to="/manager/workers"
+                  class="flex items-center space-x-3 rtl:space-x-reverse"
+                  >Աշխատակիցներ</nuxt-link
+                >
+              </li>
+              <!--              <li-->
+              <!--                class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
+              <!--                @click="closeSidebar"-->
+              <!--              >-->
+              <!--                <nuxt-link-->
+              <!--                  to="/manager/create/users"-->
+              <!--                  class="flex items-center space-x-3 rtl:space-x-reverse"-->
+              <!--                  >Նոր Աշխատակից</nuxt-link-->
+              <!--                >-->
+              <!--              </li>-->
+              <li
+                class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"
+                @click="closeSidebar"
+              >
+                <nuxt-link
+                  to="/manager/update/workers"
+                  class="flex items-center space-x-3 rtl:space-x-reverse"
+                  >Թարմացում</nuxt-link
+                >
+              </li>
+            </ul>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="flex items-center p-2 w-full text-base font-medium cursor-pointer text-gray-900 rounded-lg transition duration-75 group hover:bg-gray-700 dark:text-white dark:hover:bg-gray-700"
               @click="openMaterialDrawer = !openMaterialDrawer"
             >
               <svg
@@ -380,6 +457,7 @@ export default {
       isSidebarOpen: false,
       isDrawerOpen: false,
       openUserDrawer: false,
+      openWorkersDrawer: false,
       openMaterialDrawer: false,
     }
   },

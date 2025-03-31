@@ -235,12 +235,12 @@
           </button>
         </div>
       </div>
-      <button
-        class="flex items-center justify-center font-sans italic bg-indigo-600 text-white w-52 px-1.5 py-1.5 rounded-lg mt-auto"
-        @click="updatePmp"
-      >
-        Խմբագրել
-      </button>
+      <!--      <button-->
+      <!--        class="flex items-center justify-center font-sans italic bg-indigo-600 text-white w-52 px-1.5 py-1.5 rounded-lg mt-auto"-->
+      <!--        @click="updatePmp"-->
+      <!--      >-->
+      <!--        Խմբագրել-->
+      <!--      </button>-->
     </div>
     <notifications />
   </main>

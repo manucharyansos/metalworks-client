@@ -355,14 +355,40 @@ export default {
     async fetchFile(filePath) {
       try {
         const response = await this.$axios.get(
-          `/api/factories/getFile/${encodeURIComponent(filePath)}`,
-          { responseType: 'arraybuffer' } // Ափդեյթ արած responseType
+          `/api/factories/getFile/${filePath}`,
+          {
+            responseType: 'json', // Փոխարինել arraybuffer-ին
+            headers: {
+              Accept: 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            withCredentials: true,
+          }
         )
-        const fileType = 'application/x-dxf'
-        const blob = new Blob([response.data], { type: fileType })
-        return new File([blob], filePath.split('/').pop(), { type: fileType })
+
+        // Ստուգել, արդյոք response-ը պարունակում է base64 տվյալներ
+        if (response.data && response.data.content) {
+          const byteCharacters = atob(response.data.content)
+          const byteNumbers = new Array(byteCharacters.length)
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i)
+          }
+          const byteArray = new Uint8Array(byteNumbers)
+          const blob = new Blob([byteArray], {
+            type: response.data.mime_type || 'application/x-dxf',
+          })
+
+          return new File([blob], filePath.split('/').pop(), {
+            type: response.data.mime_type || 'application/x-dxf',
+          })
+        }
+
+        throw new Error('Invalid response format')
       } catch (error) {
-        console.error(`Error fetching file ${filePath}:`, error)
+        console.error(
+          `Error fetching file ${filePath}:`,
+          error.response || error
+        )
         return null
       }
     },

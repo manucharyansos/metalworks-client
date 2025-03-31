@@ -37,8 +37,8 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    baseURL: process.env.BASE_URL,
-    // baseURL: 'https://api.metalworks.am',
+    // baseURL: process.env.BASE_URL,
+    baseURL: 'https://api.metalworks.am',
     // baseURL: 'http://localhost:8000',
     credentials: true,
   },
@@ -47,8 +47,8 @@ export default {
     strategies: {
       laravelSanctum: {
         provider: 'laravel/sanctum',
-        url: process.env.BASE_URL,
-        // url: 'https://api.metalworks.am',
+        // url: process.env.BASE_URL,
+        url: 'https://api.metalworks.am',
         // url: 'http://localhost:8000',
         endpoints: {
           login: { url: '/api/login', method: 'post' },
