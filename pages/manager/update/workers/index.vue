@@ -44,7 +44,7 @@
             <div
               v-for="(user, index) in users"
               :key="index"
-              class="p-3 border border-b-0 border-gray-200 dark:border-gray-700 hover:bg-neutral-300 cursor-pointer"
+              class="p-3 border border-b-0 border-gray-200 dark:border-gray-700 hover:bg-gray-300 cursor-pointer"
               @click="selectUser(user)"
             >
               <p class="text-base italic font-sans leading-3 my-2">
@@ -93,7 +93,7 @@
           <ul class="p-3 space-y-1 text-sm text-gray-700 dark:text-gray-200">
             <li v-for="option in workerStatusOptions" :key="option.id">
               <div
-                class="flex p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-600"
+                class="flex p-2 rounded dark:hover:bg-gray-600 hover:bg-gray-300 cursor-pointer"
               >
                 <div class="flex items-center h-5">
                   <input
@@ -108,9 +108,9 @@
                 <div class="ms-2 text-sm">
                   <label
                     :for="'status-' + option.id"
-                    class="font-medium text-gray-900 dark:text-gray-300"
+                    class="font-medium text-gray-900 dark:text-gray-300 cursor-pointer"
                   >
-                    {{ option.label }}
+                    {{ option.value }}
                   </label>
                 </div>
               </div>
@@ -123,21 +123,21 @@
         <div class="grid grid-cols-2 gap-4 float-left w-full">
           <input-with-labels
             id="name"
-            v-model="pysPersonClientData.name"
+            v-model="person.name"
             label="Անուն"
             type="text"
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
           <input-with-labels
             id="lastName"
-            v-model="pysPersonClientData.last_name"
+            v-model="personClientData.last_name"
             label="Ազգանուն"
             type="text"
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
           <input-with-labels
             id="phone"
-            v-model="pysPersonClientData.phone"
+            v-model="personClientData.phone"
             type="tel"
             label="Հեռախոս"
             class="shadow-md rounded-lg p-3"
@@ -146,7 +146,7 @@
           ></input-with-labels>
           <input-with-labels
             id="secondPhone"
-            v-model="pysPersonClientData.second_phone"
+            v-model="personClientData.second_phone"
             type="tel"
             label="Երկրորդ Հեռախոս"
             class="shadow-md rounded-lg p-3"
@@ -155,14 +155,14 @@
           ></input-with-labels>
           <input-with-labels
             id="address"
-            v-model="pysPersonClientData.address"
+            v-model="personClientData.address"
             type="text"
             label="Հասցե"
             class="shadow-md rounded-lg p-3"
           ></input-with-labels>
           <input-with-labels
             id="address"
-            v-model="pysPersonData.email"
+            v-model="person.email"
             type="email"
             label="Էլ․ փոստ"
             class="shadow-md rounded-lg p-3"
@@ -191,34 +191,40 @@ export default {
   data() {
     return {
       workerStatus: null,
-      workerStatusOptions: [
-        { id: 1, value: 'laser', label: 'Լազերային օպերատոր' }, // Changed to 'laser'
-        { id: 2, value: 'bend', label: 'Կռման օպերատոր' }, // Changed to 'bend'
-      ],
+      // workerStatusOptions: [
+      //   { id: 1, value: 'laser', label: 'Լազերային օպերատոր' }, // Changed to 'laser'
+      //   { id: 2, value: 'bend', label: 'Կռման օպերատոր' }, // Changed to 'bend'
+      // ],
       openPersonsType: false,
       openUsers: false,
       isAccordionType: false,
       isUserAccordion: false,
       isPasswordVisible: false,
       isConfirmPasswordVisible: false,
-      pysPersonData: {},
-      pysPersonClientData: {},
+      person: {},
+      personClientData: {},
     }
   },
   computed: {
     ...mapGetters('users', ['getUsers']),
+    ...mapGetters('roles', ['roles']),
     users() {
       return this.getUsers
+    },
+    workerStatusOptions() {
+      return this.roles
     },
   },
   mounted() {
     this.fetchWorkers()
+    this.fetchRoles()
   },
   methods: {
     ...mapActions('clients', ['addClient']),
     ...mapActions('users', ['fetchWorkers', 'createWorkers', 'updateWorker']),
+    ...mapActions('roles', ['fetchRoles']),
     formatPhoneNumber(field) {
-      let phone = this.pysPersonClientData[field]
+      let phone = this.personClientData[field]
       phone = phone.replace(/\D/g, '')
       if (phone.length > 0) {
         phone = '+374 ' + phone.substring(3)
@@ -226,14 +232,14 @@ export default {
       if (phone.length > 13) {
         phone = phone.substring(0, 13)
       }
-      this.pysPersonClientData[field] = phone
+      this.personClientData[field] = phone
     },
     selectUser(user) {
-      this.pysPersonData.email = user.email
-      this.pysPersonData.name = user.name
-      this.pysPersonData.user_id = user.id
+      this.person.email = user.email
+      this.person.name = user.name
+      this.person.user_id = user.id
       this.id = user.id
-      this.pysPersonClientData = { ...user.client }
+      this.personClientData = { ...user.client }
       this.isUserAccordion = false
     },
     async createOrUpdateUser() {
@@ -245,11 +251,13 @@ export default {
         return
       }
 
-      const clientData = { ...this.pysPersonClientData }
+      const clientData = { ...this.personClientData }
       const userData = {
-        ...this.pysPersonData,
+        ...this.person,
         ...clientData,
-        type: this.workerStatus, // This will now be 'laser' or 'bend'
+        name: this.person.name,
+        email: this.person.email,
+        type: this.workerStatus,
       }
 
       try {

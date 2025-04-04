@@ -75,8 +75,8 @@ export default {
 
   runtimeConfig: {
     public: {
-      apiBase: 'http://localhost:8000',
-      // apiBase: 'api.metalworks.am',
+      // apiBase: 'http://localhost:8000',
+      apiBase: 'api.metalworks.am',
     },
   },
 

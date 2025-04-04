@@ -41,7 +41,7 @@ export const actions = {
   },
   async createWorkers({ commit }, data) {
     try {
-      await this.$axios.post('api/workers/worker', data)
+      await this.$axios.post('api/workers', data)
       await this.$router.push('/manager/workers')
       return true
     } catch (err) {
