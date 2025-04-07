@@ -8,3 +8,11 @@
   font-weight: bold;
   color: red;
 }
+.manager-active-link {
+  border-radius: 20px;
+  color: #83a2e3;
+}
+.engineer-active-link {
+  border-radius: 20px;
+  color: #83a2e3;
+}

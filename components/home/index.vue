@@ -1,34 +1,34 @@
 <template>
   <div>
     <header-layout class="page-header">
-<!--      <template #searchInput>-->
-<!--        <input-with-icon-->
-<!--          type="text"-->
-<!--          placeholder="Փնտրել"-->
-<!--          label_class="mb-2 text-sm font-medium text-gray-900 sr-only"-->
-<!--          label="Փնտրել"-->
-<!--        >-->
-<!--          <template #label_svg>-->
-<!--            <svg-->
-<!--              class="w-5 h-5 text-gray-900 dark:text-white"-->
-<!--              aria-hidden="true"-->
-<!--              xmlns="http://www.w3.org/2000/svg"-->
-<!--              width="24"-->
-<!--              height="24"-->
-<!--              fill="white"-->
-<!--              viewBox="0 0 24 24"-->
-<!--              :class="{ isActiveInputStyle: openSearchInput }"-->
-<!--            >-->
-<!--              <path-->
-<!--                stroke="currentColor"-->
-<!--                stroke-linecap="round"-->
-<!--                stroke-width="2"-->
-<!--                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"-->
-<!--              />-->
-<!--            </svg>-->
-<!--          </template>-->
-<!--        </input-with-icon>-->
-<!--      </template>-->
+      <!--      <template #searchInput>-->
+      <!--        <input-with-icon-->
+      <!--          type="text"-->
+      <!--          placeholder="Փնտրել"-->
+      <!--          label_class="mb-2 text-sm font-medium text-gray-900 sr-only"-->
+      <!--          label="Փնտրել"-->
+      <!--        >-->
+      <!--          <template #label_svg>-->
+      <!--            <svg-->
+      <!--              class="w-5 h-5 text-gray-900 dark:text-white"-->
+      <!--              aria-hidden="true"-->
+      <!--              xmlns="http://www.w3.org/2000/svg"-->
+      <!--              width="24"-->
+      <!--              height="24"-->
+      <!--              fill="white"-->
+      <!--              viewBox="0 0 24 24"-->
+      <!--              :class="{ isActiveInputStyle: openSearchInput }"-->
+      <!--            >-->
+      <!--              <path-->
+      <!--                stroke="currentColor"-->
+      <!--                stroke-linecap="round"-->
+      <!--                stroke-width="2"-->
+      <!--                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"-->
+      <!--              />-->
+      <!--            </svg>-->
+      <!--          </template>-->
+      <!--        </input-with-icon>-->
+      <!--      </template>-->
     </header-layout>
     <div
       class="home_component flex flex-col m-0 p-0 min-h-screen w-full h-full items-center"
@@ -42,9 +42,6 @@
             class="xl:text-7xl lg:text-7xl md:text-6xl sm:text-5xl text-2xl text-neutral-700 z-10 leading-loose font-sans font-bold italic mx-auto text-center my-4"
           >
             Պատվերով թիթեղյա մասեր
-            <!--            ը ընդամենը-->
-
-            <!--            <span class="text-red-700">2 օրում</span>-->
           </h1>
 
           <div
@@ -146,35 +143,6 @@
           ՍԿՍԵԼ
         </nuxt-link>
 
-        <!--        <div class="flex items-center justify-center my-4 shadow-gray-400">-->
-        <!--          <div class="flex -space-x-4 rtl:space-x-reverse">-->
-        <!--            <img-->
-        <!--              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"-->
-        <!--              src="/profile-picture-5.jpg"-->
-        <!--              alt=""-->
-        <!--            />-->
-        <!--            <img-->
-        <!--              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"-->
-        <!--              src="/picture2.jpg"-->
-        <!--              alt=""-->
-        <!--            />-->
-        <!--            <img-->
-        <!--              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"-->
-        <!--              src="/profile-picture-3.jpg"-->
-        <!--              alt=""-->
-        <!--            />-->
-        <!--            <img-->
-        <!--              class="w-10 h-10 border-2 border-white rounded-full dark:border-gray-800"-->
-        <!--              src="/profile-picture-4.jpg"-->
-        <!--              alt=""-->
-        <!--            />-->
-        <!--          </div>-->
-        <!--          <div>-->
-        <!--            <p class="text-neutral-700 text-xl font-bold font-sans italic">-->
-        <!--              JOIN 100,000+ Customers-->
-        <!--            </p>-->
-        <!--          </div>-->
-        <!--        </div>-->
         <p class="text-base font-sans italic my-4">
           CAD չկա՞ Սկսեք ձևանմուշից <span class="font-bold">կաղապար</span> կամ
           ուղարկեք մեզ <span class="font-bold">ուրվագիծ</span>.

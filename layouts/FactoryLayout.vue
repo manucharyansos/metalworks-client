@@ -83,6 +83,7 @@
           <li>
             <nuxt-link
               to="/admin"
+              exact-active-class="active-link"
               class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
               @click="closeSidebar"
             >

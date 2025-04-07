@@ -8,12 +8,19 @@
       Պատվերի մանրամասները
     </h2>
 
-    <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+    <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-12 items-center">
       <div class="flex flex-col">
         <slot name="pmpGroup"></slot>
       </div>
       <div class="flex flex-col">
         <slot name="pmpName"></slot>
+      </div>
+    </div>
+    <div
+      class="w-full grid grid-cols-1 sm:grid-cols-2 gap-12 items-center my-3"
+    >
+      <div class="flex flex-col w-full">
+        <slot name="finishDate"></slot>
       </div>
     </div>
     <div class="flex flex-col w-full">
@@ -27,12 +34,12 @@
       >
         {{ buttonText }}
       </button>
-      <button
-        class="mt-8 py-3 px-10 bg-green-500 rounded-full text-white font-semibold hover:bg-green-600 transition-transform transform hover:scale-105"
-        @click="$emit('doneButton')"
-      >
-        {{ doneButton }}
-      </button>
+      <!--      <button-->
+      <!--        class="mt-8 py-3 px-10 bg-green-500 rounded-full text-white font-semibold hover:bg-green-600 transition-transform transform hover:scale-105"-->
+      <!--        @click="$emit('doneButton')"-->
+      <!--      >-->
+      <!--        {{ doneButton }}-->
+      <!--      </button>-->
     </div>
   </div>
 </template>

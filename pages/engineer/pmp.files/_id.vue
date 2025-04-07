@@ -176,13 +176,37 @@
 
                       <!-- Մնացած slot-ները մնում են նույնը -->
                       <template #quantity>
-                        <input-with-label-icon v-model="fileData.quantity" />
+                        <input-with-label-icon
+                          v-model="fileData.quantity"
+                          type="number"
+                          name="quantity"
+                          placeholder=" "
+                          label="Քանակ լրակազմում"
+                          label_-id="quantity"
+                          for_-l-abel="quantity"
+                        />
                       </template>
                       <template #materialType>
-                        <input-with-label-icon v-model="fileData.material" />
+                        <input-with-label-icon
+                          v-model="fileData.material"
+                          type="text"
+                          name="materialType"
+                          placeholder=" "
+                          label="Նյութ"
+                          label_-id="materialType"
+                          for_-l-abel="materialType"
+                        />
                       </template>
                       <template #thickness>
-                        <input-with-label-icon v-model="fileData.thickness" />
+                        <input-with-label-icon
+                          v-model="fileData.thickness"
+                          type="text"
+                          name="thickness"
+                          placeholder=" "
+                          label="Հաստություն"
+                          label_-id="thickness"
+                          for_-l-abel="thickness"
+                        />
                       </template>
                     </AddFileModal>
                   </div>
@@ -230,7 +254,12 @@ import AddFileModal from '~/components/modals/add-file/AddFile.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 
 export default {
-  components: { InputWithLabelIcon, AddFileModal, PopupModal, DxfViewer },
+  components: {
+    InputWithLabelIcon,
+    AddFileModal,
+    PopupModal,
+    DxfViewer,
+  },
   layout: 'EngineerLayout',
   middleware: ['engineer', 'roleRedirect'],
   data() {

@@ -41,6 +41,7 @@
           >
             <nuxt-link
               to="/manager"
+              exact-active-class="manager-active-link"
               class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
             >
               <!-- ... (Dashboard icon) ... -->
@@ -57,6 +58,7 @@
           >
             <nuxt-link
               to="/messages"
+              exact-active-class="manager-active-link"
               class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
             >
               <!-- ... (Messages icon) ... -->
@@ -95,6 +97,7 @@
                 <li @click="closeSidebar()">
                   <nuxt-link
                     to="/manager/orders"
+                    exact-active-class="manager-active-link"
                     class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"
                   >
                     Պատվերը
@@ -103,6 +106,7 @@
                 <li @click="closeSidebar()">
                   <nuxt-link
                     to="/manager/create/order"
+                    exact-active-class="manager-active-link"
                     class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"
                   >
                     Նոր Պատվեր
@@ -111,6 +115,7 @@
                 <li @click="closeSidebar()">
                   <nuxt-link
                     to="/manager/update/order"
+                    exact-active-class="manager-active-link"
                     class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"
                   >
                     Թարմացնել Պատվերը
@@ -157,6 +162,7 @@
                 >
                   <nuxt-link
                     to="/manager/users"
+                    exact-active-class="manager-active-link"
                     class="flex items-center space-x-3 rtl:space-x-reverse"
                     >Օգտատերեր</nuxt-link
                   >
@@ -167,6 +173,7 @@
                 >
                   <nuxt-link
                     to="/manager/create/users"
+                    exact-active-class="manager-active-link"
                     class="flex items-center space-x-3 rtl:space-x-reverse"
                     >Նոր Օգտատերեր</nuxt-link
                   >
@@ -177,6 +184,7 @@
                 >
                   <nuxt-link
                     to="/manager/update/users"
+                    exact-active-class="manager-active-link"
                     class="flex items-center space-x-3 rtl:space-x-reverse"
                     >Օգտատերի թարմացում</nuxt-link
                   >
@@ -222,6 +230,7 @@
                 >
                   <nuxt-link
                     to="/manager/workers"
+                    exact-active-class="manager-active-link"
                     class="flex items-center space-x-3 rtl:space-x-reverse"
                     >Աշխատակիցներ</nuxt-link
                   >
@@ -232,6 +241,7 @@
                 >
                   <nuxt-link
                     to="/manager/create/workers"
+                    exact-active-class="manager-active-link"
                     class="flex items-center space-x-3 rtl:space-x-reverse"
                     >Նոր Աշխատակից</nuxt-link
                   >
@@ -242,6 +252,7 @@
                 >
                   <nuxt-link
                     to="/manager/update/workers"
+                    exact-active-class="manager-active-link"
                     class="flex items-center space-x-3 rtl:space-x-reverse"
                     >Թարմացում</nuxt-link
                   >
@@ -287,6 +298,7 @@
                 >
                   <nuxt-link
                     to="/manager/materials"
+                    exact-active-class="manager-active-link"
                     class="flex items-center space-x-3 rtl:space-x-reverse"
                     >Նյութեր</nuxt-link
                   >
@@ -297,6 +309,7 @@
                 >
                   <nuxt-link
                     to="/manager/create/materials"
+                    exact-active-class="manager-active-link"
                     class="flex items-center space-x-3 rtl:space-x-reverse"
                     >Նոր Նյութեր</nuxt-link
                   >
@@ -307,6 +320,7 @@
                 >
                   <nuxt-link
                     to="/manager/update/materials"
+                    exact-active-class="manager-active-link"
                     class="flex items-center space-x-3 rtl:space-x-reverse"
                     >Նյութերի թարմացում</nuxt-link
                   >

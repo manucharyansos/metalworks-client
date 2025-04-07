@@ -51,11 +51,13 @@
                 {{ order?.created_at }}
               </td>
               <td v-if="order.user_id" class="px-6 py-4 text-center">
-                {{ order.user_id }}
+                {{ order?.creator?.name }}
               </td>
               <td class="px-6 py-4 text-center">
                 {{
-                  order?.finish_date ? $formatDate(order.finish_date) : 'null'
+                  order?.dates?.finish_date
+                    ? $formatDate(order.dates?.finish_date)
+                    : 'null'
                 }}
               </td>
               <td
