@@ -1,6 +1,7 @@
 export const state = () => ({
   pmps: {},
   pmp: {},
+  error: null,
 })
 
 export const mutations = {
@@ -9,6 +10,9 @@ export const mutations = {
   },
   SET_PMP(state, pmp) {
     state.pmp = pmp || {}
+  },
+  SET_ERROR(state, error) {
+    state.error = error
   },
 }
 
@@ -73,18 +77,18 @@ export const actions = {
       console.error('Սխալ տվյալների ստուգման ընթացքում', error)
     }
   },
-  async checkPmpByRemoteNumber({ commit }, data) {
+  async checkPmpByRemoteNumber({ commit }, id) {
     try {
       const response = await this.$axios.post(
-        '/api/engineers/pmps/check-pmp-by-remote-number',
-        data
+        `/api/engineers/pmps/check-pmp-by-remote-number/${id}`
       )
       if (response.data.exists) {
         commit('SET_PMP', response.data)
-        return response.data.exists
       }
+      return true
     } catch (error) {
       console.error('Սխալ տվյալների ստուգման ընթացքում', error)
+      return false
     }
   },
   async checkIfGroupNameExists({ commit }, data) {
@@ -103,12 +107,18 @@ export const actions = {
   },
   async createPmpFilesByFactory({ commit }, order) {
     try {
-      await this.$axios.post('/api/engineers/uploadPmpFile', order, {
-        headers: { 'Content-Type': 'application/json' },
-      })
-      return true
-    } catch (e) {
-      console.error(e)
+      const response = await this.$axios.post(
+        '/api/engineers/uploadPmpFile',
+        order,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+      return response.data || true
+    } catch (error) {
+      commit('SET_ERROR', error.response?.data || error.message)
       return false
     }
   },
@@ -130,5 +140,5 @@ export const actions = {
 export const getters = {
   getPmpes: (state) => state.pmps,
   getPmp: (state) => state.pmp,
-  // errorMessage: (state) => state.errorMessage,
+  errorMessage: (state) => state.error,
 }

@@ -250,65 +250,58 @@
       </div>
 
       <!--      Materials -->
-      <div
-        class="container mx-auto ld:px-0 flex flex-col items-center justify-center my-10"
+      <div class="container mx-auto ld:px-0 flex flex-col items-center justify-center my-10">
+    <h2 class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700">
+      <span class="text-red-600">{{ totalMaterialsCount }}+</span> նյութեր պահեստում
+    </h2>
+
+    <div class="flex flex-row flex-wrap items-center justify-center my-10 w-5/6">
+      <nuxt-link
+        exact-active-class="active-link"
+        to="/"
+        class="px-5 py-1 text-xs font-medium text-center text-indigo-400 hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
+        @click.native="selectCategory(null)"
       >
-        <h2
-          class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700"
+        Բոլորը
+      </nuxt-link>
+      <div
+        v-for="category in categories"
+        :key="category.id"
+        class="flex items-center justify-center"
+      >
+        <button
+          class="px-3 py-1 text-xs text-center text-neutral-700 font-sans font-bold italic hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
+          :class="{ 'bg-indigo-400 text-white': selectedCategory === category.id }"
+          @click="selectCategory(category.id)"
         >
-          <span class="text-red-600">165+</span> նյութեր պահեստում
-        </h2>
-        <div
-          v-if="categories?.length > 0"
-          class="flex flex-row flex-wrap items-center justify-center my-10 w-5/6"
-        >
-          <nuxt-link
-            exact-active-class="active-link"
-            to="/"
-            class="px-5 py-1 text-xs font-medium text-center text-indigo-400 hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
-          >
-            All
-          </nuxt-link>
-          <div
-            v-for="category in categories"
-            :key="category.id"
-            class="flex items-center justify-center"
-          >
-            <button
-              v-if="categories"
-              class="px-3 py-1 text-xs text-center text-neutral-700 font-sans font-bold italic hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
-            >
-              {{ category.name }}
-            </button>
-          </div>
-        </div>
-        <div
-          class="container flex flex-row flex-wrap items-center justify-center md:px-8 px-2 place-items-center gap-4"
-        >
-          <div
-            v-for="(material, index) in materials"
-            :key="index"
-            class="flex items-center justify-center my-3 cursor-pointer"
-          >
-            <div
-              v-if="materials"
-              class="materials flex m-2 p-3 w-80 rounded-2xl border border-neutral-400 dark:bg-neutral-800 dark:border-gray-800"
-            >
-              <div class="for_material_image size-16">
-                <img
-                  class="rounded-xl"
-                  :src="getImage(material.image)"
-                  alt=""
-                />
-              </div>
-              <div class="w-full flex flex-col items-start justify-start mx-2">
-                <p class="font-sans italic font-bold">{{ material.name }}</p>
-                <p class="font-sans italic">{{ material.description }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          {{ category.name }}
+        </button>
       </div>
+    </div>
+
+    <div class="container flex flex-row flex-wrap items-center justify-center md:px-8 px-2 place-items-center gap-4">
+      <div
+  v-for="(material, index) in filteredMaterials"
+  :key="index"
+  class="flex items-center justify-center my-3 cursor-pointer"
+>
+  <div
+    class="materials flex m-2 p-3 w-80 rounded-2xl border border-neutral-400 dark:bg-neutral-800 dark:border-gray-800"
+  >
+    <div class="for_material_image size-16">
+      <img class="rounded-xl" :src="getImage(material.image)" alt="" />
+    </div>
+    <div class="w-full flex flex-col items-start justify-start mx-2 h-24">
+      <p class="font-sans italic font-bold">{{ material.description }}</p>
+      <!-- Optionally, add more details if needed -->
+      <p class="font-sans italic">
+        {{ material.thickness }} մմ հաստություն
+      </p>
+    </div>
+  </div>
+</div>
+</div>
+  </div>
 
       <!--      services-->
       <div class="container flex items-center justify-center flex-col my-12">
@@ -496,6 +489,7 @@ export default {
   components: { HeaderLayout, UploadConfigure },
   data() {
     return {
+      selectedCategory: null,
       isActiveBg: false,
       isPrecisionCutting: false,
       isBending: false,
@@ -513,45 +507,58 @@ export default {
     ...mapGetters('materials', ['getMaterials']),
     ...mapGetters('categories', ['allMaterialGroups']),
     materials() {
-      return this.getMaterials
+      return this.getMaterials || [];
     },
     categories() {
+      // Flatten categories from allMaterialGroups
       return this.allMaterialGroups
+        ?.flatMap(group => group.categories)
+        .filter(category => category) || [];
+    },
+    filteredMaterials() {
+      if (!this.selectedCategory) return this.materials;
+      return this.materials.filter(
+        material => material.material_category_id === this.selectedCategory
+      );
+    },
+    totalMaterialsCount() {
+      return this.materials.length;
     },
   },
   watch: {
     scrollY(val) {
-      this.isActiveBg = val > 600
+      this.isActiveBg = val > 600;
     },
   },
   mounted() {
-    window.addEventListener('scroll', this.handleScroll)
-    if (this.getMaterials && this.getMaterials?.length === 0) {
-      this.fetchMaterials()
+    window.addEventListener('scroll', this.handleScroll);
+    if (this.getMaterials?.length === 0) {
+      this.fetchMaterials();
     }
-    if (this.allMaterialGroups && this.allMaterialGroups?.length === 0) {
-      this.fetchMaterialGroups()
+    if (this.allMaterialGroups?.length === 0) {
+      this.fetchMaterialGroups();
     }
   },
   beforeDestroy() {
-    window.removeEventListener('scroll', this.handleScroll)
+    window.removeEventListener('scroll', this.handleScroll);
   },
   methods: {
     ...mapActions('materials', ['fetchMaterials']),
     ...mapActions('categories', ['fetchMaterialGroups']),
+    selectCategory(categoryId) {
+      this.selectedCategory = categoryId;
+    },
     activateService(service) {
-      this.activeService = service
+      this.activeService = service;
     },
     handleScroll() {
-      this.scrollY = window.scrollY
+      this.scrollY = window.scrollY;
     },
     getImage(image) {
       if (image) {
-        return `https://api.metalworks.am/storage/${image}`
-        // return `http://localhost:8000/storage/${image}`
-      } else {
-        return '/download.png'
+        return `https://api.metalworks.am/storage/${image}`;
       }
+      return '/download.png'; // Fallback image
     },
   },
 }

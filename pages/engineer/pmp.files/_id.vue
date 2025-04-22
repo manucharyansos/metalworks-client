@@ -162,6 +162,7 @@
                     <AddFileModal
                       :is-open-modal="isOpenAddFileModal"
                       :file="currentFile"
+                      :is-dxf-file="isDxfFile"
                       @closeModal="openAddFileModal"
                       @createFile="addFile"
                     >
@@ -187,15 +188,69 @@
                         />
                       </template>
                       <template #materialType>
-                        <input-with-label-icon
-                          v-model="fileData.material"
-                          type="text"
-                          name="materialType"
-                          placeholder=" "
-                          label="Նյութ"
-                          label_-id="materialType"
-                          for_-l-abel="materialType"
-                        />
+                        <div class="relative">
+                          <!-- <label
+              for="pmpGroup"
+              class="block text-sm font-medium text-gray-600 mb-1"
+            >
+              Նյութեր
+            </label> -->
+                          <div class="relative">
+                            <!-- <input
+                id="pmpGroup"
+                v-model="pmpGroup"
+                type="text"
+                class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                placeholder="Նշեք ծածկագիր"
+                @focus="openPmpGroup"
+              /> -->
+                            <input-with-label-icon
+                              v-model="fileData.material"
+                              type="text"
+                              name="materialType"
+                              placeholder=" "
+                              label="Նյութ"
+                              label_-id="materialType"
+                              for_-l-abel="materialType"
+                              @focus="openMaterials"
+                            />
+                            <button
+                              class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                              @click="openMaterials"
+                            >
+                              <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+
+                          <!-- Dropdown menu -->
+                          <div
+                            v-if="isSelectedMaterials"
+                            class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
+                          >
+                            <ul class="py-1">
+                              <li
+                                v-for="material in filteredMaterials"
+                                :key="material.id"
+                                class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700"
+                                @click="selectMaterial(material)"
+                              >
+                                {{ material.description }}
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
                       </template>
                       <template #thickness>
                         <input-with-label-icon
@@ -222,9 +277,9 @@
           v-if="selectedFile"
           class="description_section flex flex-col items-start justify-between border border-gray-300 rounded-md h-28 px-4 my-6"
         >
-          <div>Քանակ։ {{ selectedFile.quantity }}</div>
-          <div>Մատերիալի տեսակ։ {{ selectedFile.material_type }}</div>
-          <div>Հաստություն։ {{ selectedFile.thickness }}</div>
+          <div>Քանակ։ {{ selectedFile?.quantity }}</div>
+          <div>Մատերիալի տեսակ։ {{ selectedFile?.material_type }}</div>
+          <div>Հաստություն։ {{ selectedFile?.thickness }}</div>
         </div>
         <div
           v-if="dxfUrl"
@@ -245,7 +300,6 @@
     <notifications />
   </main>
 </template>
-
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import DxfViewer from '~/components/File/DxfViewer.vue'
@@ -278,6 +332,8 @@ export default {
       loading: false,
       isOpenModal: false,
       isOpenAddFileModal: false,
+      isDxfFile: false,
+      isSelectedMaterials: false,
       fileData: {
         quantity: null,
         material: '',
@@ -291,8 +347,22 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('pmp', ['getPmp']),
+    ...mapGetters('pmp', ['getPmp', 'errorMessage']),
     ...mapGetters('factory', ['getFactory']),
+    ...mapGetters('materials', ['getMaterials']),
+
+    materials() {
+      return this.getMaterials || []
+    },
+
+    filteredMaterials() {
+      if (!this.fileData.material) return this.materials
+      return this.materials.filter((material) =>
+        material.description
+          .toLowerCase()
+          .includes(this.fileData.material.toLowerCase())
+      )
+    },
   },
   watch: {
     '$route.params.id': {
@@ -307,6 +377,18 @@ export default {
   methods: {
     ...mapActions('pmp', ['fetchPmp', 'deleteFile', 'createPmpFilesByFactory']),
     ...mapActions('factory', ['fetchFactory']),
+    ...mapActions('materials', ['fetchMaterials']),
+
+    openMaterials() {
+      this.fetchMaterials()
+      this.isSelectedMaterials = !this.isSelectedMaterials
+    },
+
+    selectMaterial(material) {
+      this.fileData.material = material.description
+      this.fileData.thickness = material.thickness
+      this.isSelectedMaterials = false
+    },
 
     showButton(fileId) {
       this.hoveredFileId = fileId
@@ -328,6 +410,9 @@ export default {
     },
 
     selectFactory(factory) {
+      if (factory.value === 'DXF') {
+        this.isDxfFile = true
+      }
       if (this.isOpenFiles === factory.id) {
         this.isOpenFiles = null
       } else {
@@ -363,56 +448,73 @@ export default {
     },
 
     async addFile() {
-      try {
-        if (
-          !this.fileData.file ||
-          !this.fileData.quantity ||
-          !this.fileData.material ||
-          !this.fileData.thickness
-        ) {
+      const { file, quantity, material, thickness } = this.fileData
+
+      const isDxfFactory = this.isDxfFile
+
+      if (isDxfFactory) {
+        if (!file || !quantity || !material || !thickness) {
           this.$notify({
             text: `Խնդրում ենք լրացնել բոլոր դաշտերը և ընտրել ֆայլ:`,
             duration: 3000,
             speed: 1000,
             position: 'top',
-            type: 'success',
+            type: 'warning',
           })
           return
         }
-        const formData = new FormData()
-        formData.append('file', this.fileData.file)
-        formData.append('pmp_id', this.id)
-        formData.append('remote_number_id', this.selectedRemoteNumberId)
-        formData.append('factory_id', this.selectedFactoryId)
-        formData.append('quantity', this.fileData.quantity)
-        formData.append('material_type', this.fileData.material)
-        formData.append('thickness', this.fileData.thickness)
-
-        const response = await this.createPmpFilesByFactory(formData)
-
-        if (response) {
-          this.$notify({
-            text: `Ֆայլը հաջողությամբ ավելացված է:`,
-            duration: 3000,
-            speed: 1000,
-            position: 'top',
-            type: 'success',
-          })
-          await this.fetchPmp(this.id)
-
-          this.selectedFiles = this.getPmp.files.filter(
-            (file) =>
-              file.remote_number_id === this.selectedRemoteNumberId &&
-              file.factory_id === this.selectedFactoryId
-          )
-
-          this.openAddFileModal()
-        }
-      } catch (error) {
+      } else if (!file) {
         this.$notify({
-          text:
-            'Ֆայլ ավելացնելիս սխալ: ' +
-            (error.response?.data?.message || error.message),
+          text: `Խնդրում ենք ընտրել ֆայլ:`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'warning',
+        })
+        return
+      }
+
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('pmp_id', this.getPmp.id)
+      formData.append('remote_number_id', this.selectedRemoteNumberId)
+      formData.append('factory_id', this.selectedFactoryId)
+
+      if (isDxfFactory) {
+        formData.append('quantity', quantity)
+        formData.append('material_type', material)
+        formData.append('thickness', thickness)
+      }
+
+      const isSuccess = await this.createPmpFilesByFactory(formData)
+
+      if (isSuccess) {
+        this.$notify({
+          text: `Ֆայլը հաջողությամբ ավելացվեց:`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'success',
+        })
+
+        await this.fetchPmp(this.id)
+
+        this.selectedFiles = this.getPmp.files.filter(
+          (f) =>
+            f.remote_number_id === this.selectedRemoteNumberId &&
+            f.factory_id === this.selectedFactoryId
+        )
+
+        this.openAddFileModal()
+        this.fileData = {
+          file: null,
+          quantity: '',
+          material: '',
+          thickness: '',
+        }
+      } else {
+        this.$notify({
+          text: this.errorMessage.error || this.errorMessage.error.message,
           duration: 3000,
           speed: 1000,
           position: 'top',
@@ -442,6 +544,7 @@ export default {
         if (this.selectedFile && this.selectedFile.id === fileId) {
           this.selectedFile = null
           this.dxfUrl = ''
+          this.isOpenModal = false
         }
         this.selectedFiles = this.selectedFiles.filter(
           (file) => file.id !== fileId
@@ -459,11 +562,11 @@ export default {
     },
 
     resetFileFields() {
-      this.file = {
+      this.fileData = {
         quantity: null,
-        material_type: '',
+        material: '',
         thickness: '',
-        uploadedFile: null,
+        file: null,
       }
     },
 
@@ -522,6 +625,7 @@ export default {
   },
 }
 </script>
+
 <style scoped>
 .slide-down-enter-active {
   transition: all 1.5s ease-in-out;

@@ -1,10 +1,13 @@
 <template>
   <div class="container flex flex-col">
     <h1 class="text-3xl font-sans italic leading-6 my-6 text-start mx-4">
-      Ստեղծել նոր պատվեր
+      Ստեղծել նոր պատվեր խմբագրելով
     </h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12">
+    <div
+      v-if="!isFiles"
+      class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12"
+    >
       <div class="w-full h-full ml-auto mr-4 p-6 bg-white rounded-xl shadow-lg">
         <select-with-label
           v-model="selectedClient"
@@ -48,7 +51,13 @@
         </div>
       </div>
       <div class="w-full">
-        <create-order @addButton="pmpFiles" @editButton="createEditing">
+        <create-by-editing
+          open-files-button="Ընտրել ֆայլերը"
+          success-button="Հաստատել"
+          cancel-button="Չեղարկել"
+          @cancelButton="cancelBack"
+          @openFiles="openFiles"
+        >
           <template #pmpGroup>
             <div class="relative shadow-md rounded-lg p-3 pt-5">
               <label
@@ -177,40 +186,69 @@
               label="Անհաժեշտ ավարտի ամսաթիվ"
               type="datetime-local"
               class="shadow-md rounded-lg p-3 pt-5"
+              :class="{
+                'border-red-600': formSubmitted && !finishDate,
+              }"
             ></input-with-labels>
           </template>
 
-          <template #detailsDesc>
-            <textarea-with-label
-              v-model="order.description"
-              placeholder="Նկարագրություն"
-              class="w-full my-2 p-3 border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600"
+          <template #quantity>
+            <input-with-labels
+              id="quantity"
+              v-model="quantity"
+              label="Քանակ"
+              type="number"
+              class="shadow-md rounded-lg p-3 pt-5"
               :class="{
-                'border-red-500': !order.description && formSubmitted,
+                'border-red-600': formSubmitted && !quantity,
               }"
-              required
+            ></input-with-labels>
+          </template>
+
+          <template #description>
+            <textarea-with-label
+              id="description"
+              v-model="order.description"
+              label="Նկարագրություն"
+              type="text"
+              class="shadow-md rounded-lg p-3 pt-5"
+              :class="{
+                'border-red-600': formSubmitted && !order.description,
+              }"
             ></textarea-with-label>
           </template>
-        </create-order>
+        </create-by-editing>
       </div>
     </div>
+    <div v-else>
+      <ShowFiles
+        :pmps="getPmp"
+        :factories="getFactory"
+        @files-selected="handleFilesSelected"
+        @factory-files-selected="handleFactoryFilesSelected"
+        @back="isFiles = false"
+      />
+    </div>
+    <!--      notifications-->
     <notifications />
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
-import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
-import CreateOrder from '~/components/modals/create/CreateOrder.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
+import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
+import CreateByEditing from '~/components/modals/create/CreateByEditing.vue'
+import ShowFiles from '~/components/File/ShowFactoryFiles/ShowFiles.vue'
+import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 
 export default {
   components: {
-    InputWithLabels,
-    CreateOrder,
     TextareaWithLabel,
+    InputWithLabels,
+    CreateByEditing,
     SelectWithLabel,
+    ShowFiles,
   },
   layout: 'EngineerLayout',
   middleware: ['engineer', 'roleRedirect'],
@@ -241,8 +279,10 @@ export default {
       selectedFactoryId: null,
       selectedFileIndex: null,
       finishDate: null,
+      quantity: null,
       remote_number_id: null,
       pmpGroupInput: null,
+      isFiles: false,
     }
   },
   computed: {
@@ -251,9 +291,6 @@ export default {
     ...mapGetters('pmp', ['getPmpes', 'getPmp']),
     users() {
       return this.getUsers
-    },
-    pnpGroup() {
-      return this.getPmpes || []
     },
     filteredPmpGroups() {
       if (!this.pmpGroupSearch) return this.getPmpes?.pmp || []
@@ -296,9 +333,31 @@ export default {
     ...mapActions('pmp', [
       'checkIfGroupExists',
       'fetchPmps',
-      'checkIfGroupNameExists',
+      'checkPmpByRemoteNumber',
       'checkIfGroupExists',
     ]),
+
+    handleFactoryFilesSelected(data) {
+      this.createNewOrder(data)
+        .then(() => {
+          this.$notify({
+            text: `Պատվերի մասը հաջողությամբ ստեղծվեց ${data.selected_files.length} ֆայլով։`,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'success',
+          })
+        })
+        .catch((error) => {
+          this.$notify({
+            text: `Սխալ՝ ${error.response?.data?.error || error.message}`,
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'error',
+          })
+        })
+    },
 
     selectPmpGroup(pmp) {
       this.remote_number_id = pmp.id
@@ -307,11 +366,33 @@ export default {
       this.isSelectPmpGroup = false
     },
 
-    selectPmpRemoteNumber(remoteNumber) {
+    async selectPmpRemoteNumber(remoteNumber) {
       this.selectedPmpRemoteNumber = remoteNumber.remote_number
       this.pmpNameSearch = remoteNumber.remote_number
       this.isSelectPmpName = false
       this.remote_number_id = remoteNumber.id
+      await this.checkPmpByRemoteNumber(remoteNumber.id)
+    },
+
+    openFiles() {
+      this.formSubmitted = true
+      if (
+        !this.selectedClient ||
+        !this.selectedPmp ||
+        !this.selectedPmpRemoteNumber ||
+        !this.finishDate ||
+        !this.quantity
+      ) {
+        this.$notify({
+          text: `Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը։`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
+        return
+      }
+      this.isFiles = true
     },
 
     filterPmpGroups() {
@@ -322,8 +403,10 @@ export default {
       this.isSelectPmpName = true
     },
 
-    createEditing() {
-      this.$router.push('/engineer/orders/create/editing')
+    handleFilesSelected(files) {
+      this.selectedFiles = files.map((file) => file.id)
+      this.isFiles = false
+      this.pmpFiles() // Ավտոմատ կանչել պատվերի ստեղծումը
     },
 
     async pmpFiles() {
@@ -334,10 +417,11 @@ export default {
         !this.selectedPmp ||
         !this.selectedPmpRemoteNumber ||
         !this.order.description ||
-        !this.finishDate
+        !this.finishDate ||
+        this.selectedFiles.length === 0
       ) {
         this.$notify({
-          text: `Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը։`,
+          text: `Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը և ընտրել ֆայլեր։`,
           duration: 3000,
           speed: 1000,
           position: 'top',
@@ -355,19 +439,24 @@ export default {
         finish_date: this.finishDate,
         remote_number_id: this.remote_number_id,
         pmp_id: this.selectedPmp.id,
-        link_existing_files: true, // Add this to link PMP files to the order
+        link_existing_files: true,
+        selected_files: this.selectedFiles,
       }
 
       try {
         await this.createNewOrder(data)
+
         this.$notify({
-          text: `Պատվերը հաջողությամբ ստեղծվեց։`,
+          text: `Պատվերը հաջողությամբ ստեղծվեց ${this.selectedFiles.length} ֆայլով։`,
           duration: 3000,
           speed: 1000,
           position: 'top',
           type: 'success',
         })
+
         this.resetForm()
+        this.selectedFiles = []
+        this.$router.push('/engineer/orders') // Ուղղորդել պատվերների էջ
       } catch (error) {
         this.$notify({
           text: `Սխալ՝ ${error.response?.data?.error || error.message}`,
@@ -379,6 +468,10 @@ export default {
       }
     },
 
+    cancelBack() {
+      this.$router.push('/engineer')
+    },
+
     resetForm() {
       this.selectedClient = null
       this.selectedPmp = null
@@ -387,28 +480,9 @@ export default {
       this.pmpNameSearch = ''
       this.order.description = ''
       this.finishDate = null
+      this.quantity = null
       this.formSubmitted = false
     },
   },
 }
 </script>
-
-<style scoped>
-.container {
-  padding: 1rem;
-}
-.show_file_section {
-  border: 1px solid #ccc;
-  padding: 1rem;
-}
-.show_files_name {
-  border: 1px solid #ccc;
-  padding: 1rem;
-}
-.cursor-pointer {
-  cursor: pointer;
-}
-ol {
-  list-style-type: decimal;
-}
-</style>

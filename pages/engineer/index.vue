@@ -33,8 +33,8 @@
                 @focus="openPmpGroup"
               />
               <button
-                @click="openPmpGroup"
                 class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                @click="openPmpGroup"
               >
                 <svg
                   class="w-5 h-5"

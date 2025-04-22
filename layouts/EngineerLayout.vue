@@ -2,8 +2,8 @@
   <div class="min-h-screen bg-gray-100">
     <!-- Mobile Toggle Button -->
     <button
-      @click="toggleSidebar"
       class="fixed top-4 right-4 z-50 p-2 rounded-lg lg:hidden bg-white shadow-md hover:bg-gray-200 transition-colors"
+      @click="toggleSidebar"
     >
       <svg
         class="w-6 h-6 text-gray-600"
@@ -42,8 +42,8 @@
           <span class="text-xl font-semibold text-white">Engineer Panel</span>
         </div>
         <button
-          @click="toggleSidebar"
           class="p-1 rounded-lg lg:hidden text-gray-400 hover:text-white hover:bg-gray-700"
+          @click="toggleSidebar"
         >
           <svg
             class="w-6 h-6"
@@ -84,7 +84,7 @@
                   clip-rule="evenodd"
                 />
               </svg>
-              <span class="ml-3">PMP Ֆայլեր</span>
+              <span class="ml-3">Ֆայլեր</span>
             </nuxt-link>
           </li>
 
@@ -109,6 +109,29 @@
                 />
               </svg>
               <span class="ml-3">Ստեղծել նոր պատվեր</span>
+            </nuxt-link>
+          </li>
+          <!-- Create Order by editing Link -->
+          <li>
+            <nuxt-link
+              to="/engineer/orders/create/editing"
+              exact-active-class="engineer-active-link"
+              class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 group transition-colors"
+              active-class="bg-gray-700 text-white"
+              @click="closeSidebar"
+            >
+              <svg
+                class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="ml-3">Ստեղծել խմբագրելով</span>
             </nuxt-link>
           </li>
         </ul>
@@ -150,17 +173,6 @@ export default {
       isSidebarOpen: false,
     }
   },
-  methods: {
-    toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen
-    },
-    closeSidebar() {
-      this.isSidebarOpen = false
-    },
-    logout() {
-      this.$auth.logout()
-    },
-  },
   mounted() {
     // Close sidebar when clicking outside on mobile
     document.addEventListener('click', (e) => {
@@ -175,6 +187,17 @@ export default {
         this.closeSidebar()
       }
     })
+  },
+  methods: {
+    toggleSidebar() {
+      this.isSidebarOpen = !this.isSidebarOpen
+    },
+    closeSidebar() {
+      this.isSidebarOpen = false
+    },
+    logout() {
+      this.$auth.logout()
+    },
   },
 }
 </script>

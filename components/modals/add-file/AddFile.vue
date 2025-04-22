@@ -45,7 +45,10 @@
             class="flex-1 p-6 md:p-8 flex flex-col items-center justify-center space-y-6"
           >
             <!-- Input sections in a responsive grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+            <div
+              v-if="isDxfFile"
+              class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full"
+            >
               <div class="bg-gray-50 p-4 rounded-lg">
                 <slot name="quantity"></slot>
               </div>
@@ -146,6 +149,10 @@ export default {
   props: {
     isOpenModal: Boolean,
     text: String,
+    isDxfFile: {
+      type: Boolean,
+      default: false,
+    },
     file: {
       // Ավելացնում ենք նոր prop
       type: Object,

@@ -3,7 +3,7 @@
     <template v-if="getOrderByFactories && !isModal">
       <div class="relative overflow-x-auto shadow-md sm:rounded-lg pt-36">
         <table
-          class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
+          class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400 box-content"
         >
           <thead
             class="text-xs text-gray-700 bg-gray-300 uppercase dark:text-gray-400"
@@ -31,7 +31,11 @@
             <tr
               class="border-b border-gray-200 dark:border-gray-700"
               :class="
-                order.factory_order.some((item) => item.status === 'Ավարտել')
+                order?.factory_orders?.some(
+                  (item) =>
+                    item.status === 'Ավարտել' ||
+                    item.admin_confirmation_date !== null
+                )
                   ? 'bg-green-500 text-white'
                   : ''
               "
@@ -43,32 +47,32 @@
               >
                 {{ order.id }}
               </th>
-              <td v-if="order.dates.created_at" class="px-6 py-4 text-center">
-                {{ order.dates.created_at }}
+              <td v-if="order?.created_at" class="px-6 py-4 text-center">
+                {{ order?.created_at }}
               </td>
               <td v-if="order.user_id" class="px-6 py-4 text-center">
-                {{ order.user.name }}
+                {{ order?.creator?.name }}
               </td>
               <td class="px-6 py-4 text-center">
                 {{
-                  order.dates.finish_date
-                    ? $formatDate(order.dates.finish_date)
+                  order?.dates?.finish_date
+                    ? $formatDate(order.dates?.finish_date)
                     : 'null'
                 }}
               </td>
               <td
                 v-if="order.description"
-                class="px-6 py-4 cursor-pointer text-center hover:text-indigo-900"
+                class="px-6 py-4 cursor-pointer text-center bg-indigo-400 text-white hover:text-indigo-100 hover:bg-[#2557D6]/90"
                 @click="toggleDetails(order)"
               >
                 Դիտել
               </td>
               <td
-                v-if="order.factory_order"
+                v-if="order.factory_orders"
                 class="flex items-center justify-center text-center"
               >
                 <div
-                  v-for="item in order.factory_order"
+                  v-for="item in order.factory_orders"
                   :key="item.id"
                   class="px-6 py-4 text-center w-full"
                   :class="
@@ -150,7 +154,7 @@
             <div>
               <select-with-label
                 v-model="selectedOption"
-                :dates="status"
+                :data-value="status"
                 label="Գործողություն"
               >
               </select-with-label>
@@ -168,7 +172,7 @@
                 v-if="selectedOption && selectedOption.value === 'finishing'"
                 class="my-5"
               >
-                {{ finishDade }}
+                {{ finishDate }}
               </div>
               <div
                 v-if="selectedOption && selectedOption.value === 'changeDate'"
@@ -210,7 +214,7 @@
       <div
         class="absolute top-0 min-h-screen w-full flex items-center justify-center bg-gray-100 rounded p-4 text-gray-700"
       >
-        <!-- Փակելու կոճակը -->
+        <!-- Close button -->
         <button class="fixed top-10 right-20" @click="isOpenDetails = false">
           <svg
             class="w-6 h-6 text-gray-800"
@@ -231,18 +235,78 @@
         </button>
 
         <div
-          class="grid md:grid-cols-2 grid-cols-1 gap-2 bg-white p-6 rounded-lg shadow-md lg:w-3/4 w-full"
+          class="grid lg:grid-cols-2 grid-cols-1 justify-between gap-2 bg-white p-6 rounded-lg shadow-slate-500 lg:w-5/6 w-full"
         >
-          <div class="flex flex-col items-start justify-start mt-10">
+          <div
+            class="flex items-center justify-center show_file_section mx-auto text-center"
+          >
+            <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
+          </div>
+          <div class="flex flex-col items-start justify-center">
             <h3 class="text-lg font-bold mb-4">Առաջադրանքի մանրամասներ</h3>
             <ul class="text-base font-medium leading-7">
               <li>Անուն: {{ details.name }}</li>
-              <li>Քանակ: {{ details.quantity }}</li>
+              <!--              <li>Քանակ: {{ details.quantity }}</li>-->
               <li>Նկարագրություն: {{ details.description }}</li>
             </ul>
-            <!-- Ֆայլերի ցուցակ -->
+            <!-- File list -->
+            <div
+              v-if="details.factory_orders && details.factory_orders.length > 0"
+              class="flex flex-col items-center justify-center w-full"
+            >
+              <h4 class="text-lg font-bold mt-4">Ֆայլեր</h4>
+              <ul class="w-full">
+                <li v-for="order in details.factory_orders" :key="order.id">
+                  <div v-if="order.files && order.files.length > 0">
+                    <div
+                      v-for="file in order.files"
+                      :key="file.id"
+                      class="border border-gray-200 rounded-md my-1 shadow-slate-600 shadow-md rounded-b-lg w-full"
+                    >
+                      <div class="flex items-center gap-4 justify-between p-3">
+                        <button
+                          class="text-blue-500 hover:text-blue-700"
+                          @click="viewFile(file.path)"
+                        >
+                          Դիտել
+                        </button>
+                        <button
+                          class="text-green-500 hover:text-green-700 flex items-center gap-2 justify-between"
+                          :class="{
+                            'text-black': file.status === 'downloaded',
+                          }"
+                          @click="downloadFile(file)"
+                        >
+                          {{ file.original_name }}
+                          <img class="w-8 h-8" src="/images/img.png" alt="" />
+                        </button>
+                      </div>
+                      <div
+                        class="flex items-center justify-between gap-2 my-2 p-3"
+                      >
+                        <p class="flex flex-col items-center gap-2">
+                          <span class="italic font-sans font-bold">Քանակ։</span>
+                          {{ file?.quantity }}
+                        </p>
+                        <p class="flex flex-col items-center gap-2">
+                          <span class="italic font-sans font-bold"
+                            >Նյութի տեսակ։</span
+                          >
+                          {{ file?.material_type }}
+                        </p>
+                        <p class="flex flex-col items-center gap-2">
+                          <span class="italic font-sans font-bold"
+                            >Հաստություն։</span
+                          >
+                          {{ file?.thickness }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
-          <FileViewer :details="details.files" />
         </div>
       </div>
     </template>
@@ -254,11 +318,11 @@
 import { mapActions, mapGetters } from 'vuex'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
-import FileViewer from '~/components/File/FileViewer.vue'
+import DxfViewer from '~/components/File/DxfViewer.vue'
 
 export default {
   components: {
-    FileViewer,
+    DxfViewer,
     InputWithLabelIcon,
     SelectWithLabel,
   },
@@ -274,6 +338,7 @@ export default {
       selectedOption: null,
       additionalOption: null,
       selectedOrderId: null,
+      dxfUrl: '',
       details: {
         name: '',
         quantity: 0,
@@ -299,9 +364,9 @@ export default {
     searchFilter() {
       const searchTerm = this.searchable.trim().toLowerCase()
       if (searchTerm === '') {
-        return this.getOrderByFactories
+        return this.getOrderByFactories.orders
       }
-      return this.getOrderByFactories.filter((order) => {
+      return this.getOrderByFactories.orders.filter((order) => {
         const orderNumber =
           order.order_number && typeof order.order_number.number === 'string'
             ? order.order_number.number.toLowerCase()
@@ -329,7 +394,7 @@ export default {
       })
     },
 
-    finishDade() {
+    finishDate() {
       const date = new Date()
       return this.$formatDate(date)
     },
@@ -343,7 +408,26 @@ export default {
       'doneFinishedOrder',
       'downloadUploadedFile',
     ]),
+    viewFile(filePath) {
+      this.dxfUrl = filePath
+    },
+    async downloadFile(file) {
+      await this.downloadUploadedFile(file)
+      file.status = 'downloaded'
+    },
+    loadFile(file) {
+      if (!(file instanceof Blob)) {
+        return
+      }
 
+      const reader = new FileReader()
+
+      reader.onload = (e) => {
+        const blob = new Blob([e.target.result], { type: 'application/dxf' })
+        this.dxfUrl = URL.createObjectURL(blob)
+      }
+      reader.readAsArrayBuffer(file)
+    },
     updateOrder(order) {
       this.isModal = true
       this.selectedOrder = { ...order }
@@ -421,4 +505,8 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+td {
+  width: 200px;
+}
+</style>
