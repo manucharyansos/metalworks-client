@@ -3,7 +3,8 @@
     <!-- Mobile Toggle Button -->
     <button
       class="fixed top-4 right-4 z-50 p-2 rounded-lg lg:hidden bg-white shadow-md hover:bg-gray-200 transition-colors"
-      @click="toggleSidebar"
+      :aria-expanded="isSidebarOpen"
+      @click.stop="toggleSidebar"
     >
       <svg
         class="w-6 h-6 text-gray-600"
@@ -118,7 +119,7 @@
               exact-active-class="engineer-active-link"
               class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 group transition-colors"
               active-class="bg-gray-700 text-white"
-              @click="closeSidebar"
+              @@click.native.stop="closeSidebar"
             >
               <svg
                 class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors"
@@ -139,7 +140,7 @@
         <!-- Logout Button -->
         <button
           class="flex items-center justify-center w-full p-3 mt-auto text-gray-300 rounded-lg hover:bg-gray-700 absolute bottom-20 left-0 right-0 mb-4 transition-colors"
-          @click="logout"
+          @click.stop="logout"
         >
           <svg
             class="w-6 h-6 text-red-500"
@@ -174,18 +175,24 @@ export default {
     }
   },
   mounted() {
-    // Close sidebar when clicking outside on mobile
-    document.addEventListener('click', (e) => {
+    const handleClickOutside = (e) => {
       const sidebar = document.querySelector('aside')
-      const toggleBtn = document.querySelector('button[aria-expanded]')
+      const toggleBtn = document.querySelector('[aria-expanded]')
 
       if (
         this.isSidebarOpen &&
         !sidebar.contains(e.target) &&
-        !toggleBtn?.contains(e.target)
+        e.target !== toggleBtn
       ) {
         this.closeSidebar()
       }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+
+    // Cleanup
+    this.$once('hook:beforeDestroy', () => {
+      document.removeEventListener('click', handleClickOutside)
     })
   },
   methods: {
@@ -206,6 +213,12 @@ export default {
 /* Smooth transitions */
 aside {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 40;
+}
+
+
+button.lg\:hidden {
+  z-index: 50;
 }
 
 /* Active link styling */

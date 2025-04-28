@@ -20,11 +20,6 @@ export const actions = {
       const response = await this.$axios.post(
         '/api/engineers/engineer',
         order
-        // {
-        //   headers: {
-        //     'Content-Type': 'multipart/form-data',
-        //   },
-        // }
       )
       commit('ADD_ORDERS', response.data)
       await this.$router.push('/engineer')

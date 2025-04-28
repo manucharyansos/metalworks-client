@@ -259,7 +259,7 @@ export default {
   methods: {
     selectFactory(factory) {
       this.selectedFactory = factory
-      this.selectedFiles = [] // Reset selection when changing factory
+      this.selectedFiles = []
     },
     getFactoryFiles(remoteNumberId) {
       if (!this.pmps.exists) return []
@@ -282,11 +282,10 @@ export default {
         const allFiles = this.pmps.pmp.remote_number.flatMap((remote) =>
           this.getFactoryFiles(remote.id).map((file) => file.id)
         )
-        this.selectedFiles = [...new Set(allFiles)] // Remove duplicates
+        this.selectedFiles = [...new Set(allFiles)]
       }
     },
     submitSelectedFiles() {
-      // Ստեղծել ֆայլերի խմբավորում ըստ գործարանի
       const filesByFactory = {}
 
       this.pmps.pmp.files.forEach((file) => {
@@ -298,26 +297,25 @@ export default {
         }
       })
 
-      // Ուղարկել բեքենդ ըստ գործարանի
       Object.keys(filesByFactory).forEach((factoryId) => {
         const data = {
           user_id: this.$parent.selectedClient.id,
           creator_id: this.$auth.user.id,
           name: `${this.$parent.selectedPmp.group}.${this.$parent.selectedPmpRemoteNumber}`,
-          description: this.$parent.order.description,
+          description: this.$parent.description,
+          quantity: this.$parent.quantity,
           status: 'pending',
           finish_date: this.$parent.finishDate,
           remote_number_id: this.$parent.remote_number_id,
           pmp_id: this.$parent.selectedPmp.id,
           link_existing_files: true,
-          factory_id: factoryId, // Ավելացնել factory_id
+          factory_id: factoryId,
           selected_files: filesByFactory[factoryId], // Ուղարկել միայն այս գործարանի ֆայլերը
         }
 
         this.$emit('factory-files-selected', data)
       })
 
-      // Փակել ֆայլերի ընտրության պատուհանը
       this.$emit('back')
     },
 

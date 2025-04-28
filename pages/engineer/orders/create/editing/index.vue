@@ -173,6 +173,7 @@
                     @click="selectPmpRemoteNumber(remoteNumber)"
                   >
                     {{ remoteNumber.remote_number }}
+                    {{ remoteNumber.remote_number_name }}
                   </li>
                 </ul>
               </div>
@@ -195,8 +196,9 @@
           <template #quantity>
             <input-with-labels
               id="quantity"
-              v-model="quantity"
+              v-model.number="quantity"
               label="Քանակ"
+              min="1"
               type="number"
               class="shadow-md rounded-lg p-3 pt-5"
               :class="{
@@ -208,13 +210,11 @@
           <template #description>
             <textarea-with-label
               id="description"
-              v-model="order.description"
+              v-model="description"
               label="Նկարագրություն"
               type="text"
               class="shadow-md rounded-lg p-3 pt-5"
-              :class="{
-                'border-red-600': formSubmitted && !order.description,
-              }"
+              :class="{ 'border-red-600': formSubmitted && !description }"
             ></textarea-with-label>
           </template>
         </create-by-editing>
@@ -266,10 +266,9 @@ export default {
       pmpNameSearch: '',
       selectedPmp: null,
       selectedPmpRemoteNumber: null,
-      order: {
-        name: null,
-        description: null,
-      },
+      quantity: 0,
+      description: '',
+      finishDate: '',
       formSubmitted: false,
       isSelectedLaser: false,
       isSelectedBend: false,
@@ -278,8 +277,6 @@ export default {
       files: [],
       selectedFactoryId: null,
       selectedFileIndex: null,
-      finishDate: null,
-      quantity: null,
       remote_number_id: null,
       pmpGroupInput: null,
       isFiles: false,
@@ -381,7 +378,9 @@ export default {
         !this.selectedPmp ||
         !this.selectedPmpRemoteNumber ||
         !this.finishDate ||
-        !this.quantity
+        this.quantity === null ||
+        this.quantity <= 0 ||
+        !this.description
       ) {
         this.$notify({
           text: `Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը։`,
@@ -406,7 +405,7 @@ export default {
     handleFilesSelected(files) {
       this.selectedFiles = files.map((file) => file.id)
       this.isFiles = false
-      this.pmpFiles() // Ավտոմատ կանչել պատվերի ստեղծումը
+      this.pmpFiles() 
     },
 
     async pmpFiles() {
@@ -416,8 +415,12 @@ export default {
         !this.selectedClient ||
         !this.selectedPmp ||
         !this.selectedPmpRemoteNumber ||
-        !this.order.description ||
         !this.finishDate ||
+        this.quantity === null ||
+        this.quantity <= 0 ||
+        !this.description ||
+        this.description.trim() === '' ||
+        !this.selectedFiles ||
         this.selectedFiles.length === 0
       ) {
         this.$notify({
@@ -434,7 +437,8 @@ export default {
         user_id: this.selectedClient.id,
         creator_id: this.$auth.user.id,
         name: `${this.selectedPmp.group}.${this.selectedPmpRemoteNumber}`,
-        description: this.order.description,
+        description: this.description,
+        quantity: this.quantity,
         status: 'pending',
         finish_date: this.finishDate,
         remote_number_id: this.remote_number_id,
@@ -456,7 +460,7 @@ export default {
 
         this.resetForm()
         this.selectedFiles = []
-        this.$router.push('/engineer/orders') // Ուղղորդել պատվերների էջ
+        this.$router.push('/engineer/orders')
       } catch (error) {
         this.$notify({
           text: `Սխալ՝ ${error.response?.data?.error || error.message}`,
@@ -478,7 +482,7 @@ export default {
       this.selectedPmpRemoteNumber = null
       this.pmpGroupSearch = ''
       this.pmpNameSearch = ''
-      this.order.description = ''
+      this.description = ''
       this.finishDate = null
       this.quantity = null
       this.formSubmitted = false

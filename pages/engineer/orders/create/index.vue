@@ -163,7 +163,7 @@
                     }"
                     @click="selectPmpRemoteNumber(remoteNumber)"
                   >
-                    {{ remoteNumber.remote_number }}
+                    {{ remoteNumber.remote_number }} {{ remoteNumber.remote_number_name }}
                   </li>
                 </ul>
               </div>
@@ -182,11 +182,11 @@
 
           <template #detailsDesc>
             <textarea-with-label
-              v-model="order.description"
+              v-model="description"
               placeholder="Նկարագրություն"
               class="w-full my-2 p-3 border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600"
               :class="{
-                'border-red-500': !order.description && formSubmitted,
+                'border-red-500': !description && formSubmitted,
               }"
               required
             ></textarea-with-label>
@@ -228,10 +228,9 @@ export default {
       pmpNameSearch: '',
       selectedPmp: null,
       selectedPmpRemoteNumber: null,
-      order: {
-        name: null,
-        description: null,
-      },
+      quantity: 0,
+      description: '',
+      finishDate: '',
       formSubmitted: false,
       isSelectedLaser: false,
       isSelectedBend: false,
@@ -240,9 +239,9 @@ export default {
       files: [],
       selectedFactoryId: null,
       selectedFileIndex: null,
-      finishDate: null,
       remote_number_id: null,
       pmpGroupInput: null,
+      isFiles: false,
     }
   },
   computed: {
@@ -333,7 +332,7 @@ export default {
         !this.selectedClient ||
         !this.selectedPmp ||
         !this.selectedPmpRemoteNumber ||
-        !this.order.description ||
+        !this.description ||
         !this.finishDate
       ) {
         this.$notify({
@@ -350,12 +349,13 @@ export default {
         user_id: this.selectedClient.id,
         creator_id: this.$auth.user.id,
         name: `${this.selectedPmp.group}.${this.selectedPmpRemoteNumber}`,
-        description: this.order.description,
+        description: this.description,
+        quantity: 0,
         status: 'pending',
         finish_date: this.finishDate,
         remote_number_id: this.remote_number_id,
         pmp_id: this.selectedPmp.id,
-        link_existing_files: true, // Add this to link PMP files to the order
+        link_existing_files: true,
       }
 
       try {
@@ -385,7 +385,7 @@ export default {
       this.selectedPmpRemoteNumber = null
       this.pmpGroupSearch = ''
       this.pmpNameSearch = ''
-      this.order.description = ''
+      this.description = ''
       this.finishDate = null
       this.formSubmitted = false
     },
