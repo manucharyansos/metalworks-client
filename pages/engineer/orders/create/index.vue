@@ -1,10 +1,15 @@
 <template>
   <div class="container flex flex-col">
     <h1 class="text-3xl font-sans italic leading-6 my-6 text-start mx-4">
-      Ստեղծել նոր պատվեր
+      {{
+        isEditingMode ? 'Ստեղծել նոր պատվեր խմբագրելով' : 'Ստեղծել նոր պատվեր'
+      }}
     </h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12">
+    <div
+      v-if="!isFiles"
+      class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12"
+    >
       <div class="w-full h-full ml-auto mr-4 p-6 bg-white rounded-xl shadow-lg">
         <select-with-label
           v-model="selectedClient"
@@ -48,7 +53,16 @@
         </div>
       </div>
       <div class="w-full">
-        <create-order @addButton="pmpFiles" @editButton="createEditing">
+        <create-order-form
+          :is-editing-mode="isEditingMode"
+          :open-files-button="'Ընտրել ֆայլերը'"
+          :success-button="'Հաստատել'"
+          :cancel-button="'Չեղարկել'"
+          :edit-button="'Խմբագրել'"
+          @openFiles="openFiles(true)"
+          @addButton="pmpFiles"
+          @cancelButton="cancelBack"
+        >
           <template #pmpGroup>
             <div class="relative shadow-md rounded-lg p-3 pt-5">
               <label
@@ -86,8 +100,6 @@
                   </svg>
                 </button>
               </div>
-
-              <!-- Dropdown menu -->
               <div
                 v-if="isSelectPmpGroup"
                 class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
@@ -146,8 +158,6 @@
                   </svg>
                 </button>
               </div>
-
-              <!-- Dropdown menu -->
               <div
                 v-if="isSelectPmpName && selectedPmp"
                 class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
@@ -163,7 +173,8 @@
                     }"
                     @click="selectPmpRemoteNumber(remoteNumber)"
                   >
-                    {{ remoteNumber.remote_number }} {{ remoteNumber.remote_number_name }}
+                    {{ remoteNumber.remote_number }}
+                    {{ remoteNumber.remote_number_name }}
                   </li>
                 </ul>
               </div>
@@ -177,22 +188,33 @@
               label="Անհաժեշտ ավարտի ամսաթիվ"
               type="datetime-local"
               class="shadow-md rounded-lg p-3 pt-5"
+              :class="{ 'border-red-600': formSubmitted && !finishDate }"
             ></input-with-labels>
           </template>
 
-          <template #detailsDesc>
+          <template #description>
             <textarea-with-label
+              id="description"
               v-model="description"
-              placeholder="Նկարագրություն"
-              class="w-full my-2 p-3 border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600"
-              :class="{
-                'border-red-500': !description && formSubmitted,
-              }"
-              required
+              label="Նկարագրություն"
+              type="text"
+              class="shadow-md rounded-lg p-3 pt-5"
+              :class="{ 'border-red-600': formSubmitted && !description }"
             ></textarea-with-label>
           </template>
-        </create-order>
+        </create-order-form>
       </div>
+    </div>
+    <div v-else>
+      <show-files
+        :pmps="getPmp"
+        :factories="getFactory"
+        :auto-open-factory-id="autoOpenFactoryId"
+        :selected-files.sync="selectedFiles"
+        :file-quantities.sync="fileQuantities"
+        @files-selected="handleFilesSelected"
+        @back="isFiles = false"
+      />
     </div>
     <notifications />
   </div>
@@ -200,17 +222,19 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
-import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
-import CreateOrder from '~/components/modals/create/CreateOrder.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
+import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
+import CreateOrderForm from '~/components/modals/create/CreateOrderForm.vue'
+import ShowFiles from '~/components/File/ShowFactoryFiles/ShowFiles.vue'
+import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 
 export default {
   components: {
     InputWithLabels,
-    CreateOrder,
-    TextareaWithLabel,
     SelectWithLabel,
+    CreateOrderForm,
+    ShowFiles,
+    TextareaWithLabel,
   },
   layout: 'EngineerLayout',
   middleware: ['engineer', 'roleRedirect'],
@@ -219,29 +243,21 @@ export default {
       isSelectedClient: false,
       isSelectPmpGroup: false,
       isSelectPmpName: false,
-      factories: {
-        ids: [],
-        files: {},
-      },
       selectedClient: null,
       pmpGroupSearch: '',
       pmpNameSearch: '',
       selectedPmp: null,
       selectedPmpRemoteNumber: null,
-      quantity: 0,
+      quantity: null,
       description: '',
       finishDate: '',
       formSubmitted: false,
-      isSelectedLaser: false,
-      isSelectedBend: false,
-      fileNames: [],
-      dxfUrl: '',
-      files: [],
-      selectedFactoryId: null,
-      selectedFileIndex: null,
-      remote_number_id: null,
-      pmpGroupInput: null,
       isFiles: false,
+      selectedFiles: [],
+      fileQuantities: {},
+      autoOpenFactoryId: null,
+      isLoading: false,
+      files_existing: false
     }
   },
   computed: {
@@ -250,9 +266,6 @@ export default {
     ...mapGetters('pmp', ['getPmpes', 'getPmp']),
     users() {
       return this.getUsers
-    },
-    pnpGroup() {
-      return this.getPmpes || []
     },
     filteredPmpGroups() {
       if (!this.pmpGroupSearch) return this.getPmpes?.pmp || []
@@ -265,14 +278,15 @@ export default {
     },
     filteredPmpNames() {
       if (!this.selectedPmp) return []
-
       const remoteNumbers = this.selectedPmp.remote_number || []
       if (!this.pmpNameSearch) return remoteNumbers
-
       const searchTerm = this.pmpNameSearch.toLowerCase()
       return remoteNumbers.filter((rn) =>
         rn.remote_number.toLowerCase().includes(searchTerm)
       )
+    },
+    isEditingMode() {
+      return this.$route.path.includes('/editing')
     },
   },
   watch: {
@@ -293,9 +307,8 @@ export default {
     ...mapActions('users', ['fetchUsers']),
     ...mapActions('engineer', ['createNewOrder']),
     ...mapActions('pmp', [
-      'checkIfGroupExists',
       'fetchPmps',
-      'checkIfGroupNameExists',
+      'checkPmpByRemoteNumber',
       'checkIfGroupExists',
     ]),
 
@@ -306,11 +319,12 @@ export default {
       this.isSelectPmpGroup = false
     },
 
-    selectPmpRemoteNumber(remoteNumber) {
+    async selectPmpRemoteNumber(remoteNumber) {
       this.selectedPmpRemoteNumber = remoteNumber.remote_number
       this.pmpNameSearch = remoteNumber.remote_number
       this.isSelectPmpName = false
       this.remote_number_id = remoteNumber.id
+      await this.checkPmpByRemoteNumber(remoteNumber.id)
     },
 
     filterPmpGroups() {
@@ -321,19 +335,17 @@ export default {
       this.isSelectPmpName = true
     },
 
-    createEditing() {
-      this.$router.push('/engineer/orders/create/editing')
-    },
-
-    async pmpFiles() {
+    openFiles(arg) {
       this.formSubmitted = true
+      this.files_existing = arg
 
       if (
         !this.selectedClient ||
         !this.selectedPmp ||
         !this.selectedPmpRemoteNumber ||
+        !this.finishDate ||
         !this.description ||
-        !this.finishDate
+        (this.isEditingMode && (!this.quantity || this.quantity <= 0))
       ) {
         this.$notify({
           text: `Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը։`,
@@ -344,30 +356,105 @@ export default {
         })
         return
       }
+      const factoryWithFiles = this.getFactory.find(
+        (factory) => factory.files && factory.files.length > 0
+      )
+      this.autoOpenFactoryId = factoryWithFiles ? factoryWithFiles.id : null
+      this.isFiles = true
+    },
 
+    handleFilesSelected(files) {
+      this.selectedFiles = files.map((file) => file.id)
+      this.fileQuantities = files.reduce((acc, file) => {
+        acc[file.id] = file.quantity
+        return acc
+      }, {})
+      this.isFiles = false
+      this.pmpFiles()
+    },
+
+    async pmpFiles() {
+      if (this.isLoading) return
+      this.isLoading = true
+      this.formSubmitted = true
+
+      // Validate required fields
+      if (
+        !this.selectedClient ||
+        !this.selectedPmp ||
+        !this.selectedPmpRemoteNumber ||
+        !this.finishDate ||
+        !this.description ||
+        (this.isEditingMode &&
+          (!this.quantity ||
+            this.quantity <= 0 ||
+            !this.selectedFiles ||
+            this.selectedFiles.length === 0))
+      ) {
+        this.$notify({
+          text: `Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը${
+            this.isEditingMode ? ' և ընտրել ֆայլեր' : ''
+          }։`,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
+        this.isLoading = false
+        return
+      }
+
+      // Validate that all selected files have valid quantities
+      const invalidFiles = this.selectedFiles.filter(
+        (id) => !this.fileQuantities[id] || this.fileQuantities[id] <= 0
+      )
+      if (invalidFiles.length > 0) {
+        this.$notify({
+          text: 'Խնդրում ենք սահմանել վավեր քանակ (1 կամ ավելի) բոլոր ընտրված ֆայլերի համար։',
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
+        this.isLoading = false
+        return
+      }
+
+      // Prepare data with selected files and their quantities
       const data = {
         user_id: this.selectedClient.id,
         creator_id: this.$auth.user.id,
         name: `${this.selectedPmp.group}.${this.selectedPmpRemoteNumber}`,
         description: this.description,
-        quantity: 0,
+        quantity: this.quantity,
         status: 'pending',
         finish_date: this.finishDate,
         remote_number_id: this.remote_number_id,
         pmp_id: this.selectedPmp.id,
-        link_existing_files: true,
+        link_existing_files: this.files_existing,
+        selected_files: this.selectedFiles.map((id) => ({
+          id,
+          quantity: this.fileQuantities[id],
+        })),
       }
 
       try {
         await this.createNewOrder(data)
         this.$notify({
-          text: `Պատվերը հաջողությամբ ստեղծվեց։`,
+          text: `Պատվերը հաջողությամբ ստեղծվեց${
+            this.selectedFiles.length > 0
+              ? ` ${this.selectedFiles.length} ֆայլով`
+              : ''
+          }։`,
           duration: 3000,
           speed: 1000,
           position: 'top',
           type: 'success',
         })
         this.resetForm()
+        this.selectedFiles = []
+        this.fileQuantities = {}
+        this.$router.push('/engineer/orders')
       } catch (error) {
         this.$notify({
           text: `Սխալ՝ ${error.response?.data?.error || error.message}`,
@@ -376,7 +463,13 @@ export default {
           position: 'top',
           type: 'error',
         })
+      } finally {
+        this.isLoading = false
       }
+    },
+
+    cancelBack() {
+      this.$router.push('/engineer')
     },
 
     resetForm() {
@@ -386,8 +479,11 @@ export default {
       this.pmpGroupSearch = ''
       this.pmpNameSearch = ''
       this.description = ''
-      this.finishDate = null
+      this.finishDate = ''
+      this.quantity = null
       this.formSubmitted = false
+      this.isFiles = false
+      this.autoOpenFactoryId = null
     },
   },
 }
@@ -396,19 +492,5 @@ export default {
 <style scoped>
 .container {
   padding: 1rem;
-}
-.show_file_section {
-  border: 1px solid #ccc;
-  padding: 1rem;
-}
-.show_files_name {
-  border: 1px solid #ccc;
-  padding: 1rem;
-}
-.cursor-pointer {
-  cursor: pointer;
-}
-ol {
-  list-style-type: decimal;
 }
 </style>

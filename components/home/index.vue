@@ -1,34 +1,7 @@
 <template>
   <div>
     <header-layout class="page-header">
-      <!--      <template #searchInput>-->
-      <!--        <input-with-icon-->
-      <!--          type="text"-->
-      <!--          placeholder="Փնտրել"-->
-      <!--          label_class="mb-2 text-sm font-medium text-gray-900 sr-only"-->
-      <!--          label="Փնտրել"-->
-      <!--        >-->
-      <!--          <template #label_svg>-->
-      <!--            <svg-->
-      <!--              class="w-5 h-5 text-gray-900 dark:text-white"-->
-      <!--              aria-hidden="true"-->
-      <!--              xmlns="http://www.w3.org/2000/svg"-->
-      <!--              width="24"-->
-      <!--              height="24"-->
-      <!--              fill="white"-->
-      <!--              viewBox="0 0 24 24"-->
-      <!--              :class="{ isActiveInputStyle: openSearchInput }"-->
-      <!--            >-->
-      <!--              <path-->
-      <!--                stroke="currentColor"-->
-      <!--                stroke-linecap="round"-->
-      <!--                stroke-width="2"-->
-      <!--                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"-->
-      <!--              />-->
-      <!--            </svg>-->
-      <!--          </template>-->
-      <!--        </input-with-icon>-->
-      <!--      </template>-->
+      <!-- Commented search input remains unchanged -->
     </header-layout>
     <div
       class="home_component flex flex-col m-0 p-0 min-h-screen w-full h-full items-center"
@@ -61,13 +34,13 @@
                 class="w-7 h-7 mx-4"
               >
                 <path
-                  d="M63.6,34.6c0.3-0.4,0.4-0.9,0.4-1.4c0-0.5-0.1-1-0.4-1.4l0.1-0.1l-0.3-0.2c-0.2-0.3-0.5-0.6-0.9-0.7l-5.4-4.6l5.3-2.8 c0.5-0.3,0.9-0.7,1.1-1.1c0.3-0.5,0.4-0.9,0.4-1.4c0-0.6-0.1-1.1-0.4-1.5c-0.3-0.5-0.7-0.8-1.1-0.9L47.1,10 c-2.5-5.6-8.1-9.5-14.7-9.5c-6.5,0-12.1,3.9-14.6,9.4l-16.1,9c-0.5,0.2-0.9,0.6-1.1,1.1c-0.3,0.5-0.4,1-0.4,1.5 c0,0.6,0.1,1.1,0.4,1.5c0.3,0.5,0.7,0.8,1.1,0.9L7,26.7l-6,5c0,0,0,0,0,0l0,0l0,0c-0.2,0.2-0.3,0.4-0.5,0.6c-0.3,0.5-0.4,1-0.4,1.5 c0,0.6,0.1,1.1,0.4,1.5c0.3,0.4,0.7,0.8,1.1,1L7,39l-5.8,4.8l0,0c-0.3,0.3-0.5,0.5-0.7,0.8c-0.3,0.5-0.4,0.9-0.4,1.4 c0,0.6,0.1,1.1,0.4,1.6c0.3,0.4,0.7,0.8,1.1,1l28.1,14.5c0.4,0.2,0.7,0.4,1.1,0.5c0.4,0.1,0.8,0.2,1.2,0.2c0.4,0,0.8-0.1,1.2-0.2 c0.4-0.1,0.8-0.3,1.1-0.5l28.1-15.1c0.5-0.2,0.9-0.5,1.1-0.9c0.3-0.5,0.4-1,0.4-1.5c0-0.6-0.1-1.1-0.4-1.6c0,0-0.1-0.1-0.1-0.1 l0-0.1l-0.4-0.3c-0.1-0.1-0.1-0.1-0.2-0.2l-5.8-4.8l5.2-2.8C62.9,35.4,63.3,35,63.6,34.6z M25,18.8c-1.3,0-2.3-1-2.3-2.3 s1-2.3,2.3-2.3h5.1v-5c0-1.3,1-2.3,2.3-2.3c1.3,0,2.3,1,2.3,2.3v5.1h5.1c1.3,0,2.3,1,2.3,2.3c-0.1,1.2-1.1,2.2-2.3,2.2h-5.1v5.2 c0,1.3-1,2.3-2.3,2.3c-1.3,0-2.3-1-2.3-2.3v-5.2H25z M2.1,21.8c0-0.2-0.1-0.3-0.1-0.4c0-0.1,0-0.3,0.1-0.4c0-0.2,0.2-0.3,0.5-0.5 l14.2-7.9c-0.3,1.3-0.5,2.6-0.5,4c0,8.9,7.2,16.1,16.1,16.1c8.9,0,16.1-7.2,16.1-16.1c0-1.4-0.2-2.7-0.5-3.9l13.5,7.2 c0.3,0.2,0.5,0.4,0.5,0.6c0,0.2,0.1,0.3,0.1,0.4c0,0.1,0,0.3-0.1,0.4c0,0.2-0.2,0.3-0.5,0.5L33.4,36.9c-0.2,0.1-0.4,0.2-0.6,0.2 c-0.3,0.1-0.5,0.1-0.7,0.1s-0.4,0-0.7-0.1c-0.3-0.1-0.5-0.2-0.6-0.2L2.7,22.2C2.3,22.1,2.2,21.9,2.1,21.8z M61.3,44.6 c0,0.1,0.1,0.1,0.1,0.2c0.2,0.1,0.4,0.2,0.5,0.5c0.1,0.2,0.2,0.4,0.2,0.5c0,0.1,0,0.2-0.1,0.4c0,0.2-0.2,0.4-0.5,0.6L33.4,61.9 C33,62,32.6,62.1,32,62.1c-0.5,0-1-0.1-1.3-0.2L2.7,47.1c-0.3-0.2-0.5-0.3-0.5-0.5c0-0.2-0.1-0.3-0.1-0.5c0-0.1,0-0.2,0.1-0.4 c0-0.1,0.2-0.3,0.3-0.4l0,0L8.9,40l20.9,10.8c0.4,0.2,0.7,0.4,1.1,0.5c0.4,0.1,0.8,0.2,1.2,0.2c0.4,0,0.8,0,1.2-0.2 c0.4-0.1,0.8-0.3,1.1-0.5l20.9-11.2L61.3,44.6z M62,33.6c0,0.2-0.2,0.4-0.5,0.6L33.4,49.3c-0.4,0.2-0.8,0.2-1.3,0.2 c-0.5,0-1-0.1-1.3-0.2L2.7,34.5c-0.3-0.1-0.5-0.2-0.5-0.4c0-0.2-0.1-0.3-0.1-0.4c0-0.1,0-0.3,0.1-0.5c0-0.1,0.1-0.1,0.1-0.2l0.1,0.1 l6.6-5.6l20.8,10.8c0.4,0.2,0.7,0.4,1.1,0.5C31.3,39,31.6,39,32,39c0.4,0,0.8,0,1.2-0.2c0.4-0.1,0.8-0.3,1.1-0.5l20.9-11.2l6.8,5.7 c0,0.1,0,0.2,0,0.3C62,33.3,62,33.4,62,33.6z"
+                  d="M63.6,34.6c0.3-0.4,0.4-0.9,0.4-1.4c0-0.5-0.1-1-0.4-1.4l0.1-0.1l-0.3-0.2c-0.2-0.3-0.5-0.6-0.9-0.7l-5.4-4.6l5.3-2.8 c0.5-0.3,0.9-0.7,1.1-1.1c0.3-0.5,0.4-0.9,0.4-1.4c0-0.6-0.1-1.1-0.4-1.5c-0.3-0.5-0.7-0.8-1.1-0.9L47.1,10 c-2.5-5.6-8.1-9.5-14.7-9.5c-6.5,0-12.1,3.9-14.6,9.4l-16.1,9c-0.5,0.2-0.9,0.6-1.1,1.1c-0.3,0.5-0.4,1-0.4,1.5 c0,0.6,0.1,1.1,0.4,1.5c0.3,0.5,0.7,0.8,1.1,0.9L7,26.7l-6,5c0,0,0,0,0,0l0,0l0,0c-0.2,0.2-0.3,0.4-0.5,0.6c-0.3,0.5-0.4,1-0.4,1.5 c0,0.6,0.1,1.1,0.4,1.5c0.3,0.4,0.7,0.8,1.1,1L7,39l-5.8,4.8l0,0c-0.3,0.3-0.5,0.5-0.7,0.8c-0.3,0.5-0.4,0.9-0.4,1.4 c0,0.6,0.1,1.1,0.4,1.6c0.3,0.4,0.7,0.8,1.1,1l28.1,14.5c0.4,0.2,0.7,0.4,1.1,0.5c0.4,0.1,0.8,0.2,1.2,0.2c0.4,0,0.8-0.1,1.2-0.2 c0.4-0.1,0.8-0.3,1.1-0.5l28.1-15.1c0.5-0.2,0.9-0.5,1.1-0.9c0.3-0.5,0.4-1,0.4-1.5c0-0.6-0.1-1.1-0.4-1.6c0,0-0.1-0.1-0.1-0.1 l0-0.1l-0.4-0.3c-0.1-0.1-0.1-0.1-0.2-0.2l-5.8-4.8l5.2-2.8C62.9,35.4,63.3,35,63.6,34.6z M25,18.8c-1.3,0-2.3-1-2.3-2.3 s1-2.3,2.3-2.3h5.1v-5c0-1.3,1-2.3,2.3-2.3c1.3,0,2.3,1,2.3,2.3v5.1h5.1c1.3,0,2.3,1,2.3,2.3c-0.1,1.2-1.1,2.2-2.3,2.2h-5.1v5.2 c0,1.3-1,2.3-2.3,2.3c-1.3,0-2.3-1-2.3-2.3v-5.2H25z M2.1,21.8c0-0.2-0.1-0.3-0.1-0.4c0-0.1,0-0.3,0.1-0.4c0-0.2,0.2-0.3,0.5-0.5 l14.2-7.9c-0.3,1.3-0.5,2.6-0.5,4c0,8.9,7.2,16.1,16.1,16.1c8.9,0,16.1-7.2,16.1-16.1c0-1.4-0.2-2.7-0.5-3.9l13.5,7.2 c0.3,0.2,0.5,0.4,0.5,0.6c0,0.2,0.1,0.3,0.1,0.4c0,0.1,0,0.3-0.1,0.4c0,0.2-0.2,0.3-0.5,0.5L33.4,36.9c-0.2,0.1-0.4,0.2-0.6,0.2 c-0.3,0.1-0.5,0.1-0.7,0.1s-0.4,0-0.7-0.1c-0.3-0.1-0.5-0.2-0.6-0.2L2.7,22.2C2.3,22.1,2.2,21.9,2.1,21.8z M61.3,44.6 c0,0.1,0.1,0.1,0.1,0.2c0.2,0.1,0.4,0.2,0.5,0.5c0.1,0.2,0.2,0.4,0.2,0.5c0,0.1,0,0.2-0.1,0.4c0,0.2-0.2,0.4-0.5,0.6L33.4,61.9 C33,62,32.6,62.1,32,62.1c-0.5,0-1-0.1-1.3-0.2L2.7,47.1c-0.3-0.2-0.5-0.3-0.5-0.5c0-0.2-0.1-0.3-0.1-0.5c0-0.1,0-0.2,0.1-0.4 c0-0.1,0.2-0.3,0.3-0.4l0,0L8.9,40l20.9,10.8c0.4,0.2,0.7,0.4,1.1,0.5C31.3,51.4,31.6,51.5,32,51.5c0.4,0,0.8,0,1.2-0.2 c0.4-0.1,0.8-0.3,1.1-0.5l20.9-11.2L61.3,44.6z M62,33.6c0,0.2-0.2,0.4-0.5,0.6L33.4,49.3c-0.4,0.2-0.8,0.2-1.3,0.2 c-0.5,0-1-0.1-1.3-0.2L2.7,34.5c-0.3-0.1-0.5-0.2-0.5-0.4c0-0.2-0.1-0.3-0.1-0.4c0-0.1,0-0.3,0.1-0.5c0-0.1,0.1-0.1,0.1-0.2l0.1,0.1 l6.6-5.6l20.8,10.8c0.4,0.2,0.7,0.4,1.1,0.5C31.3,39,31.6,39,32,39c0.4,0,0.8,0,1.2-0.2c0.4-0.1,0.8-0.3,1.1-0.5l20.9-11.2l6.8,5.7 c0,0.1,0,0.2,0,0.3C62,33.3,62,33.4,62,33.6z"
                 ></path>
               </svg>
               Նվազագույն քանակություն չկա
             </p>
             <p
-              class="lg:text-xl text-base font-mono italic flex font-bold my-2 mx-4 lg:my-12"
+              class="lg:text-xl Bender text-base font-mono italic flex font-bold my-2 mx-4 lg:my-12"
             >
               <svg
                 id="Layer_1"
@@ -116,7 +89,7 @@
               >
                 <g>
                   <path
-                    d="M356.3,58.8c-1.9-1.9-4.5-3-7.2-3H10.9C5.3,55.8,0.7,60.4,0.7,66v231.2c0,5.6,4.6,10.2,10.2,10.2H349  c5.6,0,10.2-4.6,10.2-10.2V66C359.2,63.3,358.2,60.7,356.3,58.8z M135,94.2c0,2,1.6,3.6,3.6,3.6h213.6v27.8H138.6  c-2,0-3.6,1.6-3.6,3.6s1.6,3.6,3.6,3.6h213.6v27.8H7.9V66c0-1.7,1.4-3,3-3h338.2c1.7,0,3,1.4,3,3v24.6H138.6  C136.6,90.6,135,92.2,135,94.2z M352.1,195.4H7.9v-27.8h344.3V195.4z M352.1,230.3H7.9v-27.7h344.3V230.3z M352.1,265.2H7.9v-27.7  h344.3V265.2z M352.1,272.4v24.8c0,1.7-1.4,3-3,3H10.9c-1.7,0-3-1.4-3-3v-24.8H352.1z"
+                    d="M356.3,58.8c-1.9-1.9-4.5-3-7.2-3H10.9C5.3,55.8,0.7,60.4,0.7,66v231.2c0,5.6,4.6,10.2,10.2,10.2H349  c5.6,0,10.2-4.6,10.2-10.2V66C359.2,63.3,358.2,60.7,356.3,58.8z M135,94.2c0,2,1.6,3.6,3.6,3.6h213.6v27.8H138.6  c-2,0-3.6,1.6-3.6,3.6s1.6,3.6,3.6,3.6h213.6v27.8H7.9V66c0-1.7,1.4-3,3-3h338.2c1.7,0,3,1.4,3,3v24.6H138.6  C136.6,90.6,135,92.2,135,94.2z M352.1,195.4H7.9v-27.8h344.3V195.4z M352.1,230.3H7.9v-27.7h344.3V230.3z M352.1,265.4H7.9v-27.7  h344.3V265.4z M352.1,272.4v24.8c0,1.7-1.4,3-3,3H10.9c-1.7,0-3-1.4-3-3v-24.8H352.1z"
                   ></path>
                   <path
                     d="M101.9,94.3l-19-2.7l-8.5-17.1c-0.8-1.6-2.5-2.7-4.5-2.7c-2.1,0-3.9,1-4.7,2.7l-8.3,17.1l-19,2.7c-1.9,0.3-3.6,1.7-4.1,3.6  c-0.6,1.9-0.1,3.9,1.3,5.2l13.6,13.3l-3.3,18.8c-0.3,1.9,0.5,3.8,2,5c0.9,0.7,2,1,3,1c0.8,0,1.6-0.2,2.4-0.6l16.9-8.9l17,8.9  c0.7,0.4,1.6,0.6,2.4,0.6c1,0,2-0.3,3-1c1.6-1.1,2.4-3.1,2-5.1l-3.3-18.8l13.7-13.3c1.4-1.3,1.9-3.4,1.4-5.3  C105.5,96,103.9,94.6,101.9,94.3z M56,116.7c0.3-1.7-0.3-3.4-1.5-4.5l-11.5-11.4l16-2.3l0,0c1.6-0.3,3.1-1.3,3.9-2.8L70,81.2  l7.1,14.5c0.8,1.5,2.2,2.6,3.8,2.8l16,2.4l-11.5,11.2c-1.3,1.2-1.8,2.9-1.5,4.6l2.7,15.9l-14.3-7.5c-1.5-0.8-3.2-0.8-4.8,0  l-14.3,7.5L56,116.7z"
@@ -127,7 +100,7 @@
           </div>
         </div>
       </div>
-      <!--    section upload-->
+      <!-- Section upload -->
       <div
         class="bg-white hidden md:flex flex-col items-center justify-center rounded-3xl shadow-2xl z-10"
       >
@@ -149,7 +122,7 @@
         </p>
       </div>
 
-      <!--    video-->
+      <!-- Video -->
       <div class="my-20 hidden sm:flex shadow-3xl rounded-3xl z-10">
         <video
           src="/new-home-vid.mp4"
@@ -162,7 +135,7 @@
           Your browser does not support the video tag.
         </video>
       </div>
-      <!--      upload configure-->
+      <!-- Upload configure -->
       <div
         class="flex flex-col items-center justify-center w-full bg-gradient-to-b from-[#f5f5f5] md:my-16"
       >
@@ -249,61 +222,170 @@
         </div>
       </div>
 
-      <!--      Materials -->
-      <div class="container mx-auto ld:px-0 flex flex-col items-center justify-center my-10">
-    <h2 class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700">
-      <span class="text-red-600">{{ totalMaterialsCount }}+</span> նյութեր պահեստում
-    </h2>
-
-    <div class="flex flex-row flex-wrap items-center justify-center my-10 w-5/6">
-      <nuxt-link
-        exact-active-class="active-link"
-        to="/"
-        class="px-5 py-1 text-xs font-medium text-center text-indigo-400 hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
-        @click.native="selectCategory(null)"
-      >
-        Բոլորը
-      </nuxt-link>
+      <!-- Materials -->
       <div
-        v-for="category in categories"
-        :key="category.id"
-        class="flex items-center justify-center"
+        class="container mx-auto ld:px-0 flex flex-col items-center justify-center my-10"
       >
-        <button
-          class="px-3 py-1 text-xs text-center text-neutral-700 font-sans font-bold italic hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
-          :class="{ 'bg-indigo-400 text-white': selectedCategory === category.id }"
-          @click="selectCategory(category.id)"
+        <h2
+          class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700"
         >
-          {{ category.name }}
-        </button>
+          <span class="text-red-600">{{ totalMaterialsCount }}+</span> նյութեր
+          պահեստում
+        </h2>
+
+        <div
+          class="flex flex-row flex-wrap items-center justify-center my-10 w-5/6"
+        >
+          <nuxt-link
+            exact-active-class="active-link"
+            to="/"
+            class="px-5 py-1 text-xs font-medium text-center text-indigo-400 hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
+            @click.native="selectCategory(null)"
+          >
+            Բոլորը
+          </nuxt-link>
+          <div
+            v-for="category in categories"
+            :key="category.id"
+            class="flex items-center justify-center"
+          >
+            <button
+              class="px-3 py-1 text-xs text-center text-neutral-700 font-sans font-bold italic hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
+              :class="{
+                'bg-indigo-400 text-white': selectedCategory === category.id,
+              }"
+              @click="selectCategory(category.id)"
+            >
+              {{ category.name }}
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="container flex flex-row flex-wrap items-center justify-center md:px-8 px-2 place-items-center gap-4"
+        >
+          <div
+            v-for="(material, index) in filteredMaterials"
+            :key="index"
+            class="flex items-center justify-center my-3 cursor-pointer"
+          >
+            <div
+              class="materials flex m-2 p-3 w-80 rounded-2xl border border-neutral-400 dark:bg-neutral-800 dark:border-gray-800"
+            >
+              <div class="for_material_image size-16">
+                <img
+                  class="rounded-xl"
+                  :src="getImage(material.image)"
+                  alt=""
+                />
+              </div>
+              <div
+                class="w-full flex flex-col items-start justify-start mx-2 h-24"
+              >
+                <p class="font-sans italic font-bold">
+                  {{ material.description }}
+                </p>
+                <p class="font-sans italic">
+                  {{ material.thickness }} մմ հաստություն
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination Controls for Materials -->
+        <div v-if="materialPagination" class="flex items-center justify-center my-8">
+          <button
+            :disabled="!materialPagination.prev_page_url"
+            class="px-4 py-2 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="changePage(materialPagination.current_page - 1)"
+          >
+            Նախորդ
+          </button>
+          <button
+            v-for="page in materialPagination.last_page"
+            :key="page"
+            class="px-4 py-2 mx-1 text-sm font-medium rounded-lg"
+            :class="{
+              'bg-indigo-400 text-white': materialPagination.current_page === page,
+              'bg-indigo-100 text-neutral-700 hover:bg-indigo-200':
+                materialPagination.current_page !== page,
+            }"
+            @click="changePage(page)"
+          >
+            {{ page }}
+          </button>
+          <button
+            :disabled="!materialPagination.next_page_url"
+            class="px-4 py-2 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="changePage(materialPagination.current_page + 1)"
+          >
+            Հաջորդ
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="container flex flex-row flex-wrap items-center justify-center md:px-8 px-2 place-items-center gap-4">
+      <!-- Products -->
       <div
-  v-for="(material, index) in filteredMaterials"
-  :key="index"
-  class="flex items-center justify-center my-3 cursor-pointer"
->
-  <div
-    class="materials flex m-2 p-3 w-80 rounded-2xl border border-neutral-400 dark:bg-neutral-800 dark:border-gray-800"
-  >
-    <div class="for_material_image size-16">
-      <img class="rounded-xl" :src="getImage(material.image)" alt="" />
-    </div>
-    <div class="w-full flex flex-col items-start justify-start mx-2 h-24">
-      <p class="font-sans italic font-bold">{{ material.description }}</p>
-      <!-- Optionally, add more details if needed -->
-      <p class="font-sans italic">
-        {{ material.thickness }} մմ հաստություն
-      </p>
-    </div>
-  </div>
-</div>
-</div>
-  </div>
+        class="container mx-auto ld:px-0 flex flex-col items-center justify-center my-10"
+      >
+        <h2
+          class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold font-sans leading-loose italic text-neutral-700"
+        >
+          Մեր արտադրանքը
+        </h2>
+        <div
+          class="container flex flex-row flex-wrap items-center justify-center md:px-8 px-2 place-items-center gap-4"
+        >
+          <div
+            v-for="(product, index) in products"
+            :key="index"
+            class=" p-4"
+          >
+            <ProductCard
+              :price="product.price"
+              :name="product.name"
+              :img-url="getImage(product.image)"
+            />
+          </div>
+        </div>
 
-      <!--      services-->
+        <!-- Pagination Controls for Products -->
+        <div
+          v-if="productPagination"
+          class="flex items-center justify-center my-8"
+        >
+          <button
+            :disabled="!productPagination.prev_page_url"
+            class="px-4 py-2 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="changeProductPage(productPagination.current_page - 1)"
+          >
+            Նախորդ
+          </button>
+          <button
+            v-for="page in productPagination.last_page"
+            :key="page"
+            class="px-4 py-2 mx-1 text-sm font-medium rounded-lg"
+            :class="{
+              'bg-indigo-400 text-white': productPagination.current_page === page,
+              'bg-indigo-100 text-neutral-700 hover:bg-indigo-200':
+                productPagination.current_page !== page,
+            }"
+            @click="changeProductPage(page)"
+          >
+            {{ page }}
+          </button>
+          <button
+            :disabled="!productPagination.next_page_url"
+            class="px-4 py-2 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="changeProductPage(productPagination.current_page + 1)"
+          >
+            Հաջորդ
+          </button>
+        </div>
+      </div>
+
+      <!-- Services -->
       <div class="container flex items-center justify-center flex-col my-12">
         <div class="flex flex-col items-center justify-center">
           <h2
@@ -407,7 +489,7 @@
           <div
             class="md:flex hidden items-center justify-between relative overflow-y-hidden"
           >
-            <!--            images-->
+            <!-- Images -->
             <div
               class="w-full h-full flex items-center justify-center precision_image"
               :class="{
@@ -463,7 +545,6 @@
               <img src="/materials/ano-home-img-1.webp" alt="" />
               <div>
                 <h2>Սարքավորումների տեղադրում</h2>
-                <!--                 <p>Հասանելի է 9 մետաղի և 1 պլաստիկի համար</p>-->
               </div>
             </div>
             <div
@@ -483,86 +564,114 @@
 import { mapActions, mapGetters } from 'vuex'
 import UploadConfigure from '~/components/pages/home/UploadConfigure.vue'
 import HeaderLayout from '~/components/layouts/Header-layout.vue'
+import ProductCard from '~/components/product/ProductCard.vue'
 
 export default {
   name: 'HomeComponent',
-  components: { HeaderLayout, UploadConfigure },
+  components: { HeaderLayout, UploadConfigure, ProductCard },
   data() {
     return {
       selectedCategory: null,
       isActiveBg: false,
-      isPrecisionCutting: false,
-      isBending: false,
-      isPowderCoating: false,
-      isDimpleForming: false,
-      isHdwInserting: false,
-      isAnodizing: false,
-      isTapping: false,
-      scrollY: 0,
       activeService: 'PrecisionCutting',
+      scrollY: 0,
+      perPage: 10, // Default items per page
     }
   },
-
   computed: {
-    ...mapGetters('materials', ['getMaterials']),
+    ...mapGetters('materials', ['getMaterials', 'getPagination']),
     ...mapGetters('categories', ['allMaterialGroups']),
+    ...mapGetters('products', ['getProducts', 'getProductPagination']),
     materials() {
-      return this.getMaterials || [];
+      return this.getMaterials || []
+    },
+    products() {
+      return this.getProducts || []
+    },
+    materialPagination() {
+      return this.getPagination || {}
+    },
+    productPagination() {
+      return this.getProductPagination || {}
     },
     categories() {
-      // Flatten categories from allMaterialGroups
-      return this.allMaterialGroups
-        ?.flatMap(group => group.categories)
-        .filter(category => category) || [];
+      return (
+        this.allMaterialGroups
+          ?.flatMap((group) => group.categories)
+          .filter((category) => category) || []
+      )
     },
     filteredMaterials() {
-      if (!this.selectedCategory) return this.materials;
+      if (!this.selectedCategory) return this.materials
       return this.materials.filter(
-        material => material.material_category_id === this.selectedCategory
-      );
+        (material) => material.material_category_id === this.selectedCategory
+      )
     },
     totalMaterialsCount() {
-      return this.materials.length;
+      return this.materialPagination.total || this.materials.length
     },
   },
   watch: {
     scrollY(val) {
-      this.isActiveBg = val > 600;
+      this.isActiveBg = val > 600
+    },
+    selectedCategory() {
+      this.fetchMaterialsWithParams() // Re-fetch materials when category changes
     },
   },
   mounted() {
-    window.addEventListener('scroll', this.handleScroll);
+    window.addEventListener('scroll', this.handleScroll)
     if (this.getMaterials?.length === 0) {
-      this.fetchMaterials();
+      this.fetchMaterialsWithParams()
     }
     if (this.allMaterialGroups?.length === 0) {
-      this.fetchMaterialGroups();
+      this.fetchMaterialGroups()
+    }
+    if (this.getProducts?.length === 0) {
+      this.fetchProducts({ page: 1, perPage: this.perPage })
     }
   },
   beforeDestroy() {
-    window.removeEventListener('scroll', this.handleScroll);
+    window.removeEventListener('scroll', this.handleScroll)
   },
   methods: {
     ...mapActions('materials', ['fetchMaterials']),
     ...mapActions('categories', ['fetchMaterialGroups']),
+    ...mapActions('products', ['fetchProducts']),
     selectCategory(categoryId) {
-      this.selectedCategory = categoryId;
+      this.selectedCategory = categoryId
     },
     activateService(service) {
-      this.activeService = service;
+      this.activeService = service
     },
     handleScroll() {
-      this.scrollY = window.scrollY;
+      this.scrollY = window.scrollY
     },
     getImage(image) {
       if (image) {
-        return `https://api.metalworks.am/storage/${image}`;
+        return `https://api.metalworks.am/storage/${image}`
       }
-      return '/download.png'; // Fallback image
+      return '/download.png' // Fallback image
+    },
+    async fetchMaterialsWithParams(page = 1) {
+      await this.fetchMaterials({
+        page,
+        perPage: this.perPage,
+      })
+    },
+    async changePage(page) {
+      await this.fetchMaterialsWithParams(page)
+    },
+    async changeProductPage(page) {
+      await this.fetchProducts({
+        page,
+        perPage: this.perPage,
+      })
     },
   },
 }
 </script>
+
 <style>
 .home_component {
   background-color: #f5f5f5;

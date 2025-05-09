@@ -110,7 +110,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import CreateOrder from '~/components/modals/create/CreateOrder.vue'
+import CreateOrder from '~/components/modals/create/CreateOrderForm.vue'
 import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'

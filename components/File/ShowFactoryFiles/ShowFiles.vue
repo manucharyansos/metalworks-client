@@ -10,10 +10,8 @@
           class="p-4 border rounded-lg cursor-pointer transition-colors flex items-center justify-between"
           :class="{
             'hover:border-blue-300': factory.fileCount > 0,
-            'border-green-200 bg-green-50 hover:bg-green-100':
-              factory.fileCount > 0,
-            'border-gray-100 bg-gray-50 hover:bg-gray-100':
-              factory.fileCount === 0,
+            'border-green-200 bg-green-50 hover:bg-green-100': factory.fileCount > 0,
+            'border-gray-100 bg-gray-50 hover:bg-gray-100': factory.fileCount === 0,
             'opacity-60': factory.fileCount === 0,
           }"
           @click="factory.fileCount > 0 && selectFactory(factory)"
@@ -106,9 +104,7 @@
                     d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                   />
                 </svg>
-                <span class="text-sm font-medium">{{
-                  selectedFactory.name
-                }}</span>
+                <span class="text-sm font-medium">{{ selectedFactory.name }}</span>
               </div>
             </div>
             <button
@@ -138,9 +134,7 @@
               :key="file.id"
               class="p-3 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
               :class="{
-                'bg-blue-50 border border-blue-200': selectedFiles.includes(
-                  file.id
-                ),
+                'bg-blue-50 border border-blue-200': selectedFiles.includes(file.id),
               }"
             >
               <div class="flex items-start">
@@ -174,21 +168,53 @@
                       {{ file.path }}
                     </p>
                   </label>
+                  <div
+                    v-if="selectedFiles.includes(file.id)"
+                    class="mt-2 ml-7"
+                  >
+                    <label :for="'quantity_' + file.id" class="text-sm text-gray-600">
+                      Քանակ *
+                    </label>
+                    <input
+                      :id="'quantity_' + file.id"
+                      :value="fileQuantities[file.id]"
+                      type="number"
+                      min="1"
+                      required
+                      class="w-24 p-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      :class="{ 'border-red-500': !isQuantityValid(file.id) }"
+                      placeholder="1"
+                      @input="updateQuantity(file.id, $event.target.value)"
+                    />
+                    <p
+                      v-if="!isQuantityValid(file.id)"
+                      class="text-red-500 text-xs mt-1"
+                    >
+                      Քանակը պետք է լինի 1 կամ ավելի
+                    </p>
+                    <!-- Display original quantity with strikethrough in editing mode -->
+                    <p
+                      v-if="isEditingMode && file.quantity"
+                      class="text-sm text-gray-600 mt-1"
+                    >
+                      <span class="line-through">{{ file.quantity }}</span>
+                      → {{ fileQuantities[file.id] || 1 }}
+                    </p>
+                  </div>
                 </div>
                 <div class="text-right">
-                  <span v-if="file.quantity" class="block text-green-700"
-                    >Քանակ: {{ file.quantity }}</span
-                  >
-                  <span v-if="file.material_type" class="block text-purple-700"
-                    >Նյութ: {{ file.material_type }}</span
-                  >
-                  <span v-if="file.thickness" class="block text-orange-700"
-                    >Հաստություն: {{ file.thickness }}</span
-                  >
+                  <span v-if="file.quantity" class="block text-green-700">
+                    Քանակ: {{ file.quantity }}
+                  </span>
+                  <span v-if="file.material_type" class="block text-purple-700">
+                    Նյութ: {{ file.material_type }}
+                  </span>
+                  <span v-if="file.thickness" class="block text-orange-700">
+                    Հաստություն: {{ file.thickness }}
+                  </span>
                 </div>
               </div>
             </div>
-            <!--            ասդադաս-->
             <div
               v-if="getFactoryFiles(remote.id).length === 0"
               class="p-3 text-center text-gray-500"
@@ -203,13 +229,20 @@
         Տվյալներ չեն գտնվել
       </div>
 
-      <!-- Submit button when files are selected -->
-      <div v-if="selectedFiles.length > 0" class="mt-6 sticky bottom-4">
+      <!-- Buttons when files are selected -->
+      <div v-if="selectedFiles.length > 0" class="mt-6 sticky bottom-4 flex gap-4">
         <button
-          class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition-colors"
+          class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition-colors"
+          :disabled="!areQuantitiesValid"
           @click="submitSelectedFiles"
         >
           Հաստատել ընտրությունը ({{ selectedFiles.length }})
+        </button>
+        <button
+          class="flex-1 py-3 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded-lg shadow-md transition-colors"
+          @click="selectedFactory = null"
+        >
+          Ընտրել այլ գործարանից
         </button>
       </div>
     </div>
@@ -228,11 +261,26 @@ export default {
       type: Array,
       default: () => [],
     },
+    autoOpenFactoryId: {
+      type: [String, Number],
+      default: null,
+    },
+    selectedFiles: {
+      type: Array,
+      default: () => [],
+    },
+    fileQuantities: {
+      type: Object,
+      default: () => ({}),
+    },
+    isEditingMode: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       selectedFactory: null,
-      selectedFiles: [],
     }
   },
   computed: {
@@ -255,11 +303,32 @@ export default {
         allFiles.length > 0 && this.selectedFiles.length === allFiles.length
       )
     },
+    areQuantitiesValid() {
+      return this.selectedFiles.every((fileId) =>
+        this.isQuantityValid(fileId)
+      )
+    },
+  },
+  mounted() {
+    if (this.autoOpenFactoryId) {
+      const factory = this.factoriesWithCount.find(
+        (f) => f.id === this.autoOpenFactoryId
+      )
+      if (factory && factory.fileCount > 0) {
+        this.selectFactory(factory)
+      }
+    } else {
+      const factoryWithFiles = this.factoriesWithCount.find(
+        (factory) => factory.fileCount > 0
+      )
+      if (factoryWithFiles) {
+        this.selectFactory(factoryWithFiles)
+      }
+    }
   },
   methods: {
     selectFactory(factory) {
       this.selectedFactory = factory
-      this.selectedFiles = []
     },
     getFactoryFiles(remoteNumberId) {
       if (!this.pmps.exists) return []
@@ -269,31 +338,88 @@ export default {
       })
     },
     toggleFileSelection(fileId) {
-      if (this.selectedFiles.includes(fileId)) {
-        this.selectedFiles = this.selectedFiles.filter((id) => id !== fileId)
+      let updatedFiles = [...this.selectedFiles]
+      const updatedQuantities = { ...this.fileQuantities }
+
+      if (updatedFiles.includes(fileId)) {
+        updatedFiles = updatedFiles.filter((id) => id !== fileId)
+        delete updatedQuantities[fileId]
       } else {
-        this.selectedFiles.push(fileId)
+        updatedFiles.push(fileId)
+        updatedQuantities[fileId] = 1 // Default quantity to 1
       }
+
+      this.$emit('update:selectedFiles', updatedFiles)
+      this.$emit('update:fileQuantities', updatedQuantities)
+    },
+    updateQuantity(fileId, value) {
+      const updatedQuantities = { ...this.fileQuantities, [fileId]: Number(value) }
+      this.$emit('update:fileQuantities', updatedQuantities)
     },
     toggleSelectAll() {
+      let updatedFiles = [...this.selectedFiles]
+      const updatedQuantities = { ...this.fileQuantities }
+
       if (this.allSelected) {
-        this.selectedFiles = []
-      } else {
-        const allFiles = this.pmps.pmp.remote_number.flatMap((remote) =>
+        const currentFactoryFiles = this.pmps.pmp.remote_number.flatMap((remote) =>
           this.getFactoryFiles(remote.id).map((file) => file.id)
         )
-        this.selectedFiles = [...new Set(allFiles)]
+        updatedFiles = updatedFiles.filter(
+          (id) => !currentFactoryFiles.includes(id)
+        )
+        currentFactoryFiles.forEach((fileId) => {
+          delete updatedQuantities[fileId]
+        })
+      } else {
+        const newFiles = this.pmps.pmp.remote_number
+          .flatMap((remote) => this.getFactoryFiles(remote.id))
+          .map((file) => file.id)
+        updatedFiles = [...new Set([...updatedFiles, ...newFiles])]
+        newFiles.forEach((fileId) => {
+          if (!updatedQuantities[fileId]) {
+            updatedQuantities[fileId] = 1
+          }
+        })
       }
+
+      this.$emit('update:selectedFiles', updatedFiles)
+      this.$emit('update:fileQuantities', updatedQuantities)
+    },
+    isQuantityValid(fileId) {
+      const quantity = this.fileQuantities[fileId]
+      return quantity !== undefined && quantity > 0
     },
     submitSelectedFiles() {
-      const filesByFactory = {}
+      if (!this.areQuantitiesValid) {
+        this.$notify({
+          text: 'Խնդրում ենք մուտքագրել վավեր քանակ բոլոր ընտրված ֆայլերի համար (քանակը պետք է լինի > 0):',
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
+        return
+      }
 
+      const selectedFilesWithQuantities = this.pmps.pmp.files
+        .filter((file) => this.selectedFiles.includes(file.id))
+        .map((file) => ({
+          ...file,
+          quantity: this.fileQuantities[file.id],
+        }))
+
+      this.$emit('files-selected', selectedFilesWithQuantities)
+
+      const filesByFactory = {}
       this.pmps.pmp.files.forEach((file) => {
         if (this.selectedFiles.includes(file.id)) {
           if (!filesByFactory[file.factory_id]) {
             filesByFactory[file.factory_id] = []
           }
-          filesByFactory[file.factory_id].push(file.id)
+          filesByFactory[file.factory_id].push({
+            id: file.id,
+            quantity: this.fileQuantities[file.id],
+          })
         }
       })
 
@@ -303,23 +429,17 @@ export default {
           creator_id: this.$auth.user.id,
           name: `${this.$parent.selectedPmp.group}.${this.$parent.selectedPmpRemoteNumber}`,
           description: this.$parent.description,
-          quantity: this.$parent.quantity,
           status: 'pending',
           finish_date: this.$parent.finishDate,
           remote_number_id: this.$parent.remote_number_id,
           pmp_id: this.$parent.selectedPmp.id,
-          link_existing_files: true,
+          link_existing_files: this.$parent.link_existing_files,
           factory_id: factoryId,
-          selected_files: filesByFactory[factoryId], // Ուղարկել միայն այս գործարանի ֆայլերը
+          selected_files: filesByFactory[factoryId],
         }
-
         this.$emit('factory-files-selected', data)
       })
 
-      this.$emit('back')
-    },
-
-    goBack() {
       this.$emit('back')
     },
   },
@@ -335,5 +455,8 @@ export default {
 .sticky {
   position: sticky;
   z-index: 10;
+}
+.line-through {
+  text-decoration: line-through;
 }
 </style>
