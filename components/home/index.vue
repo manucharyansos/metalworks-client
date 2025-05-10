@@ -14,7 +14,7 @@
           <h1
             class="xl:text-7xl lg:text-7xl md:text-6xl sm:text-5xl text-2xl text-neutral-700 z-10 leading-loose font-sans font-bold italic mx-auto text-center my-4"
           >
-            Պատվերով թիթեղյա մասեր
+            Պատվերով թիթեղյա դետալներ
           </h1>
 
           <div
@@ -327,6 +327,7 @@
 
       <!-- Products -->
       <div
+        v-if="products?.length > 0"
         class="container mx-auto ld:px-0 flex flex-col items-center justify-center my-10"
       >
         <h2
@@ -649,9 +650,9 @@ export default {
     },
     getImage(image) {
       if (image) {
-        return `https://api.metalworks.am/storage/${image}`
+        return image
       }
-      return '/download.png' // Fallback image
+      return '/metalworks-logo.jpg'
     },
     async fetchMaterialsWithParams(page = 1) {
       await this.fetchMaterials({

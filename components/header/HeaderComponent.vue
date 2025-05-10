@@ -40,7 +40,7 @@
         </button>
         <nuxt-link to="/" class="flex items-center justify-between mr-4">
           <img
-            src="/WhatsApp%20Image%202024-08-24%20at%2013.01.26_24d3ab90.jpg"
+            src="/metalworks-logo.jpg"
             class="mr-3 h-8 rounded-2xl"
             alt="Metalworks Logo"
           />
@@ -83,7 +83,7 @@
           <span class="sr-only">Open user menu</span>
           <img
             class="w-8 h-8 rounded-full"
-            src="/WhatsApp%20Image%202024-08-24%20at%2013.01.26_24d3ab90.jpg"
+            src="/metalworks-logo.jpg"
             alt="user photo"
           />
         </button>

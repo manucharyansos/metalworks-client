@@ -1,22 +1,16 @@
 <template>
   <div
-    class="flex flex-col items-center w-full gap-12 border border-neutral-400 shadow-xl rounded-xl py-4 m-6"
+    class="flex flex-col items-center w-full gap-12 border border-neutral-400 shadow-xl rounded-xl py-4 m-6 relative"
   >
-    <!--    <nuxt-link to="/engineer" class="ml-auto mr-6">-->
-    <!--      <svg-->
-    <!--        xmlns="http://www.w3.org/2000/svg"-->
-    <!--        x="0px"-->
-    <!--        y="0px"-->
-    <!--        width="25"-->
-    <!--        height="25"-->
-    <!--        fill="red"-->
-    <!--        viewBox="0 0 30 30"-->
-    <!--      >-->
-    <!--        <path-->
-    <!--          d="M15,3C8.373,3,3,8.373,3,15c0,6.627,5.373,12,12,12s12-5.373,12-12C27,8.373,21.627,3,15,3z M16.414,15 c0,0,3.139,3.139,3.293,3.293c0.391,0.391,0.391,1.024,0,1.414c-0.391,0.391-1.024,0.391-1.414,0C18.139,19.554,15,16.414,15,16.414 s-3.139,3.139-3.293,3.293c-0.391,0.391-1.024,0.391-1.414,0c-0.391-0.391-0.391-1.024,0-1.414C10.446,18.139,13.586,15,13.586,15 s-3.139-3.139-3.293-3.293c-0.391-0.391-0.391-1.024,0-1.414c0.391-0.391,1.024-0.391,1.414,0C11.861,10.446,15,13.586,15,13.586 s3.139-3.139,3.293-3.293c0.391-0.391,1.024-0.391,1.414,0c0.391,0.391,0.391,1.024,0,1.414C19.554,11.861,16.414,15,16.414,15z"-->
-    <!--        ></path>-->
-    <!--      </svg>-->
-    <!--    </nuxt-link>-->
+    <!-- Loading Overlay -->
+    <div
+      v-if="loading"
+      class="absolute inset-0 bg-gray-200 bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="loader">Բեռնում...</div>
+    </div>
+
+    <!-- Existing Template -->
     <div class="flex items-center justify-center gap-12 w-full">
       <h1>PMP_</h1>
       <input-with-label-icon
@@ -27,8 +21,8 @@
         class="w-44 text-center"
         placeholder="###"
         required
+        :disabled="loading"
       />
-
       <input-with-label-icon
         id="group_name"
         v-model="pmp.group_name"
@@ -37,8 +31,8 @@
         class="w-64"
         placeholder="Խմբի անվանում"
         required
+        :disabled="loading"
       />
-
       <input-with-label-icon
         id="remote_number"
         v-model="pmp.remote_number"
@@ -47,12 +41,13 @@
         class="w-44 text-center"
         placeholder="##"
         required
+        :disabled="loading"
       />
-
       <button
         v-if="getPmp.exists !== true"
         type="button"
         class="bg-green-600 rounded-xl text-white font-sans italic px-3 py-1"
+        :disabled="loading"
         @click="addPmp"
       >
         Ավելացնել Նորը
@@ -60,12 +55,14 @@
       <button
         v-else
         class="bg-green-600 rounded-xl text-white font-sans italic px-3 py-1"
+        :disabled="loading"
         @click="remoteNumber"
       >
         Ավելացնել հերթական համար
       </button>
     </div>
 
+    <!-- Rest of the Template (unchanged for brevity) -->
     <div v-if="getPmp">
       {{ getPmp?.pmp?.group_name || 'Տվյալներ չկան' }}
     </div>
@@ -88,6 +85,7 @@
               'bg-gray-600 text-white':
                 pmpFiles.files[pmp.id] && pmpFiles.files[pmp.id].length > 0,
             }"
+            :disabled="loading"
             @click="selectPmp(pmp)"
           >
             {{ pmp.remote_number }}
@@ -112,6 +110,7 @@
                 pmpFiles.files[selectedRemoteNumber][factory.id] &&
                 pmpFiles.files[selectedRemoteNumber][factory.id].length > 0,
             }"
+            :disabled="loading"
             @click="selectFactory(factory)"
           >
             {{ factory?.value }}
@@ -129,6 +128,7 @@
         class="w-44 text-center"
         placeholder="Քանակ"
         required
+        :disabled="loading"
       />
       <input-with-label-icon
         id="material_type"
@@ -138,6 +138,7 @@
         class="w-44 text-center"
         placeholder="Մատերիալի տեսակը"
         required
+        :disabled="loading"
       />
       <input-with-label-icon
         id="thickness"
@@ -147,19 +148,18 @@
         class="w-44 text-center"
         placeholder="Հաստություն"
         required
+        :disabled="loading"
       />
     </div>
+
     <div v-if="selectedRemoteNumber" class="container flex flex-col">
       <div class="grid grid-cols-2 gap-8">
-        <!-- DXF Ֆայլի դիտման հատված -->
         <div class="show_file_section">
           <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
         </div>
-
-        <!-- Ընտրած ֆայլերի ցուցակ -->
         <div class="show_files_name min-h-96 max-h-[32rem] overflow-y-auto">
           <div class="w-full my-4">
-            <input type="file" @change="handleFileChange" />
+            <input type="file" :disabled="loading" @change="handleFileChange" />
           </div>
           <div v-if="selectedRemoteNumber && selectedFactoryId">
             <ol class="list-decimal px-3">
@@ -197,8 +197,6 @@
               </li>
             </ol>
           </div>
-
-          <!-- Եթե ֆայլ չկա -->
           <div v-else>
             <p>Ֆայլ չկա ընտրված գործարանի համար:</p>
           </div>
@@ -209,6 +207,7 @@
       >
         <button
           class="border border-green-700 bg-green-700 text-white rounded-xl px-3 py-1"
+          :disabled="loading"
           @click="saveFiles"
         >
           Պահպանել Ֆայլերը
@@ -218,6 +217,7 @@
     <notifications />
   </div>
 </template>
+
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import DxfViewer from '~/components/File/DxfViewer.vue'
@@ -261,6 +261,7 @@ export default {
       files: [],
       selectedFileIndex: null,
       pmpId: null,
+      loading: false,
     }
   },
   computed: {
@@ -290,9 +291,14 @@ export default {
       }
       this.timeout = setTimeout(async () => {
         if (newVal.length === 3) {
-          const groupName = await this.checkGroupExists(newVal)
-          if (groupName) {
-            this.pmp.group_name = groupName
+          this.loading = true
+          try {
+            const groupName = await this.checkGroupExists(newVal)
+            if (groupName) {
+              this.pmp.group_name = groupName
+            }
+          } finally {
+            this.loading = false
           }
         }
       }, 500)
@@ -305,36 +311,40 @@ export default {
       }
       this.timeout = setTimeout(async () => {
         if (newVal.length >= 3) {
-          const group = await this.checkGroupNameExists(newVal)
-          if (group) {
-            this.pmp.group = group
+          this.loading = true
+          try {
+            const group = await this.checkGroupNameExists(newVal)
+            if (group) {
+              this.pmp.group = group
+            }
+          } finally {
+            this.loading = false
           }
         }
       }, 500)
     },
   },
-
   mounted() {
-    this.fetchUsers()
-    this.fetchPmps()
-    this.fetchFactory()
-    this.formSubmitted = true
-    this.isDoneDetails = false
-    this.selectedRemoteNumber = 1
-    if (!this.pmpFiles.ids.includes(1)) {
-      this.pmpFiles.ids.push(1)
-    }
-    if (!this.pmpFiles.files[1]) {
-      this.pmpFiles.files[1] = []
-    }
-    this.selectedFileIndex = null
-    this.dxfUrl = ''
-    this.fileNames = []
-
-    this.pmpId = this.getPmp?.pmp?.id
-    // this.fetchPmp(this.pmpId).then(() => {
-    //   this.initializeFiles()
-    // })
+    this.loading = true
+    Promise.all([this.fetchUsers(), this.fetchPmps(), this.fetchFactory()])
+      .then(() => {
+        this.formSubmitted = true
+        this.isDoneDetails = false
+        this.selectedRemoteNumber = 1
+        if (!this.pmpFiles.ids.includes(1)) {
+          this.pmpFiles.ids.push(1)
+        }
+        if (!this.pmpFiles.files[1]) {
+          this.pmpFiles.files[1] = []
+        }
+        this.selectedFileIndex = null
+        this.dxfUrl = ''
+        this.fileNames = []
+        this.pmpId = this.getPmp?.pmp?.id
+      })
+      .finally(() => {
+        this.loading = false
+      })
   },
   methods: {
     ...mapActions('users', ['fetchUsers']),
@@ -357,7 +367,6 @@ export default {
       this.pmp.group_name = ''
       this.pmp.remote_number = null
     },
-
     async checkGroupExists(group) {
       const exists = await this.checkIfGroupExists(group)
       if (exists) {
@@ -368,7 +377,6 @@ export default {
         this.pmp.group_name = ''
       }
     },
-
     async checkGroupNameExists(groupName) {
       const exists = await this.checkIfGroupNameExists(groupName)
       if (exists) {
@@ -378,7 +386,6 @@ export default {
         console.log(this.pmp.group, 'gn')
       }
     },
-
     debounce(func, wait = 500) {
       let timeout
       return function (...args) {
@@ -387,65 +394,70 @@ export default {
         timeout = setTimeout(() => func.apply(context, args), wait)
       }
     },
-
     async addPmp() {
       if (!this.pmp.group || !this.pmp.remote_number) {
         console.error('Group or Remote Number is missing.')
         return
       }
-
-      const pmp = {
-        group: this.pmp.group.padStart(3, '0'),
-        group_name: this.pmp.group_name,
-        remote_number: this.pmp.remote_number.padStart(2, '0'),
-        admin_confirmation: true,
+      this.loading = true
+      try {
+        const pmp = {
+          group: this.pmp.group.padStart(3, '0'),
+          group_name: this.pmp.group_name,
+          remote_number: this.pmp.remote_number.padStart(2, '0'),
+          admin_confirmation: true,
+        }
+        await this.createPmp(pmp)
+        await this.resetPmpData()
+      } finally {
+        this.loading = false
       }
-
-      await this.createPmp(pmp)
-      await this.resetPmpData()
     },
-
     async remoteNumber() {
       if (!this.pmp.group || !this.pmp.remote_number) {
         console.error('Group or Remote Number is missing.')
         return
       }
-
-      const data = {
-        id: this.getPmp.pmp.id,
-        group: this.pmp.group.padStart(3, '0'),
-        group_name: this.pmp.group_name,
-        remote_number: this.pmp.remote_number.padStart(2, '0'),
-        admin_confirmation: true,
+      this.loading = true
+      try {
+        const data = {
+          id: this.getPmp.pmp.id,
+          group: this.pmp.group.padStart(3, '0'),
+          group_name: this.pmp.group_name,
+          remote_number: this.pmp.remote_number.padStart(2, '0'),
+          admin_confirmation: true,
+        }
+        await this.rememberNumberPmp(data)
+        await this.resetPmpData()
+      } finally {
+        this.loading = false
       }
-
-      await this.rememberNumberPmp(data)
-      await this.resetPmpData()
     },
-
     async initializeFiles() {
       if (this.files) {
-        for (const factoryOrder of this.files) {
-          const factoryId = factoryOrder.factory_id
-          if (!this.pmpFiles.files[factoryId]) {
-            this.pmpFiles.files[factoryId] = []
-          }
-          for (const file of factoryOrder.files) {
-            try {
+        this.loading = true
+        try {
+          for (const factoryOrder of this.files) {
+            const factoryId = factoryOrder.factory_id
+            if (!this.pmpFiles.files[factoryId]) {
+              this.pmpFiles.files[factoryId] = []
+            }
+            for (const file of factoryOrder.files) {
               const response = await fetch(`/${file.path}`)
               const blob = await response.blob()
               const fileObject = new File([blob], file.original_name, {
                 type: 'application/dxf',
               })
               this.pmpFiles.files[factoryId].push(fileObject)
-            } catch (error) {
-              console.error('Error loading file:', error)
             }
           }
+        } catch (error) {
+          console.error('Error loading file:', error)
+        } finally {
+          this.loading = false
         }
       }
     },
-
     selectPmp(remoteNumber) {
       this.isSelectPmp = true
       this.selectedRemoteNumber = remoteNumber.id
@@ -457,7 +469,6 @@ export default {
       this.dxfUrl = ''
       this.fileNames = []
     },
-
     selectFactory(factory) {
       this.selectedFactoryId = factory.id
       this.selectedFactory = factory.value
@@ -471,7 +482,6 @@ export default {
       this.dxfUrl = ''
       this.fileNames = []
     },
-
     handleFileChange(event) {
       const newFiles = Array.from(event.target.files)
       if (this.selectedRemoteNumber && this.selectedFactoryId) {
@@ -488,7 +498,6 @@ export default {
         console.error('Գործարան կամ հեռակա համար ընտրված չէ')
       }
     },
-
     selectFile(index) {
       if (this.selectedRemoteNumber && this.selectedFactoryId) {
         const selectedFile =
@@ -499,7 +508,6 @@ export default {
         this.loadFile(selectedFile)
       }
     },
-
     deleteFile(index) {
       if (this.selectedRemoteNumber && this.selectedFactoryId) {
         this.pmpFiles.files[this.selectedRemoteNumber][
@@ -521,17 +529,14 @@ export default {
         }
       }
     },
-
     loadFile(file) {
       const reader = new FileReader()
-
       reader.onload = (e) => {
         const blob = new Blob([e.target.result], { type: 'application/dxf' })
         this.dxfUrl = URL.createObjectURL(blob)
       }
       reader.readAsArrayBuffer(file)
     },
-
     saveFiles() {
       const formData = new FormData()
       formData.append('pmp_id', this.pmpId)
@@ -541,6 +546,7 @@ export default {
             this.selectedFactoryId
           ] || []
         if (files.length > 0) {
+          this.loading = true
           const file = files[0]
           formData.append('file', file)
           formData.append('remote_number_id', this.selectedRemoteNumber)
@@ -548,7 +554,6 @@ export default {
           formData.append('quantity', this.pmp.quantity)
           formData.append('material_type', this.pmp.material_type)
           formData.append('thickness', this.pmp.thickness)
-
           this.createPmpFilesByFactory(formData)
             .then(() => {
               alert('Ֆայլը հաջողությամբ պահպանված է։')
@@ -556,6 +561,9 @@ export default {
             .catch((error) => {
               console.error('Ֆայլը պահպանելիս սխալ:', error)
               alert('Ֆայլը պահպանելիս սխալ։')
+            })
+            .finally(() => {
+              this.loading = false
             })
         }
       } else {
@@ -583,5 +591,22 @@ export default {
 }
 ol {
   list-style-type: decimal;
+}
+/* Loading Spinner */
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

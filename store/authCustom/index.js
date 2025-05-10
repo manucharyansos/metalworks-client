@@ -1,16 +1,16 @@
 export const state = () => ({
   resMessage: false,
-  error: false,
-  errorMessage: false,
+  error: false, // Store the general error (e.g., "Registration failed")
+  errorMessage: false, // Store the specific error message (e.g., "The email has already been taken")
   user: [],
 })
 
 export const getters = {
-  getErrorMessages(state) {
-    return state.errorMessage
+  getError(state) {
+    return state.error // Getter for the general error
   },
-  getErrors(state) {
-    return state.error
+  getErrorMessage(state) {
+    return state.errorMessage // Getter for the specific error message
   },
   getUser(state) {
     return state.user
@@ -35,33 +35,28 @@ export const actions = {
       return false
     }
   },
-
   async registerUser({ commit }, userData) {
     try {
       const response = await this.$axios.post('/api/register', userData)
       if (response.status === 201 || response.status === 200) {
-        await this.$router.push('/login')
-        return true
+        return true // Let the component handle redirection
       }
-
       return false
     } catch (error) {
-      commit('setErrorMessageErrors', error.response?.data?.error || 'Error')
-      commit(
-        'setErrorMessageMessages',
-        error.response?.data?.message || 'Error occurred'
-      )
+      // Store both error and message from the response
+      commit('setError', error.response?.data?.error || 'Registration failed')
+      commit('setErrorMessage', error.response?.data?.message || 'An error occurred')
       return false
     }
   },
 }
 
 export const mutations = {
-  setErrorMessageErrors(state, error) {
-    state.error = error
+  setError(state, error) {
+    state.error = error // Set the general error
   },
-  setErrorMessage(state, messages) {
-    state.errorMessage = messages
+  setErrorMessage(state, message) {
+    state.errorMessage = message // Set the specific error message
   },
   setUser(state, user) {
     state.user = user

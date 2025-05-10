@@ -1,303 +1,226 @@
 <template>
   <div
-    class="flex flex-col overflow-y-auto items-center justify-center bg-gray-50 dark:bg-gray-800"
+    class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-950 overflow-y-auto"
   >
-    <div class="w-full p-16 rounded-lg shadow-md dark:bg-gray-900">
-      <div v-if="getOrder && getFactory">
-        <!-- Stepper Component -->
-        <div class="my-5">
-          <stepper-component :data-stepper="stepperData" />
-        </div>
-
-        <!--order detail-->
-
-        <OrderDetail>
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+      <div
+        v-if="getOrder && getFactory && !loading"
+        class="transition-all duration-300 animate-fade-in"
+      >
+        <OrderDetail :order-id="getOrder.id">
+          <!-- Name -->
           <template #name>
             <input-with-labels
               id="name"
               v-model="getOrder.name"
               label="Անուն"
               type="text"
-              class="shadow-md rounded-lg p-3 pt-5"
-            ></input-with-labels>
+              class="w-full rounded-lg p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              :class="{ 'border-red-500 ring-1 ring-red-500': errors.name }"
+              label_class="py-2.5"
+              @input="clearError('name')"
+            />
+            <p v-if="errors.name" class="text-red-500 text-sm mt-1.5">
+              {{ errors.name }}
+            </p>
           </template>
 
+          <!-- Order Number -->
           <template #orderNumber>
             <input-with-labels
               id="orderNumber"
               v-model="getOrder.order_number.number"
               label="Պատվերի համարը"
-              class="shadow-md rounded-lg p-3 pt-5"
+              class="w-full rounded-lg p-3 bg-gray-100 dark:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 cursor-not-allowed"
+              label_class="py-2.5"
               disabled
-            ></input-with-labels>
+            />
           </template>
 
-          <!--          <template #quantity>-->
-          <!--            <input-with-labels-->
-          <!--              id="quantity"-->
-          <!--              v-model="getOrder.quantity"-->
-          <!--              label="Քանակ"-->
-          <!--              type="number"-->
-          <!--              class="shadow-md rounded-lg p-3 pt-5"-->
-          <!--            ></input-with-labels>-->
-          <!--          </template>-->
-
+          <!-- Start Date -->
           <template #startDate>
             <input-with-labels
               id="startDate"
               v-model="getOrder.created_at"
               label="Ստեղծված ամսաթիվ"
-              class="shadow-md rounded-lg p-3 pt-5"
+              class="w-full rounded-lg p-3 bg-gray-100 dark:bg-gray-600 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 cursor-not-allowed"
+              label_class="py-2.5"
               disabled
-            ></input-with-labels>
+            />
           </template>
 
+          <!-- Finish Date -->
           <template #finishDate>
             <input-with-labels
               id="finishDate"
               v-model="getOrder.dates.finish_date"
               label="Անհաժեշտ ավարտի ամսաթիվ"
               type="datetime-local"
-              class="shadow-md rounded-lg p-3 pt-5"
-            ></input-with-labels>
+              class="w-full rounded-lg p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              :class="{
+                'border-red-500 ring-1 ring-red-500': errors.finish_date,
+              }"
+              label_class="py-2.5"
+              @input="clearError('finish_date')"
+            />
+            <p v-if="errors.finish_date" class="text-red-500 text-sm mt-1.5">
+              {{ errors.finish_date }}
+            </p>
           </template>
 
+          <!-- Description -->
           <template #description>
             <textarea-with-label
               v-model="getOrder.description"
-              placeholder="Description"
-              class="w-full my-2 p-3 border border-gray-300 rounded-lg focus:ring-primary-600 focus:border-primary-600"
-              required
-            ></textarea-with-label>
+              label="Նկարագրություն"
+              placeholder="Մուտքագրեք նկարագրություն..."
+              class="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              :class="{
+                'border-red-500 ring-1 ring-red-500': errors.description,
+              }"
+              rows="5"
+              @input="clearError('description')"
+            />
+            <p v-if="errors.description" class="text-red-500 text-sm mt-1.5">
+              {{ errors.description }}
+            </p>
           </template>
+
+          <!-- Factory Status -->
+          <template #factoryStatus>
+            <div class="space-y-4">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Գործարանային կարգավիճակ
+              </h3>
+              <div class="space-y-3">
+                <div
+                  v-for="factoriesStatus in getOrder.factory_orders"
+                  :key="factoriesStatus.id"
+                  class="rounded-xl p-4 transition-all duration-200"
+                  :class="getStatusStyles(factoriesStatus.status)"
+                >
+                  <div
+                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div class="space-y-1">
+                      <span
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >Գործարան</span
+                      >
+                      <p
+                        class="text-base font-medium text-gray-900 dark:text-white"
+                      >
+                        {{ getFactoryName(factoriesStatus.factory_id) }} ({{
+                          getFactoryValue(factoriesStatus.factory_id)
+                        }})
+                      </p>
+                    </div>
+                    <div class="space-y-1 sm:text-right">
+                      <span
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >Կարգավիճակ</span
+                      >
+                      <div class="flex items-center gap-2 sm:justify-end">
+                        <span class="text-base font-medium">
+                          {{ factoriesStatus?.status }}
+                          <template v-if="factoriesStatus.canceling">
+                            ({{ factoriesStatus.canceling }})
+                          </template>
+                        </span>
+                        <span
+                          v-if="
+                            factoriesStatus.cancel_date ||
+                            factoriesStatus.operator_finish_date
+                          "
+                          class="text-xs text-gray-500 dark:text-gray-400"
+                        >
+                          {{
+                            $formatDate(
+                              factoriesStatus.cancel_date ||
+                                factoriesStatus.operator_finish_date
+                            )
+                          }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    v-if="factoriesStatus.status === 'Ավարտել'"
+                    class="mt-3 w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200"
+                    @click="confirmStatus(factoriesStatus)"
+                  >
+                    Հաստատել
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- Action Buttons -->
           <template #buttons>
             <button
               type="button"
-              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              class="inline-flex justify-center items-center gap-2 py-2.5 px-6 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="loading"
               @click="doneOrder"
             >
-              Հաստատել
+              <svg
+                v-if="loading"
+                class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              {{ loading ? 'Բեռնվում է...' : 'Հաստատել' }}
             </button>
             <button
               type="button"
-              class="inline-flex justify-center py-2 px-4 border border-red-600 shadow-sm text-sm font-medium rounded-md text-red-600 hover:bg-red-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              @click="deleteOrder(order.id)"
+              class="inline-flex justify-center items-center gap-2 py-2.5 px-6 text-sm font-medium text-red-600 hover:text-white border border-red-600 hover:bg-red-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
+              @click="deleteOrder(getOrder.id)"
             >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
               Ջնջել
             </button>
           </template>
-
-          <!--          Factory order status-->
-          <template #factoryStatus>
-            <div class="my-6">
-              <p class="text-sm font-medium text-gray-900 dark:text-white">
-                Գործարանային կարգավիճակ
-              </p>
-              <div
-                v-for="factoriesStatus in getOrder.factory_orders"
-                :key="factoriesStatus.id"
-                class="mt-2"
-              >
-                <div
-                  class="flex items-center justify-between space-x-2 text-gray-700 dark:text-gray-300"
-                  :class="
-                    factoriesStatus.status === 'Հաստատել'
-                      ? 'bg-green-300 text-white p-2 rounded'
-                      : factoriesStatus.status === 'Մերժել'
-                      ? 'bg-red-500 text-white p-2 rounded'
-                      : factoriesStatus.status === 'Կատարման ժամկետի փոխարինում'
-                      ? 'bg-orange-500 text-white p-2 rounded'
-                      : factoriesStatus.status === 'Ավարտել'
-                      ? 'bg-green-500 text-white p-2 rounded'
-                      : 'bg-gray-100 text-gray-500 p-2 rounded'
-                  "
-                >
-                  <div class="flex flex-col items-center justify-center">
-                    <p>Գործարաններ</p>
-                    <p>{{ factoriesStatus?.factory?.name }}</p>
-                  </div>
-
-                  <div class="flex flex-col items-center justify-center">
-                    <p>Կարգավիճակ</p>
-                    <p>
-                      {{ factoriesStatus?.status }}
-
-                      <template v-if="factoriesStatus.canceling">
-                        {{ factoriesStatus?.canceling }}
-                      </template>
-                      <template v-if="factoriesStatus.cancel_date">
-                        {{ $formatDate(factoriesStatus?.cancel_date) }}
-                      </template>
-                      <template v-if="factoriesStatus.operator_finish_date">
-                        {{ $formatDate(factoriesStatus?.operator_finish_date) }}
-                      </template>
-                    </p>
-                    <template v-if="factoriesStatus.status === 'Ավարտել'">
-                      <button
-                        class="border border-green-800 rounded-xl bg-green-800 hover:bg-green-400 px-6 py-1 mt-2"
-                        @click="confirmStatus(factoriesStatus)"
-                      >
-                        Հաստատել
-                      </button>
-                    </template>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <template #factories>
-            <template v-if="getOrder.factories">
-              <div
-                v-for="actualFactory in getOrder.factories"
-                :key="actualFactory.id"
-                class="mt-2 text-gray-700 dark:text-gray-300"
-              >
-                {{ actualFactory.name }}
-              </div>
-            </template>
-          </template>
-
-          <template #selectFactory>
-            <!-- Factory Selection -->
-            <div class="mt-6">
-              <p>Ընտրել գործարան</p>
-              <div
-                v-for="manyFactory in factories"
-                :key="manyFactory.id"
-                class="flex justify-between items-center mt-2 p-2"
-              >
-                <label
-                  :for="'factory-' + manyFactory.id"
-                  class="text-sm text-gray-600 dark:text-gray-400"
-                  >{{ manyFactory.name }}</label
-                >
-                <input
-                  :id="'factory-' + manyFactory.id"
-                  v-model="selectedFactories"
-                  type="checkbox"
-                  :value="manyFactory.id"
-                  class="rounded-md border-gray-300 focus:ring-indigo-500 h-5 w-5 text-indigo-600"
-                  @change="addFactory(manyFactory)"
-                />
-              </div>
-            </div>
-          </template>
-
-          <template #files>
-            <div>
-              <label
-                for="file"
-                class="block text-sm font-medium text-gray-900 dark:text-white"
-                >File</label
-              >
-              <input
-                type="file"
-                multiple
-                class="block w-full mt-1"
-                @change="handleFileUpload"
-              />
-
-              <!-- Displaying the uploaded files -->
-              <div v-if="getOrder.files && getOrder.files.length">
-                <h3
-                  class="mt-4 text-sm font-medium text-gray-900 dark:text-white"
-                >
-                  Uploaded Files:
-                </h3>
-                <div class="grid gap-6 grid-cols-2 items-start justify-between">
-                  <div>
-                    <ul class="list-disc list-inside mt-2">
-                      <li v-for="(file, index) in getOrder.files" :key="index">
-                        <div>
-                          <!-- File Download Link -->
-                          <button
-                            :disabled="!selectedFactory"
-                            @click="addFileForFactory(file)"
-                          >
-                            {{ file.original_name || 'Download File' }}
-                          </button>
-                        </div>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div
-                    class="flex flex-row flex-wrap items-start justify-between"
-                  >
-                    <div v-for="factory in getFactory" :key="factory.id">
-                      <h2
-                        class="cursor-pointer"
-                        @click="selectFactoryForFiles(factory)"
-                      >
-                        {{ factory.name }}
-                      </h2>
-                      <div v-if="factoryFiles.find((f) => f.id === factory.id)">
-                        <ul>
-                          <li
-                            v-for="file in factoryFiles.find(
-                              (f) => f.id === factory.id
-                            )?.files"
-                            :key="file"
-                            class="flex flex-row items-center justify-between my-1 hover:bg-indigo-300 px-3 py-2"
-                          >
-                            <p class="w-32">
-                              {{
-                                file.name ||
-                                file.original_name ||
-                                'Unnamed File'
-                              }}
-                            </p>
-
-                            <button
-                              @click="removeFileFromFactory(factory.id, file)"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                x="0px"
-                                y="0px"
-                                width="20"
-                                height="20"
-                                fill="red"
-                                viewBox="0 0 30 30"
-                              >
-                                <path
-                                  d="M 14.984375 2.4863281 A 1.0001 1.0001 0 0 0 14 3.5 L 14 4 L 8.5 4 A 1.0001 1.0001 0 0 0 7.4863281 5 L 6 5 A 1.0001 1.0001 0 1 0 6 7 L 24 7 A 1.0001 1.0001 0 1 0 24 5 L 22.513672 5 A 1.0001 1.0001 0 0 0 21.5 4 L 16 4 L 16 3.5 A 1.0001 1.0001 0 0 0 14.984375 2.4863281 z M 6 9 L 7.7929688 24.234375 C 7.9109687 25.241375 8.7633438 26 9.7773438 26 L 20.222656 26 C 21.236656 26 22.088031 25.241375 22.207031 24.234375 L 24 9 L 6 9 z"
-                                ></path>
-                              </svg>
-                            </button>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                    <button
-                      class="px-3 py-1 bg-green-400 rounded-xl"
-                      @click="addFiles"
-                    >
-                      Add files
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
         </OrderDetail>
-
         <notifications />
       </div>
-
-      <template v-else>
-        <div class="flex justify-center items-center">
-          <spinner-component />
-        </div>
-      </template>
+      <div v-else class="flex justify-center items-center h-96">
+        <spinner-component class="h-12 w-12 text-blue-500" />
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import StepperComponent from '@/components/stepper'
 import SpinnerComponent from '~/components/spinner/index.vue'
 import OrderDetail from '~/components/modals/admin/OrderDetail.vue'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
@@ -308,17 +231,19 @@ export default {
     TextareaWithLabel,
     InputWithLabels,
     OrderDetail,
-    StepperComponent,
     SpinnerComponent,
   },
   layout: 'AdminLayout',
   middleware: ['admin', 'roleRedirect'],
   data() {
     return {
+      id: null,
       stepperData: [],
       selectedFactories: [],
       selectedFactory: null,
       factoryFiles: [],
+      loading: false,
+      errors: {},
     }
   },
   computed: {
@@ -331,9 +256,19 @@ export default {
       return this.getFactory ? JSON.parse(JSON.stringify(this.getFactory)) : []
     },
   },
-  mounted() {
-    this.fetchOrder(this.id)
-    this.fetchFactory()
+  async mounted() {
+    this.loading = true
+    try {
+      await Promise.all([this.fetchOrder(this.id), this.fetchFactory()])
+    } catch (error) {
+      this.$notify({
+        type: 'error',
+        title: 'Սխալ',
+        message: 'Չհաջողվեց բեռնել տվյալները',
+      })
+    } finally {
+      this.loading = false
+    }
   },
   created() {
     this.id = this.$route.params.id
@@ -342,249 +277,200 @@ export default {
     ...mapActions('orders', ['fetchOrder', 'updateOrder', 'orderDelete']),
     ...mapActions('factory', ['fetchFactory', 'adminConfirmFactoryStatus']),
     ...mapActions('factoryFiles', ['createFactoryFiles']),
-    handleFileUpload(event) {
-      const files = Array.from(event.target.files)
-      if (this.selectedFactory) {
-        const factory = this.factoryFiles.find(
-          (f) => f.id === this.selectedFactory.id
-        )
-        if (factory) {
-          files.forEach((file) => {
-            if (!factory.files.some((f) => f.name === file.name)) {
-              factory.files.push(file)
-            } else {
-              this.$notify({
-                text: `File "${file.name}" is already added to the factory.`,
-                type: 'error',
-              })
-            }
-          })
-        } else {
-          this.factoryFiles.push({
-            id: this.selectedFactory.id,
-            name: this.selectedFactory.name,
-            files,
-          })
-        }
-      } else {
-        this.$notify({
-          text: 'Please select a factory first',
-          type: 'error',
-        })
-      }
-    },
-    fileUrl(filePath) {
-      return this.$getFileUrl(filePath)
-    },
-    deleteFile(index) {
-      this.getOrder.files.splice(index, 1)
-      this.fetchOrder(this.id)
-      this.$notify({
-        text: 'File deleted successfully',
-        duration: 3000,
-        speed: 1000,
-        position: 'top',
-        type: 'success',
-      })
-    },
-    addFactory(value) {
-      const factoryId = value.id
-      const exists = this.stepperData.some((item) => item.id === factoryId)
 
-      if (exists) {
-        this.stepperData = this.stepperData.filter(
-          (item) => item.id !== factoryId
-        )
-      } else {
-        this.stepperData.push(value)
+    getStatusStyles(status) {
+      const baseStyles = 'border border-transparent'
+      const statusStyles = {
+        confirmed:
+          'bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-100 dark:border-green-800/50',
+        Հաստատել:
+          'bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 border-green-100 dark:border-green-800/50',
+        Մերժել:
+          'bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 border-red-100 dark:border-red-800/50',
+        'Կատարման ժամկետի փոխարինում':
+          'bg-orange-50 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200 border-orange-100 dark:border-orange-800/50',
+        Ավարտել:
+          'bg-green-100 dark:bg-green-900/40 text-green-900 dark:text-green-300 border-green-200 dark:border-green-800/50',
+        default:
+          'bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600/50',
       }
+      return `${baseStyles} ${statusStyles[status] || statusStyles.default}`
     },
 
-    getFormDataEntries(formData) {
-      const entries = {}
-      for (const [key, value] of formData.entries()) {
-        if (entries[key]) {
-          if (Array.isArray(entries[key])) {
-            entries[key].push(value)
-          } else {
-            entries[key] = [entries[key], value]
-          }
-        } else {
-          entries[key] = value
-        }
-      }
-      return entries
-    },
-    addFileForFactory(file) {
-      if (this.selectedFactory) {
-        const factory = this.factoryFiles.find(
-          (f) => f.id === this.selectedFactory.id
-        )
-        if (factory) {
-          if (!factory.files.includes(file)) {
-            factory.files.push(file)
-          } else {
-            this.$notify({
-              text: 'This file is already added to the factory',
-              type: 'error',
-            })
-          }
-        } else {
-          this.factoryFiles.push({
-            id: this.selectedFactory.id,
-            name: this.selectedFactory.name,
-            files: [file],
-          })
-        }
-      } else {
-        this.$notify({
-          text: 'Please select a factory first',
-          type: 'error',
-        })
-      }
+    getFactoryName(factoryId) {
+      const factory = this.factories.find((f) => f.id === factoryId)
+      return factory ? factory.name : 'Անհայտ գործարան'
     },
 
-    addFiles() {
-      const formData = new FormData()
-
-      let factory = this.factoryFiles.find(
-        (f) => f.id === this.selectedFactory.id
-      )
-      if (!factory) {
-        factory = {
-          id: this.selectedFactory.id,
-          name: this.selectedFactory.name,
-          files: [],
-        }
-        this.factoryFiles.push(factory)
-      }
-      factory.files.forEach((file) => {
-        if (file.path && file.original_name) {
-          formData.append('files[]', file.path)
-          formData.append('original_name[]', file.original_name)
-        } else {
-          formData.append('files[]', file)
-        }
-      })
-      if (formData.has('files[]')) {
-        formData.append('factory_id', this.selectedFactory.id)
-        formData.append('order_id', this.getOrder.id)
-
-        this.createFactoryFiles(formData)
-      } else {
-        this.$notify({
-          text: 'Please add at least one file.',
-          type: 'error',
-        })
-      }
+    getFactoryValue(factoryId) {
+      const factory = this.factories.find((f) => f.id === factoryId)
+      return factory ? factory.value : 'N/A'
     },
 
-    removeFileFromFactory(factoryId, file) {
-      const factory = this.factoryFiles.find((f) => f.id === factoryId)
-      if (factory) {
-        const fileIndex = factory.files.indexOf(file)
-        if (fileIndex !== -1) {
-          factory.files.splice(fileIndex, 1)
-        }
-      }
+    clearError(field) {
+      this.$set(this.errors, field, '')
     },
 
-    selectFactoryForFiles(factory) {
-      if (this.selectedFactory && this.selectedFactory.id === factory.id) {
-        this.selectedFactory = null
-      } else {
-        this.selectedFactory = factory
+    validateFields() {
+      this.errors = {}
+      let isValid = true
+
+      if (!this.getOrder.name?.trim()) {
+        this.errors.name = 'Անուն դաշտը պարտադիր է'
+        isValid = false
       }
+
+      if (!this.getOrder.dates?.finish_date) {
+        this.errors.finish_date = 'Անհաժեշտ ավարտի ամսաթիվը պարտադիր է'
+        isValid = false
+      }
+
+      if (!this.getOrder.description?.trim()) {
+        this.errors.description = 'Նկարագրությունը պարտադիր է'
+        isValid = false
+      }
+
+      return isValid
     },
+
     async doneOrder() {
-      try {
-        if (!this.getOrder.name) {
-          throw new Error('Անուն դաշտը պարտադիր է')
-        }
-        if (
-          !this.getOrder.quantity ||
-          isNaN(this.getOrder.quantity) ||
-          this.getOrder.quantity <= 0
-        )
-          if (!this.getOrder.dates || !this.getOrder.dates.finish_date) {
-            // {
-            //   throw new Error('Քանակը պարտադիր է և պետք է լինի դրական թիվ')
-            // }
-            throw new Error('Անհրաժեշտ ավարտի ամսաթիվը պարտադիր է')
-          }
-        if (!this.getOrder.description) {
-          throw new Error('Նկարագրությունը պարտադիր է')
-        }
-
-        if (this.getOrder.files && !Array.isArray(this.getOrder.files)) {
-          throw new Error('Ֆայլերը պետք է լինեն զանգվածի ձևով')
-        }
-
-        const formData = new FormData()
-        this.getOrder.files?.forEach((file) => {
-          if (file instanceof File) {
-            formData.append('files[]', file)
-          }
+      if (!this.validateFields()) {
+        this.$notify({
+          type: 'error',
+          title: 'Սխալ',
+          message: 'Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը',
         })
-        formData.append('name', this.getOrder.name)
-        // formData.append('quantity', this.getOrder.quantity)
-        formData.append('description', this.getOrder.description)
-        formData.append('status', this.getOrder.status || 'in process')
-        formData.append('finish_date', this.getOrder.dates.finish_date)
+        return
+      }
 
-        if (this.getOrder.store_link && this.getOrder.store_link.url) {
-          formData.append('store_link[url]', this.getOrder.store_link.url)
+      this.loading = true
+      try {
+        const payload = {
+          name: this.getOrder.name,
+          description: this.getOrder.description,
+          status: this.getOrder.status || 'in process',
+          finish_date: this.getOrder.dates.finish_date,
+          factories: this.getOrder.factory_orders.map((fo) => ({
+            id: fo.factory_id,
+            status: fo.status || 'pending',
+          })),
+          store_link: this.getOrder.store_link?.url
+            ? { url: this.getOrder.store_link.url }
+            : null,
         }
 
-        if (this.selectedFactories.length) {
-          this.selectedFactories.forEach((factoryId, index) => {
-            formData.append(`factories[${index}][id]`, factoryId)
-          })
-        } else if (
-          this.getOrder.factories &&
-          Array.isArray(this.getOrder.factories)
-        ) {
-          this.getOrder.factories.forEach((factory, index) => {
-            formData.append(`factories[${index}][id]`, factory.id)
-          })
-        } else {
-          throw new Error('Գոնե մեկ գործարան պետք է ընտրված լինի')
-        }
+        await this.updateOrder({ id: this.id, payload })
 
-        await this.updateOrder({ id: this.id, payload: formData })
         this.$notify({
           type: 'success',
-          title: 'Պատվերը հաջողությամբ թարմացվել է',
+          title: 'Հաջողություն',
+          message: 'Պատվերը հաջողությամբ թարմացվել է',
         })
       } catch (error) {
         this.$notify({
           type: 'error',
-          title: 'Սխալ պատվերի թարմացման ընթացքում',
-          text: error.message,
+          title: 'Սխալ',
+          message:
+            error.response?.data?.message || 'Սխալ պատվերի թարմացման ընթացքում',
         })
+      } finally {
+        this.loading = false
       }
     },
-
     async deleteOrder(id) {
+      const confirmed = confirm(
+        'Դուք վստահ ե՞ք, որ ցանկանում եք ջնջել այս պատվերը'
+      )
+      if (!confirmed) return
+
+      this.loading = true
       try {
         await this.orderDelete(id)
-        this.$notify({ type: 'success', title: 'Order deleted successfully' })
+        this.$notify({
+          type: 'success',
+          title: 'Հաջողություն',
+          message: 'Պատվերը հաջողությամբ ջնջվել է',
+        })
         await this.$router.push('/admin/orders')
       } catch (error) {
         this.$notify({
           type: 'error',
-          title: 'Error deleting order',
-          text: error.message,
+          title: 'Սխալ',
+          message: error.message || 'Սխալ պատվերի ջնջման ընթացքում',
         })
+      } finally {
+        this.loading = false
       }
     },
-    confirmStatus(factoryStatus) {
-      const confirmData = {
-        id: factoryStatus.order_id,
-        factory_id: factoryStatus.factory_id,
+
+    async confirmStatus(factoryStatus) {
+      try {
+        const confirmed = confirm(
+          `Հաստատե՞լ ${this.getFactoryName(
+            factoryStatus.factory_id
+          )} գործարանի կարգավիճակի ավարտը`
+        )
+        if (!confirmed) return
+
+        const confirmData = {
+          id: factoryStatus.order_id,
+          factory_id: factoryStatus.factory_id,
+        }
+
+        await this.adminConfirmFactoryStatus(confirmData)
+
+        this.$notify({
+          type: 'success',
+          title: 'Հաջողություն',
+          message: `Գործարան ${this.getFactoryName(
+            factoryStatus.factory_id
+          )}-ի կարգավիճակը հաստատվել է`,
+        })
+      } catch (error) {
+        this.$notify({
+          type: 'error',
+          title: 'Սխալ',
+          message: error.message || 'Սխալ կարգավիճակի հաստատման ընթացքում',
+        })
       }
-      this.adminConfirmFactoryStatus(confirmData)
     },
   },
 }
 </script>
+
+<style scoped>
+.container {
+  width: 100%;
+  max-width: 1280px;
+}
+
+/* Smooth transitions for dark mode */
+.bg-white {
+  transition: background-color 0.3s ease;
+}
+.dark .bg-white {
+  transition: background-color 0.3s ease;
+}
+
+/* Better focus states */
+:focus-visible {
+  outline: none;
+  ring: 2px;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+</style>

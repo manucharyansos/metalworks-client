@@ -65,8 +65,8 @@ export default {
       default: '',
     },
     name: {
-      type: String,
-      default: '',
+      type: Number,
+      default: null,
     },
     price: {
       type: String,

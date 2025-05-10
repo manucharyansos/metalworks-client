@@ -9,7 +9,7 @@
           class="flex items-center space-x-3 rtl:space-x-reverse"
         >
           <img
-            src="/WhatsApp%20Image%202024-08-24%20at%2013.01.26_24d3ab90.jpg"
+            src="/metalworks-logo.jpg"
             class="h-8 w-8 rounded-full"
             alt="Flow bite Logo"
           />

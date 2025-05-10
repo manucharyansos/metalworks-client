@@ -1,7 +1,14 @@
 export const state = () => ({
   orders: [],
   order: null,
-  errorMessage: null,
+  pagination: {
+    current_page: 1,
+    total: 0,
+    per_page: 10,
+    last_page: 1,
+    from: 0,
+    to: 0,
+  },
 })
 
 export const mutations = {
@@ -10,6 +17,9 @@ export const mutations = {
   },
   SET_ORDER(state, order) {
     state.order = order
+  },
+    SET_PAGINATION(state, pagination) {
+    state.pagination = pagination
   },
   ADD_ORDER(state, order) {
     state.orders.push(order)
@@ -20,10 +30,13 @@ export const mutations = {
 }
 
 export const actions = {
-  async fetchOrders({ commit }) {
+  async fetchOrders({ commit }, { page = 1, perPage = 10 } = {}) {
     try {
-      const response = await this.$axios.get('/api/admin/order')
-      commit('SET_ORDERS', response.data)
+      const response = await this.$axios.get('/api/admin/order', {
+        params: { page, per_page: perPage },
+      })
+      commit('SET_ORDERS', response.data.orders)
+      commit('SET_PAGINATION', response.data.pagination)
       return true
     } catch (err) {
       commit('ERROR', err.response?.data || 'Failed to fetch orders')
@@ -41,33 +54,24 @@ export const actions = {
     }
   },
   async createOrder({ commit }, orderData) {
-    try {
-      const response = await this.$axios.post('/api/orders/order', orderData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
-      commit('ADD_ORDER', response.data.order)
-      if (response.status === 201) {
-        this.$router.push('/manager')
-        return response.data.order
-      }
-    } catch (error) {
-      commit('ERROR', error.response?.data || 'Failed to create order')
-      return false
-    }
-  },
+  try {
+    const response = await this.$axios.post('/api/orders/order', orderData);
+    commit('ADD_ORDER', response.data.order);
+    return response.data.order;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Չհաջողվեց ստեղծել պատվերը';
+    commit('ERROR', errorMessage);
+    throw new Error(errorMessage);
+  }
+},
   async updateOrder({ commit }, { id, payload }) {
     try {
       const response = await this.$axios.post(
         `/api/admin/orders/update/${id}`,
-        payload,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
+        payload
       )
-      commit('SET_ORDER', response.data)
-      await this.$router.push('/manager')
+      commit('SET_ORDER', response.data.order)
+      await this.$router.push('/admin')
       return response.data
     } catch (error) {
       commit('ERROR', error.response?.data || 'Failed to update order')
@@ -88,5 +92,7 @@ export const actions = {
 export const getters = {
   orders: (state) => state.orders,
   order: (state) => state.order,
-  errorMessage: (state) => state.errorMessage,
+    getPagination(state) {
+    return state.pagination
+  },
 }

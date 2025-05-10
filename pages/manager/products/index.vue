@@ -1,46 +1,46 @@
 <template>
-  <div>
-    <ProductTable
-      :products="getProducts"
-      :pagination="getProductPagination"
-      :search-query="searchQuery"
-      @update:searchQuery="updateSearchQuery"
-      @change-page="handlePageChange"
-    />
-  </div>
+  <ProductTable
+    :products="products"
+    :pagination="pagination"
+    :search-query.sync="searchQuery"
+    @change-page="fetchProducts"
+  />
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
 import ProductTable from '~/components/product/PtoductTable.vue'
 
 export default {
-  components: {
-    ProductTable,
-  },
+  components: { ProductTable },
   layout: 'ManagerLayout',
   middleware: ['manager', 'roleRedirect'],
   data() {
     return {
-      searchQuery: '',
+      products: [],
+      pagination: null,
+      searchQuery: ''
     }
   },
-  computed: {
-    ...mapGetters('products', ['getProducts', 'getProductPagination']),
+  watch: {
+    searchQuery(newQuery) {
+      this.fetchProducts(1) // Refetch on search change
+    }
   },
   mounted() {
-    this.fetchProducts({ page: 1 })
+    this.fetchProducts(1)
   },
   methods: {
-    ...mapActions('products', ['fetchProducts']),
-    updateSearchQuery(newQuery) {
-      this.searchQuery = newQuery
-    },
-    handlePageChange(page) {
-      if (page > 0 && page <= this.getProductPagination.last_page) {
-        this.fetchProducts({ page })
+    async fetchProducts(page) {
+      try {
+        const response = await this.$axios.get('/api/products', {
+          params: { page, search: this.searchQuery }
+        })
+        this.products = response.data.data
+        this.pagination = response.data.pagination
+      } catch (error) {
+        console.error('Failed to fetch products:', error)
       }
-    },
-  },
+    }
+  }
 }
 </script>

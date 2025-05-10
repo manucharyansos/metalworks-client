@@ -79,30 +79,27 @@
               scope="row"
               class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800"
             >
-              {{ order.id }}
+              {{ order?.id }}
             </th>
             <td v-if="order.created_at" class="px-6 py-4">
-              {{ order.created_at }}
+              {{ order?.created_at }}
             </td>
             <td class="px-6 py-4">
-              {{ order.dates.finish_date ? order.dates.finish_date : 'null' }}
+              {{ order?.dates?.finish_date ? order.dates.finish_date : 'null' }}
             </td>
             <td v-if="order.order_number" class="px-6 py-4">
-              {{ order.order_number.number }}
+              {{ order?.order_number?.number }}
             </td>
             <td v-if="order.prefix_code" class="px-6 py-4">
-              {{ order.prefix_code.code }}
+              {{ order?.prefix_code?.code }}
             </td>
             <td v-if="order.status" class="px-6 py-4">
-              {{ order.status }}
+              {{ order?.status }}
             </td>
             <td v-if="order.name" class="px-6 py-4">
-              {{ order.name }}
+              {{ order?.name }}
             </td>
-            <td v-if="order.quantity" class="px-6 py-4">
-              {{ order.quantity }}
-            </td>
-            <td v-if="order.store_link" class="px-12">
+            <td v-if="order?.store_link" class="px-12">
               <a class="hover:!text-blue-700" :href="order.store_link?.url"
               >Link</a
               >

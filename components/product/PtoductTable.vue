@@ -52,10 +52,10 @@
         </div>
         <input
           :value="searchQuery"
-          @input="$emit('update:searchQuery', $event.target.value)"
-          type="text"
           class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          type="text"
           placeholder="Որոնել ապրանք..."
+          @input="$emit('update:searchQuery', $event.target.value)"
         />
       </div>
     </div>
@@ -110,7 +110,6 @@
                 :src="resolveImageUrl(product.image)"
                 class="w-10 h-10 rounded-full object-cover"
                 :alt="product.name"
-                loading="lazy"
                 @error="handleImageError(product.id)"
               />
               <div
@@ -149,8 +148,9 @@
       </tbody>
     </table>
 
-    <!-- Pagination -->
+    <!-- Pagination (shown only if pagination data exists) -->
     <nav
+      v-if="pagination"
       class="flex items-center justify-between p-4"
       aria-label="Table navigation"
     >
@@ -166,31 +166,31 @@
       <ul class="inline-flex -space-x-px text-sm h-8">
         <li>
           <button
-            @click="$emit('change-page', pagination.current_page - 1)"
             :disabled="!pagination.prev_page_url"
             class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            @click="$emit('change-page', pagination.current_page - 1)"
           >
             Նախորդ
           </button>
         </li>
         <li v-for="page in pagination.last_page" :key="page">
           <button
-            @click="$emit('change-page', page)"
             :class="[
               pagination.current_page === page
                 ? 'text-blue-600 bg-blue-50 border-blue-300 hover:bg-blue-100 hover:text-blue-700'
                 : 'text-gray-500 bg-white border-gray-300 hover:bg-gray-100 hover:text-gray-700',
               'flex items-center justify-center px-3 h-8 leading-tight border dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white'
             ]"
+            @click="$emit('change-page', page)"
           >
             {{ page }}
           </button>
         </li>
         <li>
           <button
-            @click="$emit('change-page', pagination.current_page + 1)"
             :disabled="!pagination.next_page_url"
             class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
+            @click="$emit('change-page', pagination.current_page + 1)"
           >
             Հաջորդ
           </button>
@@ -210,14 +210,7 @@ export default {
     },
     pagination: {
       type: Object,
-      default: () => ({
-        current_page: 1,
-        last_page: 1,
-        per_page: 10,
-        total: 0,
-        next_page_url: null,
-        prev_page_url: null
-      })
+      default: () => null 
     },
     searchQuery: {
       type: String,
@@ -227,7 +220,7 @@ export default {
   emits: ['update:searchQuery', 'change-page'],
   data() {
     return {
-      imageErrors: {} // Track which product images failed to load
+      imageErrors: {}
     }
   },
   computed: {
@@ -240,37 +233,26 @@ export default {
     }
   },
   methods: {
-    resolveImageUrl(image) {
-      if (!image || typeof image !== 'string' || image.trim() === '' || image === 'products/') {
-        console.warn('Invalid or empty image path:', image)
-        return ''
-      }
-      const baseUrl = this.$baseUrl || this.$axios.defaults.baseURL || 'http://localhost:8000'
-      // Handle absolute paths (e.g., '/storage/MetalWorks/filename.jpg', '/storage/Products/filename.jpg')
-      if (image.startsWith('/storage/')) {
-        const resolvedUrl = `${baseUrl}${image}`
-        console.log(`Resolved image URL (absolute) for path "${image}":`, resolvedUrl)
-        return resolvedUrl
-      }
-      // Handle relative paths (e.g., 'products/filename.jpg', 'Products/filename.jpg', 'MetalWorks/filename.jpg')
-      if (!image.startsWith('http') && !image.startsWith('data:')) {
-        // Normalize to '/storage/directory/filename.jpg'
-        const normalizedImage = image.startsWith('products/') || 
-                               image.startsWith('Products/') || 
-                               image.startsWith('MetalWorks/')
-          ? `/storage/${image}`
-          : `/storage/MetalWorks/${image}`
-        const resolvedUrl = `${baseUrl}${normalizedImage}`
-        console.log(`Resolved image URL (relative) for path "${image}":`, resolvedUrl)
-        return resolvedUrl
-      }
-      console.log(`Resolved image URL (unchanged) for path "${image}":`, image)
-      return image
-    },
-    handleImageError(productId) {
-      console.error('Image failed to load for product:', productId)
-      this.$set(this.imageErrors, productId, true)
+      resolveImageUrl(image) {
+    if (!image || typeof image !== 'string' || image.trim() === '') {
+      return null;
     }
+    if (image.startsWith('http') || image.startsWith('data:') || image.startsWith('/storage')) {
+      return image;
+    }
+    if (!image.startsWith('storage/') && !image.startsWith('/storage/')) {
+      image = `storage/${image}`;
+    }
+    if (!image.startsWith('/')) {
+      image = `/${image}`;
+    }
+    const baseUrl = process.env.BASE_URL || 'http://localhost:8000';
+    return `${baseUrl}${image}`;
+  },
+
+  handleImageError(productId) {
+    this.$set(this.imageErrors, productId, true);
+  }
   }
 }
 </script>
