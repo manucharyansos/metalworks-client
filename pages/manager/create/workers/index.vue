@@ -3,7 +3,7 @@
     <p
       class="text-gray-800 dark:text-white font-bold font-sans italic my-8 text-2xl text-center"
     >
-      Ստեղծել նոր հաճախորդ
+      Ստեղծել նոր աշխատակից
     </p>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12 p-4">
       <!--      for role-->

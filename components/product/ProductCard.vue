@@ -2,13 +2,15 @@
   <div
     class="w-80 group my-10 flex max-w-xs flex-col overflow-hidden border border-gray-300 bg-white shadow-md"
   >
-    <a class="relative flex h-60 overflow-hidden" href="#">
+    <nuxt-link
+      class="relative flex h-60 overflow-hidden"
+      :to="`/products/${product.id}`"
+    >
       <img
         class="absolute top-0 right-0 h-full w-full object-cover"
-        :src="imgUrl"
+        :src="product.image"
         alt="product image"
       />
-
       <div
         class="absolute -right-16 bottom-0 mr-2 mb-4 space-y-2 transition-all duration-300 group-hover:right-0"
       >
@@ -29,17 +31,15 @@
           </svg>
         </button>
       </div>
-    </a>
+    </nuxt-link>
     <div class="mt-4 px-5 pb-5">
-      <h5 class="text-xl tracking-tight text-gray-700">{{ name }}</h5>
+      <h5 class="text-xl tracking-tight text-gray-700">{{ product.name }}</h5>
       <div class="mt-2 mb-5 flex items-center justify-between">
-        <p>
-          {{ price }}
-        </p>
+        <p>{{ product.price }}</p>
       </div>
       <button
         class="flex items-center justify-center bg-gray-700 px-2 py-1 text-sm text-white transition hover:bg-gray-700"
-        @click="$emit('addToCard')"
+        @click="$emit('addToCard', product)"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -56,21 +56,14 @@
     </div>
   </div>
 </template>
+
 <script>
 export default {
   name: 'ProductCard',
   props: {
-    imgUrl: {
-      type: String,
-      default: '',
-    },
-    name: {
-      type: Number,
-      default: null,
-    },
-    price: {
-      type: String,
-      default: '',
+    product: {
+      type: Object,
+      default: () => ({}),
     },
   },
 }

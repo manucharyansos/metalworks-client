@@ -51,6 +51,7 @@
           </div>
 
           <div v-if="$auth.loggedIn" class="flex items-center gap-4 relative">
+            <slot name="basket"></slot>
             <img
               type="button"
               src="/User-avatar.svg.png"

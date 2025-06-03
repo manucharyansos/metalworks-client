@@ -192,7 +192,8 @@ export default {
   methods: {
     ...mapActions('engineer', ['fetchOrders']),
     editOrder(order) {
-      this.$router.push(`/engineer/orders/${order.id}`)
+
+      this.$router.push(`/engineer/orders/order/${order.id}`)
     },
     changePage(page) {
       if (page >= 1 && page <= this.pagination.last_page) {

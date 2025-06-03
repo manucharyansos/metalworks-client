@@ -20,7 +20,7 @@
         :value="data"
         class="first-letter:lowercase"
       >
-        {{ data.name }}
+        {{ displayField === 'value' ? data.value : data.name }}
       </option>
     </select>
     <p
@@ -35,6 +35,10 @@
 <script>
 export default {
   props: {
+    displayField: {
+      type: String,
+      default: 'name',
+    },
     label: {
       type: String,
       default: '',
