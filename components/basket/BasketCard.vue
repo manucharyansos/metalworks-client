@@ -1,98 +1,391 @@
 <template>
-  <div class="w-full max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden font-sans">
+  <div class="basket-card">
     <!-- Header -->
-    <div class="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
-      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Զամբյուղ</h2>
-      <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" @click="$emit('closeBasket')">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
+    <div class="basket-header">
+      <h2 class="basket-title">Ձեր Զամբյուղը</h2>
+      <button
+        class="close-button"
+        aria-label="Close basket"
+        @click="$emit('close')"
+      >
+        &times;
       </button>
     </div>
 
-    <!-- Body -->
-    <div v-if="items.length === 0" class="p-4 text-center text-gray-500 dark:text-gray-400">
-      Զամբյուղը դատարկ է
+    <!-- Loading state -->
+    <div v-if="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Բեռնվում է...</p>
     </div>
-    <div v-else class="divide-y divide-gray-200 dark:divide-gray-700">
-      <div v-for="item in items" :key="item.id" class="flex items-start p-4 space-x-4">
-        <!-- Image -->
-        <img :src="item.image" :alt="item.name" class="w-16 h-16 object-cover rounded-md" />
 
-        <!-- Product Details -->
-        <div class="flex-1">
-          <h3 class="text-sm font-medium text-gray-800 dark:text-white">{{ item.name }}</h3>
-          <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{{ item.description }}</p>
-          <p class="text-sm font-semibold text-gray-800 dark:text-white mt-1">{{ item.price }} դրամ</p>
+    <!-- Error message -->
+    <div v-if="error" class="error-message">
+      {{ error }}
+      <button @click="retry">Փորձել կրկին</button>
+    </div>
 
-          <!-- Quantity Controls -->
-          <div class="flex items-center mt-2 space-x-2">
+    <!-- Empty basket -->
+    <div v-if="!loading && items.length === 0" class="empty-basket">
+      <!-- <img src="~/assets/images/empty-cart.svg" alt="Empty basket" /> -->
+      <p>Ձեր զամբյուղը դատարկ է</p>
+      <button class="continue-shopping" @click="$emit('close')">
+        Շարունակել գնումները
+      </button>
+    </div>
+
+    <!-- Items list -->
+    <transition-group v-else name="basket-item" tag="div" class="items-list">
+      <div v-for="item in items" :key="item.id" class="basket-item">
+        <div class="item-image">
+          <img
+            :src="item.image || '/images/placeholder-product.jpg'"
+            :alt="item.name"
+          />
+        </div>
+
+        <div class="item-details">
+          <h3 class="item-name">{{ item.name }}</h3>
+          <p class="item-price">{{ formatPrice(item.price) }} դրամ</p>
+
+          <div class="quantity-controls">
             <button
               :disabled="item.quantity <= 1"
-              class="w-8 h-8 flex items-center justify-center bg-red-100 text-red-600 rounded-full hover:bg-red-200"
-              @click="$emit('update-quantity', { product: item, action: 'decrease' })"
+              class="quantity-button"
+              aria-label="Decrease quantity"
+              @click="updateQuantity(item.id, item.quantity - 1)"
             >
-              -
+              −
             </button>
-            <span class="text-sm text-gray-800 dark:text-white">{{ item.quantity }}</span>
+            <span class="quantity">{{ item.quantity }}</span>
             <button
-              class="w-8 h-8 flex items-center justify-center bg-green-100 text-green-600 rounded-full hover:bg-green-200"
-              @click="$emit('update-quantity', { product: item, action: 'increase' })"
+              class="quantity-button"
+              aria-label="Increase quantity"
+              @click="updateQuantity(item.id, item.quantity + 1)"
             >
               +
             </button>
           </div>
         </div>
 
-        <!-- Delete Button -->
         <button
-          class="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
-          @click="$emit('delete-item', item.id)"
+          class="remove-item"
+          aria-label="Remove item"
+          @click="deleteItem(item.id)"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-          </svg>
+          &times;
         </button>
       </div>
-    </div>
+    </transition-group>
 
-    <!-- Footer -->
-    <div v-if="items.length > 0" class="p-4 border-t border-gray-200 dark:border-gray-700">
-      <div class="flex justify-between items-center mb-4">
-        <span class="text-sm font-medium text-gray-800 dark:text-white">Ընդհանուր:</span>
-        <span class="text-lg font-bold text-gray-800 dark:text-white">{{ totalPrice }} դրամ</span>
+    <!-- Checkout section -->
+    <div v-if="items.length > 0" class="checkout-section">
+      <div class="total-section">
+        <span>Ընդհանուր:</span>
+        <span class="total-price">{{ formatPrice(total) }} դրամ</span>
       </div>
-      <button
-        @click="$emit('clear-basket')"
-        class="w-full py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
-      >
-        Ջնջել Զամբյուղը
+
+      <button class="checkout-button" @click="proceedToCheckout">
+        Անցնել վճարման
+      </button>
+
+      <button class="clear-basket" @click="clearBasket">
+        Դատարկել զամբյուղը
       </button>
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   props: {
-    items: {
-      type: Array,
-      default: () => [],
+    isOpen: {
+      type: Boolean,
+      default: false,
     },
   },
   computed: {
-    totalPrice() {
-      return this.items.reduce((total, item) => total + item.price * item.quantity, 0);
+    ...mapGetters('basket', [
+      'basketItems',
+      'basketTotal',
+      'isLoading',
+      'error',
+    ]),
+
+    items() {
+      return Array.isArray(this.basketItems) ? this.basketItems : []
+    },
+
+    total() {
+      return this.basketTotal
+    },
+
+    loading() {
+      return this.isLoading
     },
   },
-};
+  mounted() {
+    this.fetchBasket()
+  },
+
+  methods: {
+    ...mapActions('basket', [
+      'updateItem',
+      'removeItem',
+      'clearBasket',
+      'fetchBasket',
+    ]),
+
+    formatPrice(price) {
+      return parseFloat(price).toFixed(2)
+    },
+
+    updateQuantity(itemId, newQuantity) {
+      if (newQuantity > 0) {
+        this.updateItem({ itemId, quantity: newQuantity })
+      }
+      this.fetchBasket()
+    },
+
+    async deleteItem(itemId) {
+      await this.removeItem(itemId)
+      await this.fetchBasket()
+    },
+
+    proceedToCheckout() {
+      this.$router.push('/checkout')
+      this.$emit('close')
+    },
+
+    retry() {
+      this.fetchBasket()
+    },
+  },
+}
 </script>
 
 <style scoped>
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.basket-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 420px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.basket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.basket-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+}
+
+.spinner {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 3px solid #3498db;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  padding: 1rem;
+  color: #e74c3c;
+  text-align: center;
+}
+
+.empty-basket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.empty-basket img {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 1rem;
+}
+
+.continue-shopping {
+  margin-top: 1rem;
+  padding: 8px 16px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.items-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.basket-item {
+  display: flex;
+  padding: 12px;
+  border-bottom: 1px solid #f5f5f5;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.item-image {
+  width: 80px;
+  height: 80px;
+  margin-right: 12px;
+}
+
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.item-details {
+  flex: 1;
+}
+
+.item-name {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.item-price {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+}
+
+.quantity-button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ddd;
+  background: white;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.quantity-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quantity {
+  margin: 0 8px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.remove-item {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #999;
+  cursor: pointer;
+}
+
+.checkout-section {
+  padding: 16px;
+  border-top: 1px solid #eee;
+}
+
+.total-section {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+}
+
+.total-price {
+  font-weight: 600;
+  color: #e74c3c;
+}
+
+.checkout-button {
+  width: 100%;
+  padding: 12px;
+  background: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.clear-basket {
+  width: 100%;
+  padding: 8px;
+  background: none;
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Transition effects */
+.basket-item-enter-active,
+.basket-item-leave-active {
+  transition: all 0.3s;
+}
+
+.basket-item-enter,
+.basket-item-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
 }
 </style>

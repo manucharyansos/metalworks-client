@@ -1,8 +1,8 @@
 <template>
   <div>
-    <!--    <header>-->
-    <!--      <HeaderLayout />-->
-    <!--    </header>-->
+    <header>
+      <HeaderLayout />
+    </header>
     <main>
       <Nuxt />
     </main>
@@ -14,10 +14,12 @@
 </template>
 
 <script>
+import HeaderLayout from '~/components/layouts/Header-layout.vue'
 import FooterComponent from '~/components/footer/FooterComponent.vue'
 export default {
   components: {
     FooterComponent,
+    HeaderLayout
   },
 }
 </script>

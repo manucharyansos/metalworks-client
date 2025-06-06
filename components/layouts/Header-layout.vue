@@ -51,7 +51,8 @@
           </div>
 
           <div v-if="$auth.loggedIn" class="flex items-center gap-4 relative">
-            <slot name="basket"></slot>
+            <BasketButton @toggle="toggleBasket" />
+            <BasketModal :is-open="showBasket" @close="toggleBasket" />
             <img
               type="button"
               src="/User-avatar.svg.png"
@@ -112,7 +113,7 @@
             <NuxtLink
               to="/login"
               class="login_button text-sm xl:text-base flex items-center justify-content-center text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3"
-            >ՄՈՒՏՔ</NuxtLink
+              >ՄՈՒՏՔ</NuxtLink
             >
             <NuxtLink
               to="/register"
@@ -151,13 +152,13 @@
             class="flex flex-col p-4 lg:p-2 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 lg:space-x-3 rtl:space-x-reverse lg:flex-row lg:mt-0 lg:border-0 lg:bg-white dark:bg-gray-800 lg:dark:bg-gray-900 dark:border-gray-700"
           >
             <li>
-<!--              <NuxtLink-->
-<!--                exact-active-class="active-link"-->
-<!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
-<!--                to="/materials"-->
-<!--              >-->
-<!--                Նյութեր-->
-<!--              </NuxtLink>-->
+              <!--              <NuxtLink-->
+              <!--                exact-active-class="active-link"-->
+              <!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
+              <!--                to="/materials"-->
+              <!--              >-->
+              <!--                Նյութեր-->
+              <!--              </NuxtLink>-->
             </li>
             <li @click="closeNav">
               <NuxtLink
@@ -220,14 +221,18 @@
   </header>
 </template>
 <script>
+import BasketButton from '~/components/basket/BasketButton'
+import BasketModal from '~/components/basket/BasketModal'
 export default {
   name: 'HeaderLayout',
+  components: { BasketButton, BasketModal },
   data() {
     return {
       openDropdown: false,
       openNavbar: false,
       openSearchInput: false,
       scrollX: 0,
+      showBasket: false,
     }
   },
   watch: {
@@ -260,6 +265,9 @@ export default {
       if (this.scrollX < 1024) {
         this.openNavbar = false
       }
+    },
+    toggleBasket() {
+      this.showBasket = !this.showBasket
     },
   },
 }

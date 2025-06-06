@@ -3,6 +3,7 @@ export default {
   state() {
     return {
       products: [],
+      product: {},
       pagination: {
         current_page: 1,
         last_page: 1,
@@ -17,6 +18,10 @@ export default {
     getProducts(state) {
       return state.products
     },
+    
+    getProduct(state) {
+      return state.product
+    },
     getProductPagination(state) {
       return state.pagination
     }
@@ -24,6 +29,10 @@ export default {
   mutations: {
     SET_PRODUCTS(state, products) {
       state.products = products
+    },
+    
+    SET_PRODUCT(state, product) {
+      state.product = product
     },
     SET_PAGINATION(state, pagination) {
       state.pagination = pagination
@@ -43,6 +52,20 @@ export default {
         throw error
       }
     },
+    
+async fetchProduct({ commit }, id) {
+    try {
+      const response = await this.$axios.$get(`/api/products/${id}`);
+      if (response.status) {
+        commit('SET_PRODUCT', response.data); // Extract nested 'data'
+      } else {
+        throw new Error(response.message || 'Failed to fetch product');
+      }
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      throw error;
+    }
+  },
     async createProduct({ commit }, formData) {
       try {
         const response = await this.$axios.$post('/api/products', formData, {
