@@ -1,9 +1,5 @@
 <template>
   <div>
-    <header-layout class="page-header">
-
-      <!-- Commented search input remains unchanged -->
-    </header-layout>
     <div
       class="home_component flex flex-col m-0 p-0 min-h-screen w-full h-full items-center"
       :class="{ activeScroll: isActiveBg }"
@@ -248,7 +244,7 @@
           <div
             v-for="category in categories"
             :key="category.id"
-            class="flex items-center justify-center"
+            class="hidden md:flex items-center justify-center"
           >
             <button
               class="px-3 py-1 text-xs text-center text-neutral-700 font-sans font-bold italic hover:text-indigo-800 bg-indigo-100 rounded-2xl focus:outline-none dark:bg-neutral-600 dark:hover:bg-neutral-800 border border-indigo-400 m-2"
@@ -301,7 +297,7 @@
         >
           <button
             :disabled="!materialPagination.prev_page_url"
-            class="px-4 py-2 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-2 py-1 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
             @click="changePage(materialPagination.current_page - 1)"
           >
             Նախորդ
@@ -309,7 +305,7 @@
           <button
             v-for="page in materialPagination.last_page"
             :key="page"
-            class="px-4 py-2 mx-1 text-sm font-medium rounded-lg"
+            class="px-3 py-1 mx-1 text-sm font-medium rounded-lg"
             :class="{
               'bg-indigo-400 text-white':
                 materialPagination.current_page === page,
@@ -322,7 +318,7 @@
           </button>
           <button
             :disabled="!materialPagination.next_page_url"
-            class="px-4 py-2 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-2 py-1 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
             @click="changePage(materialPagination.current_page + 1)"
           >
             Հաջորդ
@@ -358,7 +354,7 @@
         >
           <button
             :disabled="!productPagination.prev_page_url"
-            class="px-4 py-2 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-2 py-1 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
             @click="changeProductPage(productPagination.current_page - 1)"
           >
             Նախորդ
@@ -366,7 +362,7 @@
           <button
             v-for="page in productPagination.last_page"
             :key="page"
-            class="px-4 py-2 mx-1 text-sm font-medium rounded-lg"
+            class="px-3 py-1 mx-1 text-sm font-medium rounded-lg"
             :class="{
               'bg-indigo-400 text-white':
                 productPagination.current_page === page,
@@ -379,7 +375,7 @@
           </button>
           <button
             :disabled="!productPagination.next_page_url"
-            class="px-4 py-2 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-2 py-1 mx-1 text-sm font-medium text-neutral-700 bg-indigo-100 border border-indigo-400 rounded-lg hover:bg-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
             @click="changeProductPage(productPagination.current_page + 1)"
           >
             Հաջորդ
@@ -568,12 +564,11 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import UploadConfigure from '~/components/pages/home/UploadConfigure.vue'
-import HeaderLayout from '~/components/layouts/Header-layout.vue'
 import ProductCard from '~/components/product/ProductCard.vue'
 
 export default {
   name: 'HomeComponent',
-  components: { HeaderLayout, UploadConfigure, ProductCard },
+  components: { UploadConfigure, ProductCard },
   data() {
     return {
       selectedCategory: null,

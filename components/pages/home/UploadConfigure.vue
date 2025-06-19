@@ -1,6 +1,6 @@
 <template>
   <div
-    class="relative grid grid-cols-2 md:grid-cols-1 bg-white md:min-h-80 h-full w-96 m-4 rounded-lg shadow-md hover:shadow-xl hover:translate-y-2 transition-shadow duration-300 overflow-hidden"
+    class="relative grid grid-cols-2 md:grid-cols-1 bg-white md:min-h-80 h-32 md:w-96 w-80 sm:w-60 m-4 rounded-lg shadow-md hover:shadow-xl hover:translate-y-2 transition-shadow duration-300 overflow-hidden"
   >
     <img
       :src="image"

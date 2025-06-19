@@ -1,15 +1,15 @@
 <template>
   <div>
-    <header>
-      <HeaderLayout />
-    </header>
+    <!-- <header> -->
+    <HeaderLayout />
+    <!-- </header> -->
     <main>
       <Nuxt />
     </main>
 
-    <footer>
-      <footer-component />
-    </footer>
+    <!--    <footer>-->
+    <footer-component />
+    <!--    </footer>-->
   </div>
 </template>
 
@@ -19,7 +19,7 @@ import FooterComponent from '~/components/footer/FooterComponent.vue'
 export default {
   components: {
     FooterComponent,
-    HeaderLayout
+    HeaderLayout,
   },
 }
 </script>

@@ -47,7 +47,7 @@ export const actions = {
   async fetchBasket({ commit }) {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
-    
+
     try {
       const response = await this.$axios.get('/api/baskets/current')
       commit('SET_BASKET', {
@@ -66,7 +66,7 @@ export const actions = {
   async addToBasket({ commit, dispatch }, product) {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
-    
+
     try {
       const response = await this.$axios.post('/api/baskets', {
         product_id: product.id,
@@ -85,10 +85,10 @@ export const actions = {
 
   async updateItem({ commit }, { itemId, quantity, action = 'set' }) {
     if (quantity < 1) return
-    
+
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
-    
+
     try {
       const response = await this.$axios.put(`/api/baskets/items/${itemId}`, {
         quantity,
@@ -107,7 +107,7 @@ export const actions = {
   async removeItem({ commit }, itemId) {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
-    
+
     try {
       const response = await this.$axios.delete(`/api/baskets/items/${itemId}`)
       commit('SET_BASKET', response.data)
@@ -123,7 +123,7 @@ export const actions = {
   async clearBasket({ commit, state }) {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
-    
+
     try {
       await this.$axios.delete(`/api/baskets/${state.basket.id}`)
       commit('CLEAR_BASKET')
