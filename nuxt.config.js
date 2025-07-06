@@ -1,8 +1,9 @@
 export default {
+  ssr: true,
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title:
-      'MetalwWrks - Մետաղի աշխատանքներ, լազերային եռակցում, փոշեմատտացնող ծածկույթ',
+      'MetalWorks - Մետաղի աշխատանքներ, լազերային եռակցում, փոշեմատտացնող ծածկույթ',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -16,7 +17,7 @@ export default {
       {
         name: 'keywords',
         content:
-          'metalworks, MetalWorks, լազերային եռակցում, փոշեմատտացնող ծածկույթ, թեքում, մետաղամշակում',
+          "metalwork's, MetalWorks, լազերային եռակցում, փոշեմատտացնող ծածկույթ, թեքում, մետաղամշակում",
       },
       { name: 'robots', content: 'index, follow' },
       { name: 'author', content: 'MetalWorks' },
@@ -116,6 +117,10 @@ export default {
     manifest: {
       lang: 'en',
     },
+  },
+
+  generate: {
+    fallback: true,
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

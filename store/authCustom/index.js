@@ -1,16 +1,16 @@
 export const state = () => ({
   resMessage: false,
-  error: false, // Store the general error (e.g., "Registration failed")
-  errorMessage: false, // Store the specific error message (e.g., "The email has already been taken")
+  error: false,
+  errorMessage: false,
   user: [],
 })
 
 export const getters = {
   getError(state) {
-    return state.error // Getter for the general error
+    return state.error
   },
   getErrorMessage(state) {
-    return state.errorMessage // Getter for the specific error message
+    return state.errorMessage
   },
   getUser(state) {
     return state.user
@@ -45,7 +45,10 @@ export const actions = {
     } catch (error) {
       // Store both error and message from the response
       commit('setError', error.response?.data?.error || 'Registration failed')
-      commit('setErrorMessage', error.response?.data?.message || 'An error occurred')
+      commit(
+        'setErrorMessage',
+        error.response?.data?.message || 'An error occurred'
+      )
       return false
     }
   },

@@ -84,14 +84,18 @@
               <input-with-label-icon
                 v-model="password"
                 type="password"
-               肢 name="password"
+                肢
+                name="password"
                 placeholder=" "
                 :class="{ 'border-red-500': fieldErrors.password }"
                 :label="label.password"
                 label_-id="password"
                 for_-l-abel="password"
               />
-              <p v-if="fieldErrors.password" class="text-red-500 text-xs italic">
+              <p
+                v-if="fieldErrors.password"
+                class="text-red-500 text-xs italic"
+              >
                 {{ fieldErrors.password }}
               </p>
             </div>
@@ -190,10 +194,10 @@ export default {
   computed: {
     ...mapGetters('authCustom', ['getError', 'getErrorMessage', 'getUser']),
     error() {
-      return this.getError // General error (e.g., "Registration failed")
+      return this.getError
     },
     errorMessage() {
-      return this.getErrorMessage // Specific error message (e.g., "The email has already been taken")
+      return this.getErrorMessage
     },
   },
   methods: {
@@ -224,7 +228,9 @@ export default {
         }
       } catch (error) {
         this.$notify({
-          text: this.error || 'Հաշվի ստեղծման ժամանակ սխալ է տեղի ունեցել: Խնդրում ենք կրկին փորձել:',
+          text:
+            this.error ||
+            'Հաշվի ստեղծման ժամանակ սխալ է տեղի ունեցել: Խնդրում ենք կրկին փորձել:',
           type: 'error',
           duration: 3000,
         })
@@ -237,7 +243,8 @@ export default {
       if (!this.name)
         this.fieldErrors.name = 'Խնդրում ենք մուտքագրել Ձեր անունը'
       if (!this.email)
-        this.fieldErrors.email = 'Խնդրում ենք մուտքագրել էլ․ փոստի հՀաշվի ստեղծման ժամանակ սխալ է տեղի ունեցել: Խնդրում ենք կրկին փորձել:'
+        this.fieldErrors.email =
+          'Խնդրում ենք մուտքագրել էլ․ փոստի հՀաշվի ստեղծման ժամանակ սխալ է տեղի ունեցել: Խնդրում ենք կրկին փորձել:'
       if (this.password.length < 6)
         this.fieldErrors.password = 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ'
       if (this.password !== this.password_confirmation) {

@@ -8,7 +8,9 @@
         <h2 class="text-xl font-semibold mb-4">Առաքման մանրամասներ</h2>
         <form @submit.prevent="submitPurchase">
           <div class="mb-4">
-            <label for="name" class="block text-sm font-medium text-gray-700">Անուն</label>
+            <label for="name" class="block text-sm font-medium text-gray-700"
+              >Անուն</label
+            >
             <input
               id="name"
               v-model="form.name"
@@ -18,7 +20,9 @@
             />
           </div>
           <div class="mb-4">
-            <label for="email" class="block text-sm font-medium text-gray-700">Էլ. փոստ</label>
+            <label for="email" class="block text-sm font-medium text-gray-700"
+              >Էլ. փոստ</label
+            >
             <input
               id="email"
               v-model="form.email"
@@ -28,7 +32,9 @@
             />
           </div>
           <div class="mb-4">
-            <label for="address" class="block text-sm font-medium text-gray-700">Հասցե</label>
+            <label for="address" class="block text-sm font-medium text-gray-700"
+              >Հասցե</label
+            >
             <input
               id="address"
               v-model="form.address"
@@ -38,7 +44,9 @@
             />
           </div>
           <div class="mb-4">
-            <label for="phone" class="block text-sm font-medium text-gray-700">Հեռախոս</label>
+            <label for="phone" class="block text-sm font-medium text-gray-700"
+              >Հեռախոս</label
+            >
             <input
               id="phone"
               v-model="form.phone"
@@ -48,7 +56,11 @@
             />
           </div>
           <div class="mb-4">
-            <label for="payment_method" class="block text-sm font-medium text-gray-700">Վճարման եղանակ</label>
+            <label
+              for="payment_method"
+              class="block text-sm font-medium text-gray-700"
+              >Վճարման եղանակ</label
+            >
             <select
               id="payment_method"
               v-model="form.payment_method"
@@ -76,12 +88,22 @@
           Ձեր զամբյուղը դատարկ է
         </div>
         <div v-else>
-          <div v-for="item in items" :key="item.id" class="flex justify-between mb-3">
+          <div
+            v-for="item in items"
+            :key="item.id"
+            class="flex justify-between mb-3"
+          >
             <div class="flex items-center">
-              <img :src="item.image || '/images/placeholder-product.jpg'" alt="item.name" class="w-12 h-12 object-cover rounded mr-3" />
+              <img
+                :src="item.image || '/images/placeholder-product.jpg'"
+                alt="item.name"
+                class="w-12 h-12 object-cover rounded mr-3"
+              />
               <div>
                 <p class="font-medium">{{ item.name }}</p>
-                <p class="text-sm text-gray-500">{{ item.quantity }} x {{ formatPrice(item.price) }} դրամ</p>
+                <p class="text-sm text-gray-500">
+                  {{ item.quantity }} x {{ formatPrice(item.price) }} դրամ
+                </p>
               </div>
             </div>
             <p class="font-medium">{{ formatPrice(item.total) }} դրամ</p>
@@ -131,15 +153,19 @@ export default {
   },
   methods: {
     ...mapActions('basket', ['fetchBasket', 'clearBasket']),
-    async loadUserData() {
-      try {
-        const response = await axios.get('/api/user')
-        const user = response.data
-        this.form.name = user.name || ''
-        this.form.email = user.email || ''
-      } catch (error) {
-        console.error('Failed to load user data:', error)
-      }
+    loadUserData() {
+      this.form.name = this.$auth.user.name || ''
+      this.form.email = this.$auth.user.email || ''
+      this.form.address = this.$auth.user.address || ''
+      this.form.phone = this.$auth.user.phone || ''
+      // try {
+      //   const response = await axios.get('/api/user')
+      //   const user = response.data
+      //   this.form.name = user.name || ''
+      //   this.form.email = user.email || ''
+      // } catch (error) {
+      //   console.error('Failed to load user data:', error)
+      // }
     },
     async submitPurchase() {
       try {
@@ -149,9 +175,14 @@ export default {
           total: this.total,
         })
         this.clearBasket()
-        this.$router.push({ name: 'purchase-confirmation', params: { purchaseId: response.data.purchase_id } })
+        this.$router.push({
+          name: 'purchase-confirmation',
+          params: { purchaseId: response.data.purchase_id },
+        })
       } catch (error) {
-        this.$toast.error(error.response?.data?.message || 'Պատվերը տեղադրելու խնդիր')
+        this.$toast.error(
+          error.response?.data?.message || 'Պատվերը տեղադրելու խնդիր'
+        )
       }
     },
     formatPrice(price) {

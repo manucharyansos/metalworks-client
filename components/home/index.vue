@@ -122,7 +122,7 @@
       <!-- Video -->
       <div class="my-20 hidden sm:flex shadow-3xl rounded-3xl z-10">
         <video
-          src="/new-home-vid.mp4"
+          src="/WhatsApp Video 2025-06-20 at 15.07.46_2a75a161.mp4"
           autoplay
           muted
           loop

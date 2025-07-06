@@ -1,5 +1,7 @@
 <template>
-  <div class="product-card group flex flex-col overflow-hidden border border-gray-200 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+  <div
+    class="product-card group flex flex-col overflow-hidden border border-gray-200 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
+  >
     <nuxt-link
       class="relative block aspect-square overflow-hidden"
       :to="`/products/${product.id}`"
@@ -10,7 +12,9 @@
         :alt="product.name"
         loading="lazy"
       />
-      <div class="absolute inset-x-0 bottom-0 p-2 flex justify-end transition-all duration-300 opacity-0 group-hover:opacity-100">
+      <div
+        class="absolute inset-x-0 bottom-0 p-2 flex justify-end transition-all duration-300 opacity-0 group-hover:opacity-100"
+      >
         <button
           class="w-10 h-10 flex items-center justify-center bg-white/90 text-gray-800 rounded-full shadow-md hover:bg-gray-100 transition-colors"
           aria-label="Add to favorites"
@@ -21,8 +25,7 @@
             viewBox="0 0 20 20"
             fill="currentColor"
           >
-            <pathnpm run dev -- -o
-
+            <path
               fill-rule="evenodd"
               d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
               clip-rule="evenodd"
@@ -74,15 +77,15 @@ export default {
       required: true,
       validator: (product) => {
         return product.id && product.name && product.price
-      }
-    }
+      },
+    },
   },
   methods: {
     formatPrice(price) {
       // Ավելացրեք ձեր գնի ֆորմատավորման տրամաբանությունը
       return typeof price === 'number' ? `$${price.toFixed(2)}` : price
-    }
-  }
+    },
+  },
 }
 </script>
 

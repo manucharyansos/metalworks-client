@@ -163,9 +163,9 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('authCustom', ['getErrors', 'getErrorMessages']),
+    ...mapGetters('authCustom', ['getError', 'getErrorMessage']),
     errors() {
-      return this.getErrorMessages
+      return this.getErrorMessage
     },
   },
   watch: {
@@ -198,10 +198,10 @@ export default {
           if (response) {
             this.email = ''
             this.password = ''
-          } else if (typeof this.getErrorMessages === 'string') {
-            this.errorMessage.general = this.getErrorMessages
+          } else if (typeof this.getErrorMessage === 'string') {
+            this.errorMessage.general = this.getErrorMessage
           } else {
-            this.errorMessage = { ...this.getErrorMessages }
+            this.errorMessage = { ...this.getErrorMessage }
           }
         } else {
           this.fieldEmail = !this.email
