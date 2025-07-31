@@ -1,301 +1,263 @@
 <template>
-  <header class="justify-center">
+  <header class="sticky top-0 z-50">
     <nav
-      class="bg-white dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600"
+      class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm"
     >
-      <div class="max-w-screen-3xl flex flex-wrap items-center mx-auto p-4">
-        <NuxtLink
-          to="/"
-          class="flex items-center space-x-3 rtl:space-x-reverse"
-        >
-          <img
-            src="/metalworks-logo.jpg"
-            class="h-8 w-8 rounded-full"
-            alt="Flow bite Logo"
-          />
-          <span
-            class="self-center text-lg lg:text-xl font-semibold italic font-sans whitespace-nowrap dark:text-white"
-            >Metalwork's</span
-          >
-        </NuxtLink>
-        <div
-          class="flex items-center ml-auto justify-content-between lg:order-2 space-x-4 lg:space-x-3 rtl:space-x-reverse"
-        >
-          <div
-            v-if="openSearchInput"
-            class="hidden lg:flex"
-            :class="{ activeInputStyle: openSearchInput }"
-          >
-            <slot name="searchInput"></slot>
-          </div>
-          <div
-            class="lg:hidden flex cursor-pointer"
-            @click="openSearchInput = !openSearchInput"
-          >
-            <svg
-              class="w-5 h-5 text-gray-900 dark:text-white"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-width="2"
-                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+      <div class="mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <!-- Logo -->
+          <div class="flex-shrink-0 flex items-center">
+            <NuxtLink to="/" class="flex items-center group">
+              <img
+                src="/metalworks-logo.jpg"
+                class="logo-img h-8 w-8 rounded-full border-2 border-red-500 group-hover:border-red-600 transition-colors duration-200"
+                alt="Metalwork's Logo"
               />
-            </svg>
+              <span
+                class="ml-3 text-xl font-bold text-gray-900 dark:text-white tracking-tight italic"
+              >
+                Metal<span class="text-red-600">work's</span>
+              </span>
+            </NuxtLink>
           </div>
 
-          <div v-if="$auth.loggedIn" class="flex items-center gap-4 relative">
-            <BasketButton @toggle="toggleBasket" />
-            <BasketModal :is-open="showBasket" @close="toggleBasket" />
-            <img
-              type="button"
-              src="/User-avatar.svg.png"
-              class="w-10 h-10 rounded-full cursor-pointer"
-              alt="User dropdown"
-              @click="openDropdown = !openDropdown"
-            />
-
-            <!-- Dropdown menu -->
-            <div
-              v-if="openDropdown"
-              class="absolute top-14 right-2 z-10 bg-neutral-100 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600"
+          <!-- Desktop Navigation -->
+          <div class="hidden lg:flex lg:items-center lg:space-x-4">
+            <NuxtLink
+              to="/services"
+              class="nav-link"
+              active-class="text-red-600 dark:text-red-400 font-semibold"
+              exact
             >
-              <div
-                v-if="$auth.user"
-                class="px-4 py-3 text-sm text-gray-900 dark:text-white"
-              >
-                <div>{{ $auth.user.name }}</div>
-                <div class="font-medium truncate">{{ $auth.user.email }}</div>
-              </div>
-              <ul
-                class="py-2 text-sm text-gray-700 dark:text-gray-200"
-                aria-labelledby="avatarButton"
-              >
-                <li>
-                  <a
-                    href="#"
-                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                    >Dashboard</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                    >Settings</a
-                  >
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                    >Earnings</a
-                  >
-                </li>
-              </ul>
-              <div class="py-1">
-                <button
-                  class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                  @click="$auth.logout()"
+              Ծառայություններ
+            </NuxtLink>
+            <NuxtLink
+              to="/contact"
+              class="nav-link"
+              active-class="text-red-600 dark:text-red-400 font-semibold"
+              exact
+            >
+              Կոնտակտ
+            </NuxtLink>
+          </div>
+
+          <!-- Right side elements -->
+          <div class="flex items-center space-x-4">
+            <template v-if="$auth.loggedIn">
+              <BasketButton @toggle="toggleBasket" />
+              <BasketModal :is-open="showBasket" @close="toggleBasket" />
+
+              <BaseModal :isOpen="openDropdown" @close="openDropdown = false">
+                <div
+                  class="rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-700 w-56"
                 >
-                  Դուրս գալ
-                </button>
+                  <div class="px-4 py-3">
+                    <p
+                      class="text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                      {{ $auth.user.name }}
+                    </p>
+                    <p
+                      class="text-sm text-gray-500 dark:text-gray-400 truncate"
+                    >
+                      {{ $auth.user.email }}
+                    </p>
+                  </div>
+                  <div class="py-1">
+                    <NuxtLink
+                      to="/"
+                      class="dropdown-item"
+                      @click.native="openDropdown = false"
+                    >
+                      Dashboard
+                    </NuxtLink>
+                    <NuxtLink
+                      to="/#"
+                      class="dropdown-item"
+                      @click.native="openDropdown = false"
+                    >
+                      Settings
+                    </NuxtLink>
+                  </div>
+                  <div class="py-1">
+                    <button
+                      class="dropdown-item text-left w-full"
+                      @click="$auth.logout()"
+                    >
+                      Դուրս գալ
+                    </button>
+                  </div>
+                </div>
+              </BaseModal>
+
+              <button
+                class="flex items-center focus:outline-none"
+                aria-label="User menu"
+                @click="openDropdown = !openDropdown"
+              >
+                <div class="relative">
+                  <img
+                    src="/User-avatar.svg.png"
+                    class="w-8 h-8 rounded-full border-2 border-transparent hover:border-red-500 transition-all duration-200"
+                    alt="User avatar"
+                  />
+                  <span
+                    class="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-900"
+                  ></span>
+                </div>
+              </button>
+            </template>
+
+            <template v-else>
+              <div class="hidden lg:flex lg:space-x-3">
+                <NuxtLink to="/login" class="auth-link">ՄՈՒՏՔ</NuxtLink>
+                <NuxtLink to="/register" class="auth-button">ԳՐԱՆՑՎԵԼ</NuxtLink>
               </div>
+            </template>
+
+            <!-- Mobile menu button -->
+            <button
+              class="lg:hidden p-2 rounded-md text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition-colors duration-200"
+              aria-label="Menu"
+              @click="openNavbar = !openNavbar"
+            >
+              <svg
+                class="w-6 h-6"
+                :class="{ hidden: openNavbar, block: !openNavbar }"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              <svg
+                class="w-6 h-6"
+                :class="{ hidden: !openNavbar, block: openNavbar }"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Nav -->
+        <transition name="slide-down">
+          <div
+            v-if="openNavbar"
+            class="lg:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-4 px-4"
+          >
+            <NuxtLink
+              to="/services"
+              class="mobile-link"
+              @click.native="openNavbar = false"
+              >Ծառայություններ</NuxtLink
+            >
+            <NuxtLink
+              to="/contact"
+              class="mobile-link"
+              @click.native="openNavbar = false"
+              >Կոնտակտ</NuxtLink
+            >
+            <div v-if="!$auth.loggedIn" class="mt-4">
+              <NuxtLink to="/login" class="mobile-link block text-center"
+                >ՄՈՒՏՔ</NuxtLink
+              >
+              <NuxtLink
+                to="/register"
+                class="mobile-link block text-center bg-red-600 text-white mt-2 py-2 rounded-md"
+                >ԳՐԱՆՑՎԵԼ</NuxtLink
+              >
             </div>
           </div>
-          <div v-else class="lg:flex hidden">
-            <NuxtLink
-              to="/login"
-              class="login_button text-sm xl:text-base flex items-center justify-content-center text-red-600 border bg-white border-red-500 rounded-xl mx-2 shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3"
-              >ՄՈՒՏՔ</NuxtLink
-            >
-            <NuxtLink
-              to="/register"
-              class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3"
-              >ԳՐԱՆՑՎԵԼ</NuxtLink
-            >
-          </div>
-
-          <button
-            type="button"
-            class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-            @click="openNavbar = !openNavbar"
-          >
-            <svg
-              class="w-5 h-5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 17 14"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M1 1h15M1 7h15M1 13h15"
-              />
-            </svg>
-          </button>
-        </div>
-        <div
-          v-if="openNavbar"
-          class="items-center duration-700 justify-between w-full lg:flex lg:w-auto lg:order-1 z-50"
-        >
-          <ul
-            class="flex flex-col p-4 lg:p-2 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 lg:space-x-3 rtl:space-x-reverse lg:flex-row lg:mt-0 lg:border-0 lg:bg-white dark:bg-gray-800 lg:dark:bg-gray-900 dark:border-gray-700"
-          >
-            <li>
-              <!--              <NuxtLink-->
-              <!--                exact-active-class="active-link"-->
-              <!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
-              <!--                to="/materials"-->
-              <!--              >-->
-              <!--                Նյութեր-->
-              <!--              </NuxtLink>-->
-            </li>
-            <li @click="closeNav">
-              <NuxtLink
-                exact-active-class="active-link"
-                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
-                to="/services"
-              >
-                Ծառայություններ
-              </NuxtLink>
-            </li>
-            <!--            <li>-->
-            <!--              <NuxtLink-->
-            <!--                exact-active-class="active-link"-->
-            <!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
-            <!--                to="/resources"-->
-            <!--              >-->
-            <!--                Resources-->
-            <!--              </NuxtLink>-->
-            <!--            </li>-->
-            <!--            <li>-->
-            <!--              <NuxtLink-->
-            <!--                exact-active-class="active-link"-->
-            <!--                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"-->
-            <!--                to="/examples"-->
-            <!--              >-->
-            <!--                Examples-->
-            <!--              </NuxtLink>-->
-            <!--            </li>-->
-            <li @click="closeNav">
-              <NuxtLink
-                exact-active-class="active-link"
-                class="block uppercase xl:text-base text-sm font-bold py-2 px-2 xl:px-4 text-gray-700 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-primary-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700"
-                to="/contact"
-              >
-                Կոնտակտ
-              </NuxtLink>
-            </li>
-            <li>
-              <div
-                v-if="!$auth.loggedIn"
-                class="lg:hidden flex flex-col"
-                @click="closeNav"
-              >
-                <NuxtLink
-                  to="/register"
-                  class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white bg-black p-1.5 w-full my-2"
-                  >ԳՐԱՆՑՎԵԼ</NuxtLink
-                >
-                <NuxtLink
-                  to="/login"
-                  class="login_button text-sm xl:text-base flex items-center justify-content-center text-red-600 bg-white duration-300 p-1.5 w-full my-2"
-                  >ՄՈՒՏՔ</NuxtLink
-                >
-              </div>
-            </li>
-          </ul>
-        </div>
+        </transition>
       </div>
     </nav>
   </header>
 </template>
+
 <script>
 import BasketButton from '~/components/basket/BasketButton'
 import BasketModal from '~/components/basket/BasketModal'
+import BaseModal from '~/components/modals/ui/BaseModal.vue'
+
 export default {
   name: 'HeaderLayout',
-  components: { BasketButton, BasketModal },
+  components: { BasketButton, BasketModal, BaseModal },
   data() {
     return {
       openDropdown: false,
       openNavbar: false,
-      openSearchInput: false,
-      scrollX: 0,
       showBasket: false,
     }
   },
   watch: {
-    scrollX: {
-      immediate: true,
-      deep: true,
-      handler(val) {
-        if (val > 1024) {
-          this.openNavbar = true
-          this.openSearchInput = true
-        } else {
-          this.openNavbar = false
-          this.openSearchInput = false
-        }
-      },
+    showBasket(val) {
+      if (val) this.openDropdown = false
     },
-  },
-  mounted() {
-    window.addEventListener('resize', this.handleScroll)
-    this.handleScroll()
-  },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.handleScroll)
+    openDropdown(val) {
+      if (val) this.showBasket = false
+    },
   },
   methods: {
-    handleScroll() {
-      this.scrollX = window.innerWidth
-    },
-    closeNav() {
-      if (this.scrollX < 1024) {
-        this.openNavbar = false
-      }
-    },
     toggleBasket() {
       this.showBasket = !this.showBasket
     },
   },
 }
 </script>
-<style>
-.login_button {
-  box-shadow: rgba(103, 29, 29, 0.04) 0 0 1px 0,
-    rgba(166, 21, 21, 0.87) 0 5px 8px 0;
-}
-.login_button:hover {
-  box-shadow: rgba(103, 29, 29, 0.04) 0 0 1px 0,
-    rgba(148, 20, 20, 0.87) 0 2px 4px 0;
-}
-.get_started_button {
-  box-shadow: rgba(80, 20, 20, 0.04) 0 0 1px 0, rgba(66, 6, 6, 0.87) 0 5px 8px 0;
-}
-.get_started_button:hover {
-  box-shadow: rgba(80, 20, 20, 0.04) 0 0 1px 0, rgba(72, 7, 7, 0.87) 0 2px 4px 0;
+
+<style scoped>
+.logo-img {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-input:focus-visible {
-  outline-style: none;
+.nav-link {
+  @apply px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 rounded-md transition duration-200;
 }
-.activeInputStyle {
-  display: flex;
+
+.dropdown-item {
+  @apply block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition;
 }
-.isActiveInputStyle {
-  display: none;
-  transition-duration: 1s;
+
+.auth-link {
+  @apply px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors duration-200;
+}
+
+.auth-button {
+  @apply px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md shadow transition-colors duration-200;
+}
+
+.mobile-link {
+  @apply block px-4 py-2 rounded-md text-base font-medium dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition duration-200;
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+}
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+.slide-down-enter-to,
+.slide-down-leave-from {
+  opacity: 1;
+  transform: translateY(0);
 }
 </style>

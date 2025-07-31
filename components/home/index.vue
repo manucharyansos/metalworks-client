@@ -18,7 +18,7 @@
             class="flex flex-row flex-wrap lg:flex-nowrap items-center justify-center mx-auto z-10 w-full my-12"
           >
             <p
-              class="lg:text-xl text-base font-mono italic flex font-bold mx-4"
+              class="lg:text-xl text-base font-sans italic flex font-bold mx-4"
             >
               <svg
                 id="Layer_1"
@@ -37,7 +37,7 @@
               Նվազագույն քանակություն չկա
             </p>
             <p
-              class="lg:text-xl Bender text-base font-mono italic flex font-bold my-2 mx-4 lg:my-12"
+              class="lg:text-xl Bender text-base font-sans italic flex font-bold my-2 mx-4 lg:my-12"
             >
               <svg
                 id="Layer_1"
@@ -72,7 +72,7 @@
               >Առաքում
             </p>
             <p
-              class="lg:text-xl text-base font-mono italic flex font-bold my-2 mx-4"
+              class="lg:text-xl text-base font-sans italic flex font-bold my-2 mx-4"
             >
               <svg
                 id="Layer_1"

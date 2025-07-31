@@ -1,91 +1,114 @@
 <template>
-  <div class="mx-auto py-24">
-    <header-layout />
-    <div class="container mx-auto px-6">
-      <div class="flex lg:hidden">
-        <img src="/servicesImg/services-mobile-1-768x244.webp" alt="" />
+  <div class="mx-auto py-16 md:py-24 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Մոբայլ պատկեր -->
+      <div class="flex lg:hidden justify-center">
+        <img
+          class="w-full h-auto object-contain rounded-xl shadow-md"
+          src="/servicesImg/services-mobile-1-768x244.webp"
+          alt="Մոբայլ պատկեր"
+        />
       </div>
+
+      <!-- Վերնագիր -->
       <h1
-        class="md:text-5xl text-xl font-sans italic font-bold leading-10 text-center mb-12 text-gray-800 mt-12"
+        class="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-sans italic font-bold leading-tight text-center text-gray-800 mt-10 sm:mt-12 mb-8 sm:mb-12"
       >
         Մետաղական դետալների և նախագծերի հարդարման ծառայություններ
       </h1>
-      <div class="grid lg:grid-cols-2 grid-cols-1">
-        <div class="flex flex-col items-center justify-center py-6">
-          <p class="text-neutral-700 font-sans italic p-6 text-center">
+
+      <!-- Տեքստ + Լուսանկար -->
+      <div class="grid lg:grid-cols-2 grid-cols-1 gap-8">
+        <div
+          class="flex flex-col items-center justify-center py-6 px-4 sm:px-8"
+        >
+          <p
+            class="text-sm sm:text-base md:text-lg text-neutral-700 font-sans italic text-center"
+          >
             Մենք գիտենք, որ նախագիծը հազվադեպ է ավարտվում կտրվածքով: Անկախ
             նրանից, թե դուք փնտրում եք հարդարման գործընթացներ, անցքերի
             գործառնություններ կամ ծալում, մենք ձեզ ապահովում ենք:
           </p>
-          <!--        <NuxtLink-->
-          <!--          to="/register"-->
-          <!--          class="get_started_button text-sm xl:text-base flex items-center justify-content-center text-white border bg-red-700 border-red-500 mx-2 rounded-xl shadow-2xl hover:translate-y-0.5 hover:shadow-2xl duration-300 py-0.5 px-3"-->
-          <!--        >ՍԿՍԵԼ</NuxtLink-->
-          <!--        >-->
         </div>
         <div class="hidden lg:flex items-center justify-center">
-          <img src="/servicesImg/service-parts-straight.webp" alt="" />
+          <img
+            class="w-full max-w-md h-auto object-contain rounded-xl shadow-md"
+            src="/servicesImg/service-parts-straight.webp"
+            alt="Հարդարման ծառայություններ"
+          />
         </div>
       </div>
+
+      <!-- Նավիգացիոն հղումներ -->
       <div
-        class="flex flex-wrap justify-center items-center text-primary-400 font-bold font-sans italic lg:p-12"
+        class="flex flex-wrap justify-center items-center text-red-700 font-bold font-sans italic text-sm sm:text-base gap-4 mt-12 mb-8"
       >
-        <h2 id="holeOperations" class="mx-4 cursor-pointer">
+        <h2
+          id="holeOperations"
+          class="cursor-pointer hover:text-red-800 hover:underline transition"
+        >
           Փոսային գործողություններ
         </h2>
-        <h2 id="bending" class="mx-4 cursor-pointer">Կռում</h2>
-        <h2 id="finishingOperations" class="mx-4 cursor-pointer">
+        <h2
+          id="bending"
+          class="cursor-pointer hover:text-red-800 hover:underline transition"
+        >
+          Կռում
+        </h2>
+        <h2
+          id="finishingOperations"
+          class="cursor-pointer hover:text-red-800 hover:underline transition"
+        >
           Հարդարման ընտրանքներ
         </h2>
-        <h2 id="cuttingMethods" class="mx-4 cursor-pointer">Կտրման մեթոդներ</h2>
+        <h2
+          id="cuttingMethods"
+          class="cursor-pointer hover:text-red-800 hover:underline transition"
+        >
+          Կտրման մեթոդներ
+        </h2>
       </div>
     </div>
-    <div
-      class="flex flex-col items-center justify-center w-full bg-gradient-to-b from-[#f5f5f5] my-16"
-    >
-      <div class="flex w-full bg-white">
-        <div
-          class="w-full md:h-24 h-12 bg-gradient-to-b bg-[#f5f5f5] rounded-tr-3xl"
-        ></div>
-        <div
-          class="w-full md:h-24 h-12 bg-gradient-to-b bg-[#f5f5f5] rounded-tl-3xl"
-        ></div>
-      </div>
 
-      <div
-        class="w-full bg-gradient-to-b bg-[#f5f5f5] flex items-center justify-center mx-auto"
-      >
-        <div class="container flex flex-col items-center justify-center">
-          <h2
-            class="md:text-5xl text-xl font-sans italic font-bold leading-loose text-center mb-12 text-gray-800 md:mt-12"
-          >
-            Մետաղական թիթեղների պատրաստում, ներառյալ հակահարվածումը, փորվածքների
-            ձևավորումը և սարքավորումը
-          </h2>
-          <div
-            class="flex flex-row flex-wrap items-center justify-center md:my-24 my-12"
-          >
-            <service-card
-              title="Խորացումներ"
-              image="/servicesImg/countersink-parts-300x193.webp"
-              description="Հնարավորություն տվեք հարմարանքներին տեղադրվել ձեր մասերի վրա այնպես, որ դրանք դառնան հարթ՝ մաշվածությունն ու վնասվածքները նվազեցնելու համար։"
-            ></service-card>
-            <service-card
-              title="Փորվածքների ձևավորում"
-              image="/servicesImg/dimple-hero-300x206.jpg"
-              description="Ամրացրեք նյութը՝ ավելացնելով էսթետիկ գեղեցիկ խոռոչներ։"
-            ></service-card>
-            <service-card
-              title="Տեղադրում"
-              image="/servicesImg/powder-hardware-top-300x193.webp"
-              description="Ընտրեք մեր PEM մամլիչ հարմարանքների կատալոգից՝ ձեր մասերին ընկույզներ, շպիլկաներ և բաժանարարներ ավելացնելու համար։"
-            ></service-card>
-            <service-card
-              title="Թելատում"
-              image="/servicesImg/tap-tile-white-300x180.webp"
-              description="Արագ և հեշտ կերպով ավելացրեք թելավորումներ՝ ձեր մասերին հարմարանքներ միացնելու համար։"
-            ></service-card>
-          </div>
+    <!-- Սպիտակ հատված և ծառայությունների ցուցակ -->
+    <div
+      class="flex flex-col items-center justify-center w-full bg-gradient-to-b from-[#f5f5f5] to-white py-12"
+    >
+      <!-- Սլայդներ/ծառայություններ -->
+      <div class="container px-4 sm:px-6 lg:px-8">
+        <h2
+          class="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-sans italic font-bold leading-snug text-center text-gray-800 mt-8 md:mt-12 mb-8 sm:mb-12"
+        >
+          Մետաղական թիթեղների պատրաստում, ներառյալ հակահարվածումը, փորվածքների
+          ձևավորումը և սարքավորումը
+        </h2>
+
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-12"
+        >
+          <service-card
+            title="Խորացումներ"
+            image="/servicesImg/countersink-parts-300x193.webp"
+            description="Հնարավորություն տվեք հարմարանքներին տեղադրվել ձեր մասերի վրա այնպես, որ դրանք դառնան հարթ՝ մաշվածությունն ու վնասվածքները նվազեցնելու համար։"
+          ></service-card>
+
+          <service-card
+            title="Փորվածքների ձևավորում"
+            image="/servicesImg/dimple-hero-300x206.jpg"
+            description="Ամրացրեք նյութը՝ ավելացնելով էսթետիկ գեղեցիկ խոռոչներ։"
+          ></service-card>
+
+          <service-card
+            title="Տեղադրում"
+            image="/servicesImg/powder-hardware-top-300x193.webp"
+            description="Ընտրեք մեր PEM մամլիչ հարմարանքների կատալոգից՝ ձեր մասերին ընկույզներ, շպիլկաներ և բաժանարարներ ավելացնելու համար։"
+          ></service-card>
+
+          <service-card
+            title="Թելատում"
+            image="/servicesImg/tap-tile-white-300x180.webp"
+            description="Արագ և հեշտ կերպով ավելացրեք թելավորումներ՝ ձեր մասերին հարմարանքներ միացնելու համար։"
+          ></service-card>
         </div>
       </div>
     </div>
@@ -94,11 +117,9 @@
 
 <script>
 import ServiceCard from '~/components/pages/services/ServiceCard.vue'
-import HeaderLayout from '~/components/layouts/Header-layout.vue'
 
 export default {
   components: {
-    HeaderLayout,
     ServiceCard,
   },
   middleware: ['publicPage'],
@@ -106,6 +127,7 @@ export default {
 </script>
 
 <style scoped>
+/* Բութոնի ստվեր՝ եթե որոշես օգտագործել */
 .get_started_button {
   box-shadow: rgba(80, 20, 20, 0.04) 0 0 1px 0, rgba(66, 6, 6, 0.87) 0 5px 8px 0;
 }
