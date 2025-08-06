@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[65],{599:function(n,e,t){"use strict";t.r(e);var r={layout:"ManagerLayout",middleware:["manager","roleRedirect"]},l=t(7),component=Object(l.a)(r,function(){return(0,this._self._c)("div",[this._v("\n  products\n")])},[],!1,null,null,null);e.default=component.exports}}]);

@@ -526,7 +526,7 @@ export default {
       this.pmpRemoteNumberName = null
     },
     editPmp() {
-      this.$router.push({ path: 'engineer/files/view', query: { id: this.remoteNumberId } })
+      this.$router.push(`/engineer/files/${this.remoteNumberId}`)
     },
     async addPmpGroupRemoteNumber() {
       if (
@@ -553,7 +553,10 @@ export default {
         this.isCreatePmp = false
         this.isEditPmp = false
         this.isCreatePmpRemoteNumber = false
-        await this.$router.push({ path: 'engineer/files/view', query: { id: this.remoteNumberId } })
+        await this.$router.push({
+          path: 'engineer/files/view',
+          query: { id: this.remoteNumberId },
+        })
       }
     },
   },

@@ -43,7 +43,7 @@
       <div class="mt-auto">
         <div class="flex items-center justify-between mb-3">
           <span class="text-lg font-bold text-gray-900">
-            {{ formatPrice(product.price) }}
+            {{ formatPrice(product.price) }} դրամ
           </span>
         </div>
 
@@ -82,8 +82,7 @@ export default {
   },
   methods: {
     formatPrice(price) {
-      // Ավելացրեք ձեր գնի ֆորմատավորման տրամաբանությունը
-      return typeof price === 'number' ? `$${price.toFixed(2)}` : price
+      return price.toLocaleString()
     },
   },
 }

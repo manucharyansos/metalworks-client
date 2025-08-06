@@ -16,7 +16,7 @@
               <span
                 class="ml-3 text-xl font-bold text-gray-900 dark:text-white tracking-tight italic"
               >
-                Metal<span class="text-red-600">work's</span>
+                Metal<span class="text-red-600">Work's</span>
               </span>
             </NuxtLink>
           </div>
@@ -42,12 +42,12 @@
           </div>
 
           <!-- Right side elements -->
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center">
             <template v-if="$auth.loggedIn">
               <BasketButton @toggle="toggleBasket" />
               <BasketModal :is-open="showBasket" @close="toggleBasket" />
 
-              <BaseModal :isOpen="openDropdown" @close="openDropdown = false">
+              <BaseModal :is-open="openDropdown" @close="openDropdown = false">
                 <div
                   class="rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-700 w-56"
                 >
