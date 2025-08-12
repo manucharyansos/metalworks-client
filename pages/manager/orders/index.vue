@@ -1,5 +1,5 @@
 <template>
-  <div class="shadow-md sm:rounded-lg mt-8">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Action & Search Section -->
     <div
       class="flex items-center justify-between flex-row flex-wrap my-8 space-y-4 md:space-y-0 pb-4 bg-white dark:bg-gray-900"

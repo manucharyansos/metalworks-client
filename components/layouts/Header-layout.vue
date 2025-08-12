@@ -4,20 +4,20 @@
       class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm"
     >
       <div class="mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
+        <div class="flex items-center justify-between">
           <!-- Logo -->
           <div class="flex-shrink-0 flex items-center">
-            <NuxtLink to="/" class="flex items-center group">
+            <NuxtLink to="/" class="flex flex-col items-center group">
               <img
-                src="/metalworks-logo.jpg"
-                class="logo-img h-8 w-8 rounded-full border-2 border-red-500 group-hover:border-red-600 transition-colors duration-200"
+                src="/logo.png"
+                class="logo-img h-32 w-32 rounded-full border-2 border-red-500 group-hover:border-red-600 transition-colors duration-200"
                 alt="Metalwork's Logo"
               />
-              <span
-                class="ml-3 text-xl font-bold text-gray-900 dark:text-white tracking-tight italic"
-              >
-                Metal<span class="text-red-600">Work's</span>
-              </span>
+              <!--              <span-->
+              <!--                class="ml-3 text-xl font-bold text-gray-900 dark:text-white tracking-tight italic"-->
+              <!--              >-->
+              <!--                Metal<span class="text-red-600">Work's</span>-->
+              <!--              </span>-->
             </NuxtLink>
           </div>
 

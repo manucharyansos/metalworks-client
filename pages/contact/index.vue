@@ -60,8 +60,14 @@
       >
         <div class="mt-6 md:mt-0 bg-white p-6 rounded-lg shadow-md w-full">
           <h2 class="text-xl font-semibold mb-4">Կոնտակտային տվյալներ</h2>
-          <div>
-            <p class="mb-2"><strong>Էլ փոստ:</strong> info@metalworks.am</p>
+          <div class="flex flex-col">
+            <a
+              href="mailto:info@metalworks.am"
+              class="mb-2"
+              aria-label="Էլ. փոստ՝ info@metalworks.am"
+            >
+              <strong>Էլ․ փոստ՝</strong> info@metalworks.am
+            </a>
             <a href="tel:+37498025044" class="mb-2"
               ><strong>Հեռախոս:</strong> 098 025 044</a
             >

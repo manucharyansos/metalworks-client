@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-50 dark:bg-gray-900 h-screen">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div
       v-if="!isOpenDeleteModal && !openEditModal"
       class="grid md:grid-cols-3 grid-cols-1 gap-4 mt-12"
