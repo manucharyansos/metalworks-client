@@ -526,7 +526,17 @@ export default {
       this.pmpRemoteNumberName = null
     },
     editPmp() {
-      this.$router.push(`/engineer/files/${this.remoteNumberId}`)
+      if (this.remoteNumberId) {
+        this.$router.push(`/engineer/files/${this.remoteNumberId}`)
+      } else {
+        this.$notify({
+          text: 'Հաշվի ID-ն բացակայում է:',
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
+      }
     },
     async addPmpGroupRemoteNumber() {
       if (
@@ -547,16 +557,23 @@ export default {
       }
 
       const res = await this.rememberNumberPmp(data)
-      await this.resetPmpData()
+      this.resetPmpData()
       if (res) {
         this.isExistPmpRemoteNumber = true
         this.isCreatePmp = false
         this.isEditPmp = false
         this.isCreatePmpRemoteNumber = false
-        await this.$router.push({
-          path: 'engineer/files/view',
-          query: { id: this.remoteNumberId },
-        })
+        if (this.remoteNumberId) {
+          await this.$router.push(`/engineer/files/${this.remoteNumberId}`)
+        } else {
+          this.$notify({
+            text: 'Հաշվի ID-ն բացակայում է:',
+            duration: 3000,
+            speed: 1000,
+            position: 'top',
+            type: 'error',
+          })
+        }
       }
     },
   },

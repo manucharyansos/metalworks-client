@@ -1,7 +1,7 @@
 <template>
   <header class="sticky top-0 z-50">
     <nav
-      class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm"
+      class="bg-transparent dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm"
     >
       <div class="mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between">
