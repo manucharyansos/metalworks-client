@@ -1,5 +1,31 @@
 <template>
-  <div>
+  <div class="bg-stone-100">
+    <div
+      class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 md:p-8 lg:p-16 bg-stone-100"
+    >
+      <!-- Text and Products Section -->
+      <div
+        class="flex flex-col items-center lg:items-start justify-start order-2 lg:order-1"
+      >
+        <!-- Title -->
+        <h2
+          class="text-center lg:text-start w-full py-4 lg:py-0 mb-8 lg:mb-12 text-2xl sm:text-3xl md:text-3xl lg:text-4xl xl:text-4xl text-neutral-800 tracking-wide leading-tight font-serif font-bold italic"
+        >
+          ԹԻԹԵՂԱՎՈՐ ՄԵՏԱՂՆԵՐԻ, ՊՐՈՖԻԼԱՅԻՆ ԽՈՂՈՎԱԿՆԵՐԻ ՎԵՐԱՄՇԱԿՄԱՆ ԹՎԱՅԻՆ
+          ԱՐՏԱԴՐՈՒԹՅՈՒՆ
+        </h2>
+
+        <!-- Products Carousel -->
+        <div v-if="products.length > 0" class="carousel_section w-full">
+          <product-slider :products="products" />
+        </div>
+      </div>
+
+      <!-- Image Section -->
+      <div
+        class="first_section w-full h-64 md:h-80 lg:h-[60vh] order-1 lg:order-2 bg-cover bg-center bg-no-repeat rounded-lg shadow-lg"
+      ></div>
+    </div>
     <div
       class="home_component flex flex-col m-0 p-0 min-h-screen w-full h-full items-center"
       :class="{ activeScroll: isActiveBg }"
@@ -8,12 +34,6 @@
         class="container flex bg-none items-center justify-center md:mt-44 mt-24 px-4"
       >
         <div class="flex flex-col items-center justify-center">
-          <h1
-            class="xl:text-7xl lg:text-7xl md:text-6xl sm:text-5xl text-2xl text-neutral-700 z-10 leading-loose font-sans font-bold italic mx-auto text-center my-4"
-          >
-            Պատվերով թիթեղյա դետալներ
-          </h1>
-
           <div
             class="flex flex-row flex-wrap lg:flex-nowrap items-center justify-center mx-auto z-10 w-full my-12"
           >
@@ -728,10 +748,27 @@ export default {
   },
 }
 </script>
-<style>
-.home_component {
-  background-color: #f5f5f5;
-  background-image: url('@/static/lines-bg.svg');
+<style scoped>
+.first_section {
+  background-image: url('@/static/laser.jpg');
+  position: relative;
+}
+
+.first_section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: inherit;
+}
+
+@media (min-width: 1024px) {
+  .first_section {
+    min-height: 500px;
+  }
 }
 
 .get_started_button {

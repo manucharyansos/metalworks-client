@@ -34,14 +34,14 @@
             <button
               v-for="(img, index) in [product, ...product.images]"
               :key="index"
-              @click="currentImage = index === 0 ? product.image : img.path"
-              class="w-3 h-3 rounded-full"
               :class="{
                 'bg-blue-500':
                   currentImage === (index === 0 ? product.image : img.path),
                 'bg-white bg-opacity-50':
                   currentImage !== (index === 0 ? product.image : img.path),
               }"
+              @click="currentImage = index === 0 ? product.image : img.path"
+              class="w-3 h-3 rounded-full"
             ></button>
           </div>
         </div>
@@ -56,8 +56,8 @@
           </p>
 
           <button
-            @click="addToCart(product)"
             class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition duration-300"
+            @click="addToCart(product)"
           >
             Ավելացնել զամբյուղ
           </button>
@@ -85,12 +85,12 @@
             <button
               v-for="(img, index) in [product, ...product.images]"
               :key="index"
-              @click="currentImage = index === 0 ? product.image : img.path"
               class="h-20 rounded overflow-hidden border-2"
               :class="{
                 'border-blue-500':
                   currentImage === (index === 0 ? product.image : img.path),
               }"
+              @click="currentImage = index === 0 ? product.image : img.path"
             >
               <img
                 :src="index === 0 ? product.image : img.path"

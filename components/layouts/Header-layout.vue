@@ -1,5 +1,5 @@
 <template>
-  <header class="sticky top-0 z-50">
+  <header class="sticky top-0 z-50 bg-stone-200">
     <nav
       class="bg-transparent dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm"
     >
@@ -13,16 +13,27 @@
                 class="logo-img h-32 w-32 rounded-full border-2 border-red-500 group-hover:border-red-600 transition-colors duration-200"
                 alt="Metalwork's Logo"
               />
-              <!--              <span-->
-              <!--                class="ml-3 text-xl font-bold text-gray-900 dark:text-white tracking-tight italic"-->
-              <!--              >-->
-              <!--                Metal<span class="text-red-600">Work's</span>-->
-              <!--              </span>-->
             </NuxtLink>
           </div>
 
           <!-- Desktop Navigation -->
           <div class="hidden lg:flex lg:items-center lg:space-x-4">
+            <NuxtLink
+              to="/"
+              class="nav-link"
+              active-class="text-red-600 dark:text-red-400 font-semibold text-blur"
+              exact
+            >
+              Գլխավոր
+            </NuxtLink>
+            <NuxtLink
+              to="/about"
+              class="nav-link"
+              active-class="text-red-600 dark:text-red-400 font-semibold text-blur"
+              exact
+            >
+              Մեր մասին
+            </NuxtLink>
             <NuxtLink
               to="/services"
               class="nav-link"
@@ -159,6 +170,12 @@
             v-if="openNavbar"
             class="lg:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-4 px-4"
           >
+            <NuxtLink
+              to="/"
+              class="mobile-link"
+              @click.native="openNavbar = false"
+              >Գլխավոր</NuxtLink
+            >
             <NuxtLink
               to="/services"
               class="mobile-link"
