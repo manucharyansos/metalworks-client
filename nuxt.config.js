@@ -37,7 +37,7 @@ export default {
   css: [
     '~/assets/css/main.css',
     'leaflet/dist/leaflet.css',
-    'swiper/css/swiper.min.css',
+    // 'swiper/css/swiper.min.css',
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
@@ -108,7 +108,7 @@ export default {
     { src: '~/plugins/notifications-client', ssr: false },
     { src: '~/plugins/leaflet.js', mode: 'client' },
     { src: '~/plugins/formatDate' },
-    { src: '~/plugins/swiper.js', mode: 'client' },
+    { src: '~/plugins/vue-carousel.js', mode: 'client' },
   ],
 
   components: true,

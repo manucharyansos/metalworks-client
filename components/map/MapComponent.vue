@@ -1,59 +1,72 @@
 <template>
-  <div id="map"></div>
+  <div ref="wrapper" class="relative w-full h-full">
+    <div ref="map" class="absolute inset-0"></div>
+  </div>
 </template>
 
 <script>
 export default {
   name: 'MapComponent',
+  props: {
+    lat: { type: Number, default: 40.17161 },
+    lng: { type: Number, default: 44.429071 },
+    zoom: { type: Number, default: 13 },
+    popup: { type: String, default: 'Րաֆֆու 111' },
+    scrollWheelZoom: { type: Boolean, default: false }, // footer-ի համար հարմար է off
+    tileUrl: {
+      type: String,
+      default: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    },
+    maxZoom: { type: Number, default: 19 },
+  },
+  data() {
+    return { map: null, ro: null }
+  },
   mounted() {
+    if (!this.$leaflet) return
     this.initMap()
+
+    this.$nextTick(() =>
+      setTimeout(() => this.map && this.map.invalidateSize(), 50)
+    )
+
+    this.ro = new ResizeObserver(() => this.map && this.map.invalidateSize())
+    this.ro.observe(this.$refs.wrapper)
+  },
+  beforeDestroy() {
+    if (this.ro) {
+      this.ro.disconnect()
+      this.ro = null
+    }
+    if (this.map) {
+      this.map.remove()
+      this.map = null
+    }
   },
   methods: {
     initMap() {
-      const map = this.$leaflet.map('map').setView([40.17161, 44.429071], 13)
+      const L = this.$leaflet
+      const center = [this.lat, this.lng]
 
-      this.$leaflet
-        .tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-        })
-        .addTo(map)
+      this.map = L.map(this.$refs.map, {
+        center,
+        zoom: this.zoom,
+        scrollWheelZoom: this.scrollWheelZoom,
+      })
 
-      this.$leaflet
-        .marker([40.17161, 44.429071])
-        .addTo(map)
-        .bindPopup('Րաֆֆու 111 ')
-        .openPopup()
+      L.tileLayer(this.tileUrl, {
+        maxZoom: this.maxZoom,
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(this.map)
+
+      const marker = L.marker(center).addTo(this.map)
+      if (this.popup) marker.bindPopup(this.popup)
+    },
+    setView(lat, lng, zoom = this.zoom) {
+      if (this.map) this.map.setView([lat, lng], zoom)
     },
   },
 }
 </script>
 
-<style>
-#map {
-  height: 200px;
-  width: 500px;
-  z-index: 0;
-}
-@media screen and (max-width: 1280px) {
-  #map {
-    width: 400px;
-  }
-}
-@media screen and (max-width: 1024px) {
-  #map {
-    width: 300px;
-  }
-}
-@media screen and (max-width: 768px) {
-  #map {
-    margin: auto;
-    width: 400px;
-  }
-}
-@media screen and (max-width: 450px) {
-  #map {
-    margin: auto;
-    width: 300px;
-  }
-}
-</style>
+<style scoped></style>

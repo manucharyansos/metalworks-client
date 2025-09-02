@@ -1,17 +1,17 @@
 <template>
-  <div class="m-0 p-0 relative">
-    <!-- Sidebar Toggle Button -->
+  <div class="relative min-h-screen">
+    <!-- Mobile toggle -->
     <button
       type="button"
-      class="fixed top-0 right-0 p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
+      class="fixed top-3 right-3 z-50 p-2 rounded-lg lg:hidden bg-white/90 text-gray-700 shadow hover:bg-white focus:outline-none"
       :aria-expanded="isSidebarOpen"
+      :aria-label="isSidebarOpen ? 'Close sidebar' : 'Open sidebar'"
       @click="toggleSidebar"
     >
-      <span class="sr-only">Open sidebar</span>
       <svg
+        v-if="!isSidebarOpen"
         class="w-6 h-6"
         fill="currentColor"
-        xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
       >
         <path
@@ -20,24 +20,43 @@
           d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
         />
       </svg>
+      <svg v-else class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+        />
+      </svg>
     </button>
+
+    <!-- Backdrop (mobile) -->
+    <div
+      v-if="isSidebarOpen && !isDesktop"
+      class="fixed inset-0 z-30 bg-black/40 backdrop-blur-[1px]"
+      @click="closeSidebar"
+    />
 
     <!-- Sidebar -->
     <aside
-      class="fixed top-0 left-0 z-40 md:w-64 w-full h-screen bg-gray-900 transition-transform lg:translate-x-0"
-      :class="{ '-translate-x-full': !isSidebarOpen }"
+      class="fixed inset-y-0 left-0 z-40 w-72 lg:w-64 bg-gray-900 text-gray-50 transform-gpu transition-transform duration-300 ease-out lg:translate-x-0 will-change-transform"
+      :class="{
+        '-translate-x-full': !isSidebarOpen && !isDesktop,
+        'translate-x-0': isSidebarOpen || isDesktop,
+      }"
       aria-label="Sidebar"
+      :aria-hidden="!isSidebarOpen && !isDesktop"
     >
-      <div class="relative h-full px-3 py-4 overflow-y-auto">
-        <ul class="mt-6 space-y-2">
+      <div class="relative h-full px-4 py-6 overflow-y-auto">
+        <ul class="mt-2 space-y-2">
           <!-- Dashboard -->
           <li>
             <nuxt-link
+              ref="firstLink"
               to="/manager"
               exact-active-class="manager-active-link"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
+              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+              @click.native="onNavClick"
             >
-              <!-- ... (Dashboard icon) ... -->
               Dashboard
             </nuxt-link>
           </li>
@@ -47,249 +66,94 @@
             <nuxt-link
               to="/messages"
               exact-active-class="manager-active-link"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
+              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+              @click.native="onNavClick"
             >
               Հաղորդագրություն
             </nuxt-link>
           </li>
 
           <!-- Orders -->
-          <li class="text-white">
+          <li>
             <nuxt-link
               to="/manager/orders"
               exact-active-class="manager-active-link"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
+              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+              @click.native="onNavClick"
             >
               Պատվերը
             </nuxt-link>
-            <!--            <transition name="slide-fade">-->
-            <!--              <ul v-if="activeDrawer === 'orders'" class="pl-6 mt-2 space-y-2">-->
-            <!--                <li @click="closeSidebar()">-->
-
-            <!--                </li>-->
-            <!--                <li @click="closeSidebar()">-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/create/order"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  >-->
-            <!--                    Նոր Պատվեր-->
-            <!--                  </nuxt-link>-->
-            <!--                </li>-->
-            <!--                <li @click="closeSidebar()">-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/update/order"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  >-->
-            <!--                    Թարմացնել Պատվերը-->
-            <!--                  </nuxt-link>-->
-            <!--                </li>-->
-            <!--              </ul>-->
-            <!--            </transition>-->
           </li>
 
           <!-- Products -->
-          <li class="text-white">
+          <li>
             <nuxt-link
               to="/manager/products"
               exact-active-class="manager-active-link"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
+              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+              @click.native="onNavClick"
             >
               Ապրանք
             </nuxt-link>
-            <!--            <transition name="slide-fade">-->
-            <!--              <ul-->
-            <!--                v-if="activeDrawer === 'products'"-->
-            <!--                class="pl-6 mt-2 space-y-2"-->
-            <!--              >-->
-            <!--                <li @click="closeSidebar()">-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/products"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  >-->
-            <!--                    Ապրանք-->
-            <!--                  </nuxt-link>-->
-            <!--                </li>-->
-            <!--                <li @click="closeSidebar()">-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/create/products"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  >-->
-            <!--                    Նոր Ապրանք-->
-            <!--                  </nuxt-link>-->
-            <!--                </li>-->
-            <!--              </ul>-->
-            <!--            </transition>-->
           </li>
 
           <!-- Users -->
-          <li class="text-white">
+          <li>
             <nuxt-link
               to="/manager/users"
               exact-active-class="manager-active-link"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
-              >Օգտատերեր</nuxt-link
+              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+              @click.native="onNavClick"
             >
-            <!--            <transition name="slide-fade">-->
-            <!--              <ul-->
-            <!--                v-if="activeDrawer === 'users'"-->
-            <!--                class="py-2 space-y-2 text-white"-->
-            <!--              >-->
-            <!--                <li-->
-            <!--                  class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  @click="closeSidebar()"-->
-            <!--                >-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/users"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="flex items-center space-x-3 rtl:space-x-reverse"-->
-            <!--                    >Օգտատերեր</nuxt-link-->
-            <!--                  >-->
-            <!--                </li>-->
-            <!--                <li-->
-            <!--                  class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  @click="closeSidebar()"-->
-            <!--                >-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/create/users"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="flex items-center space-x-3 rtl:space-x-reverse"-->
-            <!--                    >Նոր Օգտատերեր</nuxt-link-->
-            <!--                  >-->
-            <!--                </li>-->
-            <!--                <li-->
-            <!--                  class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  @click="closeSidebar()"-->
-            <!--                >-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/update/users"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="flex items-center space-x-3 rtl:space-x-reverse"-->
-            <!--                    >Օգտատերի թարմացում</nuxt-link-->
-            <!--                  >-->
-            <!--                </li>-->
-            <!--              </ul>-->
-            <!--            </transition>-->
+              Օգտատերեր
+            </nuxt-link>
           </li>
 
           <!-- Workers -->
-          <li class="text-white">
+          <li>
             <nuxt-link
               to="/manager/workers"
               exact-active-class="manager-active-link"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
-              >Աշխատակիցներ</nuxt-link
+              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+              @click.native="onNavClick"
             >
-            <!--            <transition name="slide-fade">-->
-            <!--              <ul-->
-            <!--                v-if="activeDrawer === 'workers'"-->
-            <!--                class="py-2 space-y-2 text-white"-->
-            <!--              >-->
-            <!--                <li-->
-            <!--                  class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  @click="closeSidebar()"-->
-            <!--                >-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/workers"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="flex items-center space-x-3 rtl:space-x-reverse"-->
-            <!--                    >Աշխատակիցներ</nuxt-link-->
-            <!--                  >-->
-            <!--                </li>-->
-            <!--                <li-->
-            <!--                  class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  @click="closeSidebar()"-->
-            <!--                >-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/create/workers"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="flex items-center space-x-3 rtl:space-x-reverse"-->
-            <!--                    >Նոր Աշխատակից</nuxt-link-->
-            <!--                  >-->
-            <!--                </li>-->
-            <!--                <li-->
-            <!--                  class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  @click="closeSidebar()"-->
-            <!--                >-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/update/workers"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="flex items-center space-x-3 rtl:space-x-reverse"-->
-            <!--                    >Թարմացում</nuxt-link-->
-            <!--                  >-->
-            <!--                </li>-->
-            <!--              </ul>-->
-            <!--            </transition>-->
+              Աշխատակիցներ
+            </nuxt-link>
           </li>
 
           <!-- Materials -->
-          <li class="text-white">
+          <li>
             <nuxt-link
               to="/manager/materials"
               exact-active-class="manager-active-link"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
-              >Նյութեր</nuxt-link
+              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+              @click.native="onNavClick"
             >
-            <!--            <transition name="slide-fade">-->
-            <!--              <ul-->
-            <!--                v-if="activeDrawer === 'materials'"-->
-            <!--                class="py-2 space-y-2 text-white"-->
-            <!--              >-->
-            <!--                <li-->
-            <!--                  class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  @click="closeSidebar()"-->
-            <!--                >-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/materials"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="flex items-center space-x-3 rtl:space-x-reverse"-->
-            <!--                    >Նյութեր</nuxt-link-->
-            <!--                  >-->
-            <!--                </li>-->
-            <!--                <li-->
-            <!--                  class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  @click="closeSidebar()"-->
-            <!--                >-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/create/materials"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="flex items-center space-x-3 rtl:space-x-reverse"-->
-            <!--                    >Նոր Նյութեր</nuxt-link-->
-            <!--                  >-->
-            <!--                </li>-->
-            <!--                <li-->
-            <!--                  class="cursor-pointer mx-6 hover:bg-gray-700 py-1 px-2.5 rounded-xl"-->
-            <!--                  @click="closeSidebar()"-->
-            <!--                >-->
-            <!--                  <nuxt-link-->
-            <!--                    to="/manager/update/materials"-->
-            <!--                    exact-active-class="manager-active-link"-->
-            <!--                    class="flex items-center space-x-3 rtl:space-x-reverse"-->
-            <!--                    >Նյութերի թարմացում</nuxt-link-->
-            <!--                  >-->
-            <!--                </li>-->
-            <!--              </ul>-->
-            <!--            </transition>-->
+              Նյութեր
+            </nuxt-link>
           </li>
         </ul>
 
-        <!-- Logout Button -->
+        <!-- Logout -->
         <button
           type="button"
-          class="absolute bottom-6 left-6 flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
+          class="absolute bottom-6 left-4 right-4 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-100 w-auto"
           @click="logout"
         >
-          <!-- ... (Logout icon) ... -->
-          <span class="ms-3">Log out</span>
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M3 4.75A1.75 1.75 0 014.75 3h5.5A1.75 1.75 0 0112 4.75V7a.75.75 0 01-1.5 0V4.75a.25.25 0 00-.25-.25h-5.5a.25.25 0 00-.25.25v10.5c0 .138.112.25.25.25h5.5a.25.25 0 00.25-.25V13a.75.75 0 011.5 0v2.25A1.75 1.75 0 0110.25 17h-5.5A1.75 1.75 0 013 15.25V4.75zM13.47 10.53a.75.75 0 010-1.06l2-2a.75.75 0 111.06 1.06L15.81 9.25H8.75a.75.75 0 000 1.5h7.06l.72.72a.75.75 0 001.06-1.06l-2-2z"
+            />
+          </svg>
+          <span>Log out</span>
         </button>
       </div>
     </aside>
 
-    <!-- Main Content -->
-    <div class="lg:ml-64">
+    <!-- Main content -->
+    <div class="lg:ml-64 transition-[margin] duration-300 ease-out">
       <Nuxt />
     </div>
   </div>
@@ -300,24 +164,67 @@ export default {
   data() {
     return {
       isSidebarOpen: false,
-      activeDrawer: null,
+      isDesktop: false,
     }
   },
+  mounted() {
+    this.onResize()
+    window.addEventListener('resize', this.onResize, { passive: true })
+    document.addEventListener('keydown', this.onKeydown)
+
+    this._unwatch = this.$watch(
+      () => this.$route.fullPath,
+      () => {
+        if (!this.isDesktop) this.closeSidebar()
+      }
+    )
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.onResize)
+    document.removeEventListener('keydown', this.onKeydown)
+    if (this._unwatch) this._unwatch()
+  },
   methods: {
+    onResize() {
+      this.isDesktop = window.matchMedia('(min-width: 1024px)').matches
+      if (this.isDesktop) {
+        this.unlockScroll()
+      } else if (!this.isSidebarOpen) {
+        this.unlockScroll()
+      }
+    },
+    onKeydown(e) {
+      if (e.key === 'Escape' && this.isSidebarOpen && !this.isDesktop) {
+        this.closeSidebar()
+      }
+    },
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen
+      if (this.isSidebarOpen && !this.isDesktop) {
+        this.$nextTick(() => {
+          this.$refs.firstLink && this.$refs.firstLink.$el?.focus?.()
+        })
+        this.lockScroll()
+      } else {
+        this.unlockScroll()
+      }
     },
     closeSidebar() {
       this.isSidebarOpen = false
+      this.unlockScroll()
     },
-    closeAllDrawers() {
-      this.activeDrawer = null
+    onNavClick() {
+      if (!this.isDesktop) this.closeSidebar()
     },
-    toggleDrawer(drawerName) {
-      this.activeDrawer = this.activeDrawer === drawerName ? null : drawerName
+    lockScroll() {
+      document.documentElement.classList.add('overflow-hidden')
+    },
+    unlockScroll() {
+      document.documentElement.classList.remove('overflow-hidden')
     },
     logout() {
       this.$auth.logout()
+      this.onNavClick()
     },
   },
 }
@@ -325,25 +232,10 @@ export default {
 
 <style scoped>
 aside {
-  transition: transform 0.3s ease-in-out;
+  will-change: transform;
 }
 
-/* Ենթամենյուների անիմացիա */
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-.slide-fade-leave-active {
-  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
-}
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateY(-10px);
-  opacity: 0;
-}
-
-/* Սլաքի պտույտի անիմացիա */
-.rotate-180 {
-  transform: rotate(180deg);
-  transition: transform 0.2s ease;
+.manager-active-link {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 </style>

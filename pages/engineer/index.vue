@@ -527,7 +527,10 @@ export default {
     },
     editPmp() {
       if (this.remoteNumberId) {
-        this.$router.push(`/engineer/files/${this.remoteNumberId}`)
+        this.$router.push({
+          path: '/engineer/files/view',
+          query: { id: this.remoteNumberId },
+        })
       } else {
         this.$notify({
           text: 'Հաշվի ID-ն բացակայում է:',
@@ -564,7 +567,10 @@ export default {
         this.isEditPmp = false
         this.isCreatePmpRemoteNumber = false
         if (this.remoteNumberId) {
-          await this.$router.push(`/engineer/files/${this.remoteNumberId}`)
+          await this.$router.push({
+            path: '/engineer/files/view',
+            query: { id: this.remoteNumberId },
+          })
         } else {
           this.$notify({
             text: 'Հաշվի ID-ն բացակայում է:',

@@ -1,145 +1,302 @@
 <template>
-  <footer class="bg-white dark:bg-gray-900 z-10">
-    <div class="mx-auto w-full p-4 py-6 lg:py-8">
-      <div class="md:flex md:justify-between">
-        <div class="z-0">
-          <MapComponent />
-        </div>
-        <div class="grid grid-cols-2 my-4 gap-8 sm:gap-6 sm:grid-cols-2">
+  <footer
+    class="relative bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 mt-12"
+  >
+    <!-- subtle gradient top border -->
+    <div
+      class="h-1 w-full bg-gradient-to-r from-red-500/70 via-rose-500/70 to-orange-400/70"
+    ></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+      <div class="grid gap-10 lg:gap-12 md:grid-cols-12">
+        <!-- Map card -->
+        <section class="md:col-span-5">
+          <div
+            class="rounded-2xl overflow-hidden ring-1 ring-gray-200/70 dark:ring-white/10 shadow-sm bg-white/70 dark:bg-white/5 backdrop-blur"
+          >
+            <div class="aspect-video sm:aspect-[4/3]">
+              <MapComponent />
+            </div>
+          </div>
+        </section>
+
+        <!-- Links + Info -->
+        <section
+          class="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          <!-- Resources -->
           <div>
             <h2
-              class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white"
+              class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white"
             >
               Ռեսուրսներ
             </h2>
-            <ul class="text-gray-500 dark:text-gray-400 font-medium">
+            <ul class="space-y-2.5">
               <li>
-                <a href="#" class="hover:underline">Ինժիներական նախագծում</a>
+                <NuxtLink
+                  to="/services#engineering"
+                  class="group inline-flex items-center hover:text-red-600 dark:hover:text-red-400 transition"
+                >
+                  <span>Ինժիներական նախագծում</span>
+                  <svg
+                    class="ml-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 transition"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </NuxtLink>
               </li>
               <li>
-                <a href="#" class="hover:underline">Լազերային կտրում</a>
+                <NuxtLink
+                  to="/services#laser"
+                  class="group inline-flex items-center hover:text-red-600 dark:hover:text-red-400 transition"
+                >
+                  <span>Լազերային կտրում</span>
+                  <svg
+                    class="ml-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 transition"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </NuxtLink>
               </li>
               <li>
-                <a href="#" class="hover:underline">Փոշեներկում</a>
+                <NuxtLink
+                  to="/services#powder"
+                  class="group inline-flex items-center hover:text-red-600 dark:hover:text-red-400 transition"
+                >
+                  <span>Փոշեներկում</span>
+                  <svg
+                    class="ml-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 transition"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </NuxtLink>
               </li>
               <li>
-                <a href="#" class="hover:underline">Զոդում</a>
+                <NuxtLink
+                  to="/services#welding"
+                  class="group inline-flex items-center hover:text-red-600 dark:hover:text-red-400 transition"
+                >
+                  <span>Զոդում</span>
+                  <svg
+                    class="ml-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 transition"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </NuxtLink>
               </li>
               <li>
-                <a href="#" class="hover:underline">Ճկում</a>
+                <NuxtLink
+                  to="/services#bending"
+                  class="group inline-flex items-center hover:text-red-600 dark:hover:text-red-400 transition"
+                >
+                  <span>Ճկում</span>
+                  <svg
+                    class="ml-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 transition"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </NuxtLink>
               </li>
             </ul>
           </div>
+
+          <!-- About -->
           <div>
             <h2
-              class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white"
+              class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white"
             >
               Մեր մասին
             </h2>
-            <ul class="text-gray-500 dark:text-gray-400 font-medium">
-              <li class="mb-4">
-                <a href="#" class="hover:underline">Metalwork's</a>
+            <ul class="space-y-2.5">
+              <li>
+                <NuxtLink
+                  to="/about"
+                  class="hover:text-red-600 dark:hover:text-red-400 transition"
+                >
+                  Metalwork's
+                </NuxtLink>
               </li>
               <li>
-                <a href="#" class="hover:underline">Terms &amp; Conditions</a>
+                <NuxtLink
+                  to="/terms"
+                  class="hover:text-red-600 dark:hover:text-red-400 transition"
+                >
+                  Terms &amp; Conditions
+                </NuxtLink>
+              </li>
+              <li>
+                <NuxtLink
+                  to="/contact"
+                  class="hover:text-red-600 dark:hover:text-red-400 transition"
+                >
+                  Կոնտակտ
+                </NuxtLink>
               </li>
             </ul>
           </div>
-        </div>
+
+          <!-- Contact -->
+          <div>
+            <h2
+              class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white"
+            >
+              Կապ
+            </h2>
+            <ul class="space-y-2.5">
+              <li class="text-sm leading-6">
+                ԵՐԵՎԱՆ, Հայաստան<br />
+                <span class="text-gray-500 dark:text-gray-400"
+                  >Արտադրական տարածք (մետաղամշակում)</span
+                >
+              </li>
+              <li>
+                <a
+                  href="tel:+37498025044"
+                  class="hover:text-red-600 dark:hover:text-red-400 transition"
+                >
+                  +37498025044
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:info@metalworks.am"
+                  class="hover:text-red-600 dark:hover:text-red-400 transition"
+                >
+                  info@metalworks.am
+                </a>
+              </li>
+              <li class="text-sm text-gray-500 dark:text-gray-400">
+                Ժամեր․ Երկ-Շաբ 10:00–19:00
+              </li>
+            </ul>
+            <div class="mt-4">
+              <NuxtLink
+                to="/contact"
+                class="inline-flex items-center gap-2 text-sm font-medium px-3.5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition shadow-sm"
+              >
+                Գրեք մեզ
+                <svg
+                  class="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M5 12h14M13 5l7 7-7 7"
+                  />
+                </svg>
+              </NuxtLink>
+            </div>
+          </div>
+        </section>
       </div>
-      <hr
-        class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8"
-      />
-      <div class="sm:flex sm:items-center sm:justify-between">
-        <div class="flex order-2 mt-4 sm:justify-center sm:mt-0">
-          <a
-            href="https://www.facebook.com/people/Metal-Works/61558844766402/"
-            class="text-gray-500 hover:text-gray-900 dark:hover:text-white"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              x="0px"
-              y="0px"
-              width="50"
-              height="50"
-              viewBox="0 0 48 48"
+
+      <!-- Divider -->
+      <div class="my-10 border-t border-gray-200 dark:border-white/10"></div>
+
+      <!-- Bottom row -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="order-2 sm:order-1 text-sm text-gray-600 dark:text-gray-400">
+          © 2024
+          <NuxtLink to="/" class="hover:underline">Metalwork's™</NuxtLink>.
+          Բոլոր իրավունքները պաշտպանված են։
+        </p>
+
+        <ul class="order-1 sm:order-2 flex items-center gap-3">
+          <!-- Facebook -->
+          <li>
+            <a
+              href="https://www.facebook.com/people/Metal-Works/61558844766402/"
+              target="_blank"
+              rel="noopener"
+              class="group inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-gray-200 dark:ring-white/10 hover:ring-red-500/50 transition"
+              aria-label="Facebook"
             >
-              <path
-                fill="#039be5"
-                d="M24 5A19 19 0 1 0 24 43A19 19 0 1 0 24 5Z"
-              ></path>
-              <path
-                fill="#fff"
-                d="M26.572,29.036h4.917l0.772-4.995h-5.69v-2.73c0-2.075,0.678-3.915,2.619-3.915h3.119v-4.359c-0.548-0.074-1.707-0.236-3.897-0.236c-4.573,0-7.254,2.415-7.254,7.917v3.323h-4.701v4.995h4.701v13.729C22.089,42.905,23.032,43,24,43c0.875,0,1.729-0.08,2.572-0.194V29.036z"
-              ></path>
-            </svg>
-          </a>
-          <a
-            href="https://www.instagram.com/metalworks_co"
-            class="text-gray-500 hover:text-gray-900 dark:hover:text-white"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              x="0px"
-              y="0px"
-              width="50"
-              height="50"
-              viewBox="0 0 48 48"
+              <svg
+                class="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-400 transition"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M22 12.06C22 6.53 17.52 2 12 2S2 6.53 2 12.06c0 5.01 3.66 9.16 8.44 9.94v-7.03H7.9v-2.9h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.9h-2.34V22c4.78-.78 8.44-4.93 8.44-9.94Z"
+                />
+              </svg>
+            </a>
+          </li>
+          <!-- Instagram -->
+          <li>
+            <a
+              href="https://www.instagram.com/metalworks_co"
+              target="_blank"
+              rel="noopener"
+              class="group inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 ring-gray-200 dark:ring-white/10 hover:ring-red-500/50 transition"
+              aria-label="Instagram"
             >
-              <radialGradient
-                id="yOrnnhliCrdS2gy~4tD8ma_Xy10Jcu1L2Su_gr1"
-                cx="19.38"
-                cy="42.035"
-                r="44.899"
-                gradientUnits="userSpaceOnUse"
+              <svg
+                class="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-red-600 dark:group-hover:text-red-400 transition"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                aria-hidden="true"
               >
-                <stop offset="0" stop-color="#fd5"></stop>
-                <stop offset=".328" stop-color="#ff543f"></stop>
-                <stop offset=".348" stop-color="#fc5245"></stop>
-                <stop offset=".504" stop-color="#e64771"></stop>
-                <stop offset=".643" stop-color="#d53e91"></stop>
-                <stop offset=".761" stop-color="#cc39a4"></stop>
-                <stop offset=".841" stop-color="#c837ab"></stop>
-              </radialGradient>
-              <path
-                fill="url(#yOrnnhliCrdS2gy~4tD8ma_Xy10Jcu1L2Su_gr1)"
-                d="M34.017,41.99l-20,0.019c-4.4,0.004-8.003-3.592-8.008-7.992l-0.019-20	c-0.004-4.4,3.592-8.003,7.992-8.008l20-0.019c4.4-0.004,8.003,3.592,8.008,7.992l0.019,20	C42.014,38.383,38.417,41.986,34.017,41.99z"
-              ></path>
-              <radialGradient
-                id="yOrnnhliCrdS2gy~4tD8mb_Xy10Jcu1L2Su_gr2"
-                cx="11.786"
-                cy="5.54"
-                r="29.813"
-                gradientTransform="matrix(1 0 0 .6663 0 1.849)"
-                gradientUnits="userSpaceOnUse"
-              >
-                <stop offset="0" stop-color="#4168c9"></stop>
-                <stop
-                  offset=".999"
-                  stop-color="#4168c9"
-                  stop-opacity="0"
-                ></stop>
-              </radialGradient>
-              <path
-                fill="url(#yOrnnhliCrdS2gy~4tD8mb_Xy10Jcu1L2Su_gr2)"
-                d="M34.017,41.99l-20,0.019c-4.4,0.004-8.003-3.592-8.008-7.992l-0.019-20	c-0.004-4.4,3.592-8.003,7.992-8.008l20-0.019c4.4-0.004,8.003,3.592,8.008,7.992l0.019,20	C42.014,38.383,38.417,41.986,34.017,41.99z"
-              ></path>
-              <path
-                fill="#fff"
-                d="M24,31c-3.859,0-7-3.14-7-7s3.141-7,7-7s7,3.14,7,7S27.859,31,24,31z M24,19c-2.757,0-5,2.243-5,5	s2.243,5,5,5s5-2.243,5-5S26.757,19,24,19z"
-              ></path>
-              <circle cx="31.5" cy="16.5" r="1.5" fill="#fff"></circle>
-              <path
-                fill="#fff"
-                d="M30,37H18c-3.859,0-7-3.14-7-7V18c0-3.86,3.141-7,7-7h12c3.859,0,7,3.14,7,7v12	C37,33.86,33.859,37,30,37z M18,13c-2.757,0-5,2.243-5,5v12c0,2.757,2.243,5,5,5h12c2.757,0,5-2.243,5-5V18c0-2.757-2.243-5-5-5H18z"
-              ></path>
-            </svg>
-          </a>
-        </div>
-        <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400"
-          >© 2024 <a href="/" class="hover:underline">Metalwork's™</a>
-          Բոլոր իրավունքները պաշտպանված են:
-        </span>
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="3.2" />
+                <circle
+                  cx="17.2"
+                  cy="6.8"
+                  r="1"
+                  fill="currentColor"
+                  stroke="none"
+                />
+              </svg>
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
   </footer>

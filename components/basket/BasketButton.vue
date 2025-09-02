@@ -1,33 +1,40 @@
 <template>
   <div class="basket-button-container">
-    <button class="basket-button" @click="toggleBasket" aria-label="Basket">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <path d="M16 10a4 4 0 0 1-8 0"></path>
+    <button class="basket-button" aria-label="Basket" @click="toggleBasket">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        class="w-8 h-8"
+      >
+        <path
+          d="M6 8h12l-1.2 10.2A2 2 0 0 1 14.8 20H9.2a2 2 0 0 1-2-1.8L6 8Z"
+        />
+        <path d="M9 8a3 3 0 0 1 6 0" />
       </svg>
-      <span v-if="itemCount > 0" class="basket-count">
-        {{ itemCount }}
-      </span>
+
+      <span v-if="itemCount > 0" class="basket-count">{{ itemCount }}</span>
     </button>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-
+import { mapGetters, mapActions } from 'vuex'
 export default {
   computed: {
     ...mapGetters('basket', ['basketItemCount']),
     itemCount() {
       return this.basketItemCount
-    }
+    },
   },
   methods: {
-    toggleBasket() {
-      this.$emit('toggle') // ✅ Emit event to parent (HeaderLayout)
-    }
-  }
+    ...mapActions('basket', ['toggleBasket']),
+  },
 }
 </script>
 

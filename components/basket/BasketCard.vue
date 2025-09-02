@@ -26,7 +26,6 @@
 
     <!-- Empty basket -->
     <div v-if="!loading && items.length === 0" class="empty-basket">
-      <!-- <img src="~/assets/images/empty-cart.svg" alt="Empty basket" /> -->
       <p>Ձեր զամբյուղը դատարկ է</p>
       <button class="continue-shopping" @click="$emit('close')">
         Շարունակել գնումները
@@ -38,7 +37,7 @@
       <div v-for="item in items" :key="item.id" class="basket-item">
         <div class="item-image">
           <img
-            :src="item.image || '/images/placeholder-product.jpg'"
+            :src="item.image_url || '/metalworks-logo.jpg'"
             :alt="item.name"
           />
         </div>
@@ -136,21 +135,20 @@ export default {
       'clearBasket',
       'fetchBasket',
     ]),
-
     formatPrice(price) {
-      return parseFloat(price).toFixed(2)
+      return (parseFloat(price) || 0).toFixed(2)
     },
 
-    updateQuantity(itemId, newQuantity) {
+    async updateQuantity(itemId, newQuantity) {
       if (newQuantity > 0) {
-        this.updateItem({ itemId, quantity: newQuantity })
+        await this.updateItem({ itemId, quantity: newQuantity })
+        // ❌ await this.fetchBasket() // ավելորդ է, actions-ը արդեն թարմացնում է
       }
-      this.fetchBasket()
     },
 
     async deleteItem(itemId) {
       await this.removeItem(itemId)
-      await this.fetchBasket()
+      // ❌ await this.fetchBasket()
     },
 
     proceedToCheckout() {

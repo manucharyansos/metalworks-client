@@ -1,77 +1,47 @@
+// store/users.js
 export const state = () => ({
   users: [],
 })
 
 export const getters = {
-  getUsers(state) {
-    return state.users
-  },
-  getWorkers(state) {
-    return state.users
-  },
-}
-
-export const actions = {
-  async fetchUsers({ commit }) {
-    try {
-      const user = await this.$axios.get('api/users')
-      commit('setUsers', user.data)
-      return true
-    } catch (err) {
-      return false
-    }
-  },
-  async fetchWorkers({ commit }) {
-    try {
-      const user = await this.$axios.get('api/workers')
-      commit('setUsers', user.data)
-      return true
-    } catch (err) {
-      return false
-    }
-  },
-  async createUser({ commit }, data) {
-    try {
-      await this.$axios.post('api/clients/client', data)
-      await this.$router.push('/manager/users')
-      return true
-    } catch (err) {
-      return false
-    }
-  },
-  async createWorkers({ commit }, data) {
-    try {
-      await this.$axios.post('api/workers', data)
-      await this.$router.push('/manager/workers')
-      return true
-    } catch (err) {
-      return false
-    }
-  },
-  async updateUser({ commit }, { id, data }) {
-    try {
-      const response = await this.$axios.put(`api/clients/client/${id}`, data)
-      await this.$router.push('/manager/users')
-      return response.data
-    } catch (err) {
-      console.error('Error updating user:', err)
-      throw err
-    }
-  },
-  async updateWorker({ commit }, { id, data }) {
-    try {
-      const response = await this.$axios.put(`api/workers/${id}`, data)
-      await this.$router.push('/manager/workers')
-      return response.data
-    } catch (err) {
-      console.error('Error updating user:', err)
-      throw err
-    }
-  },
+  getUsers: (s) => s.users,
+  getWorkers: (s) => s.users,
 }
 
 export const mutations = {
   setUsers(state, users) {
-    state.users = users
+    state.users = users || []
+  },
+}
+
+export const actions = {
+  async fetchWorkers({ commit }) {
+    try {
+      const { data } = await this.$axios.get('/api/workers')
+      const list = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data)
+        ? data
+        : []
+      commit('setUsers', list)
+      return true
+    } catch (e) {
+      return false
+    }
+  },
+
+  async createWorkers(_, payload) {
+    await this.$axios.post('/api/workers', payload)
+    return true
+  },
+
+  async updateWorker(_, { id, payload }) {
+    await this.$axios.put(`/api/workers/${id}`, payload)
+    return true
+  },
+
+  async deleteWorker(_, id) {
+    await this.$axios.delete(`/api/workers/${id}`)
+    return true
   },
 }

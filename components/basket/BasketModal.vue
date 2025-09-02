@@ -9,27 +9,19 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import BasketCard from './BasketCard.vue'
 
 export default {
-  components: {
-    BasketCard
-  },
-  props: {
-    isOpen: {
-      type: Boolean,
-      default: false
-    }
-  },
-  mounted() {
-
-  },
+  components: { BasketCard },
+  props: { isOpen: { type: Boolean, default: false } },
   methods: {
-    // ...mapActions('basket')
+    ...mapActions('basket', ['closeBasket']),
     close() {
-      this.$emit('close')
-    }
-  }
+      this.closeBasket()
+      this.$emit('close') // optional backward-compat
+    },
+  },
 }
 </script>
 

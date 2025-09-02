@@ -10,7 +10,7 @@
             <NuxtLink to="/" class="flex flex-col items-center group">
               <img
                 src="/logo.png"
-                class="logo-img h-32 w-32 rounded-full border-2 border-red-500 group-hover:border-red-600 transition-colors duration-200"
+                class="logo-img size-20 rounded-full border-2 border-red-500 group-hover:border-red-600 transition-colors duration-200"
                 alt="Metalwork's Logo"
               />
             </NuxtLink>
@@ -21,7 +21,7 @@
             <NuxtLink
               to="/"
               class="nav-link"
-              active-class="text-red-600 dark:text-red-400 font-semibold text-blur"
+              exact-active-class="active-link"
               exact
             >
               Գլխավոր
@@ -29,7 +29,7 @@
             <NuxtLink
               to="/about"
               class="nav-link"
-              active-class="text-red-600 dark:text-red-400 font-semibold text-blur"
+              exact-active-class="active-link"
               exact
             >
               Մեր մասին
@@ -37,15 +37,23 @@
             <NuxtLink
               to="/services"
               class="nav-link"
-              active-class="text-red-600 dark:text-red-400 font-semibold"
+              exact-active-class="active-link"
               exact
             >
               Ծառայություններ
             </NuxtLink>
             <NuxtLink
+              to="/products"
+              class="nav-link"
+              exact-active-class="active-link"
+              exact
+            >
+              Արտադրանք
+            </NuxtLink>
+            <NuxtLink
               to="/contact"
               class="nav-link"
-              active-class="text-red-600 dark:text-red-400 font-semibold"
+              exact-active-class="active-link"
               exact
             >
               Կոնտակտ
@@ -55,8 +63,8 @@
           <!-- Right side elements -->
           <div class="flex items-center">
             <template v-if="$auth.loggedIn">
-              <BasketButton @toggle="toggleBasket" />
-              <BasketModal :is-open="showBasket" @close="toggleBasket" />
+              <BasketButton />
+              <BasketModal :is-open="isBasketOpen" @close="closeBasket" />
 
               <BaseModal :is-open="openDropdown" @close="openDropdown = false">
                 <div
@@ -172,19 +180,25 @@
           >
             <NuxtLink
               to="/"
-              class="mobile-link"
+              class="mobile-link active-link"
               @click.native="openNavbar = false"
               >Գլխավոր</NuxtLink
             >
             <NuxtLink
               to="/services"
-              class="mobile-link"
+              class="mobile-link active-link"
               @click.native="openNavbar = false"
               >Ծառայություններ</NuxtLink
             >
             <NuxtLink
+              to="/products"
+              class="mobile-link active-link"
+              @click.native="openNavbar = false"
+              >Արտադրանք</NuxtLink
+            >
+            <NuxtLink
               to="/contact"
-              class="mobile-link"
+              class="mobile-link active-link"
               @click.native="openNavbar = false"
               >Կոնտակտ</NuxtLink
             >
@@ -206,32 +220,29 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
 import BasketButton from '~/components/basket/BasketButton'
 import BasketModal from '~/components/basket/BasketModal'
 import BaseModal from '~/components/modals/ui/BaseModal.vue'
 
 export default {
-  name: 'HeaderLayout',
   components: { BasketButton, BasketModal, BaseModal },
   data() {
-    return {
-      openDropdown: false,
-      openNavbar: false,
-      showBasket: false,
-    }
+    return { openDropdown: false, openNavbar: false }
+  },
+  computed: {
+    ...mapGetters('basket', ['isBasketOpen']),
   },
   watch: {
-    showBasket(val) {
+    isBasketOpen(val) {
       if (val) this.openDropdown = false
     },
     openDropdown(val) {
-      if (val) this.showBasket = false
+      if (val && this.isBasketOpen) this.closeBasket()
     },
   },
   methods: {
-    toggleBasket() {
-      this.showBasket = !this.showBasket
-    },
+    ...mapActions('basket', ['closeBasket']),
   },
 }
 </script>
@@ -244,23 +255,35 @@ export default {
 }
 
 .nav-link {
-  @apply px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 rounded-md transition duration-200;
+  @apply px-3 py-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 rounded-md transition duration-200;
 }
 
 .dropdown-item {
-  @apply block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition;
+  @apply block px-4 py-2 text-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition;
 }
 
 .auth-link {
-  @apply px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors duration-200;
+  @apply px-4 py-2 text-lg font-medium text-red-600 hover:text-red-700 transition-colors duration-200;
 }
 
 .auth-button {
-  @apply px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md shadow transition-colors duration-200;
+  @apply px-4 py-2 text-lg font-medium text-white bg-red-600 hover:bg-red-700 rounded-md shadow transition-colors duration-200;
 }
 
 .mobile-link {
-  @apply block px-4 py-2 rounded-md text-base font-medium dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition duration-200;
+  @apply block px-4 py-2 rounded-md text-lg font-medium dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition duration-200;
+}
+.nav-link {
+  @apply px-3 py-2 text-lg font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 rounded-md transition duration-200;
+}
+
+.mobile-link {
+  @apply block px-4 py-2 rounded-md text-lg font-medium dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition duration-200;
+}
+
+/* Ակտիվ վիճակ՝ desktop + mobile*/
+.active-link {
+  @apply text-red-600 dark:text-red-400 font-semibold;
 }
 
 .slide-down-enter-active,

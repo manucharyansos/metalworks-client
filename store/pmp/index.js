@@ -12,126 +12,121 @@ export const mutations = {
     state.pmp = pmp || {}
   },
   SET_ERROR(state, error) {
-    state.error = error
+    state.error = error || null
   },
 }
 
 export const actions = {
   async createPmp({ commit }, pmp) {
     try {
-      const response = await this.$axios.post('/api/engineers/pmps', pmp)
-      commit('SET_PMP', response.data)
+      const { data } = await this.$axios.post('/api/engineers/pmps', pmp)
+      commit('SET_PMP', data)
       return true
     } catch (error) {
-      console.log(error)
+      commit('SET_ERROR', error.response?.data || error.message)
       return false
     }
   },
+
   async rememberNumberPmp({ commit }, pmp) {
     try {
-      const response = await this.$axios.post(
+      const { data } = await this.$axios.post(
         `/api/engineers/pmps/remoteNumber/${pmp.id}`,
         pmp
       )
-      commit('SET_PMP', response.data)
+      commit('SET_PMP', data)
       return true
     } catch (error) {
-      console.log(error)
+      commit('SET_ERROR', error.response?.data || error.message)
       return false
     }
   },
 
   async fetchPmps({ commit }) {
     try {
-      const response = await this.$axios.get('/api/engineers/pmps')
-      commit('SET_PMPS', response.data)
+      const { data } = await this.$axios.get('/api/engineers/pmps')
+      commit('SET_PMPS', data)
       return true
     } catch (err) {
-      commit('ERROR', err.response?.data || 'Failed to fetch orders')
+      commit('SET_ERROR', err.response?.data || 'Failed to fetch pmps')
       return false
     }
   },
+
   async fetchPmp({ commit }, id) {
     try {
-      const response = await this.$axios.get(`/api/engineers/pmps/${id}`)
-      commit('SET_PMP', response.data.pmp)
+      const { data } = await this.$axios.get(`/api/engineers/pmps/${id}`)
+      // եթե backend-ը վերադարձնում է { pmp: {...} }
+      commit('SET_PMP', data.pmp ?? data)
       return true
     } catch (err) {
-      commit('ERROR', err.response?.data || 'Failed to fetch orders')
+      commit('SET_ERROR', err.response?.data || 'Failed to fetch pmp')
       return false
     }
   },
-  async checkIfGroupExists({ commit }, data) {
+
+  async checkIfGroupExists({ commit }, group) {
     try {
-      const response = await this.$axios.post(
+      const { data } = await this.$axios.post(
         '/api/engineers/pmps/check-group',
-        {
-          group: data,
-        }
+        { group }
       )
-      if (response.data.exists) {
-        commit('SET_PMP', response.data)
-        return response.data.exists
-      }
-    } catch (error) {
-      console.error('Սխալ տվյալների ստուգման ընթացքում', error)
-    }
-  },
-  async checkPmpByRemoteNumber({ commit }, id) {
-    try {
-      const response = await this.$axios.post(
-        `/api/engineers/pmps/check-pmp-by-remote-number/${id}`
-      )
-      if (response.data.exists) {
-        commit('SET_PMP', response.data)
-      }
-      return true
-    } catch (error) {
-      console.error('Սխալ տվյալների ստուգման ընթացքում', error)
-      return false
-    }
-  },
-  async checkIfGroupNameExists({ commit }, data) {
-    try {
-      const response = await this.$axios.post(
-        '/api/engineers/pmps/check-group-name',
-        {
-          group_name: data,
-        }
-      )
-      commit('SET_PMP', response.data)
-      return response.data.exists
-    } catch (error) {
-      console.error('Սխալ տվյալների ստուգման ընթացքում', error)
-    }
-  },
-  async createPmpFilesByFactory({ commit }, order) {
-    try {
-      const response = await this.$axios.post(
-        '/api/engineers/uploadPmpFile',
-        order,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      )
-      return response.data || true
+      if (data?.exists) commit('SET_PMP', data)
+      return !!data?.exists
     } catch (error) {
       commit('SET_ERROR', error.response?.data || error.message)
       return false
     }
   },
+
+  async checkPmpByRemoteNumber({ commit }, id) {
+    try {
+      const { data } = await this.$axios.post(
+        `/api/engineers/pmps/check-pmp-by-remote-number/${id}`
+      )
+      if (data?.exists) commit('SET_PMP', data)
+      return true
+    } catch (error) {
+      commit('SET_ERROR', error.response?.data || error.message)
+      return false
+    }
+  },
+
+  async checkIfGroupNameExists({ commit }, groupName) {
+    try {
+      const { data } = await this.$axios.post(
+        '/api/engineers/pmps/check-group-name',
+        { groupName }
+      )
+      if (typeof data?.exists !== 'undefined') commit('SET_PMP', data)
+      return !!data?.exists
+    } catch (error) {
+      commit('SET_ERROR', error.response?.data || error.message)
+      return false
+    }
+  },
+
+  async createPmpFilesByFactory({ commit }, formData) {
+    try {
+      // formData պարտադիր է՝ File + DXF չափեր (width/height) case-ում
+      // ԿԱՐԵՎՈՐ — չսահմանեք Content-Type՝ թող բրաուզերը դնի multipart boundary
+      const { data } = await this.$axios.post(
+        '/api/engineers/uploadPmpFile',
+        formData
+      )
+      return data || true
+    } catch (error) {
+      commit('SET_ERROR', error.response?.data || error.message)
+      return false
+    }
+  },
+
   async deleteFile({ commit }, fileId) {
     try {
-      const responce = await this.$axios.delete(
-        `/api/engineers/pmpFiles/${fileId}`
-      )
-      if (responce.status === 200) {
-        return true
-      }
+      const resp = await this.$axios.delete(`/api/engineers/pmpFiles/${fileId}`)
+      return resp.status === 200
     } catch (e) {
-      console.log(e)
+      commit('SET_ERROR', e.response?.data || e.message)
       return false
     }
   },
