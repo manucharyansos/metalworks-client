@@ -1,16 +1,16 @@
 export const namespaced = true
 
 export const state = () => ({
-  items: [],
-  item: null, // было {}, удобнее null для «нет данных»
+  works: [],
+  work: null,
   pagination: null,
   loading: false,
   error: null,
 })
 
 export const getters = {
-  items: (s) =>
-    (s.items || []).map((w) => {
+  works: (s) =>
+    (s.works || []).map((w) => {
       const cover =
         w.image_url ||
         (Array.isArray(w.images) && w.images.length ? w.images[0].url : null) ||
@@ -23,9 +23,10 @@ export const getters = {
         image: cover,
         tags: w.tags || [],
         created_at: w.created_at,
+        images: w.images,
       }
     }),
-  item: (s) => s.item, // <-- корректный геттер для одного проекта
+  work: (s) => s.work,
   pagination: (s) => s.pagination,
   loading: (s) => s.loading,
   error: (s) => s.error,
@@ -38,11 +39,11 @@ export const mutations = {
   SET_ERROR(state, err) {
     state.error = err
   },
-  SET_ITEMS(state, items) {
-    state.items = items || []
+  SET_ITEMS(state, works) {
+    state.works = works || []
   },
-  SET_ITEM(state, item) {
-    state.item = item || null
+  SET_ITEM(state, work) {
+    state.work = work || null
   },
   SET_PAGINATION(state, p) {
     state.pagination = p || null
@@ -72,9 +73,9 @@ export const actions = {
       const { data: res } = await this.$axios.get('/api/works', {
         params: query,
       })
-      const items = unwrapItems(res)
+      const works = unwrapItems(res)
       const pagination = unwrapPagination(res)
-      commit('SET_ITEMS', items)
+      commit('SET_ITEMS', works)
       commit('SET_PAGINATION', pagination)
       return { data: res } // чтобы можно было цепочкой использовать
     } catch (e) {
@@ -87,16 +88,11 @@ export const actions = {
     }
   },
 
-  // Загрузить один проект по id
   async fetchItem({ commit }, id) {
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
-      // ВАРИАНТ 1 (REST): /api/works/:id
       const { data: res } = await this.$axios.get(`/api/works/${id}`)
-
-      // ВАРИАНТ 2 (если у тебя show через query): раскомментируй это, а строку выше закомментируй
-      // const { data: res } = await this.$axios.get('/api/works/show', { params: { id } })
 
       const data = res?.data || res
       commit('SET_ITEM', data)

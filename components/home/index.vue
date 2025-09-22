@@ -5,19 +5,18 @@
 
     <!-- News / Products -->
     <section
-      class="flex flex-col gap-6 md:gap-8 lg:gap-10 p-6 md:p-10 lg:p-16 rounded-xl shadow-xl bg-gradient-to-br from-stone-100 via-stone-50 to-white w-full"
+      class="flex flex-col mx-auto gap-6 md:gap-8 lg:gap-10 md:p-10 lg:p-16 rounded-xl shadow-xl bg-gradient-to-br from-stone-100 via-stone-50 to-white w-full"
       aria-labelledby="news-heading"
     >
       <header v-if="products && products.length">
         <h2
           id="news-heading"
-          class="mt-3 text-2xl sm:text-3xl md:text-4xl font-serif font-extrabold italic text-neutral-800"
+          class="mt-3 mx-12 text-2xl sm:text-3xl md:text-4xl font-serif font-extrabold italic text-neutral-800"
         >
           Նորություններ
         </h2>
       </header>
 
-      <!-- Skeleton երբ products դեռ չեն բերվել -->
       <div
         v-if="!products || products.length === 0"
         class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
@@ -29,14 +28,16 @@
         />
       </div>
 
-      <!-- Slider-ը հաճախ ունի window, դնենք client-only -->
       <client-only v-if="products && products.length">
         <product-slider :products="products" />
       </client-only>
     </section>
 
     <!-- Works / Portfolio -->
-    <section class="p-6 md:p-10 lg:p-16 w-full" aria-labelledby="works-heading">
+    <section
+      class="p-6 md:p-10 lg:p-16 w-full mx-auto"
+      aria-labelledby="works-heading"
+    >
       <!-- Skeleton -->
       <div
         v-if="!works || works.length === 0"
@@ -49,7 +50,7 @@
         />
       </div>
 
-      <WorksGallery v-else :items="works" :show-filters="true" />
+      <WorksGallery :work-data="works" @openDetails="openDetails" />
 
       <PaginationUi
         v-if="pagination"
@@ -74,8 +75,8 @@
 import { mapActions, mapGetters } from 'vuex'
 import HeroCarousel from '~/components/carousel/HeroCarousel.vue'
 import PartnersCarousel from '@/components/carousel/PartnersCarousel.vue'
-import WorksGallery from '@/components/portfolio/WorksGallery.vue'
 import PaginationUi from '@/components/ui/Pagination.vue'
+import WorksGallery from '@/components/portfolio/WorksGallery.vue'
 
 export default {
   name: 'HomeComponent',
@@ -88,11 +89,16 @@ export default {
       isActiveBg: false,
       scrollY: 0,
       perPage: 10,
+      isOpenDetails: false,
       // eslint-disable-next-line vue/no-reserved-keys
       _raf: null,
 
       videos: [
-        { type: 'video', url: '/videos/20250821_150802.mp4', text: '' },
+        {
+          type: 'video',
+          url: '/videos/IMG_8887.MP4',
+          text: 'ԹԻԹԵՂԱՎՈՐ ՄԵՏԱՂՆԵՐԻ, ՊՐՈՖԻԼԱՅԻՆ ԽՈՂՈՎԱԿՆԵՐԻ ՎԵՐԱՄՇԱԿՄԱՆ ԹՎԱՅԻՆ ԱՐՏԱԴՐՈՒԹՅՈՒՆ',
+        },
         {
           type: 'video',
           url: '/videos/20250821_152207.mp4',
@@ -171,6 +177,16 @@ export default {
   methods: {
     ...mapActions('products', ['fetchProducts']),
     ...mapActions('works', ['fetchWorks']),
+
+    openDetails(work) {
+      if (work.id) {
+        this.isOpenDetails = !this.isOpenDetails
+      }
+    },
+
+    goDetail(w) {
+      this.$router.push({ path: '/projects/view', query: { id: w.id } })
+    },
 
     handleScroll() {
       this._onScroll()

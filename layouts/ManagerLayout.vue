@@ -57,7 +57,7 @@
               class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
               @click.native="onNavClick"
             >
-              Dashboard
+              Գլխավոր
             </nuxt-link>
           </li>
 
@@ -97,6 +97,18 @@
             </nuxt-link>
           </li>
 
+          <!-- Projects -->
+          <li>
+            <nuxt-link
+              to="/manager/projects"
+              exact-active-class="manager-active-link"
+              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+              @click.native="onNavClick"
+            >
+              Մեր աշխատանքները
+            </nuxt-link>
+          </li>
+
           <!-- Users -->
           <li>
             <nuxt-link
@@ -132,7 +144,84 @@
               Նյութեր
             </nuxt-link>
           </li>
+          <!-- Services -->
+          <li>
+            <nuxt-link
+              to="/manager/services"
+              exact-active-class="manager-active-link"
+              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+              @click.native="onNavClick"
+            >
+              Ծառայություններ
+            </nuxt-link>
+          </li>
         </ul>
+
+        <!-- Locale Switcher -->
+        <div class="absolute bottom-24 left-4 right-4">
+          <label class="block text-xs text-gray-400 mb-1">Լեզու</label>
+          <button
+            type="button"
+            class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-100"
+            :aria-expanded="openLang"
+            aria-haspopup="listbox"
+            @click="openLang = !openLang"
+          >
+            <span class="inline-flex items-center gap-2">
+              <span>{{ activeLocale.flag }}</span>
+              <span class="font-medium">{{ activeLocale.name }}</span>
+              <span class="text-xs text-gray-400"
+                >({{ activeLocale.code.toUpperCase() }})</span
+              >
+            </span>
+            <svg
+              class="w-4 h-4 opacity-80"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+              />
+            </svg>
+          </button>
+
+          <!-- dropdown -->
+          <ul
+            v-if="openLang"
+            class="mt-2 max-h-56 overflow-auto rounded-lg bg-gray-800 ring-1 ring-black/10 p-1 text-sm focus:outline-none"
+            role="listbox"
+            @keydown.esc="openLang = false"
+          >
+            <li
+              v-for="l in locales"
+              :key="l.code"
+              class="flex items-center justify-between gap-2 px-3 py-2 rounded cursor-pointer hover:bg-gray-700"
+              :class="l.code === currentLocaleCode ? 'bg-gray-700' : ''"
+              role="option"
+              :aria-selected="l.code === currentLocaleCode"
+              @click="changeLocale(l.code)"
+            >
+              <span class="inline-flex items-center gap-2">
+                <span>{{ l.flag }}</span>
+                <span>{{ l.name }}</span>
+              </span>
+              <svg
+                v-if="l.code === $i18n.locale"
+                class="w-4 h-4 text-emerald-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M16.704 5.29a1 1 0 010 1.42l-7.2 7.2a1 1 0 01-1.42 0l-3.2-3.2a1 1 0 111.42-1.42l2.49 2.49 6.49-6.49a1 1 0 011.42 0z"
+                />
+              </svg>
+            </li>
+          </ul>
+        </div>
 
         <!-- Logout -->
         <button
@@ -165,12 +254,41 @@ export default {
     return {
       isSidebarOpen: false,
       isDesktop: false,
+      openLang: false,
     }
+  },
+  computed: {
+    // i18n.safe locales
+    locales() {
+      const base =
+        this.$i18n && this.$i18n.locales && this.$i18n.locales.length
+          ? this.$i18n.locales
+          : [
+              { code: 'hy', name: 'Հայերեն' },
+              { code: 'ru', name: 'Русский' },
+              { code: 'en', name: 'English' },
+            ]
+      const flags = { hy: '🇦🇲', ru: '🇷🇺', en: '🇬🇧' }
+      return base.map((l) => ({ ...l, flag: flags[l.code] || '🏳️' }))
+    },
+    currentLocaleCode() {
+      return this.$i18n && this.$i18n.locale ? this.$i18n.locale : 'hy'
+    },
+    activeLocale() {
+      return (
+        this.locales.find((l) => l.code === this.currentLocaleCode) || {
+          code: 'hy',
+          name: 'Հայերեն',
+          flag: '🇦🇲',
+        }
+      )
+    },
   },
   mounted() {
     this.onResize()
     window.addEventListener('resize', this.onResize, { passive: true })
     document.addEventListener('keydown', this.onKeydown)
+    document.addEventListener('click', this.onDocumentClick)
 
     this._unwatch = this.$watch(
       () => this.$route.fullPath,
@@ -182,6 +300,7 @@ export default {
   beforeDestroy() {
     window.removeEventListener('resize', this.onResize)
     document.removeEventListener('keydown', this.onKeydown)
+    document.removeEventListener('click', this.onDocumentClick)
     if (this._unwatch) this._unwatch()
   },
   methods: {
@@ -225,6 +344,22 @@ export default {
     logout() {
       this.$auth.logout()
       this.onNavClick()
+    },
+    onDocumentClick(e) {
+      // dropdown–ից դուրս սեղմելու դեպքում փակենք
+      const asideEl = this.$el.querySelector('aside')
+      if (!asideEl) return
+      const clickInside = asideEl.contains(e.target)
+      if (!clickInside) this.openLang = false
+    },
+
+    async changeLocale(code) {
+      if (!this.$i18n || !code || code === this.currentLocaleCode) {
+        this.openLang = false
+        return
+      }
+      await this.$i18n.setLocale(code)
+      this.openLang = false
     },
   },
 }

@@ -4,18 +4,25 @@
   >
     <client-only>
       <Carousel
+        ref="heroCarousel"
         :per-page="1"
-        :loop="true"
-        :autoplay="true"
-        :autoplay-timeout="5000"
-        :scroll-per-page="true"
         :navigation-enabled="true"
+        :navigation-prev-label="'‹'"
+        :navigation-next-label="'›'"
+        :navigation-click-target-size="8"
+        :pagination-enabled="true"
+        :scroll-per-page="true"
+        :autoplay="true"
+        :autoplay-timeout="3500"
+        :loop="true"
+        :mouse-drag="true"
+        :touch-drag="true"
+        :speed="450"
         class="w-full h-full"
         @page-change="onPageChange"
-        @pageChange="onPageChange"
       >
         <Slide v-for="(slide, i) in items" :key="slide.url || i">
-          <div class="relative w-full min-h-[100svh]">
+          <div class="relative w-full mt-1 min-h-[88svh]">
             <template v-if="slide.type === 'video'">
               <video
                 v-if="isActive(i)"
@@ -35,7 +42,9 @@
                 v-else
                 class="absolute inset-0 w-full h-full object-cover"
                 :src="
-                  encoded(slide.poster || slide.fallback || '/images/logo.png')
+                  encoded(
+                    slide.poster || slide.fallback || '/static/images/logo.png'
+                  )
                 "
                 alt=""
                 loading="lazy"
@@ -133,18 +142,35 @@ export default {
 
 <style scoped>
 .hero-vh {
-  min-height: 100vh;
+  min-height: 80vh;
+}
+
+:deep(.VueCarousel-navigation-button) {
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  border-radius: 9999px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+:deep(.VueCarousel-navigation-prev) {
+  left: 3.5rem;
+}
+:deep(.VueCarousel-navigation-next) {
+  right: 3.5rem;
 }
 
 @supports (min-height: 100svh) {
   .hero-vh {
-    min-height: 100svh;
+    min-height: 80svh;
   }
 }
 
 @supports (min-height: 100dvh) {
   .hero-vh {
-    min-height: 100dvh;
+    min-height: 80dvh;
   }
 }
 </style>

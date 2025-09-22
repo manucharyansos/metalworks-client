@@ -187,18 +187,21 @@
             <NuxtLink
               to="/services"
               class="mobile-link active-link"
+              exact-active-class="active-link"
               @click.native="openNavbar = false"
               >Ծառայություններ</NuxtLink
             >
             <NuxtLink
               to="/products"
               class="mobile-link active-link"
+              exact-active-class="active-link"
               @click.native="openNavbar = false"
               >Արտադրանք</NuxtLink
             >
             <NuxtLink
               to="/contact"
               class="mobile-link active-link"
+              exact-active-class="active-link"
               @click.native="openNavbar = false"
               >Կոնտակտ</NuxtLink
             >

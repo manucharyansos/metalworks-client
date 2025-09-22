@@ -109,13 +109,37 @@ export default {
     { src: '~/plugins/leaflet.js', mode: 'client' },
     { src: '~/plugins/formatDate' },
     { src: '~/plugins/vue-carousel.js', mode: 'client' },
+    { src: '~/plugins/axios-locale.js' },
   ],
 
   components: true,
 
   buildModules: ['@nuxtjs/eslint-module', '@nuxtjs/tailwindcss'],
 
-  modules: ['@nuxtjs/pwa', '@nuxtjs/axios', '@nuxtjs/auth-next'],
+  modules: [
+    '@nuxtjs/pwa',
+    '@nuxtjs/axios',
+    '@nuxtjs/auth-next',
+    '@nuxtjs/i18n',
+  ],
+
+  i18n: {
+    locales: [
+      { code: 'hy', iso: 'hy-AM', file: 'hy.json', name: 'Հայերեն' },
+      { code: 'ru', iso: 'ru-RU', file: 'ru.json', name: 'Русский' },
+      { code: 'en', iso: 'en-US', file: 'en.json', name: 'English' },
+    ],
+    defaultLocale: 'hy',
+    lazy: true,
+    langDir: 'locales/',
+    strategy: 'prefix_except_default',
+    seo: true,
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      fallbackLocale: 'hy',
+    },
+  },
 
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {

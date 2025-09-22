@@ -60,13 +60,13 @@
           v-for="service in services"
           :key="service.id"
           :image="service.image_url || '/services/bend.jpg'"
+          :video="service.video_url"
+          :poster="service.video_poster_url"
           :title="service.title"
           :description="service.description"
-          :to="`/services/${service.slug}`"
-          :is-loading="false"
+          :to="{ path: '/services/view', query: { id: service.id } }"
           action-button-text="Դիտել"
-          :show-details-button="true"
-          class="hover:shadow-md transition-shadow duration-300"
+          class="w-full"
         >
           <template v-if="service.is_new" #badge>
             <span
@@ -77,12 +77,12 @@
 
           <template #meta>
             <span
-              class="rounded-lg bg-indigo-50 px-2 py-1 text-xs text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200"
+              class="rounded-lg bg-indigo-50 px-2 py-1 text-xs text-indigo-700"
             >
               {{ priceText(service) }}
             </span>
             <span
-              class="rounded-lg bg-emerald-50 px-2 py-1 text-xs text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200"
+              class="rounded-lg bg-emerald-50 px-2 py-1 text-xs text-emerald-700"
             >
               {{ leadTimeText(service) }}
             </span>

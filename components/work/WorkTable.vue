@@ -156,7 +156,7 @@ export default {
       return (
         w.image_url ||
         (Array.isArray(w.images) && w.images.length ? w.images[0].url : null) ||
-        '/placeholder.svg'
+        'static/images/logo.png'
       )
     },
     dateText(v) {

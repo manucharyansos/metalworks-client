@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[49],{627:function(e){e.exports=JSON.parse('{"dashboard":"Վահանակ","services":"Ծառայություններ","see_all":"Տեսնել բոլորը","logout":"Ելք","search":"Որոնել…","price_from":"Սկս. {price}֏"}')}}]);

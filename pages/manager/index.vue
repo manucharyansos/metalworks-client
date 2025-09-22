@@ -45,7 +45,7 @@
           </h5>
           <p class="text-gray-600 italic">
             Օգտատերեր․
-            <span class="font-semibold">{{ users.length }}</span>
+            <span class="font-semibold">{{ workers.length }}</span>
           </p>
         </div>
       </div>
@@ -206,8 +206,8 @@
           <button
             type="button"
             class="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-            @click="closeDeleteModal"
             aria-label="Close"
+            @click="closeDeleteModal"
           >
             ✕
           </button>
@@ -417,15 +417,15 @@ export default {
   computed: {
     ...mapGetters('orders', ['orders']),
     ...mapGetters('materials', ['getMaterials']),
-    ...mapGetters('users', ['getUsers']),
+    ...mapGetters('users', ['getWorkers']),
     allOrders() {
       return this.orders || []
     },
     materials() {
       return this.getMaterials || []
     },
-    users() {
-      return this.getUsers || []
+    workers() {
+      return this.getWorkers || []
     },
     searchFilter() {
       const q = this.searchable.trim().toLowerCase()
@@ -470,12 +470,12 @@ export default {
   created() {
     this.fetchMaterials()
     this.fetchOrders()
-    this.fetchUsers()
+    this.fetchWorkers()
   },
   methods: {
     ...mapActions('orders', ['fetchOrders', 'orderDelete']),
     ...mapActions('materials', ['fetchMaterials']),
-    ...mapActions('users', ['fetchUsers']),
+    ...mapActions('users', ['fetchWorkers']),
     editOrder(order) {
       this.openEditModal = true
       this.showOrder = order
