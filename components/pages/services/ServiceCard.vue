@@ -29,12 +29,12 @@
     <!-- Body -->
     <div class="p-4 md:p-6">
       <h2
-        class="text-lg md:text-2xl font-sans italic mb-2 md:mb-3 text-gray-800 text-center md:text-left"
+        class="text-lg md:text-2xl font-montserrat mb-2 md:mb-3 text-gray-800 text-center md:text-left"
       >
         {{ title }}
       </h2>
 
-      <p class="hidden md:block text-gray-600 font-sans italic leading-relaxed">
+      <p class="hidden md:block text-gray-600 font-montserrat leading-relaxed">
         {{ description }}
       </p>
 

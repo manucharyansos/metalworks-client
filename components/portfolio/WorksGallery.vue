@@ -4,7 +4,7 @@
     <h2
       class="text-2xl sm:text-3xl font-serif font-bold italic text-neutral-900 mb-6"
     >
-      Մեր Աշխատանքները
+      {{ $t('our_works') }}
     </h2>
 
     <!-- Responsive Grid -->

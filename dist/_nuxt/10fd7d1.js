@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[78],{665:function(e,n,t){"use strict";t.r(n);var l={layout:"ManagerLayout",middleware:["manager","roleRedirect"]},r=t(11),component=Object(r.a)(l,function(){return(0,this._self._c)("div",[this._v("Materials")])},[],!1,null,null,null);n.default=component.exports}}]);

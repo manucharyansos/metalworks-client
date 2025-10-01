@@ -1,7 +1,7 @@
 <template>
   <div class="w-full h-screen bg-gray-100 dark:bg-gray-800 overflow-y-auto">
     <p
-      class="text-gray-800 dark:text-white font-bold font-sans italic my-8 text-2xl text-center"
+      class="text-gray-800 dark:text-white font-bold font-montserrat my-8 text-2xl text-center"
     >
       Ստեղծել նոր աշխատակից
     </p>

@@ -3,7 +3,7 @@
     class="w-full min-h-screen bg-gray-100 dark:bg-gray-800 flex flex-col items-center py-12 px-6"
   >
     <p
-      class="text-gray-800 dark:text-white font-bold italic mb-8 text-2xl text-center"
+      class="text-gray-800 dark:text-white font-bold font-montserrat mb-8 text-2xl text-center"
     >
       Նոր նյութի ստեղծում
     </p>

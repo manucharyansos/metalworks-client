@@ -68,26 +68,41 @@
                       @click="$emit('download-file', file)"
                     >
                       {{ file.original_name }}
-                      <img class="w-8 h-8" src="/images/img.png" alt="File Icon" />
+                      <img
+                        class="w-8 h-8"
+                        src="/images/img.png"
+                        alt="File Icon"
+                      />
                     </button>
                   </div>
-                  <div
-                    class="flex items-center justify-between gap-2 my-2 p-3"
-                  >
+                  <div class="flex items-center justify-between gap-2 my-2 p-3">
                     <p class="flex flex-col items-center gap-2">
-                      <span class="italic font-sans font-bold">Քանակ։</span>
-                      <span v-if="details.link_existing_files && getSelectedFileQuantity(file)">
-                        <span class="line-through">{{ file.quantity || 'N/A' }}</span>
-                        <span class="ml-2 text-blue-500">{{ getSelectedFileQuantity(file) }}</span>
+                      <span class="font-montserrat font-bold">Քանակ։</span>
+                      <span
+                        v-if="
+                          details.link_existing_files &&
+                          getSelectedFileQuantity(file)
+                        "
+                      >
+                        <span class="line-through">{{
+                          file.quantity || 'N/A'
+                        }}</span>
+                        <span class="ml-2 text-blue-500">{{
+                          getSelectedFileQuantity(file)
+                        }}</span>
                       </span>
                       <span v-else>{{ file.quantity || 'N/A' }}</span>
                     </p>
                     <p class="flex flex-col items-center gap-2">
-                      <span class="italic font-sans font-bold">Նյութի տեսակ։</span>
+                      <span class="italic font-sans font-bold"
+                        >Նյութի տեսակ։</span
+                      >
                       {{ file.material_type || 'N/A' }}
                     </p>
                     <p class="flex flex-col items-center gap-2">
-                      <span class="italic font-sans font-bold">Հաստություն։</span>
+                      <span class="font-montserrat font-bold"
+                        >Հաստություն։</span
+                      >
                       {{ file.thickness || 'N/A' }}
                     </p>
                   </div>
@@ -138,5 +153,4 @@ export default {
 .absolute {
   z-index: 50;
 }
-
 </style>

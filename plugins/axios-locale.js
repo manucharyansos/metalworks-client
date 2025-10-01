@@ -1,7 +1,23 @@
-export default ({ $axios, app }) => {
-  $axios.onRequest((config) => {
-    const lc = app.i18n && app.i18n.locale ? app.i18n.locale : 'hy'
-    config.headers['X-Locale'] = lc
-    return config
-  })
+export default function ({ $axios, app, req }) {
+  const readLocale = () => {
+    const fromI18n = app.i18n?.locale
+    const fromCookie = process.server
+      ? (req?.headers?.cookie || '').match(
+          /(?:^|;\s*)i18n_redirected=([^;]+)/
+        )?.[1]
+      : app.$cookies
+      ? app.$cookies.get('i18n_redirected')
+      : null
+    const loc = fromI18n || fromCookie || 'hy'
+    return ['hy', 'ru', 'en'].includes(loc) ? loc : 'hy'
+  }
+
+  const set = () => {
+    const loc = readLocale()
+    $axios.setHeader('X-Locale', loc)
+    if ($axios.setQueryParams) $axios.setQueryParams({ locale: loc })
+  }
+
+  set()
+  $axios.onRequest(set)
 }

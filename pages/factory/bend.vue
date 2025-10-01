@@ -285,7 +285,7 @@
                         class="flex items-center justify-between gap-2 my-2 p-3"
                       >
                         <p class="flex flex-col items-center gap-2">
-                          <span class="italic font-sans font-bold">Քանակ։</span>
+                          <span class="font-montserrat font-bold">Քանակ։</span>
                           {{ file?.quantity }}
                         </p>
                         <p class="flex flex-col items-center gap-2">
@@ -295,7 +295,7 @@
                           {{ file?.material_type }}
                         </p>
                         <p class="flex flex-col items-center gap-2">
-                          <span class="italic font-sans font-bold"
+                          <span class="font-montserrat font-bold"
                             >Հաստություն։</span
                           >
                           {{ file?.thickness }}

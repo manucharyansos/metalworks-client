@@ -1,6 +1,6 @@
 <template>
   <div class="container flex flex-col">
-    <h1 class="text-3xl font-sans italic leading-6 my-6 text-start mx-4">
+    <h1 class="text-3xl font-montserrat leading-6 my-6 text-start mx-4">
       {{
         isEditingMode ? 'Ստեղծել նոր պատվեր խմբագրելով' : 'Ստեղծել նոր պատվեր'
       }}
@@ -257,7 +257,7 @@ export default {
       fileQuantities: {},
       autoOpenFactoryId: null,
       isLoading: false,
-      files_existing: false
+      files_existing: false,
     }
   },
   computed: {

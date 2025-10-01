@@ -64,7 +64,9 @@
           :poster="service.video_poster_url"
           :title="service.title"
           :description="service.description"
-          :to="{ path: '/services/view', query: { id: service.id } }"
+          :to="
+            localePath({ path: '/services/view', query: { id: service.id } })
+          "
           action-button-text="Դիտել"
           class="w-full"
         >
@@ -102,7 +104,7 @@
           Կապվեք մեզ հետ՝ ստանալու անհատական առաջարկներ և ժամկետներ։
         </p>
         <NuxtLink
-          to="/contact"
+          :to="localePath('/contact')"
           class="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 transition"
         >
           Կապ մեզ հետ
@@ -125,7 +127,7 @@
       <!-- CTA -->
       <div class="mt-10 text-center">
         <NuxtLink
-          to="/services"
+          :to="localePath('/services')"
           class="inline-flex items-center gap-2 rounded-full ring-1 ring-gray-300 px-4 py-2 text-sm hover:ring-red-400 hover:text-red-600 transition"
         >
           Տեսնել բոլորը
@@ -156,6 +158,9 @@ export default {
   components: { ServiceCard },
   computed: {
     ...mapGetters('services', ['getServices', 'isLoading', 'error']),
+    currentLocale() {
+      return this.$i18n?.locale || 'hy'
+    },
     services() {
       return this.getServices || []
     },
@@ -163,8 +168,25 @@ export default {
       return this.isLoading
     },
   },
-  mounted() {
-    if (!this.services.length) this.fetchServices({ simple: true })
+  watch: {
+    currentLocale: {
+      immediate: false,
+      async handler() {
+        await this.fetchServices({ simple: true })
+        this.$store.commit('services/SET_LAST_LOCALE', this.currentLocale)
+      },
+    },
+  },
+  async mounted() {
+    if (!this.services.length) {
+      await this.fetchServices({ simple: true })
+      this.$store.commit('services/SET_LAST_LOCALE', this.currentLocale)
+    } else if (
+      this.$store.state.services.lastLoadedLocale !== this.currentLocale
+    ) {
+      await this.fetchServices({ simple: true })
+      this.$store.commit('services/SET_LAST_LOCALE', this.currentLocale)
+    }
   },
   methods: {
     ...mapActions('services', ['fetchServices']),

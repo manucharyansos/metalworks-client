@@ -5,7 +5,7 @@
     >
       <!-- Header Section -->
       <div class="p-6 border-b border-gray-200">
-        <h1 class="text-3xl font-bold text-gray-800 font-serif italic">
+        <h1 class="text-3xl font-bold text-gray-800 font-montserrat">
           Նախագծեր
         </h1>
       </div>

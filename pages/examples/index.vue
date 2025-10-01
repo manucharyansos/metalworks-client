@@ -630,7 +630,7 @@
                 class="flex flex-row items-start"
               >
                 <span class="font-bold">Status:</span>
-                <div class="bg-blue-700 font-sans italic mx-2">
+                <div class="bg-blue-700 font-montserrat mx-2">
                   {{ order.status.status }}
                 </div>
               </div>
@@ -639,7 +639,7 @@
                 class="flex flex-row items-start"
               >
                 <span class="font-bold">Status:</span>
-                <div class="bg-yellow-700 font-sans italic mx-2">
+                <div class="bg-yellow-700 font-montserrat mx-2">
                   {{ order.status.status }}
                 </div>
               </div>
@@ -648,7 +648,7 @@
                 class="flex flex-row items-start"
               >
                 <span class="font-bold">Status:</span>
-                <div class="bg-green-700 font-sans italic mx-2">
+                <div class="bg-green-700 font-montserrat mx-2">
                   {{ order.status.status }}
                 </div>
               </div>

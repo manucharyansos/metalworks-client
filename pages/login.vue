@@ -34,7 +34,9 @@
       <div
         class="flex flex-col items-center justify-center md:rounded-tl-3xl rounded-bl-3xl md:rounded-br-none rounded-br-3xl bg-white w-full h-full dark:bg-gray-800 mx-auto md:p-7 p-3 md:order-1 order-2"
       >
-        <h2 class="text-black font-bold italic text-2xl py-8">Մուտք գործել</h2>
+        <h2 class="text-black font-bold font-montserrat text-2xl py-8">
+          Մուտք գործել
+        </h2>
 
         <!-- Wrap in a form tag -->
         <form class="w-full" @submit.prevent="login">
@@ -53,7 +55,7 @@
               />
             </div>
             <template v-if="fieldEmail">
-              <p class="text-red-500 text-xs italic">
+              <p class="text-red-500 text-xs font-montserrat">
                 Խնդրում ենք մուտքագրեկ էլփոստի հասցե:
               </p>
             </template>
@@ -74,11 +76,11 @@
               />
             </div>
             <template v-if="fieldPassword">
-              <p class="text-red-500 text-xs italic">
+              <p class="text-red-500 text-xs font-montserrat">
                 Խնդրում ենք մուտքագրեկ գաղտնաբառ:
               </p>
             </template>
-            <p v-if="errors" class="text-red-500 text-xs italic">
+            <p v-if="errors" class="text-red-500 text-xs font-montserrat">
               {{ errors }}
             </p>
           </div>
@@ -124,7 +126,7 @@
               </span>
               <nuxt-link
                 to="/register"
-                class="text-xl font-bold font-sans italic m-2 text-cyan-800 dark:text-indigo-300"
+                class="text-xl font-bold font-montserrat m-2 text-cyan-800 dark:text-indigo-300"
               >
                 Գրանցվեք
               </nuxt-link>

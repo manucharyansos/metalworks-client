@@ -2,17 +2,17 @@
   <section class="w-full bg-white rounded-3xl shadow-2xl px-4 sm:px-8 py-8">
     <div class="flex flex-col items-center text-center">
       <h2 class="text-xl text-neutral-700 font-bold font-sans italic my-6">
-        ՄԵՐ ՀԱՃԱԽՈՐԴՆԵՐՆ ՈՒ ԳՈՐԾԸՆԿԵՐՆԵՐՆ ԵՆ
+        {{ $t('clients') }}
       </h2>
       <div
         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-base sm:text-lg mb-4 text-neutral-600 font-sans italic text-start"
       >
-        <p>Քաղաքային և պետական կառույցներ</p>
-        <p>Շինարարական ընկերություններ</p>
-        <p>Ճարտարապետներ և դիզայներներ</p>
-        <p>Կահույք արտադրողներ</p>
-        <p>Արդյունաբերական ձեռնարկություններ</p>
-        <p>Հանքարդյունաբերողներ</p>
+        <p>{{ $t('city_state_institutions') }}</p>
+        <p>{{ $t('construction_companies') }}</p>
+        <p>{{ $t('architects_designers') }}</p>
+        <p>{{ $t('furniture_manufacturers') }}</p>
+        <p>{{ $t('industrial_enterprises') }}</p>
+        <p>{{ $t('miners') }}</p>
       </div>
     </div>
 

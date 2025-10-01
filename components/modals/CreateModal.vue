@@ -41,7 +41,7 @@
           <slot name="check"></slot>
         </div>
         <button
-          class="py-1.5 px-10 bg-green-400 rounded-2xl text-white font-bold font-sans italic"
+          class="py-1.5 px-10 bg-green-400 rounded-2xl text-white font-bold font-montserrat"
           @click="$emit('addButton')"
         >
           Add

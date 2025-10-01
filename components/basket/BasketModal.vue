@@ -15,11 +15,12 @@ import BasketCard from './BasketCard.vue'
 export default {
   components: { BasketCard },
   props: { isOpen: { type: Boolean, default: false } },
+
   methods: {
     ...mapActions('basket', ['closeBasket']),
     close() {
       this.closeBasket()
-      this.$emit('close') // optional backward-compat
+      this.$emit('close')
     },
   },
 }
@@ -37,6 +38,8 @@ export default {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  width: 100%;
+  height: 100vh;
 }
 
 .modal-container {

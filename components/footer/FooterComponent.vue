@@ -27,101 +27,26 @@
           <!-- Resources -->
           <div>
             <h2
-              class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white"
+              class="mb-4 text-xs font-montserrat uppercase tracking-wider text-gray-900 dark:text-white"
             >
-              Ռեսուրսներ
+              {{ $t('footer.resources') }}
             </h2>
-            <ul class="space-y-2.5">
+            <ul
+              v-for="service in services"
+              :key="service.id"
+              class="space-y-2.5"
+            >
               <li>
                 <NuxtLink
-                  to="/services#engineering"
+                  :to="
+                    localePath({
+                      path: '/services/view',
+                      query: { id: service.id },
+                    })
+                  "
                   class="group inline-flex items-center hover:text-red-600 dark:hover:text-red-400 transition"
                 >
-                  <span>Ինժիներական նախագծում</span>
-                  <svg
-                    class="ml-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 transition"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink
-                  to="/services#laser"
-                  class="group inline-flex items-center hover:text-red-600 dark:hover:text-red-400 transition"
-                >
-                  <span>Լազերային կտրում</span>
-                  <svg
-                    class="ml-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 transition"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink
-                  to="/services#powder"
-                  class="group inline-flex items-center hover:text-red-600 dark:hover:text-red-400 transition"
-                >
-                  <span>Փոշեներկում</span>
-                  <svg
-                    class="ml-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 transition"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink
-                  to="/services#welding"
-                  class="group inline-flex items-center hover:text-red-600 dark:hover:text-red-400 transition"
-                >
-                  <span>Զոդում</span>
-                  <svg
-                    class="ml-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 transition"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink
-                  to="/services#bending"
-                  class="group inline-flex items-center hover:text-red-600 dark:hover:text-red-400 transition"
-                >
-                  <span>Ճկում</span>
+                  <span>{{ service.title }}</span>
                   <svg
                     class="ml-1.5 h-4 w-4 opacity-0 group-hover:opacity-100 transition"
                     fill="none"
@@ -143,9 +68,9 @@
           <!-- About -->
           <div>
             <h2
-              class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white"
+              class="mb-4 text-xs font-semibold font-montserrat uppercase tracking-wider text-gray-900 dark:text-white"
             >
-              Մեր մասին
+              {{ $t('footer.about') }}
             </h2>
             <ul class="space-y-2.5">
               <li>
@@ -158,18 +83,10 @@
               </li>
               <li>
                 <NuxtLink
-                  to="/terms"
-                  class="hover:text-red-600 dark:hover:text-red-400 transition"
-                >
-                  Terms &amp; Conditions
-                </NuxtLink>
-              </li>
-              <li>
-                <NuxtLink
                   to="/contact"
                   class="hover:text-red-600 dark:hover:text-red-400 transition"
                 >
-                  Կոնտակտ
+                  {{ $t('footer.contact') }}
                 </NuxtLink>
               </li>
             </ul>
@@ -178,16 +95,16 @@
           <!-- Contact -->
           <div>
             <h2
-              class="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-white"
+              class="mb-4 text-xs font-semibold font-montserrat uppercase tracking-wider text-gray-900 dark:text-white"
             >
-              Կապ
+              {{ $t('footer.contact') }}
             </h2>
             <ul class="space-y-2.5">
               <li class="text-sm leading-6">
-                ԵՐԵՎԱՆ, Հայաստան<br />
-                <span class="text-gray-500 dark:text-gray-400"
-                  >Արտադրական տարածք (մետաղամշակում)</span
-                >
+                {{ $t('footer.address') }}<br />
+                <span class="text-gray-500 dark:text-gray-400">{{
+                  $t('footer.address_val')
+                }}</span>
               </li>
               <li>
                 <a
@@ -206,15 +123,15 @@
                 </a>
               </li>
               <li class="text-sm text-gray-500 dark:text-gray-400">
-                Ժամեր․ Երկ-Շաբ 10:00–19:00
+                {{ $t('footer.times') }}
               </li>
             </ul>
             <div class="mt-4">
               <NuxtLink
                 to="/contact"
-                class="inline-flex items-center gap-2 text-sm font-medium px-3.5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition shadow-sm"
+                class="inline-flex items-center gap-2 text-sm font-montserrat font-medium px-3.5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition shadow-sm"
               >
-                Գրեք մեզ
+                {{ $t('footer.write_to_us') }}
                 <svg
                   class="h-4 w-4"
                   viewBox="0 0 24 24"
@@ -242,7 +159,7 @@
         <p class="order-2 sm:order-1 text-sm text-gray-600 dark:text-gray-400">
           © 2024
           <NuxtLink to="/" class="hover:underline">Metalwork's™</NuxtLink>.
-          Բոլոր իրավունքները պաշտպանված են։
+          {{ $t('footer.all_rights_reserved') }}
         </p>
 
         <ul class="order-1 sm:order-2 flex items-center gap-3">
@@ -303,11 +220,44 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 import MapComponent from '~/components/map/MapComponent.vue'
 
 export default {
   name: 'FooterComponent',
   components: { MapComponent },
+  computed: {
+    ...mapGetters('services', ['getServices', 'isLoading', 'error']),
+    currentLocale() {
+      return this.$i18n?.locale || 'hy'
+    },
+    services() {
+      return this.getServices || []
+    },
+  },
+  watch: {
+    currentLocale: {
+      immediate: false,
+      async handler() {
+        await this.fetchServices({ simple: true })
+        this.$store.commit('services/SET_LAST_LOCALE', this.currentLocale)
+      },
+    },
+  },
+  async mounted() {
+    if (!this.services.length) {
+      await this.fetchServices({ simple: true })
+      this.$store.commit('services/SET_LAST_LOCALE', this.currentLocale)
+    } else if (
+      this.$store.state.services.lastLoadedLocale !== this.currentLocale
+    ) {
+      await this.fetchServices({ simple: true })
+      this.$store.commit('services/SET_LAST_LOCALE', this.currentLocale)
+    }
+  },
+  methods: {
+    ...mapActions('services', ['fetchServices']),
+  },
 }
 </script>
 

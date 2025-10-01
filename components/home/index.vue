@@ -11,9 +11,9 @@
       <header v-if="products && products.length">
         <h2
           id="news-heading"
-          class="mt-3 mx-12 text-2xl sm:text-3xl md:text-4xl font-serif font-extrabold italic text-neutral-800"
+          class="mt-3 mx-12 text-2xl sm:text-3xl md:text-4xl font-extrabold font-montserrat text-neutral-800"
         >
-          Նորություններ
+          {{ $t('news') }}
         </h2>
       </header>
 

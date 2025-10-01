@@ -1,6 +1,6 @@
 <template>
   <div class="mx-2 h-full">
-    <h2 class="font-sans italic text-lg mb-4 h-12">
+    <h2 class="font-montserrat text-lg mb-4 h-12">
       {{ paragraph }}
     </h2>
     <ul class="h-56 overflow-y-auto">

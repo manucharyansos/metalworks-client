@@ -251,11 +251,11 @@
 
     <!-- Note -->
     <section class="max-w-3xl mx-auto text-center mt-12">
-      <p class="text-neutral-600 italic">
+      <p class="text-neutral-600">
         Խնդրում ենք նկատի ունենալ, որ գնային, տեխնիկական և պատվերի կարգավիճակի
         հարցումները համակարգվում են էլ.փոստի/չաթի միջոցով։
       </p>
-      <p class="mt-2 font-semibold italic text-neutral-800">
+      <p class="mt-2 font-semibold font-montserrat text-neutral-800">
         *Ներկա պահին հեռախոսային աջակցություն չենք տրամադրում։
       </p>
     </section>

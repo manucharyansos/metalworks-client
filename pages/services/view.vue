@@ -75,7 +75,7 @@
         </div>
 
         <nuxt-link
-          to="/services"
+          :to="localePath('/services')"
           class="inline-block mt-6 text-indigo-700 hover:underline"
         >
           ← Վերադառնալ ծառայությունների ցանկ
@@ -87,52 +87,71 @@
 
 <script>
 export default {
-  async asyncData({ $axios, route, error, redirect }) {
+  async asyncData({ $axios, app, req, route, redirect }) {
     try {
-      const id = route.query.id
-      if (!id) {
-        // fallback՝ կարող ես փոխել, եթե ուզում ես գնա services list
-        return redirect('/services')
+      const seg1 = (route.path.split('/')[1] || '').toLowerCase()
+      const locFromPath = ['hy', 'ru', 'en'].includes(seg1) ? seg1 : null
+
+      const cookieLocale = process.server
+        ? (req?.headers?.cookie || '').match(
+            /(?:^|;\s*)i18n_redirected=([^;]+)/
+          )?.[1]
+        : app.$cookies
+        ? app.$cookies.get('i18n_redirected')
+        : null
+
+      const loc = locFromPath || app.i18n?.locale || cookieLocale || 'hy'
+
+      const localized = app.i18n?.localePath?.(
+        { path: route.path, query: route.query },
+        loc
+      )
+      if (localized && localized !== route.fullPath) {
+        return redirect(localized)
       }
-      const { data } = await $axios.get(`/api/services/${id}`)
+
+      const id = route.query.id
+      if (!id)
+        return redirect(app.i18n?.localePath('/services', loc) || '/services')
+
+      const { data } = await $axios.get(`/api/services/${id}`, {
+        params: { locale: loc },
+        headers: {
+          'X-Locale': loc,
+          'Accept-Language': loc,
+        },
+      })
+
       if (!data?.status || !data?.data) {
         return { item: null, error: 'Ծառայությունը չի գտնվել' }
       }
-      // API-ում նախորդ քայլերով ավելացրել էինք ServiceResource՝ ուր արդեն կա video_url/video_poster_url/works
       return { item: data.data, error: null }
     } catch (e) {
-      // 404/500 դեպքերում
       return { item: null, error: 'Չհաջողվեց բեռնել տվյալ ծառայությունը' }
     }
   },
-  head() {
-    return {
-      title: this.item?.title
-        ? `${this.item.title} — Services`
-        : 'Service — View',
-      meta: [
-        {
-          hid: 'description',
-          name: 'description',
-          content: this.item?.description || '',
-        },
-        {
-          hid: 'og:title',
-          property: 'og:title',
-          content: this.item?.title || '',
-        },
-        {
-          hid: 'og:image',
-          property: 'og:image',
-          content: this.item?.image_url || '',
-        },
-      ],
-    }
-  },
+
   data() {
+    return { item: null, error: null }
+  },
+
+  head() {
+    const title = this.item?.title
+      ? `${this.item.title} — Services`
+      : 'Service — View'
+    const desc = this.item?.description || ''
+    const image = this.item?.image_url || this.item?.video_poster_url || ''
+    const ogLocale = (this.$i18n?.locale || 'ru').replace('_', '-')
+
     return {
-      item: null,
-      error: null,
+      title,
+      meta: [
+        { hid: 'description', name: 'description', content: desc },
+        { hid: 'og:title', property: 'og:title', content: title },
+        { hid: 'og:description', property: 'og:description', content: desc },
+        { hid: 'og:image', property: 'og:image', content: image },
+        { hid: 'og:locale', property: 'og:locale', content: ogLocale },
+      ],
     }
   },
 }

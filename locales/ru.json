@@ -4,5 +4,47 @@
   "see_all": "Смотреть все",
   "logout": "Выйти",
   "search": "Искать…",
-  "price_from": "От {price}֏"
+  "price_from": "От {price}֏",
+  "nav": {
+    "home": "Главная",
+    "about": "О нас",
+    "services": "Услуги",
+    "products": "Продукция",
+    "contact": "Контакты",
+    "login": "Войти",
+    "register": "Регистрация",
+    "dashboard": "Панель",
+    "settings": "Настройки",
+    "logout": "Выйти"
+  },
+  "news": "Новости",
+  "our_works": "Наши работы",
+  "clients": "НАШИ КЛИЕНТЫ И ПАРТНЕРЫ",
+  "city_state_institutions": "Городские и государственные учреждения",
+  "construction_companies": "Строительные компании",
+  "architects_designers": "Архитекторы и дизайнеры",
+  "furniture_manufacturers": "Производители мебели",
+  "industrial_enterprises": "Промышленные предприятия",
+  "miners": "Шахтеры",
+  "footer": {
+    "resources": "Ресурсы",
+    "about": "О нас",
+    "contact": "Контакты",
+    "address": "ЕРЕВАН, Армения",
+    "address_val": "Производственная зона (металлообработка)",
+    "times": "Часы работы: пн-сб 10:00–19:00",
+    "write_to_us": "Напишите нам",
+    "all_rights_reserved": "Все права защищены."
+  },
+  "hero_carousel_text": "ЦИФРОВОЕ ПРОИЗВОДСТВО ЛИСТОВОГО МЕТАЛЛА, ОБРАБОТКА ПРОФИЛЬНЫХ ТРУБ",
+  "basket": {
+    "your_cart": "Ваша корзина",
+    "loading": "Загрузка...",
+    "try_again": "Попробуйте еще раз",
+    "cart_is_empty": "Ваша корзина пуста.",
+    "continue_shopping": "Continue shopping",
+    "to_checkout": "Перейти к оформлению заказа",
+    "empty_the_cart": "Очистить корзину",
+    "general": "Общий"
+  }
 }

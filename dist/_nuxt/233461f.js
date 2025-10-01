@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[50],{628:function(e){e.exports=JSON.parse('{"dashboard":"Панель","services":"Услуги","see_all":"Смотреть все","logout":"Выйти","search":"Искать…","price_from":"От {price}֏"}')}}]);

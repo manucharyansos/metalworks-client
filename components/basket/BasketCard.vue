@@ -2,7 +2,7 @@
   <div class="basket-card">
     <!-- Header -->
     <div class="basket-header">
-      <h2 class="basket-title">Ձեր Զամբյուղը</h2>
+      <h2 class="basket-title">{{ $t('basket.your_cart') }}</h2>
       <button
         class="close-button"
         aria-label="Close basket"
@@ -15,20 +15,20 @@
     <!-- Loading state -->
     <div v-if="loading" class="loading-state">
       <div class="spinner"></div>
-      <p>Բեռնվում է...</p>
+      <p>{{ $t('basket.loading') }}</p>
     </div>
 
     <!-- Error message -->
     <div v-if="error" class="error-message">
       {{ error }}
-      <button @click="retry">Փորձել կրկին</button>
+      <button @click="retry">{{ $t('basket.try_again') }}</button>
     </div>
 
     <!-- Empty basket -->
     <div v-if="!loading && items.length === 0" class="empty-basket">
-      <p>Ձեր զամբյուղը դատարկ է</p>
+      <p>{{ $t('basket.cart_is_empty') }}</p>
       <button class="continue-shopping" @click="$emit('close')">
-        Շարունակել գնումները
+        {{ $t('basket.continue_shopping') }}
       </button>
     </div>
 
@@ -79,16 +79,16 @@
     <!-- Checkout section -->
     <div v-if="items.length > 0" class="checkout-section">
       <div class="total-section">
-        <span>Ընդհանուր:</span>
+        <span>{{ $t('basket.general') }}</span>
         <span class="total-price">{{ formatPrice(total) }} դրամ</span>
       </div>
 
       <button class="checkout-button" @click="proceedToCheckout">
-        Անցնել վճարման
+        {{ $t('basket.to_checkout') }}
       </button>
 
       <button class="clear-basket" @click="clearBasket">
-        Դատարկել զամբյուղը
+        {{ $t('basket.empty_the_cart') }}
       </button>
     </div>
   </div>

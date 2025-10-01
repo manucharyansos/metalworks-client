@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="mx-auto text-center font-sans italic my-6 text-2xl">
+    <h1 class="mx-auto text-center font-montserrat my-6 text-2xl">
       Ստեղծել ֆայլերի տեսակներ
     </h1>
 

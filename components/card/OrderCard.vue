@@ -14,7 +14,7 @@
             class="flex flex-row items-start"
           >
             <span class="font-bold">Status:</span>
-            <div :class="status.class" class="font-sans italic mx-2">
+            <div :class="status.class" class="font-montserrat mx-2">
               {{ order.factory_order.status }}
             </div>
           </div>

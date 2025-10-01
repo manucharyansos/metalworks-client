@@ -18,7 +18,7 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <h5 class="mb-1 italic font-sans font-bold text-gray-900">Նյութեր</h5>
+          <h5 class="mb-1 font-montserrat font-bold text-gray-900">Նյութեր</h5>
           <p class="text-gray-600 italic">
             Քանակ․ <span class="font-semibold">{{ materials.length }}</span>
           </p>
