@@ -1,47 +1,65 @@
 export const state = () => ({
-  materials: [],
-  pagination: null,
+  items: [],
+  pagination: {
+    current_page: 1,
+    last_page: 1,
+    per_page: 10,
+    total: 0,
+  },
+  loading: false,
 })
 
 export const getters = {
-  getMaterials(state) {
-    return state.materials
+  getMaterials: (s) => s.items,
+  getPagination: (s) => s.pagination,
+  isLoading: (s) => s.loading,
+}
+
+export const mutations = {
+  SET_LOADING(state, v) {
+    state.loading = !!v
   },
-  getPagination(state) {
-    return state.pagination
+  SET_ITEMS(state, rows) {
+    state.items = Array.isArray(rows) ? rows : []
+  },
+  SET_PAGINATION(state, p) {
+    state.pagination = { ...state.pagination, ...(p || {}) }
   },
 }
 
 export const actions = {
-  async fetchMaterials({ commit }, { page = 1, perPage = 10 } = {}) {
+  async fetchMaterials(
+    { commit },
+    { page = 1, perPage = 10, search = '', categoryId = null } = {}
+  ) {
+    commit('SET_LOADING', true)
     try {
-      const response = await this.$axios.get('api/materials', {
-        params: { page, per_page: perPage }
-      });
-      commit('setMaterials', response.data.data); // Commit only the paginated data
-      commit('setPagination', response.data); // Optionally commit pagination metadata
-      return true;
-    } catch (err) {
-      console.error('Error fetching materials:', err);
-      return false;
+      const { data } = await this.$axios.get('/api/materials', {
+        params: {
+          page,
+          per_page: perPage,
+          search: search || undefined,
+          category_id: categoryId || undefined,
+        },
+      })
+      // backend-ը պետք է վերադարձնի { data: [...], pagination: {...} }
+      commit('SET_ITEMS', data.data)
+      commit('SET_PAGINATION', data.pagination)
+      return true
+    } catch (e) {
+      console.error('fetchMaterials:', e)
+      return false
+    } finally {
+      commit('SET_LOADING', false)
     }
   },
 
-  async createMaterials({ commit }, data) {
-    const response = await this.$axios.post('/api/materials', data, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-    if (response) {
-      this.$router.push('/manager')
-    }
+  async deleteMaterial(_, id) {
+    await this.$axios.delete(`/api/materials/${id}`)
   },
-}
 
-export const mutations = {
-  setMaterials(state, materials) {
-    state.materials = materials
-  },
-  setPagination(state, pagination) {
-    state.pagination = pagination;
+  async fetchMaterialById(_, id) {
+    const { data } = await this.$axios.get(`/api/materials/${id}`)
+    return data.data || data
   },
 }

@@ -4,49 +4,29 @@
   "see_all": "See all",
   "logout": "Log out",
   "search": "Search…",
-  "price_from": "From {price}֏",
-  "nav": {
-    "home": "Home",
-    "about": "About",
-    "services": "Services",
-    "products": "Products",
-    "contact": "Contact",
-    "login": "Log in",
-    "register": "Sign up",
-    "dashboard": "Dashboard",
-    "settings": "Settings",
-    "logout": "Log out"
+  "common": {
+    "create_user": "Create new user",
+    "status": "Status",
+    "physPerson": "Individual",
+    "legalEntity": "Legal entity",
+    "name": "Name",
+    "last_name": "Last name",
+    "phone": "Phone",
+    "second_phone": "Second phone",
+    "address": "Address",
+    "legal_address": "Legal address",
+    "email": "Email",
+    "password": "Password",
+    "password_confirm": "Confirm password",
+    "passport_number": "Passport number",
+    "company_name": "Company name",
+    "avc": "Tax ID",
+    "accountant": "Accountant",
+    "create_client": "Create client",
+    "update_client": "Update"
   },
-  "news": "News",
-  "our_works": "Our Works",
-  "clients": "OUR CUSTOMERS AND PARTNERS ARE",
-  "city_state_institutions": "City and state institutions",
-  "construction_companies": "Construction companies",
-  "architects_designers": "Architects and designers",
-  "furniture_manufacturers": "Architects and designers",
-  "industrial_enterprises": "Architects and designers",
-  "miners": "Miners",
-  "footer": {
-    "resources": "Resources",
-    "about": "About",
-    "contact": "Contact",
-    "address": "YEREVAN, Armenia",
-    "address_val": "Production area (metalworking)",
-    "times": "Hours: Mon-Sat 10:00–19:00",
-    "write_to_us": "Write to us",
-    "all_rights_reserved": "All rights reserved."
-  },
-  "hero_carousel": {
-    "text_1": "DIGITAL PRODUCTION OF SHEET METAL, PROFILE PIPES PROCESSING"
-  },
-  "basket": {
-    "your_cart": "Your Cart",
-    "loading": "Loading",
-    "try_again": "Try again",
-    "cart_is_empty": "Your cart is empty.",
-    "continue_shopping": "Continue shopping",
-    "to_checkout": "Go to checkout",
-    "empty_the_cart": "Go to checkout",
-    "general": "General"
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next"
   }
 }

@@ -1,19 +1,29 @@
-export default function ({ $config, $auth, redirect }) {
-  const userRole = $auth.user.role
+export default function ({ app, route, redirect, $auth, $config }) {
+  const toLocale = (p) => (app.localePath ? app.localePath(p) : p)
+  const path = route.path
+  const isLoggedIn = $auth && $auth.loggedIn
 
-  if (userRole === $config.managerRole) {
-    return redirect('/manager')
+  const roleToPath = (role) => {
+    const map = {
+      [$config.managerRole]: $config.dashboards.manager,
+      [$config.engineerRole]: $config.dashboards.engineer,
+      [$config.adminRole]: $config.dashboards.admin,
+      [$config.laserRole]: $config.dashboards.laser,
+      [$config.bendRole]: $config.dashboards.bend,
+    }
+    return map[role] || '/'
   }
-  if (userRole === $config.engineerRole) {
-    return redirect('/engineer')
-  }
-  if (userRole === $config.adminRole) {
-    return redirect('/admin')
-  }
-  if (userRole === $config.laserRole) {
-    return redirect('/factory/laser')
-  }
-  if (userRole === $config.bendRole) {
-    return redirect('/factory/bend')
+
+  const root = toLocale('/')
+  if (path === '/' || path === root) {
+    if (!isLoggedIn) {
+      const login = toLocale('/login')
+      if (path !== login) return redirect(login)
+      return
+    }
+    const target = toLocale(roleToPath($auth.user?.role?.name))
+    if (path !== target) {
+      return redirect(target)
+    }
   }
 }

@@ -3,7 +3,8 @@
 </template>
 <script>
 export default {
-  layout: 'ManagerLayout',
-  middleware: ['manager', 'roleRedirect'],
+  layout: 'manager',
+  middleware: ['role-guard'],
+  meta: { role: 'manager' },
 }
 </script>

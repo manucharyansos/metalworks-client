@@ -1,596 +1,200 @@
 <template>
-  <main class="min-h-screen bg-gray-50 p-6">
-    <div
-      class="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden h-screen"
-    >
-      <!-- Header Section -->
-      <div class="p-6 border-b border-gray-200">
-        <h1 class="text-3xl font-bold text-gray-800 font-montserrat">
-          Նախագծեր
-        </h1>
+  <div class="min-h-screen w-full bg-gray-50 dark:bg-gray-950">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Իմ պատվերները
+          </h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Փնտրեք, դիտեք և կառավարեք ձեր ստեղծած պատվերները
+          </p>
+        </div>
       </div>
 
-      <!-- Main Content Section -->
-      <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- PMP Group Section -->
-        <div class="space-y-4">
-          <h2 class="text-xl font-semibold text-gray-700">Խումբ</h2>
+      <div class="mt-6">
+        <OrdersToolbar
+          :search="filters.search"
+          :per-page="pagination.per_page"
+          @update:search="onSetSearch"
+          @update:per-page="onSetPerPage"
+        />
+      </div>
 
-          <div class="relative">
-            <label
-              for="pmpGroup"
-              class="block text-sm font-medium text-gray-600 mb-1"
-            >
-              Ծածկագիր
-            </label>
-            <div class="relative">
-              <input
-                id="pmpGroup"
-                v-model="pmpGroup"
-                type="text"
-                class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                placeholder="Նշեք ծածկագիր"
-                @focus="openPmpGroup"
-              />
-              <button
-                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
-                @click="openPmpGroup"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-            </div>
+      <div class="mt-6">
+        <div
+          v-if="error"
+          class="p-4 rounded-xl bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-200"
+        >
+          {{ error }}
+        </div>
 
-            <!-- Dropdown menu -->
+        <!-- skeletons -->
+        <div
+          v-if="loading"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+        >
+          <div
+            v-for="i in 8"
+            :key="i"
+            class="animate-pulse bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5"
+          >
             <div
-              v-if="isSelectPmpGroup"
-              class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
-            >
-              <ul class="py-1">
-                <li
-                  v-for="pmp in filteredPmps"
-                  :key="pmp.id"
-                  class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700"
-                  @click="selectPmpGroup(pmp)"
-                >
-                  {{ pmp.group }}
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="relative">
-            <label class="block text-sm font-medium text-gray-600 mb-1">
-              Անվանում
-            </label>
-            <div class="relative">
-              <input
-                v-model="pmpGroupName"
-                type="text"
-                class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                placeholder="Նշեք անվանում"
-                @focus="openPmpGroupName"
-              />
-              <button
-                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
-                @click="openPmpGroupName"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <!-- Dropdown menu -->
+              class="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded mb-3"
+            ></div>
             <div
-              v-if="isSelectPmpGroupName"
-              class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
-            >
-              <ul class="py-1">
-                <li
-                  v-for="pmp in filteredPmpNames"
-                  :key="pmp.id"
-                  class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700"
-                  @click="selectPmpGroupName(pmp)"
-                >
-                  {{ pmp.group_name }}
-                </li>
-              </ul>
+              class="h-5 w-40 bg-gray-200 dark:bg-gray-800 rounded mb-2"
+            ></div>
+            <div class="h-20 bg-gray-200 dark:bg-gray-800 rounded mb-4"></div>
+            <div class="flex justify-between">
+              <div class="h-8 w-24 bg-gray-200 dark:bg-gray-800 rounded"></div>
+              <div class="h-8 w-20 bg-gray-200 dark:bg-gray-800 rounded"></div>
             </div>
           </div>
         </div>
 
-        <!-- Remote Number Section -->
-        <div class="space-y-4">
-          <h2 class="text-xl font-semibold text-gray-700">Ենթախումբ</h2>
-
-          <div class="relative">
-            <label class="block text-sm font-medium text-gray-600 mb-1"
-              >Ծածկագիր
-            </label>
-            <div class="relative">
-              <input
-                v-model="pmpRemoteNumber"
-                type="text"
-                class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition disabled:bg-gray-100 disabled:text-gray-500"
-                :disabled="isExistPmpRemoteNumber"
-                @focus="openRemoteNumber"
-              />
-              <button
-                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
-                @click="openRemoteNumber"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <!-- Dropdown menu -->
-            <div
-              v-if="isPmpRemoteNumber"
-              class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
+        <!-- empty -->
+        <div
+          v-else-if="!orders || !orders.length"
+          class="rounded-2xl bg-white dark:bg-gray-900 border border-dashed border-gray-300 dark:border-gray-700 p-10 text-center"
+        >
+          <div
+            class="mx-auto w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 grid place-items-center mb-3"
+          >
+            <svg
+              class="w-6 h-6 opacity-60"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
             >
-              <ul class="py-1">
-                <li
-                  v-for="pmp in pmpRemoteNumbers"
-                  :key="pmp.id"
-                  class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700"
-                  @click="selectPmpRemoteNumber(pmp)"
-                >
-                  {{ pmp.remote_number }}
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="relative">
-            <label class="block text-sm font-medium text-gray-600 mb-1">
-              Նկարագրություն
-            </label>
-            <div class="relative">
-              <input
-                v-model="pmpRemoteNumberName"
-                type="text"
-                class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition disabled:bg-gray-100 disabled:text-gray-500"
-                :disabled="isExistPmpRemoteNumber"
-                @focus="openRemoteNumberName"
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 7l9 4 9-4-9-4-9 4ZM3 7v10l9 4 9-4V7"
               />
-              <button
-                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
-                @click="openRemoteNumberName"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <!-- Dropdown menu -->
-            <div
-              v-if="isPmpRemoteNumberName"
-              class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
-            >
-              <ul class="py-1">
-                <li
-                  v-for="pmp in pmpRemoteNumbers"
-                  :key="pmp.id"
-                  class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700"
-                  @click="selectPmpRemoteNumberName(pmp)"
-                >
-                  {{ pmp.remote_number_name }}
-                </li>
-              </ul>
-            </div>
+            </svg>
           </div>
+          <h3 class="text-lg font-semibold mb-1">Պատվերներ չկան</h3>
+          <p class="text-sm text-gray-500">
+            Սկսեք նոր պատվերից կամ փոխեք որոնման դաշտը
+          </p>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="flex flex-col justify-end gap-4">
-          <button
-            v-if="isCreatePmp"
-            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-sm transition transform hover:scale-105"
-            @click="addPmpGroup"
-          >
-            Ստեղծել
-          </button>
-          <button
-            v-if="isCreatePmpRemoteNumber"
-            class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-sm transition transform hover:scale-105"
-            @click="addPmpGroupRemoteNumber"
-          >
-            Ստեղծել հերթական համար
-          </button>
-          <button
-            v-if="isEditPmp"
-            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition transform hover:scale-105"
-            @click="editPmp"
-          >
-            Դիտել
-          </button>
-        </div>
+        <!-- grid -->
+        <transition-group
+          name="card"
+          tag="div"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+        >
+          <OrderCard
+            v-for="o in orders"
+            :key="o.id"
+            :order="o"
+            @open="openOrder"
+          />
+        </transition-group>
+      </div>
+
+      <div class="mt-6">
+        <Pagination :meta="pagination" @change="onGoPage" />
       </div>
     </div>
-    <notifications />
-  </main>
+
+    <!-- DETAILS MODAL -->
+    <OrderDetailsModal
+      :visible="isDetailsOpen"
+      :order="selectedOrder"
+      @close="isDetailsOpen = false"
+    />
+  </div>
 </template>
+
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import OrdersToolbar from '~/components/engineer/OrdersToolbar.vue'
+import OrderCard from '~/components/engineer/OrderCard.vue'
+import Pagination from '~/components/ui/Pagination.vue'
+import OrderDetailsModal from '~/components/engineer/OrderDetailsModal.vue'
+import DxfViewerModal from '~/components/engineer/DxfViewerModal.vue'
 
 export default {
-  name: 'EngineerPage',
-  layout: 'EngineerLayout',
-  middleware: ['engineer', 'roleRedirect'],
-  data() {
-    return {
-      pmpGroup: '',
-      pmpGroupName: '',
-      pmpRemoteNumber: '',
-      pmpRemoteNumberName: '',
-      isSelectPmpGroup: false,
-      isSelectPmpGroupName: false,
-      isPmpRemoteNumber: false,
-      isPmpRemoteNumberName: false,
-      isCreatePmp: false,
-      isCreatePmpRemoteNumber: false,
-      isEditPmp: false,
-      pmpRemoteNumbers: [],
-      remote_number_id: '',
-      isExistPmpRemoteNumber: true,
-      pmpId: null,
-      remoteNumberId: null,
-    }
+  components: {
+    // eslint-disable-next-line vue/no-unused-components
+    DxfViewerModal,
+    OrdersToolbar,
+    OrderCard,
+    Pagination,
+    OrderDetailsModal,
   },
+  layout: 'engineer',
+  middleware: ['role-guard'],
+  meta: { role: 'engineer' },
+  data: () => ({
+    isDetailsOpen: false,
+    selectedOrder: null,
+  }),
   computed: {
-    ...mapGetters('pmp', ['getPmpes']),
-    filteredPmps() {
-      if (!this.pmpGroup) return this.getPmpes?.pmp || []
-      return this.getPmpes?.pmp.filter((pmp) =>
-        pmp.group.startsWith(this.pmpGroup)
-      )
+    ...mapGetters('engineer', [
+      'getOrders',
+      'getPagination',
+      'getFilters',
+      'isLoading',
+      'getError',
+    ]),
+    orders() {
+      return this.getOrders
     },
-    filteredPmpNames() {
-      if (!this.pmpGroupName) return this.getPmpes?.pmp || []
-      return this.getPmpes?.pmp.filter((pmp) =>
-        pmp.group_name.toLowerCase().startsWith(this.pmpGroupName.toLowerCase())
-      )
+    pagination() {
+      return this.getPagination
     },
-  },
-  watch: {
-    pmpGroup(val) {
-      if (val && val.length >= 3) {
-        if (this.getPmpes?.pmp && Array.isArray(this.getPmpes.pmp)) {
-          const isGroupExists = this.getPmpes.pmp.some(
-            (pmp) => String(pmp.group) === String(val)
-          )
-          if (isGroupExists) {
-            this.isExistPmpRemoteNumber = false
-          } else {
-            this.isExistPmpRemoteNumber = false
-            this.isCreatePmp = true
-          }
-        }
-      } else if (!val) {
-        this.isSelectPmpGroup = false
-        this.pmpGroupName = ''
-        this.isCreatePmp = false
-      }
+    filters() {
+      return this.getFilters
     },
-    pmpRemoteNumber(val) {
-      if (!val) {
-        this.isEditPmp = false
-        this.isCreatePmpRemoteNumber = false
-        this.pmpRemoteNumber = ''
-        this.pmpRemoteNumberName = ''
-        this.remote_number_id = ''
-        return
-      }
-      if (val.length >= 2) {
-        const currentPmp = this.getPmpes?.pmp?.find(
-          (pmp) => String(pmp.group) === String(this.pmpGroup.padStart(3, '0'))
-        )
-        if (currentPmp?.remote_number?.length > 0) {
-          const paddedVal = val.padStart(2, '0')
-          const remoteExists = currentPmp.remote_number.some(
-            (remote) => String(remote.remote_number) === paddedVal
-          )
-
-          if (remoteExists) {
-            this.isPmpRemoteNumber = true
-            this.isEditPmp = true
-            this.isCreatePmpRemoteNumber = false
-            const selectedRemote = currentPmp.remote_number.find(
-              (remote) => String(remote.remote_number) === paddedVal
-            )
-            this.remote_number_id = selectedRemote?.id || ''
-            this.pmpRemoteNumberName = selectedRemote?.remote_number_name || ''
-          } else {
-            this.isPmpRemoteNumber = false
-            this.isEditPmp = false
-            this.isCreatePmpRemoteNumber = true
-            this.remote_number_id = ''
-            this.pmpRemoteNumberName = ''
-          }
-        } else {
-          this.isEditPmp = false
-          this.isCreatePmpRemoteNumber = false
-          this.remote_number_id = ''
-        }
-      }
+    loading() {
+      return this.isLoading
     },
-    pmpGroupName(val) {
-      if (val) {
-        if (this.getPmpes?.pmp && Array.isArray(this.getPmpes.pmp)) {
-          const isGroupExists = this.getPmpes.pmp.some(
-            (pmp) => String(pmp.group_name) === String(val)
-          )
-          if (isGroupExists) {
-            this.isExistPmpRemoteNumber = false
-          }
-        }
-      } else if (!val) {
-        this.isSelectPmpGroupName = false
-        this.pmpGroup = ''
-      }
-    },
-    pmpRemoteNumberName(val) {
-      if (val) {
-        const currentPmp = this.getPmpes?.pmp?.find(
-          (pmp) => String(pmp.group) === String(this.pmpGroup.padStart(3, '0'))
-        )
-
-        if (currentPmp?.remote_number?.length > 0) {
-          const remoteExists = currentPmp.remote_number.some(
-            (remote) => String(remote.remote_number_name) === String(val)
-          )
-
-          if (remoteExists) {
-            const selectedRemote = currentPmp.remote_number.find(
-              (remote) => String(remote.remote_number_name) === String(val)
-            )
-
-            if (selectedRemote) {
-              this.pmpRemoteNumber = selectedRemote.remote_number
-              this.remote_number_id = selectedRemote.id
-              this.isEditPmp = true
-              this.isCreatePmpRemoteNumber = false
-              this.isPmpRemoteNumber = false
-            }
-          } else {
-            this.isEditPmp = false
-            this.isCreatePmpRemoteNumber = true
-          }
-        }
-      } else {
-        this.isEditPmp = false
-        this.isCreatePmpRemoteNumber = false
-        this.pmpRemoteNumber = ''
-        this.remote_number_id = ''
-      }
+    error() {
+      return this.getError
     },
   },
   created() {
-    this.fetchPmps()
+    this.fetchOrders().catch(() => {
+      this.$notify?.({ type: 'error', text: 'Չհաջողվեց բեռնել պատվերները' })
+    })
   },
   methods: {
-    ...mapActions('pmp', [
-      'fetchPmps',
-      'createPmp',
-      'checkPmpByRemoteNumber',
-      'rememberNumberPmp',
+    ...mapActions('engineer', [
+      'fetchOrders',
+      'setSearch',
+      'setPerPage',
+      'goPage',
     ]),
-
-    openPmpGroup() {
-      this.isSelectPmpGroup = !this.isSelectPmpGroup
-      this.isSelectPmpGroupName = false
-      this.isPmpRemoteNumber = false
-      this.isPmpRemoteNumberName = false
+    onSetSearch(q) {
+      this.setSearch(q)
     },
-    openRemoteNumber() {
-      this.isPmpRemoteNumber = !this.isPmpRemoteNumber
-      this.isSelectPmpGroup = false
-      this.isSelectPmpGroupName = false
-      this.isPmpRemoteNumberName = false
+    onSetPerPage(n) {
+      this.setPerPage(n)
     },
-    openPmpGroupName() {
-      this.isSelectPmpGroupName = !this.isSelectPmpGroupName
-      this.isSelectPmpGroup = false
-      this.isPmpRemoteNumber = false
-      this.isPmpRemoteNumberName = false
+    onGoPage(p) {
+      this.goPage(p)
     },
-    openRemoteNumberName() {
-      this.isPmpRemoteNumberName = !this.isPmpRemoteNumberName
-      this.isSelectPmpGroup = false
-      this.isPmpRemoteNumber = false
-      this.isSelectPmpGroupName = false
-    },
-    selectPmpGroup(pmp) {
-      this.isSelectPmpGroupName = false
-      this.pmpId = pmp.id
-      this.pmpGroup = pmp.group
-      this.pmpGroupName = pmp.group_name
-      this.pmpRemoteNumbers = pmp.remote_number
-      this.pmpRemoteNumber = this.pmpRemoteNumbers[pmp.remote_number]
-      this.pmpRemoteNumberName = this.pmpRemoteNumbers[pmp.remote_number_name]
-      this.isSelectPmpGroup = false
-      this.isSelectPmpGroupName = false
-      this.isExistPmpRemoteNumber = false
-      const isGroupExists = this.getPmpes.pmp.some(
-        (pmp) => pmp.group === this.pmpGroup
-      )
-      if (!isGroupExists) {
-        this.isCreatePmp = true
-      }
-    },
-    selectPmpGroupName(pmp) {
-      this.pmpGroup = pmp.group
-      this.pmpGroupName = pmp.group_name
-      this.pmpRemoteNumbers = pmp.remote_number
-      this.pmpRemoteNumber = this.pmpRemoteNumbers[pmp.remote_number]
-      this.pmpRemoteNumberName = this.pmpRemoteNumbers[pmp.remote_number_name]
-      this.isSelectPmpGroupName = false
-      this.isSelectPmpGroup = false
-      this.isExistPmpRemoteNumber = false
-    },
-
-    selectPmpRemoteNumber(pmp) {
-      this.remoteNumberId = pmp.id
-      this.pmpRemoteNumberName = pmp.remote_number_name
-      this.pmpRemoteNumber = pmp.remote_number
-      this.isPmpRemoteNumber = false
-      this.remote_number_id = pmp.id
-    },
-
-    selectPmpRemoteNumberName(pmp) {
-      this.remoteNumberId = pmp.id
-      this.pmpRemoteNumberName = pmp.remote_number_name
-      this.pmpRemoteNumber = pmp.remote_number
-      this.isPmpRemoteNumberName = false
-    },
-
-    async addPmpGroup() {
-      if (
-        !this.pmpGroup ||
-        !this.pmpGroupName ||
-        !this.pmpRemoteNumber ||
-        !this.pmpRemoteNumberName
-      ) {
-        this.$notify({
-          text: `Group or Remote Number is missing:`,
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
-          type: 'error',
-        })
-        return
-      }
-      const pmp = {
-        group: this.pmpGroup.padStart(3, '0'),
-        group_name: this.pmpGroupName,
-        remote_number: this.pmpRemoteNumber.padStart(2, '0'),
-        remote_number_name: this.pmpRemoteNumberName,
-        admin_confirmation: true,
-      }
-      const response = await this.createPmp(pmp)
-      if (response) {
-        await this.resetPmpData()
-        await this.fetchPmps()
-        // await this.$router.push({ path: 'files/view', query: { id: this.remoteNumberId } })
-      }
-    },
-    resetPmpData() {
-      this.pmpGroup = ''
-      this.pmpGroupName = ''
-      this.pmpRemoteNumber = null
-      this.pmpRemoteNumberName = null
-    },
-    editPmp() {
-      if (this.remoteNumberId) {
-        this.$router.push({
-          path: '/engineer/files/view',
-          query: { id: this.remoteNumberId },
-        })
-      } else {
-        this.$notify({
-          text: 'Հաշվի ID-ն բացակայում է:',
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
-          type: 'error',
-        })
-      }
-    },
-    async addPmpGroupRemoteNumber() {
-      if (
-        !this.pmpGroup ||
-        !this.pmpGroupName ||
-        !this.pmpRemoteNumberName ||
-        !this.pmpRemoteNumberName
-      ) {
-        return
-      }
-
-      const data = {
-        id: this.pmpId,
-        group: this.pmpGroup,
-        group_name: this.pmpGroupName,
-        remote_number: this.pmpRemoteNumber,
-        remote_number_name: this.pmpRemoteNumberName,
-      }
-
-      const res = await this.rememberNumberPmp(data)
-      this.resetPmpData()
-      if (res) {
-        this.isExistPmpRemoteNumber = true
-        this.isCreatePmp = false
-        this.isEditPmp = false
-        this.isCreatePmpRemoteNumber = false
-        if (this.remoteNumberId) {
-          await this.$router.push({
-            path: '/engineer/files/view',
-            query: { id: this.remoteNumberId },
-          })
-        } else {
-          this.$notify({
-            text: 'Հաշվի ID-ն բացակայում է:',
-            duration: 3000,
-            speed: 1000,
-            position: 'top',
-            type: 'error',
-          })
-        }
-      }
+    openOrder(order) {
+      this.selectedOrder = order
+      this.isDetailsOpen = true
     },
   },
 }
 </script>
-<style scoped>
-input:focus {
-  outline: none !important;
-  box-shadow: none !important;
-  border: none !important;
-  background: inherit !important;
-  color: inherit !important;
+
+<style>
+.card-enter-active,
+.card-leave-active {
+  transition: all 0.18s ease;
+}
+.card-enter,
+.card-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
 }
 </style>

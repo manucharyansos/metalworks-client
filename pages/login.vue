@@ -1,35 +1,10 @@
 <template>
   <div
-    class="login_page flex w-full h-full items-center justify-center lg:p-0 p-6"
+    class="login_page flex w-full min-h-screen items-center justify-center lg:p-0 p-6"
   >
     <div
       class="grid grid-cols-1 md:grid-cols-2 items-center justify-center w-full mx-auto font-roboto dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0"
     >
-      <!-- Close Button -->
-      <div class="absolute top-4 right-4 md:top-12 md:right-12">
-        <NuxtLink
-          to="/"
-          class="flex items-center justify-center rounded-full hover:border-2 border-red-400"
-        >
-          <svg
-            class="w-6 h-6 text-white dark:text-gray-800"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            fill="red"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke="red"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18 17.94 6M18 18 6.06 6"
-            />
-          </svg>
-        </NuxtLink>
-      </div>
-
       <!-- Form Container -->
       <div
         class="flex flex-col items-center justify-center md:rounded-tl-3xl rounded-bl-3xl md:rounded-br-none rounded-br-3xl bg-white w-full h-full dark:bg-gray-800 mx-auto md:p-7 p-3 md:order-1 order-2"
@@ -149,8 +124,7 @@ import inputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 export default {
   name: 'Login',
   components: { inputWithLabelIcon },
-  layout: 'authLayout',
-  middleware: ['guest'],
+  layout: 'default',
   data() {
     return {
       email: '',

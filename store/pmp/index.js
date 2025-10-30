@@ -31,7 +31,7 @@ export const actions = {
   async rememberNumberPmp({ commit }, pmp) {
     try {
       const { data } = await this.$axios.post(
-        `/api/engineers/pmps/remoteNumber/${pmp.id}`,
+        `/api/engineers/pmps/${pmp.id}/remote-number`,
         pmp
       )
       commit('SET_PMP', data)
@@ -55,8 +55,9 @@ export const actions = {
 
   async fetchPmp({ commit }, id) {
     try {
-      const { data } = await this.$axios.get(`/api/engineers/pmps/${id}`)
-      // եթե backend-ը վերադարձնում է { pmp: {...} }
+      const { data } = await this.$axios.get(
+        `/api/engineers/pmps/remote-number/${id}`
+      )
       commit('SET_PMP', data.pmp ?? data)
       return true
     } catch (err) {
@@ -85,7 +86,7 @@ export const actions = {
         `/api/engineers/pmps/check-pmp-by-remote-number/${id}`
       )
       if (data?.exists) commit('SET_PMP', data)
-      return true
+      return !!data?.exists
     } catch (error) {
       commit('SET_ERROR', error.response?.data || error.message)
       return false
@@ -96,7 +97,7 @@ export const actions = {
     try {
       const { data } = await this.$axios.post(
         '/api/engineers/pmps/check-group-name',
-        { groupName }
+        { group_name: groupName }
       )
       if (typeof data?.exists !== 'undefined') commit('SET_PMP', data)
       return !!data?.exists
@@ -108,8 +109,6 @@ export const actions = {
 
   async createPmpFilesByFactory({ commit }, formData) {
     try {
-      // formData պարտադիր է՝ File + DXF չափեր (width/height) case-ում
-      // ԿԱՐԵՎՈՐ — չսահմանեք Content-Type՝ թող բրաուզերը դնի multipart boundary
       const { data } = await this.$axios.post(
         '/api/engineers/uploadPmpFile',
         formData

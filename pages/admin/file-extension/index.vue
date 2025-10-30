@@ -86,8 +86,9 @@ import FileExtension from '~/components/File/FileExtension/index.vue'
 
 export default {
   components: { InputWithLabelIcon, FileExtension },
-  layout: 'AdminLayout',
-  middleware: ['admin', 'roleRedirect'],
+  layout: 'admin',
+  middleware: ['role-guard'],
+  meta: { role: 'admin' },
   data() {
     return {
       newLaserExtension: '',

@@ -402,8 +402,9 @@ export default {
     EditModal,
     InputWithLabelIcon,
   },
-  layout: 'ManagerLayout',
-  middleware: ['manager', 'roleRedirect'],
+  layout: 'manager',
+  middleware: ['role-guard'],
+  meta: { role: 'manager' },
   data() {
     return {
       searchable: '',

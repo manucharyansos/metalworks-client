@@ -143,8 +143,9 @@ import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 
 export default {
   components: { InputWithLabelIcon },
-  layout: 'ManagerLayout',
-  middleware: ['manager', 'roleRedirect'],
+  layout: 'manager',
+  middleware: ['role-guard'],
+  meta: { role: 'manager' },
   data() {
     return {
       searchable: null,

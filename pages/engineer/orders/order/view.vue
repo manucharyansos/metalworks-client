@@ -233,8 +233,9 @@ export default {
     OrderDetail,
     SpinnerComponent,
   },
-  layout: 'EngineerLayout',
-  middleware: ['engineer', 'roleRedirect'],
+  layout: 'engineer',
+  middleware: ['role-guard'],
+  meta: { role: 'engineer' },
   data() {
     return {
       id: null,

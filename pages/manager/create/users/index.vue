@@ -484,8 +484,9 @@ import InputWithLabels from '~/components/form/InputWithIcon.vue'
 
 export default {
   components: { InputWithLabels },
-  layout: 'ManagerLayout',
-  middleware: ['manager', 'roleRedirect'],
+  layout: 'manager',
+  middleware: ['role-guard'],
+  meta: { role: 'manager' },
   data() {
     return {
       personType: '',

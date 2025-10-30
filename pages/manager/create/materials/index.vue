@@ -238,8 +238,9 @@ import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 
 export default {
   components: { SelectWithLabel, InputWithLabelIcon },
-  layout: 'ManagerLayout',
-  middleware: ['manager', 'roleRedirect'],
+  layout: 'manager',
+  middleware: ['role-guard'],
+  meta: { role: 'manager' },
   data() {
     return {
       materialGroup: {

@@ -1,27 +1,11 @@
 <template>
-  <div>
-    <!-- <header> -->
-    <HeaderLayout />
-    <!-- </header> -->
-    <main>
-      <Nuxt />
-    </main>
-
-    <!--    <footer>-->
-    <footer-component />
-    <!--    </footer>-->
-  </div>
+  <main class="flex flex-col min-h-screen items-center justify-center">
+    <Nuxt />
+  </main>
 </template>
 
 <script>
-import HeaderLayout from '~/components/layouts/Header-layout.vue'
-import FooterComponent from '~/components/footer/FooterComponent.vue'
-export default {
-  components: {
-    FooterComponent,
-    HeaderLayout,
-  },
-}
+export default {}
 </script>
 
 <style scoped></style>

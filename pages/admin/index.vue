@@ -1,61 +1,12 @@
 <template>
   <main class="flex flex-row flex-wrap p-4 h-auto pt-20">
     <template v-if="searchFilter">
-<!--      <div-->
-<!--        v-for="(order, index) in searchFilter"-->
-<!--        :key="index"-->
-<!--        class="m-3 flex items-start justify-between flex-wrap"-->
-<!--      >-->
-<!--        <div-->
-<!--          class="border-2 border-dashed border-gray-300 rounded-lg p-4 dark:border-gray-600 h-64 cursor-pointer"-->
-<!--        >-->
-<!--          <p v-if="order.created_at">-->
-<!--            <span class="font-bold">Start:</span> {{ order.created_at }}-->
-<!--          </p>-->
-<!--          <div @click="editOrder(order)">-->
-<!--            <div>-->
-<!--              <div>-->
-<!--                <p v-if="order.status.status === 'in process'">-->
-<!--                  <span class="font-bold">Status:</span>-->
-<!--                  <span class="bg-blue-700 font-sans italic"-->
-<!--                    >{{ order.status.status }}-->
-<!--                  </span>-->
-<!--                </p>-->
-<!--                <p v-if="order.status.status === 'waiting'">-->
-<!--                  <span class="font-bold">Status:</span>-->
-<!--                  <span class="bg-yellow-700 font-sans italic">-->
-<!--                    {{ order.status.status }}</span-->
-<!--                  >-->
-<!--                </p>-->
-<!--              </div>-->
-<!--              <div class="flex flex-col items-start justify-start">-->
-<!--                <span class="font-bold">Մանրամասներ</span>-->
-<!--                <p>Անուն: {{ order.name }}</p>-->
-<!--                <p>Քանակ: {{ order.quantity }}</p>-->
-<!--                <p class="will-change-auto">-->
-<!--                  Նկարագրություն: {{ order.description }}-->
-<!--                </p>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--          </div>-->
-<!--          <p>-->
-<!--            <span class="font-bold">Order number:</span>-->
-<!--            {{ order.order_number.number }}-->
-<!--          </p>-->
-<!--          <a-->
-<!--            v-if="order.store_link"-->
-<!--            target="_blank"-->
-<!--            :href="order.store_link.url"-->
-<!--            class="font-medium text-blue-600 dark:text-blue-500 hover:underline"-->
-<!--            >Read more</a-->
-<!--          >-->
-<!--        </div>-->
-        <table
-          class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      <table
+        class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
+      >
+        <thead
+          class="text-xs text-gray-700 bg-gray-300 uppercase dark:text-gray-400"
         >
-          <thead
-            class="text-xs text-gray-700 bg-gray-300 uppercase dark:text-gray-400"
-          >
           <tr class="border-b-neutral-700">
             <th scope="col" class="px-3 py-3">Id</th>
             <th scope="col" class="px-3 py-3">Ստեղծման ամսաթիվը</th>
@@ -67,12 +18,12 @@
             <th scope="col" class="px-3 py-3">Քանակ</th>
             <th scope="col" class="px-3 py-3"></th>
           </tr>
-          </thead>
-          <tbody
-            v-for="(order, index) in searchFilter"
-            :key="index"
-            class="bg-amber-50"
-          >
+        </thead>
+        <tbody
+          v-for="(order, index) in searchFilter"
+          :key="index"
+          class="bg-amber-50"
+        >
           <tr class="border-b border-gray-200 dark:border-gray-700">
             <th
               v-if="order.id"
@@ -101,7 +52,7 @@
             </td>
             <td v-if="order?.store_link" class="px-12">
               <a class="hover:!text-blue-700" :href="order.store_link?.url"
-              >Link</a
+                >Link</a
               >
             </td>
             <td
@@ -111,9 +62,9 @@
               Դիտել
             </td>
           </tr>
-          </tbody>
-        </table>
-<!--      </div>-->
+        </tbody>
+      </table>
+      <!--      </div>-->
     </template>
   </main>
 </template>
@@ -122,8 +73,9 @@ import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'AdminPage',
-  layout: 'AdminLayout',
-  middleware: ['admin', 'roleRedirect'],
+  layout: 'admin',
+  middleware: ['role-guard'],
+  meta: { role: 'admin' },
   data() {
     return {
       searchable: '',

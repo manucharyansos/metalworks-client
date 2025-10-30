@@ -233,8 +233,9 @@ export default {
     OrderDetail,
     SpinnerComponent,
   },
-  layout: 'AdminLayout',
-  middleware: ['admin', 'roleRedirect'],
+  layout: 'admin',
+  middleware: ['role-guard'],
+  meta: { role: 'admin' },
   data() {
     return {
       id: null,

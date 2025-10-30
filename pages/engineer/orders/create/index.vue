@@ -1,223 +1,367 @@
 <template>
-  <div class="container flex flex-col">
-    <h1 class="text-3xl font-montserrat leading-6 my-6 text-start mx-4">
-      {{
-        isEditingMode ? 'Ստեղծել նոր պատվեր խմբագրելով' : 'Ստեղծել նոր պատվեր'
-      }}
-    </h1>
+  <main
+    class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 md:p-6"
+  >
+    <div class="mx-auto max-w-7xl space-y-6">
+      <!-- Global header with BACK -->
+      <header
+        class="rounded-2xl overflow-hidden shadow-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+      >
+        <div class="p-5 md:p-8 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div>
+              <h1 class="text-2xl md:text-3xl font-bold font-montserrat">
+                {{
+                  isEditingMode
+                    ? 'Ստեղծել նոր պատվեր խմբագրելով'
+                    : 'Ստեղծել նոր պատվեր'
+                }}
+              </h1>
+              <p class="mt-1 md:mt-2 text-indigo-100">
+                Հաճախորդ, PMP և ֆայլերի արագ ընտրություն
+              </p>
+            </div>
+          </div>
 
-    <div
-      v-if="!isFiles"
-      class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full mt-12"
-    >
-      <div class="w-full h-full ml-auto mr-4 p-6 bg-white rounded-xl shadow-lg">
-        <select-with-label
-          v-model="selectedClient"
-          :data-value="users"
-          label="Ընտրել հաճախորդ"
-          :class="{ 'border-red-600': formSubmitted && !selectedClient }"
-        ></select-with-label>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-12">
-          <input-with-labels
-            id="name"
-            :value="selectedClient?.name"
-            label="Անուն"
-            type="text"
-            :disabled="true"
-            class="shadow-md rounded-lg p-5"
-          ></input-with-labels>
-          <input-with-labels
-            id="phone"
-            :value="selectedClient?.client?.phone"
-            label="Հեռախոսահամար"
-            type="text"
-            :disabled="true"
-            class="shadow-md rounded-lg p-5"
-          ></input-with-labels>
-          <input-with-labels
-            id="email"
-            :value="selectedClient?.email"
-            label="Էլ․ փոստ"
-            type="text"
-            :disabled="true"
-            class="shadow-md rounded-lg p-5"
-          ></input-with-labels>
-          <input-with-labels
-            id="address"
-            :value="selectedClient?.client?.address"
-            label="Հասցե"
-            type="text"
-            class="shadow-md rounded-lg p-5"
-            :disabled="true"
-          ></input-with-labels>
+          <transition name="fade">
+            <div
+              v-if="isLoading"
+              class="flex items-center gap-2 text-indigo-100"
+            >
+              <span class="h-2 w-2 rounded-full bg-white animate-pulse"></span>
+              <span
+                class="h-2 w-2 rounded-full bg-white/80 animate-pulse delay-150"
+              ></span>
+              <span
+                class="h-2 w-2 rounded-full bg-white/60 animate-pulse delay-300"
+              ></span>
+              <span class="text-sm">Պահպանվում է…</span>
+            </div>
+          </transition>
+        </div>
+      </header>
+
+      <!-- Secondary back on details step -->
+      <div v-if="!isFiles" class="flex justify-between items-center">
+        <button
+          class="inline-flex items-center text-indigo-700 hover:text-indigo-900"
+          type="button"
+          @click="goBackToList"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 mr-1"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Վերադառնալ ցանկին
+        </button>
+        <div class="text-sm text-gray-500">
+          Քայլ՝
+          <span class="font-medium">{{
+            isFiles ? 'Ֆայլեր' : 'Մանրամասներ'
+          }}</span>
         </div>
       </div>
-      <div class="w-full">
-        <create-order-form
-          :is-editing-mode="isEditingMode"
-          :open-files-button="'Ընտրել ֆայլերը'"
-          :success-button="'Հաստատել'"
-          :cancel-button="'Չեղարկել'"
-          :edit-button="'Խմբագրել'"
-          @openFiles="openFiles(true)"
-          @addButton="pmpFiles"
-          @cancelButton="cancelBack"
+
+      <!-- Main content -->
+      <div v-if="!isFiles" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Client card -->
+        <section
+          class="relative w-full h-full p-5 md:p-6 bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60"
         >
-          <template #pmpGroup>
-            <div class="relative shadow-md rounded-lg p-3 pt-5">
-              <label
-                for="pmpGroup"
-                class="block text-sm font-medium text-gray-600 mb-1"
-              >
-                Ծածկագիր
-              </label>
-              <div class="relative">
-                <input
-                  id="pmpGroup"
-                  v-model="pmpGroupSearch"
-                  type="text"
-                  class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                  placeholder="Փնտրել ծածկագիր"
-                  @focus="isSelectPmpGroup = true"
-                  @input="filterPmpGroups"
-                />
-                <button
-                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
-                  @click="isSelectPmpGroup = !isSelectPmpGroup"
-                >
-                  <svg
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <div
-                v-if="isSelectPmpGroup"
-                class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
-              >
-                <ul class="py-1">
-                  <li
-                    v-for="pmp in filteredPmpGroups"
-                    :key="pmp.id"
-                    class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700"
-                    :class="{ 'border-red-600': formSubmitted && !selectedPmp }"
-                    @click="selectPmpGroup(pmp)"
-                  >
-                    {{ pmp.group }} : {{ pmp.group_name }}
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </template>
-
-          <template #pmpName>
-            <div class="relative shadow-md rounded-lg p-3 pt-5">
-              <label
-                for="pmpRemoteNumberName"
-                class="block text-sm font-medium text-gray-600 mb-1"
-              >
-                Ընտրել Անունը
-              </label>
-              <div class="relative">
-                <input
-                  id="pmpRemoteNumberName"
-                  v-model="pmpNameSearch"
-                  type="text"
-                  class="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                  placeholder="Փնտրել անուն"
-                  :disabled="!selectedPmp"
-                  @focus="isSelectPmpName = !!selectedPmp"
-                  @input="filterPmpNames"
-                />
-                <button
-                  class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
-                  :disabled="!selectedPmp"
-                  @click="isSelectPmpName = !isSelectPmpName"
-                >
-                  <svg
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <div
-                v-if="isSelectPmpName && selectedPmp"
-                class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
-              >
-                <ul class="py-1">
-                  <li
-                    v-for="(remoteNumber, index) in filteredPmpNames"
-                    :key="index"
-                    class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700"
-                    :class="{
-                      'border-red-600':
-                        formSubmitted && !selectedPmpRemoteNumber,
-                    }"
-                    @click="selectPmpRemoteNumber(remoteNumber)"
-                  >
-                    {{ remoteNumber.remote_number }}
-                    {{ remoteNumber.remote_number_name }}
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </template>
-
-          <template #finishDate>
+          <select-with-label
+            v-model="selectedClient"
+            :data-value="clients"
+            label="Ընտրել հաճախորդ"
+            :class="{ 'ring-2 ring-red-400': formSubmitted && !selectedClient }"
+          />
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 my-6">
             <input-with-labels
-              id="finishDate"
-              v-model="finishDate"
-              label="Անհաժեշտ ավարտի ամսաթիվ"
-              type="datetime-local"
-              class="shadow-md rounded-lg p-3 pt-5"
-              :class="{ 'border-red-600': formSubmitted && !finishDate }"
-            ></input-with-labels>
-          </template>
-
-          <template #description>
-            <textarea-with-label
-              id="description"
-              v-model="description"
-              label="Նկարագրություն"
+              id="name"
+              :value="selectedClient?.name"
+              label="Անուն"
               type="text"
-              class="shadow-md rounded-lg p-3 pt-5"
-              :class="{ 'border-red-600': formSubmitted && !description }"
-            ></textarea-with-label>
-          </template>
-        </create-order-form>
+              :disabled="true"
+              class="rounded-lg"
+            />
+            <input-with-labels
+              id="phone"
+              :value="selectedClient?.client?.phone"
+              label="Հեռախոսահամար"
+              type="text"
+              :disabled="true"
+              class="rounded-lg"
+            />
+            <input-with-labels
+              id="email"
+              :value="selectedClient?.email"
+              label="Էլ․ փոստ"
+              type="text"
+              :disabled="true"
+              class="rounded-lg"
+            />
+            <input-with-labels
+              id="address"
+              :value="selectedClient?.client?.address"
+              label="Հասցե"
+              type="text"
+              :disabled="true"
+              class="rounded-lg"
+            />
+          </div>
+
+          <transition name="fade">
+            <div
+              v-if="!selectedClient"
+              class="space-y-3 mt-4"
+              aria-hidden="true"
+            >
+              <div class="h-3 rounded bg-gray-100 animate-pulse"></div>
+              <div class="h-3 rounded bg-gray-100 animate-pulse"></div>
+              <div class="h-3 rounded bg-gray-100 animate-pulse"></div>
+            </div>
+          </transition>
+        </section>
+
+        <!-- Order form -->
+        <section class="w-full">
+          <create-order-form
+            :is-editing-mode="isEditingMode"
+            :open-files-button="'Շարունակել դեպի ֆայլեր'"
+            :success-button="'Հաստատել'"
+            :edit-button="'Խմբագրել (ֆայլեր)'"
+            @openFiles="openFiles(true)"
+            @addButton="pmpFiles"
+            @cancelButton="goBackToList"
+          >
+            <!-- PMP Group -->
+            <template #pmpGroup>
+              <div
+                class="relative rounded-xl p-3 pt-5 border border-gray-100 shadow-sm bg-white"
+              >
+                <label
+                  for="pmpGroup"
+                  class="block text-sm font-medium text-gray-600 mb-1"
+                  >Ծածկագիր</label
+                >
+                <div class="relative">
+                  <input
+                    id="pmpGroup"
+                    v-model="pmpGroupSearch"
+                    type="text"
+                    class="w-full pl-3 pr-8 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+                    placeholder="Փնտրել ծածկագիր"
+                    @focus="isSelectPmpGroup = true"
+                    @input="onGroupSearch"
+                    @keydown.down.prevent="focusNext('group')"
+                    @keydown.esc="isSelectPmpGroup = false"
+                    autocomplete="off"
+                    aria-haspopup="listbox"
+                    :aria-expanded="isSelectPmpGroup ? 'true' : 'false'"
+                  />
+                  <button
+                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                    type="button"
+                    @click="isSelectPmpGroup = !isSelectPmpGroup"
+                    aria-label="Բացել ընտրացանկը"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <transition name="dropdown">
+                  <div
+                    v-if="isSelectPmpGroup"
+                    ref="groupMenu"
+                    class="absolute z-20 mt-1 w-full bg-white rounded-lg shadow-xl border border-gray-200 max-h-60 overflow-auto"
+                    role="listbox"
+                  >
+                    <ul class="py-1">
+                      <li
+                        v-for="pmp in filteredPmpGroups"
+                        :key="pmp.id"
+                        class="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-gray-700 transition"
+                        :class="{
+                          'ring-1 ring-red-400': formSubmitted && !selectedPmp,
+                        }"
+                        @click="selectPmpGroup(pmp)"
+                      >
+                        <span class="font-medium text-gray-800">{{
+                          pmp.group
+                        }}</span>
+                        <span class="text-gray-500">
+                          · {{ pmp.group_name }}</span
+                        >
+                      </li>
+                    </ul>
+                  </div>
+                </transition>
+              </div>
+            </template>
+
+            <!-- PMP Name -->
+            <template #pmpName>
+              <div
+                class="relative rounded-xl p-3 pt-5 border border-gray-100 shadow-sm bg-white"
+              >
+                <label
+                  for="pmpRemoteNumberName"
+                  class="block text-sm font-medium text-gray-600 mb-1"
+                  >Ընտրել Անունը</label
+                >
+                <div class="relative">
+                  <input
+                    id="pmpRemoteNumberName"
+                    v-model="pmpNameSearch"
+                    type="text"
+                    class="w-full pl-3 pr-8 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition disabled:bg-gray-50"
+                    placeholder="Փնտրել անուն"
+                    :disabled="!selectedPmp"
+                    @focus="isSelectPmpName = !!selectedPmp"
+                    @input="onNameSearch"
+                    @keydown.down.prevent="focusNext('name')"
+                    @keydown.esc="isSelectPmpName = false"
+                    autocomplete="off"
+                    aria-haspopup="listbox"
+                    :aria-expanded="isSelectPmpName ? 'true' : 'false'"
+                  />
+                  <button
+                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                    :disabled="!selectedPmp"
+                    type="button"
+                    @click="isSelectPmpName = !isSelectPmpName"
+                    aria-label="Բացել ընտրացանկը"
+                  >
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <transition name="dropdown">
+                  <div
+                    v-if="isSelectPmpName && selectedPmp"
+                    ref="nameMenu"
+                    class="absolute z-20 mt-1 w-full bg-white rounded-lg shadow-xl border border-gray-200 max-h-60 overflow-auto"
+                    role="listbox"
+                  >
+                    <ul class="py-1">
+                      <li
+                        v-for="(remoteNumber, index) in filteredPmpNames"
+                        :key="index"
+                        class="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-gray-700 transition"
+                        :class="{
+                          'ring-1 ring-red-400':
+                            formSubmitted && !selectedPmpRemoteNumber,
+                        }"
+                        @click="selectPmpRemoteNumber(remoteNumber)"
+                      >
+                        <span class="font-medium text-gray-800">{{
+                          remoteNumber.remote_number
+                        }}</span>
+                        <span class="text-gray-500">
+                          · {{ remoteNumber.remote_number_name }}</span
+                        >
+                      </li>
+                    </ul>
+                  </div>
+                </transition>
+              </div>
+            </template>
+
+            <!-- Finish Date -->
+            <template #finishDate>
+              <input-with-labels
+                id="finishDate"
+                v-model="finishDate"
+                label="Անհաժեշտ ավարտի ամսաթիվ"
+                type="datetime-local"
+                class="rounded-xl bg-white border border-gray-100 shadow-sm p-3"
+                :class="{ 'ring-2 ring-red-400': formSubmitted && !finishDate }"
+              />
+            </template>
+
+            <!-- Quantity only in editing -->
+            <template #quantity>
+              <input-with-labels
+                id="quantity"
+                v-model.number="quantity"
+                label="Քանակ"
+                type="number"
+                min="1"
+                class="rounded-xl bg-white border border-gray-100 shadow-sm p-3"
+                :class="{
+                  'ring-2 ring-red-400':
+                    formSubmitted && (!quantity || quantity <= 0),
+                }"
+              />
+            </template>
+
+            <!-- Description -->
+            <template #description>
+              <textarea-with-label
+                id="description"
+                v-model="description"
+                label="Նկարագրություն"
+                type="text"
+                class="rounded-xl bg-white border border-gray-100 shadow-sm p-3"
+                :class="{
+                  'ring-2 ring-red-400': formSubmitted && !description,
+                }"
+              />
+            </template>
+          </create-order-form>
+        </section>
       </div>
+
+      <!-- Files step -->
+      <transition v-else name="slide-up">
+        <div id="files-step">
+          <show-files
+            :pmps="getPmp"
+            :factories="getFactory"
+            :auto-open-factory-id="autoOpenFactoryId"
+            :selected-files.sync="selectedFiles"
+            :file-quantities.sync="fileQuantities"
+            :is-editing-mode="isEditingMode"
+            @files-selected="handleFilesSelected"
+            @back="backToDetails"
+          />
+        </div>
+      </transition>
     </div>
-    <div v-else>
-      <show-files
-        :pmps="getPmp"
-        :factories="getFactory"
-        :auto-open-factory-id="autoOpenFactoryId"
-        :selected-files.sync="selectedFiles"
-        :file-quantities.sync="fileQuantities"
-        @files-selected="handleFilesSelected"
-        @back="isFiles = false"
-      />
-    </div>
+
     <notifications />
-  </div>
+  </main>
 </template>
 
 <script>
@@ -236,8 +380,9 @@ export default {
     ShowFiles,
     TextareaWithLabel,
   },
-  layout: 'EngineerLayout',
-  middleware: ['engineer', 'roleRedirect'],
+  layout: 'engineer',
+  middleware: ['role-guard'],
+  meta: { role: 'engineer' },
   data() {
     return {
       isSelectedClient: false,
@@ -258,31 +403,33 @@ export default {
       autoOpenFactoryId: null,
       isLoading: false,
       files_existing: false,
+      // eslint-disable-next-line vue/no-reserved-keys
+      _debounceTimer: null,
     }
   },
   computed: {
     ...mapGetters('factory', ['getFactory']),
-    ...mapGetters('users', ['getUsers']),
+    ...mapGetters('clients', ['allClients']),
     ...mapGetters('pmp', ['getPmpes', 'getPmp']),
-    users() {
-      return this.getUsers
+    clients() {
+      return this.allClients
     },
     filteredPmpGroups() {
       if (!this.pmpGroupSearch) return this.getPmpes?.pmp || []
-      const searchTerm = this.pmpGroupSearch.toLowerCase()
-      return this.getPmpes?.pmp.filter(
-        (pmp) =>
-          pmp.group.toLowerCase().includes(searchTerm) ||
-          pmp.group_name.toLowerCase().includes(searchTerm)
+      const q = this.pmpGroupSearch.toLowerCase()
+      return (this.getPmpes?.pmp || []).filter(
+        (p) =>
+          p.group.toLowerCase().includes(q) ||
+          p.group_name.toLowerCase().includes(q)
       )
     },
     filteredPmpNames() {
       if (!this.selectedPmp) return []
-      const remoteNumbers = this.selectedPmp.remote_number || []
-      if (!this.pmpNameSearch) return remoteNumbers
-      const searchTerm = this.pmpNameSearch.toLowerCase()
-      return remoteNumbers.filter((rn) =>
-        rn.remote_number.toLowerCase().includes(searchTerm)
+      const arr = this.selectedPmp.remote_number || []
+      if (!this.pmpNameSearch) return arr
+      const q = this.pmpNameSearch.toLowerCase()
+      return arr.filter((rn) =>
+        (rn.remote_number || '').toLowerCase().includes(q)
       )
     },
     isEditingMode() {
@@ -290,21 +437,34 @@ export default {
     },
   },
   watch: {
-    selectedPmp(newVal) {
-      if (!newVal) {
+    selectedPmp(n) {
+      if (!n) {
         this.selectedPmpRemoteNumber = null
         this.pmpNameSearch = ''
       }
     },
   },
   mounted() {
-    this.fetchUsers()
+    this.fetchClients()
     this.fetchFactory()
     this.fetchPmps()
+
+    const step = this.$route.query.step
+    if (step === 'files') {
+      this.isFiles = true
+      this.$nextTick(() => {
+        const el = document.getElementById('files-step')
+        el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
+    document.addEventListener('click', this.onClickOutside, true)
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this.onClickOutside, true)
   },
   methods: {
     ...mapActions('factory', ['fetchFactory']),
-    ...mapActions('users', ['fetchUsers']),
+    ...mapActions('clients', ['fetchClients']),
     ...mapActions('engineer', ['createNewOrder']),
     ...mapActions('pmp', [
       'fetchPmps',
@@ -312,13 +472,22 @@ export default {
       'checkIfGroupExists',
     ]),
 
+    goBackToList() {
+      this.$router.push('/engineer')
+    },
+
+    backToDetails() {
+      this.$router.replace({ query: { ...this.$route.query, step: 'details' } })
+      this.isFiles = false
+      this.$nextTick(() => window.scrollTo({ top: 0, behavior: 'smooth' }))
+    },
+
     selectPmpGroup(pmp) {
       this.remote_number_id = pmp.id
       this.selectedPmp = pmp
       this.pmpGroupSearch = pmp.group
       this.isSelectPmpGroup = false
     },
-
     async selectPmpRemoteNumber(remoteNumber) {
       this.selectedPmpRemoteNumber = remoteNumber.remote_number
       this.pmpNameSearch = remoteNumber.remote_number
@@ -327,18 +496,37 @@ export default {
       await this.checkPmpByRemoteNumber(remoteNumber.id)
     },
 
-    filterPmpGroups() {
-      this.isSelectPmpGroup = true
+    onGroupSearch() {
+      clearTimeout(this._debounceTimer)
+      this._debounceTimer = setTimeout(
+        () => (this.isSelectPmpGroup = true),
+        120
+      )
+    },
+    onNameSearch() {
+      clearTimeout(this._debounceTimer)
+      this._debounceTimer = setTimeout(() => (this.isSelectPmpName = true), 120)
     },
 
-    filterPmpNames() {
-      this.isSelectPmpName = true
+    focusNext(menu) {
+      const ref = menu === 'group' ? 'groupMenu' : 'nameMenu'
+      const el = this.$refs[ref]
+      if (!el) return
+      const first = el.querySelector('li')
+      first?.focus?.()
+    },
+    onClickOutside(e) {
+      const g = this.$refs.groupMenu
+      const n = this.$refs.nameMenu
+      if (g && !g.contains(e.target) && e.target?.id !== 'pmpGroup')
+        this.isSelectPmpGroup = false
+      if (n && !n.contains(e.target) && e.target?.id !== 'pmpRemoteNumberName')
+        this.isSelectPmpName = false
     },
 
     openFiles(arg) {
       this.formSubmitted = true
-      this.files_existing = arg
-
+      this.files_existing = arg === true
       if (
         !this.selectedClient ||
         !this.selectedPmp ||
@@ -348,7 +536,7 @@ export default {
         (this.isEditingMode && (!this.quantity || this.quantity <= 0))
       ) {
         this.$notify({
-          text: `Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը։`,
+          text: 'Խնդրում ենք լրացնել բոլոր պարտադիր դաշտերը։',
           duration: 3000,
           speed: 1000,
           position: 'top',
@@ -357,18 +545,27 @@ export default {
         return
       }
       const factoryWithFiles = this.getFactory.find(
-        (factory) => factory.files && factory.files.length > 0
+        (f) => f.files && f.files.length > 0
       )
       this.autoOpenFactoryId = factoryWithFiles ? factoryWithFiles.id : null
+
+      this.$router.replace({ query: { ...this.$route.query, step: 'files' } })
       this.isFiles = true
+      this.$nextTick(() =>
+        document
+          .getElementById('files-step')
+          ?.scrollIntoView({ behavior: 'smooth' })
+      )
     },
 
     handleFilesSelected(files) {
-      this.selectedFiles = files.map((file) => file.id)
-      this.fileQuantities = files.reduce((acc, file) => {
-        acc[file.id] = file.quantity
-        return acc
-      }, {})
+      this.selectedFiles = files.map((f) => f.id)
+      // eslint-disable-next-line no-return-assign,no-sequences
+      this.fileQuantities = files.reduce(
+        // eslint-disable-next-line no-sequences
+        (acc, f) => ((acc[f.id] = f.quantity), acc),
+        {}
+      )
       this.isFiles = false
       this.pmpFiles()
     },
@@ -378,7 +575,6 @@ export default {
       this.isLoading = true
       this.formSubmitted = true
 
-      // Validate required fields
       if (
         !this.selectedClient ||
         !this.selectedPmp ||
@@ -404,7 +600,6 @@ export default {
         return
       }
 
-      // Validate that all selected files have valid quantities
       const invalidFiles = this.selectedFiles.filter(
         (id) => !this.fileQuantities[id] || this.fileQuantities[id] <= 0
       )
@@ -420,7 +615,6 @@ export default {
         return
       }
 
-      // Prepare data with selected files and their quantities
       const data = {
         user_id: this.selectedClient.id,
         creator_id: this.$auth.user.id,
@@ -454,7 +648,7 @@ export default {
         this.resetForm()
         this.selectedFiles = []
         this.fileQuantities = {}
-        this.$router.push('/engineer/orders')
+        this.$router.push('/engineer')
       } catch (error) {
         this.$notify({
           text: `Սխալ՝ ${error.response?.data?.error || error.message}`,
@@ -466,10 +660,6 @@ export default {
       } finally {
         this.isLoading = false
       }
-    },
-
-    cancelBack() {
-      this.$router.push('/engineer')
     },
 
     resetForm() {
@@ -490,7 +680,33 @@ export default {
 </script>
 
 <style scoped>
-.container {
-  padding: 1rem;
+/* transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.dropdown-enter,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.slide-up-enter,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
 }
 </style>

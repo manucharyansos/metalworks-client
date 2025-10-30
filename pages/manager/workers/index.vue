@@ -128,8 +128,9 @@ import WorkerFormModal from '~/components/users/WorkerFormModal.vue'
 
 export default {
   components: { WorkerFormModal },
-  layout: 'ManagerLayout',
-  middleware: ['manager', 'roleRedirect'],
+  layout: 'manager',
+  middleware: ['role-guard'],
+  meta: { role: 'manager' },
   data() {
     return {
       loading: false,
