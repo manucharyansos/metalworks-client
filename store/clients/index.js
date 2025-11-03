@@ -18,7 +18,7 @@ export const mutations = {
 export const actions = {
   async fetchClients({ commit }) {
     const clients = await this.$axios.$get('/api/clients/client')
-    commit('SET_CLIENTS', clients)
+    commit('SET_CLIENTS', clients.data || clients)
   },
   async fetchClient({ commit }, clientId) {
     const client = await this.$axios.$get(`/api/clients/client/${clientId}`)
