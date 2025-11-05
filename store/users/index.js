@@ -1,47 +1,60 @@
 // store/users.js
+export const namespaced = true
+
 export const state = () => ({
   users: [],
+  user: null,
 })
 
 export const getters = {
-  getUsers: (s) => s.users,
-  getWorkers: (s) => s.users,
+  allUsers: (s) => s.users,
+  singleUser: (s) => s.user,
 }
 
 export const mutations = {
-  setUsers(state, users) {
+  SET_USERS(state, users) {
     state.users = users || []
+  },
+  SET_USER(state, user) {
+    state.user = user || null
   },
 }
 
 export const actions = {
-  async fetchWorkers({ commit }) {
+  async fetchUsers({ commit }) {
     try {
-      const { data } = await this.$axios.get('/api/workers')
+      const { data } = await this.$axios.get('/api/users')
       const list = Array.isArray(data?.data)
-        ? data.data
+        ? data.data // մենք հիմա index()-ում վերադարձրեցինք ['data' => $users]
         : Array.isArray(data)
         ? data
         : []
-      commit('setUsers', list)
+      commit('SET_USERS', list)
       return true
     } catch (e) {
+      console.error('fetchUsers error:', e)
       return false
     }
   },
 
-  async createWorkers(_, payload) {
-    await this.$axios.post('/api/workers', payload)
+  async fetchUser({ commit }, id) {
+    try {
+      const { data } = await this.$axios.get(`/api/users/${id}`)
+      commit('SET_USER', data)
+      return true
+    } catch (e) {
+      console.error('fetchUser error:', e)
+      return false
+    }
+  },
+
+  async updateUser(_, { id, payload }) {
+    await this.$axios.put(`/api/users/${id}`, payload)
     return true
   },
 
-  async updateWorker(_, { id, payload }) {
-    await this.$axios.put(`/api/workers/${id}`, payload)
-    return true
-  },
-
-  async deleteWorker(_, id) {
-    await this.$axios.delete(`/api/workers/${id}`)
+  async deleteUser(_, id) {
+    await this.$axios.delete(`/api/users/${id}`)
     return true
   },
 }

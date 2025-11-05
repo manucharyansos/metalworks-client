@@ -14,6 +14,8 @@
       :visible="isFormOpen"
       :client="selectedClient"
       :submitting="submitting"
+      :errors="formErrors"
+      :global-error="formGlobalError"
       @close="closeForm"
       @submit="handleSubmit"
     />
@@ -24,6 +26,7 @@
       @close="deleteTarget = null"
       @confirm="doDelete"
     />
+    <notifications />
   </div>
 </template>
 
@@ -47,6 +50,9 @@ export default {
       selectedClient: null,
       deleteTarget: null,
       searchQuery: '',
+      // ⬇ errors-ի state
+      formErrors: {},
+      formGlobalError: '',
     }
   },
   computed: {
@@ -78,15 +84,21 @@ export default {
     },
     openCreate() {
       this.selectedClient = null
+      this.formErrors = {}
+      this.formGlobalError = ''
       this.isFormOpen = true
     },
     openEdit(row) {
       this.selectedClient = row
+      this.formErrors = {}
+      this.formGlobalError = ''
       this.isFormOpen = true
     },
     closeForm() {
       this.isFormOpen = false
       this.selectedClient = null
+      this.formErrors = {}
+      this.formGlobalError = ''
     },
     confirmDeleteClient(row) {
       this.deleteTarget = row
@@ -97,7 +109,7 @@ export default {
         await this.$axios.delete(`/api/clients/client/${this.deleteTarget.id}`)
         await this.loadClients()
       } catch (e) {
-        console.error(e)
+        this.$notify({ text: e, type: 'error' })
       } finally {
         this.submitting = false
         this.deleteTarget = null
@@ -105,6 +117,9 @@ export default {
     },
     async handleSubmit(payload) {
       this.submitting = true
+      this.formErrors = {}
+      this.formGlobalError = ''
+
       try {
         if (payload.isEdit) {
           await this.$axios.put(
@@ -114,10 +129,20 @@ export default {
         } else {
           await this.$axios.post('/api/clients/client', payload.data)
         }
+
         await this.loadClients()
         this.closeForm()
       } catch (e) {
-        console.error(e)
+        this.$notify({ text: e, type: 'error' })
+        if (e.response && e.response.status === 422) {
+          this.formErrors = e.response.data.errors || {}
+          this.formGlobalError =
+            e.response.data.message || 'Վավերացման սխալ է տեղի ունեցել'
+        } else {
+          this.formGlobalError =
+            e.response?.data?.message ||
+            'Սերվերում սխալ է տեղի ունեցել, փորձեք ավելի ուշ'
+        }
       } finally {
         this.submitting = false
       }

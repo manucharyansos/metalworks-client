@@ -418,7 +418,7 @@ export default {
   computed: {
     ...mapGetters('orders', ['orders']),
     ...mapGetters('materials', ['getMaterials']),
-    ...mapGetters('users', ['getWorkers']),
+    ...mapGetters('workers', ['getWorkers']),
     allOrders() {
       return this.orders || []
     },
@@ -476,7 +476,7 @@ export default {
   methods: {
     ...mapActions('orders', ['fetchOrders', 'orderDelete']),
     ...mapActions('materials', ['fetchMaterials']),
-    ...mapActions('users', ['fetchWorkers']),
+    ...mapActions('workers', ['fetchWorkers']),
     editOrder(order) {
       this.openEditModal = true
       this.showOrder = order

@@ -222,7 +222,7 @@ export default {
   },
   methods: {
     ...mapActions('clients', ['addClient']),
-    ...mapActions('users', ['fetchWorkers', 'createWorkers', 'updateWorker']),
+    ...mapActions('workers', ['fetchWorkers', 'createWorkers', 'updateWorker']),
     ...mapActions('roles', ['fetchRoles']),
     formatPhoneNumber(field) {
       let phone = this.personClientData[field]

@@ -1,10 +1,13 @@
+// store/roles.js
+export const namespaced = true
+
 export const state = () => ({
   roles: null,
 })
 
 export const mutations = {
   SET_ROLES(state, roles) {
-    state.roles = roles
+    state.roles = roles || []
   },
 }
 
@@ -12,6 +15,7 @@ export const actions = {
   async fetchRoles({ commit }) {
     try {
       const response = await this.$axios.get('/api/roles')
+      // ենթադրում եմ, որ սա վերադարձնում է roles array
       commit('SET_ROLES', response.data)
       return true
     } catch (err) {

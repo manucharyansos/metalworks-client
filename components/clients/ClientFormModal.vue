@@ -9,6 +9,14 @@
         {{ isEdit ? 'Խմբագրել հաճախորդին' : 'Նոր հաճախորդ' }}
       </h2>
 
+      <!-- գլոբալ սխալի բլոկ -->
+      <div
+        v-if="globalError"
+        class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
+      >
+        {{ globalError }}
+      </div>
+
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block mb-1">Անուն</label>
@@ -17,7 +25,11 @@
             type="text"
             class="border rounded w-full p-2"
           />
+          <p v-if="errors && errors.name" class="mt-1 text-xs text-red-600">
+            {{ errors.name[0] }}
+          </p>
         </div>
+
         <div>
           <label class="block mb-1">Հեռախոս</label>
           <input
@@ -25,7 +37,11 @@
             type="text"
             class="border rounded w-full p-2"
           />
+          <p v-if="errors && errors.phone" class="mt-1 text-xs text-red-600">
+            {{ errors.phone[0] }}
+          </p>
         </div>
+
         <div>
           <label class="block mb-1">Հասցե</label>
           <input
@@ -33,7 +49,11 @@
             type="text"
             class="border rounded w-full p-2"
           />
+          <p v-if="errors && errors.address" class="mt-1 text-xs text-red-600">
+            {{ errors.address[0] }}
+          </p>
         </div>
+
         <div>
           <label class="block mb-1">Կարգավիճակ</label>
           <select v-model="form.type" class="border rounded w-full p-2">
@@ -41,8 +61,12 @@
             <option value="physPerson">Ֆիզիկական անձ</option>
             <option value="legalEntity">Իրավաբանական անձ</option>
           </select>
+          <p v-if="errors && errors.type" class="mt-1 text-xs text-red-600">
+            {{ errors.type[0] }}
+          </p>
         </div>
 
+        <!-- միայն create ժամանակ email/password դաշտերը -->
         <template v-if="!isEdit">
           <div>
             <label class="block mb-1">Էլ․ փոստ</label>
@@ -51,7 +75,11 @@
               type="email"
               class="border rounded w-full p-2"
             />
+            <p v-if="errors && errors.email" class="mt-1 text-xs text-red-600">
+              {{ errors.email[0] }}
+            </p>
           </div>
+
           <div>
             <label class="block mb-1">Գախտնաբառ</label>
             <input
@@ -59,7 +87,14 @@
               type="password"
               class="border rounded w-full p-2"
             />
+            <p
+              v-if="errors && errors.password"
+              class="mt-1 text-xs text-red-600"
+            >
+              {{ errors.password[0] }}
+            </p>
           </div>
+
           <div>
             <label class="block mb-1">Գախտնաբառի կրկնություն</label>
             <input
@@ -67,6 +102,12 @@
               type="password"
               class="border rounded w-full p-2"
             />
+            <p
+              v-if="errors && errors.password_confirmation"
+              class="mt-1 text-xs text-red-600"
+            >
+              {{ errors.password_confirmation[0] }}
+            </p>
           </div>
         </template>
       </div>
@@ -95,6 +136,15 @@ export default {
     visible: Boolean,
     client: Object,
     submitting: Boolean,
+    // ⬇ errors / globalError նոր props
+    errors: {
+      type: Object,
+      default: () => ({}),
+    },
+    globalError: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return {
@@ -119,24 +169,39 @@ export default {
     client: {
       handler(val) {
         if (val) {
-          this.form = { ...val, id: val.user_id }
-        } else {
           this.form = {
-            id: null,
-            name: '',
-            phone: '',
-            address: '',
-            type: '',
-            email: '',
+            id: val.user_id ?? val.id ?? null,
+            name: val.name || '',
+            phone: val.phone || '',
+            address: val.address || '',
+            type: val.type || '',
+            email: val.user?.email || '',
             password: '',
             password_confirmation: '',
           }
+        } else {
+          this.resetForm()
         }
       },
       immediate: true,
     },
+    visible(v) {
+      if (!v) this.resetForm()
+    },
   },
   methods: {
+    resetForm() {
+      this.form = {
+        id: null,
+        name: '',
+        phone: '',
+        address: '',
+        type: '',
+        email: '',
+        password: '',
+        password_confirmation: '',
+      }
+    },
     submit() {
       this.$emit('submit', {
         isEdit: this.isEdit,

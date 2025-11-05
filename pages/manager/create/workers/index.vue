@@ -221,7 +221,7 @@ export default {
     this.fetchRoles()
   },
   methods: {
-    ...mapActions('users', ['createWorkers']),
+    ...mapActions('workers', ['createWorkers']),
     ...mapActions('roles', ['fetchRoles']),
     togglePasswordVisibility() {
       this.isPasswordVisible = !this.isPasswordVisible
