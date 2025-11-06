@@ -1,6 +1,9 @@
 <template>
   <div class="min-h-screen w-full bg-gray-50 dark:bg-gray-950">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div
+      v-if="$can('orders.view')"
+      class="container mx-auto px-4 sm:px-6 lg:px-8 py-8"
+    >
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -20,7 +23,6 @@
           @update:per-page="onSetPerPage"
         />
       </div>
-
       <div class="mt-6">
         <div
           v-if="error"
@@ -100,10 +102,16 @@
         <Pagination :meta="pagination" @change="onGoPage" />
       </div>
     </div>
+    <div
+      v-else
+      class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4"
+    >
+      <PermissionDenied />
+    </div>
 
     <!-- DETAILS MODAL -->
     <OrderDetailsModal
-      :visible="isDetailsOpen"
+      :visible="isDetailsOpen || $can('orders.view')"
       :order="selectedOrder"
       @close="isDetailsOpen = false"
     />
@@ -117,9 +125,11 @@ import OrderCard from '~/components/engineer/OrderCard.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import OrderDetailsModal from '~/components/engineer/OrderDetailsModal.vue'
 import DxfViewerModal from '~/components/engineer/DxfViewerModal.vue'
+import PermissionDenied from '@/components/modals/permission/PermissionDenied.vue'
 
 export default {
   components: {
+    PermissionDenied,
     // eslint-disable-next-line vue/no-unused-components
     DxfViewerModal,
     OrdersToolbar,

@@ -186,8 +186,7 @@ export default {
         await this.load(this.pagination.current_page || 1)
         this.closeForm()
       } catch (e) {
-        console.error(e)
-        this.$notify?.({ type: 'error', text: 'Չհաջողվեց պահել' })
+        this.$notify?.({ type: 'error', text: e })
       } finally {
         this.submitting = false
       }
@@ -204,8 +203,7 @@ export default {
         await this.load(backOne)
         this.$notify?.({ type: 'success', text: 'Ջնջվեց' })
       } catch (e) {
-        console.error(e)
-        this.$notify?.({ type: 'error', text: 'Չհաջողվեց ջնջել' })
+        this.$notify?.({ type: 'error', text: e })
       }
     },
   },

@@ -16,8 +16,10 @@
       <!-- Main Form Grid -->
       <div v-if="!isFiles" class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <!-- Client Information Card -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-          <div class="flex items-center mb-12">
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 w"
+        >
+          <div class="flex items-center mb-12 w-full">
             <div class="w-2 h-8 bg-blue-500 rounded-full mr-3"></div>
             <h2 class="text-xl font-semibold text-gray-900">
               Հաճախորդի տվյալներ
@@ -113,7 +115,7 @@
                   <div>
                     <p class="text-xs text-gray-500">Էլ․ փոստ</p>
                     <p class="font-medium">
-                      {{ selectedClient?.email || '—' }}
+                      {{ selectedClient?.client?.email || '—' }}
                     </p>
                   </div>
                 </div>
@@ -185,7 +187,7 @@
 
         <!-- Order Form Card -->
         <div
-          class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 col-span-2"
+          class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 lg:col-span-2"
         >
           <div class="flex items-center mb-6">
             <div class="w-2 h-8 bg-indigo-500 rounded-full mr-3"></div>
@@ -493,7 +495,7 @@ export default {
       autoOpenFactoryId: null,
       isLoading: false,
       files_existing: false,
-      remote_number_id: null, // Added missing property
+      remote_number_id: null,
     }
   },
   computed: {
@@ -641,7 +643,7 @@ export default {
       }
 
       const data = {
-        user_id: this.selectedClient.id,
+        user_id: this.selectedClient.client.id,
         creator_id: this.$auth.user.id,
         name: `${this.selectedPmp.group}.${this.selectedPmpRemoteNumber}`,
         description: this.description,
@@ -686,9 +688,9 @@ export default {
         this.isLoading = false
       }
     },
-    selectFromOtherFactory(arg) {
+    selectFromOtherFactory() {
       this.formSubmitted = true
-      this.files_existing = arg
+      this.files_existing = true
 
       if (
         !this.selectedClient ||

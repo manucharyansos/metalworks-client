@@ -72,7 +72,7 @@
               exact-active-class="engineer-active-link"
               class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 group transition-colors"
               active-class="bg-gray-700 text-white"
-              @click="closeSidebar"
+              @click.native="closeSidebar"
             >
               <svg
                 class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors"
@@ -95,7 +95,7 @@
               exact-active-class="engineer-active-link"
               class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 group transition-colors"
               active-class="bg-gray-700 text-white"
-              @click="closeSidebar"
+              @click.native="closeSidebar"
             >
               <svg
                 class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors"
@@ -119,7 +119,7 @@
               exact-active-class="engineer-active-link"
               class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 group transition-colors"
               active-class="bg-gray-700 text-white"
-              @click="closeSidebar"
+              @click.native="closeSidebar"
             >
               <svg
                 class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors"

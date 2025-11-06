@@ -109,6 +109,7 @@ export default {
   plugins: [
     { src: '~/plugins/url-helper.js', mode: 'client' },
     { src: '~/plugins/base-url.js', mode: 'client' },
+    { src: '~/plugins/can.js', mode: 'client' },
     { src: '~/plugins/notifications-ssr', ssr: true },
     { src: '~/plugins/notifications-client', ssr: false },
     { src: '~/plugins/leaflet.js', mode: 'client' },
