@@ -30,23 +30,32 @@
 
       <!-- Description -->
       <p class="mb-10 text-base leading-relaxed text-gray-600 sm:text-lg">
-        Դուք չունեք թույլտվություն՝ դիտելու պատվերները։<br />
+        Դուք չունեք հասանելիություն։<br />
         <span class="font-medium text-gray-700"
           >Խնդրում ենք դիմել ադմինիստրատորին</span
         >
         օգնության համար։
       </p>
 
-      <!-- Back Button -->
-      <!--      <button-->
-      <!--        class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-medium text-white shadow-md transition-all duration-200 hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-100 active:scale-95"-->
-      <!--        @click="$router.push('/engineer')"-->
-      <!--      >-->
-      <!--        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">-->
-      <!--          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d=" HygieneM10 19l-7-7m0 0l7-7m-7 7h18" />-->
-      <!--        </svg>-->
-      <!--        Վերադառնալ-->
-      <!--      </button>-->
+      <button
+        class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-medium text-white shadow-md transition-all duration-200 hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-100 active:scale-95"
+        @click="$router.push('/engineer')"
+      >
+        <svg
+          class="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d=" HygieneM10 19l-7-7m0 0l7-7m-7 7h18"
+          />
+        </svg>
+        Վերադառնալ
+      </button>
     </div>
   </div>
 </template>

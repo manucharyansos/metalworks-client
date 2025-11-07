@@ -14,12 +14,14 @@
           </div>
           <div class="flex items-center gap-2">
             <button
+              v-if="$can('pmp_files.upload')"
               class="flex-1 h-10 rounded-lg bg-gray-900 text-white dark:bg-gray-700 hover:bg-black/80 transition"
               @click="downloadFile(f)"
             >
               Ներբեռնել
             </button>
             <button
+              v-if="$can('pmp_files.view')"
               class="flex-1 h-10 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
               @click="openDxf(f)"
             >
@@ -52,12 +54,14 @@
             <div class="text-xs truncate">{{ f.original_name }}</div>
             <div class="flex items-center gap-2">
               <button
+                v-if="$can('pmp_files.upload')"
                 class="text-xs text-blue-600 hover:underline"
                 @click="downloadFile(f)"
               >
                 Ներբեռնել
               </button>
               <a
+                v-if="$can('pmp_files.view')"
                 class="text-xs text-gray-700 hover:underline"
                 :href="filePreviewUrl(f.path, f.original_name)"
                 target="_blank"
@@ -72,7 +76,7 @@
     </section>
 
     <!-- Images -->
-    <section v-if="images.length">
+    <section v-if="images.length && $can('pmp_files.view')">
       <h4 class="text-sm font-semibold mb-2">Նկարներ</h4>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         <a
@@ -105,6 +109,7 @@
             {{ f.original_name }}
           </div>
           <button
+            v-if="$can('pmp_files.upload')"
             class="w-full h-10 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
             @click="downloadFile(f)"
           >

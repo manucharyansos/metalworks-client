@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
+    <div v-if="$can('orders.create')" class="max-w-7xl mx-auto">
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
@@ -454,6 +454,7 @@
 
       <notifications />
     </div>
+    <PermissionDenied />
   </div>
 </template>
 
@@ -464,9 +465,11 @@ import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import CreateOrderForm from '~/components/modals/create/CreateOrderForm.vue'
 import ShowFiles from '~/components/File/ShowFactoryFiles/ShowFiles.vue'
 import TextareaWithLabel from '~/components/form/TextareaWithLabel.vue'
+import PermissionDenied from '@/components/modals/permission/PermissionDenied.vue'
 
 export default {
   components: {
+    PermissionDenied,
     InputWithLabels,
     SelectWithLabel,
     CreateOrderForm,

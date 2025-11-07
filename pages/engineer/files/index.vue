@@ -265,7 +265,7 @@
           <!-- ACTIONS -->
           <div class="flex flex-col justify-end space-y-4">
             <button
-              v-if="showCreateGroup"
+              v-if="showCreateGroup && $can('pmp.create')"
               class="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-xl shadow-lg"
               @click="addPmpGroup"
             >
@@ -273,7 +273,7 @@
             </button>
 
             <button
-              v-if="showCreateRemote"
+              v-if="showCreateRemote && $can('pmp.create')"
               class="w-full px-6 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg"
               @click="addPmpGroupRemoteNumber"
             >
@@ -281,7 +281,7 @@
             </button>
 
             <button
-              v-if="showView"
+              v-if="showView && $can('pmp.view')"
               class="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-lg"
               @click="viewFiles"
             >

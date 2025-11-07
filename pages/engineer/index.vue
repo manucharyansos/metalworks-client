@@ -111,7 +111,7 @@
 
     <!-- DETAILS MODAL -->
     <OrderDetailsModal
-      :visible="isDetailsOpen || $can('orders.view')"
+      :visible="isDetailsOpen && $can('orders.view')"
       :order="selectedOrder"
       @close="isDetailsOpen = false"
     />

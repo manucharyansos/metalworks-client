@@ -159,7 +159,7 @@
                 class="mt-3 space-y-2 pl-4 border-l-2 border-blue-500"
                 name="slide-down"
               >
-                <div>
+                <div v-if="$can('pmp_files.view')">
                   <div
                     v-for="file in selectedFiles"
                     :key="file.id"
@@ -178,13 +178,17 @@
                         class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <button
+                          v-if="$can('pmp_files.upload')"
                           class="text-xs text-blue-600 hover:underline"
                           @click.stop="downloadFile(file)"
                         >
                           Ներբեռնել
                         </button>
                         <button
-                          v-if="hoveredFileId === file.id"
+                          v-if="
+                            hoveredFileId === file.id &&
+                            $can('pmp_files.delete')
+                          "
                           class="text-xs text-red-600 hover:underline"
                           @click.stop="openDelete(file.id)"
                         >
@@ -227,109 +231,138 @@
         class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 lg:p-8 min-h-[70vh] flex flex-col"
       >
         <transition name="fade">
-          <div v-if="selectedFile" class="flex-1 flex flex-col">
-            <!-- DXF Meta -->
+          <div class="flex-1 flex flex-col">
             <div
-              v-if="isDxfFile && selectedFile"
-              class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
+              v-if="selectedFile && $can('pmp_files.view')"
+              class="flex-1 flex flex-col"
             >
+              <!-- DXF Meta (միայն DXF-ի համար) -->
               <div
-                class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-center"
+                v-if="isDxfFile && selectedFile"
+                class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
               >
-                <div class="text-xs text-gray-600 dark:text-gray-400">
-                  Քանակ
-                </div>
-                <div class="font-bold text-blue-700 dark:text-blue-300">
-                  {{ selectedFile.quantity }}
-                </div>
-              </div>
-              <div
-                class="bg-green-50 dark:bg-green-900/30 p-3 rounded-lg text-center"
-              >
-                <div class="text-xs text-gray-600 dark:text-gray-400">
-                  Նյութ
+                <div
+                  class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-center"
+                >
+                  <div class="text-xs text-gray-600 dark:text-gray-400">
+                    Քանակ
+                  </div>
+                  <div class="font-bold text-blue-700 dark:text-blue-300">
+                    {{ selectedFile.quantity }}
+                  </div>
                 </div>
                 <div
-                  class="font-bold text-green-700 dark:text-green-300 truncate"
+                  class="bg-green-50 dark:bg-green-900/30 p-3 rounded-lg text-center"
                 >
-                  {{ selectedFile.material_type }}
+                  <div class="text-xs text-gray-600 dark:text-gray-400">
+                    Նյութ
+                  </div>
+                  <div
+                    class="font-bold text-green-700 dark:text-green-300 truncate"
+                  >
+                    {{ selectedFile.material_type }}
+                  </div>
+                </div>
+                <div
+                  class="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-lg text-center"
+                >
+                  <div class="text-xs text-gray-600 dark:text-gray-400">
+                    Հաստություն
+                  </div>
+                  <div class="font-bold text-purple-700 dark:text-purple-300">
+                    {{ selectedFile.thickness }}
+                  </div>
                 </div>
               </div>
+
+              <!-- Ֆայլի անուն -->
+              <h3
+                class="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center break-all"
+              >
+                {{ selectedFile.original_name }}
+              </h3>
+
+              <!-- DXF Viewer -->
               <div
-                class="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-lg text-center"
+                v-if="fileType === 'dxf' && dxfUrl && $can('pmp_files.upload')"
+                class="flex-1 min-h-0"
               >
-                <div class="text-xs text-gray-600 dark:text-gray-400">
-                  Հաստություն
-                </div>
-                <div class="font-bold text-purple-700 dark:text-purple-300">
-                  {{ selectedFile.thickness }}
-                </div>
+                <DxfViewerModal
+                  :dxf-url="dxfUrl"
+                  class="w-full h-full rounded-lg border border-gray-200 dark:border-gray-700"
+                  @close="dxfUrl = ''"
+                />
+              </div>
+
+              <!-- PDF -->
+              <div v-else-if="fileType === 'pdf'" class="flex-1">
+                <embed
+                  :src="fileUrl(selectedFile.path)"
+                  type="application/pdf"
+                  class="w-full h-full min-h-[60vh] rounded-lg border"
+                />
+                <a
+                  v-if="$can('pmp_files.upload')"
+                  :href="fileUrl(selectedFile.path)"
+                  target="_blank"
+                  class="mt-3 block text-center text-blue-600 hover:underline"
+                >
+                  Բացել նոր պատուհանում
+                </a>
+              </div>
+
+              <div
+                v-else-if="fileType === 'image'"
+                class="flex justify-center items-center flex-1"
+              >
+                <a :href="fileUrl(selectedFile.path)" target="_blank">
+                  <img
+                    :src="fileUrl(selectedFile.path)"
+                    class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md"
+                    :alt="selectedFile.original_name"
+                  />
+                </a>
+              </div>
+
+              <div v-else-if="fileType === 'cad'" class="text-center py-12">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                  {{ selectedFile.original_name }} ({{
+                    fileType.toUpperCase()
+                  }})
+                </p>
+                <a
+                  v-if="$can('pmp_files.upload')"
+                  :href="fileUrl(selectedFile.path)"
+                  :download="selectedFile.original_name"
+                  class="inline-block px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-lg hover:shadow-lg transition-all"
+                >
+                  Ներբեռնել
+                </a>
               </div>
             </div>
-
-            <h3
-              class="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center break-all"
-            >
-              {{ selectedFile.original_name }}
-            </h3>
-
-            <!-- DXF Viewer -->
-            <div v-if="fileType === 'dxf' && dxfUrl" class="flex-1 min-h-0">
-              <DxfViewerModal
-                :dxf-url="dxfUrl"
-                class="w-full h-full rounded-lg border border-gray-200 dark:border-gray-700"
-                @close="dxfUrl = ''"
-              />
-            </div>
-
-            <!-- PDF -->
-            <div v-else-if="fileType === 'pdf'" class="flex-1">
-              <embed
-                :src="fileUrl(selectedFile.path)"
-                type="application/pdf"
-                class="w-full h-full min-h-[60vh] rounded-lg border"
-              />
-              <a
-                :href="fileUrl(selectedFile.path)"
-                target="_blank"
-                class="mt-3 block text-center text-blue-600 hover:underline"
-                >Բացել նոր պատուհանում</a
-              >
-            </div>
-
-            <!-- Image -->
             <div
-              v-else-if="fileType === 'image'"
-              class="flex justify-center items-center flex-1"
+              v-else
+              class="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400"
             >
-              <a :href="fileUrl(selectedFile.path)" target="_blank">
-                <img
-                  :src="fileUrl(selectedFile.path)"
-                  class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md"
-                  :alt="selectedFile.original_name"
-                />
-              </a>
-            </div>
-
-            <!-- CAD -->
-            <div v-else-if="fileType === 'cad'" class="text-center py-12">
-              <p class="text-gray-600 dark:text-gray-400 mb-4">
-                {{ selectedFile.original_name }} ({{ fileType.toUpperCase() }})
-              </p>
-              <a
-                :href="fileUrl(selectedFile.path)"
-                :download="selectedFile.original_name"
-                class="inline-block px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-lg hover:shadow-lg transition-all"
+              <div
+                class="flex items-center justify-center gap-2 text-lg text-blue-700 font-medium py-4 px-6 bg-blue-50 rounded-xl border border-blue-200"
               >
-                Ներբեռնել
-              </a>
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+                  />
+                </svg>
+                Ընտրեք ֆայլ՝ դիտելու համար
+              </div>
             </div>
-          </div>
-          <div
-            v-else
-            class="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400"
-          >
-            <p class="text-lg">Ընտրեք ֆայլ՝ դիտելու համար</p>
           </div>
         </transition>
       </section>

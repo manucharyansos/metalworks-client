@@ -146,47 +146,6 @@
           </div>
         </div>
 
-        <!-- selected files (PMP) – preview + download ճիշտ լոգիկայով -->
-        <div v-if="(order?.selected_files || []).length" class="mb-6">
-          <h4 class="text-sm font-semibold mb-2">Ընտրված ֆայլեր</h4>
-          <ul class="text-sm list-disc pl-5 space-y-1">
-            <li
-              v-for="sf in order.selected_files"
-              :key="sf.id"
-              class="flex items-center gap-2"
-            >
-              <span class="truncate">
-                {{ sf?.pmp_file?.original_name || 'pmp ֆայլ' }}
-              </span>
-
-              <!-- Download always forces attachment -->
-              <button
-                class="ml-auto text-blue-600 hover:underline text-xs"
-                @click="downloadFile(sf?.pmp_file || sf)"
-              >
-                Ներբեռնել
-              </button>
-
-              <!-- Preview only if previewable -->
-              <a
-                v-if="isPreviewable(sf?.pmp_file || sf)"
-                class="text-xs text-gray-600 hover:underline"
-                :href="publicUrl((sf?.pmp_file || sf)?.path)"
-                target="_blank"
-                rel="noopener"
-              >
-                Տեսնել
-              </a>
-
-              <span
-                class="text-[11px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800"
-              >
-                քանակ՝ {{ Number(sf.quantity) || 1 }}
-              </span>
-            </li>
-          </ul>
-        </div>
-
         <!-- footer -->
         <div class="mt-6 flex justify-end">
           <button

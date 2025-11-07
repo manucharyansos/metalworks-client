@@ -13,6 +13,7 @@
           class="w-full sm:w-64 rounded-lg border px-3 py-2"
         />
         <button
+          v-if="$can('workers.create')"
           class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 hover:bg-blue-700"
           @click="openCreate"
         >
@@ -54,12 +55,14 @@
               <td class="px-6 py-3">
                 <div class="flex justify-end gap-2">
                   <button
+                    v-if="$can('workers.view')"
                     class="px-3 py-1.5 rounded-lg border"
                     @click="openEdit(u)"
                   >
                     Խմբագրել
                   </button>
                   <button
+                    v-if="!$can('workers.delete')"
                     class="px-3 py-1.5 rounded-lg border text-red-600 hover:bg-red-50"
                     :disabled="!canDelete"
                     title="Ջնջել"
@@ -93,7 +96,7 @@
 
     <!-- Delete confirm (backend destroy դեռ չունես, կթողնենք skeleton) -->
     <div
-      v-if="confirmDelete"
+      v-if="confirmDelete && $can('workers.delete')"
       class="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4"
       @click.self="confirmDelete = null"
     >

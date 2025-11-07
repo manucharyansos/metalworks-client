@@ -61,18 +61,6 @@
             </nuxt-link>
           </li>
 
-          <!-- Orders -->
-          <li>
-            <nuxt-link
-              to="/manager/orders"
-              exact-active-class="manager-active-link"
-              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
-              @click.native="onNavClick"
-            >
-              Պատվերը
-            </nuxt-link>
-          </li>
-
           <!-- Users -->
           <li>
             <nuxt-link
