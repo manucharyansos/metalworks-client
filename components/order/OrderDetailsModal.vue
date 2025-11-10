@@ -50,6 +50,14 @@
           <ul class="w-full">
             <li v-for="order in details.factory_orders" :key="order.id">
               <div v-if="order.files && order.files.length > 0">
+                <div class="flex items-center justify-between mb-2 px-1">
+                  <div class="text-sm font-semibold">
+                    {{ order.factory?.name || 'Արտադրամաս' }}
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    Կատարող՝ <span class="font-medium">{{ order.operator?.name || '—' }}</span>
+                  </div>
+                </div>
                 <div
                   v-for="file in order.files"
                   :key="file.id"

@@ -132,8 +132,16 @@
               class="rounded-xl border border-gray-200 dark:border-gray-800 p-4"
             >
               <div class="flex items-center justify-between mb-3">
-                <div class="text-sm font-semibold">
-                  {{ fo.factory?.name || 'Արտադրամաս' }}
+                <div>
+                  <div class="text-sm font-semibold">
+                    {{ fo.factory?.name || 'Արտադրամաս' }}
+                  </div>
+                  <div class="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                    Կատարող՝
+                    <span class="font-medium">
+                      {{ fo.operator?.name || '—' }}
+                    </span>
+                  </div>
                 </div>
                 <div class="text-xs opacity-70">
                   Ֆայլեր՝ {{ countFactoryFiles(fo) }}

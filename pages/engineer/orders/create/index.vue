@@ -412,7 +412,7 @@
                     'border-red-500 ring-2 ring-red-100':
                       formSubmitted && !description,
                   }"
-                  rows="4"
+                  :rows="4"
                   placeholder="Մուտքագրեք պատվերի նկարագրությունը..."
                 />
               </div>
@@ -427,7 +427,7 @@
         class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
       >
         <show-files
-          :pmps="getPmp"
+          :pmps="pmpsData"
           :factories="getFactory"
           :auto-open-factory-id="autoOpenFactoryId"
           :selected-files.sync="selectedFiles"
@@ -435,6 +435,55 @@
           @files-selected="handleFilesSelected"
           @back="isFiles = false"
         />
+
+        <!-- Ընտրել կատարող յուրաքանչյուր գործարանի համար -->
+        <div class="mt-8 space-y-4">
+          <h3 class="text-lg font-semibold text-gray-900">
+            Ընտրել կատարող յուրաքանչյուր գործարանի համար
+          </h3>
+
+          <div
+            v-for="factory in selectedFactories"
+            :key="factory.id"
+            class="flex flex-col sm:flex-row items-start sm:items-center gap-3"
+          >
+            <div class="w-full sm:w-64 font-medium text-gray-700">
+              {{ factory.name }}
+            </div>
+
+            <select
+              v-model="factoryOperators[factory.id]"
+              class="w-full sm:flex-1 border-2 border-gray-200 rounded-xl px-3 py-2 focus:ring-4 focus:ring-blue-100 focus:border-blue-500"
+            >
+              <option :value="null" disabled>Ընտրել կատարող</option>
+              <option
+                v-for="user in getFactoryOperatorsFor(factory)"
+                :key="user.id"
+                :value="user.id"
+              >
+                {{ user.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Կոճակներ -->
+        <div class="mt-8 flex justify-end gap-3">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50"
+            @click="isFiles = false"
+          >
+            Վերադառնալ
+          </button>
+          <button
+            type="button"
+            class="px-6 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700"
+            @click="pmpFiles"
+          >
+            Պահպանել պատվերը
+          </button>
+        </div>
       </div>
 
       <!-- Loading Overlay -->
@@ -454,7 +503,7 @@
 
       <notifications />
     </div>
-    <PermissionDenied />
+    <PermissionDenied v-else />
   </div>
 </template>
 
@@ -499,15 +548,46 @@ export default {
       isLoading: false,
       files_existing: false,
       remote_number_id: null,
+
+      factoryOperators: {},
     }
   },
   computed: {
     ...mapGetters('factory', ['getFactory']),
     ...mapGetters('clients', ['allClients']),
     ...mapGetters('pmp', ['getPmpes', 'getPmp']),
+
+    pmpsData() {
+      const p = this.getPmp || {}
+      // Adapt store pmp to component's expected shape { exists, pmp }
+      const exists =
+        !!p?.id ||
+        (!!p?.group && Array.isArray(p?.remote_number)) ||
+        Array.isArray(p?.files)
+      return exists ? { exists: true, pmp: p } : { exists: false }
+    },
+
     users() {
       return this.allClients
     },
+
+    selectedFactories() {
+      const files = this.getPmp?.files || []
+      const factoryIds = new Set()
+
+      this.selectedFiles.forEach((fileId) => {
+        const file = files.find((f) => f.id === fileId)
+        if (file?.factory_id) {
+          factoryIds.add(file.factory_id)
+        }
+      })
+
+      const stores = Array.isArray(this.getFactory) ? this.getFactory : []
+      return stores
+        .filter((f) => factoryIds.has(f.id))
+        .map((f) => ({ ...f, operators: f.operators || [] }))
+    },
+
     canProceedToFiles() {
       return !!(
         this.selectedClient &&
@@ -521,6 +601,7 @@ export default {
     canSubmit() {
       return this.canProceedToFiles && !this.isEditingMode
     },
+
     filteredPmpGroups() {
       if (!this.pmpGroupSearch) return this.getPmpes?.pmp || []
       const searchTerm = this.pmpGroupSearch.toLowerCase()
@@ -530,6 +611,7 @@ export default {
           pmp.group_name.toLowerCase().includes(searchTerm)
       )
     },
+
     filteredPmpNames() {
       if (!this.selectedPmp) return []
       const remoteNumbers = this.selectedPmp.remote_number || []
@@ -539,6 +621,7 @@ export default {
         rn.remote_number.toLowerCase().includes(searchTerm)
       )
     },
+
     isEditingMode() {
       return this.$route.path.includes('/editing')
     },
@@ -550,6 +633,21 @@ export default {
         this.pmpNameSearch = ''
         this.remote_number_id = null
       }
+    },
+    selectedFactories(newFactories) {
+      const allowedIds = new Set(newFactories.map((factory) => factory.id))
+
+      newFactories.forEach((factory) => {
+        if (!(factory.id in this.factoryOperators)) {
+          this.$set(this.factoryOperators, factory.id, null)
+        }
+      })
+
+      Object.keys(this.factoryOperators).forEach((factoryId) => {
+        if (!allowedIds.has(Number(factoryId))) {
+          this.$delete(this.factoryOperators, factoryId)
+        }
+      })
     },
   },
   mounted() {
@@ -596,8 +694,18 @@ export default {
         acc[file.id] = file.quantity
         return acc
       }, {})
-      this.isFiles = false
-      this.pmpFiles()
+
+      this.$notify({
+        text: 'Ֆայլերը ընտրված են, ընտրեք կատարող(ներ) և պահպանեք պատվերը։',
+        duration: 3000,
+        speed: 1000,
+        position: 'top',
+        type: 'success',
+      })
+    },
+
+    getFactoryOperatorsFor(factory) {
+      return factory.operators || []
     },
 
     async pmpFiles() {
@@ -645,6 +753,13 @@ export default {
         return
       }
 
+      const factoryOperatorsArray = Object.entries(this.factoryOperators)
+        .filter(([factoryId, userId]) => !!userId)
+        .map(([factoryId, userId]) => ({
+          factory_id: Number(factoryId),
+          user_id: userId,
+        }))
+
       const data = {
         user_id: this.selectedClient.client.id,
         creator_id: this.$auth.user.id,
@@ -660,6 +775,7 @@ export default {
           id,
           quantity: this.fileQuantities[id],
         })),
+        factory_operators: factoryOperatorsArray,
       }
 
       try {
@@ -676,8 +792,6 @@ export default {
           type: 'success',
         })
         this.resetForm()
-        this.selectedFiles = []
-        this.fileQuantities = {}
         this.$router.push('/engineer')
       } catch (error) {
         this.$notify({
@@ -691,6 +805,7 @@ export default {
         this.isLoading = false
       }
     },
+
     selectFromOtherFactory() {
       this.formSubmitted = true
       this.files_existing = true
@@ -713,17 +828,16 @@ export default {
         return
       }
 
-      // Գտնել առաջին գործարանը, որն ունի ֆայլեր
-      const factoryWithFiles = this.getFactory.find(
+      const factories = Array.isArray(this.getFactory) ? this.getFactory : []
+
+      const factoryWithFiles = factories.find(
         (factory) => factory.files && factory.files.length > 0
       )
 
-      // Եթե կա — բացել այն, եթե ոչ — բացել առաջինը (կամ ոչինչ)
       this.autoOpenFactoryId = factoryWithFiles
         ? factoryWithFiles.id
-        : this.getFactory[0]?.id || null
+        : factories[0]?.id || null
 
-      // Անմիջապես անցնել ֆայլերին
       this.isFiles = true
     },
 
@@ -744,6 +858,10 @@ export default {
       this.isFiles = false
       this.autoOpenFactoryId = null
       this.remote_number_id = null
+      this.selectedFiles = []
+      this.fileQuantities = {}
+      this.factoryOperators = {}
+      this.files_existing = false
     },
   },
 }

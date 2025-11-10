@@ -210,7 +210,7 @@
           </button>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="flex items-center justify-center">
-              <DxfViewer v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
+              <DxfViewerModal v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
             </div>
             <div class="space-y-4">
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -292,15 +292,16 @@
 import { mapActions, mapGetters } from 'vuex'
 import SelectWithLabel from '@/components/form/SelectWithLabel.vue'
 import InputWithLabelIcon from '@/components/form/InputWithLabelIcon.vue'
-import DxfViewer from '@/components/File/DxfViewer.vue'
+import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 
 export default {
   components: {
-    DxfViewer,
     InputWithLabelIcon,
     SelectWithLabel,
+    // eslint-disable-next-line vue/no-unused-components
+    DxfViewerModal,
   },
-  layout: 'FactoryLayout',
+  layout: 'factory',
   middleware: ['role-guard'],
   meta: { role: 'laser' },
   data() {
@@ -359,7 +360,12 @@ export default {
     },
   },
   mounted() {
-    this.fetchOrdersByFactory(3)
+    const factoryId = this.$auth.user?.factory_id
+    console.log(factoryId, 'factoryId')
+
+    if (factoryId) {
+      this.fetchOrdersByFactory(factoryId)
+    }
   },
   methods: {
     ...mapActions('factory', [

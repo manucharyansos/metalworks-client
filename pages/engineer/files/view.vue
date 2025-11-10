@@ -455,7 +455,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import DxfViewerModal from '~/components/engineer/DxfViewerModal.vue'
+import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 import PopupModal from '~/components/modals/popup-modal/PopupModal.vue'
 import AddFileModal from '~/components/modals/add-file/AddFile.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'

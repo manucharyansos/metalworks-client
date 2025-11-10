@@ -89,6 +89,7 @@
       :visible="isFormOpen"
       :worker="selectedWorker"
       :roles="roles"
+      :factories="factories"
       :submitting="submitting"
       @close="closeForm"
       @submit="handleSubmit"
@@ -147,6 +148,10 @@ export default {
   },
   computed: {
     ...mapGetters('roles', ['roles']),
+    ...mapGetters('factory', ['getFactory']),
+    factories() {
+      return Array.isArray(this.getFactory) ? this.getFactory : []
+    },
     filtered() {
       const q = (this.searchQuery || '').toLowerCase().trim()
       if (!q) return this.workers
@@ -164,10 +169,12 @@ export default {
   },
   async mounted() {
     await this.fetchRoles()
+    await this.fetchFactory()
     await this.loadWorkers()
   },
   methods: {
     ...mapActions('roles', ['fetchRoles']),
+    ...mapActions('factory', ['fetchFactory']),
     async loadWorkers() {
       this.loading = true
       try {

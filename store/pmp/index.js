@@ -9,7 +9,7 @@ export const mutations = {
     state.pmps = pmps || {}
   },
   SET_PMP(state, pmp) {
-    state.pmp = pmp || {}
+    state.pmp = (pmp && pmp.pmp) || pmp || {}
   },
   SET_ERROR(state, error) {
     state.error = error || null

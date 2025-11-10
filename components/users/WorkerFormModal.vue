@@ -59,7 +59,24 @@
               >
                 <option disabled value="">Ընտրել դեր</option>
                 <option v-for="r in roles" :key="r.id" :value="r.id">
-                  {{ r.name }}
+                  {{ r.value || r.name }}
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm mb-1">Արտադրամաս</label>
+              <select
+                v-model="form.factory_id"
+                class="w-full rounded-lg border px-3 py-2"
+              >
+                <option :value="null">— Չկցել —</option>
+                <option
+                  v-for="f in factories"
+                  :key="f.id"
+                  :value="f.id"
+                >
+                  {{ f.name }}
                 </option>
               </select>
             </div>
@@ -138,6 +155,7 @@ export default {
     visible: { type: Boolean, default: false },
     worker: { type: Object, default: null }, // edit mode if has id
     roles: { type: Array, default: () => [] },
+    factories: { type: Array, default: () => [] },
     submitting: { type: Boolean, default: false },
   },
   data() {
@@ -147,6 +165,7 @@ export default {
         last_name: '',
         email: '',
         role_id: '',
+        factory_id: null,
         phone: '',
         second_phone: '',
         address: '',
@@ -175,6 +194,7 @@ export default {
           last_name: u?.client?.last_name || '',
           email: u?.email || '',
           role_id: u?.role_id || '',
+          factory_id: u?.factory_id ?? null,
           phone: u?.client?.phone || '',
           second_phone: u?.client?.second_phone || '',
           address: u?.client?.address || '',
@@ -191,6 +211,7 @@ export default {
         last_name: '',
         email: '',
         role_id: '',
+        factory_id: null,
         phone: '',
         second_phone: '',
         address: '',
@@ -202,6 +223,7 @@ export default {
       if (!this.form.name.trim()) return 'Անունը պարտադիր է'
       if (!this.form.email.trim()) return 'Էլ․ փոստը պարտադիր է'
       if (!this.form.role_id) return 'Ընտրեք դեր'
+      // factory_id ոչ պարտադիր, բայց կարող է ընտրվել
       if (!this.form.phone.trim()) return 'Հեռախոսը պարտադիր է'
       if (!this.isEdit) {
         if (!this.form.password) return 'Գաղտնաբառը պարտադիր է'
@@ -222,6 +244,7 @@ export default {
         last_name: this.form.last_name || null,
         email: this.form.email,
         role_id: this.form.role_id,
+        factory_id: this.form.factory_id || null,
         // client fields
         type: 'worker',
         phone: this.form.phone,

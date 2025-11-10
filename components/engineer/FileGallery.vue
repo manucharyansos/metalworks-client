@@ -132,7 +132,7 @@
 
 <script>
 import { mapActions } from 'vuex'
-import DxfViewerModal from '~/components/engineer/DxfViewerModal.vue'
+import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 
 export default {
   name: 'FileGallery',
