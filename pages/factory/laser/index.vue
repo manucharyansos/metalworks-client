@@ -1,107 +1,94 @@
-```vue
 <template>
   <main class="min-h-screen bg-gray-100 dark:bg-gray-900">
-    <!-- Orders Table -->
+    <!-- Orders Board -->
     <template v-if="getOrderByFactories && !isModal">
-      <div class="container mx-auto px-4 py-16 sm:py-24">
-        <div class="relative overflow-x-auto shadow-lg rounded-lg">
-          <table
-            class="w-full text-sm text-left text-gray-700 bg-white dark:bg-gray-800 dark:text-gray-300"
+      <div class="container mx-auto px-4 py-10 sm:py-16">
+        <!-- Toolbar -->
+        <OrdersToolbar
+          :search="searchable"
+          :status-options="statusOptions"
+          :selected-statuses="selectedStatuses"
+          @update:search="(v) => (searchable = v)"
+          @update:selected-statuses="(v) => (selectedStatuses = v)"
+        />
+
+        <!-- Kanban board -->
+        <div
+          v-if="boardColumns.length"
+          class="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+        >
+          <div
+            v-for="column in boardColumns"
+            :key="column.id"
+            class="flex flex-col rounded-2xl bg-gray-50/70 p-3 shadow-sm dark:bg-gray-800/60"
+            @dragover.prevent
+            @drop="onDrop(column)"
           >
-            <thead
-              class="text-xs uppercase bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-            >
-              <tr>
-                <th scope="col" class="px-4 py-3 text-center">Հ/Հ</th>
-                <th scope="col" class="px-4 py-3 text-center">
-                  Ստեղծման ամսաթիվ
-                </th>
-                <th scope="col" class="px-4 py-3 text-center">Ում կողմից</th>
-                <th scope="col" class="px-4 py-3 text-center">Ավարտի ժամկետ</th>
-                <th scope="col" class="px-4 py-3 text-center">
-                  Նկարագրություն
-                </th>
-                <th scope="col" class="px-4 py-3 text-center">Կարգավիճակ</th>
-                <th scope="col" class="px-4 py-3 text-center">Գործողություն</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="(order, index) in searchFilter"
-                :key="index"
-                class="border-b dark:border-gray-700"
-                :class="{
-                  'bg-green-100 dark:bg-green-800': order?.factory_orders?.some(
-                    (item) =>
-                      item.status === 'Ավարտել' ||
-                      item.admin_confirmation_date !== null
-                  ),
-                }"
+            <!-- Column header -->
+            <div class="mb-2 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span
+                  class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold text-white"
+                  :class="column.iconBg"
+                >
+                  {{ column.icon }}
+                </span>
+                <h3
+                  class="text-sm font-semibold text-gray-800 dark:text-gray-100"
+                >
+                  {{ column.label }}
+                </h3>
+              </div>
+              <span
+                class="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200"
               >
-                <th
-                  scope="row"
-                  class="px-4 py-4 font-medium text-gray-900 dark:text-white text-center"
-                >
-                  {{ order.id }}
-                </th>
-                <td class="px-4 py-4 text-center">
-                  {{ order?.created_at }}
-                </td>
-                <td class="px-4 py-4 text-center">
-                  {{ order?.creator?.name }}
-                </td>
-                <td class="px-4 py-4 text-center">
-                  {{
-                    order?.dates?.finish_date
-                      ? $formatDate(order.dates?.finish_date)
-                      : 'Հաշվի առնել'
-                  }}
-                </td>
-                <td
-                  class="px-4 py-4 text-center bg-indigo-500 text-white hover:bg-indigo-600 cursor-pointer transition-colors"
-                  @click="toggleDetails(order)"
-                >
-                  Դիտել
-                </td>
-                <td class="px-4 py-4 text-center">
-                  <div
-                    v-for="item in order.factory_orders"
-                    :key="item.id"
-                    class="py-2"
-                    :class="{
-                      'bg-green-300 text-white': item.status === 'Հաստատել',
-                      'bg-red-500 text-white': item.status === 'Մերժել',
-                      'bg-orange-500 text-white':
-                        item.status === 'Կատարման ժամկետի փոխարինում',
-                      'bg-green-500 text-white': item.status === 'Ավարտել',
-                      'text-gray-500': !item.status,
-                    }"
-                  >
-                    <div
-                      v-if="item.factory_id === 3 || item.factory_id === '3'"
-                      class="text-center"
-                    >
-                      {{
-                        item.status === 'Մերժել'
-                          ? item.canceling || 'Հաշվի առնել'
-                          : item.status === 'Կատարման ժամկետի փոխարինում'
-                          ? $formatDate(item.cancel_date) || 'Հաշվի առնել'
-                          : item.operator_finish_date
-                          ? item.operator_finish_date
-                          : item.status || 'Հաշվի առնել'
-                      }}
-                    </div>
-                  </div>
-                </td>
-                <td
-                  class="px-4 py-4 text-center text-indigo-600 hover:text-indigo-800 cursor-pointer transition-colors"
-                  @click="updateOrder(order)"
-                >
-                  Խմբագրել
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                {{ column.orders.length }}
+              </span>
+            </div>
+
+            <!-- Cards list -->
+            <transition-group
+              name="fade-list"
+              tag="div"
+              class="flex flex-1 flex-col gap-3"
+            >
+              <OrderCard
+                v-for="order in column.orders"
+                :key="order.id"
+                :order="order"
+                :factory-id="currentFactoryId"
+                :current-user-id="currentUserId"
+                @drag-start="onDragStart(order, column)"
+                @view-details="toggleDetails"
+                @edit="updateOrder"
+              />
+            </transition-group>
+
+            <!-- empty state -->
+            <div
+              v-if="!column.orders.length"
+              class="mt-2 flex flex-1 items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white/60 p-3 text-center text-xs text-gray-400 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-500"
+            >
+              Քաշեք պատվերներ այստեղ
+            </div>
+          </div>
+        </div>
+
+        <!-- Եթե լրիվ պատվերներ չկան -->
+        <div
+          v-else
+          class="mt-10 flex items-center justify-center rounded-2xl bg-white p-8 text-center text-sm text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-300"
+        >
+          Պատվերներ չկան։
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-8 flex justify-center">
+          <Pagination
+            v-if="paginationMeta.total > perPage"
+            :pagination="paginationMeta"
+            @page-changed="handlePageChange"
+          />
         </div>
       </div>
     </template>
@@ -112,9 +99,9 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
     >
       <div
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg p-6 relative"
+        class="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
       >
-        <div class="flex justify-between items-center mb-4">
+        <div class="mb-4 flex items-center justify-between">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
             Խմբագրել առաջադրանքը
           </h3>
@@ -123,7 +110,7 @@
             @click="closeModal"
           >
             <svg
-              class="w-5 h-5"
+              class="h-5 w-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -173,7 +160,7 @@
             />
           </div>
           <button
-            class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+            class="w-full rounded-lg bg-indigo-600 py-2 text-white transition-colors hover:bg-indigo-700"
             @click="doneOrder(selectedOrder.id)"
           >
             Հաստատել
@@ -188,14 +175,14 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       >
         <div
-          class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl p-6 relative"
+          class="relative w-full max-w-4xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
         >
           <button
-            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
             @click="isOpenDetails = false"
           >
             <svg
-              class="w-6 h-6"
+              class="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -208,78 +195,12 @@
               />
             </svg>
           </button>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="flex items-center justify-center">
-              <DxfViewerModal v-if="dxfUrl" :key="dxfUrl" :dxf-url="dxfUrl" />
-            </div>
-            <div class="space-y-4">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                Առաջադրանքի մանրամասներ
-              </h3>
-              <ul class="space-y-2 text-gray-700 dark:text-gray-300">
-                <li>Անուն: {{ details.name }}</li>
-                <li>Քանակ: {{ details.quantity }}</li>
-                <li>Նկարագրություն: {{ details.description }}</li>
-              </ul>
-              <div v-if="details.factory_orders?.length">
-                <h4 class="text-lg font-semibold mt-4">Ֆայլեր</h4>
-                <ul class="space-y-2">
-                  <li
-                    v-for="order in details.factory_orders"
-                    :key="order.id"
-                    class="border border-gray-200 dark:border-gray-600 rounded-lg p-4"
-                  >
-                    <div v-for="file in order.files" :key="file.id">
-                      <div class="flex items-center justify-between gap-4 mb-2">
-                        <button
-                          class="text-blue-500 hover:text-blue-700"
-                          @click="viewFile(file.path)"
-                        >
-                          Դիտել
-                        </button>
-                        <button
-                          class="text-green-500 hover:text-green-700 flex items-center gap-2"
-                          :class="{
-                            'text-black': file.status === 'downloaded',
-                          }"
-                          @click="downloadFile(file)"
-                        >
-                          {{ file.original_name }}
-                          <img class="w-6 h-6" src="/images/img.png" alt="" />
-                        </button>
-                      </div>
-                      <div class="grid grid-cols-3 gap-2 text-sm">
-                        <p>
-                          <span class="font-bold">Քանակ:</span>
-                          <span
-                            v-if="details.link_existing_files"
-                            class="flex items-center gap-1"
-                          >
-                            <span class="line-through text-gray-500">{{
-                              file.quantity
-                            }}</span>
-                            <span class="text-gray-400">→</span>
-                            <span class="text-green-600 font-bold">{{
-                              file.pivot.quantity
-                            }}</span>
-                          </span>
-                          <span v-else>{{ file.quantity }}</span>
-                        </p>
-                        <p>
-                          <span class="font-bold">Նյութ Torrentին տեսակ:</span>
-                          {{ file?.material_type }}
-                        </p>
-                        <p>
-                          <span class="font-bold">Հաստություն:</span>
-                          {{ file?.thickness }}
-                        </p>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <OrderDetailsPanel
+            :details="details"
+            :dxf-url="dxfUrl"
+            @view-file="viewFile"
+            @download-file="downloadFile"
+          />
         </div>
       </div>
     </template>
@@ -292,14 +213,19 @@
 import { mapActions, mapGetters } from 'vuex'
 import SelectWithLabel from '@/components/form/SelectWithLabel.vue'
 import InputWithLabelIcon from '@/components/form/InputWithLabelIcon.vue'
-import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
+import OrdersToolbar from '@/components/factory/OrdersToolbar.vue'
+import OrderCard from '@/components/factory/OrderCard.vue'
+import Pagination from '~/components/ui/Pagination.vue'
+import OrderDetailsPanel from '@/components/factory/OrderDetailsPanel.vue'
 
 export default {
   components: {
+    OrderDetailsPanel,
     InputWithLabelIcon,
     SelectWithLabel,
-    // eslint-disable-next-line vue/no-unused-components
-    DxfViewerModal,
+    OrdersToolbar,
+    OrderCard,
+    Pagination,
   },
   layout: 'factory',
   middleware: ['role-guard'],
@@ -320,6 +246,18 @@ export default {
         description: '',
         files: [],
       },
+
+      // drag & drop
+      draggingOrder: null,
+      draggingFromColumnId: null,
+
+      // filters & pagination
+      selectedStatuses: [],
+      currentPage: 1,
+      perPage: 12,
+      currentFactoryId: null,
+      currentUserId: null,
+
       status: [
         { id: 1, name: 'Հաստատել', value: 'confirmation' },
         { id: 2, name: 'Մերժել', value: 'canceling' },
@@ -335,14 +273,45 @@ export default {
           value: 'no_material',
         },
       ],
+      statusOptions: [
+        { id: 'no_status', label: 'Առանց կարգավիճակի', value: 'null' },
+        { id: 'confirmed', label: 'Հաստատել', value: 'Հաստատել' },
+        { id: 'rejected', label: 'Մերժել', value: 'Մերժել' },
+        {
+          id: 'changed',
+          label: 'Ժամկետի փոփոխություն',
+          value: 'Կատարման ժամկետի փոխարինում',
+        },
+        { id: 'finished', label: 'Ավարտել', value: 'Ավարտել' },
+      ],
     }
   },
   computed: {
     ...mapGetters('factory', ['getOrderByFactories']),
-    searchFilter() {
+    allOrders() {
+      return this.getOrderByFactories?.orders || []
+    },
+    // filter by status
+    filteredByStatus() {
+      if (!this.selectedStatuses.length) return this.allOrders
+
+      return this.allOrders.filter((order) => {
+        const fo = this.getFactoryOrderForCurrentFactory(order)
+        // եթե ընդհանրապես չի վերաբերվում գործարանին՝ skip
+        if (!fo) return false
+
+        const status = fo.status || null
+        const statusKey = status ?? 'null'
+        return this.selectedStatuses.includes(statusKey)
+      })
+    },
+
+    // filter by search
+    filteredBySearch() {
       const searchTerm = this.searchable.trim().toLowerCase()
-      if (!searchTerm) return this.getOrderByFactories.orders
-      return this.getOrderByFactories.orders.filter((order) => {
+      if (!searchTerm) return this.filteredByStatus
+
+      return this.filteredByStatus.filter((order) => {
         const orderNumber = order.order_number?.number?.toLowerCase() || ''
         const name = order.name?.toLowerCase() || ''
         const description = order.description?.toLowerCase() || ''
@@ -355,13 +324,83 @@ export default {
         )
       })
     },
+    // local pagination
+    paginatedOrders() {
+      const start = (this.currentPage - 1) * this.perPage
+      return this.filteredBySearch.slice(start, start + this.perPage)
+    },
+    paginationMeta() {
+      const total = this.filteredBySearch.length
+      const lastPage = Math.max(Math.ceil(total / this.perPage), 1)
+
+      return {
+        current_page: this.currentPage,
+        per_page: this.perPage,
+        total,
+        last_page: lastPage,
+      }
+    },
+    // Kanban columns
+    boardColumns() {
+      const columnsConfig = [
+        {
+          id: 'no_status',
+          label: 'Առանց կարգավիճակի',
+          value: 'null',
+          icon: '•',
+          iconBg: 'bg-gray-400',
+        },
+        {
+          id: 'confirmed',
+          label: 'Հաստատել',
+          value: 'Հաստাতել',
+          icon: '✓',
+          iconBg: 'bg-green-500',
+        },
+        {
+          id: 'changed',
+          label: 'Ժամկետի փոփոխություն',
+          value: 'Կատարման ժամկետի փոխարինում',
+          icon: '⟳',
+          iconBg: 'bg-orange-500',
+        },
+        {
+          id: 'rejected',
+          label: 'Մերժել',
+          value: 'Մերժել',
+          icon: '✕',
+          iconBg: 'bg-red-500',
+        },
+        {
+          id: 'finished',
+          label: 'Ավարտել',
+          value: 'Ավարտել',
+          icon: '✔',
+          iconBg: 'bg-եմերալդ-500',
+        },
+      ]
+
+      return columnsConfig.map((col) => {
+        const orders = this.paginatedOrders.filter((order) => {
+          const fo = this.getFactoryOrderForCurrentFactory(order)
+          if (!fo) return false // ընդհանրապես չի մտնում այս գործարանի մեջ
+
+          const status = fo.status || null
+          const statusKey = status ?? 'null'
+          return statusKey === col.value
+        })
+        return { ...col, orders }
+      })
+    },
     finishDate() {
       return this.$formatDate(new Date())
     },
   },
   mounted() {
     const factoryId = this.$auth.user?.factory_id
-    console.log(factoryId, 'factoryId')
+    const userId = this.$auth.user?.id
+    this.currentFactoryId = factoryId
+    this.currentUserId = userId
 
     if (factoryId) {
       this.fetchOrdersByFactory(factoryId)
@@ -373,6 +412,42 @@ export default {
       'doneFinishedOrder',
       'downloadUploadedFile',
     ]),
+    getFactoryOrderForCurrentFactory(order) {
+      if (order.factory_orders && order.factory_orders.length) {
+        const fo = order.factory_orders.find(
+          (f) => String(f.factory_id) === String(this.currentFactoryId)
+        )
+
+        if (fo) {
+          const rawStatus = fo.status
+          const normalizedStatus =
+            !rawStatus || rawStatus === 'pending' ? null : rawStatus
+
+          return {
+            ...fo,
+            status: normalizedStatus,
+          }
+        }
+      }
+
+      if (order.factories && order.factories.length) {
+        const belongs = order.factories.some(
+          (f) => String(f.id) === String(this.currentFactoryId)
+        )
+        if (belongs) {
+          return {
+            factory_id: this.currentFactoryId,
+            status: null,
+            operator_id: null,
+          }
+        }
+      }
+
+      return null
+    },
+    handlePageChange(page) {
+      this.currentPage = page
+    },
     viewFile(filePath) {
       this.dxfUrl = filePath
     },
@@ -390,15 +465,41 @@ export default {
       reader.readAsArrayBuffer(file)
     },
     updateOrder(order) {
+      const fo = this.getFactoryOrderForCurrentFactory(order)
+
+      if (fo && fo.status === 'Ավարտել') {
+        this.$notify({
+          text: 'Այս առաջադրանքը արդեն ավարտված է, հնարավոր չէ փոխել կարգավիճակը։',
+          duration: 3000,
+          position: 'top',
+          type: 'info',
+        })
+        return
+      }
+
+      if (
+        fo &&
+        fo.operator_id &&
+        String(fo.operator_id) !== String(this.currentUserId)
+      ) {
+        this.$notify({
+          text: 'Պատվերը ընդունված է այլ օպերատորի կողմից, դուք չեք կարող փոփոխել։',
+          duration: 3000,
+          position: 'top',
+          type: 'warning',
+        })
+        return
+      }
+
       this.isModal = true
       this.selectedOrder = {
         ...order,
-        factory_order: order.factory_order
+        factory_order: fo
           ? {
-              ...order.factory_order,
-              cancel_date: order.factory_order.cancel_date || null,
-              canceling: order.factory_order.canceling || '',
-              finish_date: order.factory_order.finish_date || null,
+              ...fo,
+              cancel_date: fo.cancel_date || null,
+              canceling: fo.canceling || '',
+              finish_date: fo.finish_date || null,
             }
           : { status: '', cancel_date: null, canceling: '', finish_date: null },
       }
@@ -410,6 +511,16 @@ export default {
       this.changeDate = null
     },
     async doneOrder() {
+      if (!this.selectedOption?.name) {
+        this.$notify({
+          text: 'Խնդրում ենք ընտրել գործողություն։',
+          duration: 3000,
+          position: 'top',
+          type: 'warning',
+        })
+        return
+      }
+
       const updatedOrder = {
         id: this.selectedOrder.id,
         factory_order: {
@@ -421,58 +532,127 @@ export default {
               ? new Date().toISOString().slice(0, 19).replace('T', ' ')
               : null,
         },
-        factory_id: 3,
+        factory_id: this.currentFactoryId,
       }
 
-      if (
-        this.selectedOption?.name &&
-        this.selectedOrder.status !== 'finished'
-      ) {
-        const res = await this.doneFinishedOrder(updatedOrder)
-        if (res) {
-          this.$notify({
-            text: 'Առաջադրանքը հաջողությամբ թարմացվել է։',
-            duration: 3000,
-            position: 'top',
-            type: 'success',
-          })
-          this.closeModal()
-          await this.fetchOrdersByFactory(3)
-        }
-      } else {
+      const res = await this.doneFinishedOrder(updatedOrder)
+      if (res) {
         this.$notify({
-          text: 'Առաջադրանքն արդեն ավարտված է։',
+          text: 'Առաջադրանքը հաջողությամբ թարմացվել է։',
           duration: 3000,
           position: 'top',
-          type: 'info',
+          type: 'success',
         })
         this.closeModal()
+        await this.fetchOrdersByFactory(this.currentFactoryId)
+      } else {
+        this.$notify({
+          text: 'Սխալ տեղի ունեցավ առաջադրանքը թարմացնելիս։',
+          duration: 3000,
+          position: 'top',
+          type: 'error',
+        })
       }
     },
     toggleDetails(order) {
       this.isOpenDetails = !this.isOpenDetails
       this.details = order
     },
+
+    // drag & drop
+    onDragStart(order, column) {
+      this.draggingOrder = order
+      this.draggingFromColumnId = column.id
+    },
+    async onDrop(targetColumn) {
+      if (!this.draggingOrder) return
+
+      const newStatusValue =
+        targetColumn.value === 'null' ? null : targetColumn.value
+
+      await this.updateOrderStatusByDrag(this.draggingOrder, newStatusValue)
+
+      this.draggingOrder = null
+      this.draggingFromColumnId = null
+    },
+    async updateOrderStatusByDrag(order, newStatus) {
+      const fo = this.getFactoryOrderForCurrentFactory(order)
+
+      if (fo && fo.status === 'Ավարտել') {
+        this.$notify({
+          text: 'Արդեն ավարտված պատվերի կարգավիճակը չի կարող փոխվել։',
+          duration: 3000,
+          position: 'top',
+          type: 'info',
+        })
+        return
+      }
+
+      if (
+        fo &&
+        fo.operator_id &&
+        String(fo.operator_id) !== String(this.currentUserId)
+      ) {
+        this.$notify({
+          text: 'Պատվերը ընդունված է այլ օպերատորի կողմից, դուք չեք կարող փոխել։',
+          duration: 3000,
+          position: 'top',
+          type: 'warning',
+        })
+        return
+      }
+
+      let cancelDate = null
+      if (newStatus === 'Կատարման ժամկետի փոխարինում') {
+        const dt = new Date()
+        dt.setDate(dt.getDate() + 1)
+        cancelDate = dt.toISOString().slice(0, 19).replace('T', ' ')
+      }
+
+      const payload = {
+        id: order.id,
+        factory_id: this.currentFactoryId,
+        factory_order: {
+          status: newStatus,
+          canceling: null,
+          cancel_date: cancelDate,
+          operator_finish_date:
+            newStatus === 'Ավարտել'
+              ? new Date().toISOString().slice(0, 19).replace('T', ' ')
+              : null,
+        },
+      }
+
+      const res = await this.doneFinishedOrder(payload)
+      if (res) {
+        this.$notify({
+          text: 'Կարգավիճակը հաջողությամբ թարմացվել է։',
+          duration: 2500,
+          position: 'top',
+          type: 'success',
+        })
+        await this.fetchOrdersByFactory(this.currentFactoryId)
+      } else {
+        this.$notify({
+          text: 'Սխալ տեղի ունեցավ կարգավիճակը թարմացնելիս։',
+          duration: 3000,
+          position: 'top',
+          type: 'error',
+        })
+      }
+    },
   },
 }
 </script>
 
 <style scoped>
-table {
-  border-collapse: collapse;
-  width: 100%;
+.fade-list-enter-active,
+.fade-list-leave-active {
+  transition: all 0.2s ease;
 }
-
-th,
-td {
-  min-width: 120px;
-}
-
-@media (max-width: 640px) {
-  th,
-  td {
-    min-width: 80px;
-    font-size: 0.75rem;
-  }
+.fade-list-enter-from,
+.fade-list-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
 }
 </style>
