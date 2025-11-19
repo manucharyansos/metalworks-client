@@ -1,78 +1,84 @@
 <template>
-  <main class="flex flex-row flex-wrap p-4 h-auto pt-20">
-    <template v-if="searchFilter">
-      <table
-        class="w-full text-sm bg-amber-50 border-b-gray-500 text-left rtl:text-right text-gray-500 dark:text-gray-400"
+  <main
+    class="min-h-screen bg-gray-50 dark:bg-gray-950 py-6 px-4 sm:px-6 lg:px-8"
+  >
+    <div class="max-w-7xl mx-auto space-y-6">
+      <!-- Վերեւի Toolbar -->
+      <orders-toolbar
+        :total="allOrders.length"
+        :filtered="searchFilter.length"
+        :search-term="searchable"
+        :pagination="pagination"
+        @update:search="(val) => (searchable = val)"
+        @change-page="changePage"
+      />
+
+      <!-- Քարտերի ցանց / Բովանդակություն -->
+      <div
+        v-if="searchFilter && searchFilter.length"
+        class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6"
       >
-        <thead
-          class="text-xs text-gray-700 bg-gray-300 uppercase dark:text-gray-400"
+        <order-card
+          v-for="order in searchFilter"
+          :key="order.id"
+          :order="order"
+          @edit="editOrder"
+        />
+      </div>
+
+      <!-- Դատարկ վիճակ -->
+      <div
+        v-else
+        class="flex flex-col items-center justify-center py-16 bg-white dark:bg-gray-900 rounded-2xl shadow-md border border-dashed border-gray-300 dark:border-gray-700"
+      >
+        <p
+          class="text-base sm:text-lg font-medium text-gray-700 dark:text-gray-200 mb-2"
         >
-          <tr class="border-b-neutral-700">
-            <th scope="col" class="px-3 py-3">Id</th>
-            <th scope="col" class="px-3 py-3">Ստեղծման ամսաթիվը</th>
-            <th scope="col" class="px-3 py-3">Անհրաժեշտ ավարտի ժամանակը</th>
-            <th scope="col" class="px-3 py-3">Պատվերի համարը</th>
-            <th scope="col" class="px-3 py-3">Prefix code</th>
-            <th scope="col" class="px-3 py-3">Կարգավիճակ</th>
-            <th scope="col" class="px-3 py-3">Անուն</th>
-            <th scope="col" class="px-3 py-3">Քանակ</th>
-            <th scope="col" class="px-3 py-3"></th>
-          </tr>
-        </thead>
-        <tbody
-          v-for="(order, index) in searchFilter"
-          :key="index"
-          class="bg-amber-50"
+          Պատվերներ չեն գտնվել
+        </p>
+        <p
+          class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center max-w-md"
         >
-          <tr class="border-b border-gray-200 dark:border-gray-700">
-            <th
-              v-if="order.id"
-              scope="row"
-              class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap bg-gray-50 dark:text-white dark:bg-gray-800"
+          Փորձեք փոխել որոնման արտահայտությունը կամ անցնել այլ էջ։
+        </p>
+      </div>
+      <transition name="fade">
+        <div
+          v-if="selectedOrder"
+          class="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
+          @click.self="closeEditModal"
+        >
+          <transition name="slide-in-right">
+            <div
+              v-if="selectedOrder"
+              class="w-full sm:w-[520px] lg:w-[720px] max-w-full h-full bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-800 flex flex-col"
             >
-              {{ order?.id }}
-            </th>
-            <td v-if="order.created_at" class="px-6 py-4">
-              {{ order?.created_at }}
-            </td>
-            <td class="px-6 py-4">
-              {{ order?.dates?.finish_date ? order.dates.finish_date : 'null' }}
-            </td>
-            <td v-if="order.order_number" class="px-6 py-4">
-              {{ order?.order_number?.number }}
-            </td>
-            <td v-if="order.prefix_code" class="px-6 py-4">
-              {{ order?.prefix_code?.code }}
-            </td>
-            <td v-if="order.status" class="px-6 py-4">
-              {{ order?.status }}
-            </td>
-            <td v-if="order.name" class="px-6 py-4">
-              {{ order?.name }}
-            </td>
-            <td v-if="order?.store_link" class="px-12">
-              <a class="hover:!text-blue-700" :href="order.store_link?.url"
-                >Link</a
-              >
-            </td>
-            <td
-              class="px-12 text-indigo-500 border-indigo-500 hover:bg-indigo-500 hover:text-indigo-50 cursor-pointer"
-              @click="editOrder(order)"
-            >
-              Դիտել
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <!--      </div>-->
-    </template>
+              <order-detail
+                :order="selectedOrder"
+                @close="closeEditModal"
+                @saved="handleSaved"
+              />
+            </div>
+          </transition>
+        </div>
+      </transition>
+    </div>
   </main>
 </template>
+
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import OrderCard from '~/components/admin/orders/OrderCard.vue'
+import OrdersToolbar from '~/components/admin/orders/OrdersToolbar.vue'
+import OrderDetail from '@/components/modals/admin/OrderDetail.vue'
 
 export default {
   name: 'AdminPage',
+  components: {
+    OrderDetail,
+    OrderCard,
+    OrdersToolbar,
+  },
   layout: 'admin',
   middleware: ['role-guard'],
   meta: { role: 'admin' },
@@ -82,15 +88,19 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('orders', ['orders']),
+    ...mapGetters('orders', ['orders', 'getPagination']),
     allOrders() {
-      return this.orders
+      return this.orders || []
+    },
+    pagination() {
+      return this.getPagination
     },
     searchFilter() {
       const searchTerm = this.searchable.trim().toLowerCase()
       if (searchTerm === '') {
         return this.allOrders
       }
+
       return this.allOrders.filter((order) => {
         const orderNumber =
           order.order_number && typeof order.order_number.number === 'string'
@@ -101,13 +111,14 @@ export default {
             ? order.name.toLowerCase()
             : ''
         const description =
-          order.details && typeof order.description === 'string'
+          order.description && typeof order.description === 'string'
             ? order.description.toLowerCase()
             : ''
         const prefixCode =
           order.prefix_code && typeof order.prefix_code.code === 'string'
             ? order.prefix_code.code.toLowerCase()
             : ''
+
         return (
           orderNumber.includes(searchTerm) ||
           description.includes(searchTerm) ||
@@ -125,6 +136,36 @@ export default {
     editOrder(order) {
       this.$router.push(`/admin/${order.id}`)
     },
+    changePage(page) {
+      if (!this.pagination) return
+      if (page < 1 || page > this.pagination.last_page) return
+
+      this.fetchOrders({
+        page,
+        perPage: this.pagination.per_page || 10,
+      })
+    },
   },
 }
 </script>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-in-right-enter-active,
+.slide-in-right-leave-active {
+  transition: transform 0.3s ease;
+}
+.slide-in-right-enter {
+  transform: translateX(100%);
+}
+.slide-in-right-leave-to {
+  transform: translateX(100%);
+}
+</style>

@@ -526,7 +526,7 @@ export default {
     TextareaWithLabel,
   },
   layout: 'engineer',
-  middleware: ['engineer', 'roleRedirect'],
+  middleware: ['engineer'],
   data() {
     return {
       isSelectedClient: false,

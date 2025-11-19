@@ -1,13 +1,66 @@
 <template>
-  <div
-    class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-950 overflow-y-auto"
-  >
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+  <div class="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <!-- Վերեւի header / back + info -->
       <div
-        v-if="getOrder && getFactory && !loading"
+        class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 px-4 sm:px-6 py-4"
+      >
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs sm:text-sm text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            @click="$router.back()"
+          >
+            <span class="text-lg leading-none">←</span>
+            <span>Վերադառնալ</span>
+          </button>
+
+          <div class="space-y-1">
+            <h1
+              class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white"
+            >
+              Պատվերի խմբագրում
+            </h1>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+              ID:
+              <span class="font-semibold text-gray-800 dark:text-gray-100">
+                {{ getOrder?.id || '—' }}
+              </span>
+              <span v-if="getOrder?.order_number?.number">
+                · Պատվերի համարը:
+                <span class="font-semibold text-gray-800 dark:text-gray-100">
+                  {{ getOrder.order_number.number }}
+                </span>
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-start sm:items-end gap-2">
+          <span
+            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+            :class="statusChipClass"
+          >
+            {{ getOrder?.status || 'Կարգավիճակ չկա' }}
+          </span>
+          <p
+            v-if="getOrder?.created_at"
+            class="text-xs text-gray-500 dark:text-gray-400"
+          >
+            Ստեղծված է՝
+            <span class="font-medium text-gray-700 dark:text-gray-200">
+              {{ getOrder.created_at }}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Հիմնական բովանդակություն -->
+      <div
+        v-if="getOrder && factories.length && !loading"
         class="transition-all duration-300 animate-fade-in"
       >
-        <OrderDetail :order-id="getOrder.id">
+        <OrderDetail :order-id="getOrder.id" :order="getOrder">
           <!-- Name -->
           <template #name>
             <input-with-labels
@@ -65,24 +118,6 @@
             />
             <p v-if="errors.finish_date" class="text-red-500 text-sm mt-1.5">
               {{ errors.finish_date }}
-            </p>
-          </template>
-
-          <!-- Description -->
-          <template #description>
-            <textarea-with-label
-              v-model="getOrder.description"
-              label="Նկարագրություն"
-              placeholder="Մուտքագրեք նկարագրություն..."
-              class="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-              :class="{
-                'border-red-500 ring-1 ring-red-500': errors.description,
-              }"
-              rows="5"
-              @input="clearError('description')"
-            />
-            <p v-if="errors.description" class="text-red-500 text-sm mt-1.5">
-              {{ errors.description }}
             </p>
           </template>
 
@@ -156,63 +191,89 @@
             </div>
           </template>
 
+          <!-- Description -->
+          <template #description>
+            <textarea-with-label
+              v-model="getOrder.description"
+              label="Նկարագրություն"
+              placeholder="Մուտքագրեք նկարագրություն..."
+              class="w-full p-3 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              :class="{
+                'border-red-500 ring-1 ring-red-500': errors.description,
+              }"
+              rows="5"
+              @input="clearError('description')"
+            />
+            <p v-if="errors.description" class="text-red-500 text-sm mt-1.5">
+              {{ errors.description }}
+            </p>
+          </template>
+
           <!-- Action Buttons -->
           <template #buttons>
-            <button
-              type="button"
-              class="inline-flex justify-center items-center gap-2 py-2.5 px-6 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="loading"
-              @click="doneOrder"
-            >
-              <svg
-                v-if="loading"
-                class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+            <div class="flex flex-wrap gap-3 justify-end w-full">
+              <button
+                type="button"
+                class="inline-flex justify-center items-center gap-2 py-2.5 px-6 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="loading"
+                @click="doneOrder"
               >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
+                <svg
+                  v-if="loading"
+                  class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938լ3-2.647z"
+                  ></path>
+                </svg>
+                {{ loading ? 'Բեռնվում է...' : 'Պահպանել փոփոխությունները' }}
+              </button>
+
+              <button
+                type="button"
+                class="inline-flex justify-center items-center gap-2 py-2.5 px-6 text-sm font-medium text-red-600 hover:text-white border border-red-600 hover:bg-red-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
+                @click="deleteOrder(getOrder.id)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
                   stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              {{ loading ? 'Բեռնվում է...' : 'Հաստատել' }}
-            </button>
-            <button
-              type="button"
-              class="inline-flex justify-center items-center gap-2 py-2.5 px-6 text-sm font-medium text-red-600 hover:text-white border border-red-600 hover:bg-red-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
-              @click="deleteOrder(getOrder.id)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-              Ջնջել
-            </button>
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6մ4-6v6մ1-10V4a1 1 0 00-1-1h-4ա1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+                Ջնջել պատվերը
+              </button>
+            </div>
           </template>
         </OrderDetail>
         <notifications />
       </div>
-      <div v-else class="flex justify-center items-center h-96">
+
+      <!-- Loading state -->
+      <div
+        v-else
+        class="flex justify-center items-center h-72 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800"
+      >
         <spinner-component class="h-12 w-12 text-blue-500" />
       </div>
     </div>
@@ -248,13 +309,34 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('orders', ['order', 'errorMessage']),
+    ...mapGetters('orders', ['order', 'errorMessage', 'getPagination']),
     ...mapGetters('factory', ['getFactory']),
     getOrder() {
       return this.order ? JSON.parse(JSON.stringify(this.order)) : {}
     },
     factories() {
       return this.getFactory ? JSON.parse(JSON.stringify(this.getFactory)) : []
+    },
+    statusChipClass() {
+      const base =
+        'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200 border border-transparent'
+      const map = {
+        pending:
+          'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-200',
+        completed:
+          'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-200',
+        canceled:
+          'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-200',
+        Հաստատել:
+          'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-200',
+        Մերժել:
+          'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-200',
+        'Կատարման ժամկետի փոխարինում':
+          'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-200',
+        Ավարտել:
+          'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200',
+      }
+      return map[this.getOrder?.status] || base
     },
   },
   async mounted() {
@@ -378,6 +460,7 @@ export default {
         this.loading = false
       }
     },
+
     async deleteOrder(id) {
       const confirmed = confirm(
         'Դուք վստահ ե՞ք, որ ցանկանում եք ջնջել այս պատվերը'
@@ -443,20 +526,6 @@ export default {
 .container {
   width: 100%;
   max-width: 1280px;
-}
-
-/* Smooth transitions for dark mode */
-.bg-white {
-  transition: background-color 0.3s ease;
-}
-.dark .bg-white {
-  transition: background-color 0.3s ease;
-}
-
-/* Better focus states */
-:focus-visible {
-  outline: none;
-  ring: 2px;
 }
 
 /* Fade-in animation */

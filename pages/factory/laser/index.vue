@@ -353,7 +353,7 @@ export default {
         {
           id: 'confirmed',
           label: 'Հաստատել',
-          value: 'Հաստাতել',
+          value: 'Հաստատել',
           icon: '✓',
           iconBg: 'bg-green-500',
         },

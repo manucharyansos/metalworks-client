@@ -40,15 +40,15 @@ export default {
     // 'swiper/css/swiper.min.css',
   ],
   router: {
-    // base: '/work/',
+    base: '/work/',
     middleware: ['roleRedirect'],
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // baseURL: process.env.BASE_URL,
-    // baseURL: 'https://api.metalworks.am',
-    baseURL: 'http://localhost:8000',
+    baseURL: 'https://api.metalworks.am',
+    // baseURL: 'http://localhost:8000',
     credentials: true,
   },
 
@@ -63,8 +63,8 @@ export default {
       laravelSanctum: {
         provider: 'laravel/sanctum',
         // url: process.env.BASE_URL,
-        // url: 'https://api.metalworks.am',
-        url: 'http://localhost:8000',
+        url: 'https://api.metalworks.am',
+        // url: 'http://localhost:8000',
         endpoints: {
           csrf: { url: '/sanctum/csrf-cookie' },
           login: { url: '/api/login', method: 'post' },
@@ -85,8 +85,8 @@ export default {
 
   runtimeConfig: {
     public: {
-      apiBase: 'http://localhost:8000',
-      // apiBase: 'api.metalworks.am',
+      // apiBase: 'http://localhost:8000',
+      apiBase: 'api.metalworks.am',
     },
   },
 
@@ -109,6 +109,7 @@ export default {
   plugins: [
     { src: '~/plugins/url-helper.js', mode: 'client' },
     { src: '~/plugins/base-url.js', mode: 'client' },
+    { src: '~/plugins/moment.js', mode: 'client' },
     { src: '~/plugins/can.js', mode: 'client' },
     { src: '~/plugins/notifications-ssr', ssr: true },
     { src: '~/plugins/notifications-client', ssr: false },
