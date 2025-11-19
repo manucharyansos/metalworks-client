@@ -232,7 +232,7 @@
               </div>
             </div>
 
-            <!-- Files inside factory order -->
+            <!-- Files inside operator order -->
             <div
               v-for="file in order.files"
               :key="file.id"

@@ -45,10 +45,10 @@
       <transition name="fade">
         <div
           v-if="selectedOrder"
-          class="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm"
+          class="fixed inset-0 z-50 flex justify-center bg-black/40 backdrop-blur-sm"
           @click.self="closeEditModal"
         >
-          <transition name="slide-in-right">
+          <transition name="slide-in-center">
             <div
               v-if="selectedOrder"
               class="w-full sm:w-[520px] lg:w-[720px] max-w-full h-full bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200 dark:border-gray-800 flex flex-col"
@@ -85,6 +85,7 @@ export default {
   data() {
     return {
       searchable: '',
+      selectedOrder: null,
     }
   },
   computed: {
@@ -133,8 +134,18 @@ export default {
   },
   methods: {
     ...mapActions('orders', ['fetchOrders']),
+    handleSaved(updatedOrder) {
+      const index = this.allOrders.findIndex((o) => o.id === updatedOrder.id)
+      if (index !== -1) {
+        this.$set(this.allOrders, index, updatedOrder)
+      }
+      this.closeEditModal()
+    },
     editOrder(order) {
-      this.$router.push(`/admin/${order.id}`)
+      this.selectedOrder = { ...order }
+    },
+    closeEditModal() {
+      this.selectedOrder = null
     },
     changePage(page) {
       if (!this.pagination) return
@@ -144,6 +155,7 @@ export default {
         page,
         perPage: this.pagination.per_page || 10,
       })
+      this.closeEditModal()
     },
   },
 }
@@ -158,14 +170,14 @@ export default {
   opacity: 0;
 }
 
-.slide-in-right-enter-active,
-.slide-in-right-leave-active {
+.slide-in-center-enter-active,
+.slide-in-center-leave-active {
   transition: transform 0.3s ease;
 }
-.slide-in-right-enter {
+.slide-in-center-enter {
   transform: translateX(100%);
 }
-.slide-in-right-leave-to {
+.slide-in-center-leave-to {
   transform: translateX(100%);
 }
 </style>

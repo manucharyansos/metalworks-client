@@ -174,6 +174,17 @@ export default {
           if (response) {
             this.email = ''
             this.password = ''
+            const role = this.$auth.user.role.name
+            const map = {
+              admin: '/admin',
+              manager: '/manager',
+              engineer: '/engineer',
+              laser: '/factory/laser',
+              bend: '/factory/bend',
+            }
+            const target = this.localePath(map[role] || '/')
+
+            this.$router.push(target)
           } else if (typeof this.getErrorMessage === 'string') {
             this.errorMessage.general = this.getErrorMessage
           } else {

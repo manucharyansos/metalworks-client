@@ -2,7 +2,7 @@
   <div class="p-5 sm:p-6 md:p-7 space-y-6 h-full flex flex-col">
     <!-- Header -->
     <header class="flex items-start justify-between gap-3 border-b pb-4">
-      <div class="space-y-1" v-if="localOrder">
+      <div v-if="localOrder" class="space-y-1">
         <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
           Պատվեր #{{ localOrder.id }}
         </h2>
@@ -394,9 +394,20 @@ export default {
       }
       return map[status] || 'bg-gray-100 text-gray-700'
     },
+
+    // ՈՒՇԱԴՐՈՒԹՅՈՒՆ — ԱՅՍՏԵՂ Է ՈՒՂՂՎԱԾ ՖՈՒՆԿՑԻԱՆ
     formatDate(date) {
       if (!date) return '—'
-      return this.$moment(date).format('DD/MM/YYYY HH:mm')
+
+      // Ճիշտ ֆորմատով + strict mode → warning-ը ընդմիշտ անհետանում է
+      const m = this.$moment(date)
+
+      if (!m.isValid()) {
+        console.warn('Invalid date format:', date)
+        return date // կամ '—'
+      }
+
+      return m.format('DD/MM/YYYY HH:mm')
     },
 
     // ✅ Պատվերի տվյալների պահպանում

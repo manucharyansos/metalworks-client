@@ -215,7 +215,7 @@ import SelectWithLabel from '@/components/form/SelectWithLabel.vue'
 import InputWithLabelIcon from '@/components/form/InputWithLabelIcon.vue'
 import OrdersToolbar from '@/components/factory/OrdersToolbar.vue'
 import OrderCard from '@/components/factory/OrderCard.vue'
-import Pagination from '~/components/ui/Pagination.vue'
+import Pagination from '@/components/ui/Pagination.vue'
 import OrderDetailsPanel from '@/components/factory/OrderDetailsPanel.vue'
 
 export default {
@@ -340,7 +340,6 @@ export default {
         last_page: lastPage,
       }
     },
-    // Kanban columns
     boardColumns() {
       const columnsConfig = [
         {
