@@ -42,6 +42,8 @@
           Փորձեք փոխել որոնման արտահայտությունը կամ անցնել այլ էջ։
         </p>
       </div>
+
+      <!-- Modal -->
       <transition name="fade">
         <div
           v-if="selectedOrder"
@@ -134,13 +136,18 @@ export default {
   },
   methods: {
     ...mapActions('orders', ['fetchOrders']),
-    handleSaved(updatedOrder) {
-      const index = this.allOrders.findIndex((o) => o.id === updatedOrder.id)
-      if (index !== -1) {
-        this.$set(this.allOrders, index, updatedOrder)
-      }
+
+    // ✅ Այստեղ այլևս չենք mutat անում Vuex state–ը
+    async handleSaved(updatedOrder) {
+      // վերաբեռնում ենք ներկայիս էջը, որ state–ը թարմանա mutation–ներով
+      await this.fetchOrders({
+        page: this.pagination?.current_page || 1,
+        perPage: this.pagination?.per_page || 10,
+      })
+
       this.closeEditModal()
     },
+
     editOrder(order) {
       this.selectedOrder = { ...order }
     },
@@ -160,6 +167,7 @@ export default {
   },
 }
 </script>
+
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {

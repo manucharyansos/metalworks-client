@@ -96,21 +96,21 @@
     <!-- Edit Modal -->
     <div
       v-if="isModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm"
     >
       <div
-        class="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
+        class="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-2xl dark:bg-gray-800"
       >
-        <div class="mb-4 flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            Խմբագրել առաջադրանքը
+        <div class="mb-5 flex items-center justify-between">
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+            Գործողություն պատվերի վրա
           </h3>
           <button
-            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
             @click="closeModal"
+            class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
           >
             <svg
-              class="h-5 w-5"
+              class="h-6 w-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -124,46 +124,69 @@
             </svg>
           </button>
         </div>
-        <div class="space-y-4">
+
+        <div class="space-y-5">
+          <!-- Գլխավոր գործողությունը -->
           <select-with-label
             v-model="selectedOption"
-            :data-value="status"
-            label="Գործողություն"
+            :data-value="actionOptions"
+            label="Ընտրեք գործողություն"
+            placeholder="Ընտրել..."
           />
+
+          <!-- Մերժման պատճառ (միայն canceling-ի դեպքում) -->
           <div
-            v-if="selectedOption && selectedOption.value === 'canceling'"
-            class="my-4"
+            v-if="selectedOption?.value === 'canceled'"
+            class="animate-fade-in"
           >
             <select-with-label
               v-model="additionalOption"
-              :data-value="additionalOptions"
+              :data-value="cancelReasons"
               label="Մերժման պատճառ"
+              placeholder="Ընտրել պատճառ..."
             />
           </div>
+
+          <!-- Նոր ամսաթիվ (միայն date_changed-ի դեպքում) -->
           <div
-            v-if="selectedOption && selectedOption.value === 'finishing'"
-            class="my-4"
-          >
-            <p class="text-gray-700 dark:text-gray-300">
-              Ավարտի ամսաթիվ: {{ finishDate }}
-            </p>
-          </div>
-          <div
-            v-if="selectedOption && selectedOption.value === 'changeDate'"
-            class="my-4"
+            v-if="selectedOption?.value === 'date_changed'"
+            class="animate-fade-in"
           >
             <input-with-label-icon
               v-model="changeDate"
               type="date"
-              format="dd-mm-yyyy"
-              label="Նոր ավարտի ամսաթիվ"
+              label="Նոր կատարման ամսաթիվ"
+              :min="tomorrowDate"
             />
           </div>
-          <button
-            class="w-full rounded-lg bg-indigo-600 py-2 text-white transition-colors hover:bg-indigo-700"
-            @click="doneOrder(selectedOrder.id)"
+
+          <!-- Ավարտի ամսաթիվ (միայն finishing-ի դեպքում) -->
+          <div
+            v-if="selectedOption?.value === 'finished'"
+            class="p-4 rounded-lg bg-green-50 dark:bg-green-900/20"
           >
-            Հաստատել
+            <p class="text-sm text-green-800 dark:text-green-300">
+              <strong>Ավարտի ամսաթիվը կլինի:</strong>
+              <span class="font-semibold">{{ todayFormatted }}</span>
+            </p>
+          </div>
+
+          <!-- Հաստատել կոճակ -->
+          <button
+            @click="doneOrder"
+            :disabled="!selectedOption"
+            class="w-full py-3 px-4 rounded-lg font-medium text-white transition-all"
+            :class="
+              selectedOption
+                ? 'bg-indigo-600 hover:bg-indigo-700'
+                : 'bg-gray-400 cursor-not-allowed'
+            "
+          >
+            {{
+              selectedOption
+                ? 'Հաստատել գործողությունը'
+                : 'Ընտրեք գործողություն'
+            }}
           </button>
         </div>
       </div>
@@ -233,12 +256,9 @@ export default {
   data() {
     return {
       searchable: '',
-      changeDate: '',
       isModal: false,
       isOpenDetails: false,
       selectedOrder: {},
-      selectedOption: null,
-      additionalOption: null,
       dxfUrl: '',
       details: {
         name: '',
@@ -258,32 +278,18 @@ export default {
       currentFactoryId: null,
       currentUserId: null,
 
-      status: [
-        { id: 1, name: 'Հաստատել', value: 'confirmation' },
-        { id: 2, name: 'Մերժել', value: 'canceling' },
-        { id: 3, name: 'Կատարման ժամկետի փոխարինում', value: 'changeDate' },
-        { id: 4, name: 'Ավարտել', value: 'finishing' },
+      status: [],
+      statusOptions: [],
+      actionOptions: [],
+      cancelReasons: [
+        { label: 'Ոչ հստակ պատվեր', value: 'unclear' },
+        { label: 'Սխալ տվյալներ', value: 'wrong_data' },
+        { label: 'Նյութի բացակայություն', value: 'no_material' },
+        { label: 'Այլ պատճառ', value: 'other' },
       ],
-      additionalOptions: [
-        { id: 1, name: 'Ոչ հստակ պատվեր', value: 'unclear' },
-        { id: 2, name: 'Սխալ տվյալներ', value: 'error' },
-        {
-          id: 3,
-          name: 'Նյութի առկայության բացակայություն',
-          value: 'no_material',
-        },
-      ],
-      statusOptions: [
-        { id: 'no_status', label: 'Առանց կարգավիճակի', value: 'null' },
-        { id: 'confirmed', label: 'Հաստատել', value: 'Հաստատել' },
-        { id: 'rejected', label: 'Մերժել', value: 'Մերժել' },
-        {
-          id: 'changed',
-          label: 'Ժամկետի փոփոխություն',
-          value: 'Կատարման ժամկետի փոխարինում',
-        },
-        { id: 'finished', label: 'Ավարտել', value: 'Ավարտել' },
-      ],
+      selectedOption: null,
+      additionalOption: null,
+      changeDate: null,
     }
   },
   computed: {
@@ -394,11 +400,40 @@ export default {
     finishDate() {
       return this.$formatDate(new Date())
     },
+
+    todayFormatted() {
+      return this.$formatDate(new Date(), 'dd.MM.yyyy')
+    },
+    tomorrowDate() {
+      const d = new Date()
+      d.setDate(d.getDate() + 1)
+      return d.toISOString().split('T')[0]
+    },
   },
-  mounted() {
+  async mounted() {
+    try {
+      const [actionsRes, filtersRes] = await Promise.all([
+        this.$axios.get('/api/factories/factory-order-actions'),
+        this.$axios.get('/api/factories/factory-order-filters'),
+      ])
+
+      this.actionOptions = actionsRes.data
+
+      this.statusOptions = filtersRes.data
+    } catch (err) {
+      this.$notify({
+        text: 'Չհաջողվեց բեռնել գործողությունները',
+        type: 'error',
+      })
+    }
     const factoryId = this.$auth.user?.factory_id
     const userId = this.$auth.user?.id
-    this.currentFactoryId = factoryId
+    this.currentFactoryId = this.$auth.user?.factory_id
+    this.currentUserId = this.$auth.user?.id
+
+    if (this.currentFactoryId) {
+      await this.fetchOrdersByFactory(this.currentFactoryId)
+    }
     this.currentUserId = userId
 
     if (factoryId) {
@@ -503,55 +538,42 @@ export default {
           : { status: '', cancel_date: null, canceling: '', finish_date: null },
       }
     },
+    async doneOrder() {
+      if (!this.selectedOption) return
+
+      const payload = {
+        id: this.selectedOrder.id,
+        factory_id: this.currentFactoryId,
+        factory_order: {
+          status: this.selectedOption.value, // confirmed | canceled | date_changed | finished
+
+          // ԿԱՐԵՎՈՐ — միշտ ուղարկիր canceling, նույնիսկ դատարկ տեքստ
+          canceling: this.additionalOption?.value || '', // ← դատարկ string, ոչ null
+
+          cancel_date:
+            this.selectedOption.value === 'date_changed'
+              ? this.changeDate
+              : null,
+
+          operator_finish_date:
+            this.selectedOption.value === 'finished'
+              ? new Date().toISOString().slice(0, 19).replace('T', ' ')
+              : null,
+        },
+      }
+
+      const success = await this.doneFinishedOrder(payload)
+      if (success) {
+        this.$notify({ text: 'Հաջողությամբ թարմացվեց', type: 'success' })
+        this.closeModal()
+        await this.fetchOrdersByFactory(this.currentFactoryId)
+      }
+    },
     closeModal() {
       this.isModal = false
       this.selectedOption = null
       this.additionalOption = null
       this.changeDate = null
-    },
-    async doneOrder() {
-      if (!this.selectedOption?.name) {
-        this.$notify({
-          text: 'Խնդրում ենք ընտրել գործողություն։',
-          duration: 3000,
-          position: 'top',
-          type: 'warning',
-        })
-        return
-      }
-
-      const updatedOrder = {
-        id: this.selectedOrder.id,
-        factory_order: {
-          status: this.selectedOption?.name || null,
-          canceling: this.additionalOption?.name || null,
-          cancel_date: this.changeDate || null,
-          operator_finish_date:
-            this.selectedOption?.value === 'finishing'
-              ? new Date().toISOString().slice(0, 19).replace('T', ' ')
-              : null,
-        },
-        factory_id: this.currentFactoryId,
-      }
-
-      const res = await this.doneFinishedOrder(updatedOrder)
-      if (res) {
-        this.$notify({
-          text: 'Առաջադրանքը հաջողությամբ թարմացվել է։',
-          duration: 3000,
-          position: 'top',
-          type: 'success',
-        })
-        this.closeModal()
-        await this.fetchOrdersByFactory(this.currentFactoryId)
-      } else {
-        this.$notify({
-          text: 'Սխալ տեղի ունեցավ առաջադրանքը թարմացնելիս։',
-          duration: 3000,
-          position: 'top',
-          type: 'error',
-        })
-      }
     },
     toggleDetails(order) {
       this.isOpenDetails = !this.isOpenDetails

@@ -1,3 +1,4 @@
+// store/factory.js
 export const state = () => ({
   factory: null,
   orderByFactory: null,
@@ -26,6 +27,7 @@ export const actions = {
       return false
     }
   },
+
   async fetchOrdersByFactory({ commit }, factoryIds) {
     try {
       const res = await this.$axios.get(`/api/factories/factory/${factoryIds}`)
@@ -48,6 +50,7 @@ export const actions = {
       return false
     }
   },
+
   async adminConfirmFactoryStatus({ commit }, confirmData) {
     try {
       await this.$axios.put(
@@ -78,7 +81,9 @@ export const actions = {
       link.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(link)
-      file.status = 'downloaded'
+
+      // ⚠️ ՎԵՐԱՑՐԵՑԻՆՔ՝ file.status = 'downloaded'
+      // اگر պետք է status, լավ է անես local copy–ի վրա կամ Vuex mutation–ով
     } catch (error) {
       console.error('File download failed:', error)
     }

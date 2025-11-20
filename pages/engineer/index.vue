@@ -124,14 +124,12 @@ import OrdersToolbar from '~/components/engineer/OrdersToolbar.vue'
 import OrderCard from '~/components/engineer/OrderCard.vue'
 import Pagination from '~/components/ui/Pagination.vue'
 import OrderDetailsModal from '~/components/engineer/OrderDetailsModal.vue'
-import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
+// import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 import PermissionDenied from '@/components/modals/permission/PermissionDenied.vue'
 
 export default {
   components: {
     PermissionDenied,
-    // eslint-disable-next-line vue/no-unused-components
-    DxfViewerModal,
     OrdersToolbar,
     OrderCard,
     Pagination,

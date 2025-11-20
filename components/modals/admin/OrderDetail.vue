@@ -241,7 +241,6 @@
             :key="log.id"
             class="flex items-start gap-3"
           >
-            <!-- Timeline line + dot -->
             <div class="flex flex-col items-center">
               <span
                 class="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-sm animate-pulse-soft"
@@ -331,17 +330,6 @@ export default {
       storeLinkUrl: '',
     }
   },
-  created() {
-    this.resetLocal(this.order)
-  },
-  watch: {
-    order: {
-      deep: true,
-      handler(newVal) {
-        this.resetLocal(newVal)
-      },
-    },
-  },
   computed: {
     finishDate() {
       if (!this.localOrder?.dates?.finish_date) return null
@@ -366,11 +354,21 @@ export default {
       return ''
     },
   },
+  watch: {
+    order: {
+      deep: true,
+      handler(newVal) {
+        this.resetLocal(newVal)
+      },
+    },
+  },
+  created() {
+    this.resetLocal(this.order)
+  },
   methods: {
     resetLocal(order) {
       const cloned = JSON.parse(JSON.stringify(order || {}))
 
-      // ապահովենք, որ nested օբյեկտները լինեն
       cloned.dates = cloned.dates || { finish_date: null }
       cloned.factory_orders = cloned.factory_orders || []
       cloned.selected_files = cloned.selected_files || []
@@ -395,22 +393,16 @@ export default {
       return map[status] || 'bg-gray-100 text-gray-700'
     },
 
-    // ՈՒՇԱԴՐՈՒԹՅՈՒՆ — ԱՅՍՏԵՂ Է ՈՒՂՂՎԱԾ ՖՈՒՆԿՑԻԱՆ
     formatDate(date) {
       if (!date) return '—'
-
-      // Ճիշտ ֆորմատով + strict mode → warning-ը ընդմիշտ անհետանում է
       const m = this.$moment(date)
-
       if (!m.isValid()) {
         console.warn('Invalid date format:', date)
-        return date // կամ '—'
+        return date
       }
-
       return m.format('DD/MM/YYYY HH:mm')
     },
 
-    // ✅ Պատվերի տվյալների պահպանում
     async save() {
       if (!this.localOrder) return
       this.saving = true
@@ -452,7 +444,6 @@ export default {
       }
     },
 
-    // ✅ Ադմինն այստեղ հաստատում է կոնկրետ factory_order-ի ավարտը
     async confirmFactoryFinish(fo) {
       if (!fo || !fo.factory_id) return
       this.confirmingId = fo.id
@@ -462,7 +453,6 @@ export default {
           factory_id: fo.factory_id,
         })
 
-        // թարմացնում ենք localOrder-ում
         const target = this.localOrder.factory_orders.find(
           (x) => x.id === fo.id
         )
