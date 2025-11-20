@@ -289,6 +289,8 @@
               >
                 <DxfViewerModal
                   :dxf-url="dxfUrl"
+                  :file-meta="selectedFile"
+                  :show-laser-info="true"
                   class="w-full h-full rounded-lg border border-gray-200 dark:border-gray-700"
                   @close="dxfUrl = ''"
                 />
@@ -311,6 +313,7 @@
                 </a>
               </div>
 
+              <!-- Image -->
               <div
                 v-else-if="fileType === 'image'"
                 class="flex justify-center items-center flex-1"
@@ -324,6 +327,7 @@
                 </a>
               </div>
 
+              <!-- CAD file download -->
               <div v-else-if="fileType === 'cad'" class="text-center py-12">
                 <p class="text-gray-600 dark:text-gray-400 mb-4">
                   {{ selectedFile.original_name }} ({{
@@ -462,7 +466,6 @@ import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 
 export default {
   name: 'EngineerFilesView',
-  // eslint-disable-next-line vue/no-unused-components
   components: { InputWithLabelIcon, AddFileModal, PopupModal, DxfViewerModal },
   layout: 'engineer',
   middleware: ['role-guard'],
@@ -516,7 +519,6 @@ export default {
       this.loading = true
       Promise.all([this.fetchPmp(this.id), this.fetchFactory()])
         .catch((error) => this.$notify({ text: String(error), type: 'error' }))
-        // eslint-disable-next-line no-return-assign
         .finally(() => (this.loading = false))
     } else {
       this.$notify({ text: 'ID-ն բացակայում է', type: 'error' })
@@ -534,10 +536,8 @@ export default {
     openMaterials() {
       this.loading = true
       this.fetchMaterials()
-        // eslint-disable-next-line no-return-assign
         .then(() => (this.isSelectedMaterials = !this.isSelectedMaterials))
         .catch((error) => this.$notify({ text: String(error), type: 'error' }))
-        // eslint-disable-next-line no-return-assign
         .finally(() => (this.loading = false))
     },
 
@@ -761,7 +761,7 @@ export default {
           (n) => n.remote_number_name === this.breadcrumb[1]
         )
         if (rn) {
-          this.selectedRemoteNumberId = this.n(rn.id) // ← թիվ
+          this.selectedRemoteNumberId = this.n(rn.id)
           this.selectedFiles = (this.getPmp.files || []).filter(
             (f) => this.n(f.remote_number_id) === this.selectedRemoteNumberId
           )
@@ -771,7 +771,7 @@ export default {
           (f) => f.value === this.breadcrumb[2]
         )
         if (fac) {
-          this.selectedFactoryId = this.n(fac.id) // ← թիվ
+          this.selectedFactoryId = this.n(fac.id)
           this.isDxfFile = fac.value === 'DXF'
           this.selectedFiles = (this.getPmp.files || []).filter(
             (f) => this.n(f.factory_id) === this.selectedFactoryId
