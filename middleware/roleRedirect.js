@@ -2,10 +2,16 @@ export default async function ({ app, route, redirect, $auth }) {
   const localePath = app.localePath
 
   if (!$auth.loggedIn) {
-    if (route.path !== '/login') {
-      return redirect(localePath('/login'))
+    try {
+      await $auth.fetchUser()
+    } catch (e) {
+      try {
+        $auth.reset()
+      } catch (_) {}
     }
-    return
+    if (!$auth.loggedIn) {
+      return route.path === '/login' ? undefined : redirect(localePath('/login'))
+    }
   }
 
   if (!$auth.user) {
@@ -25,6 +31,7 @@ export default async function ({ app, route, redirect, $auth }) {
     engineer: '/engineer',
     laser: '/factory/laser',
     bend: '/factory/bend',
+    operator: '/factory/bend',
   }
 
   const allowedPrefix = localePath(allowedPrefixes[role] || '/')

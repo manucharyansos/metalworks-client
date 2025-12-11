@@ -34,7 +34,6 @@ export const actions = {
     try {
       const effectiveSearch = search !== null ? search : state.search
 
-      // պահում ենք search-ը state-ում
       commit('SET_SEARCH', effectiveSearch)
 
       const res = await this.$axios.$get('/api/permissions', {
@@ -64,18 +63,14 @@ export const actions = {
   },
 
   async createPermission({ dispatch }, payload) {
-    // payload = { name, slug, group? }
     await this.$axios.$post('/api/permissions', {
       name: payload.name,
       slug: payload.slug,
       group: payload.group || null,
     })
-
-    // սրա մեջ կարող ես չանել refresh, թող calling component-ը որոշի երբ fetch անի
   },
 
   async updatePermission({ dispatch }, payload) {
-    // payload = { id, name, slug, group? }
     await this.$axios.$put(`/api/permissions/${payload.id}`, {
       name: payload.name,
       slug: payload.slug,

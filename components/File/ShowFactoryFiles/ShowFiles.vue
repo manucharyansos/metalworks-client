@@ -8,7 +8,6 @@
         <h2 class="text-xl md:text-2xl font-bold text-gray-800">
           Ընտրեք արտադրամաս
         </h2>
-        <!-- Back to details is already above -->
 
         <button
           type="button"
@@ -66,7 +65,7 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  d="M4 21h16M5 21V9a1 1 0 011-1h3V5a1 1 0 011-1h4a1 1 0 011 1v3h3a1 1 0 011 1v12"
                 />
               </svg>
             </div>
@@ -90,13 +89,12 @@
 
     <!-- Files view -->
     <div v-else class="w-full">
-      <!-- Header with Back Button (top-right) -->
+      <!-- Header with Back Button -->
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-xl md:text-2xl font-bold text-gray-800 truncate">
           {{ selectedFactory.name }}
         </h2>
 
-        <!-- Back to Factory List -->
         <button
           type="button"
           class="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200 group"
@@ -138,8 +136,9 @@
               class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-medium flex items-center"
             >
               <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <!-- Պարզ, վավեր icon -->
                 <path
-                  d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"
+                  d="M10 2a6 6 0 016 6v1a2 2 0 01-.4 1.2l-3.6 4.8A2 2 0 0110.4 16H9.6a2 2 0 01-1.6-.8L4.4 10.2A2 2 0 014 9V8a6 6 0 016-6z"
                 />
               </svg>
               {{ selectedFactory.name }}
@@ -169,13 +168,13 @@
             stroke-linecap="round"
             stroke-linejoin="round"
             stroke-width="1.5"
-            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-4l-2 3h-4l-2-3H4"
           />
         </svg>
         Տվյալներ չեն գտնվել
       </div>
 
-      <!-- Remote Numbers & Files -->
+      <!-- Remote Numbers & Files (ONLY selected remote_number) -->
       <div
         v-if="pmps.exists && remoteNumbersWithFiles.length > 0"
         class="space-y-6"
@@ -228,11 +227,12 @@
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
+                        <!-- Փաստաթղթի icon -->
                         <path
                           stroke-linecap="round"
                           stroke-linejoin="round"
                           stroke-width="2"
-                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                          d="M9 12h6m-6 4h6M9 8h3m3-6H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9l-6-7z"
                         />
                       </svg>
                       {{ file.original_name }}
@@ -275,9 +275,9 @@
                           >
                             <del class="text-gray-400">{{ file.quantity }}</del>
                             <span class="mx-1">→</span>
-                            <strong class="text-indigo-600">{{
-                              fileQuantities[file.id] || 1
-                            }}</strong>
+                            <strong class="text-indigo-600">
+                              {{ fileQuantities[file.id] || 1 }}
+                            </strong>
                           </span>
                         </div>
                         <p
@@ -291,7 +291,7 @@
                   </div>
                 </label>
 
-                <!-- File Metadata (Right Side) -->
+                <!-- File Metadata -->
                 <div class="text-right space-y-1 text-xs md:text-sm">
                   <p v-if="file.quantity" class="text-emerald-700 font-medium">
                     Քանակ: {{ file.quantity }}
@@ -306,7 +306,7 @@
               </div>
             </article>
 
-            <!-- No files in remote number -->
+            <!-- No files -->
             <div
               v-if="getFactoryFiles(remote.id).length === 0"
               class="text-center py-6 text-gray-400 text-sm"
@@ -321,7 +321,7 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="1.5"
-                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  d="M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2h-5l-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                 />
               </svg>
               Ֆայլեր չեն գտնվել
@@ -339,11 +339,10 @@
           <div
             class="bg-white/95 backdrop-blur-lg p-4 rounded-2xl shadow-2xl border border-gray-200 flex flex-col sm:flex-row gap-3"
           >
-            <!-- Submit -->
             <button
-              @click="submitSelectedFiles"
               :disabled="!areQuantitiesValid"
               class="flex-1 py-3 px-6 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-md transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
+              @click="submitSelectedFiles"
             >
               <svg
                 class="w-5 h-5 mr-2"
@@ -361,10 +360,9 @@
               Հաստատել ({{ selectedFiles.length }})
             </button>
 
-            <!-- Change Factory -->
             <button
-              @click="selectedFactory = null"
               class="flex-1 py-3 px-6 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-md transition-all transform hover:scale-105 flex items-center justify-center"
+              @click="selectedFactory = null"
             >
               <svg
                 class="w-5 h-5 mr-2"
@@ -376,7 +374,7 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  d="M4 21h16M5 21V9a1 1 0 011-1h3V5a1 1 0 011-1h4a1 1 0 011 1v3h3a1 1 0 011 1v12"
                 />
               </svg>
               Ընտրել այլ գործարանից
@@ -398,25 +396,29 @@ export default {
     selectedFiles: { type: Array, default: () => [] },
     fileQuantities: { type: Object, default: () => ({}) },
     isEditingMode: { type: Boolean, default: false },
+    remoteNumberId: { type: [Number, String], default: null },
   },
   data() {
     return { selectedFactory: null }
   },
   computed: {
     remoteNumbersWithFiles() {
-      if (!this.pmps?.exists || !this.selectedFactory) return []
+      if (!this.pmps?.exists || !this.selectedFactory || !this.remoteNumberId)
+        return []
 
-      const factoryPath = `/${this.selectedFactory.value}/`
-      return this.pmps.pmp.remote_number
-        .map((remote) => {
-          const files = (this.pmps.pmp.files || []).filter(
-            (file) =>
-              file.remote_number_id === remote.id &&
-              file.path?.includes(factoryPath)
-          )
-          return { ...remote, files }
-        })
-        .filter((remote) => remote.files.length > 0)
+      const allRemotes = this.pmps.pmp.remote_number || []
+      const remote = allRemotes.find(
+        (r) => Number(r.id) === Number(this.remoteNumberId)
+      )
+      if (!remote) return []
+
+      const files = (this.pmps.pmp.files || []).filter(
+        (file) =>
+          Number(file.remote_number_id) === Number(remote.id) &&
+          Number(file.factory_id) === Number(this.selectedFactory.id)
+      )
+
+      return files.length ? [{ ...remote, files }] : []
     },
     factoriesWithCount() {
       if (
@@ -426,16 +428,19 @@ export default {
       )
         return []
       return this.factories.map((factory) => {
-        const fileCount = (this.pmps.pmp.files || []).filter((file) =>
-          file.path?.includes(`/${factory.value}/`)
+        const fileCount = (this.pmps.pmp.files || []).filter(
+          (file) =>
+            Number(file.factory_id) === Number(factory.id) &&
+            (!this.remoteNumberId ||
+              Number(file.remote_number_id) === Number(this.remoteNumberId))
         ).length
         return { ...factory, fileCount }
       })
     },
     allSelected() {
       if (!this.pmps?.exists || !this.selectedFactory) return false
-      const allFiles = this.pmps.pmp.remote_number.flatMap((remote) =>
-        this.getFactoryFiles(remote.id)
+      const allFiles = this.remoteNumbersWithFiles.flatMap(
+        (remote) => remote.files
       )
       return (
         allFiles.length > 0 && this.selectedFiles.length === allFiles.length
@@ -471,10 +476,11 @@ export default {
     },
     getFactoryFiles(remoteNumberId) {
       if (!this.pmps?.exists || !this.selectedFactory) return []
-      return (this.pmps.pmp.files || []).filter((file) => {
-        const pathMatch = file.path?.includes(`/${this.selectedFactory.value}/`)
-        return file.remote_number_id === remoteNumberId && pathMatch
-      })
+      return (this.pmps.pmp.files || []).filter(
+        (file) =>
+          Number(file.remote_number_id) === Number(remoteNumberId) &&
+          Number(file.factory_id) === Number(this.selectedFactory.id)
+      )
     },
     toggleFileSelection(fileId) {
       const updated = this.selectedFiles.includes(fileId)
@@ -495,8 +501,8 @@ export default {
       })
     },
     toggleSelectAll() {
-      const currentFiles = this.pmps.pmp.remote_number.flatMap((r) =>
-        this.getFactoryFiles(r.id).map((f) => f.id)
+      const currentFiles = this.remoteNumbersWithFiles.flatMap((r) =>
+        r.files.map((f) => f.id)
       )
       let updated = [...this.selectedFiles]
       const qty = { ...this.fileQuantities }
@@ -506,6 +512,7 @@ export default {
         currentFiles.forEach((id) => delete qty[id])
       } else {
         updated = [...new Set([...updated, ...currentFiles])]
+
         currentFiles.forEach((id) => {
           if (!qty[id]) qty[id] = 1
         })

@@ -4,12 +4,13 @@
     class="fixed inset-0 bg-black/40 flex items-center justify-center z-[1000]"
     @click.self="$emit('close')"
   >
-    <div class="bg-white p-6 rounded-lg w-full max-w-2xl">
+    <div
+      class="bg-white p-6 rounded-lg w-full max-w-4xl max-h-screen overflow-y-auto"
+    >
       <h2 class="text-lg font-semibold mb-4">
         {{ isEdit ? 'Խմբագրել հաճախորդին' : 'Նոր հաճախորդ' }}
       </h2>
 
-      <!-- գլոբալ սխալի բլոկ -->
       <div
         v-if="globalError"
         class="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700"
@@ -18,26 +19,32 @@
       </div>
 
       <div class="grid grid-cols-2 gap-4">
+        <!-- Հիմնական դաշտեր -->
         <div>
-          <label class="block mb-1">Անուն</label>
+          <label class="block mb-1"
+            >Անուն / Առաջնային անվանում
+            <span class="text-red-600">*</span></label
+          >
           <input
             v-model="form.name"
             type="text"
             class="border rounded w-full p-2"
           />
-          <p v-if="errors && errors.name" class="mt-1 text-xs text-red-600">
+          <p v-if="errors.name" class="mt-1 text-xs text-red-600">
             {{ errors.name[0] }}
           </p>
         </div>
 
         <div>
-          <label class="block mb-1">Հեռախոս</label>
+          <label class="block mb-1"
+            >Հեռախոս <span class="text-red-600">*</span></label
+          >
           <input
             v-model="form.phone"
             type="text"
             class="border rounded w-full p-2"
           />
-          <p v-if="errors && errors.phone" class="mt-1 text-xs text-red-600">
+          <p v-if="errors.phone" class="mt-1 text-xs text-red-600">
             {{ errors.phone[0] }}
           </p>
         </div>
@@ -49,61 +56,123 @@
             type="text"
             class="border rounded w-full p-2"
           />
-          <p v-if="errors && errors.address" class="mt-1 text-xs text-red-600">
+          <p v-if="errors.address" class="mt-1 text-xs text-red-600">
             {{ errors.address[0] }}
           </p>
         </div>
 
         <div>
-          <label class="block mb-1">Կարգավիճակ</label>
+          <label class="block mb-1"
+            >Կարգավիճակ <span class="text-red-600">*</span></label
+          >
           <select v-model="form.type" class="border rounded w-full p-2">
             <option disabled value="">Ընտրել...</option>
             <option value="physPerson">Ֆիզիկական անձ</option>
             <option value="legalEntity">Իրավաբանական անձ</option>
           </select>
-          <p v-if="errors && errors.type" class="mt-1 text-xs text-red-600">
+          <p v-if="errors.type" class="mt-1 text-xs text-red-600">
             {{ errors.type[0] }}
           </p>
         </div>
 
-        <!-- միայն create ժամանակ email/password դաշտերը -->
-        <template v-if="!isEdit">
+        <!-- Իրավաբանական անձի դաշտեր -->
+        <template v-if="form.type === 'legalEntity'">
+          <div class="col-span-2 border-t pt-4 mt-4">
+            <h3 class="text-md font-medium mb-3 text-gray-700">
+              Իրավաբանական անձի տվյալներ
+            </h3>
+          </div>
+
           <div>
-            <label class="block mb-1">Էլ․ փոստ</label>
+            <label class="block mb-1"
+              >Ընկերության անվանումը <span class="text-red-600">*</span></label
+            >
+            <input
+              v-model="form.company_name"
+              type="text"
+              class="border rounded w-full p-2"
+            />
+            <p v-if="errors.company_name" class="mt-1 text-xs text-red-600">
+              {{ errors.company_name[0] }}
+            </p>
+          </div>
+
+          <div>
+            <label class="block mb-1"
+              >ՀՎՀՀ (ԱՎՃ) <span class="text-red-600">*</span></label
+            >
+            <input
+              v-model="form.AVC"
+              type="text"
+              class="border rounded w-full p-2"
+            />
+            <p v-if="errors.AVC" class="mt-1 text-xs text-red-600">
+              {{ errors.AVC[0] }}
+            </p>
+          </div>
+
+          <div class="col-span-2">
+            <label class="block mb-1"
+              >Հաշվապահի անունը <span class="text-red-600">*</span></label
+            >
+            <input
+              v-model="form.accountant"
+              type="text"
+              class="border rounded w-full p-2"
+            />
+            <p v-if="errors.accountant" class="mt-1 text-xs text-red-600">
+              {{ errors.accountant[0] }}
+            </p>
+          </div>
+        </template>
+
+        <!-- Միայն ստեղծման ժամանակ -->
+        <template v-if="!isEdit">
+          <div class="col-span-2 border-t pt-4 mt-6">
+            <h3 class="text-md font-medium mb-3 text-gray-700">
+              Մուտքի տվյալներ
+            </h3>
+          </div>
+
+          <div>
+            <label class="block mb-1"
+              >Էլ․ փոստ <span class="text-red-600">*</span></label
+            >
             <input
               v-model="form.email"
               type="email"
               class="border rounded w-full p-2"
             />
-            <p v-if="errors && errors.email" class="mt-1 text-xs text-red-600">
+            <p v-if="errors.email" class="mt-1 text-xs text-red-600">
               {{ errors.email[0] }}
             </p>
           </div>
 
           <div>
-            <label class="block mb-1">Գախտնաբառ</label>
+            <label class="block mb-1"
+              >Գաղտնաբառ <span class="text-red-600">*</span></label
+            >
             <input
               v-model="form.password"
               type="password"
               class="border rounded w-full p-2"
             />
-            <p
-              v-if="errors && errors.password"
-              class="mt-1 text-xs text-red-600"
-            >
+            <p v-if="errors.password" class="mt-1 text-xs text-red-600">
               {{ errors.password[0] }}
             </p>
           </div>
 
           <div>
-            <label class="block mb-1">Գախտնաբառի կրկնություն</label>
+            <label class="block mb-1"
+              >Գաղտնաբառի կրկնություն <span class="text-red-600">*</span></label
+            >
             <input
               v-model="form.password_confirmation"
               type="password"
               class="border rounded w-full p-2"
             />
             <p
-              v-if="errors && errors.password_confirmation"
+              v-if="errors.password_confirmation"
               class="mt-1 text-xs text-red-600"
             >
               {{ errors.password_confirmation[0] }}
@@ -136,20 +205,13 @@ export default {
     visible: Boolean,
     client: Object,
     submitting: Boolean,
-    // ⬇ errors / globalError նոր props
-    errors: {
-      type: Object,
-      default: () => ({}),
-    },
-    globalError: {
-      type: String,
-      default: '',
-    },
+    errors: { type: Object, default: () => ({}) },
+    globalError: { type: String, default: '' },
   },
+
   data() {
     return {
       form: {
-        id: null,
         name: '',
         phone: '',
         address: '',
@@ -157,25 +219,32 @@ export default {
         email: '',
         password: '',
         password_confirmation: '',
+        company_name: '',
+        AVC: '',
+        accountant: '',
       },
     }
   },
+
   computed: {
     isEdit() {
       return !!this.client
     },
   },
+
   watch: {
     client: {
-      handler(val) {
-        if (val) {
+      handler(newVal) {
+        if (newVal) {
           this.form = {
-            id: val.user_id ?? val.id ?? null,
-            name: val.name || '',
-            phone: val.phone || '',
-            address: val.address || '',
-            type: val.type || '',
-            email: val.user?.email || '',
+            name: newVal.name || '',
+            phone: newVal.phone || '',
+            address: newVal.address || '',
+            type: newVal.type || '',
+            company_name: newVal.company_name || '',
+            AVC: newVal.AVC || '',
+            accountant: newVal.accountant || '',
+            email: newVal.user?.email || '',
             password: '',
             password_confirmation: '',
           }
@@ -184,15 +253,13 @@ export default {
         }
       },
       immediate: true,
-    },
-    visible(v) {
-      if (!v) this.resetForm()
+      deep: true,
     },
   },
+
   methods: {
     resetForm() {
-      this.form = {
-        id: null,
+      Object.assign(this.$data.form, {
         name: '',
         phone: '',
         address: '',
@@ -200,13 +267,22 @@ export default {
         email: '',
         password: '',
         password_confirmation: '',
-      }
+        company_name: '',
+        AVC: '',
+        accountant: '',
+      })
     },
+
     submit() {
+      const data = {
+        ...this.form,
+        type: this.form.type || 'physPerson',
+      }
+
       this.$emit('submit', {
         isEdit: this.isEdit,
-        id: this.form.id,
-        data: this.form,
+        id: this.client?.user_id || this.client?.user?.id,
+        data,
       })
     },
   },

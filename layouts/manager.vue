@@ -134,7 +134,6 @@ export default {
     }
   },
   computed: {
-    // i18n.safe locales
     locales() {
       const base =
         this.$i18n && this.$i18n.locales && this.$i18n.locales.length
@@ -217,12 +216,39 @@ export default {
     unlockScroll() {
       document.documentElement.classList.remove('overflow-hidden')
     },
-    logout() {
-      this.$auth.logout()
+    async logout() {
+      const target = this.localePath('/login')
+      try {
+        await this.$auth.logout()
+      } catch (e) {
+        // ignore
+      }
+      try {
+        this.$auth.reset()
+      } catch (e) {}
+      this.$auth.setUser(null)
+      const s = this.$auth.$storage
+      ;[
+        'loggedIn',
+        'user',
+        'strategy',
+        'auth._token.local',
+        'auth._refresh_token.local',
+        'auth._tokenExpiration.local',
+        'auth._refresh_tokenExpiration.local',
+      ].forEach((k) => s.removeUniversal(k))
+
       this.onNavClick()
+      try {
+        await this.$router.replace(target)
+      } catch (e) {}
+      setTimeout(() => {
+        if (this.$route.path !== target) {
+          window.location.replace(target)
+        }
+      }, 150)
     },
     onDocumentClick(e) {
-      // dropdown–ից դուրս սեղմելու դեպքում փակենք
       const asideEl = this.$el.querySelector('aside')
       if (!asideEl) return
       const clickInside = asideEl.contains(e.target)

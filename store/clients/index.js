@@ -1,4 +1,3 @@
-// store/clients.js
 export const namespaced = true
 
 export const state = () => ({
@@ -22,7 +21,6 @@ export const mutations = {
 export const actions = {
   async fetchClients({ commit }) {
     const res = await this.$axios.$get('/api/clients/client')
-    // ClientController@index վերադարձնում ա Resource collection => { data: [...] }
     const list = Array.isArray(res?.data) ? res.data : res
     commit('SET_CLIENTS', list)
   },

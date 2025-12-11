@@ -51,10 +51,10 @@
                 <div>
                   <h3 class="text-xl font-bold text-gray-800">
                     {{ selectedClient?.name }}
-                    {{ selectedClient?.client?.last_name || '' }}
+                    {{ selectedClient?.last_name || '' }}
                   </h3>
                   <p class="text-sm text-blue-600 font-medium">
-                    {{ selectedClient?.client?.company_name || 'Անհատ' }}
+                    {{ selectedClient?.company_name || 'Անհատ' }}
                   </p>
                 </div>
               </div>
@@ -82,13 +82,13 @@
                   <div>
                     <p class="text-xs text-gray-500">Հեռախոս</p>
                     <p class="font-medium">
-                      {{ selectedClient?.client?.phone || '—' }}
+                      {{ selectedClient?.phone || '—' }}
                     </p>
                     <p
-                      v-if="selectedClient?.client?.second_phone"
+                      v-if="selectedClient?.second_phone"
                       class="text-xs text-gray-500"
                     >
-                      {{ selectedClient?.client?.second_phone }}
+                      {{ selectedClient?.second_phone }}
                     </p>
                   </div>
                 </div>
@@ -115,7 +115,7 @@
                   <div>
                     <p class="text-xs text-gray-500">Էլ․ փոստ</p>
                     <p class="font-medium">
-                      {{ selectedClient?.client?.email || '—' }}
+                      {{ selectedClient?.user.email || '—' }}
                     </p>
                   </div>
                 </div>
@@ -148,7 +148,7 @@
                   <div class="flex-1">
                     <p class="text-xs text-gray-500">Հասցե</p>
                     <p class="font-medium">
-                      {{ selectedClient?.client?.address || '—' }}
+                      {{ selectedClient?.address || '—' }}
                     </p>
                   </div>
                 </div>
@@ -432,6 +432,7 @@
           :auto-open-factory-id="autoOpenFactoryId"
           :selected-files.sync="selectedFiles"
           :file-quantities.sync="fileQuantities"
+          :remote-number-id="remote_number_id"
           @files-selected="handleFilesSelected"
           @back="isFiles = false"
         />
@@ -559,7 +560,6 @@ export default {
 
     pmpsData() {
       const p = this.getPmp || {}
-      // Adapt store pmp to component's expected shape { exists, pmp }
       const exists =
         !!p?.id ||
         (!!p?.group && Array.isArray(p?.remote_number)) ||
@@ -576,15 +576,15 @@ export default {
       const factoryIds = new Set()
 
       this.selectedFiles.forEach((fileId) => {
-        const file = files.find((f) => f.id === fileId)
-        if (file?.factory_id) {
-          factoryIds.add(file.factory_id)
+        const file = files.find((f) => Number(f.id) === Number(fileId))
+        if (file && file.factory_id != null) {
+          factoryIds.add(Number(file.factory_id))
         }
       })
 
       const stores = Array.isArray(this.getFactory) ? this.getFactory : []
       return stores
-        .filter((f) => factoryIds.has(f.id))
+        .filter((f) => factoryIds.has(Number(f.id)))
         .map((f) => ({ ...f, operators: f.operators || [] }))
     },
 
@@ -761,7 +761,7 @@ export default {
         }))
 
       const data = {
-        user_id: this.selectedClient.client.id,
+        user_id: this.selectedClient.user.id,
         creator_id: this.$auth.user.id,
         name: `${this.selectedPmp.group}.${this.selectedPmpRemoteNumber}`,
         description: this.description,

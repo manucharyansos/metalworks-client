@@ -32,6 +32,7 @@
     >
 
     <ClientFormModal
+      :key="modalKey"
       :visible="isFormOpen"
       :client="selectedClient"
       :submitting="submitting"
@@ -71,9 +72,9 @@ export default {
       selectedClient: null,
       deleteTarget: null,
       searchQuery: '',
-      // ⬇ errors-ի state
       formErrors: {},
       formGlobalError: '',
+      modalKey: 0,
     }
   },
   computed: {
@@ -108,6 +109,7 @@ export default {
         this.selectedClient = null
         this.formErrors = {}
         this.formGlobalError = ''
+        this.modalKey = Date.now()
         this.isFormOpen = true
       }
     },
@@ -116,6 +118,7 @@ export default {
         this.selectedClient = row
         this.formErrors = {}
         this.formGlobalError = ''
+        this.modalKey = Date.now()
         this.isFormOpen = true
       }
     },

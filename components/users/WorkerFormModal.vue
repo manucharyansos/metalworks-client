@@ -71,11 +71,7 @@
                 class="w-full rounded-lg border px-3 py-2"
               >
                 <option :value="null">— Չկցել —</option>
-                <option
-                  v-for="f in factories"
-                  :key="f.id"
-                  :value="f.id"
-                >
+                <option v-for="f in factories" :key="f.id" :value="f.id">
                   {{ f.name }}
                 </option>
               </select>
@@ -169,7 +165,6 @@ export default {
         phone: '',
         second_phone: '',
         address: '',
-        // create-only:
         password: '',
         password_confirmation: '',
       },
@@ -191,13 +186,13 @@ export default {
         const u = this.worker
         this.form = {
           name: u?.name || '',
-          last_name: u?.client?.last_name || '',
+          last_name: u?.worker?.last_name || '',
           email: u?.email || '',
           role_id: u?.role_id || '',
           factory_id: u?.factory_id ?? null,
-          phone: u?.client?.phone || '',
-          second_phone: u?.client?.second_phone || '',
-          address: u?.client?.address || '',
+          phone: u?.worker?.phone || '',
+          second_phone: u?.worker?.second_phone || '',
+          address: u?.worker?.address || '',
           password: '',
           password_confirmation: '',
         }
@@ -223,7 +218,6 @@ export default {
       if (!this.form.name.trim()) return 'Անունը պարտադիր է'
       if (!this.form.email.trim()) return 'Էլ․ փոստը պարտադիր է'
       if (!this.form.role_id) return 'Ընտրեք դեր'
-      // factory_id ոչ պարտադիր, բայց կարող է ընտրվել
       if (!this.form.phone.trim()) return 'Հեռախոսը պարտադիր է'
       if (!this.isEdit) {
         if (!this.form.password) return 'Գաղտնաբառը պարտադիր է'
@@ -238,14 +232,12 @@ export default {
       const err = this.validate()
       if (err) return alert(err)
 
-      // payload server-ի պահանջով
       const payload = {
         name: this.form.name,
         last_name: this.form.last_name || null,
         email: this.form.email,
         role_id: this.form.role_id,
         factory_id: this.form.factory_id || null,
-        // client fields
         type: 'worker',
         phone: this.form.phone,
         second_phone: this.form.second_phone || null,

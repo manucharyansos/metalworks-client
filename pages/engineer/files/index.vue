@@ -305,7 +305,6 @@ export default {
   meta: { role: 'engineer' },
   data() {
     return {
-      // form
       pmpGroup: '',
       pmpGroupName: '',
       pmpRemoteNumber: '',

@@ -1,4 +1,3 @@
-// store/factory.js
 export const state = () => ({
   factory: null,
   orderByFactory: null,
@@ -81,9 +80,6 @@ export const actions = {
       link.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(link)
-
-      // ⚠️ ՎԵՐԱՑՐԵՑԻՆՔ՝ file.status = 'downloaded'
-      // اگر պետք է status, լավ է անես local copy–ի վրա կամ Vuex mutation–ով
     } catch (error) {
       console.error('File download failed:', error)
     }

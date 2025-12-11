@@ -165,6 +165,7 @@
         </div>
       </div>
     </div>
+    <notifications />
   </transition>
 </template>
 
@@ -283,7 +284,13 @@ export default {
           original_name: file?.original_name || 'file',
         })
       } catch (e) {
-        console.error('downloadFile:', e)
+        this.$notify({
+          text: e,
+          duration: 3000,
+          speed: 1000,
+          position: 'top',
+          type: 'error',
+        })
       }
     },
   },

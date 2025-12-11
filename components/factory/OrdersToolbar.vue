@@ -41,8 +41,8 @@
       </span>
 
       <button
-        v-for="opt in statusOptions"
-        :key="opt.id"
+        v-for="(opt, index) in statusOptions"
+        :key="index"
         type="button"
         class="rounded-full px-3 py-1 text-xs font-medium transition-all"
         :class="

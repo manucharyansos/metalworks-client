@@ -50,8 +50,8 @@
             >
               <td class="px-6 py-3">{{ u.name }}</td>
               <td class="px-6 py-3">{{ u.email || '—' }}</td>
-              <td class="px-6 py-3">{{ u?.client?.phone || '—' }}</td>
-              <td class="px-6 py-3">{{ u?.client?.address || '—' }}</td>
+              <td class="px-6 py-3">{{ u?.worker?.phone || '—' }}</td>
+              <td class="px-6 py-3">{{ u?.worker?.address || '—' }}</td>
               <td class="px-6 py-3">
                 <div class="flex justify-end gap-2">
                   <button
@@ -159,11 +159,10 @@ export default {
         (u) =>
           (u.name || '').toLowerCase().includes(q) ||
           (u.email || '').toLowerCase().includes(q) ||
-          (u?.client?.phone || '').toLowerCase().includes(q)
+          (u?.worker?.phone || '').toLowerCase().includes(q)
       )
     },
     canDelete() {
-      // enable when backend has destroy
       return false
     },
   },
@@ -179,7 +178,6 @@ export default {
       this.loading = true
       try {
         const { data } = await this.$axios.get('/api/workers')
-        // controller հիմա վերադարձնում է array; եթե փոխես՝ հարմարեցնիր այստեղ
         this.workers = Array.isArray(data?.data)
           ? data.data
           : Array.isArray(data)
@@ -210,7 +208,6 @@ export default {
       this.submitting = true
       try {
         if (isEdit) {
-          // PUT /api/workers/{id}
           const { data: res } = await this.$axios.put(
             `/api/workers/${id}`,
             payload
@@ -218,7 +215,6 @@ export default {
           if (!res || res.status === false)
             throw new Error(res?.message || 'Update failed')
         } else {
-          // POST /api/workers
           const { data: res } = await this.$axios.post('/api/workers', payload)
           if (!res || res.status === false)
             throw new Error(res?.message || 'Create failed')

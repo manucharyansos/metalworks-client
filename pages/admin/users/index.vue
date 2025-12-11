@@ -335,9 +335,8 @@ export default {
     ...mapActions('roles', ['fetchRoles']),
 
     applyFilters() {
-      // client-side filter already works
+      this.fetchUsers()
     },
-
     resetFilters() {
       this.search = ''
       this.typeFilter = ''

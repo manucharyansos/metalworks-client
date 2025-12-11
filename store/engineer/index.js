@@ -113,8 +113,7 @@ export const actions = {
       commit('ADD_ORDER', data.order)
       return true
     } catch (e) {
-      console.error(e)
-      throw e // ← важно
+      throw e
     }
   },
 }

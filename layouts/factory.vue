@@ -153,8 +153,36 @@ export default {
     closeSidebar() {
       this.isSidebarOpen = false
     },
-    logout() {
-      this.$auth.logout()
+    async logout() {
+      const target = this.localePath('/login')
+      try {
+        await this.$auth.logout()
+      } catch (e) {
+        // ignore
+      }
+      try {
+        this.$auth.reset()
+      } catch (e) {}
+      this.$auth.setUser(null)
+      const s = this.$auth.$storage
+      ;[
+        'loggedIn',
+        'user',
+        'strategy',
+        'auth._token.local',
+        'auth._refresh_token.local',
+        'auth._tokenExpiration.local',
+        'auth._refresh_tokenExpiration.local',
+      ].forEach((k) => s.removeUniversal(k))
+
+      try {
+        await this.$router.replace(target)
+      } catch (e) {}
+      setTimeout(() => {
+        if (this.$route.path !== target) {
+          window.location.replace(target)
+        }
+      }, 150)
     },
   },
 }

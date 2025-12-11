@@ -1,4 +1,3 @@
-// store/modules/engineer.js
 export const state = () => ({
   factoryFiles: [],
 })

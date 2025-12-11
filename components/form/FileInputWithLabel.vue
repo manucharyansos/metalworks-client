@@ -36,9 +36,9 @@ export default {
     handleFileChange(event) {
       const file = event.target.files[0]
       if (file) {
-        this.$emit('file-uploaded', file) // Emit the file to parent component
+        this.$emit('file-uploaded', file)
       } else {
-        this.$emit('file-uploaded', null) // Emit null if no file
+        this.$emit('file-uploaded', null)
       }
     },
   },

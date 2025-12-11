@@ -102,7 +102,7 @@ export default {
     isFormOpen: false,
     editingItem: null,
     submitting: false,
-    pendingDelete: null, // <-- ԱՅՍ էր բացակայում
+    pendingDelete: null,
   }),
   computed: {
     ...mapGetters('materials', ['getMaterials', 'getPagination', 'isLoading']),
@@ -127,7 +127,7 @@ export default {
     this.load()
   },
   methods: {
-    ...mapActions('materials', ['fetchMaterials', 'deleteMaterial']), // <-- deleteMaterial mapActions-ում
+    ...mapActions('materials', ['fetchMaterials', 'deleteMaterial']),
     ...mapActions('categories', ['fetchCategories']),
 
     async load(page = 1) {

@@ -155,7 +155,7 @@ export default {
       password: '',
       password_confirmation: '',
       loading: false,
-      fieldErrors: {}, // Store individual field errors here
+      fieldErrors: {},
       label: {
         name: 'Անուն',
         email: 'Էլ․ փոստ',
@@ -244,7 +244,7 @@ export default {
 }
 .side_banner {
   background-color: #f5f5f5;
-  background-image: url('@/static/metalworks-logo.jpg');
+  background-image: url('static/metalworks-logo.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;

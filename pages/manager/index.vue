@@ -173,7 +173,6 @@ export default {
       })
     },
     tableRows() {
-      // normalize to avoid ?. in templates
       return this.searchFilter.map((o) => ({
         _raw: o,
         id: o && o.id ? o.id : '—',
@@ -244,7 +243,6 @@ export default {
       }
     },
     openFile() {
-      // demo
       const fileUrl = '/uploads/example1.step'
       fetch(fileUrl)
         .then((r) => r.blob())

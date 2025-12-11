@@ -1,4 +1,3 @@
-// store/users.js
 export const namespaced = true
 
 export const state = () => ({
@@ -25,7 +24,7 @@ export const actions = {
     try {
       const { data } = await this.$axios.get('/api/users')
       const list = Array.isArray(data?.data)
-        ? data.data // մենք հիմա index()-ում վերադարձրեցինք ['data' => $users]
+        ? data.data
         : Array.isArray(data)
         ? data
         : []

@@ -55,7 +55,10 @@
                     {{ order.factory?.name || 'Արտադրամաս' }}
                   </div>
                   <div class="text-xs text-gray-500">
-                    Կատարող՝ <span class="font-medium">{{ order.operator?.name || '—' }}</span>
+                    Կատարող՝
+                    <span class="font-medium">{{
+                      order.operator?.name || '—'
+                    }}</span>
                   </div>
                 </div>
                 <div

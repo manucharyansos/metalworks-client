@@ -66,13 +66,11 @@ export default {
   props: {
     dxfUrl: { type: String, required: true },
 
-    // Ֆայլի օբյեկտը՝ նյութի, հաստության և այլ դաշտերով
     fileMeta: {
       type: Object,
       default: null,
     },
 
-    // Կարել է անջատել, եթե չեք ուզում գծամետրի ինֆո ցույց տալ
     showLaserInfo: {
       type: Boolean,
       default: true,
@@ -88,17 +86,14 @@ export default {
       error: null,
       raf: null,
 
-      // Լազերային կտրման ընդհանուր երկարությունը մմ-ով
       laserLengthMm: 0,
     }
   },
   computed: {
-    // Կլորացրած գծամետրը մմ-ով (1 տասնորդական)
     laserLengthMmRounded() {
       if (!this.laserLengthMm) return 0
       return Number(this.laserLengthMm.toFixed(1))
     },
-    // Նյութի ինֆո ֆայլից
     materialInfo() {
       if (!this.fileMeta) return ''
       const mat =
@@ -204,9 +199,7 @@ export default {
         try {
           const parsed = JSON.parse(dxfText)
           dxfText = parsed?.content ? atob(parsed.content) : dxfText
-        } catch {
-          // ուղիղ base64
-        }
+        } catch {}
 
         this.parseDxf(dxfText)
       } catch (e) {
@@ -229,14 +222,12 @@ export default {
         const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 })
         const blueMaterial = new THREE.LineBasicMaterial({ color: 0x1e40af })
 
-        // Ֆունկցիա՝ entity-ներ ավելացնելու և միաժամանակ գծամետրը հաշվելու համար
         const addEntity = (
           ent,
           targetGroup = this.dxfGroup,
           scaleFactor = 1
         ) => {
           try {
-            // LINE
             if (ent.type === 'LINE') {
               const v1 = ent.vertices?.[0] || ent.start
               const v2 = ent.vertices?.[1] || ent.end
@@ -249,8 +240,6 @@ export default {
               targetGroup.add(new THREE.Line(geom, lineMaterial))
 
               this.laserLengthMm += p1.distanceTo(p2) * scaleFactor
-
-              // LWPOLYLINE & POLYLINE
             } else if (ent.type === 'LWPOLYLINE' || ent.type === 'POLYLINE') {
               if (!ent.vertices || ent.vertices.length < 2) return
               const pts = ent.vertices.map(
@@ -264,18 +253,13 @@ export default {
                 this.laserLengthMm +=
                   pts[i].distanceTo(pts[i - 1]) * scaleFactor
               }
-
-              // CIRCLE
             } else if (ent.type === 'CIRCLE') {
               const geom = new THREE.CircleGeometry(ent.radius, 64)
               geom.translate(ent.center.x, ent.center.y, 0)
               const edges = new THREE.EdgesGeometry(geom)
               targetGroup.add(new THREE.LineSegments(edges, lineMaterial))
 
-              // Շրջագիծ՝ 2πR
               this.laserLengthMm += 2 * Math.PI * ent.radius * scaleFactor
-
-              // ARC
             } else if (ent.type === 'ARC') {
               const start = THREE.MathUtils.degToRad(ent.startAngle)
               const end = THREE.MathUtils.degToRad(ent.endAngle)
@@ -297,8 +281,6 @@ export default {
                 this.laserLengthMm +=
                   pts[i].distanceTo(pts[i - 1]) * scaleFactor
               }
-
-              // SPLINE
             } else if (
               ent.type === 'SPLINE' &&
               ent.controlPoints?.length >= 2
@@ -316,8 +298,6 @@ export default {
                 this.laserLengthMm +=
                   splinePts[i].distanceTo(splinePts[i - 1]) * scaleFactor
               }
-
-              // ELLIPSE
             } else if (ent.type === 'ELLIPSE') {
               const curve = new THREE.EllipseCurve(
                 ent.center.x,
@@ -339,8 +319,6 @@ export default {
                 this.laserLengthMm +=
                   pts[i].distanceTo(pts[i - 1]) * scaleFactor
               }
-
-              // INSERT — block
             } else if (ent.type === 'INSERT' && dxf.blocks?.[ent.name]) {
               const block = dxf.blocks[ent.name]
               const blockGroup = new THREE.Group()
@@ -366,10 +344,8 @@ export default {
           }
         }
 
-        // 1. Model space entities
         dxf.entities?.forEach((ent) => addEntity(ent))
 
-        // 2. Եթե model space-ում ոչինչ չկա → *Model_Space կամ *Paper_Space
         if (this.dxfGroup.children.length === 0) {
           const modelBlock =
             dxf.blocks?.['*Model_Space'] || dxf.blocks?.['*Paper_Space']
@@ -378,7 +354,6 @@ export default {
 
         this.scene.add(this.dxfGroup)
 
-        // Auto zoom
         if (this.dxfGroup.children.length > 0) {
           const box = new THREE.Box3().setFromObject(this.dxfGroup)
           const center = box.getCenter(new THREE.Vector3())

@@ -192,10 +192,6 @@ export default {
   data() {
     return {
       workerStatus: null,
-      // workerStatusOptions: [
-      //   { id: 1, value: 'laser', label: 'Լազերային օպերատոր' }, // Changed to 'laser'
-      //   { id: 2, value: 'bend', label: 'Կռման օպերատոր' }, // Changed to 'bend'
-      // ],
       openPersonsType: false,
       openUsers: false,
       isAccordionType: false,

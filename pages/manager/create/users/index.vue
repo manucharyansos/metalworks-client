@@ -92,24 +92,6 @@
             </li>
           </ul>
         </div>
-        <!--          <div id="accordion-collapse-heading-2">-->
-        <!--            <button type="button" class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border border-b-0 border-gray-200 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-800 dark:border-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 gap-3" data-accordion-target="#accordion-collapse-body-2" aria-expanded="false" aria-controls="accordion-collapse-body-2">-->
-        <!--              <span>Օգտատեր</span>-->
-        <!--              <svg data-accordion-icon class="w-3 h-3 rotate-180 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">-->
-        <!--                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5 5 1 1 5"/>-->
-        <!--              </svg>-->
-        <!--            </button>-->
-        <!--          </div>-->
-        <!--          <div v-if="getUsers" id="accordion-collapse-body-2" class="hidden" aria-labelledby="accordion-collapse-heading-2">-->
-        <!--            <div-->
-        <!--              v-for="(user, index) in users"-->
-        <!--              :key="index"-->
-        <!--              class="p-3 border border-b-0 border-gray-200 dark:border-gray-700 hover:bg-neutral-300 cursor-pointer"-->
-        <!--              @click="selectUser(user)">-->
-        <!--              <p class="text-base italic font-sans leading-3 my-2"><span class="font-bold">Անուն։</span> {{ user.name }},</p>-->
-        <!--              <p class="text-base italic font-sans leading-3 my-2"><span class="font-bold">էլ․ փոստ։ </span> {{ user.email }}</p>-->
-        <!--            </div>-->
-        <!--          </div>-->
       </div>
 
       <div

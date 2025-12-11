@@ -42,7 +42,6 @@ export const actions = {
           category_id: categoryId || undefined,
         },
       })
-      // backend-ը պետք է վերադարձնի { data: [...], pagination: {...} }
       commit('SET_ITEMS', data.data)
       commit('SET_PAGINATION', data.pagination)
       return true

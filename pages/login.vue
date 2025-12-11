@@ -181,10 +181,12 @@ export default {
               engineer: '/engineer',
               laser: '/factory/laser',
               bend: '/factory/bend',
+              operator: '/factory/bend',
             }
             const target = this.localePath(map[role] || '/')
 
-            this.$router.push(target)
+            // Force full navigation so the correct layout loads immediately after role change
+            window.location.assign(target)
           } else if (typeof this.getErrorMessage === 'string') {
             this.errorMessage.general = this.getErrorMessage
           } else {
@@ -211,7 +213,7 @@ export default {
 }
 .introduction_section {
   background-color: #f5f5f5;
-  background-image: url('@/static/metalworks-logo.jpg');
+  background-image: url('static/metalworks-logo.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;

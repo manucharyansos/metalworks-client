@@ -47,9 +47,7 @@ export const actions = {
 
   async loginUser({ commit }, userData) {
     try {
-      // await this.$axios.get('/sanctum/csrf-cookie')zz
       await this.$auth.loginWith('laravelSanctum', userData)
-      // await this.dispatch('auth/fetchUser') // թարմացնենք user-ը
       return true
     } catch (err) {
       commit('setErrorMessage', err?.response?.data?.error || 'Login failed')

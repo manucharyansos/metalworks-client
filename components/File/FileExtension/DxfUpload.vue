@@ -61,7 +61,7 @@ export default {
 
         dxf.entities.forEach((entity) => {
           if (entity.type === 'LINE') {
-            const material = new THREE.LineBasicMaterial({ color: 0x000000 }) // Սև գույն
+            const material = new THREE.LineBasicMaterial({ color: 0x000000 })
             const geometry = new THREE.BufferGeometry().setFromPoints([
               new THREE.Vector3(entity.vertices[0].x, entity.vertices[0].y, 0),
               new THREE.Vector3(entity.vertices[1].x, entity.vertices[1].y, 0),
