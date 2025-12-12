@@ -40,15 +40,17 @@ export default {
     // 'swiper/css/swiper.min.css',
   ],
   router: {
-    base: '/work/',
+    // base: '/work/',
+    base: process.env.NUXT_ROUTER_BASE || '/',
     middleware: ['roleRedirect'],
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // baseURL: process.env.BASE_URL,
-    baseURL: 'https://api.metalworks.am',
+    // baseURL: 'https://api.metalworks.am',
     // baseURL: 'http://localhost:8000',
+    baseURL: process.env.API_BASE_URL,
     credentials: true,
   },
 
@@ -63,8 +65,9 @@ export default {
       laravelSanctum: {
         provider: 'laravel/sanctum',
         // url: process.env.BASE_URL,
-        url: 'https://api.metalworks.am',
+        // url: 'https://api.metalworks.am',
         // url: 'http://localhost:8000',
+        url: process.env.API_BASE_URL,
         endpoints: {
           csrf: { url: '/sanctum/csrf-cookie' },
           login: { url: '/api/login', method: 'post' },

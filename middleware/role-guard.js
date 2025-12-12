@@ -4,11 +4,7 @@ export default async function ({ app, route, redirect }) {
   if (!app.$auth.loggedIn) {
     try {
       await app.$auth.fetchUser()
-    } catch (e) {
-      try {
-        app.$auth.reset()
-      } catch (_) {}
-    }
+    } catch (e) {}
   }
 
   if (!app.$auth.loggedIn) {

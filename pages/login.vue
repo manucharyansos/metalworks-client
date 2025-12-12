@@ -157,23 +157,21 @@ export default {
   },
   methods: {
     ...mapActions('authCustom', ['loginUser']),
-    async login({ commit }, userData) {
+    async login() {
       this.loading = true
       try {
         if (this.email && this.password.length >= 6) {
-          const response = await this.loginUser(
-            {
-              data: {
-                email: this.email,
-                password: this.password,
-              },
+          const response = await this.loginUser({
+            data: {
+              email: this.email,
+              password: this.password,
             },
-            userData
-          )
+          })
 
           if (response) {
             this.email = ''
             this.password = ''
+
             const role = this.$auth.user.role.name
             const map = {
               admin: '/admin',
@@ -183,10 +181,10 @@ export default {
               bend: '/factory/bend',
               operator: '/factory/bend',
             }
+
             const target = this.localePath(map[role] || '/')
 
-            // Force full navigation so the correct layout loads immediately after role change
-            window.location.assign(target)
+            await this.$router.replace(target)
           } else if (typeof this.getErrorMessage === 'string') {
             this.errorMessage.general = this.getErrorMessage
           } else {

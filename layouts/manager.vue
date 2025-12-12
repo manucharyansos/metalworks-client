@@ -216,37 +216,8 @@ export default {
     unlockScroll() {
       document.documentElement.classList.remove('overflow-hidden')
     },
-    async logout() {
-      const target = this.localePath('/login')
-      try {
-        await this.$auth.logout()
-      } catch (e) {
-        // ignore
-      }
-      try {
-        this.$auth.reset()
-      } catch (e) {}
-      this.$auth.setUser(null)
-      const s = this.$auth.$storage
-      ;[
-        'loggedIn',
-        'user',
-        'strategy',
-        'auth._token.local',
-        'auth._refresh_token.local',
-        'auth._tokenExpiration.local',
-        'auth._refresh_tokenExpiration.local',
-      ].forEach((k) => s.removeUniversal(k))
-
-      this.onNavClick()
-      try {
-        await this.$router.replace(target)
-      } catch (e) {}
-      setTimeout(() => {
-        if (this.$route.path !== target) {
-          window.location.replace(target)
-        }
-      }, 150)
+    logout() {
+      this.$auth.logout()
     },
     onDocumentClick(e) {
       const asideEl = this.$el.querySelector('aside')

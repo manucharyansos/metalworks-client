@@ -3,15 +3,14 @@ export default async function ({ route, redirect, $auth }) {
   if (!$auth.loggedIn) {
     try {
       await $auth.fetchUser()
-    } catch (e) {
-      try {
-        $auth.reset()
-      } catch (_) {}
-    }
+    } catch (e) {}
   }
 
   if (!$auth.loggedIn) {
-    return route.path === '/login' ? undefined : redirect('/login')
+    if (route.path !== '/login') {
+      return redirect('/login')
+    }
+    return
   }
 
   const role = $auth.user?.role?.name || $auth.user?.role
@@ -20,16 +19,13 @@ export default async function ({ route, redirect, $auth }) {
     admin: '/admin',
     manager: '/manager',
     engineer: '/engineer',
-    operator: '/factory/bend',
+    operator: '/factory',
   }
 
   const targetDashboard = dashboardMap[role]
 
   if (!targetDashboard) {
-    try {
-      $auth.reset()
-    } catch (_) {}
-    return redirect('/login')
+    return redirect('/logout')
   }
   const requiredRole = route.meta?.find((m) => m.role)?.role
   if (requiredRole && role !== requiredRole) {
