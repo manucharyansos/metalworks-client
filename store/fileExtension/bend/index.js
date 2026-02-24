@@ -57,18 +57,22 @@ export const actions = {
 }
 
 export const mutations = {
-  SET_BEND_EXTENSIONS(state, bendFileExtensions) {
-    state.bendFileExtensions = bendFileExtensions
+  SET_BEND_EXTENSIONS(state, list) {
+    state.bendFileExtensions = Array.isArray(list) ? list : []
   },
-  ADD_BEND_EXTENSION(state, bendFileExtensions) {
-    state.bendFileExtensions.push(bendFileExtensions)
+
+  ADD_BEND_EXTENSION(state, item) {
+    state.bendFileExtensions.push(item)
   },
-  UPDATE_BEND_EXTENSION(state, bendFileExtensions) {
-    state.bendFileExtensions = bendFileExtensions
+
+  UPDATE_BEND_EXTENSION(state, item) {
+    const idx = state.bendFileExtensions.findIndex((x) => x.id === item.id)
+    if (idx !== -1) state.bendFileExtensions.splice(idx, 1, item)
   },
+
   REMOVE_BEND_EXTENSION(state, id) {
     state.bendFileExtensions = state.bendFileExtensions.filter(
-      (ext) => ext.id !== id
+      (x) => x.id !== id
     )
   },
 }

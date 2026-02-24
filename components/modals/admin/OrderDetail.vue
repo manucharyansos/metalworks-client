@@ -168,16 +168,14 @@
               <p class="text-gray-600 dark:text-gray-400">
                 {{
                   `Հեռախոս՝ ${
-                    localOrder.client?.phone ||
-                    localOrder.user?.phone ||
-                    '—'
+                    localOrder.client?.phone || localOrder.user?.phone || '—'
                   }`
                 }}
               </p>
               <p class="text-gray-600 dark:text-gray-400">
                 {{
                   `Էլ․ փոստ՝ ${
-                    localOrder.client?.email ||
+                    localOrder.client?.user?.email ||
                     localOrder.user?.email ||
                     '—'
                   }`

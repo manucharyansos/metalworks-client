@@ -162,7 +162,7 @@
                   stroke-linecap="round"
                 />
               </svg>
-              <span class="ml-3">Օգտատերեր</span>
+              <span class="ml-3">Աշխատակիցներ</span>
             </nuxt-link>
           </li>
         </ul>

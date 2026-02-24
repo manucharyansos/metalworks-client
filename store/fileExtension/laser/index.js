@@ -57,18 +57,22 @@ export const actions = {
 }
 
 export const mutations = {
-  SET_LASER_EXTENSIONS(state, extensions) {
-    state.laserFileExtensions = extensions
+  SET_LASER_EXTENSIONS(state, list) {
+    state.laserFileExtensions = Array.isArray(list) ? list : []
   },
-  ADD_LASER_EXTENSION(state, extension) {
-    state.laserFileExtensions.push(extension)
+
+  ADD_LASER_EXTENSION(state, item) {
+    state.laserFileExtensions.push(item)
   },
-  UPDATE_LASER_EXTENSION(state, extension) {
-    state.laserFileExtensions = extension
+
+  UPDATE_LASER_EXTENSION(state, item) {
+    const idx = state.laserFileExtensions.findIndex((x) => x.id === item.id)
+    if (idx !== -1) state.laserFileExtensions.splice(idx, 1, item)
   },
+
   REMOVE_LASER_EXTENSION(state, id) {
     state.laserFileExtensions = state.laserFileExtensions.filter(
-      (ext) => ext.id !== id
+      (x) => x.id !== id
     )
   },
 }
