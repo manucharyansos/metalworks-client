@@ -59,6 +59,18 @@
                 <input v-model.trim="form.email" required class="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" type="email" />
               </label>
 
+              <label v-if="emailChanged" class="block rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <span class="text-sm font-medium text-gray-800">{{ $t('profile.current_password') }}</span>
+                <p class="text-xs text-gray-600 mt-1">{{ $t('profile.email_change_password_help') }}</p>
+                <input
+                  v-model="form.current_password"
+                  required
+                  class="mt-3 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  type="password"
+                  autocomplete="current-password"
+                />
+              </label>
+
               <template v-if="isClient">
                 <label class="block">
                   <span class="text-sm font-medium text-gray-700">{{ $t('common.phone') }}</span>
@@ -188,6 +200,7 @@ export default {
       form: {
         name: '',
         email: '',
+        current_password: '',
         client: { phone: '', address: '' },
       },
       passwordForm: {
@@ -239,6 +252,12 @@ export default {
     isFactory() {
       return !!this.capabilities.factory_work
     },
+    emailChanged() {
+      return (
+        (this.form.email || '').trim().toLowerCase() !==
+        (this.profileUser.email || '').trim().toLowerCase()
+      )
+    },
     tabs() {
       const result = [{ key: 'settings', label: this.$t('profile.settings') }]
       if (this.isClient) {
@@ -282,6 +301,7 @@ export default {
         this.capabilities = data.capabilities || {}
         this.form.name = this.profileUser.name || ''
         this.form.email = this.profileUser.email || ''
+        this.form.current_password = ''
         this.form.client = {
           phone: this.profileUser.client?.phone || '',
           address: this.profileUser.client?.address || '',
@@ -303,10 +323,14 @@ export default {
           name: this.form.name,
           email: this.form.email,
         }
+        if (this.emailChanged) payload.current_password = this.form.current_password
         if (this.isClient) payload.client = this.form.client
+
         const { data } = await this.$axios.patch('/api/profile', payload)
         this.profileUser = data.user || this.profileUser
         this.capabilities = data.capabilities || this.capabilities
+        this.form.email = this.profileUser.email || this.form.email
+        this.form.current_password = ''
         await this.$auth.fetchUser()
         this.profileMessage = this.$t('profile.profile_saved')
       } catch (error) {
