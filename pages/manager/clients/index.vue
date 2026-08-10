@@ -11,25 +11,10 @@
       @delete="confirmDeleteClient"
     />
     <template v-else>
-      <p
-        class="flex items-center justify-center gap-2 text-lg text-red-600 font-medium py-4 bg-red-50 rounded-xl border border-red-200"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
-          />
-        </svg>
+      <p class="flex items-center justify-center gap-2 text-lg text-red-600 font-medium py-4 bg-red-50 rounded-xl border border-red-200">
         Դուք չեք կարող դիտել ցանկը
-      </p></template
-    >
+      </p>
+    </template>
 
     <ClientFormModal
       :key="modalKey"
@@ -80,19 +65,20 @@ export default {
   computed: {
     ...mapGetters('clients', ['allClients']),
     filteredClients() {
-      const q = (this.searchQuery || '').toLowerCase()
+      const q = (this.searchQuery || '').toLowerCase().trim()
       if (!q) return this.allClients
       return this.allClients.filter((c) => {
         return (
           (c.name || '').toLowerCase().includes(q) ||
           (c.phone || '').toLowerCase().includes(q) ||
-          (c.address || '').toLowerCase().includes(q)
+          (c.address || '').toLowerCase().includes(q) ||
+          (c.user?.email || '').toLowerCase().includes(q)
         )
       })
     },
   },
   mounted() {
-    this.loadClients()
+    if (this.$can('clients.view')) this.loadClients()
   },
   methods: {
     ...mapActions('clients', ['fetchClients']),
@@ -105,22 +91,20 @@ export default {
       }
     },
     openCreate() {
-      if (this.$can('clients.create')) {
-        this.selectedClient = null
-        this.formErrors = {}
-        this.formGlobalError = ''
-        this.modalKey = Date.now()
-        this.isFormOpen = true
-      }
+      if (!this.$can('clients.create')) return
+      this.selectedClient = null
+      this.formErrors = {}
+      this.formGlobalError = ''
+      this.modalKey = Date.now()
+      this.isFormOpen = true
     },
     openEdit(row) {
-      if (this.$can('clients.view')) {
-        this.selectedClient = row
-        this.formErrors = {}
-        this.formGlobalError = ''
-        this.modalKey = Date.now()
-        this.isFormOpen = true
-      }
+      if (!this.$can('clients.update')) return
+      this.selectedClient = row
+      this.formErrors = {}
+      this.formGlobalError = ''
+      this.modalKey = Date.now()
+      this.isFormOpen = true
     },
     closeForm() {
       this.isFormOpen = false
@@ -129,58 +113,57 @@ export default {
       this.formGlobalError = ''
     },
     confirmDeleteClient(row) {
-      if (this.$can('clients.delete')) {
-        this.deleteTarget = row
-      }
+      if (this.$can('clients.delete')) this.deleteTarget = row
     },
     async doDelete() {
-      if (this.$can('clients.delete')) {
-        this.submitting = true
-        try {
-          await this.$axios.delete(
-            `/api/clients/client/${this.deleteTarget.id}`
-          )
-          await this.loadClients()
-        } catch (e) {
-          this.$notify({ text: e, type: 'error' })
-        } finally {
-          this.submitting = false
-          this.deleteTarget = null
-        }
+      if (!this.$can('clients.delete') || !this.deleteTarget) return
+      this.submitting = true
+      try {
+        await this.$axios.delete(`/api/clients/client/${this.deleteTarget.user_id || this.deleteTarget.user?.id}`)
+        await this.loadClients()
+        this.$notify({ type: 'success', text: 'Հաճախորդը ջնջվեց' })
+      } catch (e) {
+        this.$notify({
+          text: e.response?.data?.message || 'Չհաջողվեց ջնջել հաճախորդին',
+          type: 'error',
+        })
+      } finally {
+        this.submitting = false
+        this.deleteTarget = null
       }
     },
     async handleSubmit(payload) {
-      if (this.$can('clients.create')) {
-        this.submitting = true
-        this.formErrors = {}
-        this.formGlobalError = ''
+      const allowed = payload.isEdit
+        ? this.$can('clients.update')
+        : this.$can('clients.create')
+      if (!allowed) return
 
-        try {
-          if (payload.isEdit) {
-            await this.$axios.put(
-              `/api/clients/client/${payload.id}`,
-              payload.data
-            )
-          } else {
-            await this.$axios.post('/api/clients/client', payload.data)
-          }
+      this.submitting = true
+      this.formErrors = {}
+      this.formGlobalError = ''
 
-          await this.loadClients()
-          this.closeForm()
-        } catch (e) {
-          this.$notify({ text: e, type: 'error' })
-          if (e.response && e.response.status === 422) {
-            this.formErrors = e.response.data.errors || {}
-            this.formGlobalError =
-              e.response.data.message || 'Վավերացման սխալ է տեղի ունեցել'
-          } else {
-            this.formGlobalError =
-              e.response?.data?.message ||
-              'Սերվերում սխալ է տեղի ունեցել, փորձեք ավելի ուշ'
-          }
-        } finally {
-          this.submitting = false
+      try {
+        if (payload.isEdit) {
+          await this.$axios.put(`/api/clients/client/${payload.id}`, payload.data)
+        } else {
+          await this.$axios.post('/api/clients/client', payload.data)
         }
+
+        await this.loadClients()
+        this.closeForm()
+        this.$notify({
+          type: 'success',
+          text: payload.isEdit ? 'Հաճախորդը թարմացվեց' : 'Հաճախորդը ստեղծվեց',
+        })
+      } catch (e) {
+        if (e.response && e.response.status === 422) {
+          this.formErrors = e.response.data.errors || {}
+          this.formGlobalError = e.response.data.message || 'Վավերացման սխալ է տեղի ունեցել'
+        } else {
+          this.formGlobalError = e.response?.data?.message || 'Սերվերում սխալ է տեղի ունեցել, փորձեք ավելի ուշ'
+        }
+      } finally {
+        this.submitting = false
       }
     },
   },
