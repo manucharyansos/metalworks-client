@@ -47,6 +47,7 @@
     "loading": "Загрузка...",
     "no_data": "Данных пока нет",
     "factory": "Цех",
+    "finish_date": "Плановое завершение",
     "current_work_title": "Текущие работы",
     "completed_work_title": "Выполненные работы",
     "current_orders_title": "Текущие заказы",
