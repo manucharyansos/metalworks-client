@@ -49,6 +49,7 @@
     "loading": "Loading...",
     "no_data": "No data yet",
     "factory": "Factory",
+    "finish_date": "Planned completion",
     "current_work_title": "Current work",
     "completed_work_title": "Completed work",
     "current_orders_title": "Current orders",
