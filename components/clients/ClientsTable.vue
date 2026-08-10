@@ -35,15 +35,18 @@
                 {{ c.type === 'legalEntity' ? 'Իրավաբանական անձ' : 'Ֆիզ․ անձ' }}
               </span>
             </td>
-            <td class="px-6 py-3 text-right">
+            <td class="px-6 py-3 text-right whitespace-nowrap">
               <button
+                v-if="$can('clients.update')"
                 class="px-3 py-1 border rounded-lg mr-2"
                 @click="$emit('edit', c)"
               >
                 Խմբագրել
               </button>
               <button
+                v-if="$can('clients.delete')"
                 class="px-3 py-1 border rounded-lg text-red-600"
+                :disabled="submitting"
                 @click="$emit('delete', c)"
               >
                 Ջնջել
