@@ -103,6 +103,20 @@
               <span class="ms-3">Dashboard</span>
             </nuxt-link>
           </li>
+
+          <li>
+            <nuxt-link
+              :to="localePath('/profile')"
+              exact-active-class="active-link"
+              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
+              @click="closeSidebar"
+            >
+              <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 21a8 8 0 10-16 0m8-10a4 4 0 100-8 4 4 0 000 8z" />
+              </svg>
+              <span class="ms-3">Անձնական էջ</span>
+            </nuxt-link>
+          </li>
         </ul>
         <!-- Logout -->
         <button
