@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-gray-100">
-    <!-- Mobile Toggle Button -->
     <button
       class="fixed top-4 right-4 z-50 p-2 rounded-lg lg:hidden bg-white shadow-md hover:bg-gray-200 transition-colors"
       :aria-expanded="isSidebarOpen"
@@ -21,12 +20,10 @@
       </svg>
     </button>
 
-    <!-- Sidebar -->
     <aside
       class="fixed top-0 left-0 z-40 w-64 h-screen bg-gray-800 shadow-xl transition-transform duration-300 lg:translate-x-0"
       :class="{ '-translate-x-full': !isSidebarOpen }"
     >
-      <!-- Sidebar Header -->
       <div
         class="flex items-center justify-between p-4 border-b border-gray-700"
       >
@@ -62,10 +59,8 @@
         </button>
       </div>
 
-      <!-- Navigation Links -->
       <div class="h-full px-3 py-4 overflow-y-auto relative">
         <ul class="space-y-2">
-          <!-- Dashboard -->
           <li>
             <nuxt-link
               to="/engineer"
@@ -88,7 +83,7 @@
               <span class="ml-3">Գլխավոր</span>
             </nuxt-link>
           </li>
-          <!-- PMP Files Link -->
+
           <li>
             <nuxt-link
               to="/engineer/files"
@@ -112,7 +107,6 @@
             </nuxt-link>
           </li>
 
-          <!-- Create Order Link -->
           <li>
             <nuxt-link
               to="/engineer/orders/create"
@@ -135,9 +129,23 @@
               <span class="ml-3">Ստեղծել նոր պատվեր</span>
             </nuxt-link>
           </li>
+
+          <li>
+            <nuxt-link
+              :to="localePath('/profile')"
+              exact-active-class="engineer-active-link"
+              class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 group transition-colors"
+              active-class="bg-gray-700 text-white"
+              @click.native="closeSidebar"
+            >
+              <svg class="w-6 h-6 text-gray-400 group-hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 21a8 8 0 10-16 0m8-10a4 4 0 100-8 4 4 0 000 8z" />
+              </svg>
+              <span class="ml-3">Անձնական էջ</span>
+            </nuxt-link>
+          </li>
         </ul>
 
-        <!-- Logout Button -->
         <button
           class="flex items-center justify-center w-full p-3 mt-auto text-gray-300 rounded-lg hover:bg-gray-700 absolute bottom-20 left-0 right-0 mb-4 transition-colors"
           @click.stop="logout"
@@ -160,7 +168,6 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
     <div class="lg:ml-64 transition-all duration-300">
       <Nuxt />
     </div>
@@ -209,7 +216,6 @@ export default {
 </script>
 
 <style scoped>
-/* Smooth transitions */
 aside {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 40;
@@ -219,7 +225,6 @@ button.lg\:hidden {
   z-index: 50;
 }
 
-/* Active link styling */
 .router-link-exact-active {
   background-color: #374151;
   color: white;
@@ -228,7 +233,6 @@ button.lg\:hidden {
   color: white;
 }
 
-/* Better scrollbar for sidebar */
 ::-webkit-scrollbar {
   width: 6px;
 }
