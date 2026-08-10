@@ -40,6 +40,7 @@
     "personal_data_help": "Update your basic account information.",
     "password_help": "After changing your password, you will need to sign in again.",
     "current_password": "Current password",
+    "email_change_password_help": "Confirm your current password to change your email address.",
     "new_password": "New password",
     "confirm_new_password": "Confirm new password",
     "save": "Save changes",
