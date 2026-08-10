@@ -211,7 +211,7 @@ export default {
 }
 .introduction_section {
   background-color: #f5f5f5;
-  background-image: url('static/metalworks-logo.jpg');
+  background-image: url('/metalworks-logo.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
