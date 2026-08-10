@@ -17,15 +17,6 @@ export const getters = {
 export const actions = {
   async fetchUser({ commit }) {
     try {
-      if (process.client) {
-        const hasCookie = document.cookie.includes('XSRF-TOKEN')
-        if (!hasCookie) {
-          commit('setUser', null)
-          commit('setLoadedOnce', true)
-          return null
-        }
-      }
-
       const res = await this.$axios.get('/api/user')
       commit('setUser', res.data)
       commit('setLoadedOnce', true)
@@ -47,6 +38,7 @@ export const actions = {
 
   async loginUser({ commit }, userData) {
     try {
+      commit('setErrorMessage', null)
       await this.$auth.loginWith('laravelSanctum', userData)
       return true
     } catch (err) {
@@ -67,6 +59,37 @@ export const actions = {
         error?.response?.data?.message || 'An error occurred'
       )
       return false
+    }
+  },
+
+  async forgotPassword({ commit }, email) {
+    try {
+      commit('setErrorMessage', null)
+      const response = await this.$axios.post('/api/forgot-password', { email })
+      return response.data
+    } catch (error) {
+      commit(
+        'setErrorMessage',
+        error?.response?.data?.message || 'Չհաջողվեց ուղարկել հղումը։'
+      )
+      return null
+    }
+  },
+
+  async resetPassword({ commit }, payload) {
+    try {
+      commit('setErrorMessage', null)
+      const response = await this.$axios.post('/api/reset-password', payload)
+      return response.data
+    } catch (error) {
+      const validationMessage = error?.response?.data?.errors?.password?.[0]
+      commit(
+        'setErrorMessage',
+        validationMessage ||
+          error?.response?.data?.message ||
+          'Չհաջողվեց փոխել գաղտնաբառը։'
+      )
+      return null
     }
   },
 }
