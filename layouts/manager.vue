@@ -48,7 +48,6 @@
     >
       <div class="relative h-full px-4 py-6 overflow-y-auto">
         <ul class="mt-2 space-y-2">
-          <!-- Dashboard -->
           <li>
             <nuxt-link
               ref="firstLink"
@@ -61,7 +60,6 @@
             </nuxt-link>
           </li>
 
-          <!-- Users -->
           <li>
             <nuxt-link
               to="/manager/clients"
@@ -73,7 +71,6 @@
             </nuxt-link>
           </li>
 
-          <!-- Workers -->
           <li>
             <nuxt-link
               to="/manager/workers"
@@ -85,7 +82,6 @@
             </nuxt-link>
           </li>
 
-          <!-- Materials -->
           <li>
             <nuxt-link
               to="/manager/materials"
@@ -96,9 +92,19 @@
               Նյութեր
             </nuxt-link>
           </li>
+
+          <li>
+            <nuxt-link
+              :to="localePath('/profile')"
+              exact-active-class="manager-active-link"
+              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
+              @click.native="onNavClick"
+            >
+              Անձնական էջ
+            </nuxt-link>
+          </li>
         </ul>
 
-        <!-- Logout -->
         <button
           type="button"
           class="absolute bottom-6 left-4 right-4 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-100 w-auto"
@@ -116,7 +122,6 @@
       </div>
     </aside>
 
-    <!-- Main content -->
     <div class="lg:ml-64 transition-[margin] duration-300 ease-out">
       <Nuxt />
     </div>
