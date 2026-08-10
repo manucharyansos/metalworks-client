@@ -1,8 +1,6 @@
 <template>
   <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div
-      class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6"
-    >
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-6">
       <h1 class="text-xl sm:text-2xl font-semibold">Աշխատակիցներ</h1>
 
       <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -18,12 +16,7 @@
           @click="openCreate"
         >
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 5v14m-7-7h14"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-            />
+            <path d="M12 5v14m-7-7h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
           Նոր աշխատակից
         </button>
@@ -37,34 +30,33 @@
             <tr>
               <th class="px-6 py-3">Անուն</th>
               <th class="px-6 py-3">Էլ․ փոստ</th>
+              <th class="px-6 py-3">Դեր</th>
+              <th class="px-6 py-3">Արտադրամաս</th>
               <th class="px-6 py-3">Հեռախոս</th>
               <th class="px-6 py-3">Հասցե</th>
               <th class="px-6 py-3 w-32 text-right">Գործողություններ</th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="u in filtered"
-              :key="u.id"
-              class="bg-white border-b hover:bg-gray-50"
-            >
-              <td class="px-6 py-3">{{ u.name }}</td>
+            <tr v-for="u in filtered" :key="u.id" class="bg-white border-b hover:bg-gray-50">
+              <td class="px-6 py-3">{{ u.display_name || u.name }}</td>
               <td class="px-6 py-3">{{ u.email || '—' }}</td>
+              <td class="px-6 py-3">{{ roleLabel(u.role) }}</td>
+              <td class="px-6 py-3">{{ u.factory || '—' }}</td>
               <td class="px-6 py-3">{{ u?.worker?.phone || '—' }}</td>
               <td class="px-6 py-3">{{ u?.worker?.address || '—' }}</td>
               <td class="px-6 py-3">
                 <div class="flex justify-end gap-2">
                   <button
-                    v-if="$can('workers.view')"
+                    v-if="$can('workers.update')"
                     class="px-3 py-1.5 rounded-lg border"
                     @click="openEdit(u)"
                   >
                     Խմբագրել
                   </button>
                   <button
-                    v-if="!$can('workers.delete')"
+                    v-if="$can('workers.delete')"
                     class="px-3 py-1.5 rounded-lg border text-red-600 hover:bg-red-50"
-                    :disabled="!canDelete"
                     title="Ջնջել"
                     @click="askDelete(u)"
                   >
@@ -75,16 +67,13 @@
             </tr>
 
             <tr v-if="!loading && filtered.length === 0">
-              <td colspan="5" class="px-6 py-6 text-center text-gray-500">
-                Աշխատակից չի գտնվել
-              </td>
+              <td colspan="7" class="px-6 py-6 text-center text-gray-500">Աշխատակից չի գտնվել</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Form Modal -->
     <WorkerFormModal
       :visible="isFormOpen"
       :worker="selectedWorker"
@@ -95,7 +84,6 @@
       @submit="handleSubmit"
     />
 
-    <!-- Delete confirm (backend destroy դեռ չունես, կթողնենք skeleton) -->
     <div
       v-if="confirmDelete && $can('workers.delete')"
       class="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4"
@@ -104,18 +92,13 @@
       <div class="w-full max-w-md rounded-xl bg-white shadow-xl p-6">
         <h3 class="text-lg font-semibold mb-2">Ջնջե՞լ աշխատակցին</h3>
         <p class="text-gray-600 mb-6">
-          Դուք պատրաստվում եք ջնջել «{{ confirmDelete?.name }}» աշխատակցին։
+          Դուք պատրաստվում եք ջնջել «{{ confirmDelete?.display_name || confirmDelete?.name }}» աշխատակցին։
         </p>
         <div class="flex justify-end gap-3">
+          <button class="px-4 py-2 rounded-lg border" @click="confirmDelete = null">Չեղարկել</button>
           <button
-            class="px-4 py-2 rounded-lg border"
-            @click="confirmDelete = null"
-          >
-            Չեղարկել
-          </button>
-          <button
-            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
-            :disabled="submitting || !canDelete"
+            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+            :disabled="submitting"
             @click="doDelete"
           >
             {{ submitting ? 'Կատարվում է…' : 'Ջնջել' }}
@@ -129,6 +112,14 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import WorkerFormModal from '~/components/users/WorkerFormModal.vue'
+
+const ROLE_LABELS = {
+  manager: 'Մենեջեր',
+  bend: 'Կռում',
+  laser: 'Լազերային կտրում',
+  powder_catting: 'Փոշեներկում',
+  engineer: 'Ինժիներ',
+}
 
 export default {
   components: { WorkerFormModal },
@@ -159,21 +150,21 @@ export default {
         (u) =>
           (u.name || '').toLowerCase().includes(q) ||
           (u.email || '').toLowerCase().includes(q) ||
-          (u?.worker?.phone || '').toLowerCase().includes(q)
+          (u?.worker?.phone || '').toLowerCase().includes(q) ||
+          (u.factory || '').toLowerCase().includes(q)
       )
-    },
-    canDelete() {
-      return false
     },
   },
   async mounted() {
-    await this.fetchRoles()
-    await this.fetchFactory()
+    await Promise.all([this.fetchRoles(), this.fetchFactory()])
     await this.loadWorkers()
   },
   methods: {
     ...mapActions('roles', ['fetchRoles']),
     ...mapActions('factory', ['fetchFactory']),
+    roleLabel(role) {
+      return ROLE_LABELS[role] || role || '—'
+    },
     async loadWorkers() {
       this.loading = true
       try {
@@ -185,6 +176,7 @@ export default {
           : []
       } catch (e) {
         console.error('Failed to fetch workers', e)
+        this.workers = []
       } finally {
         this.loading = false
       }
@@ -208,24 +200,18 @@ export default {
       this.submitting = true
       try {
         if (isEdit) {
-          const { data: res } = await this.$axios.put(
-            `/api/workers/${id}`,
-            payload
-          )
-          if (!res || res.status === false)
-            throw new Error(res?.message || 'Update failed')
+          await this.$axios.put(`/api/workers/${id}`, payload)
         } else {
-          const { data: res } = await this.$axios.post('/api/workers', payload)
-          if (!res || res.status === false)
-            throw new Error(res?.message || 'Create failed')
+          await this.$axios.post('/api/workers', payload)
         }
         this.closeForm()
         await this.loadWorkers()
+        this.$notify({ type: 'success', text: isEdit ? 'Աշխատակիցը թարմացվեց' : 'Աշխատակիցը ստեղծվեց' })
       } catch (e) {
-        console.error('Submit worker error:', e)
-        alert(
-          e.response?.data?.message || e.message || 'Սխալ՝ պահպանման ժամանակ'
-        )
+        this.$notify({
+          type: 'error',
+          text: e.response?.data?.message || e.message || 'Սխալ՝ պահպանման ժամանակ',
+        })
       } finally {
         this.submitting = false
       }
@@ -233,8 +219,22 @@ export default {
     askDelete(u) {
       this.confirmDelete = u
     },
-    doDelete() {
-      this.confirmDelete = null
+    async doDelete() {
+      if (!this.confirmDelete) return
+      this.submitting = true
+      try {
+        await this.$axios.delete(`/api/workers/${this.confirmDelete.id}`)
+        this.$notify({ type: 'success', text: 'Աշխատակիցը ջնջվեց' })
+        this.confirmDelete = null
+        await this.loadWorkers()
+      } catch (e) {
+        this.$notify({
+          type: 'error',
+          text: e.response?.data?.message || 'Չհաջողվեց ջնջել աշխատակցին',
+        })
+      } finally {
+        this.submitting = false
+      }
     },
   },
 }
