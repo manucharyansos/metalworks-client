@@ -128,8 +128,9 @@ export default {
       isSidebarOpen: false,
       navigation: [
         { to: '/admin', label: 'Օպերացիոն վահանակ', short: '01', exact: true },
-        { to: '/admin/users', label: 'Աշխատակիցներ', short: '02', exact: false },
-        { to: '/admin/file-extension', label: 'Ֆայլերի տեսակներ', short: '03', exact: false },
+        { to: '/admin/reports', label: 'Հաշվետվություններ', short: '02', exact: false },
+        { to: '/admin/users', label: 'Աշխատակիցներ', short: '03', exact: false },
+        { to: '/admin/file-extension', label: 'Ֆայլերի տեսակներ', short: '04', exact: false },
       ],
     }
   },
