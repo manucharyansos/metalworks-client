@@ -181,7 +181,18 @@ export default {
     },
     filePreviewUrl(filePath, name) {
       if (!filePath || typeof filePath !== 'string') return null
+
+      const file = this.items.find(
+        (item) => item && item.id && item.path === filePath
+      )
       const baseURL = this.$axios.defaults.baseURL
+
+      if (file?.id) {
+        return `${baseURL}/api/secure-files/pmp/${file.id}`
+      }
+
+      // Temporary compatibility fallback for unexpected legacy payloads that
+      // do not include a database file id. Normal API responses include id.
       return `${baseURL}/storage/${filePath}`
     },
     hasExt(file, exts) {
