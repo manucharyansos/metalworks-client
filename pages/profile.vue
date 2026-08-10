@@ -8,7 +8,7 @@
               {{ initials }}
             </div>
             <div>
-              <p class="text-sm text-gray-400">Անձնական էջ</p>
+              <p class="text-sm text-gray-400">{{ $t('profile.title') }}</p>
               <h1 class="text-2xl md:text-3xl font-bold">{{ profileUser.name || '—' }}</h1>
               <p class="text-gray-300 mt-1">{{ profileUser.email || '' }}</p>
             </div>
@@ -38,34 +38,34 @@
       </div>
 
       <div v-if="loading" class="mt-6 bg-white rounded-3xl p-10 text-center shadow-sm">
-        <p class="text-gray-500">Բեռնվում է...</p>
+        <p class="text-gray-500">{{ $t('profile.loading') }}</p>
       </div>
 
       <template v-else>
         <div v-if="activeTab === 'settings'" class="mt-6 grid lg:grid-cols-2 gap-6">
           <form class="bg-white rounded-3xl p-6 shadow-sm" @submit.prevent="saveProfile">
             <div class="mb-6">
-              <h2 class="text-xl font-bold text-gray-900">Անձնական տվյալներ</h2>
-              <p class="text-sm text-gray-500 mt-1">Թարմացրեք ձեր հիմնական տվյալները։</p>
+              <h2 class="text-xl font-bold text-gray-900">{{ $t('profile.personal_data') }}</h2>
+              <p class="text-sm text-gray-500 mt-1">{{ $t('profile.personal_data_help') }}</p>
             </div>
 
             <div class="space-y-4">
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">Անուն</span>
+                <span class="text-sm font-medium text-gray-700">{{ $t('common.name') }}</span>
                 <input v-model.trim="form.name" required class="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" type="text" />
               </label>
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">Էլ․ փոստ</span>
+                <span class="text-sm font-medium text-gray-700">{{ $t('common.email') }}</span>
                 <input v-model.trim="form.email" required class="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" type="email" />
               </label>
 
               <template v-if="isClient">
                 <label class="block">
-                  <span class="text-sm font-medium text-gray-700">Հեռախոս</span>
+                  <span class="text-sm font-medium text-gray-700">{{ $t('common.phone') }}</span>
                   <input v-model.trim="form.client.phone" class="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" type="tel" />
                 </label>
                 <label class="block">
-                  <span class="text-sm font-medium text-gray-700">Հասցե</span>
+                  <span class="text-sm font-medium text-gray-700">{{ $t('common.address') }}</span>
                   <input v-model.trim="form.client.address" class="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" type="text" />
                 </label>
               </template>
@@ -76,27 +76,27 @@
             </p>
 
             <button :disabled="savingProfile" class="mt-6 w-full rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-semibold py-3 px-4" type="submit">
-              {{ savingProfile ? 'Պահպանվում է...' : 'Պահպանել փոփոխությունները' }}
+              {{ savingProfile ? $t('profile.saving') : $t('profile.save') }}
             </button>
           </form>
 
           <form class="bg-white rounded-3xl p-6 shadow-sm" @submit.prevent="changePassword">
             <div class="mb-6">
-              <h2 class="text-xl font-bold text-gray-900">Գաղտնաբառ</h2>
-              <p class="text-sm text-gray-500 mt-1">Փոխելուց հետո անվտանգության համար նորից մուտք կգործեք։</p>
+              <h2 class="text-xl font-bold text-gray-900">{{ $t('common.password') }}</h2>
+              <p class="text-sm text-gray-500 mt-1">{{ $t('profile.password_help') }}</p>
             </div>
 
             <div class="space-y-4">
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">Ներկա գաղտնաբառ</span>
+                <span class="text-sm font-medium text-gray-700">{{ $t('profile.current_password') }}</span>
                 <input v-model="passwordForm.current_password" required class="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" type="password" autocomplete="current-password" />
               </label>
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">Նոր գաղտնաբառ</span>
+                <span class="text-sm font-medium text-gray-700">{{ $t('profile.new_password') }}</span>
                 <input v-model="passwordForm.password" required minlength="8" class="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" type="password" autocomplete="new-password" />
               </label>
               <label class="block">
-                <span class="text-sm font-medium text-gray-700">Կրկնել նոր գաղտնաբառը</span>
+                <span class="text-sm font-medium text-gray-700">{{ $t('profile.confirm_new_password') }}</span>
                 <input v-model="passwordForm.password_confirmation" required minlength="8" class="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500" type="password" autocomplete="new-password" />
               </label>
             </div>
@@ -106,7 +106,7 @@
             </p>
 
             <button :disabled="savingPassword" class="mt-6 w-full rounded-xl bg-gray-900 hover:bg-black disabled:opacity-60 text-white font-semibold py-3 px-4" type="submit">
-              {{ savingPassword ? 'Փոխվում է...' : 'Փոխել գաղտնաբառը' }}
+              {{ savingPassword ? $t('profile.changing') : $t('profile.change_password') }}
             </button>
           </form>
         </div>
@@ -121,10 +121,10 @@
               <span class="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">{{ activityData.total || 0 }}</span>
             </div>
 
-            <div v-if="activityLoading" class="py-12 text-center text-gray-500">Բեռնվում է...</div>
+            <div v-if="activityLoading" class="py-12 text-center text-gray-500">{{ $t('profile.loading') }}</div>
             <div v-else-if="!activityData.data || !activityData.data.length" class="py-12 text-center">
               <div class="w-14 h-14 mx-auto rounded-2xl bg-gray-100 flex items-center justify-center text-2xl">📋</div>
-              <p class="mt-3 font-medium text-gray-700">Տվյալներ դեռ չկան</p>
+              <p class="mt-3 font-medium text-gray-700">{{ $t('profile.no_data') }}</p>
             </div>
             <div v-else class="space-y-3">
               <article v-for="item in activityData.data" :key="activityKey(item)" class="border border-gray-200 rounded-2xl p-4 hover:border-gray-300 transition">
@@ -135,7 +135,9 @@
                       <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{{ activityStatus(item) }}</span>
                     </div>
                     <p class="text-sm text-gray-500 mt-1">{{ activityNumber(item) }}</p>
-                    <p v-if="activityFactory(item)" class="text-sm text-gray-600 mt-1">Արտադրամաս՝ {{ activityFactory(item) }}</p>
+                    <p v-if="activityFactory(item)" class="text-sm text-gray-600 mt-1">
+                      {{ $t('profile.factory') }}: {{ activityFactory(item) }}
+                    </p>
                   </div>
                   <div class="text-sm text-gray-500 md:text-right">
                     <p>{{ activityDate(item) }}</p>
@@ -145,9 +147,13 @@
             </div>
 
             <div v-if="activityData.last_page > 1" class="mt-6 flex items-center justify-center gap-3">
-              <button type="button" :disabled="activityData.current_page <= 1" class="px-4 py-2 rounded-xl bg-gray-100 disabled:opacity-40" @click="loadActivity(activityData.current_page - 1)">Նախորդ</button>
+              <button type="button" :disabled="activityData.current_page <= 1" class="px-4 py-2 rounded-xl bg-gray-100 disabled:opacity-40" @click="loadActivity(activityData.current_page - 1)">
+                {{ $t('pagination.previous') }}
+              </button>
               <span class="text-sm text-gray-600">{{ activityData.current_page }} / {{ activityData.last_page }}</span>
-              <button type="button" :disabled="activityData.current_page >= activityData.last_page" class="px-4 py-2 rounded-xl bg-gray-100 disabled:opacity-40" @click="loadActivity(activityData.current_page + 1)">Հաջորդ</button>
+              <button type="button" :disabled="activityData.current_page >= activityData.last_page" class="px-4 py-2 rounded-xl bg-gray-100 disabled:opacity-40" @click="loadActivity(activityData.current_page + 1)">
+                {{ $t('pagination.next') }}
+              </button>
             </div>
           </div>
         </div>
@@ -198,7 +204,20 @@ export default {
       return this.profileUser?.role?.name || this.$auth.user?.role?.name || ''
     },
     roleLabel() {
-      return this.profileUser?.role?.value || this.roleName || 'Օգտատեր'
+      if (this.$i18n?.locale === 'hy' && this.profileUser?.role?.value) {
+        return this.profileUser.role.value
+      }
+      const labels = {
+        admin: 'Admin',
+        manager: 'Manager',
+        engineer: 'Engineer',
+        laser: 'Laser',
+        bend: 'Bend',
+        powder_catting: 'Powder coating',
+        operator: 'Operator',
+        authenticatedUser: this.$t('profile.user'),
+      }
+      return labels[this.roleName] || this.$t('profile.user')
     },
     initials() {
       return (this.profileUser.name || 'U')
@@ -215,28 +234,34 @@ export default {
       return !!this.capabilities.factory_work
     },
     tabs() {
-      const result = [{ key: 'settings', label: 'Կարգավորումներ' }]
+      const result = [{ key: 'settings', label: this.$t('profile.settings') }]
       if (this.isClient) {
         result.push(
-          { key: 'current', label: 'Ընթացիկ պատվերներ' },
-          { key: 'history', label: 'Պատվերների պատմություն' }
+          { key: 'current', label: this.$t('profile.current_orders') },
+          { key: 'history', label: this.$t('profile.order_history') }
         )
       } else if (this.isFactory) {
         result.push(
-          { key: 'current', label: 'Ընթացիկ աշխատանքներ' },
-          { key: 'history', label: 'Կատարվածները' }
+          { key: 'current', label: this.$t('profile.current_work') },
+          { key: 'history', label: this.$t('profile.completed_work') }
         )
       }
       return result
     },
     activityTitle() {
-      if (this.isFactory) return this.activeTab === 'history' ? 'Կատարված աշխատանքներ' : 'Ընթացիկ աշխատանքներ'
-      return this.activeTab === 'history' ? 'Անցած պատվերներ' : 'Ընթացիկ պատվերներ'
+      if (this.isFactory) {
+        return this.activeTab === 'history'
+          ? this.$t('profile.completed_work_title')
+          : this.$t('profile.current_work_title')
+      }
+      return this.activeTab === 'history'
+        ? this.$t('profile.past_orders_title')
+        : this.$t('profile.current_orders_title')
     },
     activitySubtitle() {
       return this.isFactory
-        ? 'Ցուցադրվում են միայն ձեր արտադրամասին կցված աշխատանքները։'
-        : 'Ցուցադրվում են միայն ձեր account-ին պատկանող պատվերները։'
+        ? this.$t('profile.factory_scope')
+        : this.$t('profile.client_scope')
     },
   },
   async mounted() {
@@ -277,10 +302,10 @@ export default {
         this.profileUser = data.user || this.profileUser
         this.capabilities = data.capabilities || this.capabilities
         await this.$auth.fetchUser()
-        this.profileMessage = 'Փոփոխությունները պահպանվել են։'
+        this.profileMessage = this.$t('profile.profile_saved')
       } catch (error) {
         this.profileError = true
-        this.profileMessage = error?.response?.data?.message || 'Չհաջողվեց պահպանել փոփոխությունները։'
+        this.profileMessage = error?.response?.data?.message || this.$t('profile.profile_save_failed')
       } finally {
         this.savingProfile = false
       }
@@ -290,19 +315,25 @@ export default {
       this.passwordError = false
       if (this.passwordForm.password !== this.passwordForm.password_confirmation) {
         this.passwordError = true
-        this.passwordMessage = 'Նոր գաղտնաբառերը չեն համընկնում։'
+        this.passwordMessage = this.$t('profile.password_mismatch')
         return
       }
       this.savingPassword = true
       try {
         const { data } = await this.$axios.patch('/api/profile/password', this.passwordForm)
-        this.passwordMessage = data.message || 'Գաղտնաբառը փոխվել է։'
+        this.passwordMessage = data.message || this.$t('profile.password_changed')
         this.passwordForm = { current_password: '', password: '', password_confirmation: '' }
-        await this.$auth.logout()
+        try {
+          await this.$auth.logout()
+        } catch (logoutError) {
+          if (typeof this.$auth.reset === 'function') {
+            await this.$auth.reset()
+          }
+        }
         await this.$router.replace(this.localePath('/login'))
       } catch (error) {
         this.passwordError = true
-        this.passwordMessage = error?.response?.data?.message || 'Չհաջողվեց փոխել գաղտնաբառը։'
+        this.passwordMessage = error?.response?.data?.message || this.$t('profile.password_change_failed')
       } finally {
         this.savingPassword = false
       }
@@ -329,10 +360,10 @@ export default {
     },
     activityName(item) {
       const order = this.activityOrder(item)
-      return order.name || `Պատվեր #${order.id || item.id}`
+      return order.name || `${this.$t('profile.order')} #${order.id || item.id}`
     },
     activityStatus(item) {
-      return this.isFactory ? item.status || '—' : item.status || '—'
+      return item.status || '—'
     },
     activityNumber(item) {
       const order = this.activityOrder(item)
