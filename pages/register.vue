@@ -5,15 +5,12 @@
     <div
       class="grid grid-cols-1 md:grid-cols-2 items-center justify-center w-full mx-auto font-roboto dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0"
     >
-      <!-- Form Container -->
       <div
         class="flex flex-col items-center justify-center md:rounded-tl-3xl rounded-bl-3xl md:rounded-br-none rounded-br-3xl bg-white w-full h-full dark:bg-gray-800 mx-auto md:p-7 p-3 md:order-1 order-2"
       >
         <h2 class="text-black font-bold italic text-2xl py-8">ԳՐԱՆՑՎԵԼ</h2>
 
-        <!-- Wrap in a form tag for Enter key submission -->
-        <form @submit.prevent="sendRegister" class="w-full">
-          <!-- Name Input -->
+        <form class="w-full" @submit.prevent="sendRegister">
           <div class="md:mb-6 mb-4 w-full">
             <div class="relative z-0 w-full group">
               <input-with-label-icon
@@ -32,7 +29,6 @@
             </div>
           </div>
 
-          <!-- Email Input -->
           <div class="md:mb-6 mb-4 w-full">
             <div class="relative z-0 w-full group">
               <input-with-label-icon
@@ -52,13 +48,11 @@
             </div>
           </div>
 
-          <!-- Password Input -->
           <div class="md:mb-6 mb-4 w-full">
             <div class="relative z-0 w-full group">
               <input-with-label-icon
                 v-model="password"
                 type="password"
-                肢
                 name="password"
                 placeholder=" "
                 :class="{ 'border-red-500': fieldErrors.password }"
@@ -66,16 +60,12 @@
                 label_-id="password"
                 for_-l-abel="password"
               />
-              <p
-                v-if="fieldErrors.password"
-                class="text-red-500 text-xs italic"
-              >
+              <p v-if="fieldErrors.password" class="text-red-500 text-xs italic">
                 {{ fieldErrors.password }}
               </p>
             </div>
           </div>
 
-          <!-- Confirm Password Input -->
           <div class="md:mb-6 mb-4 w-full">
             <div class="relative z-0 w-full group">
               <input-with-label-icon
@@ -96,7 +86,6 @@
             </div>
           </div>
 
-          <!-- Display General Error and Specific Message -->
           <div v-if="error || errorMessage" class="w-full mb-4">
             <p v-if="error" class="text-red-500 text-xs italic">{{ error }}</p>
             <p v-if="errorMessage" class="text-red-500 text-xs italic">
@@ -104,12 +93,11 @@
             </p>
           </div>
 
-          <!-- Submit Button and Links -->
           <div class="flex flex-col w-full items-center justify-between">
             <button
               type="submit"
               :disabled="loading"
-              class="w-full bg-red-600 rounded-2xl hover:bg-red-800 text-white font-bold py-2 px-4 md:my-10 my-4 focus:outline-none focus:shadow-outline"
+              class="w-full bg-red-600 rounded-2xl hover:bg-red-800 text-white font-bold py-2 px-4 md:my-10 my-4 focus:outline-none focus:shadow-outline disabled:opacity-60"
             >
               {{ loading ? 'Բեռնվում է...' : 'Գրանցվել' }}
             </button>
@@ -130,12 +118,10 @@
         </form>
       </div>
 
-      <!-- Side Banner -->
       <div
         class="side_banner flex flex-col w-full md:h-full h-64 rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl items-start justify-between py-6 md:py-40 bg-black px-6 md:order-2 order-1"
       ></div>
     </div>
-    <!-- Notifications -->
     <notifications />
   </div>
 </template>
@@ -159,7 +145,7 @@ export default {
       label: {
         name: 'Անուն',
         email: 'Էլ․ փոստ',
-        password: 'Գախտնաբառ',
+        password: 'Գաղտնաբառ',
         confirmPassword: 'Հաստատեք գաղտնաբառը',
       },
     }
@@ -183,15 +169,15 @@ export default {
       this.loading = true
       try {
         const response = await this.registerUser({
-          name: this.name,
-          email: this.email,
+          name: this.name.trim(),
+          email: this.email.trim().toLowerCase(),
           password: this.password,
           password_confirmation: this.password_confirmation,
         })
 
         if (response) {
           this.$notify({
-            text: `Գրանցումը հաջողված է:`,
+            text: 'Գրանցումը հաջողված է:',
             duration: 3000,
             speed: 1000,
             position: 'top',
@@ -213,13 +199,15 @@ export default {
     },
     validateFields() {
       this.fieldErrors = {}
-      if (!this.name)
+      if (!this.name.trim()) {
         this.fieldErrors.name = 'Խնդրում ենք մուտքագրել Ձեր անունը'
-      if (!this.email)
-        this.fieldErrors.email =
-          'Խնդրում ենք մուտքագրել էլ․ փոստի հՀաշվի ստեղծման ժամանակ սխալ է տեղի ունեցել: Խնդրում ենք կրկին փորձել:'
-      if (this.password.length < 6)
-        this.fieldErrors.password = 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ'
+      }
+      if (!this.email.trim()) {
+        this.fieldErrors.email = 'Խնդրում ենք մուտքագրել էլ․ փոստի հասցեն'
+      }
+      if (this.password.length < 8) {
+        this.fieldErrors.password = 'Գաղտնաբառը պետք է լինի առնվազն 8 նիշ'
+      }
       if (this.password !== this.password_confirmation) {
         this.fieldErrors.password_confirmation = 'Գաղտնաբառերը չեն համընկնում'
       }
@@ -244,7 +232,7 @@ export default {
 }
 .side_banner {
   background-color: #f5f5f5;
-  background-image: url('static/metalworks-logo.jpg');
+  background-image: url('/metalworks-logo.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
