@@ -128,18 +128,24 @@
             </div>
             <div v-else class="space-y-3">
               <article v-for="item in activityData.data" :key="activityKey(item)" class="border border-gray-200 rounded-2xl p-4 hover:border-gray-300 transition">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                  <div>
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                  <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-2">
                       <h3 class="font-bold text-gray-900">{{ activityName(item) }}</h3>
                       <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">{{ activityStatus(item) }}</span>
                     </div>
                     <p class="text-sm text-gray-500 mt-1">{{ activityNumber(item) }}</p>
-                    <p v-if="activityFactory(item)" class="text-sm text-gray-600 mt-1">
+                    <p v-if="activityDescription(item)" class="text-sm text-gray-700 mt-3 whitespace-pre-line">
+                      {{ activityDescription(item) }}
+                    </p>
+                    <p v-if="activityFactory(item)" class="text-sm text-gray-600 mt-2">
                       {{ $t('profile.factory') }}: {{ activityFactory(item) }}
                     </p>
+                    <p v-if="activityFinishDate(item)" class="text-sm text-gray-600 mt-1">
+                      {{ $t('profile.finish_date') }}: {{ activityFinishDate(item) }}
+                    </p>
                   </div>
-                  <div class="text-sm text-gray-500 md:text-right">
+                  <div class="text-sm text-gray-500 md:text-right whitespace-nowrap">
                     <p>{{ activityDate(item) }}</p>
                   </div>
                 </div>
@@ -371,10 +377,16 @@ export default {
       const prefix = order.prefix_code?.code
       return [prefix, number].filter(Boolean).join(' / ') || `ID: ${order.id || item.id}`
     },
+    activityDescription(item) {
+      return this.activityOrder(item).description || ''
+    },
     activityFactory(item) {
       if (this.isFactory) return item.factory?.name || this.profileUser.factory?.name || ''
       const factories = item.factory_orders || []
       return factories.map((fo) => fo.factory?.name).filter(Boolean).join(', ')
+    },
+    activityFinishDate(item) {
+      return this.activityOrder(item).dates?.finish_date || ''
     },
     activityDate(item) {
       const order = this.activityOrder(item)
