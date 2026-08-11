@@ -2,7 +2,7 @@
   <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <div class="mx-auto max-w-[1500px] space-y-6">
       <MaterialsToolbar
-        :categories="allCategories"
+        :categories="$can('material_categories.view') ? allCategories : []"
         :selected-category="selectedCategory"
         :search.sync="search"
         @pick-category="pickCategory"
@@ -34,7 +34,7 @@
       </div>
     </div>
 
-    <MaterialFormModal v-if="$canAny(['materials.create', 'materials.update'])" :visible="isFormOpen" :item="editingItem" :categories="allCategories" :submitting="submitting" @close="closeForm" @submit="handleSubmit" />
+    <MaterialFormModal v-if="$canAny(['materials.create', 'materials.update'])" :visible="isFormOpen" :item="editingItem" :categories="formCategories" :submitting="submitting" @close="closeForm" @submit="handleSubmit" />
   </main>
 </template>
 
@@ -54,6 +54,8 @@ export default {
     selectedCategory: null,
     isFormOpen: false,
     editingItem: null,
+    formCategories: [],
+    formOptionsLoaded: false,
     submitting: false,
     pendingDelete: null,
   }),
@@ -71,22 +73,14 @@ export default {
     },
   },
   watch: {
-    search() {
-      this.load(1)
-    },
-    '$route.query.create'() {
-      this.openFromQuery()
-    },
-    '$route.query.edit'() {
-      this.openFromQuery()
-    },
+    search() { this.load(1) },
+    '$route.query.create'() { this.openFromQuery() },
+    '$route.query.edit'() { this.openFromQuery() },
   },
   async mounted() {
-    if (this.$can('material_categories.view')) {
-      await this.fetchCategories()
-    }
+    if (this.$can('material_categories.view')) await this.fetchCategories()
     await this.load()
-    this.openFromQuery()
+    await this.openFromQuery()
   },
   methods: {
     ...mapActions('materials', ['fetchMaterials', 'deleteMaterial']),
@@ -94,15 +88,27 @@ export default {
     async load(page = 1) {
       await this.fetchMaterials({ page, perPage: this.pagination.per_page || 10, search: this.search, categoryId: this.selectedCategory?.id || null })
     },
-    openFromQuery() {
+    async ensureFormOptions() {
+      if (this.formOptionsLoaded) return true
+      try {
+        const data = await this.$axios.$get('/api/staff/material-options')
+        this.formCategories = Array.isArray(data?.categories) ? data.categories : []
+        this.formOptionsLoaded = true
+        return true
+      } catch (e) {
+        this.$notify?.({ type: 'error', text: e.response?.data?.message || 'Չհաջողվեց բեռնել նյութի ձևի տվյալները' })
+        return false
+      }
+    },
+    async openFromQuery() {
       if (this.$route.query.create === '1' && this.$can('materials.create')) {
-        this.openCreate()
+        await this.openCreate()
         return
       }
       const editId = Number(this.$route.query.edit)
       if (editId && this.$can('materials.update')) {
         const item = this.materials.find((material) => Number(material.id) === editId)
-        if (item) this.openEdit(item)
+        if (item) await this.openEdit(item)
       }
     },
     goPage(p) {
@@ -113,13 +119,13 @@ export default {
       this.selectedCategory = c
       this.load(1)
     },
-    openCreate() {
-      if (!this.$can('materials.create')) return
+    async openCreate() {
+      if (!this.$can('materials.create') || !(await this.ensureFormOptions())) return
       this.editingItem = null
       this.isFormOpen = true
     },
-    openEdit(row) {
-      if (!this.$can('materials.update')) return
+    async openEdit(row) {
+      if (!this.$can('materials.update') || !(await this.ensureFormOptions())) return
       this.editingItem = row
       this.isFormOpen = true
     },
@@ -151,9 +157,7 @@ export default {
         this.closeForm()
       } catch (e) {
         this.$notify?.({ type: 'error', text: e.response?.data?.message || 'Չհաջողվեց պահպանել նյութը' })
-      } finally {
-        this.submitting = false
-      }
+      } finally { this.submitting = false }
     },
     async doDelete() {
       if (!this.$can('materials.delete') || !this.pendingDelete) return
