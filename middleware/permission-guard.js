@@ -3,7 +3,14 @@ const normalizePath = (path = '') => {
   return normalized || '/'
 }
 
-const routePermissions = (path) => {
+const routePermissions = (path, query = {}) => {
+  if (path === '/manager/clients' && query.create === '1') return ['clients.create']
+  if (path === '/manager/workers' && query.create === '1') return ['workers.create']
+  if (path === '/manager/materials' && query.create === '1') return ['materials.create']
+  if (path === '/manager/clients' && query.edit) return ['clients.update']
+  if (path === '/manager/workers' && query.edit) return ['workers.update']
+  if (path === '/manager/materials' && query.edit) return ['materials.update']
+
   const rules = [
     ['/manager/create/users', ['clients.create']],
     ['/manager/create/workers', ['workers.create']],
@@ -59,7 +66,7 @@ export default async function ({ app, route, redirect }) {
     : Array.isArray(meta.permissions)
     ? meta.permissions
     : []
-  const required = fromMeta.length ? fromMeta : routePermissions(path)
+  const required = fromMeta.length ? fromMeta : routePermissions(path, route.query || {})
 
   if (!required.length) return
 
