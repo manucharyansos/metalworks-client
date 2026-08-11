@@ -1,6 +1,6 @@
 <template>
   <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-    <div class="mx-auto max-w-[1500px] space-y-6">
+    <div v-if="$can('workers.view')" class="mx-auto max-w-[1500px] space-y-6">
       <section class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Team</p>
@@ -59,6 +59,15 @@
       </section>
     </div>
 
+    <div v-else class="mx-auto max-w-3xl">
+      <div class="rounded-[28px] border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/35 dark:text-blue-300">+</div>
+        <h1 class="mt-4 text-xl font-black text-slate-950 dark:text-white">Նոր աշխատակից</h1>
+        <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Ձեզ տրված է աշխատակից ստեղծելու ֆունկցիան, բայց աշխատակիցների ամբողջ ցուցակը դիտելու իրավունքը տրված չէ։</p>
+        <button v-if="$can('workers.create') && !isFormOpen" type="button" class="mt-5 rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-bold text-white dark:bg-white dark:text-slate-950" @click="openCreate">Բացել ստեղծման ձևը</button>
+      </div>
+    </div>
+
     <WorkerFormModal v-if="$canAny(['workers.create','workers.update'])" :visible="isFormOpen" :worker="selectedWorker" :roles="formRoles" :factories="formFactories" :submitting="submitting" @close="closeForm" @submit="handleSubmit" />
 
     <div v-if="confirmDelete && $can('workers.delete')" class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm" @click.self="confirmDelete = null">
@@ -78,18 +87,7 @@ export default {
   middleware: ['role-guard'],
   meta: { role: 'manager' },
   data() {
-    return {
-      loading: false,
-      workers: [],
-      formRoles: [],
-      formFactories: [],
-      formOptionsLoaded: false,
-      searchQuery: '',
-      isFormOpen: false,
-      selectedWorker: null,
-      submitting: false,
-      confirmDelete: null,
-    }
+    return { loading: false, workers: [], formRoles: [], formFactories: [], formOptionsLoaded: false, searchQuery: '', isFormOpen: false, selectedWorker: null, submitting: false, confirmDelete: null }
   },
   computed: {
     filtered() {
@@ -105,13 +103,14 @@ export default {
     '$route.query.edit'() { this.openFromQuery() },
   },
   async mounted() {
-    await this.loadWorkers()
-    this.openFromQuery()
+    if (this.$can('workers.view')) await this.loadWorkers()
+    await this.openFromQuery()
   },
   methods: {
     initials(name) { return String(name || '?').split(/\s+/).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join('') },
     roleLabel(role) { return ROLE_LABELS[role] || role || '—' },
     async loadWorkers() {
+      if (!this.$can('workers.view')) return
       this.loading = true
       try {
         const { data } = await this.$axios.get('/api/workers')
@@ -135,12 +134,9 @@ export default {
       }
     },
     async openFromQuery() {
-      if (this.$route.query.create === '1' && this.$can('workers.create')) {
-        await this.openCreate()
-        return
-      }
+      if (this.$route.query.create === '1' && this.$can('workers.create')) { await this.openCreate(); return }
       const editId = Number(this.$route.query.edit)
-      if (editId && this.$can('workers.update')) {
+      if (editId && this.$can('workers.update') && this.$can('workers.view')) {
         const worker = this.workers.find((item) => Number(item.id) === editId || Number(item.user_id) === editId)
         if (worker) await this.openEdit(worker)
       }
@@ -162,7 +158,8 @@ export default {
       this.selectedWorker = null
       document.documentElement.classList.remove('overflow-hidden')
       if (this.$route.query.create || this.$route.query.edit) {
-        this.$router.replace({ path: this.$route.path, query: {} }).catch(() => {})
+        if (this.$can('workers.view')) this.$router.replace({ path: this.$route.path, query: {} }).catch(() => {})
+        else this.$router.replace(this.localePath('/profile')).catch(() => {})
       }
     },
     async handleSubmit({ payload, isEdit, id }) {
@@ -172,9 +169,9 @@ export default {
       try {
         if (isEdit) await this.$axios.put(`/api/workers/${id}`, payload)
         else await this.$axios.post('/api/workers', payload)
-        this.closeForm()
-        await this.loadWorkers()
+        if (this.$can('workers.view')) await this.loadWorkers()
         this.$notify?.({ type: 'success', text: isEdit ? 'Աշխատակիցը թարմացվեց' : 'Աշխատակիցը ստեղծվեց' })
+        this.closeForm()
       } catch (e) {
         this.$notify?.({ type: 'error', text: e.response?.data?.message || 'Սխալ՝ պահպանման ժամանակ' })
       } finally { this.submitting = false }
@@ -186,7 +183,7 @@ export default {
       try {
         await this.$axios.delete(`/api/workers/${this.confirmDelete.id}`)
         this.confirmDelete = null
-        await this.loadWorkers()
+        if (this.$can('workers.view')) await this.loadWorkers()
         this.$notify?.({ type: 'success', text: 'Աշխատակիցը ջնջվեց' })
       } catch (e) {
         this.$notify?.({ type: 'error', text: e.response?.data?.message || 'Չհաջողվեց ջնջել աշխատակցին' })
