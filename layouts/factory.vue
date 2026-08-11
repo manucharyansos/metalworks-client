@@ -103,40 +103,23 @@ export default {
     return { isSidebarOpen: false }
   },
   computed: {
-    currentUser() {
-      return this.$auth.user || {}
-    },
-    roleName() {
-      return this.currentUser?.role?.name || this.currentUser?.role || ''
-    },
+    currentUser() { return this.$auth.user || {} },
+    roleName() { return this.currentUser?.role?.name || this.currentUser?.role || '' },
     dashboardPath() {
+      if (!this.$can('factory.view')) return '/profile'
       if (this.roleName === 'bend') return '/factory/bend'
       if (this.roleName === 'laser') return '/factory/laser'
-      if (this.$route.path.startsWith('/factory/')) return this.$route.path
+      if (this.currentUser.factory_id) return '/factory/workspace'
       return '/profile'
     },
-    factoryLabel() {
-      return this.currentUser?.factory?.name || this.roleName || 'Factory'
-    },
-    grantedCount() {
-      return Array.isArray(this.currentUser.permissions) ? this.currentUser.permissions.length : 0
-    },
+    factoryLabel() { return this.currentUser?.factory?.name || this.roleName || 'Factory' },
+    grantedCount() { return Array.isArray(this.currentUser.permissions) ? this.currentUser.permissions.length : 0 },
   },
-  watch: {
-    '$route.fullPath'() {
-      this.closeSidebar()
-    },
-  },
+  watch: { '$route.fullPath'() { this.closeSidebar() } },
   methods: {
-    toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen
-    },
-    closeSidebar() {
-      this.isSidebarOpen = false
-    },
-    async logout() {
-      await this.$auth.logout()
-    },
+    toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen },
+    closeSidebar() { this.isSidebarOpen = false },
+    async logout() { await this.$auth.logout() },
   },
 }
 </script>
