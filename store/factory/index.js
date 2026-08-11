@@ -65,23 +65,43 @@ export const actions = {
 
   async downloadUploadedFile({ commit }, file) {
     try {
-      const response = await this.$axios.get(
-        `api/factories/download/${file.path}`,
-        {
-          responseType: 'blob',
-        }
-      )
+      if (!file) throw new Error('File payload is missing')
 
-      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const baseURL = String(this.$axios.defaults.baseURL || '').replace(/\/+$/, '')
+      let url = null
+
+      if (file.id) {
+        url = `${baseURL}/api/secure-files/pmp/${encodeURIComponent(file.id)}?download=1`
+      } else if (file.path) {
+        const normalizedPath = String(file.path)
+          .replace(/\\/g, '/')
+          .replace(/^\/+/, '')
+        const encodedPath = normalizedPath
+          .split('/')
+          .map((segment) => encodeURIComponent(segment))
+          .join('/')
+        url = `${baseURL}/api/secure-files/path/${encodedPath}?download=1`
+      }
+
+      if (!url) throw new Error('File id/path is missing')
+
+      const response = await this.$axios.get(url, {
+        responseType: 'blob',
+      })
+
+      const blob = response.data instanceof Blob ? response.data : new Blob([response.data])
+      const objectUrl = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', file.original_name || 'downloaded_file.dxf')
+      link.href = objectUrl
+      link.setAttribute('download', file.original_name || 'downloaded_file')
       document.body.appendChild(link)
       link.click()
-      window.URL.revokeObjectURL(url)
       document.body.removeChild(link)
+      window.URL.revokeObjectURL(objectUrl)
+      return true
     } catch (error) {
       console.error('File download failed:', error)
+      throw error
     }
   },
 }
@@ -93,7 +113,7 @@ export const mutations = {
   SET_FACTORIES(state, orderByFactory) {
     state.orderByFactory = orderByFactory
   },
-  SET_ORDER(state, order) {
-    state.finishedOrder = order
+  SET_ORDER(state, finishedOrder) {
+    state.finishedOrder = finishedOrder
   },
 }
