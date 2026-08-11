@@ -1,153 +1,96 @@
 <template>
-  <div class="m-0 p-0 relative">
-    <!-- Sidebar Toggle Button -->
-    <button
-      type="button"
-      class="fixed top-0 right-0 p-2 mt-2 ms-3 z-20 text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
-      :aria-expanded="isSidebarOpen"
-      @click="toggleSidebar"
-    >
-      <span class="sr-only">Open sidebar</span>
-      <svg
-        class="w-6 h-6"
-        fill="currentColor"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 20 20"
-      >
-        <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-        />
-      </svg>
-    </button>
+  <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div v-if="isSidebarOpen" class="fixed inset-0 z-30 bg-slate-950/35 backdrop-blur-sm lg:hidden" @click="closeSidebar"></div>
 
-    <!-- Sidebar -->
     <aside
-      class="fixed top-0 left-0 z-40 md:w-64 w-full h-screen bg-gray-900 transition-transform lg:translate-x-0"
-      :class="{ '-translate-x-full': !isSidebarOpen }"
-      aria-label="Sidebar"
+      class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:translate-x-0 lg:shadow-none"
+      :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
     >
-      <button
-        type="button"
-        class="mt-2 ms-3 p-4 float-right text-sm text-gray-500 rounded-lg lg:hidden hover:bg-gray-100 focus:outline-none"
-        :aria-expanded="isSidebarOpen"
-        @click="toggleSidebar"
-      >
-        <span class="sr-only">Open sidebar</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          x="0px"
-          y="0px"
-          width="20"
-          height="20"
-          viewBox="0 0 120 120"
-        >
-          <rect
-            width="114.551"
-            height="15"
-            x="2.724"
-            y="57.5"
-            opacity=".35"
-            transform="rotate(-45.001 60 65.001)"
-          ></rect>
-          <rect
-            width="114.551"
-            height="15"
-            x="2.724"
-            y="52.5"
-            fill="#ff1200"
-            transform="rotate(-45.001 60 60.001)"
-          ></rect>
-          <rect
-            width="15"
-            height="114.551"
-            x="52.5"
-            y="7.724"
-            opacity=".35"
-            transform="rotate(-45.001 60 65.001)"
-          ></rect>
-          <rect
-            width="15"
-            height="114.551"
-            x="52.5"
-            y="2.724"
-            fill="#ff1200"
-            transform="rotate(-45.001 60 60.001)"
-          ></rect>
-        </svg>
-      </button>
-      <div class="h-full px-3 py-4 overflow-y-auto relative">
-        <ul class="mt-6 space-y-2">
-          <!-- Dashboard -->
-          <li>
-            <nuxt-link
-              to="/admin"
-              exact-active-class="active-link"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
-              @click="closeSidebar"
-            >
-              <svg
-                class="w-8 h-8"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 22 21"
-                fill="white"
-              >
-                <path
-                  d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z"
-                />
-                <path
-                  d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z"
-                />
-              </svg>
-              <span class="ms-3">Dashboard</span>
-            </nuxt-link>
-          </li>
+      <div class="flex h-20 items-center justify-between border-b border-slate-100 px-5 dark:border-slate-800">
+        <nuxt-link :to="dashboardPath" class="flex min-w-0 items-center gap-3" @click.native="closeSidebar">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-black tracking-tight">MetalWorks</p>
+            <p class="mt-0.5 truncate text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">{{ factoryLabel }}</p>
+          </div>
+        </nuxt-link>
+        <button type="button" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" @click="closeSidebar">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18 18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
 
-          <li>
-            <nuxt-link
-              :to="localePath('/profile')"
-              exact-active-class="active-link"
-              class="flex items-center p-2 text-gray-50 rounded-lg hover:bg-gray-700"
-              @click="closeSidebar"
-            >
-              <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 21a8 8 0 10-16 0m8-10a4 4 0 100-8 4 4 0 000 8z" />
-              </svg>
-              <span class="ms-3">Անձնական էջ</span>
-            </nuxt-link>
-          </li>
-        </ul>
-        <!-- Logout -->
-        <button
-          type="button"
-          class="flex items-center bottom-6 left-6 p-2 text-gray-50 rounded-lg hover:bg-gray-700 absolute"
-          @click="logout"
-        >
-          <svg
-            class="h-8 w-8 text-red-500"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+      <div class="flex-1 overflow-y-auto px-4 py-5">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/40">
+          <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Արտադրամաս</p>
+          <p class="mt-2 text-sm font-black text-slate-900 dark:text-white">{{ currentUser.factory?.name || factoryLabel }}</p>
+          <p class="mt-1 text-[10px] text-slate-500 dark:text-slate-400">Անհատական ֆունկցիաներով վերահսկվող աշխատանքային տարածք</p>
+        </div>
+
+        <p class="mt-6 px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Աշխատանք</p>
+        <nav class="mt-3 space-y-1.5">
+          <nuxt-link
+            v-if="$can('factory.view')"
+            :to="dashboardPath"
+            class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950"
+            @click.native="closeSidebar"
           >
-            <path stroke="none" d="M0 0h24v24H0z" />
-            <path
-              d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
-            />
-            <path d="M7 12h14l-3 -3m0 6l3 -3" />
-          </svg>
-          <span class="ms-3">Log out</span>
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-300">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 20V9l5-3v4l5-3v4l6-3v12H4Zm4 0v-4h3v4m3 0v-5h3v5" /></svg>
+            </span>
+            Պատվերներ և ընթացք
+          </nuxt-link>
+
+          <nuxt-link
+            to="/profile"
+            class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950"
+            @click.native="closeSidebar"
+          >
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-300">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 21a8 8 0 10-16 0m8-10a4 4 0 100-8 4 4 0 000 8Z" /></svg>
+            </span>
+            Անձնական էջ
+          </nuxt-link>
+        </nav>
+
+        <div class="mt-7 grid grid-cols-2 gap-2">
+          <div class="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
+            <p class="text-[9px] font-bold text-slate-400">Ֆայլեր</p>
+            <p class="mt-1 text-xs font-black" :class="$can('factory.download') ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400'">{{ $can('factory.download') ? 'Թույլատրված' : 'Փակ' }}</p>
+          </div>
+          <div class="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
+            <p class="text-[9px] font-bold text-slate-400">Թարմացում</p>
+            <p class="mt-1 text-xs font-black" :class="$can('factory.order_update') ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-400'">{{ $can('factory.order_update') ? 'Թույլատրված' : 'Փակ' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="border-t border-slate-100 p-4 dark:border-slate-800">
+        <div class="mb-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-950/50">
+          <p class="truncate text-xs font-bold text-slate-800 dark:text-slate-100">{{ currentUser.name || 'Operator' }}</p>
+          <p class="mt-1 truncate text-[10px] text-slate-400">{{ currentUser.email || '' }}</p>
+        </div>
+        <button type="button" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-3 py-2.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50 dark:border-slate-700 dark:text-rose-300 dark:hover:bg-rose-950/20" @click="logout">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 17l5-5-5-5M15 12H3m8-8h7a2 2 0 012 2v12a2 2 0 01-2 2h-7" /></svg>
+          Դուրս գալ
         </button>
       </div>
     </aside>
 
-    <!-- Main Content -->
-    <div class="lg:ml-64">
+    <div class="min-h-screen lg:pl-72">
+      <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-3">
+          <button type="button" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" @click="toggleSidebar">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
+          <div>
+            <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Production</p>
+            <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ factoryLabel }}</p>
+          </div>
+        </div>
+        <span class="hidden rounded-xl bg-slate-100 px-3 py-2 text-[10px] font-bold text-slate-500 sm:block dark:bg-slate-800 dark:text-slate-300">{{ grantedCount }} ֆունկցիա հասանելի</span>
+      </header>
       <Nuxt />
     </div>
   </div>
@@ -155,10 +98,34 @@
 
 <script>
 export default {
+  name: 'FactoryLayout',
   data() {
-    return {
-      isSidebarOpen: false,
-    }
+    return { isSidebarOpen: false }
+  },
+  computed: {
+    currentUser() {
+      return this.$auth.user || {}
+    },
+    roleName() {
+      return this.currentUser?.role?.name || this.currentUser?.role || ''
+    },
+    dashboardPath() {
+      if (this.roleName === 'bend') return '/factory/bend'
+      if (this.roleName === 'laser') return '/factory/laser'
+      if (this.$route.path.startsWith('/factory/')) return this.$route.path
+      return '/profile'
+    },
+    factoryLabel() {
+      return this.currentUser?.factory?.name || this.roleName || 'Factory'
+    },
+    grantedCount() {
+      return Array.isArray(this.currentUser.permissions) ? this.currentUser.permissions.length : 0
+    },
+  },
+  watch: {
+    '$route.fullPath'() {
+      this.closeSidebar()
+    },
   },
   methods: {
     toggleSidebar() {
@@ -167,15 +134,9 @@ export default {
     closeSidebar() {
       this.isSidebarOpen = false
     },
-    logout() {
-      this.$auth.logout()
+    async logout() {
+      await this.$auth.logout()
     },
   },
 }
 </script>
-
-<style scoped>
-aside {
-  transition: transform 0.3s ease-in-out;
-}
-</style>
