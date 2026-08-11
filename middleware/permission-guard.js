@@ -1,3 +1,8 @@
+const normalizePath = (path = '') => {
+  const normalized = path.replace(/^\/(hy|ru|en)(?=\/|$)/, '')
+  return normalized || '/'
+}
+
 const routePermission = (path) => {
   const rules = [
     ['/manager/create/users', 'clients.create'],
@@ -18,14 +23,15 @@ const routePermission = (path) => {
   const match = rules.find(([prefix]) => path.startsWith(prefix))
   if (match) return [match[1]]
 
-  if (path === '/manager' || path.startsWith('/manager?')) return ['orders.view']
-  if (path === '/engineer' || path.startsWith('/engineer?')) return ['orders.view']
+  if (path === '/manager') return ['orders.view']
+  if (path === '/engineer') return ['orders.view']
 
   return []
 }
 
 export default async function ({ app, route, redirect }) {
-  const path = route.path || ''
+  const rawPath = route.path || ''
+  const path = normalizePath(rawPath)
   const isProtectedWorkspace =
     path === '/manager' ||
     path.startsWith('/manager/') ||
@@ -43,7 +49,7 @@ export default async function ({ app, route, redirect }) {
   }
 
   if (!app.$auth.loggedIn) {
-    return redirect('/login')
+    return redirect(app.localePath ? app.localePath('/login') : '/login')
   }
 
   const meta = (route.meta && route.meta[0]) || {}
@@ -68,6 +74,7 @@ export default async function ({ app, route, redirect }) {
       : required.every((permission) => granted.has(permission))
 
   if (!allowed && path !== '/profile') {
-    return redirect('/profile?access=denied')
+    const profile = app.localePath ? app.localePath('/profile') : '/profile'
+    return redirect(`${profile}?access=denied`)
   }
 }
