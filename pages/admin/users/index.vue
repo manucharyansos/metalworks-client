@@ -5,8 +5,8 @@
         <div>
           <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Access & people</p>
           <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատակիցների կառավարում</h1>
-          <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Աշխատակիցների role-եր և անհատական թույլտվություններ։ Հաճախորդների հաշիվները այս բաժնում չեն ցուցադրվում։
+          <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+            Role-ը սահմանում է աշխատակցի տեսակը, իսկ ֆունկցիաների հասանելիությունը տրվում է առանձին։ Չնշված ֆունկցիաները փակ են։ Հաճախորդները այստեղ չեն ցուցադրվում։
           </p>
         </div>
         <button
@@ -57,7 +57,7 @@
                 <th class="px-4 py-3.5">Role</th>
                 <th class="px-4 py-3.5">Արտադրամաս</th>
                 <th class="px-4 py-3.5">Email</th>
-                <th class="px-6 py-3.5 text-right">Թույլտվություններ</th>
+                <th class="px-6 py-3.5 text-right">Ֆունկցիաներ</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -72,7 +72,7 @@
                   </div>
                 </td>
                 <td class="px-4 py-4">
-                  <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ user.roleLabel || 'Առանց role' }}</span>
+                  <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ user.roleLabel || '—' }}</span>
                 </td>
                 <td class="px-4 py-4">
                   <span v-if="user.factoryName" class="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">{{ user.factoryName }}</span>
@@ -80,9 +80,7 @@
                 </td>
                 <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400">{{ user.email }}</td>
                 <td class="px-6 py-4 text-right">
-                  <span v-if="user.roleName === 'admin'" class="inline-flex rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">
-                    Լիարժեք մուտք
-                  </span>
+                  <span v-if="user.roleName === 'admin'" class="inline-flex rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
                   <button
                     v-else
                     type="button"
@@ -104,7 +102,7 @@
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
                   <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ user.name }}</p>
-                  <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ user.roleLabel || 'Առանց role' }}</span>
+                  <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ user.roleLabel || '—' }}</span>
                 </div>
                 <p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ user.email }}</p>
                 <p class="mt-2 text-[10px] font-semibold text-slate-400">{{ user.factoryName || 'Արտադրամաս նշված չէ' }}</p>
@@ -112,7 +110,7 @@
             </div>
             <div class="mt-4 flex justify-end">
               <span v-if="user.roleName === 'admin'" class="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
-              <button v-else type="button" class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white dark:bg-white dark:text-slate-950" @click="openPermissionModal(user)">Կառավարել իրավունքները</button>
+              <button v-else type="button" class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white dark:bg-white dark:text-slate-950" @click="openPermissionModal(user)">Կառավարել ֆունկցիաները</button>
             </div>
           </article>
         </div>
@@ -133,11 +131,10 @@
       :permission-groups="permissionGroups"
       :permission-groups-keys="permissionGroupsKeys"
       :user-permission-ids="userPermissionIds"
-      :denied-permission-ids="deniedPermissionIds"
       :open-groups="openPermissionGroups"
       @close="closePermissionModal"
       @toggle-group="togglePermissionGroup"
-      @set-permission-override="setPermissionOverride"
+      @toggle-permission="togglePermission"
       @save="savePermissions"
     />
   </main>
@@ -153,7 +150,10 @@ export default {
   middleware: ['role-guard'],
   meta: { role: 'admin' },
   async asyncData({ store }) {
-    await Promise.all([store.dispatch('users/fetchUsers'), store.dispatch('roles/fetchRoles')])
+    await Promise.all([
+      store.dispatch('users/fetchUsers'),
+      store.dispatch('roles/fetchRoles'),
+    ])
   },
   data() {
     return {
@@ -165,8 +165,6 @@ export default {
       permissionSaving: false,
       permissionsRaw: [],
       userPermissionIds: [],
-      deniedPermissionIds: [],
-      rolePermissionIds: [],
       openPermissionGroups: [],
     }
   },
@@ -174,24 +172,34 @@ export default {
     ...mapGetters('users', { users: 'allUsers' }),
     ...mapGetters('roles', { roles: 'roles' }),
     staffRoles() {
-      return (this.roles || []).filter((role) => role.name !== 'authenticatedUser')
+      return (this.roles || []).filter(
+        (role) => !['authenticatedUser', 'guestUser'].includes(role.name)
+      )
     },
     normalizedUsers() {
       return (this.users || [])
-        .filter((u) => !u.client && (!u.role || u.role.name !== 'authenticatedUser'))
+        .filter(
+          (u) =>
+            !u.client &&
+            u.role &&
+            !['authenticatedUser', 'guestUser'].includes(u.role.name)
+        )
         .map((u) => ({
           id: u.id,
           name: u.name,
           email: u.email,
-          roleName: u.role ? u.role.name : null,
-          roleLabel: u.role ? u.role.value || u.role.name : null,
+          roleName: u.role.name,
+          roleLabel: u.role.value || u.role.name,
           factoryName: u.factory ? u.factory.name || u.factory.value : null,
         }))
     },
     filteredUsers() {
       const term = this.search.toLowerCase().trim()
       return this.normalizedUsers.filter((user) => {
-        const matchSearch = !term || (user.name && user.name.toLowerCase().includes(term)) || (user.email && user.email.toLowerCase().includes(term))
+        const matchSearch =
+          !term ||
+          (user.name && user.name.toLowerCase().includes(term)) ||
+          (user.email && user.email.toLowerCase().includes(term))
         const matchRole = !this.roleFilter || user.roleName === this.roleFilter
         return matchSearch && matchRole
       })
@@ -199,12 +207,14 @@ export default {
     stats() {
       const admins = this.normalizedUsers.filter((u) => u.roleName === 'admin').length
       const assignedFactories = this.normalizedUsers.filter((u) => Boolean(u.factoryName)).length
-      const rolesInUse = new Set(this.normalizedUsers.map((u) => u.roleName).filter(Boolean)).size
+      const rolesInUse = new Set(
+        this.normalizedUsers.map((u) => u.roleName).filter(Boolean)
+      ).size
       return [
         { label: 'Աշխատակիցներ', value: this.normalizedUsers.length, hint: 'միայն staff հաշիվները' },
         { label: 'Admin', value: admins, hint: 'լիարժեք հասանելիություն' },
         { label: 'Արտադրամասով', value: assignedFactories, hint: 'factory նշանակված' },
-        { label: 'Role-եր', value: rolesInUse, hint: 'օգտագործվող staff role-եր' },
+        { label: 'Role-եր', value: rolesInUse, hint: 'աշխատողի տեսակներ' },
       ]
     },
     permissionGroups() {
@@ -231,7 +241,11 @@ export default {
       this.roleFilter = ''
     },
     initials(name) {
-      return String(name || '?').split(/\s+/).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join('')
+      return String(name || '?')
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join('')
     },
     async openPermissionModal(user) {
       if (!user || user.roleName === 'admin') return
@@ -244,18 +258,19 @@ export default {
       this.permissionLoading = true
       this.permissionsRaw = []
       this.userPermissionIds = []
-      this.deniedPermissionIds = []
-      this.rolePermissionIds = []
       this.openPermissionGroups = []
       try {
-        const res = await this.$axios.$get(`/api/users/${this.selectedUser.id}/permissions`)
+        const res = await this.$axios.$get(
+          `/api/users/${this.selectedUser.id}/permissions`
+        )
         this.permissionsRaw = res.permissions || []
         this.userPermissionIds = (res.user_permission_ids || []).map(Number)
-        this.deniedPermissionIds = (res.user_denied_permission_ids || []).map(Number)
-        this.rolePermissionIds = (res.role_permission_ids || []).map(Number)
         this.openPermissionGroups = this.permissionGroupsKeys.slice()
       } catch (error) {
-        this.$notify?.({ type: 'error', text: 'Չհաջողվեց բեռնել աշխատակցի թույլտվությունները' })
+        this.$notify?.({
+          type: 'error',
+          text: 'Չհաջողվեց բեռնել աշխատակցի թույլտվությունները',
+        })
       } finally {
         this.permissionLoading = false
       }
@@ -265,8 +280,6 @@ export default {
       this.selectedUser = null
       this.permissionsRaw = []
       this.userPermissionIds = []
-      this.deniedPermissionIds = []
-      this.rolePermissionIds = []
       this.openPermissionGroups = []
     },
     togglePermissionGroup(groupKey) {
@@ -274,19 +287,12 @@ export default {
       if (index === -1) this.openPermissionGroups.push(groupKey)
       else this.openPermissionGroups.splice(index, 1)
     },
-    setPermissionOverride(permissionId, state) {
+    togglePermission(permissionId) {
       const id = Number(permissionId)
-      const allowed = new Set(this.userPermissionIds.map(Number))
-      const denied = new Set(this.deniedPermissionIds.map(Number))
-
-      allowed.delete(id)
-      denied.delete(id)
-
-      if (state === 'allow') allowed.add(id)
-      if (state === 'deny') denied.add(id)
-
-      this.userPermissionIds = Array.from(allowed)
-      this.deniedPermissionIds = Array.from(denied)
+      const selected = new Set(this.userPermissionIds.map(Number))
+      if (selected.has(id)) selected.delete(id)
+      else selected.add(id)
+      this.userPermissionIds = Array.from(selected)
     },
     async savePermissions() {
       if (!this.selectedUser) return
@@ -294,12 +300,16 @@ export default {
       try {
         await this.$axios.$put(`/api/users/${this.selectedUser.id}/permissions`, {
           permissions: this.userPermissionIds,
-          denied_permissions: this.deniedPermissionIds,
         })
-        this.$notify?.({ type: 'success', text: 'Աշխատակցի թույլտվությունները պահպանվեցին' })
+        this.$notify?.({
+          type: 'success',
+          text: 'Աշխատակցի ֆունկցիաները պահպանվեցին',
+        })
         await this.loadSelectedPermissions()
       } catch (error) {
-        const message = error?.response?.data?.message || 'Չհաջողվեց պահպանել թույլտվությունները'
+        const message =
+          error?.response?.data?.message ||
+          'Չհաջողվեց պահպանել թույլտվությունները'
         this.$notify?.({ type: 'error', text: message })
       } finally {
         this.permissionSaving = false
