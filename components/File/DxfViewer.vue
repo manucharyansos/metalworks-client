@@ -40,6 +40,14 @@ export default {
   },
 
   methods: {
+    secureUrl() {
+      if (!this.dxfUrl) return null
+      if (/^https?:\/\//i.test(this.dxfUrl) || this.dxfUrl.startsWith('/api/secure-files/')) {
+        return this.dxfUrl
+      }
+      return this.$getFileUrl ? this.$getFileUrl(this.dxfUrl) : this.dxfUrl
+    },
+
     initThreeJS() {
       this.scene = new THREE.Scene()
       this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000)
@@ -53,6 +61,7 @@ export default {
     },
 
     resize() {
+      if (!this.renderer || !this.camera || !this.$refs.canvas) return
       const rect = this.$refs.canvas.getBoundingClientRect()
       this.renderer.setSize(rect.width, rect.height)
       this.camera.aspect = rect.width / rect.height
@@ -60,15 +69,19 @@ export default {
     },
 
     async loadDxfFile() {
+      const url = this.secureUrl()
+      if (!url) return
+
       try {
         this.error = null
-        const { data } = await this.$axios.get(
-          `/api/factories/getFile/${this.dxfUrl}`
-        )
-        const dxfText = atob(data.content)
-        this.parseDxf(dxfText)
+        const response = await this.$axios.get(url, {
+          responseType: 'text',
+          transformResponse: [(data) => data],
+        })
+        if (response.status !== 200) throw new Error(`HTTP ${response.status}`)
+        this.parseDxf(String(response.data || ''))
       } catch (err) {
-        this.error = 'DXF-ը բեռնելիս սխալ'
+        this.error = err?.response?.data?.message || 'DXF-ը բեռնելիս սխալ'
       }
     },
 
