@@ -1,6 +1,5 @@
 <template>
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-    <!-- Left: PDF Viewer / Preview -->
     <div
       class="flex items-center justify-center rounded-3xl border border-dashed border-gray-300 bg-white/80 p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900/70"
     >
@@ -10,7 +9,7 @@
             <div
               class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-xs font-bold text-white"
             >
-              PDF
+              FILE
             </div>
             <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">
               Ֆայլի դիտում
@@ -18,7 +17,7 @@
           </div>
 
           <p class="text-[11px] text-gray-400 dark:text-gray-500">
-            DXF ֆայլ ընտրեք «Դիտել» կոճակով
+            Ընտրեք ֆայլ «Դիտել» կոճակով
           </p>
         </div>
 
@@ -32,11 +31,32 @@
             <iframe
               v-if="isPdfViewer"
               :key="`pdf-${dxfUrl}`"
-              :src="dxfUrl"
+              :src="fileUrl(dxfUrl)"
               class="h-full w-full border-0"
               title="PDF Preview"
             ></iframe>
-            <FileViewer v-else :key="dxfUrl" :dxf-url="dxfUrl" />
+            <DxfViewerModal
+              v-else-if="isDxfViewer"
+              :key="`dxf-${dxfUrl}`"
+              :dxf-url="dxfUrl"
+              :show-laser-info="false"
+            />
+            <div
+              v-else
+              class="flex h-full min-h-[230px] flex-col items-center justify-center gap-3 p-4 text-center"
+            >
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                Այս ֆորմատի inline preview չկա։
+              </p>
+              <a
+                :href="fileUrl(dxfUrl)"
+                target="_blank"
+                rel="noopener"
+                class="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
+              >
+                Բացել ֆայլը
+              </a>
+            </div>
           </div>
           <div
             v-else
@@ -55,15 +75,13 @@
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            DXF ֆայլի նախադիտումը կհայտնվի այստեղ
+            Ֆայլի նախադիտումը կհայտնվի այստեղ
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right: Order Info + Files -->
     <div class="space-y-5">
-      <!-- Order main info -->
       <div
         class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-200/80 dark:bg-gray-800 dark:ring-gray-700"
       >
@@ -88,7 +106,6 @@
             </p>
           </div>
 
-          <!-- Dates / deadline -->
           <div class="flex flex-col items-end gap-2 text-[11px]">
             <div
               class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-1 text-gray-700 dark:bg-gray-700 dark:text-gray-100"
@@ -147,7 +164,6 @@
           </div>
         </div>
 
-        <!-- Main fields -->
         <dl
           class="grid grid-cols-1 gap-4 text-sm text-gray-700 dark:text-gray-100 sm:grid-cols-2"
         >
@@ -172,7 +188,6 @@
         </dl>
       </div>
 
-      <!-- Files list -->
       <div
         v-if="details.factory_orders?.length"
         class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-gray-200/80 dark:bg-gray-800 dark:ring-gray-700"
@@ -194,7 +209,6 @@
             :key="order.id"
             class="rounded-2xl border border-gray-200 bg-gray-50/80 p-3 text-xs shadow-sm dark:border-gray-700 dark:bg-gray-900/60"
           >
-            <!-- Factory + operator + status row -->
             <div
               class="mb-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-gray-500 dark:text-gray-400"
             >
@@ -231,7 +245,6 @@
               </div>
             </div>
 
-            <!-- Files inside operator order -->
             <div
               v-for="file in order.files"
               :key="file.id"
@@ -302,7 +315,6 @@
         </div>
       </div>
 
-      <!-- No files -->
       <div
         v-else
         class="rounded-3xl bg-white p-5 text-sm text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-300"
@@ -314,11 +326,11 @@
 </template>
 
 <script>
-import FileViewer from '@/components/File/FileViewer.vue'
+import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 
 export default {
   name: 'BendOrderDetailsPanel',
-  components: { FileViewer },
+  components: { DxfViewerModal },
   props: {
     details: {
       type: Object,
@@ -332,6 +344,9 @@ export default {
   computed: {
     isPdfViewer() {
       return this.isPDF(this.dxfUrl)
+    },
+    isDxfViewer() {
+      return this.isDXF(this.dxfUrl)
     },
     totalFiles() {
       if (!this.details?.factory_orders?.length) return 0
@@ -408,36 +423,36 @@ export default {
 
     fileUrl(path) {
       if (!path) return null
-      const baseURL = this.$axios?.defaults?.baseURL || ''
-      return `${baseURL}/storage/${path.replace(/\\/g, '/')}`
+      if (/^https?:\/\//i.test(path) || path.startsWith('/api/secure-files/')) {
+        return path
+      }
+      return this.$getFileUrl ? this.$getFileUrl(path) : null
+    },
+
+    isDXF(path) {
+      if (!path) return false
+      const clean = String(path).split('?')[0].split('#')[0]
+      return clean.toLowerCase().endsWith('.dxf')
     },
 
     isPDF(path) {
       if (!path) return false
-      try {
-        const clean = path.split('?')[0].split('#')[0]
-        return clean.toLowerCase().endsWith('.pdf')
-      } catch (e) {
-        return path.toLowerCase().endsWith('.pdf')
-      }
+      const clean = String(path).split('?')[0].split('#')[0]
+      return clean.toLowerCase().endsWith('.pdf')
     },
 
     onViewFile(file) {
       if (!file?.path) return
 
-      const url = this.fileUrl(file.path)
-
-      if (this.isPDF(file.path)) {
-        this.$emit('view-file', url)
+      if (this.isPDF(file.path) || this.isDXF(file.path)) {
+        this.$emit('view-file', file.path)
         return
       }
 
-      if (url) {
-        window.open(url, '_blank')
-      }
+      const url = this.fileUrl(file.path)
+      if (url) window.open(url, '_blank', 'noopener')
     },
 
-    // status code → label (Հայերեն)
     statusLabel(status) {
       switch (status) {
         case 'confirmed':
@@ -453,7 +468,6 @@ export default {
       }
     },
 
-    // status code → գույն
     statusPillClass(status) {
       switch (status) {
         case 'confirmed':
