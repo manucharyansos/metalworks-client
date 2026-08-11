@@ -17,7 +17,6 @@ import DxfParser from 'dxf-parser'
 export default {
   name: 'DxfCanvas',
   props: {
-    // ENCODED path (we encode in caller)
     dxfUrl: { type: String, required: true },
   },
   data() {
@@ -48,6 +47,14 @@ export default {
     this.cleanupThreeJS()
   },
   methods: {
+    secureUrl() {
+      if (!this.dxfUrl) return null
+      if (/^https?:\/\//i.test(this.dxfUrl) || this.dxfUrl.startsWith('/api/secure-files/')) {
+        return this.dxfUrl
+      }
+      return this.$getFileUrl ? this.$getFileUrl(this.dxfUrl) : this.dxfUrl
+    },
+
     initThreeJS() {
       const canvas = this.$refs.canvas
       this.scene = new THREE.Scene()
@@ -62,7 +69,7 @@ export default {
     },
     resizeRenderer() {
       const canvas = this.$refs.canvas
-      if (!canvas) return
+      if (!canvas || !this.renderer || !this.camera) return
       const rect = canvas.getBoundingClientRect()
       const width = Math.max(200, rect.width)
       const height = Math.max(200, rect.height)
@@ -95,31 +102,25 @@ export default {
       }
     },
     async loadDxfFile() {
+      const url = this.secureUrl()
+      if (!url) return
+
       try {
-        // encoded path comes from parent
-        const url = `/api/factories/getFile/${this.dxfUrl}`
-        const response = await this.$axios.get(url)
+        const response = await this.$axios.get(url, {
+          responseType: 'text',
+          transformResponse: [(data) => data],
+        })
         if (response.status !== 200)
           throw new Error(`HTTP սխալ ${response.status}`)
 
-        const fileData = response.data
-        if (!fileData || !fileData.content)
-          throw new Error('Ֆայլի տվյալները բացակայում են։')
+        const dxfText = String(response.data || '')
+        if (!dxfText.trim()) throw new Error('Ֆայլի տվյալները բացակայում են։')
 
-        // try to extract plain DXF text from nested base64/json
-        let dxfText
-        try {
-          const jsonData = atob(fileData.content)
-          const parsed = JSON.parse(jsonData)
-          dxfText = parsed.content ? atob(parsed.content) : jsonData
-        } catch {
-          dxfText = atob(fileData.content)
-        }
         this.parseDxf(dxfText)
         this.error = null
       } catch (e) {
         console.error('DXF load error:', e)
-        this.error = e.message
+        this.error = e?.response?.data?.message || e.message
       }
     },
     parseDxf(dxfText) {
@@ -147,12 +148,10 @@ export default {
             )
             this.dxfGroup.add(new THREE.Line(geometry, material))
           }
-          // (կարող ենք ավելացնել CIRCLE/ARC/SPLINE ըստ անհրաժեշտության)
         })
 
         this.scene.add(this.dxfGroup)
 
-        // fit to view
         const box = new THREE.Box3().setFromObject(this.dxfGroup)
         const center = box.getCenter(new THREE.Vector3())
         const size = box.getSize(new THREE.Vector3())
