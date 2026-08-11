@@ -102,9 +102,9 @@ export default {
         { to: '/profile', label: 'Անձնական էջ', permission: null, icon: 'profile', exact: true },
       ],
       actionItems: [
-        { to: '/manager/create/users', label: 'Նոր հաճախորդ', permission: 'clients.create' },
-        { to: '/manager/create/workers', label: 'Նոր աշխատակից', permission: 'workers.create' },
-        { to: '/manager/create/materials', label: 'Նոր նյութ', permission: 'materials.create' },
+        { to: '/manager/clients?create=1', label: 'Նոր հաճախորդ', permission: 'clients.create' },
+        { to: '/manager/workers?create=1', label: 'Նոր աշխատակից', permission: 'workers.create' },
+        { to: '/manager/materials?create=1', label: 'Նոր նյութ', permission: 'materials.create' },
       ],
     }
   },
