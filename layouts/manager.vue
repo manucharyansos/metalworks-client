@@ -1,128 +1,88 @@
 <template>
-  <div class="relative min-h-screen">
-    <!-- Mobile toggle -->
-    <button
-      type="button"
-      class="fixed top-3 right-3 z-50 p-2 rounded-lg lg:hidden bg-white/90 text-gray-700 shadow hover:bg-white focus:outline-none"
-      :aria-expanded="isSidebarOpen"
-      :aria-label="isSidebarOpen ? 'Close sidebar' : 'Open sidebar'"
-      @click="toggleSidebar"
-    >
-      <svg
-        v-if="!isSidebarOpen"
-        class="w-6 h-6"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-        />
-      </svg>
-      <svg v-else class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-        <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 011.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-        />
-      </svg>
-    </button>
+  <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div v-if="isSidebarOpen" class="fixed inset-0 z-30 bg-slate-950/35 backdrop-blur-sm lg:hidden" @click="closeSidebar"></div>
 
-    <!-- Backdrop (mobile) -->
-    <div
-      v-if="isSidebarOpen && !isDesktop"
-      class="fixed inset-0 z-30 bg-black/40 backdrop-blur-[1px]"
-      @click="closeSidebar"
-    />
-
-    <!-- Sidebar -->
     <aside
-      class="fixed inset-y-0 left-0 z-40 w-72 lg:w-64 bg-gray-900 text-gray-50 transform-gpu transition-transform duration-300 ease-out lg:translate-x-0 will-change-transform"
-      :class="{
-        '-translate-x-full': !isSidebarOpen && !isDesktop,
-        'translate-x-0': isSidebarOpen || isDesktop,
-      }"
-      aria-label="Sidebar"
-      :aria-hidden="!isSidebarOpen && !isDesktop"
+      class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:translate-x-0 lg:shadow-none"
+      :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
     >
-      <div class="relative h-full px-4 py-6 overflow-y-auto">
-        <ul class="mt-2 space-y-2">
-          <li>
-            <nuxt-link
-              ref="firstLink"
-              to="/manager"
-              exact-active-class="manager-active-link"
-              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
-              @click.native="onNavClick"
-            >
-              Գլխավոր
-            </nuxt-link>
-          </li>
+      <div class="flex h-20 items-center justify-between border-b border-slate-100 px-5 dark:border-slate-800">
+        <nuxt-link to="/manager" class="flex min-w-0 items-center gap-3" @click.native="closeSidebar">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-black tracking-tight">MetalWorks</p>
+            <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Manager workspace</p>
+          </div>
+        </nuxt-link>
+        <button type="button" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" @click="closeSidebar">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18 18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
 
-          <li>
-            <nuxt-link
-              to="/manager/clients"
-              exact-active-class="manager-active-link"
-              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
-              @click.native="onNavClick"
-            >
-              Հաճախորդներ
-            </nuxt-link>
-          </li>
+      <div class="flex-1 overflow-y-auto px-4 py-5">
+        <p class="px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Կառավարում</p>
+        <nav class="mt-3 space-y-1.5">
+          <nuxt-link
+            v-for="item in visibleNavItems"
+            :key="item.to"
+            :to="item.to"
+            class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950"
+            :exact="item.exact"
+            @click.native="closeSidebar"
+          >
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition group-hover:bg-white dark:bg-slate-800 dark:text-slate-300 dark:group-hover:bg-slate-700" :class="isRouteActive(item) ? '!bg-white/15 !text-current dark:!bg-slate-200' : ''">
+              <svg v-if="item.icon === 'orders'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2Zm2 4h6M9 12h6M9 16h4" /></svg>
+              <svg v-else-if="item.icon === 'clients'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m7-10a4 4 0 100-8 4 4 0 000 8Zm13 10v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg>
+              <svg v-else-if="item.icon === 'workers'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 12a4 4 0 100-8 4 4 0 000 8Zm-7 9a7 7 0 0114 0m2-8v6m-3-3h6" /></svg>
+              <svg v-else-if="item.icon === 'materials'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m12 3 8 4-8 4-8-4 8-4Zm-8 9 8 4 8-4M4 17l8 4 8-4" /></svg>
+              <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 21a8 8 0 10-16 0m8-10a4 4 0 100-8 4 4 0 000 8Z" /></svg>
+            </span>
+            <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+          </nuxt-link>
+        </nav>
 
-          <li>
+        <div v-if="quickActions.length" class="mt-7">
+          <p class="px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Արագ գործողություններ</p>
+          <div class="mt-3 space-y-1.5">
             <nuxt-link
-              to="/manager/workers"
-              exact-active-class="manager-active-link"
-              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
-              @click.native="onNavClick"
+              v-for="item in quickActions"
+              :key="item.to"
+              :to="item.to"
+              class="flex items-center gap-2 rounded-xl border border-dashed border-slate-200 px-3 py-2.5 text-xs font-bold text-slate-500 transition hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+              @click.native="closeSidebar"
             >
-              Աշխատակիցներ
+              <span class="text-base leading-none">+</span>{{ item.label }}
             </nuxt-link>
-          </li>
+          </div>
+        </div>
+      </div>
 
-          <li>
-            <nuxt-link
-              to="/manager/materials"
-              exact-active-class="manager-active-link"
-              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
-              @click.native="onNavClick"
-            >
-              Նյութեր
-            </nuxt-link>
-          </li>
-
-          <li>
-            <nuxt-link
-              :to="localePath('/profile')"
-              exact-active-class="manager-active-link"
-              class="flex items-center p-2 rounded-lg hover:bg-gray-800 focus:bg-gray-800 focus:outline-none"
-              @click.native="onNavClick"
-            >
-              Անձնական էջ
-            </nuxt-link>
-          </li>
-        </ul>
-
-        <button
-          type="button"
-          class="absolute bottom-6 left-4 right-4 flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-100 w-auto"
-          @click="logout"
-        >
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M3 4.75A1.75 1.75 0 014.75 3h5.5A1.75 1.75 0 0112 4.75V7a.75.75 0 01-1.5 0V4.75a.25.25 0 00-.25-.25h-5.5a.25.25 0 00-.25.25v10.5c0 .138.112.25.25.25h5.5a.25.25 0 00.25-.25V13a.75.75 0 011.5 0v2.25A1.75 1.75 0 0110.25 17h-5.5A1.75 1.75 0 013 15.25V4.75zM13.47 10.53a.75.75 0 010-1.06l2-2a.75.75 0 111.06 1.06L15.81 9.25H8.75a.75.75 0 000 1.5h7.06l.72.72a.75.75 0 001.06-1.06l-2-2z"
-            />
-          </svg>
-          <span>Log out</span>
+      <div class="border-t border-slate-100 p-4 dark:border-slate-800">
+        <div class="mb-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-950/50">
+          <p class="truncate text-xs font-bold text-slate-800 dark:text-slate-100">{{ currentUser.name || 'Manager' }}</p>
+          <p class="mt-1 truncate text-[10px] text-slate-400">{{ currentUser.email || '' }}</p>
+        </div>
+        <button type="button" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-3 py-2.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50 dark:border-slate-700 dark:text-rose-300 dark:hover:bg-rose-950/20" @click="logout">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 17l5-5-5-5M15 12H3m8-8h7a2 2 0 012 2v12a2 2 0 01-2 2h-7" /></svg>
+          Դուրս գալ
         </button>
       </div>
     </aside>
 
-    <div class="lg:ml-64 transition-[margin] duration-300 ease-out">
+    <div class="min-h-screen lg:pl-72">
+      <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-3">
+          <button type="button" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" @click="toggleSidebar">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
+          <div>
+            <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Manager</p>
+            <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ pageTitle }}</p>
+          </div>
+        </div>
+        <div class="hidden rounded-xl bg-slate-100 px-3 py-2 text-[10px] font-bold text-slate-500 sm:block dark:bg-slate-800 dark:text-slate-300">{{ grantedCount }} ֆունկցիա հասանելի</div>
+      </header>
       <Nuxt />
     </div>
   </div>
@@ -134,121 +94,56 @@ export default {
   data() {
     return {
       isSidebarOpen: false,
-      isDesktop: false,
-      openLang: false,
+      navItems: [
+        { to: '/manager', label: 'Պատվերներ', permission: 'orders.view', icon: 'orders', exact: true },
+        { to: '/manager/clients', label: 'Հաճախորդներ', permission: 'clients.view', icon: 'clients', exact: false },
+        { to: '/manager/workers', label: 'Աշխատակիցներ', permission: 'workers.view', icon: 'workers', exact: false },
+        { to: '/manager/materials', label: 'Նյութեր', permission: 'materials.view', icon: 'materials', exact: false },
+        { to: '/profile', label: 'Անձնական էջ', permission: null, icon: 'profile', exact: true },
+      ],
+      actionItems: [
+        { to: '/manager/create/users', label: 'Նոր հաճախորդ', permission: 'clients.create' },
+        { to: '/manager/create/workers', label: 'Նոր աշխատակից', permission: 'workers.create' },
+        { to: '/manager/create/materials', label: 'Նոր նյութ', permission: 'materials.create' },
+      ],
     }
   },
   computed: {
-    locales() {
-      const base =
-        this.$i18n && this.$i18n.locales && this.$i18n.locales.length
-          ? this.$i18n.locales
-          : [
-              { code: 'hy', name: 'Հայերեն' },
-              { code: 'ru', name: 'Русский' },
-              { code: 'en', name: 'English' },
-            ]
-      const flags = { hy: '🇦🇲', ru: '🇷🇺', en: '🇬🇧' }
-      return base.map((l) => ({ ...l, flag: flags[l.code] || '🏳️' }))
+    currentUser() {
+      return this.$auth.user || {}
     },
-    currentLocaleCode() {
-      return this.$i18n && this.$i18n.locale ? this.$i18n.locale : 'hy'
+    visibleNavItems() {
+      return this.navItems.filter((item) => !item.permission || this.$can(item.permission))
     },
-    activeLocale() {
-      return (
-        this.locales.find((l) => l.code === this.currentLocaleCode) || {
-          code: 'hy',
-          name: 'Հայերեն',
-          flag: '🇦🇲',
-        }
-      )
+    quickActions() {
+      return this.actionItems.filter((item) => this.$can(item.permission))
+    },
+    grantedCount() {
+      return Array.isArray(this.currentUser.permissions) ? this.currentUser.permissions.length : 0
+    },
+    pageTitle() {
+      const found = this.navItems.find((item) => this.isRouteActive(item))
+      return found ? found.label : 'Կառավարման տարածք'
     },
   },
-  mounted() {
-    this.onResize()
-    window.addEventListener('resize', this.onResize, { passive: true })
-    document.addEventListener('keydown', this.onKeydown)
-    document.addEventListener('click', this.onDocumentClick)
-
-    this._unwatch = this.$watch(
-      () => this.$route.fullPath,
-      () => {
-        if (!this.isDesktop) this.closeSidebar()
-      }
-    )
-  },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.onResize)
-    document.removeEventListener('keydown', this.onKeydown)
-    document.removeEventListener('click', this.onDocumentClick)
-    if (this._unwatch) this._unwatch()
+  watch: {
+    '$route.fullPath'() {
+      this.closeSidebar()
+    },
   },
   methods: {
-    onResize() {
-      this.isDesktop = window.matchMedia('(min-width: 1024px)').matches
-      if (this.isDesktop) {
-        this.unlockScroll()
-      } else if (!this.isSidebarOpen) {
-        this.unlockScroll()
-      }
-    },
-    onKeydown(e) {
-      if (e.key === 'Escape' && this.isSidebarOpen && !this.isDesktop) {
-        this.closeSidebar()
-      }
-    },
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen
-      if (this.isSidebarOpen && !this.isDesktop) {
-        this.$nextTick(() => {
-          this.$refs.firstLink && this.$refs.firstLink.$el?.focus?.()
-        })
-        this.lockScroll()
-      } else {
-        this.unlockScroll()
-      }
     },
     closeSidebar() {
       this.isSidebarOpen = false
-      this.unlockScroll()
     },
-    onNavClick() {
-      if (!this.isDesktop) this.closeSidebar()
+    isRouteActive(item) {
+      return item.exact ? this.$route.path === item.to : this.$route.path.startsWith(item.to)
     },
-    lockScroll() {
-      document.documentElement.classList.add('overflow-hidden')
-    },
-    unlockScroll() {
-      document.documentElement.classList.remove('overflow-hidden')
-    },
-    logout() {
-      this.$auth.logout()
-    },
-    onDocumentClick(e) {
-      const asideEl = this.$el.querySelector('aside')
-      if (!asideEl) return
-      const clickInside = asideEl.contains(e.target)
-      if (!clickInside) this.openLang = false
-    },
-
-    async changeLocale(code) {
-      if (!this.$i18n || !code || code === this.currentLocaleCode) {
-        this.openLang = false
-        return
-      }
-      await this.$i18n.setLocale(code)
-      this.openLang = false
+    async logout() {
+      await this.$auth.logout()
     },
   },
 }
 </script>
-
-<style scoped>
-aside {
-  will-change: transform;
-}
-
-.manager-active-link {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-</style>
