@@ -65,9 +65,7 @@
             <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ pageTitle }}</p>
           </div>
         </div>
-        <div class="hidden items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-[10px] font-bold text-slate-500 sm:flex dark:bg-slate-800 dark:text-slate-300">
-          {{ grantedCount }} ֆունկցիա հասանելի
-        </div>
+        <div class="hidden items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-[10px] font-bold text-slate-500 sm:flex dark:bg-slate-800 dark:text-slate-300">{{ grantedCount }} ֆունկցիա հասանելի</div>
       </header>
       <Nuxt />
     </div>
@@ -82,45 +80,27 @@ export default {
       isSidebarOpen: false,
       navItems: [
         { to: '/engineer', label: 'Պատվերներ', permission: 'orders.view', icon: 'orders', exact: true },
-        { to: '/engineer/files', label: 'Ֆայլեր', permission: 'pmp_files.view', icon: 'files', exact: false },
+        { to: '/engineer/files', label: 'Ֆայլեր և PMP', permission: 'pmp.view', icon: 'files', exact: false },
         { to: '/engineer/orders/create', label: 'Ստեղծել պատվեր', permission: 'orders.create', icon: 'plus', exact: true },
         { to: '/profile', label: 'Անձնական էջ', permission: null, icon: 'profile', exact: true },
       ],
     }
   },
   computed: {
-    currentUser() {
-      return this.$auth.user || {}
-    },
-    visibleNavItems() {
-      return this.navItems.filter((item) => !item.permission || this.$can(item.permission))
-    },
-    grantedCount() {
-      return Array.isArray(this.currentUser.permissions) ? this.currentUser.permissions.length : 0
-    },
+    currentUser() { return this.$auth.user || {} },
+    visibleNavItems() { return this.navItems.filter((item) => !item.permission || this.$can(item.permission)) },
+    grantedCount() { return Array.isArray(this.currentUser.permissions) ? this.currentUser.permissions.length : 0 },
     pageTitle() {
       const found = this.navItems.find((item) => this.isRouteActive(item))
       return found ? found.label : 'Աշխատանքային տարածք'
     },
   },
-  watch: {
-    '$route.fullPath'() {
-      this.closeSidebar()
-    },
-  },
+  watch: { '$route.fullPath'() { this.closeSidebar() } },
   methods: {
-    toggleSidebar() {
-      this.isSidebarOpen = !this.isSidebarOpen
-    },
-    closeSidebar() {
-      this.isSidebarOpen = false
-    },
-    isRouteActive(item) {
-      return item.exact ? this.$route.path === item.to : this.$route.path.startsWith(item.to)
-    },
-    async logout() {
-      await this.$auth.logout()
-    },
+    toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen },
+    closeSidebar() { this.isSidebarOpen = false },
+    isRouteActive(item) { return item.exact ? this.$route.path === item.to : this.$route.path.startsWith(item.to) },
+    async logout() { await this.$auth.logout() },
   },
 }
 </script>
