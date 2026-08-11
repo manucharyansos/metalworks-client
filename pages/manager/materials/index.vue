@@ -74,16 +74,36 @@ export default {
     search() {
       this.load(1)
     },
+    '$route.query.create'() {
+      this.openFromQuery()
+    },
+    '$route.query.edit'() {
+      this.openFromQuery()
+    },
   },
   async mounted() {
-    await this.fetchCategories()
+    if (this.$can('material_categories.view')) {
+      await this.fetchCategories()
+    }
     await this.load()
+    this.openFromQuery()
   },
   methods: {
     ...mapActions('materials', ['fetchMaterials', 'deleteMaterial']),
     ...mapActions('categories', ['fetchCategories']),
     async load(page = 1) {
       await this.fetchMaterials({ page, perPage: this.pagination.per_page || 10, search: this.search, categoryId: this.selectedCategory?.id || null })
+    },
+    openFromQuery() {
+      if (this.$route.query.create === '1' && this.$can('materials.create')) {
+        this.openCreate()
+        return
+      }
+      const editId = Number(this.$route.query.edit)
+      if (editId && this.$can('materials.update')) {
+        const item = this.materials.find((material) => Number(material.id) === editId)
+        if (item) this.openEdit(item)
+      }
     },
     goPage(p) {
       if (p < 1 || p > this.pagination.last_page) return
@@ -106,6 +126,9 @@ export default {
     closeForm() {
       this.isFormOpen = false
       this.editingItem = null
+      if (this.$route.query.create || this.$route.query.edit) {
+        this.$router.replace({ path: this.$route.path, query: {} }).catch(() => {})
+      }
     },
     confirmDelete(row) {
       if (this.$can('materials.delete')) this.pendingDelete = row
