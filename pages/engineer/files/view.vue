@@ -2,7 +2,6 @@
   <main
     class="p-4 md:p-6 lg:p-8 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
   >
-    <!-- Loading Overlay -->
     <transition name="fade">
       <div
         v-if="loading"
@@ -14,7 +13,6 @@
       </div>
     </transition>
 
-    <!-- Breadcrumb -->
     <transition name="slide-up">
       <nav v-if="breadcrumb.length" class="mb-6">
         <ol
@@ -59,9 +57,7 @@
     <div
       class="grid grid-cols-1 lg:grid-cols-[minmax(300px,_1fr)_3fr] gap-6 xl:gap-8"
     >
-      <!-- Left Panel -->
       <aside class="space-y-6">
-        <!-- Remote Numbers -->
         <transition v-if="isOpen === 'remote_number'" name="fade-scale">
           <section class="grid gap-3">
             <button
@@ -100,7 +96,6 @@
           </section>
         </transition>
 
-        <!-- Factories -->
         <transition
           v-else-if="isOpen === 'factories'"
           class="space-y-4"
@@ -153,7 +148,6 @@
                 >
               </button>
 
-              <!-- Files List -->
               <transition
                 v-if="isOpenFiles === factory.id"
                 class="mt-3 space-y-2 pl-4 border-l-2 border-blue-500"
@@ -178,7 +172,7 @@
                         class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <button
-                          v-if="$can('pmp_files.upload')"
+                          v-if="$can('pmp_files.view')"
                           class="text-xs text-blue-600 hover:underline"
                           @click.stop="downloadFile(file)"
                         >
@@ -198,8 +192,8 @@
                     </div>
                   </div>
 
-                  <!-- Add File Button -->
                   <button
+                    v-if="$can('pmp_files.upload')"
                     :disabled="loading"
                     class="w-full mt-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
                     @click="openAddFileModal"
@@ -226,7 +220,6 @@
         </transition>
       </aside>
 
-      <!-- Right Panel -->
       <section
         class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 lg:p-8 min-h-[70vh] flex flex-col"
       >
@@ -236,7 +229,6 @@
               v-if="selectedFile && $can('pmp_files.view')"
               class="flex-1 flex flex-col"
             >
-              <!-- DXF Meta (միայն DXF-ի համար) -->
               <div
                 v-if="isDxfFile && selectedFile"
                 class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
@@ -275,16 +267,14 @@
                 </div>
               </div>
 
-              <!-- Ֆայլի անուն -->
               <h3
                 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center break-all"
               >
                 {{ selectedFile.original_name }}
               </h3>
 
-              <!-- DXF Viewer -->
               <div
-                v-if="fileType === 'dxf' && dxfUrl && $can('pmp_files.upload')"
+                v-if="fileType === 'dxf' && dxfUrl && $can('pmp_files.view')"
                 class="flex-1 min-h-0"
               >
                 <DxfViewerModal
@@ -296,52 +286,50 @@
                 />
               </div>
 
-              <!-- PDF -->
               <div v-else-if="fileType === 'pdf'" class="flex-1">
                 <embed
-                  :src="fileUrl(selectedFile.path)"
+                  :src="fileUrl(selectedFile)"
                   type="application/pdf"
                   class="w-full h-full min-h-[60vh] rounded-lg border"
                 />
                 <a
-                  v-if="$can('pmp_files.upload')"
-                  :href="fileUrl(selectedFile.path)"
+                  v-if="$can('pmp_files.view')"
+                  :href="fileUrl(selectedFile)"
                   target="_blank"
+                  rel="noopener"
                   class="mt-3 block text-center text-blue-600 hover:underline"
                 >
                   Բացել նոր պատուհանում
                 </a>
               </div>
 
-              <!-- Image -->
               <div
                 v-else-if="fileType === 'image'"
                 class="flex justify-center items-center flex-1"
               >
-                <a :href="fileUrl(selectedFile.path)" target="_blank">
+                <a :href="fileUrl(selectedFile)" target="_blank" rel="noopener">
                   <img
-                    :src="fileUrl(selectedFile.path)"
+                    :src="fileUrl(selectedFile)"
                     class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md"
                     :alt="selectedFile.original_name"
                   />
                 </a>
               </div>
 
-              <!-- CAD file download -->
               <div v-else-if="fileType === 'cad'" class="text-center py-12">
                 <p class="text-gray-600 dark:text-gray-400 mb-4">
                   {{ selectedFile.original_name }} ({{
                     fileType.toUpperCase()
                   }})
                 </p>
-                <a
-                  v-if="$can('pmp_files.upload')"
-                  :href="fileUrl(selectedFile.path)"
-                  :download="selectedFile.original_name"
+                <button
+                  v-if="$can('pmp_files.view')"
+                  type="button"
                   class="inline-block px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-lg hover:shadow-lg transition-all"
+                  @click="downloadFile(selectedFile)"
                 >
                   Ներբեռնել
-                </a>
+                </button>
               </div>
             </div>
             <div
@@ -372,7 +360,6 @@
       </section>
     </div>
 
-    <!-- Add File Modal -->
     <AddFileModal
       :is-open-modal="isOpenAddFileModal"
       :file="currentFile"
@@ -645,8 +632,8 @@ export default {
           await this.fetchPmp(this.id)
           this.selectedFiles = (this.getPmp.files || []).filter(
             (f) =>
-              f.remote_number_id === this.selectedRemoteNumberId &&
-              f.factory_id === this.selectedFactoryId
+              this.n(f.remote_number_id) === this.n(this.selectedRemoteNumberId) &&
+              this.n(f.factory_id) === this.n(this.selectedFactoryId)
           )
           this.isOpenAddFileModal = false
           this.resetFileFields()
@@ -670,23 +657,34 @@ export default {
     },
 
     async downloadFile(file) {
-      const path = String(file.path).replace(/\\/g, '/')
-      await this.downloadUploadedFile({
-        path,
-        original_name: file.original_name,
-      })
+      try {
+        await this.downloadUploadedFile(file)
+      } catch (error) {
+        this.$notify?.({
+          text:
+            error?.response?.data?.message ||
+            error?.message ||
+            'Ֆայլի ներբեռնումը ձախողվեց',
+          type: 'error',
+        })
+      }
     },
 
-    fileUrl(filePath) {
-      return `${this.$axios.defaults.baseURL}/storage/${filePath}`
+    fileUrl(file) {
+      if (!file) return null
+      if (file.id && this.$getPmpFileUrl) return this.$getPmpFileUrl(file)
+      return this.$getFileUrl ? this.$getFileUrl(file.path) : null
     },
 
     getFileType(name) {
-      const ext = name.toLowerCase().split('.').pop()
+      const ext = String(name || '').toLowerCase().split('.').pop()
       if (ext === 'dxf') return 'dxf'
       if (ext === 'pdf') return 'pdf'
-      if (['jpg', 'jpeg', 'png', 'eps'].includes(ext)) return 'image'
-      if (['step', 'sldprt', 'sldasm', 'slddrw', 'solid'].includes(ext))
+      if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'eps'].includes(ext))
+        return 'image'
+      if (
+        ['step', 'stp', 'sldprt', 'sldasm', 'slddrw', 'solid', 'igs', 'iges', 'dwg'].includes(ext)
+      )
         return 'cad'
       return null
     },
