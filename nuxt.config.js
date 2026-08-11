@@ -45,7 +45,7 @@ export default {
   router: {
     // base: '/work/',
     base: process.env.NUXT_ROUTER_BASE || '/',
-    middleware: ['roleRedirect'],
+    middleware: ['roleRedirect', 'permission-guard'],
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
