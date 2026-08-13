@@ -38,6 +38,18 @@ jobs:
       - name: Build production client
         run: npm run build
 
+      - name: Upload production build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: metalworks-client-production-build
+          include-hidden-files: true
+          retention-days: 7
+          path: |
+            .
+            !node_modules/**
+            !.git/**
+            !.vercel/**
+
   node24-compatibility:
     name: Node 24 compatibility probe
     runs-on: ubuntu-latest
