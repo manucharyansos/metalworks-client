@@ -1,0 +1,64 @@
+name: Client Security CI
+
+on:
+  push:
+    branches:
+      - master
+      - security-hardening/client
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-node20:
+    name: Build on current Node 20
+    runs-on: ubuntu-latest
+    env:
+      API_BASE_URL: https://api.metalworks.am
+      BASE_URL: https://api.metalworks.am
+      NUXT_ROUTER_BASE: /
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies from lockfile
+        run: npm ci
+
+      - name: Audit production dependencies
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=critical
+
+      - name: Build production client
+        run: npm run build
+
+  node24-compatibility:
+    name: Node 24 compatibility probe
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      API_BASE_URL: https://api.metalworks.am
+      BASE_URL: https://api.metalworks.am
+      NUXT_ROUTER_BASE: /
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies from lockfile
+        run: npm ci
+
+      - name: Build production client
+        run: npm run build

@@ -1,34 +1,22 @@
 import axios from 'axios'
 
+const apiBaseURL =
+  process.env.API_BASE_URL || process.env.BASE_URL || 'https://api.metalworks.am'
+
 const axiosInstance = axios.create({
-  baseURL: 'https://api.metalworks.am',
-  // baseURL: 'http://localhost:8000',
+  baseURL: apiBaseURL,
   timeout: 10000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('authToken')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
-
+// Keep this standalone instance compatible with Sanctum's cookie-based SPA
+// authentication. Do not persist bearer credentials in localStorage.
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      return Promise.reject(error)
-    }
-  }
+  (error) => Promise.reject(error)
 )
 
 export default axiosInstance

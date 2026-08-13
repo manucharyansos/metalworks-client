@@ -1,8 +1,7 @@
 <template>
   <div class="w-full h-full relative">
-    <!-- Close button -->
     <button
-      class="absolute top-3 right-3 flex items-center justify-center rounded-lg text-sm transition"
+      class="absolute top-3 right-3 z-10 flex items-center justify-center rounded-lg text-sm transition"
       @click="$emit('close')"
     >
       <svg
@@ -27,10 +26,8 @@
       </svg>
     </button>
 
-    <!-- DXF canvas -->
     <canvas ref="canvas" class="w-full h-full block"></canvas>
 
-    <!-- Laser info (optional) -->
     <div
       v-if="showLaserInfo && laserLengthMmRounded > 0"
       class="absolute left-2 top-2 px-3 py-1.5 rounded-lg bg-black/70 text-[11px] text-white backdrop-blur-sm flex flex-col gap-0.5 max-w-[280px]"
@@ -45,7 +42,6 @@
       </div>
     </div>
 
-    <!-- Error badge -->
     <div
       v-if="error"
       class="absolute left-2 bottom-2 px-2 py-1 text-xs rounded bg-red-600 text-white"
@@ -65,12 +61,10 @@ export default {
   name: 'DxfCanvasViewer',
   props: {
     dxfUrl: { type: String, required: true },
-
     fileMeta: {
       type: Object,
       default: null,
     },
-
     showLaserInfo: {
       type: Boolean,
       default: true,
@@ -85,7 +79,6 @@ export default {
       dxfGroup: null,
       error: null,
       raf: null,
-
       laserLengthMm: 0,
     }
   },
@@ -110,6 +103,9 @@ export default {
     dxfUrl() {
       this.loadDxfFile()
     },
+    'fileMeta.id'() {
+      this.loadDxfFile()
+    },
   },
   mounted() {
     this.initThree()
@@ -121,8 +117,56 @@ export default {
     this.cleanupThree()
   },
   methods: {
+    resolveSecureUrl() {
+      if (this.fileMeta?.id && this.$getPmpFileUrl) {
+        return this.$getPmpFileUrl(this.fileMeta)
+      }
+
+      const raw = String(this.dxfUrl || '')
+      if (!raw) return null
+
+      if (/^https?:\/\//i.test(raw) || raw.startsWith('/api/secure-files/')) {
+        return raw
+      }
+
+      return this.$getFileUrl ? this.$getFileUrl(raw) : raw
+    },
+
+    normalizeDxfResponse(data) {
+      if (typeof data === 'string') {
+        const trimmed = data.trim()
+
+        if (trimmed.startsWith('{')) {
+          try {
+            const parsed = JSON.parse(trimmed)
+            if (parsed?.content) return atob(parsed.content)
+          } catch (_) {}
+        }
+
+        return data
+      }
+
+      if (data?.content) {
+        try {
+          const decoded = atob(data.content)
+          try {
+            const parsed = JSON.parse(decoded)
+            return parsed?.content ? atob(parsed.content) : decoded
+          } catch (_) {
+            return decoded
+          }
+        } catch (_) {
+          return String(data.content)
+        }
+      }
+
+      return String(data || '')
+    },
+
     initThree() {
       const canvas = this.$refs.canvas
+      if (!canvas) return
+
       const w = canvas.clientWidth || 960
       const h = canvas.clientHeight || 600
 
@@ -142,6 +186,7 @@ export default {
       this.scene.add(new THREE.AmbientLight(0xffffff, 1))
 
       const animate = () => {
+        if (!this.renderer || !this.scene || !this.camera || !this.controls) return
         this.raf = requestAnimationFrame(animate)
         this.controls.update()
         this.renderer.render(this.scene, this.camera)
@@ -152,6 +197,7 @@ export default {
     onResize() {
       if (!this.renderer || !this.camera) return
       const canvas = this.$refs.canvas
+      if (!canvas) return
       const w = canvas.clientWidth || 960
       const h = canvas.clientHeight || 600
       this.camera.aspect = w / h
@@ -160,7 +206,11 @@ export default {
     },
 
     cleanupThree() {
-      if (this.raf) cancelAnimationFrame(this.raf)
+      if (this.raf) {
+        cancelAnimationFrame(this.raf)
+        this.raf = null
+      }
+
       this.controls?.dispose?.()
       this.renderer?.dispose?.()
 
@@ -173,39 +223,41 @@ export default {
         })
       }
 
-      this.scene =
-        this.camera =
-        this.renderer =
-        this.controls =
-        this.dxfGroup =
-          null
-
+      this.scene = null
+      this.camera = null
+      this.renderer = null
+      this.controls = null
+      this.dxfGroup = null
       this.laserLengthMm = 0
     },
 
     async loadDxfFile() {
+      const secureUrl = this.resolveSecureUrl()
+      if (!secureUrl) return
+
       try {
         this.error = null
         this.cleanupThree()
-        this.initThree()
+        this.$nextTick(() => this.initThree())
         this.laserLengthMm = 0
 
-        const { data, status } = await this.$axios.get(
-          `/api/factories/getFile/${this.dxfUrl}`
-        )
-        if (status !== 200) throw new Error(`HTTP ${status}`)
+        const response = await this.$axios.get(secureUrl, {
+          responseType: 'text',
+          transformResponse: [(data) => data],
+        })
 
-        let dxfText = atob(data.content)
-        try {
-          const parsed = JSON.parse(dxfText)
-          dxfText = parsed?.content ? atob(parsed.content) : dxfText
-        } catch {}
+        if (response.status !== 200) throw new Error(`HTTP ${response.status}`)
 
+        const dxfText = this.normalizeDxfResponse(response.data)
+        if (!dxfText.trim()) throw new Error('Ֆայլի տվյալները դատարկ են')
+
+        await this.$nextTick()
+        if (!this.scene || !this.camera || !this.renderer) this.initThree()
         this.parseDxf(dxfText)
       } catch (e) {
         console.error(e)
-        this.error = e.message || 'Չհաջողվեց բեռնել DXF-ը'
-        this.$notify({ text: this.error, type: 'error', duration: 4000 })
+        this.error = e?.response?.data?.message || e.message || 'Չհաջողվեց բեռնել DXF-ը'
+        this.$notify?.({ text: this.error, type: 'error', duration: 4000 })
       }
     },
 
@@ -213,6 +265,9 @@ export default {
       try {
         const parser = new DxfParser()
         const dxf = parser.parseSync(dxfText)
+
+        if (!this.scene) this.initThree()
+        if (!this.scene) throw new Error('Viewer-ը չի սկզբնավորվել')
 
         if (this.dxfGroup) this.scene.remove(this.dxfGroup)
         this.dxfGroup = new THREE.Group()
@@ -366,15 +421,15 @@ export default {
             1.4
           this.camera.position.set(0, 0, Math.max(dist, 50))
           this.camera.lookAt(0, 0, 0)
-          this.controls.target.set(0, 0, 0)
-          this.controls.update()
+          this.controls?.target?.set(0, 0, 0)
+          this.controls?.update?.()
         } else {
           this.error = 'DXF-ը դատարկ է կամ չի պարունակում գծագրեր'
         }
       } catch (e) {
         console.error('DXF parse error:', e)
         this.error = e.message || 'DXF-ը չի կարող մշակվել'
-        this.$notify({ text: this.error, type: 'error', duration: 5000 })
+        this.$notify?.({ text: this.error, type: 'error', duration: 5000 })
       }
     },
   },

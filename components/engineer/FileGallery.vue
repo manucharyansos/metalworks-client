@@ -1,6 +1,5 @@
 <template>
   <div class="w-full flex flex-col space-y-6 my-2">
-    <!-- DXF -->
     <section v-if="dxfFiles.length">
       <h4 class="text-sm font-semibold mb-2">DXF Files</h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -14,7 +13,7 @@
           </div>
           <div class="flex items-center gap-2">
             <button
-              v-if="$can('pmp_files.upload')"
+              v-if="$can('pmp_files.view')"
               class="flex-1 h-10 rounded-lg bg-gray-900 text-white dark:bg-gray-700 hover:bg-black/80 transition"
               @click="downloadFile(f)"
             >
@@ -32,7 +31,6 @@
       </div>
     </section>
 
-    <!-- PDF -->
     <section v-if="pdfs.length">
       <h4 class="text-sm font-semibold mb-2">PDF Files</h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -45,7 +43,7 @@
             class="h-48 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800"
           >
             <embed
-              :src="filePreviewUrl(f.path, f.original_name)"
+              :src="filePreviewUrl(f)"
               type="application/pdf"
               class="w-full h-full"
             />
@@ -54,7 +52,7 @@
             <div class="text-xs truncate">{{ f.original_name }}</div>
             <div class="flex items-center gap-2">
               <button
-                v-if="$can('pmp_files.upload')"
+                v-if="$can('pmp_files.view')"
                 class="text-xs text-blue-600 hover:underline"
                 @click="downloadFile(f)"
               >
@@ -63,7 +61,7 @@
               <a
                 v-if="$can('pmp_files.view')"
                 class="text-xs text-gray-700 hover:underline"
-                :href="filePreviewUrl(f.path, f.original_name)"
+                :href="filePreviewUrl(f)"
                 target="_blank"
                 rel="noopener"
               >
@@ -75,28 +73,27 @@
       </div>
     </section>
 
-    <!-- Images -->
     <section v-if="images.length && $can('pmp_files.view')">
       <h4 class="text-sm font-semibold mb-2">Նկարներ</h4>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         <a
           v-for="f in images"
           :key="keyOf(f)"
-          :href="filePreviewUrl(f.path, f.original_name)"
+          :href="filePreviewUrl(f)"
           target="_blank"
           rel="noopener"
           class="block rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 group"
         >
           <img
-            :src="filePreviewUrl(f.path, f.original_name)"
+            :src="filePreviewUrl(f)"
             class="w-full h-40 object-cover group-hover:scale-[1.02] transition"
+            :alt="f.original_name"
           />
           <div class="p-2 text-[11px] truncate">{{ f.original_name }}</div>
         </a>
       </div>
     </section>
 
-    <!-- CAD (այլ) -->
     <section v-if="cadFiles.length">
       <h4 class="text-sm font-semibold mb-2">CAD Files</h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -109,7 +106,7 @@
             {{ f.original_name }}
           </div>
           <button
-            v-if="$can('pmp_files.upload')"
+            v-if="$can('pmp_files.view')"
             class="w-full h-10 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
             @click="downloadFile(f)"
           >
@@ -119,12 +116,11 @@
       </div>
     </section>
 
-    <!-- DXF viewer modal -->
     <DxfViewerModal
       v-if="showDxf"
-      :dxf-url="encodedDxfPath"
-      :file-name="currentDxfName"
-      @close="showDxf = false"
+      :dxf-url="currentDxfPath"
+      :file-meta="currentDxfFile"
+      @close="closeDxf"
     />
     <notifications />
   </div>
@@ -143,8 +139,8 @@ export default {
   data() {
     return {
       showDxf: false,
-      encodedDxfPath: null,
-      currentDxfName: null,
+      currentDxfPath: null,
+      currentDxfFile: null,
     }
   },
   computed: {
@@ -179,10 +175,10 @@ export default {
     keyOf(f) {
       return f.id || `${f.path}-${f.original_name}`
     },
-    filePreviewUrl(filePath, name) {
-      if (!filePath || typeof filePath !== 'string') return null
-      const baseURL = this.$axios.defaults.baseURL
-      return `${baseURL}/storage/${filePath}`
+    filePreviewUrl(file) {
+      if (!file) return null
+      if (file.id && this.$getPmpFileUrl) return this.$getPmpFileUrl(file)
+      return this.$getFileUrl ? this.$getFileUrl(file.path) : null
     },
     hasExt(file, exts) {
       const p = (file?.path || '').toLowerCase()
@@ -191,7 +187,7 @@ export default {
     },
     async downloadFile(file) {
       try {
-        if (!file || typeof file.path !== 'string') {
+        if (!file?.id && !file?.path) {
           this.$notify?.({
             text: 'Ֆայլի ներբեռնումը ձախողվեց',
             duration: 3000,
@@ -201,14 +197,10 @@ export default {
           })
           return
         }
-        const sanitizedPath = String(file.path).replace(/\\/g, '/')
-        await this.downloadUploadedFile({
-          path: sanitizedPath,
-          original_name: file.original_name || 'downloaded_file',
-        })
+        await this.downloadUploadedFile(file)
       } catch (e) {
-        this.$notify({
-          text: e,
+        this.$notify?.({
+          text: e?.response?.data?.message || e?.message || String(e),
           duration: 3000,
           speed: 1000,
           position: 'top',
@@ -217,9 +209,14 @@ export default {
       }
     },
     openDxf(file) {
-      this.encodedDxfPath = String(file.path).replace(/\\/g, '/')
-      this.currentDxfName = file?.original_name || 'DXF'
-      this.showDxf = true
+      this.currentDxfFile = file
+      this.currentDxfPath = String(file?.path || '').replace(/\\/g, '/')
+      this.showDxf = Boolean(this.currentDxfPath)
+    },
+    closeDxf() {
+      this.showDxf = false
+      this.currentDxfPath = null
+      this.currentDxfFile = null
     },
   },
 }

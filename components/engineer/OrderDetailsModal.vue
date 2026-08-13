@@ -4,17 +4,14 @@
       v-if="visible"
       class="fixed inset-0 z-50 flex items-center justify-center"
     >
-      <!-- backdrop -->
       <div class="absolute inset-0 bg-black/40" @click="$emit('close')" />
 
-      <!-- modal -->
       <div
         class="relative max-h-[90vh] overflow-y-auto w-[95%] max-w-4xl bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6"
         role="dialog"
         aria-modal="true"
         @keydown.esc="$emit('close')"
       >
-        <!-- header -->
         <div class="flex items-start justify-between gap-3 mb-4">
           <div>
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
@@ -33,7 +30,6 @@
           </button>
         </div>
 
-        <!-- meta cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div
             class="p-4 rounded-xl border border-gray-200 dark:border-gray-800"
@@ -78,7 +74,6 @@
           </div>
         </div>
 
-        <!-- timeline (finish date) -->
         <div v-if="finishDate" class="mb-6">
           <h4 class="text-sm font-semibold mb-2">Ժամանակագրություն</h4>
           <ul class="space-y-2">
@@ -100,7 +95,6 @@
           </ul>
         </div>
 
-        <!-- files summary -->
         <div class="mb-3 flex flex-wrap items-center gap-2">
           <span class="text-sm text-gray-600 dark:text-gray-300"
             >Ֆայլերի ամփոփում</span
@@ -122,7 +116,6 @@
           </span>
         </div>
 
-        <!-- factories with their OWN files only -->
         <div v-if="(order?.factory_orders || []).length" class="mb-6">
           <h4 class="text-sm font-semibold mb-2">Արտադրամասեր</h4>
           <div class="space-y-4">
@@ -148,13 +141,11 @@
                 </div>
               </div>
 
-              <!-- ՇՈՒՐՋՓՈԽՈՒԹՅՈՒՆ՝ ցուցադրում ենք միայն տվյալ արտադրամասի ֆայլերը՝ FileGallery-ով -->
               <FileGallery :items="fo.files || []" />
             </div>
           </div>
         </div>
 
-        <!-- footer -->
         <div class="mt-6 flex justify-end">
           <button
             class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
@@ -170,7 +161,6 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
 import FileGallery from '~/components/engineer/FileGallery.vue'
 
 export default {
@@ -193,7 +183,6 @@ export default {
     finishDate() {
       return this.order?.dates?.finish_date || null
     },
-
     isOverdue() {
       if (!this.finishDate) return false
       const finish = new Date(this.finishDate)
@@ -202,8 +191,6 @@ export default {
       finish.setHours(0, 0, 0, 0)
       return finish <= today
     },
-
-    // counts
     selectedCount() {
       const arr = this.order?.selected_files || []
       return arr.reduce((a, s) => a + (Number(s.quantity) || 1), 0)
@@ -222,7 +209,6 @@ export default {
     totalCount() {
       return this.selectedCount + this.factoryCount
     },
-
     statusBadge() {
       const s = (this.order?.status || '').toLowerCase()
       if (s === 'pending')
@@ -235,7 +221,6 @@ export default {
     },
   },
   methods: {
-    ...mapActions('factory', ['downloadUploadedFile']),
     safeDate(d) {
       if (!d) return '—'
       const dt = new Date(d)
@@ -252,46 +237,6 @@ export default {
           (f.pivot && Number(f.pivot.quantity)) || Number(f.quantity) || 1
         return b + q
       }, 0)
-    },
-
-    /** Public URL for inline preview (pdf/img) */
-    publicUrl(filePath) {
-      if (!filePath || typeof filePath !== 'string') return null
-      const baseURL = this.$axios.defaults.baseURL
-      return `${baseURL}/storage/${filePath}`
-    },
-
-    /** Detect previewable by extension */
-    isPreviewable(file) {
-      const p = (file?.path || '').toLowerCase()
-      const n = (file?.original_name || '').toLowerCase()
-      return (
-        /\.pdf$/.test(p) ||
-        /\.pdf$/.test(n) ||
-        /\.(png|jpe?g|webp|gif)$/.test(p) ||
-        /\.(png|jpe?g|webp|gif)$/.test(n)
-      )
-    },
-
-    /** Force download through backend (no inline open) */
-    async downloadFile(file) {
-      try {
-        const path = file?.path
-        if (!path || typeof path !== 'string') return
-        const sanitizedPath = String(path).replace(/\\/g, '/')
-        await this.downloadUploadedFile({
-          path: sanitizedPath,
-          original_name: file?.original_name || 'file',
-        })
-      } catch (e) {
-        this.$notify({
-          text: e,
-          duration: 3000,
-          speed: 1000,
-          position: 'top',
-          type: 'error',
-        })
-      }
     },
   },
 }

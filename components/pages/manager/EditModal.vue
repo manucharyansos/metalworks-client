@@ -72,10 +72,12 @@
           </div>
         </div>
         <template v-if="otherFiles.length > 0">
-          <div v-for="(file, index) in otherFiles" :key="index">
-            <a :href="fileUrl(file.path)" target="_blank">{{
-              file.name || 'Download File'
-            }}</a>
+          <div v-for="(file, index) in otherFiles" :key="file.id || index">
+            <a
+              :href="fileUrl(file)"
+              target="_blank"
+              rel="noopener"
+            >{{ file.original_name || file.name || 'Download File' }}</a>
           </div>
         </template>
       </div>
@@ -100,8 +102,12 @@ export default {
     },
   },
   methods: {
-    fileUrl(filePath) {
-      return this.$getFileUrl(filePath);
+    fileUrl(file) {
+      if (file?.id) {
+        return `${this.$axios.defaults.baseURL}/api/secure-files/order/${file.id}`
+      }
+
+      return this.$getFileUrl(file?.path)
     },
   },
 }

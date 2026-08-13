@@ -1,198 +1,119 @@
 <template>
-  <div class="m-0 p-0 relative min-h-screen bg-gray-100">
-    <!-- Mobile Sidebar Toggle Button -->
-    <button
-      type="button"
-      class="fixed top-4 right-4 z-50 p-2 text-gray-500 rounded-lg lg:hidden hover:bg-gray-200 focus:outline-none transition-colors duration-200"
-      @click="toggleSidebar"
-    >
-      <span class="sr-only">Open sidebar</span>
-      <svg
-        class="w-6 h-6"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          fill-rule="evenodd"
-          d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-          clip-rule="evenodd"
-        ></path>
-      </svg>
-    </button>
+  <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div
+      v-if="isSidebarOpen"
+      class="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-sm lg:hidden"
+      @click="closeSidebar"
+    ></div>
 
-    <!-- Sidebar -->
     <aside
-      class="fixed top-0 left-0 z-40 w-64 h-screen bg-gray-800 shadow-xl transition-all duration-300 lg:translate-x-0"
-      :class="{ '-translate-x-full': !isSidebarOpen }"
-      aria-label="Sidebar"
+      class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white/95 shadow-xl shadow-slate-900/5 backdrop-blur transition-transform duration-300 dark:border-slate-800 dark:bg-slate-950/95 lg:translate-x-0 lg:shadow-none"
+      :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+      aria-label="Admin navigation"
     >
-      <!-- Sidebar Header -->
-      <div
-        class="flex items-center justify-between p-4 border-b border-gray-700"
-      >
-        <div class="flex items-center space-x-3">
-          <svg
-            class="w-8 h-8 text-blue-400"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path
-              d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75zM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 01-1.875-1.875V8.625zM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 013 19.875v-6.75z"
-            />
-          </svg>
-          <span class="text-xl font-semibold text-white">Admin Panel</span>
-        </div>
+      <div class="flex h-20 items-center justify-between border-b border-slate-100 px-5 dark:border-slate-900">
+        <nuxt-link to="/admin" class="flex min-w-0 items-center gap-3" @click.native="closeSidebar">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950">
+            <span class="text-sm font-black tracking-tight">MW</span>
+          </div>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-bold tracking-tight">MetalWorks</p>
+            <p class="truncate text-xs text-slate-500 dark:text-slate-400">Operations admin</p>
+          </div>
+        </nuxt-link>
         <button
-          class="p-1 rounded-lg lg:hidden text-gray-400 hover:text-white hover:bg-gray-700"
-          @click="toggleSidebar"
+          type="button"
+          class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-900 dark:hover:text-white lg:hidden"
+          aria-label="Close navigation"
+          @click="closeSidebar"
         >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            ></path>
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18 18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <!-- Sidebar Content -->
-      <div class="h-full px-3 py-4 overflow-y-auto relative">
-        <ul class="space-y-2">
-          <!-- Dashboard Link -->
-          <li>
-            <nuxt-link
-              to="/admin"
-              exact-active-class="active-link"
-              class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 group transition-colors duration-200"
-              active-class="bg-gray-700 text-white"
-              @click="closeSidebar"
+      <nav class="flex-1 overflow-y-auto px-4 py-5">
+        <p class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+          Կառավարում
+        </p>
+        <div class="space-y-1">
+          <nuxt-link
+            v-for="item in navigation"
+            :key="item.to"
+            :to="localePath(item.to)"
+            :exact="item.exact"
+            class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white"
+            active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950"
+            @click.native="closeSidebar"
+          >
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-500 transition group-hover:bg-white dark:bg-slate-900 dark:text-slate-300 dark:group-hover:bg-slate-800"
             >
-              <svg
-                class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors duration-200"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-              </svg>
-              <span class="ml-3">Պատվերներ</span>
-            </nuxt-link>
-          </li>
-          <li>
-            <nuxt-link
-              to="/admin/file-extension"
-              exact-active-class="active-link"
-              class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 group transition-colors duration-200"
-              active-class="bg-gray-700 text-white"
-              @click="closeSidebar"
-            >
-              <svg
-                class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors duration-200"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-              </svg>
-              <span class="ml-3">Ֆայլերի ընդլայնում</span>
-            </nuxt-link>
-          </li>
-          <!-- Users -->
-          <li>
-            <nuxt-link
-              to="/admin/users"
-              exact-active-class="active-link"
-              class="flex items-center p-3 text-gray-300 rounded-lg hover:bg-gray-700 group transition-colors duration-200"
-              active-class="bg-gray-700 text-white"
-              @click="closeSidebar"
-            >
-              <svg
-                class="w-6 h-6 text-gray-400 group-hover:text-white transition-colors duration-200"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <circle
-                  cx="12"
-                  cy="6"
-                  r="4"
-                  stroke="#1C274C"
-                  stroke-width="1.5"
-                />
-                <path
-                  d="M18 9C19.6569 9 21 7.88071 21 6.5C21 5.11929 19.6569 4 18 4"
-                  stroke="#1C274C"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M6 9C4.34315 9 3 7.88071 3 6.5C3 5.11929 4.34315 4 6 4"
-                  stroke="#1C274C"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M17.1973 15C17.7078 15.5883 18 16.2714 18 17C18 19.2091 15.3137 21 12 21C8.68629 21 6 19.2091 6 17C6 14.7909 8.68629 13 12 13C12.3407 13 12.6748 13.0189 13 13.0553"
-                  stroke="#1C274C"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M20 19C21.7542 18.6153 23 17.6411 23 16.5C23 15.3589 21.7542 14.3847 20 14"
-                  stroke="#1C274C"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-                <path
-                  d="M4 19C2.24575 18.6153 1 17.6411 1 16.5C1 15.3589 2.24575 14.3847 4 14"
-                  stroke="#1C274C"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-              </svg>
-              <span class="ml-3">Աշխատակիցներ</span>
-            </nuxt-link>
-          </li>
-        </ul>
+              {{ item.short }}
+            </span>
+            <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+          </nuxt-link>
+        </div>
+      </nav>
 
-        <!-- Logout Button -->
+      <div class="border-t border-slate-100 p-4 dark:border-slate-900">
+        <nuxt-link
+          :to="localePath('/profile')"
+          class="mb-2 flex items-center gap-3 rounded-2xl p-3 hover:bg-slate-100 dark:hover:bg-slate-900"
+          @click.native="closeSidebar"
+        >
+          <div class="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+            {{ userInitials }}
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-semibold">{{ currentUserName }}</p>
+            <p class="truncate text-xs text-slate-500 dark:text-slate-400">Ադմինիստրատոր</p>
+          </div>
+        </nuxt-link>
         <button
-          class="flex items-center justify-center p-3 w-full mt-auto text-gray-300 rounded-lg hover:bg-gray-700 absolute bottom-20 left-0 right-0 transition-colors duration-200"
+          type="button"
+          class="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 dark:border-slate-800 dark:text-slate-300 dark:hover:border-rose-900/60 dark:hover:bg-rose-950/30 dark:hover:text-rose-300"
           @click="logout"
         >
-          <svg
-            class="w-6 h-6 text-red-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            ></path>
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3-3H9m9.75 0-3-3m3 3-3 3" />
           </svg>
-          <span class="ml-3">Դուրս գալ</span>
+          Դուրս գալ
         </button>
       </div>
     </aside>
 
-    <!-- Main Content -->
-    <div class="lg:ml-64 transition-all duration-300">
+    <div class="min-h-screen lg:pl-72">
+      <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/85">
+        <div class="flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+          <div class="flex min-w-0 items-center gap-3">
+            <button
+              type="button"
+              class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 lg:hidden"
+              aria-label="Open navigation"
+              @click="toggleSidebar"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">Օպերացիոն կառավարում</p>
+              <p class="hidden truncate text-xs text-slate-500 dark:text-slate-400 sm:block">Պատվերներ, արտադրամասեր և ծանրաբեռնվածություն</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <nuxt-link
+              :to="localePath('/profile')"
+              class="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900"
+            >
+              {{ currentUserName }}
+            </nuxt-link>
+          </div>
+        </div>
+      </header>
+
       <Nuxt />
     </div>
   </div>
@@ -200,27 +121,38 @@
 
 <script>
 export default {
-  layout: 'admin',
   middleware: ['role-guard'],
   meta: { role: 'admin' },
   data() {
     return {
       isSidebarOpen: false,
+      navigation: [
+        { to: '/admin', label: 'Օպերացիոն վահանակ', short: '01', exact: true },
+        { to: '/admin/reports', label: 'Հաշվետվություններ', short: '02', exact: false },
+        { to: '/admin/workload', label: 'Աշխատանքների բաշխում', short: '03', exact: false },
+        { to: '/admin/users', label: 'Աշխատակիցներ', short: '04', exact: false },
+        { to: '/admin/file-extension', label: 'Ֆայլերի տեսակներ', short: '05', exact: false },
+      ],
     }
   },
-  mounted() {
-    document.addEventListener('click', (e) => {
-      const sidebar = document.querySelector('aside')
-      const toggleBtn = document.querySelector('button[aria-expanded]')
-
-      if (
-        this.isSidebarOpen &&
-        !sidebar.contains(e.target) &&
-        !toggleBtn.contains(e.target)
-      ) {
-        this.closeSidebar()
-      }
-    })
+  computed: {
+    currentUserName() {
+      return this.$auth?.user?.name || 'Admin'
+    },
+    userInitials() {
+      const value = this.currentUserName.trim()
+      if (!value) return 'A'
+      return value
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join('')
+    },
+  },
+  watch: {
+    '$route.fullPath'() {
+      this.closeSidebar()
+    },
   },
   methods: {
     toggleSidebar() {
@@ -229,38 +161,9 @@ export default {
     closeSidebar() {
       this.isSidebarOpen = false
     },
-    logout() {
-      this.$auth.logout()
+    async logout() {
+      await this.$auth.logout()
     },
   },
 }
 </script>
-
-<style scoped>
-/* Smooth transitions */
-aside {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Active link styling */
-.router-link-exact-active {
-  @apply bg-gray-700 text-white;
-}
-.router-link-exact-active svg {
-  @apply text-white;
-}
-
-/* Better scrollbar for sidebar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  @apply bg-gray-700;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-600 rounded-full;
-}
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500;
-}
-</style>

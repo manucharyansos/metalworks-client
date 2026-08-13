@@ -1,407 +1,202 @@
 <template>
-  <div class="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto h-full flex flex-col">
-    <!-- Header -->
-    <header
-      class="flex items-center justify-between mb-8 pb-6 border-b border-gray-200 dark:border-gray-800"
-    >
-      <div class="flex-1">
-        <h1
-          class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white"
-        >
-          Պատվեր #{{ localOrder?.id }}
-        </h1>
-        <div
-          class="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-500 dark:text-gray-400"
-        >
-          <span>Ստեղծվել է {{ formatDate(localOrder?.created_at) }}</span>
-          <span class="hidden sm:inline">•</span>
-          <div class="flex items-center gap-2">
-            <span>Ընդհանուր կարգավիճակ՝</span>
-            <span
-              class="px-3 py-1 rounded-full text-xs font-semibold"
-              :class="overallStatusClass"
-            >
-              {{ overallStatusText }}
-            </span>
+  <div v-if="localOrder" class="flex h-full min-h-0 flex-col bg-slate-50 dark:bg-slate-950">
+    <header class="shrink-0 border-b border-slate-200 bg-white/95 px-4 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:px-6">
+      <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-2">
+            <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Order details</p>
+            <span class="rounded-full px-2.5 py-1 text-[10px] font-bold" :class="overallStatusClass">{{ overallStatusText }}</span>
+          </div>
+          <h2 class="mt-2 truncate text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">
+            {{ localOrder.name || `Պատվեր #${localOrder.id}` }}
+          </h2>
+          <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+            <span>#{{ localOrder.order_number?.number || localOrder.id }}</span>
+            <span v-if="localOrder.prefix_code?.code">Prefix՝ {{ localOrder.prefix_code.code }}</span>
+            <span>Ստեղծվել է՝ {{ formatDate(localOrder.created_at) }}</span>
           </div>
         </div>
+        <button type="button" class="shrink-0 rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Close order" @click="$emit('close')">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18 18 6M6 6l12 12" /></svg>
+        </button>
       </div>
-      <button
-        class="p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all hover:scale-110"
-        @click="$emit('close')"
-      >
-        <svg
-          class="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
     </header>
 
-    <!-- Scrollable Content -->
-    <div class="flex-1 overflow-y-auto space-y-8 custom-scroll">
-      <!-- Top Grid: Main Info + Customer -->
-      <div class="grid lg:grid-cols-2 gap-8">
-        <!-- Հիմնական տվյալներ -->
-        <div
-          class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 space-y-5"
-        >
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-            Հիմնական տվյալներ
-          </h3>
+    <div class="custom-scroll min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+      <div class="mx-auto max-w-6xl space-y-5">
+        <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div class="info-tile">
+            <p class="info-label">Պատվերի համար</p>
+            <p class="info-value">{{ localOrder.order_number?.number || `#${localOrder.id}` }}</p>
+          </div>
+          <div class="info-tile">
+            <p class="info-label">Prefix</p>
+            <p class="info-value">{{ localOrder.prefix_code?.code || '—' }}</p>
+          </div>
+          <div class="info-tile" :class="isOverdue ? '!border-rose-200 !bg-rose-50/70 dark:!border-rose-950/70 dark:!bg-rose-950/20' : isNear ? '!border-amber-200 !bg-amber-50/70 dark:!border-amber-950/70 dark:!bg-amber-950/20' : ''">
+            <p class="info-label">Վերջնաժամկետ</p>
+            <p class="info-value" :class="isOverdue ? 'text-rose-600 dark:text-rose-300' : isNear ? 'text-amber-600 dark:text-amber-300' : ''">{{ formatDate(localOrder.dates?.finish_date) }}</p>
+          </div>
+          <div class="info-tile">
+            <p class="info-label">Factory քայլեր</p>
+            <p class="info-value">{{ factoryOrders.length }}</p>
+          </div>
+        </section>
 
-          <div class="space-y-4">
-            <div>
-              <label
-                class="text-xs font-medium text-gray-500 dark:text-gray-400"
-                >Անվանում</label
-              >
-              <input
-                v-model="localOrder.name"
-                type="text"
-                class="mt-1 block w-full rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-              />
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
+        <section class="grid gap-5 xl:grid-cols-[1.35fr_0.85fr]">
+          <div class="panel-card">
+            <div class="panel-heading">
               <div>
-                <label class="text-xs font-medium text-gray-500">Համար</label>
-                <p class="mt-1 font-semibold text-gray-900 dark:text-white">
-                  {{ localOrder.order_number?.number || '—' }}
-                </p>
+                <p class="eyebrow">Main information</p>
+                <h3 class="panel-title">Հիմնական տվյալներ</h3>
               </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="field sm:col-span-2">
+                <span>Անվանում</span>
+                <input v-model="localOrder.name" type="text" />
+              </label>
+
+              <label class="field sm:col-span-2">
+                <span>Նկարագրություն</span>
+                <textarea v-model="localOrder.description" rows="4"></textarea>
+              </label>
+
+              <label class="field">
+                <span>Ավարտի ամսաթիվ</span>
+                <input v-model="localOrder.dates.finish_date" type="datetime-local" :class="{ '!border-rose-300 !ring-rose-100': isOverdue, '!border-amber-300 !ring-amber-100': isNear && !isOverdue }" />
+                <small v-if="isOverdue" class="text-rose-600 dark:text-rose-300">Ժամկետն անցել է</small>
+                <small v-else-if="isNear" class="text-amber-600 dark:text-amber-300">24 ժամից քիչ է մնացել</small>
+              </label>
+
+              <label class="field">
+                <span>Արտաքին հղում</span>
+                <input v-model="storeLinkUrl" type="url" placeholder="https://..." />
+              </label>
+            </div>
+          </div>
+
+          <aside class="panel-card">
+            <div class="panel-heading">
               <div>
-                <label class="text-xs font-medium text-gray-500">Prefix</label>
-                <p
-                  class="mt-1 font-semibold text-indigo-600 dark:text-indigo-400"
-                >
-                  {{ localOrder.prefix_code?.code || '—' }}
-                </p>
+                <p class="eyebrow">Customer</p>
+                <h3 class="panel-title">Հաճախորդ</h3>
               </div>
             </div>
 
+            <div class="flex items-center gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/50">
+              <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">{{ customerInitials }}</div>
+              <div class="min-w-0">
+                <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ customerName }}</p>
+                <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{{ customerEmail }}</p>
+              </div>
+            </div>
+
+            <dl class="mt-4 space-y-3 text-xs">
+              <div class="detail-row"><dt>Հեռախոս</dt><dd>{{ localOrder.client?.phone || localOrder.user?.phone || '—' }}</dd></div>
+              <div class="detail-row"><dt>Email</dt><dd class="break-all">{{ customerEmail }}</dd></div>
+              <div class="detail-row"><dt>Ստեղծող</dt><dd>{{ localOrder.creator?.name || '—' }}</dd></div>
+              <div class="detail-row"><dt>Ընդհանուր status</dt><dd>{{ localOrder.status || 'pending' }}</dd></div>
+            </dl>
+          </aside>
+        </section>
+
+        <section class="panel-card">
+          <div class="panel-heading flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <label
-                class="text-xs font-medium text-gray-500 dark:text-gray-400"
-                >Ավարտի ամսաթիվ</label
-              >
-              <input
-                v-model="localOrder.dates.finish_date"
-                type="datetime-local"
-                class="mt-1 block w-full rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition"
-                :class="{
-                  'border-red-500 ring-2 ring-red-500': isOverdue,
-                  'border-orange-500 ring-2 ring-orange-500':
-                    isNear && !isOverdue,
-                }"
-              />
-              <p v-if="isOverdue" class="mt-2 text-sm font-medium text-red-600">
-                Ժամկետն անցել է
-              </p>
-              <p
-                v-else-if="isNear"
-                class="mt-2 text-sm font-medium text-orange-600"
-              >
-                24 ժամից քիչ է մնացել
-              </p>
+              <p class="eyebrow">Production flow</p>
+              <h3 class="panel-title">Արտադրամասերի ընթացքը</h3>
             </div>
-
-            <div>
-              <label
-                class="text-xs font-medium text-gray-500 dark:text-gray-400"
-                >Արտաքին հղում</label
-              >
-              <input
-                v-model="storeLinkUrl"
-                type="url"
-                placeholder="https://example.com"
-                class="mt-1 block w-full rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition"
-              />
-            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">{{ factoryOrders.length }} քայլ</p>
           </div>
-        </div>
 
-        <!-- Հաճախորդ -->
-        <div
-          class="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl p-6 border border-indigo-200 dark:border-indigo-800"
-        >
-          <h3 class="text-lg font-semibold text-gray-900 dark:text:white mb-5">
-            Հաճախորդ
-          </h3>
-          <div class="space-y-4 text-sm">
-            <div class="flex items-center gap-3">
-              <div
-                class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold"
-              >
-                {{
-                  localOrder.client?.user?.name?.[0] ||
-                  localOrder.user?.name?.[0] ||
-                  '?'
-                }}
-              </div>
-              <div>
-                <p class="font-medium text-gray-900 dark:text-white">
-                  {{
-                    localOrder.client?.user?.name ||
-                    localOrder.user?.name ||
-                    'Անհայտ'
-                  }}
-                </p>
-                <p class="text-xs text-gray-500">
-                  {{
-                    localOrder.client?.user?.email ||
-                    localOrder.user?.email ||
-                    '—'
-                  }}
-                </p>
-              </div>
-            </div>
-            <div class="pt-3 border-t border-indigo-200 dark:border-indigo-800">
-              <p class="text-gray-600 dark:text-gray-400">
-                {{
-                  `Հեռախոս՝ ${
-                    localOrder.client?.phone || localOrder.user?.phone || '—'
-                  }`
-                }}
-              </p>
-              <p class="text-gray-600 dark:text-gray-400">
-                {{
-                  `Էլ․ փոստ՝ ${
-                    localOrder.client?.user?.email ||
-                    localOrder.user?.email ||
-                    '—'
-                  }`
-                }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Description -->
-      <div
-        class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-6"
-      >
-        <h3 class="text-lg font-semibold mb-4">Նկարագրություն</h3>
-        <textarea
-          v-model="localOrder.description"
-          rows="4"
-          class="w-full rounded-xl border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm resize-none focus:ring-2 focus:ring-indigo-500 transition"
-        ></textarea>
-      </div>
-
-      <!-- Գործարաններ -->
-      <div class="space-y-5">
-        <h3 class="text-xl font-bold">Գործարաններ</h3>
-        <div
-          v-if="localOrder.factory_orders?.length"
-          class="grid gap-5 md:grid-cols-2 xl:grid-cols-3"
-        >
-          <div
-            v-for="fo in localOrder.factory_orders"
-            :key="fo.id"
-            class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-md hover:shadow-xl transition-all duration-300 group"
-          >
-            <!-- Status ribbon -->
-            <div class="absolute top-0 right-0 m-3">
-              <span
-                class="px-3 py-1.5 rounded-full text-xs font-bold shadow-lg"
-                :class="factoryStatusClass(fo.status)"
-              >
-                {{ factoryStatusLabel(fo.status) }}
-              </span>
-            </div>
-
-            <div class="p-6 pt-10">
-              <h4 class="font-bold text-lg text-gray-900 dark:text-white">
-                {{ fo.factory?.name || 'Անհայտ' }}
-              </h4>
-              <p class="text-sm text-gray-500 mt-1">
-                Օպերատոր՝ {{ fo.operator?.name || '—' }}
-              </p>
-
-              <div class="mt-4 space-y-2 text-sm">
-                <p
-                  v-if="fo.finish_date"
-                  class="text-gray-600 dark:text-gray-400"
-                >
-                  Ավարտ՝ {{ formatDate(fo.finish_date) }}
-                </p>
-                <p
-                  v-if="fo.canceling"
-                  class="text-red-600 dark:text-red-400 font-medium"
-                >
-                  Մերժված՝ {{ fo.canceling }}
-                </p>
-                <p
-                  v-if="fo.admin_confirmation_date"
-                  class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-medium"
-                >
-                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                      fill-rule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clip-rule="evenodd"
-                    />
-                  </svg>
-                  Հաստատված է ադմինի կողմից
-                </p>
-              </div>
-
-              <!-- Confirm button -->
-              <div
-                v-if="
-                  normalizeStatus(fo.status) === 'finished' &&
-                  !fo.admin_confirmation_date
-                "
-                class="mt-5"
-              >
-                <button
-                  :disabled="confirmingId === fo.id"
-                  class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-70"
-                  @click="confirmFactoryFinish(fo)"
-                >
-                  <svg
-                    v-if="confirmingId === fo.id"
-                    class="w-4 h-4 animate-spin"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    />
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
-                  Հաստատել ավարտը
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <p
-          v-else
-          class="text-center py-12 text-gray-500 bg-gray-50 dark:bg-gray-900 rounded-2xl"
-        >
-          Դեռ գործարաններ չեն կապված
-        </p>
-      </div>
-
-      <!-- Ընտրված ֆայլեր + Լոգեր -->
-      <div class="grid lg:grid-cols-2 gap-8">
-        <div
-          class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-6"
-        >
-          <h3 class="text-lg font-semibold mb-4">Ընտրված ֆայլեր</h3>
-          <div v-if="localOrder.selected_files?.length" class="space-y-3">
-            <div
-              v-for="sf in localOrder.selected_files"
-              :key="sf.id"
-              class="flex items-center justify-between p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl"
-            >
-              <span class="font-medium text-sm">{{
-                sf.pmp_file?.original_name
-              }}</span>
-              <span class="text-indigo-600 dark:text-indigo-400 font-bold"
-                >×{{ sf.quantity }}</span
-              >
-            </div>
-          </div>
-          <p v-else class="text-gray-500 text-center py-8">
-            Ֆայլեր չեն ընտրվել
-          </p>
-        </div>
-
-        <div
-          class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-6"
-        >
-          <h3 class="text-lg font-semibold mb-4">Վերջին գործողությունները</h3>
-          <div
-            v-if="localOrder.logs?.length"
-            class="space-y-4 max-h-64 overflow-y-auto"
-          >
-            <div
-              v-for="log in localOrder.logs.slice(-5)"
-              :key="log.id"
-              class="flex gap-4 pb-4 border-b border-gray-100 dark:border-gray-800 last:border-0"
-            >
-              <div class="w-2 h-2 rounded-full bg-indigo-500 mt-2"></div>
-              <div class="flex-1">
-                <div class="flex justify-between text-xs">
-                  <span class="font-medium">{{
-                    log.user?.name || 'Համակարգ'
-                  }}</span>
-                  <span class="text-gray-500">{{
-                    formatDate(log.created_at)
-                  }}</span>
+          <div v-if="factoryOrders.length" class="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
+            <article v-for="fo in factoryOrders" :key="fo.id" class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-950/35">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ fo.factory?.name || 'Անհայտ արտադրամաս' }}</p>
+                  <p class="mt-1 truncate text-[11px] text-slate-500 dark:text-slate-400">Օպերատոր՝ {{ fo.operator?.name || 'չնշանակված' }}</p>
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {{ log.message }}
-                </p>
+                <span class="shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold" :class="factoryStatusClass(fo.status)">{{ factoryStatusLabel(fo.status) }}</span>
+              </div>
+
+              <div class="mt-4 grid grid-cols-2 gap-2 text-[11px]">
+                <div class="rounded-xl bg-white p-2.5 dark:bg-slate-900">
+                  <p class="text-slate-400">Factory ավարտ</p>
+                  <p class="mt-1 font-semibold text-slate-700 dark:text-slate-200">{{ formatDate(fo.finish_date) }}</p>
+                </div>
+                <div class="rounded-xl bg-white p-2.5 dark:bg-slate-900">
+                  <p class="text-slate-400">Admin հաստատում</p>
+                  <p class="mt-1 font-semibold" :class="fo.admin_confirmation_date ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'">{{ fo.admin_confirmation_date ? formatDate(fo.admin_confirmation_date) : 'Սպասում է' }}</p>
+                </div>
+              </div>
+
+              <div v-if="fo.canceling" class="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-[11px] font-medium text-rose-700 dark:bg-rose-950/30 dark:text-rose-300">Մերժման պատճառ՝ {{ fo.canceling }}</div>
+
+              <button
+                v-if="normalizeStatus(fo.status) === 'finished' && !fo.admin_confirmation_date"
+                type="button"
+                class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 py-2.5 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
+                :disabled="confirmingId === fo.id"
+                @click="confirmFactoryFinish(fo)"
+              >
+                <span v-if="confirmingId === fo.id" class="h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white"></span>
+                Հաստատել ավարտը
+              </button>
+            </article>
+          </div>
+          <div v-else class="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-400 dark:border-slate-800">Դեռ արտադրամաս չի կցվել։</div>
+        </section>
+
+        <section class="grid gap-5 xl:grid-cols-2">
+          <div class="panel-card">
+            <div class="panel-heading">
+              <div><p class="eyebrow">Files</p><h3 class="panel-title">Ընտրված ֆայլեր</h3></div>
+              <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-300">{{ localOrder.selected_files?.length || 0 }}</span>
+            </div>
+            <div v-if="localOrder.selected_files?.length" class="space-y-2">
+              <div v-for="sf in localOrder.selected_files" :key="sf.id" class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/70 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-950/35">
+                <span class="min-w-0 truncate text-xs font-semibold text-slate-700 dark:text-slate-200">{{ sf.pmp_file?.original_name || 'Ֆայլ' }}</span>
+                <span class="shrink-0 rounded-lg bg-white px-2 py-1 text-[10px] font-black text-slate-600 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700">×{{ sf.quantity }}</span>
               </div>
             </div>
+            <p v-else class="py-8 text-center text-xs text-slate-400">Ընտրված ֆայլեր չկան։</p>
           </div>
-          <p v-else class="text-gray-500 text-center py-8">
-            Դեռ գործողություններ չկան
-          </p>
-        </div>
+
+          <div class="panel-card">
+            <div class="panel-heading">
+              <div><p class="eyebrow">Audit trail</p><h3 class="panel-title">Վերջին գործողությունները</h3></div>
+            </div>
+            <div v-if="localOrder.logs?.length" class="max-h-72 space-y-3 overflow-y-auto pr-1">
+              <div v-for="log in recentLogs" :key="log.id" class="flex gap-3 rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-slate-400"></span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <p class="text-xs font-bold text-slate-700 dark:text-slate-200">{{ log.user?.name || 'Համակարգ' }}</p>
+                    <p class="text-[10px] text-slate-400">{{ formatDate(log.created_at) }}</p>
+                  </div>
+                  <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{{ log.message }}</p>
+                </div>
+              </div>
+            </div>
+            <p v-else class="py-8 text-center text-xs text-slate-400">Գործողություններ դեռ չկան։</p>
+          </div>
+        </section>
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer
-      class="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6 mt-8 border-t border-gray-200 dark:border-gray-800"
-    >
-      <button
-        class="w-full sm:w-auto px-6 py-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-        @click="$emit('close')"
-      >
-        Փակել
-      </button>
-      <button
-        :disabled="saving"
-        class="w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition flex items-center justify-center gap-3 disabled:opacity-70"
-        @click="save"
-      >
-        <svg
-          v-if="saving"
-          class="w-5 h-5 animate-spin"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          />
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-          />
-        </svg>
-        {{ saving ? 'Պահպանվում է...' : 'Պահպանել փոփոխությունները' }}
-      </button>
+    <footer class="shrink-0 border-t border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900 sm:px-6">
+      <div class="mx-auto flex max-w-6xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-[10px] text-slate-400">Փոփոխությունները պահպանվելու են պատվերի ընթացիկ տվյալներում։</p>
+        <div class="flex gap-2">
+          <button type="button" class="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 sm:flex-none" @click="$emit('close')">Փակել</button>
+          <button type="button" class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 sm:flex-none" :disabled="saving" @click="save">
+            <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-current/30 border-t-current"></span>
+            {{ saving ? 'Պահպանվում է...' : 'Պահպանել' }}
+          </button>
+        </div>
+      </div>
     </footer>
   </div>
 </template>
@@ -422,72 +217,51 @@ export default {
     factoryOrders() {
       return this.localOrder?.factory_orders || []
     },
-
     finishDate() {
       if (!this.localOrder?.dates?.finish_date) return null
       return new Date(this.localOrder.dates.finish_date)
     },
-
+    customerName() {
+      return this.localOrder?.client?.user?.name || this.localOrder?.user?.name || 'Անհայտ'
+    },
+    customerEmail() {
+      return this.localOrder?.client?.user?.email || this.localOrder?.user?.email || '—'
+    },
+    customerInitials() {
+      return String(this.customerName || '?').split(/\s+/).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join('')
+    },
+    recentLogs() {
+      const logs = this.localOrder?.logs || []
+      return logs.slice(-8).reverse()
+    },
     hasCanceled() {
-      return this.factoryOrders.some(
-        (fo) => this.normalizeStatus(fo.status) === 'canceled'
-      )
+      return this.factoryOrders.some((fo) => this.normalizeStatus(fo.status) === 'canceled')
     },
-
-    // ՆՈՐԸ՝ կա՞ factory_order, որի status-ը date_changed է
     hasDateChanged() {
-      return this.factoryOrders.some(
-        (fo) => this.normalizeStatus(fo.status) === 'date_changed'
-      )
+      return this.factoryOrders.some((fo) => this.normalizeStatus(fo.status) === 'date_changed')
     },
-
     isAllCompleted() {
       const fos = this.factoryOrders
       if (!fos.length) return false
-
       return fos.every((fo) => {
         const code = this.normalizeStatus(fo.status)
-
         if (code === 'canceled') return false
-
-        if (code === 'finished' || code === 'confirmed') {
-          return !!fo.admin_confirmation_date
-        }
-
+        if (code === 'finished' || code === 'confirmed') return !!fo.admin_confirmation_date
         return false
       })
     },
-
     isOverdue() {
-      return (
-        this.finishDate &&
-        this.finishDate < new Date() &&
-        !this.isAllCompleted &&
-        !this.hasCanceled
-      )
+      return this.finishDate && this.finishDate < new Date() && !this.isAllCompleted && !this.hasCanceled
     },
-
     isNear() {
       if (!this.finishDate) return false
       const hoursLeft = (this.finishDate - Date.now()) / 36e5
-      return (
-        hoursLeft > 0 &&
-        hoursLeft <= 24 &&
-        !this.isAllCompleted &&
-        !this.hasCanceled
-      )
+      return hoursLeft > 0 && hoursLeft <= 24 && !this.isAllCompleted && !this.hasCanceled
     },
-
     isInProgress() {
-      return (
-        this.factoryOrders.length > 0 &&
-        !this.isAllCompleted &&
-        !this.hasCanceled
-      )
+      return this.factoryOrders.length > 0 && !this.isAllCompleted && !this.hasCanceled
     },
-
     overallStatusText() {
-      // 💡 Կարգը՝ նախ մերժված, հետո ժամկետը փոփոխված
       if (this.hasCanceled) return 'Չեղարկված'
       if (this.hasDateChanged) return 'Ժամկետը փոփոխված'
       if (this.isAllCompleted) return 'Ավարտված'
@@ -495,17 +269,15 @@ export default {
       if (this.isInProgress || this.factoryOrders.length > 0) return 'Ընթացքում'
       return 'Սպասում է'
     },
-
     overallStatusClass() {
-      if (this.hasCanceled) return 'bg-rose-600 text-white'
-      if (this.hasDateChanged) return 'bg-orange-500 text-white'
-      if (this.isAllCompleted) return 'bg-emerald-600 text-white'
-      if (this.isOverdue) return 'bg-red-600 text-white'
-      if (this.isInProgress) return 'bg-amber-600 text-white'
-      return 'bg-gray-500 text-white'
+      if (this.hasCanceled) return 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
+      if (this.hasDateChanged) return 'bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300'
+      if (this.isAllCompleted) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+      if (this.isOverdue) return 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
+      if (this.isInProgress) return 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
+      return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
     },
   },
-
   watch: {
     order: {
       deep: true,
@@ -522,139 +294,79 @@ export default {
       if (!raw) return 'pending'
       const s = raw.toString().toLowerCase()
       if (s === 'finished' || s.includes('ավարտ')) return 'finished'
-      if (s === 'canceled' || s === 'cancelled' || s.includes('մերժ'))
-        return 'canceled'
+      if (s === 'canceled' || s === 'cancelled' || s.includes('մերժ')) return 'canceled'
       if (s === 'confirmed' || s.includes('հաստատ')) return 'confirmed'
       if (s === 'date_changed' || s.includes('ժամկետ')) return 'date_changed'
-      if (s === 'pending' || s === '0' || s === 'null' || s === '-') {
-        return 'pending'
-      }
+      if (s === 'pending' || s === '0' || s === 'null' || s === '-') return 'pending'
       return s
     },
-
     factoryStatusLabel(status) {
       const code = this.normalizeStatus(status)
       switch (code) {
-        case 'finished':
-          return 'Ավարտված'
-        case 'canceled':
-          return 'Մերժված'
-        case 'confirmed':
-          return 'Հաստատված'
-        case 'date_changed':
-          return 'Ժամկետը փոփոխված'
+        case 'finished': return 'Ավարտված'
+        case 'canceled': return 'Մերժված'
+        case 'confirmed': return 'Հաստատված'
+        case 'date_changed': return 'Ժամկետը փոփոխված'
         case 'pending':
-        default:
-          return 'Սպասում է'
+        default: return 'Սպասում է'
       }
     },
-
     factoryStatusClass(status) {
       const code = this.normalizeStatus(status)
-      if (code === 'finished')
-        return 'bg-emerald-600 text-white shadow-lg dark:bg-emerald-500'
-      if (code === 'canceled')
-        return 'bg-rose-600 text-white shadow-lg dark:bg-rose-500'
-      if (code === 'confirmed')
-        return 'bg-blue-600 text-white shadow-lg dark:bg-blue-500'
-      if (code === 'date_changed')
-        return 'bg-orange-500 text-white shadow-lg dark:bg-orange-500'
-      return 'bg-amber-500 text-white shadow-lg'
+      if (code === 'finished') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+      if (code === 'canceled') return 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
+      if (code === 'confirmed') return 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
+      if (code === 'date_changed') return 'bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300'
+      return 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
     },
-
     resetLocal(order) {
       const cloned = JSON.parse(JSON.stringify(order || {}))
-
       cloned.dates = cloned.dates || { finish_date: null }
       cloned.factory_orders = cloned.factory_orders || []
       cloned.selected_files = cloned.selected_files || []
       cloned.logs = cloned.logs || []
       cloned.store_link = cloned.store_link || {}
-
       this.localOrder = cloned
       this.storeLinkUrl = cloned.store_link.url || ''
     },
-
     formatDate(date) {
       if (!date) return '—'
       const m = this.$moment(date)
-      if (!m.isValid()) {
-        return date
-      }
+      if (!m.isValid()) return date
       return m.format('DD/MM/YYYY HH:mm')
     },
-
     async save() {
       if (!this.localOrder) return
       this.saving = true
       try {
-        const factories = (this.localOrder.factory_orders || []).map((fo) => ({
-          id: fo.factory_id,
-          // status: this.normalizeStatus(fo.status) || 'pending',
-        }))
-
+        const factories = (this.localOrder.factory_orders || []).map((fo) => ({ id: fo.factory_id }))
         const payload = {
           name: this.localOrder.name,
           description: this.localOrder.description,
           finish_date: this.localOrder.dates?.finish_date || null,
           status: this.localOrder.status,
           factories,
-          store_link: {
-            url: this.storeLinkUrl || null,
-          },
+          store_link: { url: this.storeLinkUrl || null },
         }
-
-        const updated = await this.$store.dispatch('orders/updateOrder', {
-          id: this.order.id,
-          payload,
-        })
-
+        const updated = await this.$store.dispatch('orders/updateOrder', { id: this.order.id, payload })
         this.$emit('saved', updated.order)
-        this.$notify({
-          type: 'success',
-          message: updated.message || 'Պատվերը հաջողությամբ թարմացվեց',
-        })
+        this.$notify({ type: 'success', message: updated.message || 'Պատվերը հաջողությամբ թարմացվեց' })
       } catch (e) {
-        this.$notify({
-          type: 'error',
-          message:
-            e?.response?.data?.message || e.message || 'Չհաջողվեց պահպանել',
-        })
+        this.$notify({ type: 'error', message: e?.response?.data?.message || e.message || 'Չհաջողվեց պահպանել' })
       } finally {
         this.saving = false
       }
     },
-
     async confirmFactoryFinish(fo) {
       if (!fo || !fo.factory_id) return
       this.confirmingId = fo.id
       try {
-        await this.$store.dispatch('factory/adminConfirmFactoryStatus', {
-          id: this.order.id,
-          factory_id: fo.factory_id,
-        })
-
-        const target = this.localOrder.factory_orders.find(
-          (x) => x.id === fo.id
-        )
-        if (target) {
-          target.admin_confirmation_date = new Date().toISOString()
-        }
-
-        this.$notify({
-          type: 'success',
-          message: `Գործարան "${
-            fo.factory?.name || fo.factory_id
-          }"-ի ավարտը հաստատված է`,
-        })
+        await this.$store.dispatch('factory/adminConfirmFactoryStatus', { id: this.order.id, factory_id: fo.factory_id })
+        const target = this.localOrder.factory_orders.find((x) => x.id === fo.id)
+        if (target) target.admin_confirmation_date = new Date().toISOString()
+        this.$notify({ type: 'success', message: `Գործարան "${fo.factory?.name || fo.factory_id}"-ի ավարտը հաստատված է` })
       } catch (e) {
-        this.$notify({
-          type: 'error',
-          message:
-            e?.response?.data?.message ||
-            e.message ||
-            'Չհաջողվեց հաստատել ավարտը',
-        })
+        this.$notify({ type: 'error', message: e?.response?.data?.message || e.message || 'Չհաջողվեց հաստատել ավարտը' })
       } finally {
         this.confirmingId = null
       }
@@ -664,48 +376,44 @@ export default {
 </script>
 
 <style scoped>
-.custom-scroll::-webkit-scrollbar {
-  width: 8px;
+.info-tile {
+  @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900;
 }
-.custom-scroll::-webkit-scrollbar-track {
-  background: transparent;
+.info-label {
+  @apply text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400;
 }
-.custom-scroll::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.3);
-  border-radius: 4px;
+.info-value {
+  @apply mt-2 truncate text-sm font-black text-slate-900 dark:text-white;
 }
-.custom-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.6);
+.panel-card {
+  @apply rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5;
 }
-.custom-scroll::-webkit-scrollbar {
-  width: 6px;
+.panel-heading {
+  @apply mb-4 flex items-start justify-between gap-3;
 }
-.custom-scroll::-webkit-scrollbar-track {
-  background: transparent;
+.eyebrow {
+  @apply text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400;
 }
-.custom-scroll::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.7);
-  border-radius: 999px;
+.panel-title {
+  @apply mt-1 text-base font-bold text-slate-950 dark:text-white;
 }
-.custom-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(129, 140, 248, 0.9);
+.field {
+  @apply flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400;
 }
-
-@keyframes pulseSoft {
-  0% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
+.field input,
+.field textarea {
+  @apply w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 outline-none transition focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-900/5 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:border-slate-600 dark:focus:bg-slate-950;
 }
-.animate-pulse-soft {
-  animation: pulseSoft 1.5s ease-in-out infinite;
+.detail-row {
+  @apply flex items-start justify-between gap-4 border-b border-slate-100 pb-3 last:border-0 last:pb-0 dark:border-slate-800;
 }
+.detail-row dt {
+  @apply text-slate-400;
+}
+.detail-row dd {
+  @apply min-w-0 text-right font-semibold text-slate-700 dark:text-slate-200;
+}
+.custom-scroll::-webkit-scrollbar { width: 6px; }
+.custom-scroll::-webkit-scrollbar-track { background: transparent; }
+.custom-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.55); border-radius: 999px; }
 </style>

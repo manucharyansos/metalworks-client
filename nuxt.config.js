@@ -1,3 +1,6 @@
+const apiBaseURL =
+  process.env.API_BASE_URL || process.env.BASE_URL || 'https://api.metalworks.am'
+
 export default {
   ssr: false,
   // Global page headers: https://go.nuxtjs.dev/config-head
@@ -42,15 +45,12 @@ export default {
   router: {
     // base: '/work/',
     base: process.env.NUXT_ROUTER_BASE || '/',
-    middleware: ['roleRedirect'],
+    middleware: ['roleRedirect', 'permission-guard'],
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    // baseURL: process.env.BASE_URL,
-    // baseURL: 'https://api.metalworks.am',
-    // baseURL: 'http://localhost:8000',
-    baseURL: process.env.API_BASE_URL,
+    baseURL: apiBaseURL,
     credentials: true,
   },
 
@@ -64,10 +64,7 @@ export default {
     strategies: {
       laravelSanctum: {
         provider: 'laravel/sanctum',
-        // url: process.env.BASE_URL,
-        // url: 'https://api.metalworks.am',
-        // url: 'http://localhost:8000',
-        url: process.env.API_BASE_URL,
+        url: apiBaseURL,
         endpoints: {
           csrf: { url: '/sanctum/csrf-cookie' },
           login: { url: '/api/login', method: 'post' },
@@ -88,13 +85,12 @@ export default {
 
   runtimeConfig: {
     public: {
-      // apiBase: 'http://localhost:8000',
-      apiBase: 'api.metalworks.am',
+      apiBase: apiBaseURL,
     },
   },
 
   publicRuntimeConfig: {
-    baseURL: process.env.BASE_URL,
+    baseURL: apiBaseURL,
     managerRole: process.env.MANAGER_ROLE || 'manager',
     engineerRole: process.env.ENGINEER_ROLE || 'engineer',
     adminRole: process.env.ADMIN_ROLE || 'admin',

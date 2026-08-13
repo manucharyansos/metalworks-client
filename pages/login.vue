@@ -5,17 +5,14 @@
     <div
       class="grid grid-cols-1 md:grid-cols-2 items-center justify-center w-full mx-auto font-roboto dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0"
     >
-      <!-- Form Container -->
       <div
         class="flex flex-col items-center justify-center md:rounded-tl-3xl rounded-bl-3xl md:rounded-br-none rounded-br-3xl bg-white w-full h-full dark:bg-gray-800 mx-auto md:p-7 p-3 md:order-1 order-2"
       >
-        <h2 class="text-black font-bold font-montserrat text-2xl py-8">
+        <h2 class="text-black dark:text-white font-bold font-montserrat text-2xl py-8">
           Մուտք գործել
         </h2>
 
-        <!-- Wrap in a form tag -->
         <form class="w-full" @submit.prevent="login">
-          <!-- Email Input -->
           <div class="md:mb-6 mb-4 w-full">
             <div class="relative z-0 w-full group">
               <input-with-label-icon
@@ -31,13 +28,12 @@
             </div>
             <template v-if="fieldEmail">
               <p class="text-red-500 text-xs font-montserrat">
-                Խնդրում ենք մուտքագրեկ էլփոստի հասցե:
+                Խնդրում ենք մուտքագրեք էլ․ փոստի հասցեն։
               </p>
             </template>
           </div>
 
-          <!-- Password Input -->
-          <div class="md:mb-6 mb-4 w-full">
+          <div class="md:mb-4 mb-3 w-full">
             <div class="relative z-0 w-full group">
               <input-with-label-icon
                 v-model="password"
@@ -45,34 +41,56 @@
                 name="password"
                 placeholder=" "
                 :class="{ 'border-red-500': fieldPassword }"
-                label="Գախտնաբառ"
+                label="Գաղտնաբառ"
                 label_-id="password"
                 for_-l-abel="password"
               />
             </div>
             <template v-if="fieldPassword">
               <p class="text-red-500 text-xs font-montserrat">
-                Խնդրում ենք մուտքագրեկ գաղտնաբառ:
+                Խնդրում ենք մուտքագրեք գաղտնաբառը։
               </p>
             </template>
-            <p v-if="errors" class="text-red-500 text-xs font-montserrat">
+            <p v-if="errors" class="text-red-500 text-xs font-montserrat mt-2">
               {{ errors }}
             </p>
           </div>
 
-          <!-- Submit Button and Links -->
+          <div
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2"
+          >
+            <label
+              class="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200 cursor-pointer select-none"
+            >
+              <input
+                v-model="remember"
+                type="checkbox"
+                class="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+              />
+              <span>Հիշել ինձ</span>
+            </label>
+
+            <nuxt-link
+              :to="localePath('/forgot-password')"
+              class="text-sm font-semibold text-cyan-800 hover:underline dark:text-indigo-300"
+            >
+              Մոռացե՞լ եք գաղտնաբառը
+            </nuxt-link>
+          </div>
+
           <div class="flex flex-col w-full items-center justify-between">
             <button
               v-if="!loading"
+              type="submit"
               class="w-full bg-red-600 rounded-2xl hover:bg-red-800 text-white font-bold py-2 px-4 md:my-8 my-4 focus:outline-none focus:shadow-outline"
             >
-              Մուտք գործեք
+              Մուտք գործել
             </button>
             <button
-              v-if="loading"
+              v-else
               type="submit"
               disabled
-              class="w-full bg-red-600 rounded-2xl text-white font-bold py-2 px-4 md:my-8 my-4 focus:outline-none focus:shadow-outline"
+              class="w-full bg-red-600 rounded-2xl text-white font-bold py-2 px-4 md:my-8 my-4 focus:outline-none focus:shadow-outline opacity-80"
             >
               <svg
                 aria-hidden="true"
@@ -83,7 +101,7 @@
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 23.08144 27.9921 23.08144 50.5908Z"
                   fill="currentColor"
                 />
                 <path
@@ -93,24 +111,24 @@
               </svg>
               Բեռնվում է...
             </button>
+
             <div class="flex flex-col items-center justify-center md:mt-4 mt-2">
               <span
                 class="font-roboto text-lg m-2 md:mt-4 mt-2 text-gray-800 font-mono dark:text-indigo-50"
               >
-                Դեռ գրանցված չե՞ք:
+                Դեռ գրանցված չե՞ք։
               </span>
               <nuxt-link
-                to="/register"
+                :to="localePath('/register')"
                 class="text-xl font-bold font-montserrat m-2 text-cyan-800 dark:text-indigo-300"
               >
-                Գրանցվեք
+                Գրանցվել
               </nuxt-link>
             </div>
           </div>
         </form>
       </div>
 
-      <!-- Introduction Section -->
       <div
         class="introduction_section flex flex-col w-full md:h-full h-64 rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl items-start justify-between py-6 md:py-40 bg-black px-6 md:order-2 order-1"
       ></div>
@@ -121,6 +139,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import inputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+
 export default {
   name: 'Login',
   components: { inputWithLabelIcon },
@@ -129,6 +148,7 @@ export default {
     return {
       email: '',
       password: '',
+      remember: false,
       fieldEmail: false,
       fieldPassword: false,
       errorMessage: {
@@ -152,7 +172,7 @@ export default {
     password(val) {
       this.fieldPassword = val.length < 6
       this.errorMessage.password =
-        val.length >= 6 ? '' : 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ:'
+        val.length >= 6 ? '' : 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ։'
     },
   },
   methods: {
@@ -165,6 +185,7 @@ export default {
             data: {
               email: this.email,
               password: this.password,
+              remember: this.remember,
             },
           })
 
@@ -183,7 +204,6 @@ export default {
             }
 
             const target = this.localePath(map[role] || '/')
-
             await this.$router.replace(target)
           } else if (typeof this.getErrorMessage === 'string') {
             this.errorMessage.general = this.getErrorMessage
@@ -196,7 +216,7 @@ export default {
         }
       } catch (error) {
         this.errorMessage.general =
-          'Մուտք գործելու ժամանակ սխալ է տեղի ունեցել: Խնդրում ենք կրկին փորձել:'
+          'Մուտք գործելու ժամանակ սխալ է տեղի ունեցել։ Խնդրում ենք կրկին փորձել։'
       } finally {
         this.loading = false
       }
@@ -211,7 +231,7 @@ export default {
 }
 .introduction_section {
   background-color: #f5f5f5;
-  background-image: url('static/metalworks-logo.jpg');
+  background-image: url('/metalworks-logo.jpg');
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
