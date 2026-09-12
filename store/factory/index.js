@@ -108,7 +108,17 @@ export const actions = {
 
 export const mutations = {
   SET_FACTORY(state, factory) {
-    state.factory = factory
+    if (!Array.isArray(factory)) {
+      state.factory = factory
+      return
+    }
+
+    state.factory = [...factory].sort((a, b) => {
+      const aInfo = a?.value === 'INFO' ? 0 : 1
+      const bInfo = b?.value === 'INFO' ? 0 : 1
+      if (aInfo !== bInfo) return aInfo - bInfo
+      return Number(a?.id || 0) - Number(b?.id || 0)
+    })
   },
   SET_FACTORIES(state, orderByFactory) {
     state.orderByFactory = orderByFactory
