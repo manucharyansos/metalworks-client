@@ -1,129 +1,115 @@
 <template>
-  <div
-    class="register_page flex w-full min-h-screen items-center justify-center lg:p-0 p-6"
-  >
-    <div
-      class="grid grid-cols-1 md:grid-cols-2 items-center justify-center w-full mx-auto font-roboto dark:bg-gray-700 md:mt-0 sm:max-w-4xl xl:p-0"
-    >
-      <div
-        class="flex flex-col items-center justify-center md:rounded-tl-3xl rounded-bl-3xl md:rounded-br-none rounded-br-3xl bg-white w-full h-full dark:bg-gray-800 mx-auto md:p-7 p-3 md:order-1 order-2"
-      >
-        <h2 class="text-black font-bold italic text-2xl py-8">ԳՐԱՆՑՎԵԼ</h2>
+  <main class="min-h-screen bg-slate-100 px-4 py-6 dark:bg-slate-950 sm:px-6 lg:px-8">
+    <div class="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl items-center justify-center">
+      <section class="grid w-full overflow-hidden rounded-[32px] border border-white/70 bg-white shadow-[0_30px_90px_-45px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-900 lg:grid-cols-[1.02fr_0.98fr]">
+        <div class="flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
+          <div class="mb-9 flex items-center gap-3">
+            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
+            <div>
+              <p class="text-sm font-black tracking-tight text-slate-950 dark:text-white">MetalWorks</p>
+              <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Create account</p>
+            </div>
+          </div>
 
-        <form class="w-full" @submit.prevent="sendRegister">
-          <div class="md:mb-6 mb-4 w-full">
-            <div class="relative z-0 w-full group">
+          <div class="max-w-md">
+            <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Գրանցում</p>
+            <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">Ստեղծեք ձեր հաշիվը</h1>
+            <p class="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
+              Լրացրեք տվյալները՝ համակարգում նոր հաշիվ ստեղծելու համար։
+            </p>
+          </div>
+
+          <form class="mt-8 max-w-md space-y-5" @submit.prevent="sendRegister">
+            <div>
               <input-with-label-icon
                 v-model="name"
                 type="text"
                 name="name"
-                :class="{ 'border-red-500': fieldErrors.name }"
-                label_class="err"
+                placeholder="Անուն Ազգանուն"
+                :classes="fieldErrors.name ? '!border-rose-400 !ring-4 !ring-rose-50 dark:!ring-rose-950/30' : ''"
                 :label="label.name"
                 label_-id="name-label"
                 for_-l-abel="name-label"
               />
-              <p v-if="fieldErrors.name" class="text-red-500 text-xs italic">
-                {{ fieldErrors.name }}
-              </p>
+              <p v-if="fieldErrors.name" class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-300">{{ fieldErrors.name }}</p>
             </div>
-          </div>
 
-          <div class="md:mb-6 mb-4 w-full">
-            <div class="relative z-0 w-full group">
+            <div>
               <input-with-label-icon
                 v-model="email"
                 type="email"
                 name="email"
-                placeholder=" "
-                :class="{ 'border-red-500': fieldErrors.email }"
+                placeholder="name@company.am"
+                :classes="fieldErrors.email ? '!border-rose-400 !ring-4 !ring-rose-50 dark:!ring-rose-950/30' : ''"
                 :label="label.email"
                 label_-id="email-label"
                 for_-l-abel="email-label"
-                label_class="label"
               />
-              <p v-if="fieldErrors.email" class="text-red-500 text-xs italic">
-                {{ fieldErrors.email }}
-              </p>
+              <p v-if="fieldErrors.email" class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-300">{{ fieldErrors.email }}</p>
             </div>
-          </div>
 
-          <div class="md:mb-6 mb-4 w-full">
-            <div class="relative z-0 w-full group">
-              <input-with-label-icon
-                v-model="password"
-                type="password"
-                name="password"
-                placeholder=" "
-                :class="{ 'border-red-500': fieldErrors.password }"
-                :label="label.password"
-                label_-id="password"
-                for_-l-abel="password"
-              />
-              <p v-if="fieldErrors.password" class="text-red-500 text-xs italic">
-                {{ fieldErrors.password }}
-              </p>
+            <div class="grid gap-5 sm:grid-cols-2">
+              <div>
+                <input-with-label-icon
+                  v-model="password"
+                  type="password"
+                  name="password"
+                  placeholder="Առնվազն 8 նիշ"
+                  :classes="fieldErrors.password ? '!border-rose-400 !ring-4 !ring-rose-50 dark:!ring-rose-950/30' : ''"
+                  :label="label.password"
+                  label_-id="password"
+                  for_-l-abel="password"
+                />
+                <p v-if="fieldErrors.password" class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-300">{{ fieldErrors.password }}</p>
+              </div>
+
+              <div>
+                <input-with-label-icon
+                  v-model="password_confirmation"
+                  type="password"
+                  name="password_confirmation"
+                  placeholder="Կրկին մուտքագրեք"
+                  :classes="fieldErrors.password_confirmation ? '!border-rose-400 !ring-4 !ring-rose-50 dark:!ring-rose-950/30' : ''"
+                  :label="label.confirmPassword"
+                  label_-id="password_confirmation"
+                  for_-l-abel="password_confirmation"
+                />
+                <p v-if="fieldErrors.password_confirmation" class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-300">{{ fieldErrors.password_confirmation }}</p>
+              </div>
             </div>
-          </div>
 
-          <div class="md:mb-6 mb-4 w-full">
-            <div class="relative z-0 w-full group">
-              <input-with-label-icon
-                v-model="password_confirmation"
-                type="password"
-                name="password_confirmation"
-                :class="{ 'border-red-500': fieldErrors.password_confirmation }"
-                :label="label.confirmPassword"
-                label_-id="password_confirmation"
-                for_-l-abel="password_confirmation"
-              />
-              <p
-                v-if="fieldErrors.password_confirmation"
-                class="text-red-500 text-xs italic"
-              >
-                {{ fieldErrors.password_confirmation }}
-              </p>
+            <div v-if="error || errorMessage" class="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
+              <p v-if="error">{{ error }}</p>
+              <p v-if="errorMessage">{{ errorMessage }}</p>
             </div>
-          </div>
 
-          <div v-if="error || errorMessage" class="w-full mb-4">
-            <p v-if="error" class="text-red-500 text-xs italic">{{ error }}</p>
-            <p v-if="errorMessage" class="text-red-500 text-xs italic">
-              {{ errorMessage }}
-            </p>
-          </div>
-
-          <div class="flex flex-col w-full items-center justify-between">
-            <button
-              type="submit"
-              :disabled="loading"
-              class="w-full bg-red-600 rounded-2xl hover:bg-red-800 text-white font-bold py-2 px-4 md:my-10 my-4 focus:outline-none focus:shadow-outline disabled:opacity-60"
-            >
+            <button type="submit" :disabled="loading" class="app-button-primary w-full gap-2">
+              <svg v-if="loading" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" />
+                <path class="opacity-75" fill="currentColor" d="M21 12a9 9 0 0 0-9-9v3a6 6 0 0 1 6 6h3Z" />
+              </svg>
               {{ loading ? 'Բեռնվում է...' : 'Գրանցվել' }}
             </button>
-            <div class="flex flex-col items-center justify-center md:mt-4 mt-2">
-              <span
-                class="font-roboto text-lg m-2 md:mt-4 mt-2 text-gray-800 font-mono dark:text-indigo-50"
-              >
-                Արդեն ունե՞ք հաշիվ:
-              </span>
-              <nuxt-link
-                to="/login"
-                class="text-xl font-bold font-sans italic m-2 text-cyan-800 dark:text-indigo-300"
-              >
-                Մուտք գործեք
-              </nuxt-link>
-            </div>
-          </div>
-        </form>
-      </div>
+          </form>
 
-      <div
-        class="side_banner flex flex-col w-full md:h-full h-64 rounded-br-none md:rounded-br-3xl rounded-tr-3xl md:rounded-tl-none rounded-tl-3xl items-start justify-between py-6 md:py-40 bg-black px-6 md:order-2 order-1"
-      ></div>
+          <p class="mt-7 max-w-md border-t border-slate-100 pt-6 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            Արդեն ունե՞ք հաշիվ։
+            <nuxt-link :to="localePath('/login')" class="ml-1 font-black text-slate-900 hover:underline dark:text-white">Մուտք գործել</nuxt-link>
+          </p>
+        </div>
+
+        <aside class="register-visual relative hidden min-h-[760px] overflow-hidden lg:flex lg:flex-col lg:justify-end">
+          <div class="absolute inset-0 bg-gradient-to-br from-slate-950/20 via-slate-950/45 to-slate-950/90"></div>
+          <div class="relative z-10 p-10">
+            <p class="text-xs font-black uppercase tracking-[0.18em] text-white/60">MetalWorks workspace</p>
+            <h2 class="mt-3 max-w-lg text-3xl font-black leading-tight tracking-tight text-white">Մեկ հաշիվ՝ ձեր ամբողջ աշխատանքային միջավայրի համար</h2>
+            <p class="mt-4 max-w-md text-sm leading-6 text-white/70">Հասանելիությունները վերահսկվում են role-երով և permission-ներով, որպեսզի յուրաքանչյուր աշխատակից տեսնի միայն իր աշխատանքին անհրաժեշտը։</p>
+          </div>
+        </aside>
+      </section>
     </div>
     <notifications />
-  </div>
+  </main>
 </template>
 
 <script>
@@ -221,17 +207,8 @@ export default {
 </script>
 
 <style scoped>
-.active {
-  border-bottom: 2px solid red;
-}
-.err {
-  color: red;
-}
-.register_page {
-  background: rgb(226, 234, 238);
-}
-.side_banner {
-  background-color: #f5f5f5;
+.register-visual {
+  background-color: #0f172a;
   background-image: url('/metalworks-logo.jpg');
   background-position: center;
   background-size: cover;
