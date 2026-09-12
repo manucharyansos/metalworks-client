@@ -109,6 +109,7 @@ export default {
     { src: '~/plugins/vue-carousel.js', mode: 'client' },
     { src: '~/plugins/axios-locale.js' },
     { src: '~/plugins/locale-utils.js' },
+    { src: '~/plugins/locale-date-runtime.client.js', mode: 'client' },
     { src: '~/plugins/ui-i18n-bridge.client.js', mode: 'client' },
     { src: '~/plugins/global-language-switcher.client.js', mode: 'client' },
   ],
