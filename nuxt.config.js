@@ -110,6 +110,7 @@ export default {
     { src: '~/plugins/base-url.js', mode: 'client' },
     { src: '~/plugins/moment.js', mode: 'client' },
     { src: '~/plugins/can.js', mode: 'client' },
+    { src: '~/plugins/password-visibility.client.js', mode: 'client' },
     { src: '~/plugins/notifications-ssr', ssr: true },
     { src: '~/plugins/notifications-client', ssr: false },
     { src: '~/plugins/leaflet.js', mode: 'client' },
@@ -148,7 +149,7 @@ export default {
     },
   },
 
-  // PWA module configuration: https://go.nuxtjs.dev/pwa
+  // PWA module configuration: https://go.nuxtjs.dev/config-pwa
   pwa: {
     manifest: {
       lang: 'en',
