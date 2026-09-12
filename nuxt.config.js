@@ -3,32 +3,27 @@ const apiBaseURL =
 
 export default {
   ssr: false,
-  // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title:
-      'MetalWorks - Մետաղի աշխատանքներ, լազերային եռակցում, փոշեմատտացնող ծածկույթ',
+    title: 'MetalWorks',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       {
         hid: 'description',
         name: 'description',
-        content:
-          'MetalWorks-ը մասնագիտանում է մետաղի աշխատանքների ոլորտում, ներառյալ լազերային եռակցում, փոշեմատտացնող ծածկույթ, թեքում և բարձր որակի մետաղամշակում։',
+        content: 'MetalWorks production management workspace',
       },
       { name: 'format-detection', content: 'telephone=no' },
       {
         name: 'keywords',
-        content:
-          "metalwork's, MetalWorks, լազերային եռակցում, փոշեմատտացնող ծածկույթ, թեքում, մետաղամշակում",
+        content: "metalwork's, MetalWorks, production, manufacturing, metalworking",
       },
       { name: 'robots', content: 'index, follow' },
       { name: 'author', content: 'MetalWorks' },
-      { property: 'og:title', content: 'MetalWorks - Մետաղի աշխատանքներ' },
+      { property: 'og:title', content: 'MetalWorks' },
       {
         property: 'og:description',
-        content:
-          'Բարձր որակի մետաղամշակում, ներառյալ լազերային եռակցում, փոշեմատտացնող ծածկույթ և թեքում։',
+        content: 'MetalWorks production management workspace',
       },
       { property: 'og:url', content: 'https://metalworks.am' },
       { property: 'og:type', content: 'website' },
@@ -36,19 +31,15 @@ export default {
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
 
-  // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
     '~/assets/css/main.css',
     'leaflet/dist/leaflet.css',
-    // 'swiper/css/swiper.min.css',
   ],
   router: {
-    // base: '/work/',
     base: process.env.NUXT_ROUTER_BASE || '/',
     middleware: ['roleRedirect', 'permission-guard'],
   },
 
-  // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     baseURL: apiBaseURL,
     credentials: true,
@@ -117,7 +108,7 @@ export default {
     { src: '~/plugins/formatDate' },
     { src: '~/plugins/vue-carousel.js', mode: 'client' },
     { src: '~/plugins/axios-locale.js' },
-    // { src: '~/plugins/tawk.js', mode: 'client' },
+    { src: '~/plugins/ui-i18n-bridge.client.js', mode: 'client' },
   ],
 
   components: true,
@@ -149,10 +140,11 @@ export default {
     },
   },
 
-  // PWA module configuration: https://go.nuxtjs.dev/config-pwa
   pwa: {
     manifest: {
-      lang: 'en',
+      name: 'MetalWorks',
+      short_name: 'MetalWorks',
+      lang: 'hy',
     },
   },
 
@@ -160,7 +152,6 @@ export default {
     fallback: true,
   },
 
-  // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     postcss: {
       plugins: {
