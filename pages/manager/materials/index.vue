@@ -36,7 +36,16 @@
       </div>
     </div>
 
-    <MaterialFormModal v-if="$canAny(['materials.create', 'materials.update'])" :visible="isFormOpen" :item="editingItem" :categories="formCategories" :submitting="submitting" @close="closeForm" @submit="handleSubmit" />
+    <MaterialFormModal
+      v-if="$canAny(['materials.create', 'materials.update'])"
+      :visible="isFormOpen"
+      :item="editingItem"
+      :categories="formCategories"
+      :submitting="submitting"
+      @close="closeForm"
+      @submit="handleSubmit"
+      @category-created="handleCategoryCreated"
+    />
   </main>
 </template>
 
@@ -78,8 +87,8 @@ export default {
       if (!this.$can('materials.view')) return
       await this.fetchMaterials({ page, perPage: this.pagination.per_page || 10, search: this.search, categoryId: this.selectedCategory?.id || null })
     },
-    async ensureFormOptions() {
-      if (this.formOptionsLoaded) return true
+    async ensureFormOptions(force = false) {
+      if (this.formOptionsLoaded && !force) return true
       try {
         const data = await this.$axios.$get('/api/staff/material-options')
         this.formCategories = Array.isArray(data?.categories) ? data.categories : []
@@ -88,6 +97,13 @@ export default {
       } catch (e) {
         this.$notify?.({ type: 'error', text: e.response?.data?.message || 'Չհաջողվեց բեռնել նյութի ձևի տվյալները' })
         return false
+      }
+    },
+    async handleCategoryCreated(created) {
+      await this.ensureFormOptions(true)
+      if (this.$can('material_categories.view')) await this.fetchCategories()
+      if (created?.id && !this.formCategories.some((item) => Number(item.id) === Number(created.id))) {
+        this.formCategories = [...this.formCategories, created]
       }
     },
     async openFromQuery() {
