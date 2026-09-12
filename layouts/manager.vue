@@ -35,6 +35,7 @@
               <svg v-if="item.icon === 'orders'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2Zm2 4h6M9 12h6M9 16h4" /></svg>
               <svg v-else-if="item.icon === 'clients'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m7-10a4 4 0 100-8 4 4 0 000 8Zm13 10v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" /></svg>
               <svg v-else-if="item.icon === 'workers'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 12a4 4 0 100-8 4 4 0 000 8Zm-7 9a7 7 0 0114 0m2-8v6m-3-3h6" /></svg>
+              <svg v-else-if="item.icon === 'users'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m3-8a4 4 0 100-8 4 4 0 000 8Zm8-1a3 3 0 100-6 3 3 0 000 6Zm1 5h1a4 4 0 014 4v1" /></svg>
               <svg v-else-if="item.icon === 'materials'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m12 3 8 4-8 4-8-4 8-4Zm-8 9 8 4 8-4M4 17l8 4 8-4" /></svg>
               <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 21a8 8 0 10-16 0m8-10a4 4 0 100-8 4 4 0 000 8Z" /></svg>
             </span>
@@ -81,7 +82,7 @@
             <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ pageTitle }}</p>
           </div>
         </div>
-        <div class="hidden rounded-xl bg-slate-100 px-3 py-2 text-[10px] font-bold text-slate-500 sm:block dark:bg-slate-800 dark:text-slate-300">{{ grantedCount }} ֆունկցիա հասանելի</div>
+        <div class="hidden rounded-xl bg-slate-100 px-3 py-2 text-[10px] font-bold text-slate-500 sm:block dark:bg-slate-800 dark:text-slate-300">{{ accessSummary }}</div>
       </header>
       <Nuxt />
     </div>
@@ -98,6 +99,7 @@ export default {
         { to: '/manager', label: 'Պատվերներ', permission: 'orders.view', icon: 'orders', exact: true },
         { to: '/manager/clients', label: 'Հաճախորդներ', permission: 'clients.view', icon: 'clients', exact: false },
         { to: '/manager/workers', label: 'Աշխատակիցներ', permission: 'workers.view', icon: 'workers', exact: false },
+        { to: '/manager/users', label: 'Օգտատերեր և մուտքեր', permission: null, icon: 'users', exact: false },
         { to: '/manager/materials', label: 'Նյութեր', permission: 'materials.view', icon: 'materials', exact: false },
         { to: '/profile', label: 'Անձնական էջ', permission: null, icon: 'profile', exact: true },
       ],
@@ -118,8 +120,11 @@ export default {
     quickActions() {
       return this.actionItems.filter((item) => this.$can(item.permission))
     },
-    grantedCount() {
-      return Array.isArray(this.currentUser.permissions) ? this.currentUser.permissions.length : 0
+    accessSummary() {
+      const role = this.currentUser?.role?.name || this.currentUser?.role || null
+      if (['admin', 'manager'].includes(role)) return 'Լիարժեք հասանելիություն'
+      const count = Array.isArray(this.currentUser.permissions) ? this.currentUser.permissions.length : 0
+      return `${count} ֆունկցիա հասանելի`
     },
     pageTitle() {
       const found = this.navItems.find((item) => this.isRouteActive(item))
