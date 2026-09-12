@@ -10,8 +10,7 @@ export default ({ app }, inject) => {
   const can = (permission) => {
     if (!permission) return true
     const { role, granted } = userState()
-    if (role === 'admin') return true
-    if (permission === 'roles.view' && role === 'manager') return true
+    if (['admin', 'manager'].includes(role)) return true
     return granted.has(permission)
   }
 
