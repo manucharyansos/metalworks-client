@@ -72,7 +72,7 @@ export default async function ({ app, route, redirect }) {
 
   const user = app.$auth.user || {}
   const role = user?.role?.name || user?.role || null
-  if (role === 'admin') return
+  if (['admin', 'manager'].includes(role)) return
 
   const granted = new Set(Array.isArray(user.permissions) ? user.permissions : [])
   const mode = meta.permissionMode === 'any' ? 'any' : 'all'
