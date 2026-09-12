@@ -12,8 +12,16 @@
             </div>
             <div class="min-w-0">
               <p class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{{ $t('profile.title') }}</p>
-              <h1 class="mt-1 truncate text-2xl font-black tracking-tight sm:text-3xl">{{ profileUser.name || '—' }}</h1>
-              <p class="mt-1 truncate text-sm text-slate-400">{{ profileUser.email || '' }}</p>
+              <h1 class="mt-1 truncate text-2xl font-black tracking-tight sm:text-3xl">{{ fullName }}</h1>
+              <div class="mt-1 flex flex-wrap items-center gap-2">
+                <p class="truncate text-sm text-slate-400">{{ profileUser.email || '' }}</p>
+                <span
+                  class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"
+                  :class="profileUser.email_verified ? 'bg-emerald-400/15 text-emerald-200' : 'bg-amber-400/15 text-amber-200'"
+                >
+                  {{ profileUser.email_verified ? 'Հաստատված' : 'Չհաստատված' }}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -55,36 +63,35 @@
               </div>
               <div>
                 <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ $t('profile.personal_data') }}</h2>
-                <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">{{ $t('profile.personal_data_help') }}</p>
+                <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">Անձնական տվյալները կարող եք թարմացնել ցանկացած պահի։</p>
               </div>
             </div>
 
-            <div class="space-y-4">
+            <div class="grid gap-4 sm:grid-cols-2">
               <label class="block">
-                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ $t('common.name') }}</span>
-                <input v-model.trim="form.name" required class="app-control" type="text" />
-              </label>
-              <label class="block">
-                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ $t('common.email') }}</span>
-                <input v-model.trim="form.email" required class="app-control" type="email" />
+                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Անուն</span>
+                <input v-model.trim="form.name" required class="app-control" type="text" autocomplete="given-name" />
               </label>
 
-              <label v-if="emailChanged" class="block rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
-                <span class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ $t('profile.current_password') }}</span>
-                <p class="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-400">{{ $t('profile.email_change_password_help') }}</p>
-                <input v-model="form.current_password" required class="app-control mt-3" type="password" autocomplete="current-password" />
+              <label class="block">
+                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Ազգանուն</span>
+                <input v-model.trim="form.last_name" class="app-control" type="text" autocomplete="family-name" />
               </label>
 
-              <template v-if="isClient">
-                <label class="block">
-                  <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ $t('common.phone') }}</span>
-                  <input v-model.trim="form.client.phone" class="app-control" type="tel" />
-                </label>
-                <label class="block">
-                  <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ $t('common.address') }}</span>
-                  <input v-model.trim="form.client.address" class="app-control" type="text" />
-                </label>
-              </template>
+              <label class="block sm:col-span-2">
+                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Հայրանուն</span>
+                <input v-model.trim="form.patronymic" class="app-control" type="text" />
+              </label>
+
+              <label class="block">
+                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Հեռախոս</span>
+                <input v-model.trim="form.phone" class="app-control" type="tel" autocomplete="tel" placeholder="+374 ..." />
+              </label>
+
+              <label class="block">
+                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Հասցե</span>
+                <input v-model.trim="form.address" class="app-control" type="text" autocomplete="street-address" />
+              </label>
             </div>
 
             <p v-if="profileMessage" class="mt-4 rounded-2xl p-3 text-sm font-semibold" :class="profileError ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-200' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200'">
@@ -96,40 +103,107 @@
             </button>
           </form>
 
-          <form class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6" @submit.prevent="changePassword">
-            <div class="mb-6 flex items-start gap-3">
-              <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 11V8a4 4 0 1 1 8 0v3m-9 0h10a2 2 0 0 1 2 2v7H5v-7a2 2 0 0 1 2-2Z" /></svg>
+          <div class="space-y-6">
+            <section class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+              <div class="mb-5 flex items-start justify-between gap-4">
+                <div class="flex items-start gap-3">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 6.5 12 13l9-6.5M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" /></svg>
+                  </div>
+                  <div>
+                    <h2 class="text-lg font-black text-slate-950 dark:text-white">Էլ․ փոստ</h2>
+                    <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">Փոփոխությունը կամ հաստատումը կատարվում է 6-նիշ կոդով։</p>
+                  </div>
+                </div>
+                <span
+                  class="shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wide"
+                  :class="profileUser.email_verified ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'"
+                >
+                  {{ profileUser.email_verified ? 'Հաստատված' : 'Չհաստատված' }}
+                </span>
               </div>
-              <div>
-                <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ $t('common.password') }}</h2>
-                <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">{{ $t('profile.password_help') }}</p>
+
+              <label class="block">
+                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Էլ․ փոստի հասցե</span>
+                <input v-model.trim="form.email" required class="app-control" type="email" autocomplete="email" @input="resetEmailVerificationState" />
+              </label>
+
+              <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                <button
+                  type="button"
+                  class="app-button-secondary flex-1"
+                  :disabled="sendingEmailCode || confirmingEmailCode || !form.email"
+                  @click="requestEmailCode"
+                >
+                  {{ sendingEmailCode ? 'Ուղարկվում է...' : emailCodeSent ? 'Կրկին ուղարկել կոդը' : 'Ուղարկել հաստատման կոդ' }}
+                </button>
               </div>
-            </div>
 
-            <div class="space-y-4">
-              <label class="block">
-                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ $t('profile.current_password') }}</span>
-                <input v-model="passwordForm.current_password" required class="app-control" type="password" autocomplete="current-password" />
-              </label>
-              <label class="block">
-                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ $t('profile.new_password') }}</span>
-                <input v-model="passwordForm.password" required minlength="8" class="app-control" type="password" autocomplete="new-password" />
-              </label>
-              <label class="block">
-                <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ $t('profile.confirm_new_password') }}</span>
-                <input v-model="passwordForm.password_confirmation" required minlength="8" class="app-control" type="password" autocomplete="new-password" />
-              </label>
-            </div>
+              <div v-if="emailCodeSent" class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-100">Կոդը ուղարկվել է՝ {{ emailCodeTarget }}</p>
+                <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">Մուտքագրեք նամակում ստացած 6-նիշ կոդը։ Կոդը վավեր է 10 րոպե։</p>
 
-            <p v-if="passwordMessage" class="mt-4 rounded-2xl p-3 text-sm font-semibold" :class="passwordError ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-200' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200'">
-              {{ passwordMessage }}
-            </p>
+                <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+                  <input
+                    v-model="emailCode"
+                    class="app-control text-center text-lg font-black tracking-[0.35em] sm:flex-1"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    maxlength="6"
+                    placeholder="000000"
+                    @input="normalizeEmailCode"
+                  />
+                  <button
+                    type="button"
+                    class="app-button-primary sm:w-auto"
+                    :disabled="confirmingEmailCode || emailCode.length !== 6"
+                    @click="confirmEmailCode"
+                  >
+                    {{ confirmingEmailCode ? 'Հաստատվում է...' : 'Հաստատել' }}
+                  </button>
+                </div>
+              </div>
 
-            <button :disabled="savingPassword" class="app-button-secondary mt-6 w-full" type="submit">
-              {{ savingPassword ? $t('profile.changing') : $t('profile.change_password') }}
-            </button>
-          </form>
+              <p v-if="emailMessage" class="mt-4 rounded-2xl p-3 text-sm font-semibold" :class="emailError ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-200' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200'">
+                {{ emailMessage }}
+              </p>
+            </section>
+
+            <form class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6" @submit.prevent="changePassword">
+              <div class="mb-6 flex items-start gap-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 11V8a4 4 0 1 1 8 0v3m-9 0h10a2 2 0 0 1 2 2v7H5v-7a2 2 0 0 1 2-2Z" /></svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ $t('common.password') }}</h2>
+                  <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">{{ $t('profile.password_help') }}</p>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <label class="block">
+                  <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ $t('profile.current_password') }}</span>
+                  <input v-model="passwordForm.current_password" required class="app-control" type="password" autocomplete="current-password" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ $t('profile.new_password') }}</span>
+                  <input v-model="passwordForm.password" required minlength="8" class="app-control" type="password" autocomplete="new-password" />
+                </label>
+                <label class="block">
+                  <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">{{ $t('profile.confirm_new_password') }}</span>
+                  <input v-model="passwordForm.password_confirmation" required minlength="8" class="app-control" type="password" autocomplete="new-password" />
+                </label>
+              </div>
+
+              <p v-if="passwordMessage" class="mt-4 rounded-2xl p-3 text-sm font-semibold" :class="passwordError ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-200' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200'">
+                {{ passwordMessage }}
+              </p>
+
+              <button :disabled="savingPassword" class="app-button-secondary mt-6 w-full" type="submit">
+                {{ savingPassword ? $t('profile.changing') : $t('profile.change_password') }}
+              </button>
+            </form>
+          </div>
         </div>
 
         <section v-else class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
@@ -195,10 +269,19 @@ export default {
       capabilities: {},
       form: {
         name: '',
+        last_name: '',
+        patronymic: '',
         email: '',
-        current_password: '',
-        client: { phone: '', address: '' },
+        phone: '',
+        address: '',
       },
+      emailCode: '',
+      emailCodeTarget: '',
+      emailCodeSent: false,
+      sendingEmailCode: false,
+      confirmingEmailCode: false,
+      emailMessage: '',
+      emailError: false,
       passwordForm: {
         current_password: '',
         password: '',
@@ -234,13 +317,17 @@ export default {
       }
       return labels[this.roleName] || this.$t('profile.user')
     },
+    fullName() {
+      return [this.profileUser.name, this.profileUser.last_name]
+        .filter(Boolean)
+        .join(' ') || '—'
+    },
     initials() {
-      return (this.profileUser.name || 'U')
-        .split(/\s+/)
+      return [this.profileUser.name, this.profileUser.last_name]
         .filter(Boolean)
         .slice(0, 2)
-        .map((part) => part.charAt(0).toUpperCase())
-        .join('')
+        .map((part) => String(part).charAt(0).toUpperCase())
+        .join('') || 'U'
     },
     isClient() {
       return !!this.capabilities.client_orders
@@ -296,12 +383,11 @@ export default {
         this.profileUser = data.user || {}
         this.capabilities = data.capabilities || {}
         this.form.name = this.profileUser.name || ''
+        this.form.last_name = this.profileUser.last_name || ''
+        this.form.patronymic = this.profileUser.patronymic || ''
         this.form.email = this.profileUser.email || ''
-        this.form.current_password = ''
-        this.form.client = {
-          phone: this.profileUser.client?.phone || '',
-          address: this.profileUser.client?.address || '',
-        }
+        this.form.phone = this.profileUser.phone || this.profileUser.client?.phone || ''
+        this.form.address = this.profileUser.address || this.profileUser.client?.address || ''
       } finally {
         this.loading = false
       }
@@ -317,16 +403,23 @@ export default {
       try {
         const payload = {
           name: this.form.name,
-          email: this.form.email,
+          last_name: this.form.last_name || null,
+          patronymic: this.form.patronymic || null,
+          email: this.profileUser.email,
+          phone: this.form.phone || null,
+          address: this.form.address || null,
         }
-        if (this.emailChanged) payload.current_password = this.form.current_password
-        if (this.isClient) payload.client = this.form.client
 
         const { data } = await this.$axios.patch('/api/profile', payload)
+        const pendingEmail = this.form.email
         this.profileUser = data.user || this.profileUser
         this.capabilities = data.capabilities || this.capabilities
-        this.form.email = this.profileUser.email || this.form.email
-        this.form.current_password = ''
+        this.form.name = this.profileUser.name || ''
+        this.form.last_name = this.profileUser.last_name || ''
+        this.form.patronymic = this.profileUser.patronymic || ''
+        this.form.phone = this.profileUser.phone || ''
+        this.form.address = this.profileUser.address || ''
+        this.form.email = this.emailChanged ? pendingEmail : this.profileUser.email || ''
         await this.$auth.fetchUser()
         this.profileMessage = this.$t('profile.profile_saved')
       } catch (error) {
@@ -334,6 +427,65 @@ export default {
         this.profileMessage = error?.response?.data?.message || this.$t('profile.profile_save_failed')
       } finally {
         this.savingProfile = false
+      }
+    },
+    resetEmailVerificationState() {
+      this.emailCode = ''
+      this.emailCodeTarget = ''
+      this.emailCodeSent = false
+      this.emailMessage = ''
+      this.emailError = false
+    },
+    normalizeEmailCode() {
+      this.emailCode = String(this.emailCode || '').replace(/\D/g, '').slice(0, 6)
+    },
+    async requestEmailCode() {
+      this.emailMessage = ''
+      this.emailError = false
+      const email = String(this.form.email || '').trim().toLowerCase()
+      if (!email) {
+        this.emailError = true
+        this.emailMessage = 'Մուտքագրեք էլ․ փոստի հասցեն։'
+        return
+      }
+
+      this.sendingEmailCode = true
+      try {
+        const { data } = await this.$axios.post('/api/profile/email/code', { email })
+        this.emailCodeTarget = data.email || email
+        this.emailCodeSent = true
+        this.emailCode = ''
+        this.emailMessage = data.message || 'Հաստատման կոդն ուղարկվել է։'
+      } catch (error) {
+        this.emailError = true
+        this.emailMessage = error?.response?.data?.message || 'Չհաջողվեց ուղարկել հաստատման կոդը։'
+      } finally {
+        this.sendingEmailCode = false
+      }
+    },
+    async confirmEmailCode() {
+      this.normalizeEmailCode()
+      if (this.emailCode.length !== 6 || !this.emailCodeTarget) return
+
+      this.confirmingEmailCode = true
+      this.emailMessage = ''
+      this.emailError = false
+      try {
+        const { data } = await this.$axios.post('/api/profile/email/confirm', {
+          email: this.emailCodeTarget,
+          code: this.emailCode,
+        })
+        this.emailMessage = data.message || 'Էլ․ փոստը հաստատվեց։'
+        this.emailCode = ''
+        this.emailCodeSent = false
+        this.emailCodeTarget = ''
+        await this.fetchProfile()
+        await this.$auth.fetchUser()
+      } catch (error) {
+        this.emailError = true
+        this.emailMessage = error?.response?.data?.message || 'Չհաջողվեց հաստատել կոդը։'
+      } finally {
+        this.confirmingEmailCode = false
       }
     },
     async changePassword() {
