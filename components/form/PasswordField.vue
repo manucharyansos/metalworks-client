@@ -2,6 +2,7 @@
   <span class="relative block w-full">
     <input
       v-bind="$attrs"
+      data-password-visibility-managed="true"
       :type="visible ? 'text' : 'password'"
       :value="value"
       :class="['pr-11', inputClass]"
