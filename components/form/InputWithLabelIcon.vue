@@ -1,26 +1,33 @@
 <template>
-  <div class="relative">
-    <span class="absolute start-1 bottom-3 text-gray-500 dark:text-gray-400">
-      <slot name="label_svg"></slot>
-    </span>
-    <input
-      :id="label_Id"
-      class="block py-2.5 ps-6 pe-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-      :type="type"
-      :class="classes"
-      :value="value"
-      :placeholder="placeholder"
-      :disabled="disabled"
-      @input="$emit('input', $event.target.value)"
-    />
-    <label
-      :for="for_LAbel"
-      class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-2 z-10 origin-[0] start-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto"
+  <label class="block w-full" :for="for_LAbel || label_Id">
+    <span
+      v-if="label"
+      class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400"
       :class="label_class"
     >
       {{ label }}
-    </label>
-  </div>
+    </span>
+
+    <span class="relative block">
+      <span
+        v-if="$slots.label_svg"
+        class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400 dark:text-slate-500"
+      >
+        <slot name="label_svg"></slot>
+      </span>
+
+      <input
+        :id="label_Id"
+        class="block w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:border-slate-600 dark:focus:border-slate-500 dark:focus:ring-slate-800"
+        :class="[$slots.label_svg ? 'pl-11' : '', classes]"
+        :type="type"
+        :value="value"
+        :placeholder="placeholder === ' ' ? '' : placeholder"
+        :disabled="disabled"
+        @input="$emit('input', $event.target.value)"
+      />
+    </span>
+  </label>
 </template>
 
 <script>
@@ -69,5 +76,3 @@ export default {
   },
 }
 </script>
-
-<style scoped></style>
