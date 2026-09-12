@@ -18,6 +18,7 @@
 
       <input
         :id="label_Id"
+        :data-password-visibility-managed="type === 'password' ? 'true' : null"
         class="block w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-slate-400 focus:ring-4 focus:ring-slate-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:border-slate-600 dark:focus:border-slate-500 dark:focus:ring-slate-800"
         :class="[$slots.label_svg ? 'pl-11' : '', type === 'password' ? 'pr-11' : '', classes]"
         :type="type === 'password' && passwordVisible ? 'text' : type"
