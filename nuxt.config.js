@@ -108,7 +108,9 @@ export default {
     { src: '~/plugins/formatDate' },
     { src: '~/plugins/vue-carousel.js', mode: 'client' },
     { src: '~/plugins/axios-locale.js' },
+    { src: '~/plugins/locale-utils.js' },
     { src: '~/plugins/ui-i18n-bridge.client.js', mode: 'client' },
+    { src: '~/plugins/global-language-switcher.client.js', mode: 'client' },
   ],
 
   components: true,
