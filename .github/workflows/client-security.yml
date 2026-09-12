@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - security-hardening/client
+      - i18n/full-site-3lang
   pull_request:
     branches:
       - master
