@@ -6,7 +6,7 @@
           <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Access & people</p>
           <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատակիցների կառավարում</h1>
           <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Role-ը սահմանում է աշխատակցի տեսակը, իսկ ֆունկցիաների հասանելիությունը տրվում է առանձին։ Չնշված ֆունկցիաները փակ են։ Հաճախորդները այստեղ չեն ցուցադրվում։
+            Admin և Manager role-երը ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Հաճախորդները այստեղ չեն ցուցադրվում։
           </p>
         </div>
         <button
@@ -80,7 +80,7 @@
                 </td>
                 <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400">{{ user.email }}</td>
                 <td class="px-6 py-4 text-right">
-                  <span v-if="user.roleName === 'admin'" class="inline-flex rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
+                  <span v-if="isFullAccessRole(user.roleName)" class="inline-flex rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
                   <button
                     v-else
                     type="button"
@@ -109,7 +109,7 @@
               </div>
             </div>
             <div class="mt-4 flex justify-end">
-              <span v-if="user.roleName === 'admin'" class="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
+              <span v-if="isFullAccessRole(user.roleName)" class="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
               <button v-else type="button" class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white dark:bg-white dark:text-slate-950" @click="openPermissionModal(user)">Կառավարել ֆունկցիաները</button>
             </div>
           </article>
@@ -205,14 +205,14 @@ export default {
       })
     },
     stats() {
-      const admins = this.normalizedUsers.filter((u) => u.roleName === 'admin').length
+      const fullAccess = this.normalizedUsers.filter((u) => this.isFullAccessRole(u.roleName)).length
       const assignedFactories = this.normalizedUsers.filter((u) => Boolean(u.factoryName)).length
       const rolesInUse = new Set(
         this.normalizedUsers.map((u) => u.roleName).filter(Boolean)
       ).size
       return [
         { label: 'Աշխատակիցներ', value: this.normalizedUsers.length, hint: 'միայն staff հաշիվները' },
-        { label: 'Admin', value: admins, hint: 'լիարժեք հասանելիություն' },
+        { label: 'Լիարժեք մուտք', value: fullAccess, hint: 'Admin + Manager' },
         { label: 'Արտադրամասով', value: assignedFactories, hint: 'factory նշանակված' },
         { label: 'Role-եր', value: rolesInUse, hint: 'աշխատողի տեսակներ' },
       ]
@@ -247,8 +247,11 @@ export default {
         .map((part) => part.charAt(0).toUpperCase())
         .join('')
     },
+    isFullAccessRole(roleName) {
+      return ['admin', 'manager'].includes(roleName)
+    },
     async openPermissionModal(user) {
-      if (!user || user.roleName === 'admin') return
+      if (!user || this.isFullAccessRole(user.roleName)) return
       this.selectedUser = user
       this.showPermissionModal = true
       await this.loadSelectedPermissions()
