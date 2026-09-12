@@ -38,7 +38,10 @@ jobs:
       - name: Build production client
         run: npm run build
 
-      - name: Upload production build artifact
+      - name: Generate deploy-ready /work bundle
+        run: npm run generate:server
+
+      - name: Upload source build artifact
         uses: actions/upload-artifact@v4
         with:
           name: metalworks-client-production-build
@@ -49,6 +52,15 @@ jobs:
             !node_modules/**
             !.git/**
             !.vercel/**
+            !dist/**
+
+      - name: Upload deploy-ready dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: metalworks-client-dist
+          include-hidden-files: true
+          retention-days: 7
+          path: dist/
 
   node24-compatibility:
     name: Node 24 compatibility probe
