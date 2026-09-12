@@ -35,7 +35,7 @@ export default () => {
     wrapper.className = 'password-visibility-wrapper'
     wrapper.style.position = 'relative'
     wrapper.style.display = computed.display === 'inline' ? 'inline-block' : 'block'
-    wrapper.style.width = computed.width === 'auto' ? '100%' : computed.width
+    wrapper.style.width = '100%'
     wrapper.style.maxWidth = '100%'
     wrapper.style.marginTop = computed.marginTop
     wrapper.style.marginRight = computed.marginRight
@@ -47,7 +47,7 @@ export default () => {
 
     input.style.margin = '0'
     input.style.paddingRight = '2.75rem'
-    if (computed.width !== 'auto') input.style.width = '100%'
+    input.style.width = '100%'
 
     const button = document.createElement('button')
     button.type = 'button'
