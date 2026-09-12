@@ -42,26 +42,24 @@
         <form v-else class="mt-7 space-y-5" @submit.prevent="submit">
           <label class="block">
             <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Նոր գաղտնաբառ</span>
-            <input
+            <PasswordField
               v-model="password"
-              type="password"
               autocomplete="new-password"
               required
               minlength="8"
-              class="app-control"
+              input-class="app-control"
               placeholder="Առնվազն 8 նիշ"
             />
           </label>
 
           <label class="block">
             <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Կրկնեք գաղտնաբառը</span>
-            <input
+            <PasswordField
               v-model="passwordConfirmation"
-              type="password"
               autocomplete="new-password"
               required
               minlength="8"
-              class="app-control"
+              input-class="app-control"
               placeholder="Կրկին մուտքագրեք գաղտնաբառը"
             />
           </label>
@@ -96,9 +94,11 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import PasswordField from '~/components/form/PasswordField.vue'
 
 export default {
   name: 'ResetPassword',
+  components: { PasswordField },
   layout: 'default',
   data() {
     return {
