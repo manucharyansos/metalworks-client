@@ -98,7 +98,7 @@ export default ({ app, $auth }) => {
     const publicLayoutSwitcher = document.querySelector('[data-language-switcher]')
     const authenticated = Boolean($auth?.loggedIn)
     if (authenticated && !publicLayoutSwitcher) create()
-    else if (root) {
+    else if (root && (!authenticated || publicLayoutSwitcher)) {
       root.remove()
       root = null
     }
@@ -106,9 +106,17 @@ export default ({ app, $auth }) => {
   }
 
   const run = () => window.requestAnimationFrame(sync)
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run, { once: true })
-  else run()
+  const start = () => {
+    run()
+    // Nuxt Auth may hydrate after client plugins have mounted.
+    window.setTimeout(run, 250)
+    window.setTimeout(run, 1000)
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true })
+  else start()
 
   app.router?.afterEach?.(run)
   if (app.i18n?.vm?.$watch) app.i18n.vm.$watch('locale', run)
+  if (app.router?.app?.$watch) app.router.app.$watch(() => Boolean($auth?.loggedIn), run)
 }
