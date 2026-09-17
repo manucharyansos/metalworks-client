@@ -13,9 +13,9 @@
         >
           <div class="flex flex-col rounded-lg bg-white sm:flex-row">
             <img
-              v-if="product.images"
+              v-if="product.images && product.images.length"
               class="m-2 h-24 w-28 rounded-md border object-cover object-center"
-              :src="`http://127.0.0.1:8000/storage/products-images/${product.images[0].image_path}`"
+              :src="`${$baseUrl}/storage/products-images/${product.images[0].image_path}`"
               alt=""
             />
             <div class="flex w-full flex-col px-4 py-4">
@@ -183,7 +183,7 @@
                     d="M11 5.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1z"
                   />
                   <path
-                    d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2zm13 2v5H1V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1zm-1 9H2a1 1 0 0 1-1-1v-1h14v1a1 1 0 0 1-1 1z"
+                    d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0014 2-2H2zm13 2v5H1V4a1 1 0 011-1h12a1 1 0 011 1zm-1 9H2a1 1 0 01-1-1v-1h14v1a1 1 0 01-1 1z"
                   />
                 </svg>
               </div>
