@@ -15,6 +15,19 @@ export default ({ app, $auth }) => {
   let root = null
   let switching = false
 
+  const withRouterBase = (target) => {
+    if (!target || /^https?:\/\//i.test(target)) return target
+    const base = String(app.router?.options?.base || '/').trim() || '/'
+    if (base === '/') return target
+
+    const normalizedBase = `/${base.replace(/^\/+|\/+$/g, '')}/`
+    if (target === normalizedBase.slice(0, -1) || target.startsWith(normalizedBase)) {
+      return target
+    }
+
+    return `${normalizedBase.slice(0, -1)}/${String(target).replace(/^\/+/, '')}`
+  }
+
   const applyActiveState = () => {
     if (!root) return
     const active = localeCode(app.i18n)
@@ -47,12 +60,12 @@ export default ({ app, $auth }) => {
     } catch (_) {}
 
     if (!target) {
-      const path = app.router?.currentRoute?.fullPath || window.location.pathname || '/'
+      const path = app.router?.currentRoute?.fullPath || '/'
       const clean = path.replace(/^\/(ru|en)(?=\/|$)/, '') || '/'
       target = code === 'hy' ? clean : `/${code}${clean === '/' ? '' : clean}`
     }
 
-    window.location.assign(target)
+    window.location.assign(withRouterBase(target))
   }
 
   const create = () => {
