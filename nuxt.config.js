@@ -1,5 +1,14 @@
-const apiBaseURL =
-  process.env.API_BASE_URL || process.env.BASE_URL || 'https://api.metalworks.am'
+const PRODUCTION_API_BASE_URL = 'https://api.metalworks.am'
+const configuredApiBaseURL = process.env.API_BASE_URL || process.env.BASE_URL || ''
+const configuredApiIsLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(
+  configuredApiBaseURL
+)
+const isProduction = process.env.NODE_ENV === 'production'
+const apiBaseURL = isProduction
+  ? configuredApiIsLocal || !configuredApiBaseURL
+    ? PRODUCTION_API_BASE_URL
+    : configuredApiBaseURL
+  : configuredApiBaseURL || 'http://localhost:8000'
 
 export default {
   ssr: false,
@@ -31,10 +40,7 @@ export default {
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
 
-  css: [
-    '~/assets/css/main.css',
-    'leaflet/dist/leaflet.css',
-  ],
+  css: ['~/assets/css/main.css', 'leaflet/dist/leaflet.css'],
   router: {
     base: process.env.NUXT_ROUTER_BASE || '/',
     middleware: ['roleRedirect', 'permission-guard'],
