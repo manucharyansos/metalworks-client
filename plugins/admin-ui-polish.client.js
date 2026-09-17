@@ -43,6 +43,12 @@ export default ({ app }) => {
       fileTypes: 'Նախագծերի թղթապանակ',
       allowed: 'Թույլատրված',
       helpLabel: 'Տեղեկություն',
+      employeeHelp:
+        'Admin և Manager հաստիքները ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Հաճախորդները այստեղ չեն ցուցադրվում։',
+      noPhone: 'Հեռախոս նշված չէ',
+      positionPermissions: 'Հաստիքի թույլտվությունները այստեղ չեն օգտագործվում։',
+      positionsView: 'Հաստիքների դիտում',
+      changeSearch: 'Փոխեք որոնումը կամ հաստիքի ֆիլտրը։',
     },
     ru: {
       allRoles: 'Сортировать по должности',
@@ -54,6 +60,12 @@ export default ({ app }) => {
       fileTypes: 'Папка проектов',
       allowed: 'Разрешено',
       helpLabel: 'Информация',
+      employeeHelp:
+        'Должности Admin и Manager имеют полный доступ. Для остальных сотрудников доступ к функциям назначается отдельно. Клиенты здесь не отображаются.',
+      noPhone: 'Телефон не указан',
+      positionPermissions: 'Разрешения должности здесь не используются.',
+      positionsView: 'Просмотр должностей',
+      changeSearch: 'Измените поиск или фильтр по должности.',
     },
     en: {
       allRoles: 'Sort by position',
@@ -65,6 +77,12 @@ export default ({ app }) => {
       fileTypes: 'Project folders',
       allowed: 'Allowed',
       helpLabel: 'Information',
+      employeeHelp:
+        'Admin and Manager positions have full access. Access to functions is assigned individually for all other employees. Clients are not shown here.',
+      noPhone: 'Phone not provided',
+      positionPermissions: 'Position permissions are not used here.',
+      positionsView: 'View positions',
+      changeSearch: 'Change the search or position filter.',
     },
   }
 
@@ -75,6 +93,15 @@ export default ({ app }) => {
     root.querySelectorAll('p, span').forEach((node) => {
       const text = normalize(node.textContent)
       if (removableLabels.has(text)) node.style.display = 'none'
+
+      // This is only an eyebrow above the real section title. The section title
+      // itself is renamed to "Project folders" below.
+      if (
+        node.tagName === 'P' &&
+        ['Factory formats', 'Форматы цехов'].includes(text)
+      ) {
+        node.style.display = 'none'
+      }
     })
 
     root.querySelectorAll('.metric-card').forEach((card) => {
@@ -91,68 +118,107 @@ export default ({ app }) => {
     if (!routeIsAdmin()) return
     const t = copy()
 
-    root.querySelectorAll('option, th, button, p, span, h1, h2, h3, a').forEach((node) => {
-      if (node.children.length) return
-      const text = normalize(node.textContent)
-      let next = null
+    root
+      .querySelectorAll('option, th, button, p, span, h1, h2, h3, a, div')
+      .forEach((node) => {
+        if (node.children.length) return
+        const text = normalize(node.textContent)
+        let next = null
 
-      if (
-        [
-          'Բոլոր role-երը',
-          'Все роли',
-          'All roles',
-          'Դասակարգել ըստ հաստիքի',
-          'Сортировать по должности',
-          'Sort by position',
-        ].includes(text)
-      ) {
-        next = t.allRoles
-      } else if (
-        ['Role', 'Դեր', 'Հաստիք', 'Роль', 'Должность', 'Position'].includes(text)
-      ) {
-        next = t.role
-      } else if (
-        ['Role-եր', 'Հաստիքներ', 'Роли', 'Должности', 'Roles', 'Positions'].includes(text)
-      ) {
-        next = t.rolePlural
-      } else if (
-        ['Կառավարել', 'Խմբագրել', 'Управлять', 'Редактировать', 'Manage', 'Edit'].includes(text)
-      ) {
-        next = t.manage
-      } else if (
-        [
-          'Կառավարել ֆունկցիաները',
-          'Խմբագրել ֆունկցիաները',
-          'Управлять функциями',
-          'Редактировать функции',
-          'Manage functions',
-          'Edit functions',
-        ].includes(text)
-      ) {
-        next = t.manageFunctions
-      } else if (
-        [
-          'Արտադրամասերի format-ներ',
-          'Նախագծերի թղթապանակ',
-          'Форматы цехов',
-          'Папка проектов',
-          'Factory formats',
-          'Project folders',
-        ].includes(text)
-      ) {
-        next = t.factoryFormats
-      } else if (
-        ['Ֆայլերի տեսակներ', 'Типы файлов', 'File types'].includes(text)
-      ) {
-        next = t.fileTypes
-      } else if (
-        ['Տրված է', 'Թույլատրված', 'Выдано', 'Разрешено', 'Granted', 'Allowed'].includes(text)
-      ) {
-        next = t.allowed
-      }
+        if (
+          [
+            'Բոլոր role-երը',
+            'Все роли',
+            'All roles',
+            'Դասակարգել ըստ հաստիքի',
+            'Сортировать по должности',
+            'Sort by position',
+          ].includes(text)
+        ) {
+          next = t.allRoles
+        } else if (
+          ['Role', 'Դեր', 'Հաստիք', 'Роль', 'Должность', 'Position'].includes(text)
+        ) {
+          next = t.role
+        } else if (
+          ['Role-եր', 'Հաստիքներ', 'Роли', 'Должности', 'Roles', 'Positions'].includes(text)
+        ) {
+          next = t.rolePlural
+        } else if (
+          ['Կառավարել', 'Խմբագրել', 'Управлять', 'Редактировать', 'Manage', 'Edit'].includes(text)
+        ) {
+          next = t.manage
+        } else if (
+          [
+            'Կառավարել ֆունկցիաները',
+            'Խմբագրել ֆունկցիաները',
+            'Управлять функциями',
+            'Редактировать функции',
+            'Manage functions',
+            'Edit functions',
+          ].includes(text)
+        ) {
+          next = t.manageFunctions
+        } else if (
+          [
+            'Արտադրամասերի format-ներ',
+            'Նախագծերի թղթապանակ',
+            'Форматы цехов',
+            'Папка проектов',
+            'Factory formats',
+            'Project folders',
+          ].includes(text) &&
+          node.tagName !== 'P'
+        ) {
+          next = t.factoryFormats
+        } else if (
+          ['Ֆայլերի տեսակներ', 'Типы файлов', 'File types'].includes(text)
+        ) {
+          next = t.fileTypes
+        } else if (
+          ['Տրված է', 'Թույլատրված', 'Выдано', 'Разрешено', 'Granted', 'Allowed'].includes(text)
+        ) {
+          next = t.allowed
+        } else if (
+          [
+            translations.hy.employeeHelp,
+            translations.ru.employeeHelp,
+            translations.en.employeeHelp,
+          ].includes(text)
+        ) {
+          next = t.employeeHelp
+        } else if (
+          [translations.hy.noPhone, translations.ru.noPhone, translations.en.noPhone].includes(text)
+        ) {
+          next = t.noPhone
+        } else if (
+          [
+            translations.hy.positionPermissions,
+            translations.ru.positionPermissions,
+            translations.en.positionPermissions,
+          ].includes(text)
+        ) {
+          next = t.positionPermissions
+        } else if (
+          [
+            translations.hy.positionsView,
+            translations.ru.positionsView,
+            translations.en.positionsView,
+          ].includes(text)
+        ) {
+          next = t.positionsView
+        } else if (
+          [
+            translations.hy.changeSearch,
+            translations.ru.changeSearch,
+            translations.en.changeSearch,
+          ].includes(text)
+        ) {
+          next = t.changeSearch
+        }
 
-      if (next && text !== next) node.textContent = next
-    })
+        if (next && text !== next) node.textContent = next
+      })
   }
 
   const isSearchInput = (input) => {
