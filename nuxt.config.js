@@ -60,22 +60,35 @@ export default {
     },
     strategies: {
       laravelSanctum: {
-        provider: 'laravel/sanctum',
-        url: apiBaseURL,
+        scheme: 'cookie',
         endpoints: {
-          csrf: { url: '/sanctum/csrf-cookie' },
-          login: { url: '/api/login', method: 'post' },
-          logout: { url: '/api/logout', method: 'post' },
-          user: { url: '/api/user', method: 'get' },
+          csrf: {
+            url: '/sanctum/csrf-cookie',
+            method: 'get',
+            withCredentials: true,
+          },
+          login: {
+            url: '/api/login',
+            method: 'post',
+            withCredentials: true,
+          },
+          logout: {
+            url: '/api/logout',
+            method: 'post',
+            withCredentials: true,
+          },
+          user: {
+            url: '/api/user',
+            method: 'get',
+            withCredentials: true,
+          },
         },
         cookie: {
           name: 'XSRF-TOKEN',
         },
-        token: {
-          property: 'data.access_token',
-          maxAge: 60 * 60,
+        user: {
+          property: false,
         },
-        tokenType: 'bearer',
       },
     },
   },
