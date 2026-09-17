@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NUXT_ROUTER_BASE=/ API_BASE_URL=http://localhost:8000 nuxt",
+    "dev": "cross-env NUXT_ROUTER_BASE=/ API_BASE_URL=http://localhost:8000 BASE_URL=http://localhost:8000 nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
-    "generate:server": "cross-env NUXT_ROUTER_BASE=/work/ API_BASE_URL=https://api.metalworks.am nuxt generate",
-
+    "generate:server": "cross-env NODE_ENV=production NUXT_ROUTER_BASE=/work/ API_BASE_URL=https://api.metalworks.am BASE_URL=https://api.metalworks.am nuxt generate",
     "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
     "lint:prettier": "prettier --check .",
     "lint": "npm run lint:js && npm run lint:prettier",
