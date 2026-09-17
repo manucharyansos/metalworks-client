@@ -39,7 +39,7 @@ export const actions = {
   async loginUser({ commit }, userData) {
     try {
       commit('setErrorMessage', null)
-      await this.$auth.loginWith('laravelSanctum', userData)
+      await this.$auth.loginWith('runtimeSanctum', userData)
       return true
     } catch (err) {
       commit('setErrorMessage', err?.response?.data?.error || 'Login failed')
