@@ -3,12 +3,26 @@ export default ({ app }) => {
 
   const removableLabels = new Set([
     'Operations overview',
+    'Операционный обзор',
+    'Գործառնությունների ակնարկ',
     'Report builder',
+    'Конструктор отчётов',
+    'Հաշվետվությունների կառուցում',
     'Team capacity',
+    'Ресурс команды',
+    'Թիմի ծանրաբեռնվածություն',
     'Assignment queue',
+    'Очередь назначений',
+    'Նշանակումների հերթ',
     'Access & people',
+    'Доступ и сотрудники',
+    'Հասանելիություն և աշխատակիցներ',
     'Access control',
+    'Контроль доступа',
+    'Հասանելիության կառավարում',
     'Անհատական',
+    'Индивидуально',
+    'Individual',
   ])
 
   const routeIsAdmin = () => {
@@ -27,6 +41,7 @@ export default ({ app }) => {
       manageFunctions: 'Խմբագրել ֆունկցիաները',
       factoryFormats: 'Նախագծերի թղթապանակ',
       fileTypes: 'Նախագծերի թղթապանակ',
+      allowed: 'Թույլատրված',
       helpLabel: 'Տեղեկություն',
     },
     ru: {
@@ -37,6 +52,7 @@ export default ({ app }) => {
       manageFunctions: 'Редактировать функции',
       factoryFormats: 'Папка проектов',
       fileTypes: 'Папка проектов',
+      allowed: 'Разрешено',
       helpLabel: 'Информация',
     },
     en: {
@@ -47,12 +63,12 @@ export default ({ app }) => {
       manageFunctions: 'Edit functions',
       factoryFormats: 'Project folders',
       fileTypes: 'Project folders',
+      allowed: 'Allowed',
       helpLabel: 'Information',
     },
   }
 
   const copy = () => translations[locale()] || translations.hy
-
   const normalize = (value) => String(value || '').replace(/\s+/g, ' ').trim()
 
   const hideKnownLabels = (root) => {
@@ -62,8 +78,12 @@ export default ({ app }) => {
     })
 
     root.querySelectorAll('.metric-card').forEach((card) => {
-      const label = card.querySelector('.metric-label')
-      if (normalize(label?.textContent) === 'Factory format-ներ') card.remove()
+      const label = normalize(card.querySelector('.metric-label')?.textContent)
+      if (
+        ['Factory format-ներ', 'Factory formats', 'Форматы цехов'].includes(label)
+      ) {
+        card.remove()
+      }
     })
   }
 
@@ -76,13 +96,60 @@ export default ({ app }) => {
       const text = normalize(node.textContent)
       let next = null
 
-      if (['Բոլոր role-երը', 'Все роли', 'All roles'].includes(text)) next = t.allRoles
-      else if (['Role', 'Դեր', 'Роль'].includes(text)) next = t.role
-      else if (['Role-եր', 'Роли', 'Roles'].includes(text)) next = t.rolePlural
-      else if (['Կառավարել', 'Управлять', 'Manage'].includes(text)) next = t.manage
-      else if (['Կառավարել ֆունկցիաները', 'Управлять функциями', 'Manage functions'].includes(text)) next = t.manageFunctions
-      else if (['Արտադրամասերի format-ներ', 'Форматы цехов', 'Factory formats'].includes(text)) next = t.factoryFormats
-      else if (['Ֆայլերի տեսակներ', 'Типы файлов', 'File types'].includes(text)) next = t.fileTypes
+      if (
+        [
+          'Բոլոր role-երը',
+          'Все роли',
+          'All roles',
+          'Դասակարգել ըստ հաստիքի',
+          'Сортировать по должности',
+          'Sort by position',
+        ].includes(text)
+      ) {
+        next = t.allRoles
+      } else if (
+        ['Role', 'Դեր', 'Հաստիք', 'Роль', 'Должность', 'Position'].includes(text)
+      ) {
+        next = t.role
+      } else if (
+        ['Role-եր', 'Հաստիքներ', 'Роли', 'Должности', 'Roles', 'Positions'].includes(text)
+      ) {
+        next = t.rolePlural
+      } else if (
+        ['Կառավարել', 'Խմբագրել', 'Управлять', 'Редактировать', 'Manage', 'Edit'].includes(text)
+      ) {
+        next = t.manage
+      } else if (
+        [
+          'Կառավարել ֆունկցիաները',
+          'Խմբագրել ֆունկցիաները',
+          'Управлять функциями',
+          'Редактировать функции',
+          'Manage functions',
+          'Edit functions',
+        ].includes(text)
+      ) {
+        next = t.manageFunctions
+      } else if (
+        [
+          'Արտադրամասերի format-ներ',
+          'Նախագծերի թղթապանակ',
+          'Форматы цехов',
+          'Папка проектов',
+          'Factory formats',
+          'Project folders',
+        ].includes(text)
+      ) {
+        next = t.factoryFormats
+      } else if (
+        ['Ֆայլերի տեսակներ', 'Типы файлов', 'File types'].includes(text)
+      ) {
+        next = t.fileTypes
+      } else if (
+        ['Տրված է', 'Թույլատրված', 'Выдано', 'Разрешено', 'Granted', 'Allowed'].includes(text)
+      ) {
+        next = t.allowed
+      }
 
       if (next && text !== next) node.textContent = next
     })
@@ -94,6 +161,7 @@ export default ({ app }) => {
     return (
       input.type === 'search' ||
       placeholder.includes('որոն') ||
+      placeholder.includes('փնտր') ||
       placeholder.includes('поиск') ||
       placeholder.includes('найти') ||
       placeholder.includes('search')
@@ -127,19 +195,20 @@ export default ({ app }) => {
   const makeDescriptionsHoverable = (root) => {
     if (!routeIsAdmin()) return
     const t = copy()
-    const headers = root.querySelectorAll('main section, main header')
+    const sections = root.querySelectorAll('main section, main header')
 
-    headers.forEach((section) => {
+    sections.forEach((section) => {
       if (section.dataset.hoverHelpProcessed === 'true') return
       const heading = section.querySelector(':scope h1, :scope h2')
       if (!heading) return
 
-      const paragraphs = Array.from(section.querySelectorAll(':scope > div > p, :scope > p')).filter((p) => {
+      const paragraphs = Array.from(
+        section.querySelectorAll(':scope > div > p, :scope > p')
+      ).filter((p) => {
         if (p.closest('[data-admin-hover-help]')) return false
         const text = normalize(p.textContent)
         if (!text || removableLabels.has(text)) return false
-        if (text.length < 55) return false
-        return true
+        return text.length >= 55
       })
 
       const paragraph = paragraphs[0]
@@ -236,8 +305,11 @@ export default ({ app }) => {
     window.setTimeout(polish, 900)
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true })
-  else start()
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true })
+  } else {
+    start()
+  }
 
   app.router?.afterEach?.(() => {
     schedule()
