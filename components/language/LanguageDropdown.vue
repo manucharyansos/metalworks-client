@@ -4,23 +4,23 @@
     class="relative inline-block text-left"
     @keydown.esc.stop.prevent="close"
   >
-    <!-- Trigger: compact (flag + chevron + code) -->
     <button
       type="button"
-      class="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg text-neutral-800 dark:text-neutral-100 hover:bg-gray-200/70 dark:hover:bg-gray-700 focus:outline-none focus:ring-0 focus-visible:outline-none min-w-[84px]"
+      class="inline-flex min-w-[84px] items-center gap-1 rounded-lg px-2 py-1.5 text-neutral-800 hover:bg-gray-200/70 focus:outline-none focus:ring-0 focus-visible:outline-none dark:text-neutral-100 dark:hover:bg-gray-700"
       :aria-expanded="open.toString()"
       aria-haspopup="listbox"
+      :disabled="switching"
       @click="toggle"
     >
       <div class="inline-flex items-center gap-1">
-        <FlagIcon :code="activeLocale.code" class="w-5 h-5 shrink-0" />
+        <FlagIcon :code="activeLocale.code" class="h-5 w-5 shrink-0" />
       </div>
-      <div class="text-xs sm:text-[13px] uppercase opacity-80 tracking-wide">
+      <div class="text-xs uppercase tracking-wide opacity-80 sm:text-[13px]">
         {{ activeLocale.code }}
       </div>
       <div>
         <svg
-          class="w-3.5 h-3.5 opacity-80 transition-transform duration-200"
+          class="h-3.5 w-3.5 opacity-80 transition-transform duration-200"
           :class="open ? 'rotate-180' : ''"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -35,12 +35,11 @@
       </div>
     </button>
 
-    <!-- Dropdown -->
     <transition name="fade-scale">
       <ul
         v-if="open"
         ref="list"
-        class="absolute z-50 mt-2 w-full max-h-60 overflow-auto rounded-xl bg-white dark:bg-gray-900 p-1 text-sm shadow-lg ring-1 ring-black/10 focus:outline-none"
+        class="absolute z-50 mt-2 max-h-60 w-full overflow-auto rounded-xl bg-white p-1 text-sm shadow-lg ring-1 ring-black/10 focus:outline-none dark:bg-gray-900"
         role="listbox"
         :aria-activedescendant="activeId"
         tabindex="-1"
@@ -53,29 +52,22 @@
           v-for="(l, idx) in locales"
           :id="`lang-opt-${l.code}`"
           :key="l.code"
-          class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          :class="
-            l.code === currentLocaleCode
-              ? 'bg-gray-100 dark:bg-gray-700/70'
-              : ''
-          "
+          class="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+          :class="l.code === currentLocaleCode ? 'bg-gray-100 dark:bg-gray-700/70' : ''"
           role="option"
           :aria-selected="(l.code === currentLocaleCode).toString()"
           @click="changeLocale(l.code)"
           @mousemove="hoverIndex = idx"
         >
           <span class="inline-flex items-center gap-2">
-            <FlagIcon :code="l.code" class="w-5 h-5 shrink-0" />
-            <span
-              class="text-[11px] sm:text-xs uppercase text-gray-600 dark:text-gray-300"
-              >{{ l.code }}</span
-            >
+            <FlagIcon :code="l.code" class="h-5 w-5 shrink-0" />
+            <span class="text-[11px] uppercase text-gray-600 dark:text-gray-300 sm:text-xs">{{ l.code }}</span>
           </span>
 
           <span class="ml-auto inline-flex items-center">
             <svg
               v-if="l.code === currentLocaleCode"
-              class="w-4 h-4 text-gray-400"
+              class="h-4 w-4 text-gray-400"
               viewBox="0 0 20 20"
               fill="currentColor"
               aria-hidden="true"
@@ -117,7 +109,7 @@ const FlagIcon = {
       <svg viewBox="0 0 640 480" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
         <path fill="#b22234" d="M0 0h640v480H0z"/>
         <g fill="#fff">
-          <rect x="0" y="37"  width="640" height="37"/>
+          <rect x="0" y="37" width="640" height="37"/>
           <rect x="0" y="111" width="640" height="37"/>
           <rect x="0" y="185" width="640" height="37"/>
           <rect x="0" y="259" width="640" height="37"/>
@@ -130,9 +122,7 @@ const FlagIcon = {
             ${Array.from({ length: 5 })
               .map((_, r) =>
                 Array.from({ length: 6 })
-                  .map(
-                    (__, c) => `<circle cx="${c * 46}" cy="${r * 46}" r="4"/>`
-                  )
+                  .map((__, c) => `<circle cx="${c * 46}" cy="${r * 46}" r="4"/>`)
                   .join('')
               )
               .join('')}
@@ -142,11 +132,7 @@ const FlagIcon = {
       }
       return (
         svgs[c] ||
-        `
-    <svg viewBox="0 0 24 24" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="5" width="18" height="12" rx="2" ry="2" fill="#e5e7eb"/>
-      <rect x="3" y="11" width="18" height="2" fill="#d1d5db"/>
-    </svg>`
+        `<svg viewBox="0 0 24 24" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="5" width="18" height="12" rx="2" ry="2" fill="#e5e7eb"/><rect x="3" y="11" width="18" height="2" fill="#d1d5db"/></svg>`
       )
     },
   },
@@ -166,6 +152,7 @@ export default {
     return {
       open: false,
       hoverIndex: -1,
+      switching: false,
     }
   },
   computed: {
@@ -201,16 +188,14 @@ export default {
       if (!this.$el.contains(e.target)) this.close()
     }
     document.addEventListener('click', this._onBody, { passive: true })
-
-    this.hoverIndex = this.locales.findIndex(
-      (l) => l.code === this.currentLocaleCode
-    )
+    this.hoverIndex = this.locales.findIndex((l) => l.code === this.currentLocaleCode)
   },
   beforeDestroy() {
     document.removeEventListener('click', this._onBody)
   },
   methods: {
     toggle() {
+      if (this.switching) return
       this.open = !this.open
       this.$nextTick(() => {
         if (this.open && this.$refs.list) this.$refs.list.focus()
@@ -223,9 +208,7 @@ export default {
       const len = this.locales.length
       if (!len) return
       if (this.hoverIndex === -1) {
-        this.hoverIndex = this.locales.findIndex(
-          (l) => l.code === this.currentLocaleCode
-        )
+        this.hoverIndex = this.locales.findIndex((l) => l.code === this.currentLocaleCode)
       } else {
         this.hoverIndex = (this.hoverIndex + step + len) % len
       }
@@ -234,32 +217,32 @@ export default {
       const cur = this.locales[this.hoverIndex]
       if (cur) this.changeLocale(cur.code)
     },
-    async changeLocale(code) {
-      if (!code || code === this.currentLocaleCode) {
+    changeLocale(code) {
+      if (!code || code === this.currentLocaleCode || this.switching) {
         this.close()
         return
       }
 
-      try {
-        const target =
-          (this.switchLocalePath && this.switchLocalePath(code)) ||
-          (this.localePath && this.localePath('/', code)) ||
-          `/${code}`
+      this.switching = true
+      this.close()
 
-        if (this.$cookies) {
-          this.$cookies.set('i18n_redirected', code, {
-            path: '/',
-            maxAge: 60 * 60 * 24 * 365,
-            sameSite: 'lax',
-          })
-        }
-        await this.$router.push(target)
-        if (this.$i18n && this.$i18n.locale !== code) {
-          await this.$i18n.setLocale(code)
-        }
-      } finally {
-        this.close()
+      let target = null
+      try {
+        if (typeof this.switchLocalePath === 'function') target = this.switchLocalePath(code)
+      } catch (_) {}
+      if (!target) target = code === 'hy' ? '/' : `/${code}`
+
+      if (this.$cookies) {
+        this.$cookies.set('i18n_redirected', code, {
+          path: '/',
+          maxAge: 60 * 60 * 24 * 365,
+          sameSite: 'lax',
+        })
+      } else {
+        document.cookie = `i18n_redirected=${encodeURIComponent(code)}; path=/; max-age=31536000; samesite=lax`
       }
+
+      window.location.assign(target)
     },
   },
 }
