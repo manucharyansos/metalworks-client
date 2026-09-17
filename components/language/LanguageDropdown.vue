@@ -217,6 +217,18 @@ export default {
       const cur = this.locales[this.hoverIndex]
       if (cur) this.changeLocale(cur.code)
     },
+    withRouterBase(target) {
+      if (!target || /^https?:\/\//i.test(target)) return target
+      const base = String(this.$router?.options?.base || '/').trim() || '/'
+      if (base === '/') return target
+
+      const normalizedBase = `/${base.replace(/^\/+|\/+$/g, '')}/`
+      if (target === normalizedBase.slice(0, -1) || target.startsWith(normalizedBase)) {
+        return target
+      }
+
+      return `${normalizedBase.slice(0, -1)}/${String(target).replace(/^\/+/, '')}`
+    },
     changeLocale(code) {
       if (!code || code === this.currentLocaleCode || this.switching) {
         this.close()
@@ -232,7 +244,7 @@ export default {
       } catch (_) {}
 
       if (!target) {
-        const current = this.$route?.fullPath || window.location.pathname || '/'
+        const current = this.$route?.fullPath || '/'
         const clean = current.replace(/^\/(ru|en)(?=\/|$)/, '') || '/'
         target = code === 'hy' ? clean : `/${code}${clean === '/' ? '' : clean}`
       }
@@ -247,7 +259,7 @@ export default {
         document.cookie = `i18n_redirected=${encodeURIComponent(code)}; path=/; max-age=31536000; samesite=lax`
       }
 
-      window.location.assign(target)
+      window.location.assign(this.withRouterBase(target))
     },
   },
 }
