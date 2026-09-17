@@ -3,18 +3,28 @@
     <div class="mx-auto max-w-[1500px] space-y-6">
       <section class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Access & people</p>
-          <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատակիցների կառավարում</h1>
-          <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Admin և Manager role-երը ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Հաճախորդները այստեղ չեն ցուցադրվում։
-          </p>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատակիցների կառավարում</h1>
+            <div class="group relative inline-flex">
+              <button
+                type="button"
+                class="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-xs font-black text-slate-500 transition hover:border-slate-300 hover:text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-white"
+                aria-label="Տեղեկություն"
+              >
+                i
+              </button>
+              <div class="pointer-events-none absolute left-0 top-9 z-30 w-[min(420px,80vw)] -translate-y-1 rounded-2xl bg-slate-950 px-4 py-3 text-xs font-medium leading-5 text-white opacity-0 shadow-2xl transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:bg-white dark:text-slate-950">
+                Admin և Manager հաստիքները ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Հաճախորդները այստեղ չեն ցուցադրվում։
+              </div>
+            </div>
+          </div>
         </div>
         <button
           type="button"
           class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
           @click="refreshUsers"
         >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 6v5h-5M4 18v-5h5m10.5-2a8 8 0 00-13.8-3M4.5 14a8 8 0 0013.8 3" />
           </svg>
           Թարմացնել
@@ -33,13 +43,13 @@
         <div class="border-b border-slate-100 p-5 dark:border-slate-800 sm:p-6">
           <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             <div class="relative md:col-span-2">
-              <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <input v-model="search" type="text" class="control pr-11" placeholder="Որոնել աշխատակցի անունով կամ email-ով" />
+              <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <input v-model="search" type="text" class="control pl-10" placeholder="Որոնել աշխատակցի անունով կամ email-ով" />
             </div>
             <select v-model="roleFilter" class="control">
-              <option value="">Բոլոր role-երը</option>
+              <option value="">Դասակարգել ըստ հաստիքի</option>
               <option v-for="role in staffRoles" :key="role.id || role.name" :value="role.name">{{ role.value || role.name }}</option>
             </select>
           </div>
@@ -54,7 +64,7 @@
             <thead class="bg-slate-50/80 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40">
               <tr>
                 <th class="px-6 py-3.5">Աշխատակից</th>
-                <th class="px-4 py-3.5">Role</th>
+                <th class="px-4 py-3.5">Հաստիք</th>
                 <th class="px-4 py-3.5">Արտադրամաս</th>
                 <th class="px-4 py-3.5">Email</th>
                 <th class="px-6 py-3.5 text-right">Ֆունկցիաներ</th>
@@ -87,7 +97,7 @@
                     class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
                     @click="openPermissionModal(user)"
                   >
-                    Կառավարել
+                    Խմբագրել
                   </button>
                 </td>
               </tr>
@@ -105,12 +115,13 @@
                   <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ user.roleLabel || '—' }}</span>
                 </div>
                 <p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ user.email }}</p>
+                <p v-if="user.phone" class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ user.phone }}</p>
                 <p class="mt-2 text-[10px] font-semibold text-slate-400">{{ user.factoryName || 'Արտադրամաս նշված չէ' }}</p>
               </div>
             </div>
             <div class="mt-4 flex justify-end">
               <span v-if="isFullAccessRole(user.roleName)" class="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
-              <button v-else type="button" class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white dark:bg-white dark:text-slate-950" @click="openPermissionModal(user)">Կառավարել ֆունկցիաները</button>
+              <button v-else type="button" class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white dark:bg-white dark:text-slate-950" @click="openPermissionModal(user)">Խմբագրել ֆունկցիաները</button>
             </div>
           </article>
         </div>
@@ -118,7 +129,7 @@
         <div v-if="!filteredUsers.length" class="flex min-h-[220px] flex-col items-center justify-center px-6 text-center">
           <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-lg font-black text-slate-400 dark:bg-slate-800">0</div>
           <p class="mt-4 text-sm font-bold text-slate-700 dark:text-slate-200">Աշխատակից չի գտնվել</p>
-          <p class="mt-1 text-xs text-slate-400">Փոխեք որոնումը կամ role-ի ֆիլտրը։</p>
+          <p class="mt-1 text-xs text-slate-400">Փոխեք որոնումը կամ հաստիքի ֆիլտրը։</p>
         </div>
       </section>
     </div>
@@ -188,6 +199,7 @@ export default {
           id: u.id,
           name: u.name,
           email: u.email,
+          phone: u.phone || u.worker?.phone || u.client?.phone || '',
           roleName: u.role.name,
           roleLabel: u.role.value || u.role.name,
           factoryName: u.factory ? u.factory.name || u.factory.value : null,
@@ -199,7 +211,8 @@ export default {
         const matchSearch =
           !term ||
           (user.name && user.name.toLowerCase().includes(term)) ||
-          (user.email && user.email.toLowerCase().includes(term))
+          (user.email && user.email.toLowerCase().includes(term)) ||
+          (user.phone && user.phone.toLowerCase().includes(term))
         const matchRole = !this.roleFilter || user.roleName === this.roleFilter
         return matchSearch && matchRole
       })
@@ -214,7 +227,7 @@ export default {
         { label: 'Աշխատակիցներ', value: this.normalizedUsers.length, hint: 'միայն staff հաշիվները' },
         { label: 'Լիարժեք մուտք', value: fullAccess, hint: 'Admin + Manager' },
         { label: 'Արտադրամասով', value: assignedFactories, hint: 'factory նշանակված' },
-        { label: 'Role-եր', value: rolesInUse, hint: 'աշխատողի տեսակներ' },
+        { label: 'Հաստիքներ', value: rolesInUse, hint: 'աշխատողի տեսակներ' },
       ]
     },
     permissionGroups() {
