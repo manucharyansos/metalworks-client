@@ -11,8 +11,8 @@
     <button
       type="button"
       class="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-slate-400 transition hover:text-slate-700 focus:outline-none dark:text-slate-500 dark:hover:text-slate-200"
-      :aria-label="visible ? 'Թաքցնել գաղտնաբառը' : 'Ցույց տալ գաղտնաբառը'"
-      :title="visible ? 'Թաքցնել գաղտնաբառը' : 'Ցույց տալ գաղտնաբառը'"
+      :aria-label="visibilityLabel"
+      :title="visibilityLabel"
       @click="visible = !visible"
     >
       <svg v-if="!visible" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -42,6 +42,13 @@ export default {
   },
   data() {
     return { visible: false }
+  },
+  computed: {
+    visibilityLabel() {
+      return this.visible
+        ? this.$t('common.hide_password')
+        : this.$t('common.show_password')
+    },
   },
 }
 </script>
