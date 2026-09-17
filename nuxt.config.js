@@ -156,6 +156,11 @@ export default {
       short_name: 'MetalWorks',
       lang: 'hy',
     },
+    workbox: {
+      cleanupOutdatedCaches: true,
+      clientsClaim: true,
+      skipWaiting: true,
+    },
   },
 
   generate: {
