@@ -13,6 +13,7 @@ export default ({ app, $auth }) => {
   if (!process.client) return
 
   let root = null
+  let switching = false
 
   const applyActiveState = () => {
     if (!root) return
@@ -20,35 +21,38 @@ export default ({ app, $auth }) => {
     root.querySelectorAll('button[data-locale]').forEach((button) => {
       const selected = button.dataset.locale === active
       button.setAttribute('aria-pressed', selected ? 'true' : 'false')
+      button.disabled = switching
       button.style.background = selected ? '#0f172a' : 'transparent'
       button.style.color = selected ? '#ffffff' : '#64748b'
       button.style.boxShadow = selected ? '0 1px 3px rgba(15,23,42,.18)' : 'none'
     })
   }
 
-  const changeLocale = async (code) => {
-    if (!SUPPORTED.some((item) => item.code === code) || code === localeCode(app.i18n)) return
+  const changeLocale = (code) => {
+    if (
+      switching ||
+      !SUPPORTED.some((item) => item.code === code) ||
+      code === localeCode(app.i18n)
+    ) {
+      return
+    }
 
+    switching = true
+    applyActiveState()
     document.cookie = `i18n_redirected=${encodeURIComponent(code)}; path=/; max-age=31536000; samesite=lax`
 
     let target = null
     try {
       if (typeof app.switchLocalePath === 'function') target = app.switchLocalePath(code)
-      if (!target && typeof app.localePath === 'function') target = app.localePath(app.router.currentRoute, code)
     } catch (_) {}
 
-    try {
-      if (target && target !== app.router.currentRoute.fullPath) await app.router.push(target)
-    } catch (_) {}
-
-    try {
-      if (typeof app.i18n?.setLocale === 'function') await app.i18n.setLocale(code)
-      else if (app.i18n) app.i18n.locale = code
-    } catch (_) {
-      if (app.i18n) app.i18n.locale = code
+    if (!target) {
+      const path = app.router?.currentRoute?.fullPath || window.location.pathname || '/'
+      const clean = path.replace(/^\/(ru|en)(?=\/|$)/, '') || '/'
+      target = code === 'hy' ? clean : `/${code}${clean === '/' ? '' : clean}`
     }
 
-    applyActiveState()
+    window.location.assign(target)
   }
 
   const create = () => {
@@ -95,10 +99,10 @@ export default ({ app, $auth }) => {
   }
 
   const sync = () => {
-    const publicLayoutSwitcher = document.querySelector('[data-language-switcher]')
+    const pageSwitcher = document.querySelector('[data-language-switcher]')
     const authenticated = Boolean($auth?.loggedIn)
-    if (authenticated && !publicLayoutSwitcher) create()
-    else if (root && (!authenticated || publicLayoutSwitcher)) {
+    if (authenticated && !pageSwitcher) create()
+    else if (root && (!authenticated || pageSwitcher)) {
       root.remove()
       root = null
     }
@@ -108,15 +112,18 @@ export default ({ app, $auth }) => {
   const run = () => window.requestAnimationFrame(sync)
   const start = () => {
     run()
-    // Nuxt Auth may hydrate after client plugins have mounted.
     window.setTimeout(run, 250)
     window.setTimeout(run, 1000)
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true })
-  else start()
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true })
+  } else {
+    start()
+  }
 
   app.router?.afterEach?.(run)
-  if (app.i18n?.vm?.$watch) app.i18n.vm.$watch('locale', run)
-  if (app.router?.app?.$watch) app.router.app.$watch(() => Boolean($auth?.loggedIn), run)
+  if (app.router?.app?.$watch) {
+    app.router.app.$watch(() => Boolean($auth?.loggedIn), run)
+  }
 }
