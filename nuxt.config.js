@@ -116,8 +116,8 @@ export default {
   },
 
   plugins: [
-    { src: '~/plugins/url-helper.js', mode: 'client' },
     { src: '~/plugins/base-url.js', mode: 'client' },
+    { src: '~/plugins/url-helper.js', mode: 'client' },
     { src: '~/plugins/moment.js', mode: 'client' },
     { src: '~/plugins/can.js', mode: 'client' },
     { src: '~/plugins/password-visibility.client.js', mode: 'client' },
