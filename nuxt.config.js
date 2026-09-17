@@ -103,7 +103,7 @@ export default {
     baseURL: apiBaseURL,
     managerRole: process.env.MANAGER_ROLE || 'manager',
     engineerRole: process.env.ENGINEER_ROLE || 'engineer',
-    adminRole: process.env.ADMIN_DASHBOARD || 'admin',
+    adminRole: process.env.ADMIN_ROLE || 'admin',
     laserRole: process.env.LASER_ROLE || 'laser',
     bendRole: process.env.BEND_ROLE || 'bend',
     dashboards: {
