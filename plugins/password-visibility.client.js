@@ -9,14 +9,27 @@ const EYE_OFF_ICON = `
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m3 3 18 18M10.6 6.2A10.5 10.5 0 0 1 12 6c6 0 9.5 6 9.5 6a17 17 0 0 1-2.6 3.3M14.1 14.1a3 3 0 0 1-4.2-4.2M6.2 6.2C3.8 7.7 2.5 12 2.5 12s3.5 6 9.5 6c1.5 0 2.8-.4 4-1" />
 </svg>`
 
-export default () => {
+export default ({ app }) => {
   if (process.server) return
+
+  const translate = (key, fallback) => {
+    try {
+      const value = app?.i18n?.t?.(key)
+      return value && value !== key ? String(value) : fallback
+    } catch (_) {
+      return fallback
+    }
+  }
 
   const updateButton = (button, input) => {
     const visible = input.type === 'text'
+    const label = visible
+      ? translate('common.hide_password', 'Թաքցնել գաղտնաբառը')
+      : translate('common.show_password', 'Ցույց տալ գաղտնաբառը')
+
     button.innerHTML = visible ? EYE_OFF_ICON : EYE_ICON
-    button.setAttribute('aria-label', visible ? 'Թաքցնել գաղտնաբառը' : 'Ցույց տալ գաղտնաբառը')
-    button.setAttribute('title', visible ? 'Թաքցնել գաղտնաբառը' : 'Ցույց տալ գաղտնաբառը')
+    button.setAttribute('aria-label', label)
+    button.setAttribute('title', label)
   }
 
   const enhance = (input) => {
@@ -86,6 +99,14 @@ export default () => {
     }
   }
 
+  const refreshLabels = () => {
+    document.querySelectorAll('.password-visibility-wrapper').forEach((wrapper) => {
+      const input = wrapper.querySelector('input')
+      const button = wrapper.querySelector('button')
+      if (input && button) updateButton(button, input)
+    })
+  }
+
   const start = () => {
     scan(document)
 
@@ -98,6 +119,10 @@ export default () => {
     })
 
     observer.observe(document.body, { childList: true, subtree: true })
+
+    if (app?.i18n?.vm?.$watch) {
+      app.i18n.vm.$watch('locale', () => window.requestAnimationFrame(refreshLabels))
+    }
   }
 
   if (document.readyState === 'loading') {
