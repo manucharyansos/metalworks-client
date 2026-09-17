@@ -103,7 +103,7 @@ export default {
     baseURL: apiBaseURL,
     managerRole: process.env.MANAGER_ROLE || 'manager',
     engineerRole: process.env.ENGINEER_ROLE || 'engineer',
-    adminRole: process.env.ADMIN_ROLE || 'admin',
+    adminRole: process.env.ADMIN_DASHBOARD || 'admin',
     laserRole: process.env.LASER_ROLE || 'laser',
     bendRole: process.env.BEND_ROLE || 'bend',
     dashboards: {
@@ -131,6 +131,7 @@ export default {
     { src: '~/plugins/locale-date-runtime.client.js', mode: 'client' },
     { src: '~/plugins/ui-i18n-bridge.client.js', mode: 'client' },
     { src: '~/plugins/ui-i18n-extended.client.js', mode: 'client' },
+    { src: '~/plugins/admin-ui-polish.client.js', mode: 'client' },
     { src: '~/plugins/global-language-switcher.client.js', mode: 'client' },
   ],
 
