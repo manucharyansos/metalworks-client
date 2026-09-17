@@ -59,7 +59,7 @@ export default {
       home: false,
     },
     strategies: {
-      laravelSanctum: {
+      runtimeSanctum: {
         scheme: 'cookie',
         endpoints: {
           csrf: {
