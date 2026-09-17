@@ -1,5 +1,6 @@
 <template>
   <div
+    data-language-switcher
     class="relative inline-block text-left"
     @keydown.esc.stop.prevent="close"
   >
@@ -63,7 +64,6 @@
           @click="changeLocale(l.code)"
           @mousemove="hoverIndex = idx"
         >
-          <!-- left: flag + code (առանց անվան) -->
           <span class="inline-flex items-center gap-2">
             <FlagIcon :code="l.code" class="w-5 h-5 shrink-0" />
             <span
@@ -72,7 +72,6 @@
             >
           </span>
 
-          <!-- right: check ALWAYS at far right -->
           <span class="ml-auto inline-flex items-center">
             <svg
               v-if="l.code === currentLocaleCode"
@@ -95,7 +94,6 @@
 </template>
 
 <script>
-/* --- Inline SVG Flag component --- */
 const FlagIcon = {
   name: 'FlagIcon',
   props: { code: { type: String, required: true } },
@@ -116,11 +114,8 @@ const FlagIcon = {
         <path fill="#d52b1e" d="M0 320h640v160H0z"/>
       </svg>`,
         en: `
-      <!-- normalized USA flag (simplified), same 640x480 viewBox -->
       <svg viewBox="0 0 640 480" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-        <!-- red background -->
         <path fill="#b22234" d="M0 0h640v480H0z"/>
-        <!-- white stripes (6 of them) -->
         <g fill="#fff">
           <rect x="0" y="37"  width="640" height="37"/>
           <rect x="0" y="111" width="640" height="37"/>
@@ -129,11 +124,8 @@ const FlagIcon = {
           <rect x="0" y="333" width="640" height="37"/>
           <rect x="0" y="407" width="640" height="37"/>
         </g>
-        <!-- canton -->
         <rect x="0" y="0" width="296" height="259" fill="#3c3b6e"/>
-        <!-- simplified star field (dots) -->
         <g fill="#fff" opacity="0.9">
-          <!-- 6×5 grid of small circles (just to look centered) -->
           <g transform="translate(20 20)">
             ${Array.from({ length: 5 })
               .map((_, r) =>
@@ -205,13 +197,11 @@ export default {
     },
   },
   mounted() {
-    // outside click → close
     this._onBody = (e) => {
       if (!this.$el.contains(e.target)) this.close()
     }
     document.addEventListener('click', this._onBody, { passive: true })
 
-    // start at current locale
     this.hoverIndex = this.locales.findIndex(
       (l) => l.code === this.currentLocaleCode
     )
@@ -259,7 +249,7 @@ export default {
         if (this.$cookies) {
           this.$cookies.set('i18n_redirected', code, {
             path: '/',
-            maxAge: 60 * 60 * 24 * 365, // 1 տարի
+            maxAge: 60 * 60 * 24 * 365,
             sameSite: 'lax',
           })
         }
@@ -276,7 +266,6 @@ export default {
 </script>
 
 <style scoped>
-/* open/close animation */
 .fade-scale-enter-active,
 .fade-scale-leave-active {
   transition: transform 120ms ease, opacity 120ms ease;
