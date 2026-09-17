@@ -42,6 +42,17 @@ jobs:
       - name: Generate deploy-ready /work bundle
         run: npm run generate:server
 
+      - name: Verify deploy bundle API target
+        run: |
+          if grep -R --binary-files=without-match -n "http://localhost:8000" dist; then
+            echo "ERROR: deploy bundle contains localhost API URL"
+            exit 1
+          fi
+          grep -R --binary-files=without-match -q "https://api.metalworks.am" dist || {
+            echo "ERROR: production API URL is missing from deploy bundle"
+            exit 1
+          }
+
       - name: Upload source build artifact
         uses: actions/upload-artifact@v4
         with:
