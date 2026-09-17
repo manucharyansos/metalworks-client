@@ -230,7 +230,12 @@ export default {
       try {
         if (typeof this.switchLocalePath === 'function') target = this.switchLocalePath(code)
       } catch (_) {}
-      if (!target) target = code === 'hy' ? '/' : `/${code}`
+
+      if (!target) {
+        const current = this.$route?.fullPath || window.location.pathname || '/'
+        const clean = current.replace(/^\/(ru|en)(?=\/|$)/, '') || '/'
+        target = code === 'hy' ? clean : `/${code}${clean === '/' ? '' : clean}`
+      }
 
       if (this.$cookies) {
         this.$cookies.set('i18n_redirected', code, {
