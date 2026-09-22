@@ -3,11 +3,12 @@
     <div class="mx-auto max-w-[1500px] space-y-6">
       <section class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Reports & export</p>
-          <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Հաշվետվություններ</h1>
-          <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Ստեղծեք պատվերների հաշվետվություն ըստ արտադրամասի, աշխատակցի, կարգավիճակի և ժամկետի, նախադիտեք արդյունքը և արտահանեք ամբողջ ֆիլտրված տվյալները CSV։
-          </p>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Հաշվետվություններ</h1>
+            <InfoTooltip>
+              Ստեղծեք պատվերների հաշվետվություն ըստ արտադրամասի, աշխատակցի, կարգավիճակի և ժամկետի, նախադիտեք արդյունքը և արտահանեք ամբողջ ֆիլտրված տվյալները CSV։
+            </InfoTooltip>
+          </div>
         </div>
         <button
           type="button"
@@ -37,7 +38,6 @@
         <div class="border-b border-slate-100 p-5 dark:border-slate-800 sm:p-6">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Report builder</p>
               <h2 class="mt-1 text-lg font-bold text-slate-950 dark:text-white">Ֆիլտրեր</h2>
               <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ activeFilterCount }} ակտիվ ֆիլտր</p>
             </div>
@@ -46,8 +46,8 @@
 
           <div class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <div class="relative md:col-span-2">
-              <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              <input v-model="filters.search" class="control pl-10" placeholder="Համար, անուն, նկարագրություն, հաճախորդ..." />
+              <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <input v-model="filters.search" class="control pr-10" placeholder="Համար, անուն, նկարագրություն, հաճախորդ..." />
             </div>
             <select v-model="filters.factory_id" class="control" @change="onFactoryChange">
               <option value="">Բոլոր արտադրամասերը</option>
@@ -59,11 +59,11 @@
             </select>
 
             <select v-model="filters.order_status" class="control">
-              <option value="">Պատվերի բոլոր status-ները</option>
+              <option value="">Պատվերի բոլոր կարգավիճակները</option>
               <option v-for="status in options.order_statuses || []" :key="status" :value="status">{{ status }}</option>
             </select>
             <select v-model="filters.factory_status" class="control">
-              <option value="">Factory բոլոր status-ները</option>
+              <option value="">Արտադրամասի բոլոր կարգավիճակները</option>
               <option v-for="status in options.factory_statuses || []" :key="status.value" :value="status.value">{{ status.status_label || status.name || status.value }}</option>
             </select>
             <select v-model="filters.time_range" class="control">
@@ -86,7 +86,7 @@
               <option value="unassigned">Չի նշանակված</option>
             </select>
             <select v-model="filters.confirmation" class="control">
-              <option value="">Admin հաստատման բոլոր վիճակները</option>
+              <option value="">Ադմինի հաստատման բոլոր վիճակները</option>
               <option value="waiting">Սպասում է հաստատման</option>
               <option value="confirmed">Հաստատված է</option>
             </select>
@@ -115,7 +115,7 @@
           <div v-if="orders.length" class="hidden overflow-x-auto lg:block">
             <table class="w-full min-w-[980px] text-left">
               <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40">
-                <tr><th class="px-6 py-3.5">Պատվեր</th><th class="px-4 py-3.5">Հաճախորդ</th><th class="px-4 py-3.5">Արտադրամաս / աշխատակից</th><th class="px-4 py-3.5">Վերջնաժամկետ</th><th class="px-6 py-3.5">Status</th></tr>
+                <tr><th class="px-6 py-3.5">Պատվեր</th><th class="px-4 py-3.5">Հաճախորդ</th><th class="px-4 py-3.5">Արտադրամաս / աշխատակից</th><th class="px-4 py-3.5">Վերջնաժամկետ</th><th class="px-6 py-3.5">Կարգավիճակ</th></tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                 <tr v-for="order in orders" :key="order.id" class="hover:bg-slate-50/70 dark:hover:bg-slate-950/30">
