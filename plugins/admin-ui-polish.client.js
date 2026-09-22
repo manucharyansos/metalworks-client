@@ -61,6 +61,7 @@ export default ({ app }) => {
     'Рабочая среда инженера',
     'Ինժեների աշխատանքային միջավայր',
     'Operations workspace',
+    'MetalWorks workspace',
     'Рабочая среда операций',
     'Գործառնությունների աշխատանքային միջավայր',
     'Internal system',
