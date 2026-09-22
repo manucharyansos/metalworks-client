@@ -103,7 +103,7 @@
           <div class="relative z-10 p-10">
             <p class="text-xs font-black uppercase tracking-[0.18em] text-white/60">MetalWorks workspace</p>
             <h2 class="mt-3 max-w-lg text-3xl font-black leading-tight tracking-tight text-white">Մեկ հաշիվ՝ ձեր ամբողջ աշխատանքային միջավայրի համար</h2>
-            <p class="mt-4 max-w-md text-sm leading-6 text-white/70">Հասանելիությունները վերահսկվում են role-երով և permission-ներով, որպեսզի յուրաքանչյուր աշխատակից տեսնի միայն իր աշխատանքին անհրաժեշտը։</p>
+            <p class="mt-4 max-w-md text-sm leading-6 text-white/70">Հասանելիությունները վերահսկվում են հաստիքներով և թույլտվություններով, որպեսզի յուրաքանչյուր աշխատակից տեսնի միայն իր աշխատանքին անհրաժեշտը։</p>
           </div>
         </aside>
       </section>
