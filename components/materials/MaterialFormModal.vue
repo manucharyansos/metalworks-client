@@ -11,7 +11,6 @@
       >
         <div class="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Material</p>
             <h3 class="mt-1 text-xl font-black text-slate-950 dark:text-white">
               {{ isEdit ? 'Փոփոխել նյութը' : 'Նոր նյութ' }}
             </h3>
@@ -60,7 +59,7 @@
             </select>
 
             <div v-if="!categories.length" class="mt-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-5 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-200">
-              Production բազան դեռ նյութի կատեգորիա չունի։ Սեղմեք «Նոր կատեգորիա» և ստեղծեք առաջին խումբն ու կատեգորիան։
+              Համակարգում դեռ նյութի կատեգորիա չկա։ Սեղմեք «Նոր կատեգորիա» և ստեղծեք առաջին խումբն ու կատեգորիան։
             </div>
           </div>
 
@@ -81,9 +80,10 @@
           <div class="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
             <div class="flex items-start justify-between gap-3">
               <div>
-                <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Catalog setup</p>
-                <h4 class="mt-1 text-lg font-black text-slate-950 dark:text-white">Նյութի խումբ և կատեգորիա</h4>
-                <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">Եթե խումբ չկա՝ նախ ստեղծեք խումբ, հետո դրա ներսում կատեգորիա։</p>
+                <div class="flex items-center gap-2">
+                  <h4 class="text-lg font-black text-slate-950 dark:text-white">Նյութի խումբ և կատեգորիա</h4>
+                  <InfoTooltip>Եթե խումբ չկա՝ նախ ստեղծեք խումբ, հետո դրա ներսում կատեգորիա։</InfoTooltip>
+                </div>
               </div>
               <button type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-500 dark:border-slate-700" @click="closeCategoryManager">✕</button>
             </div>
