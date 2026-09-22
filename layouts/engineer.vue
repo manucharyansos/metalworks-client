@@ -7,7 +7,7 @@
       :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
     >
       <div class="flex h-20 items-center justify-between border-b border-slate-100 px-5 dark:border-slate-800">
-        <nuxt-link to="/engineer" class="flex min-w-0 items-center gap-3" @click.native="closeSidebar">
+        <nuxt-link :to="localePath('/engineer')" class="flex min-w-0 items-center gap-3" @click.native="closeSidebar">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
           <div class="min-w-0">
             <p class="truncate text-sm font-black tracking-tight">MetalWorks</p>
@@ -20,12 +20,12 @@
       </div>
 
       <div class="flex-1 overflow-y-auto px-4 py-5">
-        <p class="px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Աշխատանքային բաժիններ</p>
+        <p class="px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">{{ $t('workspace_layout.work_sections') }}</p>
         <nav class="mt-3 space-y-1.5">
           <nuxt-link
             v-for="item in visibleNavItems"
             :key="item.to"
-            :to="item.to"
+            :to="localePath(item.to)"
             class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
             active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950"
             :exact="item.exact"
@@ -37,19 +37,24 @@
               <svg v-else-if="item.icon === 'plus'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 5v14M5 12h14" /></svg>
               <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 21a8 8 0 10-16 0m8-10a4 4 0 100-8 4 4 0 000 8Z" /></svg>
             </span>
-            <span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+            <span class="min-w-0 flex-1 truncate">{{ $t(item.labelKey) }}</span>
           </nuxt-link>
         </nav>
       </div>
 
       <div class="border-t border-slate-100 p-4 dark:border-slate-800">
-        <div class="mb-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-950/50">
-          <p class="truncate text-xs font-bold text-slate-800 dark:text-slate-100">{{ currentUser.name || 'Engineer' }}</p>
-          <p class="mt-1 truncate text-[10px] text-slate-400">{{ currentUser.email || '' }}</p>
-        </div>
+        <nuxt-link :to="localePath('/profile')" class="mb-2 flex items-center gap-3 rounded-2xl p-3 transition hover:bg-slate-100 dark:hover:bg-slate-800" @click.native="closeSidebar">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /></svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-semibold">{{ $t('workspace_layout.settings') }}</p>
+            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $t('workspace_layout.account_settings') }}</p>
+          </div>
+        </nuxt-link>
         <button type="button" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-3 py-2.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50 dark:border-slate-700 dark:text-rose-300 dark:hover:bg-rose-950/20" @click="logout">
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 17l5-5-5-5M15 12H3m8-8h7a2 2 0 012 2v12a2 2 0 01-2 2h-7" /></svg>
-          Դուրս գալ
+          {{ $t('logout') }}
         </button>
       </div>
     </aside>
@@ -60,12 +65,18 @@
           <button type="button" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" @click="toggleSidebar">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16" /></svg>
           </button>
-          <div>
-            <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Ինժեներ</p>
-            <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ pageTitle }}</p>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ pageTitle }}</p>
+            <p class="hidden truncate text-xs text-slate-500 dark:text-slate-400 sm:block">{{ $t('workspace_layout.functions_available', { count: grantedCount }) }}</p>
           </div>
         </div>
-        <div class="hidden items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-[10px] font-bold text-slate-500 sm:flex dark:bg-slate-800 dark:text-slate-300">{{ grantedCount }} ֆունկցիա հասանելի</div>
+        <div class="flex items-center gap-2">
+          <div data-language-switcher class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><language-dropdown /></div>
+          <nuxt-link :to="localePath('/profile')" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /></svg>
+            <span class="hidden sm:inline">{{ $t('workspace_layout.settings') }}</span>
+          </nuxt-link>
+        </div>
       </header>
       <Nuxt />
     </div>
@@ -79,10 +90,10 @@ export default {
     return {
       isSidebarOpen: false,
       navItems: [
-        { to: '/engineer', label: 'Պատվերներ', permission: 'orders.view', icon: 'orders', exact: true },
-        { to: '/engineer/files', label: 'Ֆայլեր և PMP', permission: 'pmp.view', icon: 'files', exact: false },
-        { to: '/engineer/orders/create', label: 'Ստեղծել պատվեր', permission: 'orders.create', icon: 'plus', exact: true },
-        { to: '/profile', label: 'Անձնական էջ', permission: null, icon: 'profile', exact: true },
+        { to: '/engineer', labelKey: 'workspace_layout.orders', permission: 'orders.view', icon: 'orders', exact: true },
+        { to: '/engineer/files', labelKey: 'workspace_layout.projects_files', permission: 'pmp.view', icon: 'files', exact: false },
+        { to: '/engineer/orders/create', labelKey: 'workspace_layout.create_order', permission: 'orders.create', icon: 'plus', exact: true },
+        { to: '/profile', labelKey: 'workspace_layout.profile', permission: null, icon: 'profile', exact: true },
       ],
     }
   },
@@ -92,7 +103,7 @@ export default {
     grantedCount() { return Array.isArray(this.currentUser.permissions) ? this.currentUser.permissions.length : 0 },
     pageTitle() {
       const found = this.navItems.find((item) => this.isRouteActive(item))
-      return found ? found.label : 'Աշխատանքային տարածք'
+      return found ? this.$t(found.labelKey) : this.$t('workspace_layout.workspace')
     },
   },
   watch: { '$route.fullPath'() { this.closeSidebar() } },
