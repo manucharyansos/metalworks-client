@@ -7,7 +7,7 @@
             <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
             <div>
               <p class="text-sm font-black tracking-tight text-slate-950 dark:text-white">MetalWorks</p>
-              <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Create account</p>
+              
             </div>
           </div>
 
@@ -101,7 +101,7 @@
         <aside class="register-visual relative hidden min-h-[760px] overflow-hidden lg:flex lg:flex-col lg:justify-end">
           <div class="absolute inset-0 bg-gradient-to-br from-slate-950/20 via-slate-950/45 to-slate-950/90"></div>
           <div class="relative z-10 p-10">
-            <p class="text-xs font-black uppercase tracking-[0.18em] text-white/60">MetalWorks workspace</p>
+            
             <h2 class="mt-3 max-w-lg text-3xl font-black leading-tight tracking-tight text-white">Մեկ հաշիվ՝ ձեր ամբողջ աշխատանքային միջավայրի համար</h2>
             <p class="mt-4 max-w-md text-sm leading-6 text-white/70">Հասանելիությունները վերահսկվում են հաստիքներով և թույլտվություններով, որպեսզի յուրաքանչյուր աշխատակից տեսնի միայն իր աշխատանքին անհրաժեշտը։</p>
           </div>
