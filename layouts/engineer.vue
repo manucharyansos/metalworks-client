@@ -11,7 +11,7 @@
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
           <div class="min-w-0">
             <p class="truncate text-sm font-black tracking-tight">MetalWorks</p>
-            <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Engineer workspace</p>
+            
           </div>
         </nuxt-link>
         <button type="button" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" @click="closeSidebar">
@@ -61,7 +61,7 @@
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16" /></svg>
           </button>
           <div>
-            <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Engineer</p>
+            <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Ինժեներ</p>
             <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ pageTitle }}</p>
           </div>
         </div>
