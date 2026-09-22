@@ -3,7 +3,7 @@
     <button
       type="button"
       class="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-xs font-black text-slate-500 transition hover:border-slate-300 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-white dark:focus:ring-slate-700"
-      :aria-label="label"
+      :aria-label="label || $t('common.info')"
     >
       i
     </button>
@@ -23,7 +23,7 @@ export default {
   props: {
     label: {
       type: String,
-      default: 'Տեղեկություն',
+      default: '',
     },
   },
 }
