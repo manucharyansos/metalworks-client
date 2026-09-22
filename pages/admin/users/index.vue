@@ -14,7 +14,7 @@
                 i
               </button>
               <div class="pointer-events-none absolute left-0 top-9 z-30 w-[min(420px,80vw)] -translate-y-1 rounded-2xl bg-slate-950 px-4 py-3 text-xs font-medium leading-5 text-white opacity-0 shadow-2xl transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:bg-white dark:text-slate-950">
-                Admin և Manager հաստիքները ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Հաճախորդները այստեղ չեն ցուցադրվում։
+                Ադմինիստրատոր և Մենեջեր հաստիքները ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Հաճախորդները այստեղ չեն ցուցադրվում։
               </div>
             </div>
           </div>
