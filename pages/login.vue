@@ -11,7 +11,7 @@
             </div>
             <div>
               <p class="text-sm font-black tracking-tight text-slate-950 dark:text-white">MetalWorks</p>
-              <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Operations workspace</p>
+              
             </div>
           </div>
 
@@ -115,9 +115,7 @@
           <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
 
           <div class="relative z-10 flex items-center justify-between p-8">
-            <span class="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-md">
-              Internal system
-            </span>
+            
           </div>
 
           <div class="relative z-10 max-w-lg p-10">
