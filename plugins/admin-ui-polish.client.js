@@ -15,83 +15,26 @@ export default ({ app }) => {
     'Очередь назначений',
     'Նշանակումների հերթ',
     'Access & people',
-    'ACCESS & PEOPLE',
     'Доступ и сотрудники',
     'Հասանելիություն և աշխատակիցներ',
     'Access control',
-    'ACCESS CONTROL',
     'Контроль доступа',
     'Հասանելիության կառավարում',
     'Անհատական',
     'Индивидуально',
     'Individual',
-
-    // Decorative eyebrow labels used across the workspace.
-    'Operations',
-    'Операции',
-    'Գործառնություններ',
-    'Team',
-    'Команда',
-    'Թիմ',
-    'Customers',
-    'Клиенты',
-    'Հաճախորդներ',
-    'Materials',
-    'Материалы',
-    'Նյութեր',
-    'Production queue',
-    'Производственная очередь',
-    'Արտադրական հերթ',
-    'Workload balancing',
-    'Балансировка нагрузки',
-    'Ծանրաբեռնվածության բաշխում',
-    'File policy',
-    'Политика файлов',
-    'Ֆայլերի քաղաքականություն',
-    'Reports & export',
-    'Отчёты и экспорт',
-    'Հաշվետվություններ և արտահանում',
-    'Catalog setup',
-    'Настройка каталога',
-    'Կատալոգի կարգավորում',
-    'Manager workspace',
-    'Рабочая среда менеджера',
-    'Մենեջերի աշխատանքային միջավայր',
-    'Engineer workspace',
-    'Рабочая среда инженера',
-    'Ինժեների աշխատանքային միջավայր',
-    'Operations workspace',
-    'MetalWorks workspace',
-    'Рабочая среда операций',
-    'Գործառնությունների աշխատանքային միջավայր',
-    'Internal system',
-    'Внутренняя система',
-    'Ներքին համակարգ',
-    'Create account',
-    'Создать аккаунт',
-    'Հաշիվ ստեղծել',
-    'Account recovery',
-    'Восстановление аккаунта',
-    'Հաշվի վերականգնում',
-    'Security',
-    'Безопасность',
-    'Անվտանգություն',
   ])
 
-  const routeIsWorkspace = () => {
-    const path = String(
-      app?.router?.currentRoute?.path || window.location.pathname || ''
-    )
-
-    return /(^|\/)(admin|manager|engineer|factory|profile)(\/|$)/.test(path)
+  const routeIsAdmin = () => {
+    const path = String(app?.router?.currentRoute?.path || window.location.pathname || '')
+    return /(^|\/)admin(\/|$)/.test(path)
   }
 
-  const locale = () =>
-    String(app?.i18n?.locale || 'hy').toLowerCase().split('-')[0]
+  const locale = () => String(app?.i18n?.locale || 'hy').toLowerCase().split('-')[0]
 
   const translations = {
     hy: {
-      allRoles: 'Բոլոր հաստիքները',
+      allRoles: 'Դասակարգել ըստ հաստիքի',
       role: 'Հաստիք',
       rolePlural: 'Հաստիքներ',
       manage: 'Խմբագրել',
@@ -108,7 +51,7 @@ export default ({ app }) => {
       changeSearch: 'Փոխեք որոնումը կամ հաստիքի ֆիլտրը։',
     },
     ru: {
-      allRoles: 'Все должности',
+      allRoles: 'Сортировать по должности',
       role: 'Должность',
       rolePlural: 'Должности',
       manage: 'Редактировать',
@@ -125,7 +68,7 @@ export default ({ app }) => {
       changeSearch: 'Измените поиск или фильтр по должности.',
     },
     en: {
-      allRoles: 'All positions',
+      allRoles: 'Sort by position',
       role: 'Position',
       rolePlural: 'Positions',
       manage: 'Edit',
@@ -151,14 +94,11 @@ export default ({ app }) => {
       const text = normalize(node.textContent)
       if (removableLabels.has(text)) node.style.display = 'none'
 
-      // Decorative eyebrow only; the real title remains visible.
+      // This is only an eyebrow above the real section title. The section title
+      // itself is renamed to "Project folders" below.
       if (
         node.tagName === 'P' &&
-        [
-          'Factory formats',
-          'Форматы цехов',
-          'Արտադրամասերի format-ներ',
-        ].includes(text)
+        ['Factory formats', 'Форматы цехов'].includes(text)
       ) {
         node.style.display = 'none'
       }
@@ -167,17 +107,15 @@ export default ({ app }) => {
     root.querySelectorAll('.metric-card').forEach((card) => {
       const label = normalize(card.querySelector('.metric-label')?.textContent)
       if (
-        ['Factory format-ներ', 'Factory formats', 'Форматы цехов'].includes(
-          label
-        )
+        ['Factory format-ներ', 'Factory formats', 'Форматы цехов'].includes(label)
       ) {
         card.remove()
       }
     })
   }
 
-  const replaceWorkspaceCopy = (root) => {
-    if (!routeIsWorkspace()) return
+  const replaceAdminCopy = (root) => {
+    if (!routeIsAdmin()) return
     const t = copy()
 
     root
@@ -190,44 +128,24 @@ export default ({ app }) => {
         if (
           [
             'Բոլոր role-երը',
-            'Բոլոր դերերը',
-            'Բոլոր հաստիքները',
-            'Դասակարգել ըստ հաստիքի',
             'Все роли',
-            'Все должности',
-            'Сортировать по должности',
             'All roles',
-            'All positions',
+            'Դասակարգել ըստ հաստիքի',
+            'Сортировать по должности',
             'Sort by position',
           ].includes(text)
         ) {
           next = t.allRoles
         } else if (
-          ['Role', 'Դեր', 'Հաստիք', 'Роль', 'Должность', 'Position'].includes(
-            text
-          )
+          ['Role', 'Դեր', 'Հաստիք', 'Роль', 'Должность', 'Position'].includes(text)
         ) {
           next = t.role
         } else if (
-          [
-            'Role-եր',
-            'Հաստիքներ',
-            'Роли',
-            'Должности',
-            'Roles',
-            'Positions',
-          ].includes(text)
+          ['Role-եր', 'Հաստիքներ', 'Роли', 'Должности', 'Roles', 'Positions'].includes(text)
         ) {
           next = t.rolePlural
         } else if (
-          [
-            'Կառավարել',
-            'Խմբագրել',
-            'Управлять',
-            'Редактировать',
-            'Manage',
-            'Edit',
-          ].includes(text)
+          ['Կառավարել', 'Խմբագրել', 'Управлять', 'Редактировать', 'Manage', 'Edit'].includes(text)
         ) {
           next = t.manage
         } else if (
@@ -258,14 +176,7 @@ export default ({ app }) => {
         ) {
           next = t.fileTypes
         } else if (
-          [
-            'Տրված է',
-            'Թույլատրված',
-            'Выдано',
-            'Разрешено',
-            'Granted',
-            'Allowed',
-          ].includes(text)
+          ['Տրված է', 'Թույլատրված', 'Выдано', 'Разрешено', 'Granted', 'Allowed'].includes(text)
         ) {
           next = t.allowed
         } else if (
@@ -277,11 +188,7 @@ export default ({ app }) => {
         ) {
           next = t.employeeHelp
         } else if (
-          [
-            translations.hy.noPhone,
-            translations.ru.noPhone,
-            translations.en.noPhone,
-          ].includes(text)
+          [translations.hy.noPhone, translations.ru.noPhone, translations.en.noPhone].includes(text)
         ) {
           next = t.noPhone
         } else if (
@@ -333,7 +240,6 @@ export default ({ app }) => {
   const moveSearchIconsRight = (root) => {
     root.querySelectorAll('input').forEach((input) => {
       if (!isSearchInput(input)) return
-
       input.dataset.searchIconRight = 'true'
       input.classList.remove('pl-9', 'pl-10', 'pl-11', 'pl-12')
       input.style.paddingLeft = '0.75rem'
@@ -345,7 +251,6 @@ export default ({ app }) => {
 
       const parent = input.parentElement
       if (!parent) return
-
       parent.querySelectorAll(':scope > svg').forEach((svg) => {
         const cls = svg.getAttribute('class') || ''
         if (cls.includes('absolute')) svg.style.display = 'none'
@@ -354,7 +259,7 @@ export default ({ app }) => {
   }
 
   const makeDescriptionsHoverable = (root) => {
-    if (!routeIsWorkspace()) return
+    if (!routeIsAdmin()) return
     const t = copy()
     const sections = root.querySelectorAll('main section, main header')
 
@@ -366,14 +271,10 @@ export default ({ app }) => {
       const paragraphs = Array.from(
         section.querySelectorAll(':scope > div > p, :scope > p')
       ).filter((p) => {
-        if (p.closest('[data-workspace-hover-help]')) return false
-
+        if (p.closest('[data-admin-hover-help]')) return false
         const text = normalize(p.textContent)
         if (!text || removableLabels.has(text)) return false
-
-        // Keep short status/count text visible; only explanatory copy moves
-        // into the information tooltip.
-        return text.length >= 45
+        return text.length >= 55
       })
 
       const paragraph = paragraphs[0]
@@ -384,7 +285,7 @@ export default ({ app }) => {
       paragraph.style.display = 'none'
 
       const wrapper = document.createElement('span')
-      wrapper.setAttribute('data-workspace-hover-help', '')
+      wrapper.setAttribute('data-admin-hover-help', '')
       wrapper.style.position = 'relative'
       wrapper.style.display = 'inline-flex'
       wrapper.style.marginLeft = '8px'
@@ -416,7 +317,7 @@ export default ({ app }) => {
         'left:0',
         'top:36px',
         'z-index:120',
-        'width:min(440px,82vw)',
+        'width:min(420px,80vw)',
         'padding:12px 14px',
         'border-radius:14px',
         'background:#0f172a',
@@ -452,9 +353,8 @@ export default ({ app }) => {
   const polish = () => {
     const root = document.body
     if (!root) return
-
     hideKnownLabels(root)
-    replaceWorkspaceCopy(root)
+    replaceAdminCopy(root)
     moveSearchIconsRight(root)
     makeDescriptionsHoverable(root)
   }
