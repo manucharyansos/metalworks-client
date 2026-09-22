@@ -66,10 +66,15 @@
       </div>
 
       <div class="border-t border-slate-100 p-4 dark:border-slate-800">
-        <div class="mb-3 rounded-2xl bg-slate-50 p-3 dark:bg-slate-950/50">
-          <p class="truncate text-xs font-bold text-slate-800 dark:text-slate-100">{{ currentUser.name || 'Operator' }}</p>
-          <p class="mt-1 truncate text-[10px] text-slate-400">{{ currentUser.email || '' }}</p>
-        </div>
+        <nuxt-link :to="localePath('/profile')" class="mb-2 flex items-center gap-3 rounded-2xl p-3 transition hover:bg-slate-100 dark:hover:bg-slate-800" @click.native="closeSidebar">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /></svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="truncate text-sm font-semibold">{{ $t('workspace_layout.settings') }}</p>
+            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $t('workspace_layout.account_settings') }}</p>
+          </div>
+        </nuxt-link>
         <button type="button" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-3 py-2.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50 dark:border-slate-700 dark:text-rose-300 dark:hover:bg-rose-950/20" @click="logout">
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 17l5-5-5-5M15 12H3m8-8h7a2 2 0 012 2v12a2 2 0 01-2 2h-7" /></svg>
           {{ $t('logout') }}
