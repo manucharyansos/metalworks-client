@@ -85,7 +85,7 @@
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16" /></svg>
           </button>
           <div>
-            <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Production</p>
+            <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Արտադրություն</p>
             <p class="text-sm font-bold text-slate-800 dark:text-slate-100">{{ factoryLabel }}</p>
           </div>
         </div>
