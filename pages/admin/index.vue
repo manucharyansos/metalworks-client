@@ -3,16 +3,14 @@
     <div class="mx-auto max-w-[1600px] space-y-8">
       <section class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <div class="mb-2 flex items-center gap-2">
-            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-            <span class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Operations overview</span>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+              Կառավարման վահանակ
+            </h1>
+            <InfoTooltip>
+              Արտադրամասերի վիճակ, աշխատակիցների ծանրաբեռնվածություն, ուշացումներ և պատվերների ամբողջական վերահսկում մեկ էջում։
+            </InfoTooltip>
           </div>
-          <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
-            Կառավարման վահանակ
-          </h1>
-          <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Արտադրամասերի վիճակ, աշխատակիցների ծանրաբեռնվածություն, ուշացումներ և պատվերների ամբողջական վերահսկում մեկ էջում։
-          </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <div v-if="generatedAt" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
@@ -83,7 +81,7 @@
                 :key="fo.id"
                 class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
               >
-                {{ fo.factory?.name || 'Factory' }} · {{ fo.operator?.name || 'չնշանակված' }}
+                {{ fo.factory?.name || 'Արտադրամաս' }} · {{ fo.operator?.name || 'չնշանակված' }}
               </span>
             </div>
           </button>
@@ -94,7 +92,6 @@
         <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Factory health</p>
               <h2 class="mt-1 text-lg font-bold text-slate-950 dark:text-white">Արտադրամասերի վիճակ</h2>
               <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ակտիվ, ուշացած, չնշանակված և հաստատման սպասող աշխատանքներ</p>
             </div>
@@ -143,7 +140,7 @@
               </div>
               <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400">
                 <span>Այսօր՝ <strong class="text-slate-700 dark:text-slate-200">{{ factory.due_today }}</strong></span>
-                <span>Admin սպասում՝ <strong class="text-slate-700 dark:text-slate-200">{{ factory.awaiting_admin_confirmation }}</strong></span>
+                <span>Ադմինի սպասում՝ <strong class="text-slate-700 dark:text-slate-200">{{ factory.awaiting_admin_confirmation }}</strong></span>
                 <span>30 օրում ավարտված՝ <strong class="text-slate-700 dark:text-slate-200">{{ factory.completed_30d }}</strong></span>
               </div>
             </button>
@@ -155,7 +152,6 @@
 
         <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div class="mb-5">
-            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Workload</p>
             <h2 class="mt-1 text-lg font-bold text-slate-950 dark:text-white">Աշխատակիցների ծանրաբեռնվածություն</h2>
             <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ցուցիչը հիմնված է ակտիվ և ուշացած պատվերների իրական քանակի վրա</p>
           </div>
@@ -163,7 +159,7 @@
           <div class="mb-4 grid gap-2 sm:grid-cols-3">
             <input v-model="operatorSearch" class="small-control sm:col-span-1" placeholder="Որոնել աշխատակցին" />
             <select v-model="operatorFactoryFilter" class="small-control">
-              <option value="">Բոլոր factory-ները</option>
+              <option value="">Բոլոր արտադրամասերը</option>
               <option v-for="factory in filterOptions.factories || []" :key="factory.id" :value="String(factory.id)">{{ factory.name }}</option>
             </select>
             <select v-model="workloadFilter" class="small-control">
@@ -213,7 +209,6 @@
         <div class="border-b border-slate-100 p-5 dark:border-slate-800 sm:p-6">
           <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Orders explorer</p>
               <h2 class="mt-1 text-xl font-bold text-slate-950 dark:text-white">Պատվերների ամբողջական որոնում</h2>
               <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ pagination.total || 0 }} արդյունք · {{ activeFilterCount }} ակտիվ ֆիլտր</p>
             </div>
@@ -238,13 +233,13 @@
 
           <div class="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
             <div class="relative md:col-span-2 xl:col-span-2">
-              <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <input v-model="filters.search" class="control pl-10" placeholder="Համար, անվանում, նկարագրություն, հաճախորդ, ստեղծող..." />
+              <input v-model="filters.search" class="control pr-10" placeholder="Համար, անվանում, նկարագրություն, հաճախորդ, ստեղծող..." />
             </div>
             <select v-model="filters.factory_id" class="control" @change="onPrimaryFilterChange">
-              <option value="">Բոլոր factory-ները</option>
+              <option value="">Բոլոր արտադրամասերը</option>
               <option v-for="factory in filterOptions.factories || []" :key="factory.id" :value="String(factory.id)">{{ factory.name }}</option>
             </select>
             <select v-model="filters.operator_id" class="control" @change="onPrimaryFilterChange">
@@ -264,11 +259,11 @@
 
           <div v-if="showAdvanced" class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <select v-model="filters.order_status" class="control" @change="onPrimaryFilterChange">
-              <option value="">Պատվերի բոլոր ստատուսները</option>
+              <option value="">Պատվերի բոլոր կարգավիճակները</option>
               <option v-for="status in filterOptions.order_statuses || []" :key="status" :value="status">{{ status }}</option>
             </select>
             <select v-model="filters.factory_status" class="control" @change="onPrimaryFilterChange">
-              <option value="">Factory բոլոր ստատուսները</option>
+              <option value="">Արտադրամասի բոլոր կարգավիճակները</option>
               <option v-for="status in filterOptions.factory_statuses || []" :key="status.value" :value="status.value">{{ status.status_label || status.name || status.value }}</option>
             </select>
             <select v-model="filters.assignment" class="control" @change="onPrimaryFilterChange">
@@ -277,7 +272,7 @@
               <option value="unassigned">Չի նշանակված</option>
             </select>
             <select v-model="filters.confirmation" class="control" @change="onPrimaryFilterChange">
-              <option value="">Admin հաստատում</option>
+              <option value="">Ադմինի հաստատում</option>
               <option value="waiting">Սպասում է հաստատման</option>
               <option value="confirmed">Հաստատված է</option>
             </select>
@@ -325,7 +320,7 @@
                 <tr>
                   <th class="px-6 py-3.5">Պատվեր</th>
                   <th class="px-4 py-3.5">Հաճախորդ</th>
-                  <th class="px-4 py-3.5">Factory / operator</th>
+                  <th class="px-4 py-3.5">Արտադրամաս / աշխատակից</th>
                   <th class="px-4 py-3.5">Վերջնաժամկետ</th>
                   <th class="px-4 py-3.5">Ստատուս</th>
                   <th class="px-6 py-3.5 text-right">Գործողություն</th>
