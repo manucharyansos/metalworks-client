@@ -105,7 +105,7 @@
         <div class="grid gap-4 border-b border-slate-100 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-950/30 sm:grid-cols-4 sm:p-6">
           <div><p class="stat-label">Արդյունքներ</p><p class="stat-value">{{ pagination.total || 0 }}</p></div>
           <div><p class="stat-label">Այս էջում</p><p class="stat-value">{{ orders.length }}</p></div>
-          <div><p class="stat-label">Ուշացած preview-ում</p><p class="stat-value text-rose-600 dark:text-rose-300">{{ previewOverdueCount }}</p></div>
+          <div><p class="stat-label">Ուշացած նախադիտման մեջ</p><p class="stat-value text-rose-600 dark:text-rose-300">{{ previewOverdueCount }}</p></div>
           <div><p class="stat-label">Չնշանակված քայլերով</p><p class="stat-value text-amber-600 dark:text-amber-300">{{ previewUnassignedCount }}</p></div>
         </div>
 
@@ -146,7 +146,7 @@
       </section>
 
       <section class="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-800 dark:border-blue-950/60 dark:bg-blue-950/20 dark:text-blue-200">
-        CSV export-ը ներառում է ամբողջ ֆիլտրված արդյունքը, ոչ միայն preview-ի ընթացիկ էջը։ Armenian տեքստը Excel-ում ճիշտ բացվելու համար export-ը UTF‑8 BOM-ով է։
+        CSV արտահանումը ներառում է ամբողջ ֆիլտրված արդյունքը, ոչ միայն նախադիտման ընթացիկ էջը։ Հայերեն տեքստը Excel-ում ճիշտ բացվելու համար ֆայլը պահվում է UTF‑8 BOM ձևաչափով։
       </section>
     </div>
   </main>
@@ -179,8 +179,8 @@ export default {
       return [
         { key: 'overdue', label: 'Ուշացած պատվերներ', value: this.summary.overdue_orders || 0, hint: 'Ակտիվ պատվերներ անցած վերջնաժամկետով' },
         { key: 'today', label: 'Այսօր ավարտվող', value: this.summary.due_today || 0, hint: 'Այսօրվա վերջնաժամկետով աշխատանքներ' },
-        { key: 'unassigned', label: 'Չնշանակված', value: this.summary.unassigned_factory_steps || 0, hint: 'Factory քայլեր առանց աշխատակցի' },
-        { key: 'confirmation', label: 'Admin հաստատում', value: this.summary.awaiting_admin_confirmation || 0, hint: 'Ավարտված, բայց դեռ չհաստատված քայլեր' },
+        { key: 'unassigned', label: 'Չնշանակված', value: this.summary.unassigned_factory_steps || 0, hint: 'Արտադրամասային քայլեր առանց աշխատակցի' },
+        { key: 'confirmation', label: 'Ադմինի հաստատում', value: this.summary.awaiting_admin_confirmation || 0, hint: 'Ավարտված, բայց դեռ չհաստատված քայլեր' },
         { key: 'nodeadline', label: 'Առանց ժամկետի', value: this.summary.without_deadline || 0, hint: 'Ակտիվ պատվերներ առանց վերջնաժամկետի' },
       ]
     },
