@@ -3,11 +3,12 @@
     <div class="mx-auto max-w-[1500px] space-y-6">
       <section class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Workload balancing</p>
-          <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատանքների բաշխում</h1>
-          <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Տեսեք աշխատակիցների ընթացիկ ծանրաբեռնվածությունը, գտեք առանց աշխատակցի մնացած factory քայլերը և վերաբաշխեք աշխատանքը նույն արտադրամասի ներսում։
-          </p>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատանքների բաշխում</h1>
+            <InfoTooltip>
+              Տեսեք աշխատակիցների ընթացիկ ծանրաբեռնվածությունը, գտեք առանց աշխատակցի մնացած արտադրամասային քայլերը և վերաբաշխեք աշխատանքը նույն արտադրամասի ներսում։
+            </InfoTooltip>
+          </div>
         </div>
         <button
           type="button"
@@ -36,12 +37,12 @@
         <div class="metric-card">
           <p class="metric-label">Ակտիվ աշխատանք</p>
           <p class="metric-value">{{ totalActiveWork }}</p>
-          <p class="metric-hint">factory քայլ</p>
+          <p class="metric-hint">արտադրամասային քայլ</p>
         </div>
         <div class="metric-card">
           <p class="metric-label">Ուշացած աշխատանք</p>
           <p class="metric-value text-rose-600 dark:text-rose-300">{{ totalOverdueWork }}</p>
-          <p class="metric-hint">operator-ներին նշանակված</p>
+          <p class="metric-hint">աշխատակիցներին նշանակված</p>
         </div>
       </section>
 
@@ -49,7 +50,6 @@
         <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p class="eyebrow">Team capacity</p>
               <h2 class="section-title">Աշխատակիցների ծանրաբեռնվածություն</h2>
             </div>
             <select v-model="factoryFilter" class="small-control sm:w-56">
@@ -112,9 +112,8 @@
           <section class="rounded-[28px] border border-amber-200 bg-amber-50/70 p-5 shadow-sm dark:border-amber-950/60 dark:bg-amber-950/15 sm:p-6">
             <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700/60 dark:text-amber-300/60">Assignment queue</p>
                 <h2 class="mt-1 text-lg font-bold text-slate-950 dark:text-white">Չնշանակված աշխատանքներ</h2>
-                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ unassignedSteps.length }} քայլ այս preview-ում</p>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ unassignedSteps.length }} քայլ այս ցանկում</p>
               </div>
               <select v-model="queueFactoryFilter" class="small-control sm:w-56" @change="loadUnassigned">
                 <option value="">Բոլոր արտադրամասերը</option>
@@ -165,14 +164,14 @@
             </div>
             <div v-else class="rounded-2xl border border-dashed border-amber-200 p-8 text-center dark:border-amber-950/60">
               <p class="text-sm font-bold text-slate-700 dark:text-slate-200">Չնշանակված աշխատանք չկա 🎉</p>
-              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Այս ֆիլտրով բոլոր factory քայլերն ունեն աշխատակից։</p>
+              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Այս ֆիլտրով բոլոր արտադրամասային քայլերն ունեն աշխատակից։</p>
             </div>
           </section>
 
           <section v-if="selectedOperator" class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
             <div class="mb-4 flex items-start justify-between gap-3">
               <div>
-                <p class="eyebrow">Selected operator</p>
+                <p class="eyebrow">Ընտրված աշխատակից</p>
                 <h2 class="section-title">{{ selectedOperator.name }}</h2>
                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ selectedOperator.factory?.name || '—' }}</p>
               </div>
