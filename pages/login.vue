@@ -130,16 +130,16 @@
             </p>
             <div class="mt-7 grid grid-cols-3 gap-3">
               <div class="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-md">
-                <p class="text-[10px] font-bold uppercase tracking-wide text-white/50">Access</p>
-                <p class="mt-1 text-sm font-black text-white">Role based</p>
+                <p class="text-[10px] font-bold uppercase tracking-wide text-white/50">Հասանելիություն</p>
+                <p class="mt-1 text-sm font-black text-white">Ըստ հաստիքի</p>
               </div>
               <div class="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-md">
-                <p class="text-[10px] font-bold uppercase tracking-wide text-white/50">Files</p>
-                <p class="mt-1 text-sm font-black text-white">Controlled</p>
+                <p class="text-[10px] font-bold uppercase tracking-wide text-white/50">Ֆայլեր</p>
+                <p class="mt-1 text-sm font-black text-white">Վերահսկվող</p>
               </div>
               <div class="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-md">
-                <p class="text-[10px] font-bold uppercase tracking-wide text-white/50">Flow</p>
-                <p class="mt-1 text-sm font-black text-white">Production</p>
+                <p class="text-[10px] font-bold uppercase tracking-wide text-white/50">Գործընթաց</p>
+                <p class="mt-1 text-sm font-black text-white">Արտադրություն</p>
               </div>
             </div>
           </div>
