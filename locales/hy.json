@@ -24,7 +24,8 @@
     "avc": "ՀՎՀՀ",
     "accountant": "Հաշվապահ",
     "create_client": "Ստեղծել նոր հաճախորդ",
-    "update_client": "Փոխել"
+    "update_client": "Փոխել",
+    "info": "Տեղեկություն"
   },
   "admin_layout": {
     "navigation": "Ադմինիստրատորի նավիգացիա",
@@ -34,7 +35,7 @@
     "reports": "Հաշվետվություններ",
     "workload": "Աշխատանքների բաշխում",
     "employees": "Աշխատակիցներ",
-    "file_types": "Ֆայլերի տեսակներ",
+    "file_types": "Նախագծերի թղթապանակ",
     "account_settings": "Հաշվի և անվտանգության կարգավորումներ",
     "operations_management": "Օպերացիոն կառավարում",
     "operations_description": "Պատվերներ, արտադրամասեր և ծանրաբեռնվածություն",
