@@ -23,7 +23,8 @@
     "avc": "ИНН",
     "accountant": "Бухгалтер",
     "create_client": "Создать клиента",
-    "update_client": "Изменить"
+    "update_client": "Изменить",
+    "info": "Информация"
   },
   "admin_layout": {
     "navigation": "Навигация администратора",
@@ -33,7 +34,7 @@
     "reports": "Отчёты",
     "workload": "Распределение работ",
     "employees": "Сотрудники",
-    "file_types": "Типы файлов",
+    "file_types": "Папка проектов",
     "account_settings": "Настройки аккаунта и безопасности",
     "operations_management": "Операционное управление",
     "operations_description": "Заказы, цеха и загрузка",
