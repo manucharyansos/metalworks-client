@@ -6,7 +6,7 @@
           <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
           <div>
             <p class="text-sm font-black tracking-tight text-slate-950 dark:text-white">MetalWorks</p>
-            <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Account recovery</p>
+            
           </div>
         </div>
 
