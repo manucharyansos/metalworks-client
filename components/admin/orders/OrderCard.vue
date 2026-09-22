@@ -42,7 +42,7 @@
       class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-gray-600 dark:text-gray-300"
     >
       <div>
-        <dt class="text-gray-500">Prefix</dt>
+        <dt class="text-gray-500">Կոդ</dt>
         <dd class="font-medium">{{ order.prefix_code?.code ?? '—' }}</dd>
       </div>
       <div>
