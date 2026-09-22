@@ -3,14 +3,13 @@
     <div v-if="$can('workers.view')" class="mx-auto max-w-[1500px] space-y-6">
       <section class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Team</p>
           <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատակիցներ</h1>
-          <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Աշխատակիցների տվյալներ, role և արտադրամասի կապ։</p>
+          <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Աշխատակիցների տվյալներ, հաստիք և արտադրամաս։</p>
         </div>
         <div class="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
           <div class="relative w-full sm:w-80">
-            <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0Z" /></svg>
-            <input v-model="searchQuery" type="text" placeholder="Անուն, email, հեռախոս..." class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
+            <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0Z" /></svg>
+            <input v-model="searchQuery" type="text" placeholder="Անուն, email, հեռախոս..." class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-10 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" />
           </div>
           <button v-if="$can('workers.create')" type="button" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200" @click="openCreate"><span class="text-lg leading-none">+</span> Նոր աշխատակից</button>
         </div>
@@ -19,7 +18,7 @@
       <section class="grid gap-3 sm:grid-cols-3">
         <div class="metric"><p class="metric-label">Ընդամենը</p><p class="metric-value">{{ workers.length }}</p></div>
         <div class="metric"><p class="metric-label">Արտադրամասով</p><p class="metric-value">{{ factoryAssignedCount }}</p></div>
-        <div class="metric"><p class="metric-label">Role-եր</p><p class="metric-value">{{ rolesInUse }}</p></div>
+        <div class="metric"><p class="metric-label">Հաստիքներ</p><p class="metric-value">{{ rolesInUse }}</p></div>
       </section>
 
       <section class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -30,7 +29,7 @@
           <div class="hidden overflow-x-auto md:block">
             <table class="w-full min-w-[1000px] text-left">
               <thead class="bg-slate-50/80 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40">
-                <tr><th class="px-6 py-3.5">Աշխատակից</th><th class="px-4 py-3.5">Role</th><th class="px-4 py-3.5">Արտադրամաս</th><th class="px-4 py-3.5">Հեռախոս</th><th class="px-4 py-3.5">Հասցե</th><th v-if="$canAny(['workers.update','workers.delete'])" class="px-6 py-3.5 text-right">Գործողություններ</th></tr>
+                <tr><th class="px-6 py-3.5">Աշխատակից</th><th class="px-4 py-3.5">Հաստիք</th><th class="px-4 py-3.5">Արտադրամաս</th><th class="px-4 py-3.5">Հեռախոս</th><th class="px-4 py-3.5">Հասցե</th><th v-if="$canAny(['workers.update','workers.delete'])" class="px-6 py-3.5 text-right">Գործողություններ</th></tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                 <tr v-for="u in filtered" :key="u.id" class="transition hover:bg-slate-50/70 dark:hover:bg-slate-950/30">
@@ -79,7 +78,7 @@
 <script>
 import WorkerFormModal from '~/components/users/WorkerFormModal.vue'
 
-const ROLE_LABELS = { manager: 'Մենեջեր', bend: 'Կռում', laser: 'Լազերային կտրում', powder_catting: 'Փոշեներկում', engineer: 'Ինժիներ', admin: 'Admin' }
+const ROLE_LABELS = { manager: 'Մենեջեր', bend: 'Կռում', laser: 'Լազերային կտրում', powder_catting: 'Փոշեներկում', engineer: 'Ինժիներ', admin: 'Ադմինիստրատոր' }
 
 export default {
   components: { WorkerFormModal },
