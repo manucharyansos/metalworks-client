@@ -49,7 +49,7 @@
               </svg>
             </div>
             <select v-model="roleFilter" class="control">
-              <option value="">Դասակարգել ըստ հաստիքի</option>
+              <option value="">Բոլոր հաստիքները</option>
               <option v-for="role in staffRoles" :key="role.id || role.name" :value="role.name">{{ role.value || role.name }}</option>
             </select>
           </div>
@@ -227,9 +227,9 @@ export default {
         this.normalizedUsers.map((u) => u.roleName).filter(Boolean)
       ).size
       return [
-        { label: 'Աշխատակիցներ', value: this.normalizedUsers.length, hint: 'միայն staff հաշիվները' },
-        { label: 'Լիարժեք մուտք', value: fullAccess, hint: 'Admin + Manager' },
-        { label: 'Արտադրամասով', value: assignedFactories, hint: 'factory նշանակված' },
+        { label: 'Աշխատակիցներ', value: this.normalizedUsers.length, hint: 'աշխատակիցների հաշիվները' },
+        { label: 'Լիարժեք մուտք', value: fullAccess, hint: 'Ադմինիստրատոր և մենեջեր' },
+        { label: 'Արտադրամասով', value: assignedFactories, hint: 'արտադրամաս նշանակված' },
         { label: 'Հաստիքներ', value: rolesInUse, hint: 'աշխատողի տեսակներ' },
       ]
     },
