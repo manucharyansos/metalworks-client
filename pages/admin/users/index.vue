@@ -43,7 +43,7 @@
         <div class="border-b border-slate-100 p-5 dark:border-slate-800 sm:p-6">
           <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             <div class="relative md:col-span-2">
-              <input v-model="search" type="text" class="control pr-11" placeholder="Որոնել աշխատակցի անունով կամ email-ով" />
+              <input v-model="search" type="text" class="control pr-11" placeholder="Որոնել աշխատակցի անունով կամ էլ․ փոստով" />
               <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -66,7 +66,7 @@
                 <th class="px-6 py-3.5">Աշխատակից</th>
                 <th class="px-4 py-3.5">Հաստիք</th>
                 <th class="px-4 py-3.5">Արտադրամաս</th>
-                <th class="px-4 py-3.5">Email</th>
+                <th class="px-4 py-3.5">Էլ․ փոստ</th>
                 <th class="px-6 py-3.5 text-right">Ֆունկցիաներ</th>
               </tr>
             </thead>
