@@ -249,7 +249,7 @@ export default {
         await this.fetchFactoryExtensions()
         this.notifySuccess(`${factory.name} արտադրամասի .${extension} ֆայլի տեսակը ավելացվեց։`)
       } catch (error) {
-        this.notifyError(error, 'Factory ֆայլի տեսակը չհաջողվեց ավելացնել։')
+        this.notifyError(error, 'Ֆայլի տեսակը չհաջողվեց ավելացնել։')
       } finally {
         this.savingFactoryId = null
       }
@@ -263,7 +263,7 @@ export default {
         await this.fetchFactoryExtensions()
         this.notifySuccess(`${factory.name} արտադրամասի ֆայլի տեսակը թարմացվեց։`)
       } catch (error) {
-        this.notifyError(error, 'Factory ֆայլի տեսակը չհաջողվեց թարմացնել։')
+        this.notifyError(error, 'Ֆայլի տեսակը չհաջողվեց թարմացնել։')
       }
     },
     async deleteFactoryExtension(factory, id) {
@@ -272,7 +272,7 @@ export default {
         await this.fetchFactoryExtensions()
         this.notifySuccess(`${factory.name} արտադրամասի ֆայլի տեսակը հեռացվեց։`)
       } catch (error) {
-        this.notifyError(error, 'Factory ֆայլի տեսակը չհաջողվեց հեռացնել։')
+        this.notifyError(error, 'Ֆայլի տեսակը չհաջողվեց հեռացնել։')
       }
     },
     async addGlobalExtension() {
