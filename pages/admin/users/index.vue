@@ -141,7 +141,9 @@
       :saving="permissionSaving"
       :permission-groups="permissionGroups"
       :permission-groups-keys="permissionGroupsKeys"
+      :permission-scope="permissionScope"
       :user-permission-ids="userPermissionIds"
+      :required-permission-ids="requiredPermissionIds"
       :open-groups="openPermissionGroups"
       @close="closePermissionModal"
       @toggle-group="togglePermissionGroup"
@@ -175,6 +177,7 @@ export default {
       permissionLoading: false,
       permissionSaving: false,
       permissionsRaw: [],
+      permissionScope: null,
       userPermissionIds: [],
       openPermissionGroups: [],
     }
@@ -232,15 +235,52 @@ export default {
     },
     permissionGroups() {
       const groups = {}
+      const seenSlugs = new Set()
+
       this.permissionsRaw.forEach((permission) => {
+        if (!permission?.slug || seenSlugs.has(permission.slug)) return
+        seenSlugs.add(permission.slug)
+
         const key = permission.group || 'general'
         if (!groups[key]) groups[key] = []
         groups[key].push(permission)
       })
+
       return groups
     },
     permissionGroupsKeys() {
-      return Object.keys(this.permissionGroups)
+      const available = Object.keys(this.permissionGroups)
+      const preferred = Array.isArray(this.permissionScope?.groups)
+        ? this.permissionScope.groups
+        : []
+
+      return [
+        ...preferred.filter((key) => available.includes(key)),
+        ...available.filter((key) => !preferred.includes(key)),
+      ]
+    },
+    requiredPermissionIds() {
+      const dependencies = this.permissionScope?.dependencies || {}
+      const bySlug = new Map(
+        this.permissionsRaw.map((permission) => [permission.slug, Number(permission.id)])
+      )
+      const selectedSlugs = new Set(
+        this.permissionsRaw
+          .filter((permission) =>
+            this.userPermissionIds.map(Number).includes(Number(permission.id))
+          )
+          .map((permission) => permission.slug)
+      )
+      const required = new Set()
+
+      selectedSlugs.forEach((slug) => {
+        ;(dependencies[slug] || []).forEach((dependencySlug) => {
+          const id = bySlug.get(dependencySlug)
+          if (id) required.add(id)
+        })
+      })
+
+      return Array.from(required)
     },
   },
   methods: {
@@ -273,15 +313,27 @@ export default {
       if (!this.selectedUser) return
       this.permissionLoading = true
       this.permissionsRaw = []
+      this.permissionScope = null
       this.userPermissionIds = []
       this.openPermissionGroups = []
       try {
         const res = await this.$axios.$get(
           `/api/users/${this.selectedUser.id}/permissions`
         )
-        this.permissionsRaw = res.permissions || []
+        const unique = new Map()
+        ;(res.permissions || []).forEach((permission) => {
+          if (permission?.slug && !unique.has(permission.slug)) {
+            unique.set(permission.slug, permission)
+          }
+        })
+
+        this.permissionsRaw = Array.from(unique.values())
+        this.permissionScope = res.permission_scope || null
         this.userPermissionIds = (res.user_permission_ids || []).map(Number)
-        this.openPermissionGroups = this.permissionGroupsKeys.slice()
+
+        const defaultGroup =
+          this.permissionScope?.default_group || this.permissionGroupsKeys[0] || null
+        this.openPermissionGroups = defaultGroup ? [defaultGroup] : []
       } catch (error) {
         this.$notify?.({
           type: 'error',
@@ -295,19 +347,56 @@ export default {
       this.showPermissionModal = false
       this.selectedUser = null
       this.permissionsRaw = []
+      this.permissionScope = null
       this.userPermissionIds = []
       this.openPermissionGroups = []
     },
     togglePermissionGroup(groupKey) {
-      const index = this.openPermissionGroups.indexOf(groupKey)
-      if (index === -1) this.openPermissionGroups.push(groupKey)
-      else this.openPermissionGroups.splice(index, 1)
+      this.openPermissionGroups = this.openPermissionGroups.includes(groupKey)
+        ? []
+        : [groupKey]
     },
     togglePermission(permissionId) {
       const id = Number(permissionId)
+      const permission = this.permissionsRaw.find(
+        (item) => Number(item.id) === id
+      )
+      if (!permission) return
+
       const selected = new Set(this.userPermissionIds.map(Number))
-      if (selected.has(id)) selected.delete(id)
-      else selected.add(id)
+      const dependencies = this.permissionScope?.dependencies || {}
+      const bySlug = new Map(
+        this.permissionsRaw.map((item) => [item.slug, Number(item.id)])
+      )
+
+      if (selected.has(id)) {
+        const selectedSlugs = this.permissionsRaw
+          .filter((item) => selected.has(Number(item.id)))
+          .map((item) => item.slug)
+
+        const requiredBy = selectedSlugs.filter(
+          (slug) =>
+            slug !== permission.slug &&
+            (dependencies[slug] || []).includes(permission.slug)
+        )
+
+        if (requiredBy.length) {
+          this.$notify?.({
+            type: 'warning',
+            text: 'Այս թույլտվությունը անհրաժեշտ է արդեն միացված այլ ֆունկցիայի աշխատանքի համար։',
+          })
+          return
+        }
+
+        selected.delete(id)
+      } else {
+        selected.add(id)
+        ;(dependencies[permission.slug] || []).forEach((dependencySlug) => {
+          const dependencyId = bySlug.get(dependencySlug)
+          if (dependencyId) selected.add(dependencyId)
+        })
+      }
+
       this.userPermissionIds = Array.from(selected)
     },
     async savePermissions() {
