@@ -25,7 +25,8 @@
     "avc": "Tax ID",
     "accountant": "Accountant",
     "create_client": "Create client",
-    "update_client": "Update"
+    "update_client": "Update",
+    "info": "Information"
   },
   "admin_layout": {
     "navigation": "Admin navigation",
@@ -35,7 +36,7 @@
     "reports": "Reports",
     "workload": "Work allocation",
     "employees": "Employees",
-    "file_types": "File types",
+    "file_types": "Project folders",
     "account_settings": "Account and security settings",
     "operations_management": "Operations management",
     "operations_description": "Orders, factories and workload",

@@ -14,7 +14,7 @@
                 i
               </button>
               <div class="pointer-events-none absolute left-0 top-9 z-30 w-[min(420px,80vw)] -translate-y-1 rounded-2xl bg-slate-950 px-4 py-3 text-xs font-medium leading-5 text-white opacity-0 shadow-2xl transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:bg-white dark:text-slate-950">
-                Admin և Manager հաստիքները ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Հաճախորդները այստեղ չեն ցուցադրվում։
+                Ադմինիստրատոր և Մենեջեր հաստիքները ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Հաճախորդները այստեղ չեն ցուցադրվում։
               </div>
             </div>
           </div>
@@ -43,13 +43,13 @@
         <div class="border-b border-slate-100 p-5 dark:border-slate-800 sm:p-6">
           <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             <div class="relative md:col-span-2">
-              <input v-model="search" type="text" class="control pr-11" placeholder="Որոնել աշխատակցի անունով կամ email-ով" />
+              <input v-model="search" type="text" class="control pr-11" placeholder="Որոնել աշխատակցի անունով կամ էլ․ փոստով" />
               <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
             <select v-model="roleFilter" class="control">
-              <option value="">Դասակարգել ըստ հաստիքի</option>
+              <option value="">Բոլոր հաստիքները</option>
               <option v-for="role in staffRoles" :key="role.id || role.name" :value="role.name">{{ role.value || role.name }}</option>
             </select>
           </div>
@@ -66,7 +66,7 @@
                 <th class="px-6 py-3.5">Աշխատակից</th>
                 <th class="px-4 py-3.5">Հաստիք</th>
                 <th class="px-4 py-3.5">Արտադրամաս</th>
-                <th class="px-4 py-3.5">Email</th>
+                <th class="px-4 py-3.5">Էլ․ փոստ</th>
                 <th class="px-6 py-3.5 text-right">Ֆունկցիաներ</th>
               </tr>
             </thead>
@@ -227,9 +227,9 @@ export default {
         this.normalizedUsers.map((u) => u.roleName).filter(Boolean)
       ).size
       return [
-        { label: 'Աշխատակիցներ', value: this.normalizedUsers.length, hint: 'միայն staff հաշիվները' },
-        { label: 'Լիարժեք մուտք', value: fullAccess, hint: 'Admin + Manager' },
-        { label: 'Արտադրամասով', value: assignedFactories, hint: 'factory նշանակված' },
+        { label: 'Աշխատակիցներ', value: this.normalizedUsers.length, hint: 'աշխատակիցների հաշիվները' },
+        { label: 'Լիարժեք մուտք', value: fullAccess, hint: 'Ադմինիստրատոր և մենեջեր' },
+        { label: 'Արտադրամասով', value: assignedFactories, hint: 'արտադրամաս նշանակված' },
         { label: 'Հաստիքներ', value: rolesInUse, hint: 'աշխատողի տեսակներ' },
       ]
     },

@@ -2,10 +2,9 @@
   <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <div class="mx-auto max-w-[1400px] space-y-6">
       <section class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">PMP workspace</p>
-          <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Նախագծեր և ֆայլեր</h1>
-          <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">Ընտրեք կամ ստեղծեք PMP խումբ և ենթախումբ, ապա անցեք համապատասխան ֆայլերին։</p>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Նախագծեր և ֆայլեր</h1>
+          <InfoTooltip>Ընտրեք կամ ստեղծեք PMP խումբ և ենթախումբ, ապա անցեք համապատասխան ֆայլերին։</InfoTooltip>
         </div>
         <div class="flex flex-wrap gap-2 text-[10px] font-bold">
           <span class="rounded-full px-3 py-1.5" :class="$can('pmp.create') ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'">Ստեղծում՝ {{ $can('pmp.create') ? 'թույլատրված' : 'փակ' }}</span>
@@ -17,7 +16,7 @@
         <div class="panel-card">
           <div class="panel-heading">
             <span class="step-badge">01</span>
-            <div><p class="eyebrow">Group</p><h2 class="panel-title">Խումբ</h2></div>
+            <div><h2 class="panel-title">Խումբ</h2></div>
           </div>
 
           <div class="space-y-4">
@@ -56,7 +55,7 @@
         <div class="panel-card" :class="{ 'opacity-60': !isExistingGroup }">
           <div class="panel-heading">
             <span class="step-badge">02</span>
-            <div><p class="eyebrow">Subgroup</p><h2 class="panel-title">Ենթախումբ</h2></div>
+            <div><h2 class="panel-title">Ենթախումբ</h2></div>
           </div>
 
           <div class="space-y-4" :class="{ 'pointer-events-none': !isExistingGroup }">
@@ -91,7 +90,7 @@
         </div>
 
         <div class="panel-card flex flex-col">
-          <div class="panel-heading"><span class="step-badge">03</span><div><p class="eyebrow">Actions</p><h2 class="panel-title">Գործողություններ</h2></div></div>
+          <div class="panel-heading"><span class="step-badge">03</span><div><h2 class="panel-title">Գործողություններ</h2></div></div>
           <div class="flex flex-1 flex-col justify-center gap-3">
             <button v-if="showCreateGroup && $can('pmp.create')" type="button" class="action-button bg-emerald-600 text-white hover:bg-emerald-700" @click="addPmpGroup"><span class="action-icon">+</span><span><b>Ստեղծել խումբ</b><small>Պահպանել նոր PMP խումբ</small></span></button>
             <button v-if="showCreateRemote && $can('pmp.create')" type="button" class="action-button bg-blue-600 text-white hover:bg-blue-700" @click="addPmpGroupRemoteNumber"><span class="action-icon">+</span><span><b>Ստեղծել ենթախումբ</b><small>Ավելացնել ընտրված խմբին</small></span></button>

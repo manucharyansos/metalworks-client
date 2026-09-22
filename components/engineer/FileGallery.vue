@@ -1,7 +1,7 @@
 <template>
   <div class="w-full flex flex-col space-y-6 my-2">
     <section v-if="dxfFiles.length">
-      <h4 class="text-sm font-semibold mb-2">DXF Files</h4>
+      <h4 class="text-sm font-semibold mb-2">DXF ֆայլեր</h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div
           v-for="f in dxfFiles"
@@ -32,7 +32,7 @@
     </section>
 
     <section v-if="pdfs.length">
-      <h4 class="text-sm font-semibold mb-2">PDF Files</h4>
+      <h4 class="text-sm font-semibold mb-2">PDF ֆայլեր</h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div
           v-for="f in pdfs"
@@ -95,7 +95,7 @@
     </section>
 
     <section v-if="cadFiles.length">
-      <h4 class="text-sm font-semibold mb-2">CAD Files</h4>
+      <h4 class="text-sm font-semibold mb-2">CAD ֆայլեր</h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div
           v-for="f in cadFiles"

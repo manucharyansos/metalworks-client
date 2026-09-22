@@ -4,7 +4,7 @@
       <div class="flex items-start justify-between gap-4">
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
-            <p class="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">Order details</p>
+            
             <span class="rounded-full px-2.5 py-1 text-[10px] font-bold" :class="overallStatusClass">{{ overallStatusText }}</span>
           </div>
           <h2 class="mt-2 truncate text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">
@@ -12,11 +12,11 @@
           </h2>
           <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
             <span>#{{ localOrder.order_number?.number || localOrder.id }}</span>
-            <span v-if="localOrder.prefix_code?.code">Prefix՝ {{ localOrder.prefix_code.code }}</span>
+            <span v-if="localOrder.prefix_code?.code">Կոդ՝ {{ localOrder.prefix_code.code }}</span>
             <span>Ստեղծվել է՝ {{ formatDate(localOrder.created_at) }}</span>
           </div>
         </div>
-        <button type="button" class="shrink-0 rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Close order" @click="$emit('close')">
+        <button type="button" class="shrink-0 rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Փակել պատվերը" @click="$emit('close')">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18 18 6M6 6l12 12" /></svg>
         </button>
       </div>
@@ -30,7 +30,7 @@
             <p class="info-value">{{ localOrder.order_number?.number || `#${localOrder.id}` }}</p>
           </div>
           <div class="info-tile">
-            <p class="info-label">Prefix</p>
+            <p class="info-label">Կոդ</p>
             <p class="info-value">{{ localOrder.prefix_code?.code || '—' }}</p>
           </div>
           <div class="info-tile" :class="isOverdue ? '!border-rose-200 !bg-rose-50/70 dark:!border-rose-950/70 dark:!bg-rose-950/20' : isNear ? '!border-amber-200 !bg-amber-50/70 dark:!border-amber-950/70 dark:!bg-amber-950/20' : ''">
@@ -38,7 +38,7 @@
             <p class="info-value" :class="isOverdue ? 'text-rose-600 dark:text-rose-300' : isNear ? 'text-amber-600 dark:text-amber-300' : ''">{{ formatDate(localOrder.dates?.finish_date) }}</p>
           </div>
           <div class="info-tile">
-            <p class="info-label">Factory քայլեր</p>
+            <p class="info-label">Արտադրամասային քայլեր</p>
             <p class="info-value">{{ factoryOrders.length }}</p>
           </div>
         </section>
@@ -47,7 +47,7 @@
           <div class="panel-card">
             <div class="panel-heading">
               <div>
-                <p class="eyebrow">Main information</p>
+                
                 <h3 class="panel-title">Հիմնական տվյալներ</h3>
               </div>
             </div>
@@ -80,7 +80,7 @@
           <aside class="panel-card">
             <div class="panel-heading">
               <div>
-                <p class="eyebrow">Customer</p>
+                
                 <h3 class="panel-title">Հաճախորդ</h3>
               </div>
             </div>
@@ -95,9 +95,9 @@
 
             <dl class="mt-4 space-y-3 text-xs">
               <div class="detail-row"><dt>Հեռախոս</dt><dd>{{ localOrder.client?.phone || localOrder.user?.phone || '—' }}</dd></div>
-              <div class="detail-row"><dt>Email</dt><dd class="break-all">{{ customerEmail }}</dd></div>
+              <div class="detail-row"><dt>Էլ․ փոստ</dt><dd class="break-all">{{ customerEmail }}</dd></div>
               <div class="detail-row"><dt>Ստեղծող</dt><dd>{{ localOrder.creator?.name || '—' }}</dd></div>
-              <div class="detail-row"><dt>Ընդհանուր status</dt><dd>{{ localOrder.status || 'pending' }}</dd></div>
+              <div class="detail-row"><dt>Ընդհանուր կարգավիճակ</dt><dd>{{ localOrder.status || 'pending' }}</dd></div>
             </dl>
           </aside>
         </section>
@@ -105,7 +105,7 @@
         <section class="panel-card">
           <div class="panel-heading flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p class="eyebrow">Production flow</p>
+              
               <h3 class="panel-title">Արտադրամասերի ընթացքը</h3>
             </div>
             <p class="text-xs text-slate-500 dark:text-slate-400">{{ factoryOrders.length }} քայլ</p>
@@ -116,18 +116,18 @@
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ fo.factory?.name || 'Անհայտ արտադրամաս' }}</p>
-                  <p class="mt-1 truncate text-[11px] text-slate-500 dark:text-slate-400">Օպերատոր՝ {{ fo.operator?.name || 'չնշանակված' }}</p>
+                  <p class="mt-1 truncate text-[11px] text-slate-500 dark:text-slate-400">Աշխատակից՝ {{ fo.operator?.name || 'չնշանակված' }}</p>
                 </div>
                 <span class="shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold" :class="factoryStatusClass(fo.status)">{{ factoryStatusLabel(fo.status) }}</span>
               </div>
 
               <div class="mt-4 grid grid-cols-2 gap-2 text-[11px]">
                 <div class="rounded-xl bg-white p-2.5 dark:bg-slate-900">
-                  <p class="text-slate-400">Factory ավարտ</p>
+                  <p class="text-slate-400">Արտադրամասի ավարտ</p>
                   <p class="mt-1 font-semibold text-slate-700 dark:text-slate-200">{{ formatDate(fo.finish_date) }}</p>
                 </div>
                 <div class="rounded-xl bg-white p-2.5 dark:bg-slate-900">
-                  <p class="text-slate-400">Admin հաստատում</p>
+                  <p class="text-slate-400">Ադմինի հաստատում</p>
                   <p class="mt-1 font-semibold" :class="fo.admin_confirmation_date ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'">{{ fo.admin_confirmation_date ? formatDate(fo.admin_confirmation_date) : 'Սպասում է' }}</p>
                 </div>
               </div>
@@ -152,7 +152,7 @@
         <section class="grid gap-5 xl:grid-cols-2">
           <div class="panel-card">
             <div class="panel-heading">
-              <div><p class="eyebrow">Files</p><h3 class="panel-title">Ընտրված ֆայլեր</h3></div>
+              <div><h3 class="panel-title">Ընտրված ֆայլեր</h3></div>
               <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-300">{{ localOrder.selected_files?.length || 0 }}</span>
             </div>
             <div v-if="localOrder.selected_files?.length" class="space-y-2">
@@ -166,7 +166,7 @@
 
           <div class="panel-card">
             <div class="panel-heading">
-              <div><p class="eyebrow">Audit trail</p><h3 class="panel-title">Վերջին գործողությունները</h3></div>
+              <div><h3 class="panel-title">Վերջին գործողությունները</h3></div>
             </div>
             <div v-if="localOrder.logs?.length" class="max-h-72 space-y-3 overflow-y-auto pr-1">
               <div v-for="log in recentLogs" :key="log.id" class="flex gap-3 rounded-xl border border-slate-100 p-3 dark:border-slate-800">

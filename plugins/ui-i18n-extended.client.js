@@ -64,8 +64,8 @@ function translateDynamic(trimmed, locale) {
   match = trimmed.match(/^(\d+)\s+ֆայլով$/)
   if (match) return pick(trimmed, `с ${match[1]} файлами`, `with ${match[1]} files`)
 
-  match = trimmed.match(/^(\d+)\s+factory աշխատակից$/)
-  if (match) return pick(trimmed, `${match[1]} сотрудников цеха`, `${match[1]} factory employees`)
+  match = trimmed.match(/^(\d+)\s+(?:factory աշխատակից|արտադրամասի աշխատակից)$/)
+  if (match) return pick(trimmed, `${match[1]} сотрудников цеха`, `${match[1]} workshop employees`)
 
   match = trimmed.match(/^(\d+)\s+աշխատակից$/)
   if (match) return pick(trimmed, `${match[1]} сотрудников`, `${match[1]} employees`)
@@ -79,8 +79,8 @@ function translateDynamic(trimmed, locale) {
   match = trimmed.match(/^Այսօր՝\s*(.+)$/)
   if (match) return pick(trimmed, `Сегодня: ${match[1]}`, `Today: ${match[1]}`)
 
-  match = trimmed.match(/^Admin սպասում՝\s*(.+)$/)
-  if (match) return pick(trimmed, `Ожидает admin: ${match[1]}`, `Admin pending: ${match[1]}`)
+  match = trimmed.match(/^(?:Admin|Ադմինի) սպասում՝\s*(.+)$/)
+  if (match) return pick(trimmed, `Ожидает администратора: ${match[1]}`, `Admin pending: ${match[1]}`)
 
   match = trimmed.match(/^30 օրում ավարտված՝\s*(.+)$/)
   if (match) return pick(trimmed, `Завершено за 30 дней: ${match[1]}`, `Completed in 30 days: ${match[1]}`)
@@ -88,14 +88,14 @@ function translateDynamic(trimmed, locale) {
   match = trimmed.match(/^Կոդը ուղարկվել է՝\s*(.+)$/)
   if (match) return pick(trimmed, `Код отправлен на: ${match[1]}`, `Code sent to: ${match[1]}`)
 
-  match = trimmed.match(/^(.+?) արտադրամասի \.([^\s]+) format-ը ավելացվեց։$/)
-  if (match) return pick(trimmed, `Формат .${match[2]} для цеха ${match[1]} добавлен.`, `Format .${match[2]} added for ${match[1]} factory.`)
+  match = trimmed.match(/^(.+?) արտադրամասի \.([^\s]+) ֆայլի տեսակը ավելացվեց։$/)
+  if (match) return pick(trimmed, `Тип файла .${match[2]} для цеха ${match[1]} добавлен.`, `File type .${match[2]} added for ${match[1]} workshop.`)
 
-  match = trimmed.match(/^(.+?) արտադրամասի format-ը թարմացվեց։$/)
-  if (match) return pick(trimmed, `Формат цеха ${match[1]} обновлён.`, `${match[1]} factory format updated.`)
+  match = trimmed.match(/^(.+?) արտադրամասի ֆայլի տեսակը թարմացվեց։$/)
+  if (match) return pick(trimmed, `Тип файла цеха ${match[1]} обновлён.`, `${match[1]} workshop file type updated.`)
 
-  match = trimmed.match(/^(.+?) արտադրամասի format-ը հեռացվեց։$/)
-  if (match) return pick(trimmed, `Формат цеха ${match[1]} удалён.`, `${match[1]} factory format removed.`)
+  match = trimmed.match(/^(.+?) արտադրամասի ֆայլի տեսակը հեռացվեց։$/)
+  if (match) return pick(trimmed, `Тип файла цеха ${match[1]} удалён.`, `${match[1]} workshop file type removed.`)
 
   return null
 }

@@ -64,9 +64,9 @@
               <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 21a8 8 0 1 0-16 0m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /></svg>
               </div>
-              <div>
+              <div class="flex items-center gap-2">
                 <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ $t('profile.personal_data') }}</h2>
-                <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">{{ $t('profile.personal_data_help') }}</p>
+                <InfoTooltip>{{ $t('profile.personal_data_help') }}</InfoTooltip>
               </div>
             </div>
 
@@ -113,9 +113,9 @@
                   <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 6.5 12 13l9-6.5M5 5h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" /></svg>
                   </div>
-                  <div>
+                  <div class="flex items-center gap-2">
                     <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ $t('profile.email_section_title') }}</h2>
-                    <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">{{ $t('profile.email_verification_help') }}</p>
+                    <InfoTooltip>{{ $t('profile.email_verification_help') }}</InfoTooltip>
                   </div>
                 </div>
                 <span
@@ -177,9 +177,9 @@
                 <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                   <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 11V8a4 4 0 1 1 8 0v3m-9 0h10a2 2 0 0 1 2 2v7H5v-7a2 2 0 0 1 2-2Z" /></svg>
                 </div>
-                <div>
+                <div class="flex items-center gap-2">
                   <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ $t('common.password') }}</h2>
-                  <p class="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">{{ $t('profile.password_help') }}</p>
+                  <InfoTooltip>{{ $t('profile.password_help') }}</InfoTooltip>
                 </div>
               </div>
 
@@ -213,8 +213,10 @@
           <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{{ $t('profile.activity') }}</p>
-              <h2 class="mt-1 text-xl font-black text-slate-950 dark:text-white">{{ activityTitle }}</h2>
-              <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ activitySubtitle }}</p>
+              <div class="mt-1 flex items-center gap-2">
+                <h2 class="text-xl font-black text-slate-950 dark:text-white">{{ activityTitle }}</h2>
+                <InfoTooltip>{{ activitySubtitle }}</InfoTooltip>
+              </div>
             </div>
             <span class="self-start rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ activityData.total || 0 }}</span>
           </div>

@@ -1,9 +1,8 @@
 <template>
   <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-    <div>
-      <p class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Materials</p>
-      <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Նյութեր</h1>
-      <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Նյութերի ցանկ, չափեր և կատեգորիաներ։</p>
+    <div class="flex items-center gap-2">
+      <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Նյութեր</h1>
+      <InfoTooltip>Նյութերի ցանկ, չափեր և կատեգորիաներ։</InfoTooltip>
     </div>
 
     <div class="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
@@ -19,8 +18,8 @@
       </div>
 
       <div class="relative min-w-[260px] flex-1 lg:w-80">
-        <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0Z" /></svg>
-        <input :value="search" class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" placeholder="Որոնել նյութ..." @input="$emit('update:search', $event.target.value)" />
+        <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0Z" /></svg>
+        <input :value="search" class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-3 pr-10 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" placeholder="Որոնել նյութ..." @input="$emit('update:search', $event.target.value)" />
       </div>
 
       <button v-if="$can('materials.create')" type="button" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200" @click="$emit('create')"><span class="text-lg leading-none">+</span> Նոր նյութ</button>
