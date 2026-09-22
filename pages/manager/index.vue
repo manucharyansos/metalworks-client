@@ -2,10 +2,9 @@
   <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <div class="mx-auto max-w-[1500px] space-y-6">
       <section class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">Operations</p>
-          <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Պատվերների կառավարում</h1>
-          <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">Աշխատանքային պատկերը՝ միայն ձեզ տրված ֆունկցիաների սահմաններում։</p>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Պատվերների կառավարում</h1>
+          <InfoTooltip>Աշխատանքային պատկերը՝ միայն ձեզ տրված ֆունկցիաների սահմաններում։</InfoTooltip>
         </div>
         <button type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300" :disabled="loading" @click="refreshDashboard">
           <svg class="h-4 w-4" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 6v5h-5M4 18v-5h5m10.5-2a8 8 0 00-13.8-3M4.5 14a8 8 0 0013.8 3" /></svg>
@@ -43,12 +42,11 @@
       <section class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex flex-col gap-3 border-b border-slate-100 p-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
-            <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">Orders</p>
             <h2 class="mt-1 text-lg font-black text-slate-900 dark:text-white">Վերջին պատվերները</h2>
           </div>
           <div class="relative w-full sm:w-80">
-            <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0Z" /></svg>
-            <input v-model="searchable" type="text" class="control pl-10" placeholder="Համար, անուն, prefix..." />
+            <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0Z" /></svg>
+            <input v-model="searchable" type="text" class="control pr-10" placeholder="Համար, անուն, կոդ..." />
           </div>
         </div>
 
@@ -66,7 +64,7 @@
           <div class="hidden overflow-x-auto md:block">
             <table class="w-full min-w-[820px] text-left">
               <thead class="bg-slate-50/80 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40">
-                <tr><th class="px-6 py-3.5">Պատվեր</th><th class="px-4 py-3.5">Prefix</th><th class="px-4 py-3.5">Անվանում</th><th class="px-4 py-3.5">Ժամկետ</th><th class="px-4 py-3.5">Status</th></tr>
+                <tr><th class="px-6 py-3.5">Պատվեր</th><th class="px-4 py-3.5">Կոդ</th><th class="px-4 py-3.5">Անվանում</th><th class="px-4 py-3.5">Ժամկետ</th><th class="px-4 py-3.5">Կարգավիճակ</th></tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                 <tr v-for="order in searchFilter" :key="order.id" class="transition hover:bg-slate-50/70 dark:hover:bg-slate-950/30">
@@ -86,7 +84,7 @@
                 <div class="min-w-0"><p class="text-xs font-black text-slate-900 dark:text-white">{{ order.order_number?.number || `#${order.id}` }}</p><p class="mt-1 truncate text-sm font-semibold text-slate-700 dark:text-slate-200">{{ order.name || '—' }}</p></div>
                 <span class="rounded-full px-2 py-1 text-[9px] font-bold" :class="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
               </div>
-              <div class="mt-3 grid grid-cols-2 gap-2 text-[10px] text-slate-500 dark:text-slate-400"><span>Prefix՝ {{ order.prefix_code?.code || '—' }}</span><span class="text-right">{{ formatDate(order.dates?.finish_date) }}</span></div>
+              <div class="mt-3 grid grid-cols-2 gap-2 text-[10px] text-slate-500 dark:text-slate-400"><span>Կոդ՝ {{ order.prefix_code?.code || '—' }}</span><span class="text-right">{{ formatDate(order.dates?.finish_date) }}</span></div>
             </article>
           </div>
         </template>
