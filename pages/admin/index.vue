@@ -52,7 +52,7 @@
               <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-sm font-black text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">!</span>
               <h2 class="text-lg font-bold text-slate-950 dark:text-white">Ուշադրություն պահանջող պատվերներ</h2>
             </div>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ուշացած, չնշանակված կամ admin հաստատման սպասող աշխատանքներ</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ուշացած, չնշանակված կամ ադմինի հաստատման սպասող աշխատանքներ</p>
           </div>
           <button class="text-xs font-semibold text-rose-700 hover:underline dark:text-rose-300" @click="applyAttentionFilter">
             Ցույց տալ ուշացածները ֆիլտրում
@@ -489,11 +489,11 @@ export default {
         { key: 'active', label: 'Ակտիվ պատվերներ', value: this.summary.active_orders || 0, description: `Ընդհանուր՝ ${this.summary.total_orders || 0}`, icon: 'A', tone: 'blue' },
         { key: 'overdue', label: 'Ուշացած', value: this.summary.overdue_orders || 0, description: 'Անցած վերջնաժամկետով ակտիվ պատվերներ', icon: '!', tone: 'red' },
         { key: 'today', label: 'Այսօր ավարտվող', value: this.summary.due_today || 0, description: `Հաջորդ 7 օրը՝ ${this.summary.due_next_7_days || 0}`, icon: 'D', tone: 'amber' },
-        { key: 'unassigned', label: 'Չնշանակված քայլեր', value: this.summary.unassigned_factory_steps || 0, description: 'Factory քայլեր առանց operator-ի', icon: 'U', tone: 'violet' },
-        { key: 'confirmation', label: 'Admin հաստատման սպասող', value: this.summary.awaiting_admin_confirmation || 0, description: 'Ավարտված factory քայլեր, որոնք դեռ չեն հաստատվել', icon: 'C', tone: 'amber' },
+        { key: 'unassigned', label: 'Չնշանակված քայլեր', value: this.summary.unassigned_factory_steps || 0, description: 'Արտադրամասային քայլեր առանց աշխատակցի', icon: 'U', tone: 'violet' },
+        { key: 'confirmation', label: 'Ադմինի հաստատման սպասող', value: this.summary.awaiting_admin_confirmation || 0, description: 'Ավարտված արտադրամասային քայլեր, որոնք դեռ չեն հաստատվել', icon: 'C', tone: 'amber' },
         { key: 'complete', label: 'Ավարտված պատվերներ', value: this.summary.completed_orders || 0, description: `Չեղարկված՝ ${this.summary.canceled_orders || 0}`, icon: '✓', tone: 'green' },
         { key: 'nodeadline', label: 'Առանց վերջնաժամկետի', value: this.summary.without_deadline || 0, description: 'Ակտիվ պատվերներ առանց finish date-ի', icon: '—', tone: 'neutral' },
-        { key: 'capacity', label: 'Արտադրական ցանց', value: this.summary.factories || 0, description: `${this.summary.factory_operators || 0} factory աշխատակից`, icon: 'F', tone: 'neutral' },
+        { key: 'capacity', label: 'Արտադրական ցանց', value: this.summary.factories || 0, description: `${this.summary.factory_operators || 0} արտադրամասի աշխատակից`, icon: 'F', tone: 'neutral' },
       ]
     },
     filteredFactories() {
@@ -560,7 +560,7 @@ export default {
         this.generatedAt = data.generated_at || ''
         this.dashboardLoaded = true
       } catch (error) {
-        this.$notify?.({ type: 'error', text: error?.response?.data?.message || 'Չհաջողվեց բեռնել admin dashboard-ը' })
+        this.$notify?.({ type: 'error', text: error?.response?.data?.message || 'Չհաջողվեց բեռնել կառավարման վահանակը' })
       } finally {
         this.dashboardLoading = false
       }
