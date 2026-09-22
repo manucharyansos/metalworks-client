@@ -186,7 +186,7 @@
             </div>
 
             <div class="mt-4 rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
-              Նոր չնշանակված աշխատանք ընտրելիս այս աշխատակիցը առաջարկվում է միայն այն դեպքում, երբ աշխատանքը պատկանում է նույն արտադրամասին։ Backend-ը նույնպես ստուգում է factory համապատասխանությունը։
+              Նոր չնշանակված աշխատանք ընտրելիս այս աշխատակիցը առաջարկվում է միայն այն դեպքում, երբ աշխատանքը պատկանում է նույն արտադրամասին։ Սերվերը նույնպես ստուգում է արտադրամասի համապատասխանությունը։
             </div>
           </section>
         </div>
@@ -252,7 +252,7 @@ export default {
           steps.push({
             id: fo.id,
             factory_id: fo.factory_id,
-            factory_name: fo.factory?.name || 'Factory',
+            factory_name: fo.factory?.name || 'Արտադրամաս',
             order_id: order.id,
             order_number: order.order_number?.number || '',
             order_name: order.name || '',
