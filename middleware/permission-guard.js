@@ -11,6 +11,11 @@ const routePermissions = (path, query = {}) => {
   if (path === '/manager/workers' && query.edit) return ['workers.update']
   if (path === '/manager/materials' && query.edit) return ['materials.update']
 
+  // Production pages own their permission UX. Keeping them routable means a
+  // worker never loses the role sidebar/logout just because one permission is
+  // disabled; the board shows the exact missing permission instead.
+  if (path.startsWith('/factory/')) return []
+
   const rules = [
     ['/manager/create/users', ['clients.create']],
     ['/manager/create/workers', ['workers.create']],
@@ -25,14 +30,16 @@ const routePermissions = (path, query = {}) => {
     ['/engineer/orders/create', ['orders.create']],
     ['/engineer/files/view', ['pmp.view', 'pmp_files.view']],
     ['/engineer/files', ['pmp.view']],
-    ['/factory/', ['factory.view']],
   ]
 
   const match = rules.find(([prefix]) => path.startsWith(prefix))
   if (match) return match[1]
 
   if (path === '/manager') return ['orders.view']
-  if (path === '/engineer') return ['orders.view']
+
+  // The engineer home page already renders PermissionDenied inside the
+  // engineer layout when orders.view is missing.
+  if (path === '/engineer') return []
 
   return []
 }
