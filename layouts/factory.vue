@@ -64,6 +64,8 @@
 </template>
 
 <script>
+import WorkspaceIdentity from '@/components/layout/WorkspaceIdentity.vue'
+
 const COPY = {
   hy: { laser: 'Լազերային կտրում', bend: 'Կռում', powder_catting: 'Փոշեներկում', operator: 'Արտադրամաս', workshop: 'Արտադրամաս', description: 'Ձեր հաստիքին և թույլտվություններին համապատասխան աշխատանքային տարածք։' },
   ru: { laser: 'Лазерная резка', bend: 'Гибка', powder_catting: 'Порошковая покраска', operator: 'Цех', workshop: 'Цех', description: 'Рабочая область в соответствии с вашей должностью и разрешениями.' },
@@ -72,11 +74,12 @@ const COPY = {
 
 export default {
   name: 'FactoryLayout',
+  components: { WorkspaceIdentity },
   data() { return { isSidebarOpen: false } },
   computed: {
     currentUser() { return this.$auth.user || {} },
     roleName() { return this.currentUser?.role?.name || this.currentUser?.role || '' },
-    locale() { const code = String(this.$i18n?.locale || 'hy').toLowerCase().split('-')[0]; return ['hy','ru','en'].includes(code) ? code : 'hy' },
+    locale() { const code = String(this.$i18n?.locale || 'hy').toLowerCase().split('-')[0]; return ['hy', 'ru', 'en'].includes(code) ? code : 'hy' },
     copy() { return COPY[this.locale] || COPY.hy },
     roleTitle() { return this.copy[this.roleName] || this.copy.workshop },
     workspaceDescription() { return this.copy.description },
@@ -89,6 +92,10 @@ export default {
     factoryLabel() { return this.currentUser?.factory?.name || this.copy.workshop },
   },
   watch: { '$route.fullPath'() { this.closeSidebar() } },
-  methods: { toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen }, closeSidebar() { this.isSidebarOpen = false }, async logout() { await this.$auth.logout() } },
+  methods: {
+    toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen },
+    closeSidebar() { this.isSidebarOpen = false },
+    async logout() { await this.$auth.logout() },
+  },
 }
 </script>
