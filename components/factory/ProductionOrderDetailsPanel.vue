@@ -2,101 +2,46 @@
   <div class="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
     <section class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-        <div>
-          <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">File preview</p>
-          <h3 class="mt-1 text-sm font-black text-slate-900 dark:text-white">Ֆայլի դիտում</h3>
-        </div>
-        <button v-if="previewUrl && canDownload" type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-500 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" @click="$emit('close-preview')">Փակել</button>
+        <h3 class="text-sm font-black text-slate-900 dark:text-white">{{ t.preview }}</h3>
+        <button v-if="previewUrl && canDownload" type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" @click="$emit('close-preview')">{{ t.close }}</button>
       </div>
-
       <div class="p-4 sm:p-5">
-        <div v-if="!canDownload" class="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center dark:border-slate-800 dark:bg-slate-950/40">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 10V7a4 4 0 018 0v3m-9 0h10a2 2 0 012 2v8H5v-8a2 2 0 012-2Z" /></svg>
-          </div>
-          <p class="mt-4 text-sm font-black text-slate-700 dark:text-slate-200">Ֆայլերի հասանելիությունը փակ է</p>
-          <p class="mt-2 max-w-sm text-xs leading-5 text-slate-400">Admin-ը պետք է տա «Արտադրամասի ֆայլեր դիտել և ներբեռնել» ֆունկցիան։</p>
-        </div>
-
+        <div v-if="!canDownload" class="empty-preview"><div class="empty-icon">🔒</div><p class="mt-4 text-sm font-black text-slate-700 dark:text-slate-200">{{ t.filesBlocked }}</p><p class="mt-2 max-w-sm text-xs leading-5 text-slate-400">{{ t.filesBlockedHint }}</p></div>
         <div v-else-if="previewUrl" class="min-h-[320px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/40">
           <DxfViewerModal v-if="previewKind === 'dxf'" :key="resolvedPreviewUrl" :dxf-url="resolvedPreviewUrl" :show-laser-info="mode === 'laser'" />
-          <iframe v-else-if="previewKind === 'pdf'" :key="resolvedPreviewUrl" :src="resolvedPreviewUrl" class="h-[430px] w-full border-0 bg-white" title="PDF Preview"></iframe>
-          <img v-else-if="previewKind === 'image'" :src="resolvedPreviewUrl" class="h-[430px] w-full object-contain p-3" alt="File preview" />
-          <div v-else class="flex min-h-[320px] flex-col items-center justify-center gap-4 px-6 text-center">
-            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 3h7l5 5v13H7a2 2 0 01-2-2V5a2 2 0 012-2Zm7 0v6h5" /></svg>
-            </div>
-            <div><p class="text-sm font-bold text-slate-700 dark:text-slate-200">Inline preview հասանելի չէ</p><p class="mt-1 text-xs text-slate-400">Ֆայլը կարող եք բացել առանձին պատուհանում։</p></div>
-            <a :href="resolvedPreviewUrl" target="_blank" rel="noopener" class="rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-bold text-white dark:bg-white dark:text-slate-950">Բացել ֆայլը</a>
-          </div>
+          <iframe v-else-if="previewKind === 'pdf'" :key="resolvedPreviewUrl" :src="resolvedPreviewUrl" class="h-[430px] w-full border-0 bg-white" :title="t.preview"></iframe>
+          <img v-else-if="previewKind === 'image'" :src="resolvedPreviewUrl" class="h-[430px] w-full object-contain p-3" :alt="t.preview" />
+          <div v-else class="empty-preview"><div class="empty-icon">FILE</div><p class="mt-4 text-sm font-bold text-slate-700 dark:text-slate-200">{{ t.inlineUnavailable }}</p><p class="mt-1 text-xs text-slate-400">{{ t.openSeparateHint }}</p><a :href="resolvedPreviewUrl" target="_blank" rel="noopener" class="mt-4 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-bold text-white dark:bg-white dark:text-slate-950">{{ t.openFile }}</a></div>
         </div>
-
-        <div v-else class="flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center dark:border-slate-800 dark:bg-slate-950/40">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 5v14M5 12h14" /></svg>
-          </div>
-          <p class="mt-4 text-sm font-bold text-slate-700 dark:text-slate-200">Ընտրեք ֆայլ</p>
-          <p class="mt-1 text-xs text-slate-400">Preview-ը կհայտնվի այստեղ։</p>
-        </div>
+        <div v-else class="empty-preview"><div class="empty-icon">+</div><p class="mt-4 text-sm font-bold text-slate-700 dark:text-slate-200">{{ t.chooseFile }}</p><p class="mt-1 text-xs text-slate-400">{{ t.previewHere }}</p></div>
       </div>
     </section>
 
     <div class="space-y-5">
       <section class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div class="min-w-0">
-            <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Production task</p>
-            <div class="mt-1 flex flex-wrap items-center gap-2">
-              <h3 class="truncate text-lg font-black text-slate-950 dark:text-white">{{ details.name || 'Առաջադրանք' }}</h3>
-              <span v-if="details?.order_number?.number" class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ details.order_number.number }}</span>
-            </div>
-            <p class="mt-2 text-xs text-slate-400">Ստեղծող՝ <span class="font-bold text-slate-600 dark:text-slate-300">{{ details?.creator?.name || '—' }}</span></p>
-          </div>
+          <div class="min-w-0"><div class="mt-1 flex flex-wrap items-center gap-2"><h3 class="truncate text-lg font-black text-slate-950 dark:text-white">{{ details.name || t.task }}</h3><span v-if="details?.order_number?.number" class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ details.order_number.number }}</span></div><p class="mt-2 text-xs text-slate-400">{{ t.creator }}՝ <span class="font-bold text-slate-600 dark:text-slate-300">{{ details?.creator?.name || '—' }}</span></p></div>
           <span class="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-black" :class="deadlineClass">{{ deadlineText }}</span>
         </div>
-
-        <div class="mt-5 grid gap-3 sm:grid-cols-2">
-          <div class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/45"><p class="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Ստեղծվել է</p><p class="mt-1 text-xs font-bold text-slate-700 dark:text-slate-200">{{ details.created_at || '—' }}</p></div>
-          <div class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/45"><p class="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Վերջնաժամկետ</p><p class="mt-1 text-xs font-bold text-slate-700 dark:text-slate-200">{{ formattedDeadline }}</p></div>
-        </div>
-
-        <div class="mt-4 rounded-2xl border border-slate-100 p-4 dark:border-slate-800">
-          <p class="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Նկարագրություն</p>
-          <p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600 dark:text-slate-300">{{ details.description || 'Առանց նկարագրության' }}</p>
-        </div>
+        <div class="mt-5 grid gap-3 sm:grid-cols-2"><div class="data-card"><p class="data-label">{{ t.created }}</p><p class="data-value">{{ details.created_at || '—' }}</p></div><div class="data-card"><p class="data-label">{{ t.deadline }}</p><p class="data-value">{{ formattedDeadline }}</p></div></div>
+        <div class="mt-4 rounded-2xl border border-slate-100 p-4 dark:border-slate-800"><p class="data-label">{{ t.description }}</p><p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600 dark:text-slate-300">{{ details.description || t.noDescription }}</p></div>
       </section>
 
       <section class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6">
-          <div><p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">Files</p><h3 class="mt-1 text-sm font-black text-slate-900 dark:text-white">Արտադրամասի ֆայլեր</h3></div>
-          <span v-if="canDownload" class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-300">{{ totalFiles }} ֆայլ</span>
-        </div>
-
-        <div v-if="!canDownload" class="p-6 text-center">
-          <p class="text-xs font-semibold text-slate-400">Ֆայլերի ցանկը հասանելի չէ այս աշխատակցին։</p>
-        </div>
+        <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6"><h3 class="text-sm font-black text-slate-900 dark:text-white">{{ t.workshopFiles }}</h3><span v-if="canDownload" class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-300">{{ totalFiles }} {{ t.fileCount }}</span></div>
+        <div v-if="!canDownload" class="p-6 text-center"><p class="text-xs font-semibold text-slate-400">{{ t.listBlocked }}</p></div>
         <div v-else-if="factoryOrders.length" class="max-h-[430px] space-y-3 overflow-y-auto p-4 sm:p-5">
           <article v-for="order in factoryOrders" :key="order.id" class="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-950/35">
-            <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <div><p class="text-xs font-black text-slate-800 dark:text-slate-100">{{ order.factory?.name || 'Արտադրամաս' }}</p><p class="mt-0.5 text-[10px] text-slate-400">Օպերատոր՝ {{ order.operator?.name || '—' }}</p></div>
-              <span v-if="order.status" class="rounded-full px-2.5 py-1 text-[9px] font-black" :class="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
-            </div>
-
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-2"><div><p class="text-xs font-black text-slate-800 dark:text-slate-100">{{ order.factory?.name || t.workshop }}</p><p class="mt-0.5 text-[10px] text-slate-400">{{ t.operator }}՝ {{ order.operator?.name || '—' }}</p></div><span v-if="order.status" class="rounded-full px-2.5 py-1 text-[9px] font-black" :class="statusClass(order.status)">{{ statusLabel(order.status) }}</span></div>
             <div v-if="order.files?.length" class="space-y-2">
               <div v-for="file in order.files" :key="file.id" class="rounded-xl border border-slate-100 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div class="min-w-0 flex-1"><p class="truncate text-xs font-bold text-slate-800 dark:text-slate-100" :title="file.original_name">{{ file.original_name || 'Ֆայլ' }}</p><div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-400"><span>Քանակ՝ {{ selectedQuantity(file) }}</span><span v-if="file.material_type">Նյութ՝ {{ file.material_type }}</span><span v-if="file.thickness">Հաստ՝ {{ file.thickness }}</span></div></div>
-                  <div class="flex shrink-0 gap-2">
-                    <button type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" @click="$emit('view-file', file)">Դիտել</button>
-                    <button type="button" class="rounded-xl bg-slate-950 px-3 py-2 text-[10px] font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200" @click="$emit('download-file', file)">Ներբեռնել</button>
-                  </div>
-                </div>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div class="min-w-0 flex-1"><p class="truncate text-xs font-bold text-slate-800 dark:text-slate-100" :title="file.original_name">{{ file.original_name || t.file }}</p><div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-400"><span>{{ t.quantity }}՝ {{ selectedQuantity(file) }}</span><span v-if="file.material_type">{{ t.material }}՝ {{ file.material_type }}</span><span v-if="file.thickness">{{ t.thickness }}՝ {{ file.thickness }}</span></div></div><div class="flex shrink-0 gap-2"><button type="button" class="small-secondary" @click="$emit('view-file', file)">{{ t.view }}</button><button type="button" class="small-primary" @click="$emit('download-file', file)">{{ t.download }}</button></div></div>
               </div>
             </div>
-            <p v-else class="py-3 text-center text-[10px] text-slate-400">Ֆայլեր չկան։</p>
+            <p v-else class="py-3 text-center text-[10px] text-slate-400">{{ t.noFiles }}</p>
           </article>
         </div>
-        <div v-else class="p-8 text-center text-xs text-slate-400">Այս պատվերի համար ֆայլեր չկան։</div>
+        <div v-else class="p-8 text-center text-xs text-slate-400">{{ t.noOrderFiles }}</div>
       </section>
     </div>
   </div>
@@ -104,76 +49,18 @@
 
 <script>
 import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
-
+const COPY = {
+  hy: { preview:'Ֆայլի դիտում',close:'Փակել',filesBlocked:'Ֆայլերի հասանելիությունը փակ է',filesBlockedHint:'Այս աշխատակցին պետք է տրվի արտադրամասի ֆայլերը դիտելու և ներբեռնելու թույլտվություն։',inlineUnavailable:'Ներքին նախադիտումը հասանելի չէ',openSeparateHint:'Ֆայլը կարող եք բացել առանձին պատուհանում։',openFile:'Բացել ֆայլը',chooseFile:'Ընտրեք ֆայլ',previewHere:'Ֆայլի նախադիտումը կհայտնվի այստեղ։',task:'Առաջադրանք',creator:'Ստեղծող',created:'Ստեղծվել է',deadline:'Վերջնաժամկետ',description:'Նկարագրություն',noDescription:'Առանց նկարագրության',workshopFiles:'Արտադրամասի ֆայլեր',fileCount:'ֆայլ',listBlocked:'Ֆայլերի ցանկը հասանելի չէ այս աշխատակցին։',workshop:'Արտադրամաս',operator:'Օպերատոր',file:'Ֆայլ',quantity:'Քանակ',material:'Նյութ',thickness:'Հաստություն',view:'Դիտել',download:'Ներբեռնել',noFiles:'Ֆայլեր չկան։',noOrderFiles:'Այս պատվերի համար ֆայլեր չկան։',noDeadline:'Ժամկետ նշված չէ',overdue:'Ժամկետն անցել է',today:'Այսօր',tomorrow:'Վաղը',days:'օր',statuses:{confirmed:'Կատարվում է',canceled:'Մերժված',date_changed:'Ժամկետը փոխված է',finished:'Ավարտված',pending:'Սպասում է',in_progress:'Ընթացքում'} },
+  ru: { preview:'Просмотр файла',close:'Закрыть',filesBlocked:'Доступ к файлам закрыт',filesBlockedHint:'Сотруднику нужно разрешение на просмотр и скачивание файлов цеха.',inlineUnavailable:'Встроенный просмотр недоступен',openSeparateHint:'Файл можно открыть в отдельном окне.',openFile:'Открыть файл',chooseFile:'Выберите файл',previewHere:'Предпросмотр файла появится здесь.',task:'Задание',creator:'Создатель',created:'Создан',deadline:'Срок',description:'Описание',noDescription:'Без описания',workshopFiles:'Файлы цеха',fileCount:'файлов',listBlocked:'Список файлов недоступен этому сотруднику.',workshop:'Цех',operator:'Оператор',file:'Файл',quantity:'Количество',material:'Материал',thickness:'Толщина',view:'Просмотр',download:'Скачать',noFiles:'Файлов нет.',noOrderFiles:'Для этого заказа файлов нет.',noDeadline:'Срок не указан',overdue:'Срок истёк',today:'Сегодня',tomorrow:'Завтра',days:'дн.',statuses:{confirmed:'В работе',canceled:'Отклонён',date_changed:'Срок изменён',finished:'Завершён',pending:'Ожидает',in_progress:'В работе'} },
+  en: { preview:'File preview',close:'Close',filesBlocked:'File access is blocked',filesBlockedHint:'This employee needs permission to view and download workshop files.',inlineUnavailable:'Inline preview is unavailable',openSeparateHint:'You can open the file in a separate window.',openFile:'Open file',chooseFile:'Choose a file',previewHere:'The file preview will appear here.',task:'Task',creator:'Creator',created:'Created',deadline:'Deadline',description:'Description',noDescription:'No description',workshopFiles:'Workshop files',fileCount:'files',listBlocked:'The file list is unavailable to this employee.',workshop:'Workshop',operator:'Operator',file:'File',quantity:'Quantity',material:'Material',thickness:'Thickness',view:'View',download:'Download',noFiles:'No files.',noOrderFiles:'This order has no files.',noDeadline:'No deadline',overdue:'Overdue',today:'Today',tomorrow:'Tomorrow',days:'days',statuses:{confirmed:'In progress',canceled:'Rejected',date_changed:'Date changed',finished:'Finished',pending:'Pending',in_progress:'In progress'} },
+}
 export default {
-  name: 'ProductionOrderDetailsPanel',
-  components: { DxfViewerModal },
-  props: {
-    details: { type: Object, required: true },
-    previewUrl: { type: String, default: '' },
-    mode: { type: String, default: 'factory' },
-  },
-  computed: {
-    canDownload() { return this.$can('factory.download') },
-    factoryOrders() { return Array.isArray(this.details?.factory_orders) ? this.details.factory_orders : [] },
-    totalFiles() { return this.factoryOrders.reduce((sum, order) => sum + (order.files?.length || 0), 0) },
-    resolvedPreviewUrl() {
-      if (!this.previewUrl) return ''
-      if (/^(https?:|blob:|data:)/i.test(this.previewUrl) || this.previewUrl.startsWith('/api/')) return this.previewUrl
-      return this.$getFileUrl ? this.$getFileUrl(this.previewUrl) : this.previewUrl
-    },
-    previewKind() {
-      const value = String(this.previewUrl || '').split('?')[0].toLowerCase()
-      if (value.endsWith('.dxf') || this.mode === 'laser') return 'dxf'
-      if (value.endsWith('.pdf')) return 'pdf'
-      if (/\.(png|jpe?g|webp|gif)$/.test(value)) return 'image'
-      return 'file'
-    },
-    formattedDeadline() {
-      const value = this.details?.dates?.finish_date
-      if (!value) return 'Չի նշված'
-      return this.$formatDate ? this.$formatDate(value) : value
-    },
-    deadlineState() {
-      const value = this.details?.dates?.finish_date
-      if (!value) return 'none'
-      const end = new Date(value)
-      if (Number.isNaN(end.getTime())) return 'none'
-      const diff = end.getTime() - Date.now()
-      if (diff < 0) return 'overdue'
-      if (diff <= 24 * 60 * 60 * 1000) return 'soon'
-      return 'ok'
-    },
-    deadlineText() {
-      if (this.deadlineState === 'overdue') return 'Ժամկետանց'
-      if (this.deadlineState === 'soon') return '24 ժամից քիչ'
-      if (this.deadlineState === 'ok') return 'Ժամկետում'
-      return 'Ժամկետ չկա'
-    },
-    deadlineClass() {
-      if (this.deadlineState === 'overdue') return 'bg-rose-50 text-rose-700 dark:bg-rose-950/35 dark:text-rose-300'
-      if (this.deadlineState === 'soon') return 'bg-amber-50 text-amber-700 dark:bg-amber-950/35 dark:text-amber-300'
-      if (this.deadlineState === 'ok') return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300'
-      return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300'
-    },
-  },
-  methods: {
-    selectedQuantity(file) {
-      if (this.details?.link_existing_files) return file?.pivot?.quantity ?? file?.quantity ?? '—'
-      return file?.quantity ?? '—'
-    },
-    statusLabel(status) {
-      const value = String(status || '').toLowerCase()
-      const labels = { pending: 'Սպասում է', waiting: 'Սպասում է', in_progress: 'Ընթացքում', accepted: 'Հաստատված', finished: 'Ավարտված', confirmed: 'Հաստատված', rejected: 'Մերժված', canceled: 'Չեղարկված', cancelled: 'Չեղարկված' }
-      return labels[value] || status || '—'
-    },
-    statusClass(status) {
-      const value = String(status || '').toLowerCase()
-      if (['finished', 'confirmed'].includes(value)) return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300'
-      if (['rejected', 'canceled', 'cancelled'].includes(value)) return 'bg-rose-50 text-rose-700 dark:bg-rose-950/35 dark:text-rose-300'
-      if (['accepted', 'in_progress'].includes(value)) return 'bg-blue-50 text-blue-700 dark:bg-blue-950/35 dark:text-blue-300'
-      return 'bg-amber-50 text-amber-700 dark:bg-amber-950/35 dark:text-amber-300'
-    },
-  },
+  name:'ProductionOrderDetailsPanel',components:{DxfViewerModal},props:{details:{type:Object,required:true},previewUrl:{type:String,default:''},mode:{type:String,default:'factory'}},
+  computed:{locale(){const code=String(this.$i18n?.locale||'hy').toLowerCase().split('-')[0];return['hy','ru','en'].includes(code)?code:'hy'},t(){return COPY[this.locale]||COPY.hy},canDownload(){return this.$can('factory.download')},factoryOrders(){return Array.isArray(this.details?.factory_orders)?this.details.factory_orders:[]},totalFiles(){return this.factoryOrders.reduce((sum,order)=>sum+(order.files?.length||0),0)},resolvedPreviewUrl(){if(!this.previewUrl)return'';if(/^(https?:|blob:|data:)/i.test(this.previewUrl)||this.previewUrl.startsWith('/api/'))return this.previewUrl;return this.$getFileUrl?this.$getFileUrl(this.previewUrl):this.previewUrl},previewKind(){const value=String(this.previewUrl||'').split('?')[0].toLowerCase();if(value.endsWith('.dxf'))return'dxf';if(value.endsWith('.pdf'))return'pdf';if(/\.(png|jpe?g|gif|webp|svg|eps)$/.test(value))return'image';return'other'},rawDeadline(){return this.details?.dates?.finish_date||this.details?.finish_date||null},formattedDeadline(){if(!this.rawDeadline)return'—';try{return new Intl.DateTimeFormat(this.locale==='hy'?'hy-AM':this.locale==='ru'?'ru-RU':'en-US',{dateStyle:'medium',timeStyle:'short'}).format(new Date(this.rawDeadline))}catch(e){return this.rawDeadline}},deadlineHours(){if(!this.rawDeadline)return null;const value=(new Date(this.rawDeadline)-new Date())/3600000;return Number.isFinite(value)?value:null},deadlineText(){if(this.deadlineHours===null)return this.t.noDeadline;if(this.deadlineHours<0)return this.t.overdue;if(this.deadlineHours<=24)return this.t.today;if(this.deadlineHours<=48)return this.t.tomorrow;return `${Math.ceil(this.deadlineHours/24)} ${this.t.days}`},deadlineClass(){if(this.deadlineHours===null)return'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300';if(this.deadlineHours<0)return'bg-rose-50 text-rose-700 dark:bg-rose-950/35 dark:text-rose-300';if(this.deadlineHours<=24)return'bg-amber-50 text-amber-700 dark:bg-amber-950/35 dark:text-amber-300';return'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300'}},
+  methods:{statusLabel(status){const key=String(status||'').toLowerCase();return this.t.statuses[key]||status||'—'},statusClass(status){const key=String(status||'').toLowerCase();if(['finished','completed'].includes(key))return'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300';if(['canceled','cancelled'].includes(key))return'bg-rose-50 text-rose-700 dark:bg-rose-950/35 dark:text-rose-300';if(['confirmed','in_progress'].includes(key))return'bg-blue-50 text-blue-700 dark:bg-blue-950/35 dark:text-blue-300';return'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'},selectedQuantity(file){return file?.pivot?.quantity||file?.quantity||1}},
 }
 </script>
+
+<style scoped>
+.empty-preview{@apply flex min-h-[320px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 text-center dark:border-slate-800 dark:bg-slate-950/40}.empty-icon{@apply flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-[10px] font-black text-slate-400 dark:bg-slate-800}.data-card{@apply rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/45}.data-label{@apply text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400}.data-value{@apply mt-1 text-xs font-bold text-slate-700 dark:text-slate-200}.small-secondary{@apply rounded-xl border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800}.small-primary{@apply rounded-xl bg-slate-950 px-3 py-2 text-[10px] font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200}
+</style>

@@ -1,5 +1,7 @@
 export default async function ({ app, route, redirect }) {
-  const needRole = route.meta && route.meta[0] && route.meta[0].role
+  const meta = (route.meta && route.meta[0]) || {}
+  const needRole = meta.role
+  const allowPrivileged = Boolean(meta.allowPrivileged)
 
   if (!app.$auth.loggedIn) {
     try {
@@ -8,14 +10,38 @@ export default async function ({ app, route, redirect }) {
   }
 
   if (!app.$auth.loggedIn) {
-    return redirect('/login')
+    const login = typeof app.localePath === 'function' ? app.localePath('/login') : '/login'
+    return redirect(login)
   }
 
   const user = app.$auth.user || {}
   const role = user?.role?.name || user?.role || null
+  const privileged = ['admin', 'manager'].includes(role)
 
-  if (needRole && role !== needRole) {
+  // Managers use dedicated production-management workspaces instead of
+  // operator-only screens, so operator ownership never blocks management.
+  if (role === 'manager') {
+    const managerProductionRoutes = {
+      laser: '/manager/factories/laser',
+      bend: '/manager/factories/bend',
+      powder_catting: '/manager/factories/powder',
+    }
+    const targetRaw = managerProductionRoutes[needRole]
+
+    if (targetRaw && String(route.path || '').includes('/factory/')) {
+      const target = typeof app.localePath === 'function'
+        ? app.localePath(targetRaw)
+        : targetRaw
+      return redirect({ path: target, query: route.query || {} })
+    }
+  }
+
+  if (needRole && role !== needRole && !(allowPrivileged && privileged)) {
     const dashboards = app.$config?.dashboards || {}
-    return redirect(dashboards[role] || '/')
+    const rawTarget = dashboards[role] || '/'
+    const target = typeof app.localePath === 'function'
+      ? app.localePath(rawTarget)
+      : rawTarget
+    return redirect(target)
   }
 }
