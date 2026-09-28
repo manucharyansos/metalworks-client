@@ -1,147 +1,60 @@
 <template>
-  <main class="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
-    <!-- Orders Board -->
-    <template v-if="getOrderByFactories && !isModal">
-      <div class="container mx-auto px-4 py-6 sm:py-10 flex-1 flex flex-col">
-        <!-- Toolbar -->
-        <OrdersToolbar
-          :search="searchable"
-          :status-options="statusOptions"
-          :selected-statuses="selectedStatuses"
-          @update:search="(v) => (searchable = v)"
-          @update:selected-statuses="(v) => (selectedStatuses = v)"
-        />
+  <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div class="mx-auto max-w-[1500px] space-y-6">
+      <section class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">{{ title }}</h1>
+          <InfoTooltip>{{ helpText }}</InfoTooltip>
+        </div>
+        <button type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300" :disabled="loading || !currentFactoryId" @click="reload">
+          <svg class="h-4 w-4" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 6v5h-5M4 18v-5h5m10.5-2a8 8 0 00-13.8-3M4.5 14a8 8 0 0013.8 3" /></svg>
+          {{ t.refresh }}
+        </button>
+      </section>
 
-        <!-- Kanban board -->
-        <div v-if="boardColumns.length" class="mt-4 flex-1">
-          <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4 h-full">
-            <div
-              v-for="column in boardColumns"
-              :key="column.id"
-              class="flex flex-col rounded-2xl bg-gray-50/70 p-3 shadow-sm dark:bg-gray-800/60 h-[calc(100vh-260px)]"
-              @dragover.prevent
-              @drop="onDrop(column)"
-            >
-              <!-- Column header -->
-              <div class="mb-2 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-2">
-                  <span
-                    class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold text-white"
-                    :style="{ backgroundColor: column.color || '#6B7280' }"
-                  >
-                    {{ column.icon }}
-                  </span>
-                  <h3
-                    class="text-sm font-semibold text-gray-800 dark:text-gray-100"
-                  >
-                    {{ column.label }}
-                  </h3>
-                </div>
-                <span
-                  class="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200"
-                >
-                  {{ column.orders.length }}
-                </span>
-              </div>
+      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="metric"><p class="metric-label">{{ t.total }}</p><p class="metric-value">{{ allOrders.length }}</p></div>
+        <div class="metric"><p class="metric-label">{{ t.unassigned }}</p><p class="metric-value">{{ unassignedCount }}</p></div>
+        <div class="metric"><p class="metric-label">{{ t.active }}</p><p class="metric-value">{{ activeCount }}</p></div>
+        <div class="metric"><p class="metric-label">{{ t.finished }}</p><p class="metric-value">{{ finishedCount }}</p></div>
+      </section>
 
-              <!-- Scrollable cards area -->
-              <div class="mt-1 flex-1 overflow-y-auto pr-1 space-y-3">
-                <transition-group
-                  name="fade-list"
-                  tag="div"
-                  class="flex flex-col gap-3"
-                >
-                  <OrderCard
-                    v-for="order in column.orders"
-                    :key="order.id"
-                    :order="order"
-                    :factory-id="currentFactoryId"
-                    :current-user-id="currentUserId"
-                    @drag-start="onDragStart(order, column)"
-                    @view-details="toggleDetails"
-                    @edit="updateOrder"
-                  />
-                </transition-group>
+      <div v-if="!currentFactoryId" class="rounded-[28px] border border-amber-200 bg-amber-50 p-8 text-center text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-200">{{ t.noFactory }}</div>
 
-                <!-- empty state -->
-                <div
-                  v-if="!column.orders.length"
-                  class="mt-2 flex items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white/60 p-3 text-center text-xs text-gray-400 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-500"
-                >
-                  Քաշեք պատվերներ այստեղ
-                </div>
-              </div>
+      <template v-else>
+        <OrdersToolbar :search="searchable" :status-options="localizedStatusOptions" :selected-statuses="selectedStatuses" @update:search="(v) => (searchable = v)" @update:selected-statuses="(v) => (selectedStatuses = v)" />
+
+        <div v-if="loading" class="flex min-h-[300px] items-center justify-center text-sm font-semibold text-slate-400"><span class="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-slate-700 dark:border-slate-700 dark:border-t-white"></span>{{ t.loading }}</div>
+
+        <div v-else-if="!filteredBySearch.length" class="rounded-[28px] border border-dashed border-slate-200 bg-white p-10 text-center dark:border-slate-800 dark:bg-slate-900">
+          <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">0</div>
+          <p class="mt-3 text-sm font-bold text-slate-700 dark:text-slate-200">{{ t.noOrders }}</p>
+          <p class="mt-1 text-xs text-slate-400">{{ t.noOrdersHint }}</p>
+        </div>
+
+        <div v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <section v-for="column in boardColumns" :key="column.id" class="flex min-h-[440px] flex-col rounded-[24px] border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60" @dragover.prevent @drop="onDrop(column)">
+            <div class="mb-3 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2"><span class="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white" :style="{ backgroundColor: column.color || '#64748b' }">{{ column.icon }}</span><h2 class="text-sm font-black text-slate-800 dark:text-slate-100">{{ column.label }}</h2></div>
+              <span class="rounded-full bg-white px-2.5 py-1 text-[10px] font-black text-slate-500 shadow-sm dark:bg-slate-800 dark:text-slate-300">{{ column.orders.length }}</span>
             </div>
-          </div>
+            <div class="space-y-3">
+              <OrderCard v-for="order in column.orders" :key="order.id" :order="order" :factory-id="currentFactoryId" :current-user-id="currentUserId" @drag-start="onDragStart(order)" @view-details="openDetails" @edit="openEdit" />
+              <div v-if="!column.orders.length" class="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-5 text-center text-xs text-slate-400 dark:border-slate-700 dark:bg-slate-950/30">{{ t.dropHere }}</div>
+            </div>
+          </section>
         </div>
+      </template>
+    </div>
 
-        <!-- Եթե լրիվ պատվերներ չկան -->
-        <div
-          v-else
-          class="mt-10 flex items-center justify-center rounded-2xl bg-white p-8 text-center text-sm text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-300"
-        >
-          Պատվերներ չկան։
-        </div>
+    <OrderActionModal :is-open="isModal" :action-options="actionOptions" :cancel-reasons="cancelReasons" :today-formatted="todayFormatted" :tomorrow-date="tomorrowDate" @close="closeModal" @confirm="handleModalConfirm" />
 
-        <!-- Pagination -->
-        <div class="mt-8 flex justify-center">
-          <Pagination
-            v-if="paginationMeta.total > perPage"
-            :pagination="paginationMeta"
-            meta=""
-            @page-changed="handlePageChange"
-          />
-        </div>
+    <div v-if="isOpenDetails" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm" @click.self="isOpenDetails = false">
+      <div class="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[28px] bg-white p-5 shadow-2xl dark:bg-slate-900 sm:p-7">
+        <button class="absolute right-4 top-4 z-10 rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" @click="isOpenDetails = false">✕</button>
+        <component :is="detailsComponent" :details="details" :dxf-url="dxfUrl" @view-file="viewFile" @download-file="downloadFile" @close-dxf="dxfUrl = ''" />
       </div>
-    </template>
-
-    <OrderActionModal
-      :is-open="isModal"
-      :action-options="actionOptions"
-      :cancel-reasons="cancelReasons"
-      :today-formatted="todayFormatted"
-      :tomorrow-date="tomorrowDate"
-      @close="closeModal"
-      @confirm="handleModalConfirm"
-    />
-
-    <!-- Details Modal -->
-    <template v-if="isOpenDetails">
-      <div
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      >
-        <div
-          class="relative w-full max-w-4xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
-        >
-          <button
-            class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            @click="isOpenDetails = false"
-          >
-            <svg
-              class="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-
-          <FactoryOrderDetailsPanel
-            :details="details"
-            :dxf-url="dxfUrl"
-            @view-file="viewFile"
-            @download-file="downloadFile"
-            @close-dxf="dxfUrl = ''"
-          />
-        </div>
-      </div>
-    </template>
+    </div>
 
     <notifications />
   </main>
@@ -151,403 +64,60 @@
 import { mapActions, mapGetters } from 'vuex'
 import OrdersToolbar from '@/components/factory/OrdersToolbar.vue'
 import OrderCard from '@/components/factory/OrderCard.vue'
-import Pagination from '@/components/ui/Pagination.vue'
 import OrderActionModal from '@/components/factory/OrderActionModal.vue'
 import FactoryOrderDetailsPanel from '@/components/factory/FactoryOrderDetailsPanel.vue'
+import LaserOrderDetailsPanel from '@/components/factory/laser/LaserOrderDetailsPanel.vue'
+import BendOrderDetailsPanel from '@/components/factory/bend/BendOrderDetailsPanel.vue'
+
+const COPY = {
+  hy: { refresh: 'Թարմացնել', total: 'Ընդամենը', unassigned: 'Չվերցված', active: 'Ընթացքում', finished: 'Ավարտված', noFactory: 'Ձեր հաշվին արտադրամաս նշանակված չէ։ Դիմեք մենեջերին կամ ադմինիստրատորին։', loading: 'Բեռնվում է...', noOrders: 'Պատվերներ չկան', noOrdersHint: 'Նոր պատվերները այստեղ կհայտնվեն, երբ նշանակվեն այս արտադրամասին։', dropHere: 'Քաշեք պատվերը այստեղ', loadError: 'Չհաջողվեց բեռնել արտադրամասի պատվերները', saved: 'Պատվերը թարմացվեց', saveError: 'Չհաջողվեց թարմացնել պատվերը', taken: 'Պատվերը զբաղված է այլ օպերատորի կողմից', completedLocked: 'Ավարտված պատվերը օպերատորը չի կարող փոխել', titles: { laser: 'Լազերային կտրման աշխատանքներ', bend: 'Կռման աշխատանքներ', powder: 'Փոշեներկման աշխատանքներ', generic: 'Արտադրամասի աշխատանքներ' }, help: { laser: 'Դիտեք լազերային կտրման պատվերները, վերցրեք աշխատանքը և թարմացրեք ընթացքը։', bend: 'Դիտեք կռման պատվերները, վերցրեք աշխատանքը և թարմացրեք ընթացքը։', powder: 'Դիտեք փոշեներկման պատվերները, վերցրեք աշխատանքը և թարմացրեք ընթացքը։', generic: 'Դիտեք ձեր արտադրամասին նշանակված պատվերները և թարմացրեք ընթացքը։' }, status: { none: 'Առանց կարգավիճակի', confirmed: 'Կատարվում է', canceled: 'Մերժված', date_changed: 'Ժամկետը փոխված է', finished: 'Ավարտված', pending: 'Սպասում է', in_progress: 'Ընթացքում' } },
+  ru: { refresh: 'Обновить', total: 'Всего', unassigned: 'Не взято', active: 'В работе', finished: 'Завершено', noFactory: 'К вашей учётной записи не привязан цех. Обратитесь к менеджеру или администратору.', loading: 'Загрузка...', noOrders: 'Заказов нет', noOrdersHint: 'Новые заказы появятся здесь после назначения этому цеху.', dropHere: 'Перетащите заказ сюда', loadError: 'Не удалось загрузить заказы цеха', saved: 'Заказ обновлён', saveError: 'Не удалось обновить заказ', taken: 'Заказ занят другим оператором', completedLocked: 'Оператор не может менять завершённый заказ', titles: { laser: 'Лазерная резка', bend: 'Гибка', powder: 'Порошковая покраска', generic: 'Работа цеха' }, help: { laser: 'Просматривайте заказы лазерной резки, принимайте работу и обновляйте её ход.', bend: 'Просматривайте заказы на гибку, принимайте работу и обновляйте её ход.', powder: 'Просматривайте заказы порошковой покраски, принимайте работу и обновляйте её ход.', generic: 'Просматривайте заказы вашего цеха и обновляйте ход работы.' }, status: { none: 'Без статуса', confirmed: 'В работе', canceled: 'Отклонён', date_changed: 'Срок изменён', finished: 'Завершён', pending: 'Ожидает', in_progress: 'В работе' } },
+  en: { refresh: 'Refresh', total: 'Total', unassigned: 'Unassigned', active: 'In progress', finished: 'Finished', noFactory: 'No workshop is assigned to your account. Contact a manager or administrator.', loading: 'Loading...', noOrders: 'No orders', noOrdersHint: 'New orders will appear here when they are assigned to this workshop.', dropHere: 'Drop order here', loadError: 'Could not load workshop orders', saved: 'Order updated', saveError: 'Could not update order', taken: 'Order is assigned to another operator', completedLocked: 'Operators cannot edit a finished order', titles: { laser: 'Laser cutting', bend: 'Bending', powder: 'Powder coating', generic: 'Workshop work' }, help: { laser: 'Review laser cutting orders, take work and update progress.', bend: 'Review bending orders, take work and update progress.', powder: 'Review powder coating orders, take work and update progress.', generic: 'Review orders assigned to your workshop and update progress.' }, status: { none: 'No status', confirmed: 'In progress', canceled: 'Rejected', date_changed: 'Date changed', finished: 'Finished', pending: 'Pending', in_progress: 'In progress' } },
+}
 
 export default {
   name: 'FactoryOrdersBoard',
-  components: {
-    OrderActionModal,
-    FactoryOrderDetailsPanel,
-    OrdersToolbar,
-    OrderCard,
-    Pagination,
-  },
-  data() {
-    return {
-      searchable: '',
-      isModal: false,
-      isOpenDetails: false,
-      selectedOrder: {},
-      dxfUrl: '',
-      details: {
-        name: '',
-        quantity: 0,
-        description: '',
-        files: [],
-      },
-
-      draggingOrder: null,
-      draggingFromColumnId: null,
-
-      selectedStatuses: [],
-      currentPage: 1,
-      perPage: 12,
-      currentFactoryId: null,
-      currentUserId: null,
-
-      statusOptions: [],
-      actionOptions: [],
-      cancelReasons: [
-        { label: 'Ոչ հստակ պատվեր', value: 'unclear' },
-        { label: 'Սխալ տվյալներ', value: 'wrong_data' },
-        { label: 'Նյութի բացակայություն', value: 'no_material' },
-        { label: 'Այլ պատճառ', value: 'other' },
-      ],
-    }
-  },
+  components: { OrdersToolbar, OrderCard, OrderActionModal, FactoryOrderDetailsPanel, LaserOrderDetailsPanel, BendOrderDetailsPanel },
+  props: { workspaceType: { type: String, default: 'generic' } },
+  data() { return { searchable: '', selectedStatuses: [], loading: false, isModal: false, isOpenDetails: false, selectedOrder: {}, details: {}, dxfUrl: '', currentFactoryId: null, currentUserId: null, statusOptions: [], actionOptions: [], draggingOrder: null, cancelReasons: [{ value: 'unclear' }, { value: 'wrong_data' }, { value: 'no_material' }, { value: 'other' }] } },
   computed: {
     ...mapGetters('factory', ['getOrderByFactories']),
-
-    allOrders() {
-      const orders = this.getOrderByFactories?.orders
-      return Array.isArray(orders) ? orders : []
-    },
-
-    filteredByStatus() {
-      if (!this.selectedStatuses.length) return this.allOrders
-
-      return this.allOrders.filter((order) => {
-        const fo = this.getFactoryOrderForCurrentFactory(order)
-        if (!fo) return false
-
-        const statusKey = fo.status ?? 'null'
-        return this.selectedStatuses.includes(statusKey)
-      })
-    },
-
-    filteredBySearch() {
-      const searchTerm = this.searchable.trim().toLowerCase()
-      if (!searchTerm) return this.filteredByStatus
-
-      return this.filteredByStatus.filter((order) => {
-        const orderNumber = order.order_number?.number?.toLowerCase() || ''
-        const name = order.name?.toLowerCase() || ''
-        const description = order.description?.toLowerCase() || ''
-        const prefixCode = order.prefix_code?.code?.toLowerCase() || ''
-        return (
-          orderNumber.includes(searchTerm) ||
-          description.includes(searchTerm) ||
-          name.includes(searchTerm) ||
-          prefixCode.includes(searchTerm)
-        )
-      })
-    },
-
-    paginatedOrders() {
-      const list = Array.isArray(this.filteredBySearch)
-        ? this.filteredBySearch
-        : []
-      const start = (this.currentPage - 1) * this.perPage
-      return list.slice(start, start + this.perPage)
-    },
-
-    paginationMeta() {
-      const total = this.filteredBySearch.length || 0
-      const lastPage = Math.max(Math.ceil(total / this.perPage), 1)
-
-      return {
-        current_page: this.currentPage,
-        per_page: this.perPage,
-        total,
-        last_page: lastPage,
-      }
-    },
-
-    boardColumns() {
-      const ordersSource = Array.isArray(this.paginatedOrders)
-        ? this.paginatedOrders
-        : []
-
-      const baseColumns = [
-        {
-          id: 'no_status',
-          label: 'Առանց կարգավիճակի',
-          value: 'null',
-          icon: '•',
-          color: '#9CA3AF',
-        },
-      ]
-
-      const statusOptions = Array.isArray(this.statusOptions)
-        ? this.statusOptions
-        : []
-
-      const dynamicColumns = statusOptions.map((s) => ({
-        id: s.value,
-        label: s.label,
-        value: s.value,
-        icon: this.mapStatusIcon(s.icon),
-        color: s.color || '#6B7280',
-      }))
-
-      const columnsConfig = [...baseColumns, ...dynamicColumns]
-
-      return columnsConfig.map((col) => {
-        const orders = ordersSource.filter((order) => {
-          const fo = this.getFactoryOrderForCurrentFactory(order)
-          if (!fo) return false
-
-          const statusKey = fo.status ?? 'null'
-          return statusKey === col.value
-        })
-        return { ...col, orders }
-      })
-    },
-
-    todayFormatted() {
-      return this.$formatDate(new Date(), 'dd.MM.yyyy')
-    },
-
-    tomorrowDate() {
-      const d = new Date()
-      d.setDate(d.getDate() + 1)
-      return d.toISOString().split('T')[0]
-    },
+    locale() { const code = String(this.$i18n?.locale || 'hy').toLowerCase().split('-')[0]; return ['hy','ru','en'].includes(code) ? code : 'hy' },
+    t() { return COPY[this.locale] || COPY.hy },
+    title() { return this.t.titles[this.workspaceType] || this.t.titles.generic },
+    helpText() { return this.t.help[this.workspaceType] || this.t.help.generic },
+    detailsComponent() { return this.workspaceType === 'laser' ? 'LaserOrderDetailsPanel' : this.workspaceType === 'bend' ? 'BendOrderDetailsPanel' : 'FactoryOrderDetailsPanel' },
+    allOrders() { const orders = this.getOrderByFactories?.orders; return Array.isArray(orders) ? orders : [] },
+    localizedStatusOptions() { return (this.statusOptions || []).map((item) => ({ ...item, label: this.t.status[item.value] || item.label })) },
+    filteredByStatus() { if (!this.selectedStatuses.length) return this.allOrders; return this.allOrders.filter((order) => this.selectedStatuses.includes(this.factoryOrder(order)?.status || 'null')) },
+    filteredBySearch() { const q = this.searchable.trim().toLowerCase(); if (!q) return this.filteredByStatus; return this.filteredByStatus.filter((o) => [o.order_number?.number,o.name,o.description,o.prefix_code?.code].some((v) => String(v || '').toLowerCase().includes(q))) },
+    boardColumns() { const base = [{ id: 'no_status', label: this.t.status.none, value: 'null', icon: '•', color: '#94a3b8' }]; const dynamic = this.localizedStatusOptions.map((s) => ({ id: s.value, label: s.label, value: s.value, icon: this.statusIcon(s.icon), color: s.color || '#64748b' })); return [...base, ...dynamic].map((col) => ({ ...col, orders: this.filteredBySearch.filter((order) => (this.factoryOrder(order)?.status || 'null') === col.value) })) },
+    unassignedCount() { return this.allOrders.filter((o) => !this.factoryOrder(o)?.operator_id).length },
+    activeCount() { return this.allOrders.filter((o) => ['confirmed','in_progress','date_changed'].includes(String(this.factoryOrder(o)?.status || '').toLowerCase())).length },
+    finishedCount() { return this.allOrders.filter((o) => ['finished','completed'].includes(String(this.factoryOrder(o)?.status || '').toLowerCase())).length },
+    todayFormatted() { return this.$formatDate(new Date(), 'dd.MM.yyyy') },
+    tomorrowDate() { const d = new Date(); d.setDate(d.getDate()+1); return d.toISOString().split('T')[0] },
   },
-  async mounted() {
-    try {
-      const [actionsRes, filtersRes] = await Promise.all([
-        this.$axios.get('/api/factories/factory-order-actions'),
-        this.$axios.get('/api/factories/factory-order-filters'),
-      ])
-
-      this.actionOptions = Array.isArray(actionsRes.data) ? actionsRes.data : []
-      this.statusOptions = Array.isArray(filtersRes.data) ? filtersRes.data : []
-    } catch (err) {
-      this.$notify({
-        text: 'Չհաջողվեց բեռնել գործողությունները',
-        type: 'error',
-      })
-    }
-
-    const factoryId = this.$auth.user?.factory_id
-    const userId = this.$auth.user?.id
-    this.currentFactoryId = factoryId || null
-    this.currentUserId = userId || null
-
-    if (this.currentFactoryId) {
-      await this.fetchOrdersByFactory(this.currentFactoryId)
-    }
-  },
+  async mounted() { this.currentFactoryId = this.$auth.user?.factory_id || null; this.currentUserId = this.$auth.user?.id || null; await this.loadOptions(); if (this.currentFactoryId) await this.reload() },
   methods: {
-    ...mapActions('factory', [
-      'fetchOrdersByFactory',
-      'doneFinishedOrder',
-      'downloadUploadedFile',
-    ]),
-
-    mapStatusIcon(iconName) {
-      switch (iconName) {
-        case 'Check':
-        case 'Check Circle':
-          return '✓'
-        case 'Cross':
-          return '✕'
-        case 'Refresh':
-          return '⟳'
-        default:
-          return '•'
-      }
-    },
-
-    getFactoryOrderForCurrentFactory(order) {
-      if (order.factory_orders && order.factory_orders.length) {
-        const fo = order.factory_orders.find(
-          (f) => String(f.factory_id) === String(this.currentFactoryId)
-        )
-
-        if (fo) {
-          const rawStatus = fo.status
-          const normalizedStatus =
-            !rawStatus || rawStatus === 'pending' ? null : rawStatus
-
-          return {
-            ...fo,
-            status: normalizedStatus,
-          }
-        }
-      }
-
-      if (order.factories && order.factories.length) {
-        const belongs = order.factories.some(
-          (f) => String(f.id) === String(this.currentFactoryId)
-        )
-        if (belongs) {
-          return {
-            factory_id: this.currentFactoryId,
-            status: null,
-            operator_id: null,
-          }
-        }
-      }
-
-      return null
-    },
-
-    handlePageChange(page) {
-      this.currentPage = page
-    },
-
-    viewFile(fileUrl) {
-      this.dxfUrl = fileUrl
-    },
-
-    async downloadFile(file) {
-      await this.downloadUploadedFile(file)
-      file.status = 'downloaded'
-    },
-
-    updateOrder(order) {
-      const fo = this.getFactoryOrderForCurrentFactory(order)
-
-      if (fo?.status === 'finished') {
-        this.$notify({ text: 'Այս առաջադրանքն արդեն ավարտված է', type: 'info' })
-        return
-      }
-
-      if (
-        fo?.operator_id &&
-        String(fo.operator_id) !== String(this.currentUserId)
-      ) {
-        this.$notify({
-          text: 'Պատվերը զբաղված է այլ օպերատորի կողմից',
-          type: 'warning',
-        })
-        return
-      }
-
-      this.selectedOrder = order
-      this.isModal = true
-    },
-
-    closeModal() {
-      this.isModal = false
-      this.selectedOrder = {}
-    },
-
-    async handleModalConfirm(payload) {
-      const finalPayload = {
-        id: this.selectedOrder.id,
-        factory_id: this.currentFactoryId,
-        factory_order: {
-          status: payload.status,
-          canceling: payload.canceling,
-          cancel_date: payload.cancel_date,
-          operator_finish_date: payload.operator_finish_date,
-        },
-      }
-
-      const success = await this.doneFinishedOrder(finalPayload)
-      if (success) {
-        this.$notify({ text: 'Հաջողությամբ թարմացվեց', type: 'success' })
-        this.closeModal()
-        await this.fetchOrdersByFactory(this.currentFactoryId)
-      }
-    },
-
-    toggleDetails(order) {
-      this.isOpenDetails = true
-      this.details = order
-    },
-
-    onDragStart(order, column) {
-      this.draggingOrder = order
-      this.draggingFromColumnId = column.id
-    },
-
-    async onDrop(targetColumn) {
-      if (!this.draggingOrder) return
-
-      const newStatusValue =
-        targetColumn.value === 'null' ? null : targetColumn.value
-
-      await this.updateOrderStatusByDrag(this.draggingOrder, newStatusValue)
-
-      this.draggingOrder = null
-      this.draggingFromColumnId = null
-    },
-
-    async updateOrderStatusByDrag(order, newStatus) {
-      const fo = this.getFactoryOrderForCurrentFactory(order)
-
-      if (fo && fo.status === 'finished') {
-        this.$notify({
-          text: 'Արդեն ավարտված պատվերի կարգավիճակը չի կարող փոխվել։',
-          duration: 3000,
-          position: 'top',
-          type: 'info',
-        })
-        return
-      }
-
-      if (
-        fo &&
-        fo.operator_id &&
-        String(fo.operator_id) !== String(this.currentUserId)
-      ) {
-        this.$notify({
-          text: 'Պատվերը ընդունված է այլ օպերատորի կողմից, դուք չեք կարող փոխել։',
-          duration: 3000,
-          position: 'top',
-          type: 'warning',
-        })
-        return
-      }
-
-      let cancelDate = null
-
-      if (newStatus === 'date_changed') {
-        const dt = new Date()
-        dt.setDate(dt.getDate() + 1)
-        cancelDate = dt.toISOString().slice(0, 19).replace('T', ' ')
-      }
-
-      const payload = {
-        id: order.id,
-        factory_id: this.currentFactoryId,
-        factory_order: {
-          status: newStatus,
-          canceling: '',
-          cancel_date: cancelDate,
-          operator_finish_date:
-            newStatus === 'finished'
-              ? new Date().toISOString().slice(0, 19).replace('T', ' ')
-              : null,
-        },
-      }
-
-      const res = await this.doneFinishedOrder(payload)
-      if (res) {
-        this.$notify({
-          text: 'Կարգավիճակը հաջողությամբ թարմացվեց։',
-          duration: 2500,
-          position: 'top',
-          type: 'success',
-        })
-        await this.fetchOrdersByFactory(this.currentFactoryId)
-      } else {
-        this.$notify({
-          text: 'Սխալ տեղի ունեցավ կարգավիճակը թարմացնելիս։',
-          duration: 3000,
-          position: 'top',
-          type: 'error',
-        })
-      }
-    },
+    ...mapActions('factory', ['fetchOrdersByFactory','doneFinishedOrder','downloadUploadedFile']),
+    async loadOptions() { try { const [a,f] = await Promise.all([this.$axios.get('/api/factories/factory-order-actions'),this.$axios.get('/api/factories/factory-order-filters')]); this.actionOptions = Array.isArray(a.data) ? a.data : []; this.statusOptions = Array.isArray(f.data) ? f.data : [] } catch (e) {} },
+    async reload() { if (!this.currentFactoryId) return; this.loading = true; try { await this.fetchOrdersByFactory(this.currentFactoryId) } catch (e) { this.$notify?.({ type:'error', text:this.t.loadError }) } finally { this.loading = false } },
+    factoryOrder(order) { const list = order?.factory_orders || []; const found = list.find((fo) => String(fo.factory_id) === String(this.currentFactoryId)); if (found) return { ...found, status: !found.status || found.status === 'pending' ? null : found.status }; if ((order?.factories || []).some((f) => String(f.id) === String(this.currentFactoryId))) return { factory_id:this.currentFactoryId,status:null,operator_id:null }; return null },
+    statusIcon(icon) { if (['Check','Check Circle'].includes(icon)) return '✓'; if (icon === 'Cross') return '✕'; if (icon === 'Refresh') return '⟳'; return '•' },
+    openDetails(order) { this.details = order; this.isOpenDetails = true; this.dxfUrl = '' },
+    openEdit(order) { const fo = this.factoryOrder(order); if (['finished','completed'].includes(String(fo?.status || '').toLowerCase())) return this.$notify?.({ type:'info', text:this.t.completedLocked }); if (fo?.operator_id && String(fo.operator_id) !== String(this.currentUserId)) return this.$notify?.({ type:'warning', text:this.t.taken }); this.selectedOrder = order; this.isModal = true },
+    closeModal() { this.isModal = false; this.selectedOrder = {} },
+    async handleModalConfirm(payload) { const success = await this.saveOrderStatus(this.selectedOrder, payload); if (success) { this.closeModal(); await this.reload() } },
+    async saveOrderStatus(order, payload) { if (!order?.id) return false; const result = await this.doneFinishedOrder({ id: order.id, factory_id: this.currentFactoryId, factory_order: { status: payload.status ?? null, canceling: payload.canceling || '', cancel_date: payload.cancel_date || null, operator_finish_date: payload.operator_finish_date || null } }); this.$notify?.({ type: result ? 'success' : 'error', text: result ? this.t.saved : this.t.saveError }); return Boolean(result) },
+    onDragStart(order) { this.draggingOrder = order },
+    async onDrop(column) { if (!this.draggingOrder) return; const fo = this.factoryOrder(this.draggingOrder); if (['finished','completed'].includes(String(fo?.status || '').toLowerCase())) { this.draggingOrder = null; return }; if (fo?.operator_id && String(fo.operator_id) !== String(this.currentUserId)) { this.$notify?.({ type:'warning', text:this.t.taken }); this.draggingOrder = null; return }; await this.saveOrderStatus(this.draggingOrder, { status: column.value === 'null' ? null : column.value }); this.draggingOrder = null; await this.reload() },
+    viewFile(path) { this.dxfUrl = path },
+    async downloadFile(file) { await this.downloadUploadedFile(file) },
   },
 }
 </script>
 
 <style scoped>
-.fade-list-enter-active,
-.fade-list-leave-active {
-  transition: all 0.2s ease;
-}
-.fade-list-enter-from,
-.fade-list-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
-}
+.metric { @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900; }.metric-label { @apply text-[10px] font-black uppercase tracking-[0.12em] text-slate-400; }.metric-value { @apply mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white; }
 </style>
