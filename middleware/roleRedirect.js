@@ -1,6 +1,16 @@
 // middleware/roleRedirect.js
 const FACTORY_ROLES = ['laser', 'bend', 'powder_catting', 'operator']
 
+const has = (user, permission) =>
+  Array.isArray(user?.permissions) && user.permissions.includes(permission)
+
+const engineerHome = (user) => {
+  if (has(user, 'orders.view')) return '/engineer'
+  if (has(user, 'pmp.view')) return '/engineer/files'
+  if (has(user, 'orders.create')) return '/engineer/orders/create'
+  return '/engineer'
+}
+
 const factoryHome = (user) => {
   const role = user?.role?.name
   if (role === 'laser') return '/factory/laser'
@@ -41,9 +51,9 @@ export default async function ({ app, route, redirect, $auth }) {
   const role = user?.role?.name
   if (!role) return redirect(loginPath)
 
-  // Every staff position keeps its own workspace shell even when one business
-  // permission is disabled. The page itself explains which function is locked;
-  // users should not lose the sidebar/logout and fall back to a generic profile.
+  // A position determines the workspace shell. Permissions determine which
+  // functions inside that shell are active. This prevents sidebar/logout from
+  // disappearing when one permission is disabled.
   let homeRaw = '/profile'
   let allowedBase = '/profile'
 
@@ -54,14 +64,14 @@ export default async function ({ app, route, redirect, $auth }) {
     homeRaw = '/manager'
     allowedBase = '/manager'
   } else if (role === 'engineer') {
-    homeRaw = '/engineer'
+    homeRaw = engineerHome(user)
     allowedBase = '/engineer'
   } else if (FACTORY_ROLES.includes(role) || user.factory_id) {
     homeRaw = factoryHome(user)
     allowedBase = '/factory'
   }
 
-  // Profile is shared, but its page chooses the correct staff layout by role.
+  // Profile is shared, but pages/profile.vue chooses the same role layout.
   if (currentPath === profilePath || currentPath.startsWith(profilePath + '/')) return
 
   const homePath = localePath(homeRaw)
