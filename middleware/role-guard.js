@@ -1,3 +1,13 @@
+const ROLE_HOMES = {
+  admin: '/admin',
+  manager: '/manager',
+  engineer: '/engineer',
+  laser: '/factory/laser',
+  bend: '/factory/bend',
+  powder_catting: '/factory/powder',
+  operator: '/factory/workspace',
+}
+
 export default async function ({ app, route, redirect }) {
   const meta = (route.meta && route.meta[0]) || {}
   const needRole = meta.role
@@ -38,7 +48,7 @@ export default async function ({ app, route, redirect }) {
 
   if (needRole && role !== needRole && !(allowPrivileged && privileged)) {
     const dashboards = app.$config?.dashboards || {}
-    const rawTarget = dashboards[role] || '/'
+    const rawTarget = dashboards[role] || ROLE_HOMES[role] || '/profile'
     const target = typeof app.localePath === 'function'
       ? app.localePath(rawTarget)
       : rawTarget
