@@ -2,8 +2,10 @@
 const has = (user, permission) =>
   Array.isArray(user?.permissions) && user.permissions.includes(permission)
 
+const isFullAccess = (user) => ['admin', 'manager'].includes(user?.role?.name)
+
 const managerHome = (user) => {
-  if (has(user, 'orders.view')) return '/manager'
+  if (isFullAccess(user) || has(user, 'orders.view')) return '/manager'
   if (has(user, 'clients.view')) return '/manager/clients'
   if (has(user, 'workers.view')) return '/manager/workers'
   if (has(user, 'materials.view')) return '/manager/materials'
@@ -25,6 +27,7 @@ const factoryHome = (user) => {
   const role = user?.role?.name
   if (role === 'laser') return '/factory/laser'
   if (role === 'bend') return '/factory/bend'
+  if (role === 'powder_catting') return '/factory/powder'
   return '/factory/workspace'
 }
 
@@ -33,12 +36,7 @@ export default async function ({ app, route, redirect, $auth }) {
   const loginPath = localePath('/login')
   const profilePath = localePath('/profile')
   const rootPath = localePath('/')
-  const publicAuthPaths = [
-    localePath('/login'),
-    localePath('/register'),
-    localePath('/forgot-password'),
-    localePath('/reset-password'),
-  ]
+  const publicAuthPaths = [localePath('/login'), localePath('/register'), localePath('/forgot-password'), localePath('/reset-password')]
 
   const currentPath = route.path
   const isPublicAuthPath = publicAuthPaths.includes(currentPath)
@@ -49,11 +47,7 @@ export default async function ({ app, route, redirect, $auth }) {
   }
 
   if (!$auth.user) {
-    try {
-      await $auth.fetchUser()
-    } catch (e) {
-      return redirect(loginPath)
-    }
+    try { await $auth.fetchUser() } catch (e) { return redirect(loginPath) }
   }
 
   const user = $auth.user || {}
@@ -88,9 +82,6 @@ export default async function ({ app, route, redirect, $auth }) {
 
   if (currentPath === rootPath || isPublicAuthPath) return redirect(homePath)
 
-  const isInAllowedSection =
-    currentPath === allowedPrefix ||
-    currentPath.startsWith(allowedPrefix + '/')
-
+  const isInAllowedSection = currentPath === allowedPrefix || currentPath.startsWith(allowedPrefix + '/')
   if (!isInAllowedSection) return redirect(homePath)
 }
