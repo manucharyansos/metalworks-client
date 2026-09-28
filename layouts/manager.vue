@@ -11,7 +11,7 @@
       <div class="flex-1 overflow-y-auto px-4 py-5">
         <p class="px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">{{ $t('workspace_layout.management') }}</p>
         <nav class="mt-3 space-y-1.5">
-          <nuxt-link v-for="item in visibleNavItems" :key="item.to" :to="localePath(item.to)" class="nav-item" active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950" :exact="item.exact" @click.native="closeSidebar">
+          <nuxt-link v-for="item in visibleNavItems" :key="item.to" :to="localePath(item.to)" class="nav-item group" active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950" :exact="item.exact" @click.native="closeSidebar">
             <span class="nav-icon"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="iconPath(item.icon)" /></svg></span><span class="min-w-0 flex-1 truncate">{{ $t(item.labelKey) }}</span>
           </nuxt-link>
         </nav>
@@ -19,7 +19,7 @@
         <div class="mt-7">
           <p class="px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">{{ productionTitle }}</p>
           <nav class="mt-3 space-y-1.5">
-            <nuxt-link v-for="item in productionItems" :key="item.to" :to="localePath(item.to)" class="nav-item" active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950" @click.native="closeSidebar">
+            <nuxt-link v-for="item in productionItems" :key="item.to" :to="localePath(item.to)" class="nav-item group" active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950" @click.native="closeSidebar">
               <span class="nav-icon"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 20V9l5-3v4l5-3v4l6-3v12H4Zm4 0v-4h3v4m3 0v-5h3v5" /></svg></span><span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
             </nuxt-link>
           </nav>
@@ -92,12 +92,12 @@ export default {
   watch: { '$route.fullPath'() { this.closeSidebar() } },
   methods: {
     toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen }, closeSidebar() { this.isSidebarOpen = false },
-    iconPath(icon) { if(icon==='orders') return 'M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2Zm2 4h6M9 12h6M9 16h4'; if(icon==='clients') return 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m7-10a4 4 0 100-8 4 4 0 000 8Z'; if(icon==='materials') return 'm12 3 8 4-8 4-8-4 8-4Zm-8 9 8 4 8-4M4 17l8 4 8-4'; return 'M12 12a4 4 0 100-8 4 4 0 000 8Zm-7 9a7 7 0 0114 0' },
+    iconPath(icon) { if(icon==='orders') return 'M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2Zm2 4h6M9 12h6M9 16h4'; if(icon==='clients') return 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m7-10a4 4 0 100-8 4 4 0 000 8Z'; if(icon==='materials') return 'm12 3 8 4-8 4-8-4 8-4 8-4Zm-8 9 8 4 8-4M4 17l8 4 8-4'; return 'M12 12a4 4 0 100-8 4 4 0 000 8Zm-7 9a7 7 0 0114 0' },
     async logout() { await this.$auth.logout() },
   },
 }
 </script>
 
 <style scoped>
-.nav-item{@apply group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white}.nav-icon{@apply flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition group-hover:bg-white dark:bg-slate-800 dark:text-slate-300}
+.nav-item{@apply flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white}.nav-icon{@apply flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 transition group-hover:bg-white dark:bg-slate-800 dark:text-slate-300}
 </style>
