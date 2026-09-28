@@ -9,11 +9,14 @@ function localeCode(i18n) {
   return SUPPORTED.some((item) => item.code === value) ? value : 'hy'
 }
 
-export default ({ app, $auth }) => {
+export default ({ app, $auth, $axios }) => {
   if (!process.client) return
 
   let root = null
   let switching = false
+  let identity = null
+  let identityLoading = null
+  let identityUserId = null
 
   const withRouterBase = (target) => {
     if (!target || /^https?:\/\//i.test(target)) return target
@@ -111,6 +114,102 @@ export default ({ app, $auth }) => {
     applyActiveState()
   }
 
+  const renderIdentity = () => {
+    if (!identity) return
+
+    const displayName = String(identity.display_name || identity.name || '').trim() || 'MetalWorks'
+    const secondary = String(identity.phone || identity.email || '').trim()
+
+    document.querySelectorAll('aside p').forEach((nameNode) => {
+      const isBrand = nameNode.textContent.trim() === 'MetalWorks'
+      const isManaged = nameNode.dataset.userIdentityName === 'true'
+      if (!isBrand && !isManaged) return
+
+      nameNode.dataset.userIdentityName = 'true'
+      nameNode.textContent = displayName
+      nameNode.title = displayName
+
+      let container = nameNode.parentElement
+      if (!container) return
+
+      if (container.tagName === 'A') {
+        const wrapper = document.createElement('div')
+        wrapper.className = 'min-w-0'
+        wrapper.setAttribute('data-user-identity-container', '')
+        container.insertBefore(wrapper, nameNode)
+        wrapper.appendChild(nameNode)
+        container = wrapper
+      }
+
+      let secondaryNode = Array.from(container.children).find(
+        (child) => child.dataset?.userIdentityPhone === 'true'
+      )
+
+      if (!secondaryNode) {
+        secondaryNode = Array.from(container.children).find(
+          (child) => child !== nameNode && child.tagName === 'P'
+        )
+      }
+
+      if (!secondaryNode) {
+        secondaryNode = document.createElement('p')
+        container.appendChild(secondaryNode)
+      }
+
+      secondaryNode.dataset.userIdentityPhone = 'true'
+      secondaryNode.className = 'truncate text-xs text-slate-500 dark:text-slate-400'
+      secondaryNode.textContent = secondary
+      secondaryNode.title = secondary
+    })
+  }
+
+  const loadIdentity = async () => {
+    if (!$auth?.loggedIn || !$axios) return null
+
+    const currentId = $auth.user?.id || null
+    if (identity && identityUserId === currentId) return identity
+    if (identityLoading) return identityLoading
+
+    identityLoading = $axios
+      .$get('/api/profile/identity')
+      .then((data) => {
+        identity = data || null
+        identityUserId = currentId || identity?.id || null
+
+        if ($auth.user && identity) {
+          if (identity.last_name !== undefined) $auth.user.last_name = identity.last_name
+          if (identity.phone !== undefined) $auth.user.phone = identity.phone
+        }
+
+        renderIdentity()
+        return identity
+      })
+      .catch(() => null)
+      .finally(() => {
+        identityLoading = null
+      })
+
+    return identityLoading
+  }
+
+  const syncIdentity = () => {
+    if (!$auth?.loggedIn) {
+      identity = null
+      identityUserId = null
+      identityLoading = null
+      return
+    }
+
+    const currentId = $auth.user?.id || null
+    if (identityUserId && currentId && identityUserId !== currentId) {
+      identity = null
+      identityUserId = null
+    }
+
+    if (identity) renderIdentity()
+    loadIdentity()
+  }
+
   const sync = () => {
     const pageSwitcher = document.querySelector('[data-language-switcher]')
     const authenticated = Boolean($auth?.loggedIn)
@@ -120,6 +219,7 @@ export default ({ app, $auth }) => {
       root = null
     }
     applyActiveState()
+    syncIdentity()
   }
 
   const run = () => window.requestAnimationFrame(sync)
@@ -138,5 +238,6 @@ export default ({ app, $auth }) => {
   app.router?.afterEach?.(run)
   if (app.router?.app?.$watch) {
     app.router.app.$watch(() => Boolean($auth?.loggedIn), run)
+    app.router.app.$watch(() => $auth?.user?.id || null, run)
   }
 }
