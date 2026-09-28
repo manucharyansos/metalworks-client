@@ -6,9 +6,9 @@
       <div class="flex h-20 items-center justify-between border-b border-slate-100 px-5 dark:border-slate-800">
         <nuxt-link :to="localePath(dashboardPath)" class="flex min-w-0 items-center gap-3" @click.native="closeSidebar">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
-          <div class="min-w-0"><p class="truncate text-sm font-black tracking-tight">MetalWorks</p></div>
+          <WorkspaceIdentity />
         </nuxt-link>
-        <button type="button" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" @click="closeSidebar"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18 18 6M6 6l12 12" /></svg></button>
+        <button type="button" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" :aria-label="$t('workspace_layout.close_navigation')" @click="closeSidebar"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18 18 6M6 6l12 12" /></svg></button>
       </div>
 
       <div class="flex-1 overflow-y-auto px-4 py-5">
@@ -20,9 +20,10 @@
 
         <p class="mt-6 px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">{{ $t('workspace_layout.work_sections') }}</p>
         <nav class="mt-3 space-y-1.5">
-          <nuxt-link v-if="$can('factory.view')" :to="localePath(dashboardPath)" class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950" @click.native="closeSidebar">
+          <nuxt-link :to="localePath(dashboardPath)" class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950" @click.native="closeSidebar">
             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-300"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 20V9l5-3v4l5-3v4l6-3v12H4Zm4 0v-4h3v4m3 0v-5h3v5" /></svg></span>
-            {{ $t('workspace_layout.workshop_orders') }}
+            <span class="min-w-0 flex-1">{{ $t('workspace_layout.workshop_orders') }}</span>
+            <svg v-if="!$can('factory.view')" class="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 17v.01M8 10V8a4 4 0 118 0v2m-9 0h10v9H7v-9Z" /></svg>
           </nuxt-link>
 
           <nuxt-link :to="localePath('/profile')" class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950" @click.native="closeSidebar">
@@ -49,7 +50,7 @@
     <div class="min-h-screen lg:pl-72">
       <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 sm:px-6 lg:px-8">
         <div class="flex items-center gap-3">
-          <button type="button" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" @click="toggleSidebar"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16" /></svg></button>
+          <button type="button" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" :aria-label="$t('workspace_layout.open_navigation')" @click="toggleSidebar"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16" /></svg></button>
           <div class="min-w-0"><p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ roleTitle }}</p><p class="hidden truncate text-xs text-slate-500 dark:text-slate-400 sm:block">{{ currentUser.factory?.name || factoryLabel }}</p></div>
         </div>
         <div class="flex items-center gap-2">
@@ -64,9 +65,9 @@
 
 <script>
 const COPY = {
-  hy: { laser: 'Լազերային կտրում', bend: 'Կռում', powder_catting: 'Փոշեներկում', workshop: 'Արտադրամաս', description: 'Ձեր հաստիքին և թույլտվություններին համապատասխան աշխատանքային տարածք։' },
-  ru: { laser: 'Лазерная резка', bend: 'Гибка', powder_catting: 'Порошковая покраска', workshop: 'Цех', description: 'Рабочая область в соответствии с вашей должностью и разрешениями.' },
-  en: { laser: 'Laser cutting', bend: 'Bending', powder_catting: 'Powder coating', workshop: 'Workshop', description: 'Workspace based on your position and assigned permissions.' },
+  hy: { laser: 'Լազերային կտրում', bend: 'Կռում', powder_catting: 'Փոշեներկում', operator: 'Արտադրամաս', workshop: 'Արտադրամաս', description: 'Ձեր հաստիքին և թույլտվություններին համապատասխան աշխատանքային տարածք։' },
+  ru: { laser: 'Лазерная резка', bend: 'Гибка', powder_catting: 'Порошковая покраска', operator: 'Цех', workshop: 'Цех', description: 'Рабочая область в соответствии с вашей должностью и разрешениями.' },
+  en: { laser: 'Laser cutting', bend: 'Bending', powder_catting: 'Powder coating', operator: 'Workshop', workshop: 'Workshop', description: 'Workspace based on your position and assigned permissions.' },
 }
 
 export default {
@@ -80,12 +81,10 @@ export default {
     roleTitle() { return this.copy[this.roleName] || this.copy.workshop },
     workspaceDescription() { return this.copy.description },
     dashboardPath() {
-      if (!this.$can('factory.view')) return '/profile'
       if (this.roleName === 'bend') return '/factory/bend'
       if (this.roleName === 'laser') return '/factory/laser'
       if (this.roleName === 'powder_catting') return '/factory/powder'
-      if (this.currentUser.factory_id) return '/factory/workspace'
-      return '/profile'
+      return '/factory/workspace'
     },
     factoryLabel() { return this.currentUser?.factory?.name || this.copy.workshop },
   },
