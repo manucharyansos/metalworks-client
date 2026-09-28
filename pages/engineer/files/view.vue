@@ -1,841 +1,127 @@
 <template>
-  <main
-    class="p-4 md:p-6 lg:p-8 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
-  >
-    <transition name="fade">
-      <div
-        v-if="loading"
-        class="fixed inset-0 bg-white/80 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50"
-      >
-        <div
-          class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"
-        ></div>
-      </div>
-    </transition>
-
-    <transition name="slide-up">
-      <nav v-if="breadcrumb.length" class="mb-6">
-        <ol
-          class="flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
-        >
-          <li
-            v-for="(item, index) in breadcrumb"
-            :key="index"
-            class="flex items-center"
-          >
-            <button
-              class="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-sm dark:hover:bg-gray-800 transition-all duration-200"
-              :class="{
-                'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300':
-                  index === breadcrumb.length - 1,
-              }"
-              @click="selectBreadcrumb(index)"
-            >
-              <svg
-                v-if="index > 0"
-                class="w-3 h-3 text-gray-400"
-                viewBox="0 0 6 10"
-                fill="none"
-              >
-                <path
-                  d="M1 9l4-4-4-4"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <span class="truncate max-w-[150px] sm:max-w-[200px]">{{
-                item
-              }}</span>
-            </button>
-          </li>
-        </ol>
-      </nav>
-    </transition>
-
-    <div
-      class="grid grid-cols-1 lg:grid-cols-[minmax(300px,_1fr)_3fr] gap-6 xl:gap-8"
-    >
-      <aside class="space-y-6">
-        <transition v-if="isOpen === 'remote_number'" name="fade-scale">
-          <section class="grid gap-3">
-            <button
-              v-for="number in getPmp.remote_number"
-              :key="number.id"
-              class="group flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 dark:border-gray-700"
-              @click="showFiles(number)"
-            >
-              <div
-                class="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-lg flex items-center justify-center"
-              >
-                <img src="/dxf.png" alt="DXF" class="w-9 h-9 object-contain" />
-              </div>
-              <div class="text-left flex-1">
-                <div class="font-semibold text-gray-900 dark:text-white">
-                  {{ number.remote_number }}
-                </div>
-                <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
-                  {{ number.remote_number_name }}
-                </div>
-              </div>
-              <svg
-                class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  d="M9 18l6-6-6-6"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </button>
-          </section>
-        </transition>
-
-        <transition
-          v-else-if="isOpen === 'factories'"
-          class="space-y-4"
-          name="fade-scale"
-        >
-          <section>
-            <div v-for="factory in getFactory" :key="factory.id">
-              <button
-                :disabled="loadingFactoryId === factory.id"
-                class="w-full p-4 rounded-xl text-left transition-all duration-300 flex items-center justify-between"
-                :class="{
-                  'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg':
-                    selectedFactoryId === factory.id,
-                  'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700':
-                    selectedFactoryId !== factory.id,
-                  'opacity-70 cursor-not-allowed':
-                    loadingFactoryId === factory.id,
-                }"
-                @click="selectFactory(factory)"
-              >
-                <span class="font-medium">{{ factory.value }}</span>
-                <span
-                  v-if="loadingFactoryId === factory.id"
-                  class="animate-spin"
-                >
-                  <svg
-                    class="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke-width="3"
-                      class="opacity-25"
-                    />
-                    <path
-                      d="M4 12a8 8 0 018-8"
-                      stroke-width="3"
-                      class="opacity-75"
-                    />
-                  </svg>
-                </span>
-                <span
-                  v-else-if="hasFiles(factory.id)"
-                  class="text-green-400 text-xl"
-                  >✔</span
-                >
-              </button>
-
-              <transition
-                v-if="isOpenFiles === factory.id"
-                class="mt-3 space-y-2 pl-4 border-l-2 border-blue-500"
-                name="slide-down"
-              >
-                <div v-if="$can('pmp_files.view')">
-                  <div
-                    v-for="file in selectedFiles"
-                    :key="file.id"
-                    class="group bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm hover:shadow transition-all duration-200 border border-gray-200 dark:border-gray-700"
-                    @mouseenter="hoveredFileId = file.id"
-                    @mouseleave="hoveredFileId = null"
-                  >
-                    <div class="flex items-center justify-between">
-                      <button
-                        class="text-left flex-1 truncate text-sm font-medium text-gray-800 dark:text-gray-200"
-                        @click="viewFile(file.path, file)"
-                      >
-                        {{ file.original_name }}
-                      </button>
-                      <div
-                        class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <button
-                          v-if="$can('pmp_files.view')"
-                          class="text-xs text-blue-600 hover:underline"
-                          @click.stop="downloadFile(file)"
-                        >
-                          Ներբեռնել
-                        </button>
-                        <button
-                          v-if="
-                            hoveredFileId === file.id &&
-                            $can('pmp_files.delete')
-                          "
-                          class="text-xs text-red-600 hover:underline"
-                          @click.stop="openDelete(file.id)"
-                        >
-                          Ջնջել
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    v-if="$can('pmp_files.upload')"
-                    :disabled="loading"
-                    class="w-full mt-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
-                    @click="openAddFileModal"
-                  >
-                    <svg
-                      class="w-5 h-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <path
-                        d="M12 4v16m8-8H4"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                    Ավելացնել ֆայլ
-                  </button>
-                </div>
-              </transition>
-            </div>
-          </section>
-        </transition>
-      </aside>
-
-      <section
-        class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 lg:p-8 min-h-[70vh] flex flex-col"
-      >
-        <transition name="fade">
-          <div class="flex-1 flex flex-col">
-            <div
-              v-if="selectedFile && $can('pmp_files.view')"
-              class="flex-1 flex flex-col"
-            >
-              <div
-                v-if="isDxfFile && selectedFile"
-                class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
-              >
-                <div
-                  class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-center"
-                >
-                  <div class="text-xs text-gray-600 dark:text-gray-400">
-                    Քանակ
-                  </div>
-                  <div class="font-bold text-blue-700 dark:text-blue-300">
-                    {{ selectedFile.quantity }}
-                  </div>
-                </div>
-                <div
-                  class="bg-green-50 dark:bg-green-900/30 p-3 rounded-lg text-center"
-                >
-                  <div class="text-xs text-gray-600 dark:text-gray-400">
-                    Նյութ
-                  </div>
-                  <div
-                    class="font-bold text-green-700 dark:text-green-300 truncate"
-                  >
-                    {{ selectedFile.material_type }}
-                  </div>
-                </div>
-                <div
-                  class="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-lg text-center"
-                >
-                  <div class="text-xs text-gray-600 dark:text-gray-400">
-                    Հաստություն
-                  </div>
-                  <div class="font-bold text-purple-700 dark:text-purple-300">
-                    {{ selectedFile.thickness }}
-                  </div>
-                </div>
-              </div>
-
-              <h3
-                class="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center break-all"
-              >
-                {{ selectedFile.original_name }}
-              </h3>
-
-              <div
-                v-if="fileType === 'dxf' && dxfUrl && $can('pmp_files.view')"
-                class="flex-1 min-h-0"
-              >
-                <DxfViewerModal
-                  :dxf-url="dxfUrl"
-                  :file-meta="selectedFile"
-                  :show-laser-info="true"
-                  class="w-full h-full rounded-lg border border-gray-200 dark:border-gray-700"
-                  @close="dxfUrl = ''"
-                />
-              </div>
-
-              <div v-else-if="fileType === 'pdf'" class="flex-1">
-                <embed
-                  :src="fileUrl(selectedFile)"
-                  type="application/pdf"
-                  class="w-full h-full min-h-[60vh] rounded-lg border"
-                />
-                <a
-                  v-if="$can('pmp_files.view')"
-                  :href="fileUrl(selectedFile)"
-                  target="_blank"
-                  rel="noopener"
-                  class="mt-3 block text-center text-blue-600 hover:underline"
-                >
-                  Բացել նոր պատուհանում
-                </a>
-              </div>
-
-              <div
-                v-else-if="fileType === 'image'"
-                class="flex justify-center items-center flex-1"
-              >
-                <a :href="fileUrl(selectedFile)" target="_blank" rel="noopener">
-                  <img
-                    :src="fileUrl(selectedFile)"
-                    class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md"
-                    :alt="selectedFile.original_name"
-                  />
-                </a>
-              </div>
-
-              <div v-else-if="fileType === 'cad'" class="text-center py-12">
-                <p class="text-gray-600 dark:text-gray-400 mb-4">
-                  {{ selectedFile.original_name }} ({{
-                    fileType.toUpperCase()
-                  }})
-                </p>
-                <button
-                  v-if="$can('pmp_files.view')"
-                  type="button"
-                  class="inline-block px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-lg hover:shadow-lg transition-all"
-                  @click="downloadFile(selectedFile)"
-                >
-                  Ներբեռնել
-                </button>
-              </div>
-            </div>
-            <div
-              v-else
-              class="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400"
-            >
-              <div
-                class="flex items-center justify-center gap-2 text-lg text-blue-700 font-medium py-4 px-6 bg-blue-50 rounded-xl border border-blue-200"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-                  />
-                </svg>
-                Ընտրեք ֆայլ՝ դիտելու համար
-              </div>
-            </div>
+  <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div class="mx-auto max-w-[1500px] space-y-6">
+      <section class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div class="flex min-w-0 items-center gap-2">
+          <div class="min-w-0">
+            <button type="button" class="mb-2 text-xs font-bold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" @click="goBack">← {{ t.back }}</button>
+            <h1 class="truncate text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">{{ projectTitle }}</h1>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ remoteTitle }}</p>
           </div>
-        </transition>
+          <InfoTooltip>{{ t.help }}</InfoTooltip>
+        </div>
+        <button v-if="$can('pmp_files.upload') && selectedFactory" type="button" class="rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950" @click="openUpload">+ {{ t.addFile }}</button>
       </section>
+
+      <div v-if="loading" class="flex min-h-[420px] items-center justify-center text-sm font-semibold text-slate-400"><span class="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-slate-700 dark:border-slate-700 dark:border-t-white"></span>{{ t.loading }}</div>
+
+      <div v-else-if="!$can('pmp_files.view')" class="rounded-[28px] border border-amber-200 bg-amber-50 p-8 text-center text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-200">{{ t.noPermission }}</div>
+
+      <template v-else>
+        <section class="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+          <p class="mb-3 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{{ t.workshops }}</p>
+          <div class="flex flex-wrap gap-2">
+            <button v-for="factory in availableFactories" :key="factory.id" type="button" class="rounded-xl border px-4 py-2.5 text-xs font-bold transition" :class="Number(selectedFactoryId) === Number(factory.id) ? 'border-slate-950 bg-slate-950 text-white dark:border-white dark:bg-white dark:text-slate-950' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'" @click="selectFactory(factory)">{{ factory.name || factory.value }}<span class="ml-2 opacity-60">{{ fileCount(factory.id) }}</span></button>
+          </div>
+          <p v-if="!availableFactories.length" class="text-xs text-slate-400">{{ t.noWorkshops }}</p>
+        </section>
+
+        <section class="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
+          <aside class="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+            <div class="flex items-center justify-between gap-3"><div><h2 class="text-base font-black text-slate-900 dark:text-white">{{ t.files }}</h2><p class="mt-1 text-xs text-slate-400">{{ selectedFactory?.name || t.chooseWorkshop }}</p></div><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-500 dark:bg-slate-800 dark:text-slate-300">{{ selectedFiles.length }}</span></div>
+
+            <div class="mt-4 space-y-2">
+              <button v-for="file in selectedFiles" :key="file.id" type="button" class="group w-full rounded-2xl border p-3 text-left transition" :class="selectedFile?.id === file.id ? 'border-blue-500 bg-blue-50 dark:border-blue-700 dark:bg-blue-950/25' : 'border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800'" @click="viewFile(file)">
+                <div class="flex items-start gap-3"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[10px] font-black uppercase text-slate-500 dark:bg-slate-800 dark:text-slate-300">{{ extension(file) }}</div><div class="min-w-0 flex-1"><p class="truncate text-xs font-bold text-slate-800 dark:text-slate-100">{{ file.original_name }}</p><p class="mt-1 text-[10px] text-slate-400">{{ fileMetaLine(file) }}</p></div></div>
+                <div class="mt-3 flex justify-end gap-2 border-t border-slate-100 pt-2 dark:border-slate-800"><button type="button" class="text-[10px] font-bold text-blue-600 dark:text-blue-300" @click.stop="downloadFile(file)">{{ t.download }}</button><button v-if="$can('pmp_files.delete')" type="button" class="text-[10px] font-bold text-rose-600 dark:text-rose-300" @click.stop="askDelete(file)">{{ t.delete }}</button></div>
+              </button>
+              <div v-if="selectedFactory && !selectedFiles.length" class="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400 dark:border-slate-800">{{ t.noFiles }}</div>
+              <div v-else-if="!selectedFactory" class="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400 dark:border-slate-800">{{ t.chooseWorkshop }}</div>
+            </div>
+          </aside>
+
+          <section class="min-h-[560px] rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <div v-if="selectedFile" class="flex h-full flex-col">
+              <div class="mb-4 flex flex-col gap-3 border-b border-slate-100 pb-4 dark:border-slate-800 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0"><h2 class="truncate text-lg font-black text-slate-900 dark:text-white">{{ selectedFile.original_name }}</h2><p class="mt-1 text-xs text-slate-400">{{ selectedFactory?.name || '—' }}</p></div>
+                <div v-if="isDxfSelected" class="flex flex-wrap gap-2"><span class="meta-chip">{{ t.quantity }}: {{ selectedFile.quantity || '—' }}</span><span class="meta-chip">{{ t.material }}: {{ selectedFile.material_type || '—' }}</span><span class="meta-chip">{{ t.thickness }}: {{ selectedFile.thickness || '—' }}</span></div>
+              </div>
+
+              <DxfViewerModal v-if="selectedType === 'dxf' && selectedFileUrl" :dxf-url="selectedFileUrl" :file-meta="selectedFile" :show-laser-info="true" class="min-h-[500px] w-full flex-1 rounded-2xl border border-slate-200 dark:border-slate-700" @close="selectedFile = null" />
+              <embed v-else-if="selectedType === 'pdf' && selectedFileUrl" :src="selectedFileUrl" type="application/pdf" class="min-h-[620px] w-full flex-1 rounded-2xl border border-slate-200 dark:border-slate-700" />
+              <div v-else-if="selectedType === 'image' && selectedFileUrl" class="flex flex-1 items-center justify-center"><a :href="selectedFileUrl" target="_blank" rel="noopener"><img :src="selectedFileUrl" :alt="selectedFile.original_name" class="max-h-[70vh] max-w-full rounded-2xl object-contain shadow" /></a></div>
+              <div v-else class="flex flex-1 flex-col items-center justify-center text-center"><div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xs font-black uppercase text-slate-500 dark:bg-slate-800">{{ extension(selectedFile) }}</div><p class="mt-4 max-w-md text-sm text-slate-500 dark:text-slate-400">{{ t.previewUnavailable }}</p><button class="mt-4 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-bold text-white dark:bg-white dark:text-slate-950" @click="downloadFile(selectedFile)">{{ t.download }}</button></div>
+            </div>
+            <div v-else class="flex min-h-[520px] items-center justify-center text-center"><div><div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">↖</div><p class="mt-4 text-sm font-bold text-slate-700 dark:text-slate-200">{{ t.chooseFile }}</p><p class="mt-1 text-xs text-slate-400">{{ t.chooseFileHint }}</p></div></div>
+          </section>
+        </section>
+      </template>
     </div>
 
-    <AddFileModal
-      :is-open-modal="isOpenAddFileModal"
-      :file="currentFile"
-      :is-dxf-file="isDxfFile"
-      text="Ընտրեք ֆայլը և լրացրեք դաշտերը"
-      @closeModal="openAddFileModal"
-      @createFile="addFile"
-    >
-      <template #file-input>
-        <input
-          type="file"
-          class="hidden"
-          :disabled="loading"
-          @change="handleFileChange"
-        />
-      </template>
-
-      <template v-if="isDxfFile" #quantity>
-        <InputWithLabelIcon
-          v-model="fileData.quantity"
-          type="number"
-          name="quantity"
-          label="Քանակ լրակազմում"
-          :disabled="loading"
-          min="1"
-        />
-      </template>
-
-      <template v-if="isDxfFile" #materialType>
-        <div class="relative">
-          <InputWithLabelIcon
-            v-model="fileData.material"
-            type="text"
-            name="materialType"
-            label="Նյութ"
-            :disabled="loading"
-            @focus="openMaterials"
-          />
-          <button
-            type="button"
-            class="absolute inset-y-0 right-0 px-3 text-gray-500"
-            :disabled="loading"
-            @click="openMaterials"
-          >
-            ▼
-          </button>
-          <div
-            v-if="isSelectedMaterials"
-            class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
-          >
-            <ul class="py-1">
-              <li
-                v-for="material in filteredMaterials"
-                :key="material.id"
-                class="px-4 py-2 hover:bg-blue-50 cursor-pointer"
-                @click="selectMaterial(material)"
-              >
-                {{ material.description }}
-              </li>
-            </ul>
-          </div>
+    <div v-if="uploadOpen" class="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm" @click.self="closeUpload">
+      <div class="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl dark:bg-slate-900">
+        <div class="flex items-start justify-between gap-4"><div><h3 class="text-lg font-black text-slate-900 dark:text-white">{{ t.addFile }}</h3><p class="mt-1 text-xs text-slate-400">{{ selectedFactory?.name || '—' }}</p></div><button class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" @click="closeUpload">✕</button></div>
+        <div class="mt-5 space-y-4">
+          <div><label class="field-label">{{ t.file }}</label><input type="file" class="field" @change="handleFileChange" /></div>
+          <template v-if="isDxfFactory">
+            <div><label class="field-label">{{ t.quantity }}</label><input v-model.number="upload.quantity" type="number" min="1" class="field" /></div>
+            <div class="relative"><label class="field-label">{{ t.material }}</label><input v-model.trim="upload.material" class="field" :placeholder="t.searchMaterial" @focus="loadMaterials" /><div v-if="materialsOpen" class="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl dark:border-slate-700 dark:bg-slate-900"><button v-for="material in filteredMaterials" :key="material.id" type="button" class="block w-full rounded-lg px-3 py-2 text-left text-xs hover:bg-slate-50 dark:hover:bg-slate-800" @click="selectMaterial(material)">{{ material.description }}</button></div></div>
+            <div><label class="field-label">{{ t.thickness }}</label><input v-model.trim="upload.thickness" class="field" /></div>
+          </template>
         </div>
-      </template>
+        <div class="mt-6 flex justify-end gap-2"><button class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="closeUpload">{{ t.cancel }}</button><button class="rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-black text-white disabled:opacity-50 dark:bg-white dark:text-slate-950" :disabled="uploading" @click="uploadFile">{{ uploading ? t.saving : t.upload }}</button></div>
+      </div>
+    </div>
 
-      <template v-if="isDxfFile" #thickness>
-        <InputWithLabelIcon
-          v-model="fileData.thickness"
-          type="text"
-          name="thickness"
-          label="Հաստություն"
-          :disabled="loading"
-        />
-      </template>
-    </AddFileModal>
-
-    <PopupModal
-      :is-open-modal="isOpenModal"
-      text="Վստահ եք, որ ուզում եք ջնջել՞"
-      @close-modal="closeModal"
-      @confirm="deleteDxfFile"
-    />
+    <div v-if="deleteTarget" class="fixed inset-0 z-[130] flex items-center justify-center bg-slate-950/55 p-4" @click.self="deleteTarget = null"><div class="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl dark:bg-slate-900"><h3 class="text-lg font-black text-slate-900 dark:text-white">{{ t.deleteTitle }}</h3><p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ deleteTarget.original_name }}</p><div class="mt-6 flex justify-end gap-2"><button class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="deleteTarget = null">{{ t.cancel }}</button><button class="rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-black text-white" @click="confirmDelete">{{ t.delete }}</button></div></div></div>
+    <notifications />
   </main>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
-import PopupModal from '~/components/modals/popup-modal/PopupModal.vue'
-import AddFileModal from '~/components/modals/add-file/AddFile.vue'
-import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+
+const COPY = {
+  hy: { back:'Նախագծեր և ֆայլեր',help:'Ընտրեք արտադրամասը, դիտեք ֆայլերը, ներբեռնեք կամ ավելացրեք նոր տարբերակ։',loading:'Բեռնվում է...',noPermission:'Ֆայլեր դիտելու թույլտվություն տրված չէ։',workshops:'Արտադրամասեր',noWorkshops:'Արտադրամասեր չեն գտնվել',files:'Ֆայլեր',chooseWorkshop:'Ընտրեք արտադրամաս',noFiles:'Այս արտադրամասի համար ֆայլ չկա',addFile:'Ավելացնել ֆայլ',download:'Ներբեռնել',delete:'Ջնջել',chooseFile:'Ընտրեք ֆայլ',chooseFileHint:'Ֆայլը բացելու համար ընտրեք այն ձախ ցուցակից։',previewUnavailable:'Այս ֆայլի տեսակի համար ներքին նախադիտում չկա։ Կարող եք ներբեռնել ֆայլը։',quantity:'Քանակ',material:'Նյութ',thickness:'Հաստություն',file:'Ֆայլ',searchMaterial:'Որոնել նյութ...',cancel:'Չեղարկել',upload:'Վերբեռնել',saving:'Պահպանվում է...',deleteTitle:'Ջնջե՞լ ֆայլը',idMissing:'Ենթախմբի ID-ն բացակայում է',loadError:'Չհաջողվեց բեռնել ֆայլերը',fileRequired:'Ընտրեք ֆայլ',dxfRequired:'DXF ֆայլի համար լրացրեք քանակը, նյութը և հաստությունը',uploaded:'Ֆայլը ավելացվեց',uploadError:'Չհաջողվեց ավելացնել ֆայլը',deleted:'Ֆայլը ջնջվեց',deleteError:'Չհաջողվեց ջնջել ֆայլը',downloadError:'Ֆայլի ներբեռնումը ձախողվեց',project:'PMP նախագիծ',subgroup:'Ենթախումբ' },
+  ru: { back:'Проекты и файлы',help:'Выберите цех, просматривайте, скачивайте или добавляйте производственные файлы.',loading:'Загрузка...',noPermission:'Нет разрешения на просмотр файлов.',workshops:'Цеха',noWorkshops:'Цеха не найдены',files:'Файлы',chooseWorkshop:'Выберите цех',noFiles:'Для этого цеха файлов нет',addFile:'Добавить файл',download:'Скачать',delete:'Удалить',chooseFile:'Выберите файл',chooseFileHint:'Выберите файл в списке слева, чтобы открыть его.',previewUnavailable:'Для этого типа файла нет встроенного просмотра. Файл можно скачать.',quantity:'Количество',material:'Материал',thickness:'Толщина',file:'Файл',searchMaterial:'Поиск материала...',cancel:'Отмена',upload:'Загрузить',saving:'Сохранение...',deleteTitle:'Удалить файл?',idMissing:'Отсутствует ID подгруппы',loadError:'Не удалось загрузить файлы',fileRequired:'Выберите файл',dxfRequired:'Для DXF заполните количество, материал и толщину',uploaded:'Файл добавлен',uploadError:'Не удалось добавить файл',deleted:'Файл удалён',deleteError:'Не удалось удалить файл',downloadError:'Не удалось скачать файл',project:'Проект PMP',subgroup:'Подгруппа' },
+  en: { back:'Projects and files',help:'Choose a workshop, review, download or add production files.',loading:'Loading...',noPermission:'File viewing permission is not granted.',workshops:'Workshops',noWorkshops:'No workshops found',files:'Files',chooseWorkshop:'Choose a workshop',noFiles:'No files for this workshop',addFile:'Add file',download:'Download',delete:'Delete',chooseFile:'Choose a file',chooseFileHint:'Select a file from the list on the left to open it.',previewUnavailable:'Preview is unavailable for this file type. You can download the file.',quantity:'Quantity',material:'Material',thickness:'Thickness',file:'File',searchMaterial:'Search material...',cancel:'Cancel',upload:'Upload',saving:'Saving...',deleteTitle:'Delete file?',idMissing:'Subgroup ID is missing',loadError:'Could not load files',fileRequired:'Choose a file',dxfRequired:'For DXF, enter quantity, material and thickness',uploaded:'File added',uploadError:'Could not add file',deleted:'File deleted',deleteError:'Could not delete file',downloadError:'File download failed',project:'PMP project',subgroup:'Subgroup' },
+}
 
 export default {
-  name: 'EngineerFilesView',
-  components: { InputWithLabelIcon, AddFileModal, PopupModal, DxfViewerModal },
-  layout: 'engineer',
-  middleware: ['role-guard'],
-  meta: { role: 'engineer' },
-
-  data() {
-    return {
-      loadingFactoryId: null,
-      loading: false,
-      isOpen: 'remote_number',
-      isOpenFiles: 'files_by_id',
-      id: '',
-      dxfUrl: '',
-      fileType: null,
-      selectedFactoryId: null,
-      selectedRemoteNumber: null,
-      selectedRemoteNumberId: null,
-      selectedFiles: [],
-      selectedFile: null,
-      breadcrumb: [],
-      hoveredFileId: null,
-      isOpenModal: false,
-      isOpenAddFileModal: false,
-      isDxfFile: false,
-      isSelectedMaterials: false,
-      fileData: { quantity: null, material: '', thickness: '', file: null },
-      currentFile: { name: '', size: 0 },
-      toDeleteId: null,
-    }
+  name:'EngineerFilesView',components:{DxfViewerModal},layout:'engineer',middleware:['role-guard'],meta:{role:'engineer'},
+  data(){return{loading:false,uploading:false,id:null,selectedFactoryId:null,selectedFile:null,uploadOpen:false,deleteTarget:null,materialsOpen:false,upload:{file:null,quantity:null,material:'',thickness:''}}},
+  computed:{
+    ...mapGetters('pmp',['getPmp']),...mapGetters('factory',['getFactory']),...mapGetters('materials',['getMaterials']),
+    locale(){const code=String(this.$i18n?.locale||'hy').toLowerCase().split('-')[0];return['hy','ru','en'].includes(code)?code:'hy'},t(){return COPY[this.locale]||COPY.hy},
+    remote(){return Array.isArray(this.getPmp?.remote_number)?this.getPmp.remote_number[0]:null},
+    projectTitle(){return this.getPmp?.group_name?`${this.getPmp.group} · ${this.getPmp.group_name}`:this.t.project},
+    remoteTitle(){return this.remote?`${this.t.subgroup}: ${this.remote.remote_number} · ${this.remote.remote_number_name}`:'—'},
+    availableFactories(){const map=new Map();(this.getFactory||[]).forEach((f)=>map.set(Number(f.id),f));(this.getPmp?.files||[]).forEach((file)=>{if(file.factory?.id&&!map.has(Number(file.factory.id)))map.set(Number(file.factory.id),file.factory)});return Array.from(map.values()).sort((a,b)=>Number(a.id)-Number(b.id))},
+    selectedFactory(){return this.availableFactories.find((f)=>Number(f.id)===Number(this.selectedFactoryId))||null},
+    selectedFiles(){return (this.getPmp?.files||[]).filter((f)=>Number(f.factory_id)===Number(this.selectedFactoryId))},
+    selectedType(){return this.selectedFile?this.fileType(this.selectedFile.original_name||this.selectedFile.path):null},
+    selectedFileUrl(){if(!this.selectedFile)return null;if(this.selectedFile.id&&this.$getPmpFileUrl)return this.$getPmpFileUrl(this.selectedFile);return this.$getFileUrl?this.$getFileUrl(this.selectedFile.path):null},
+    isDxfSelected(){return this.selectedType==='dxf'},isDxfFactory(){return String(this.selectedFactory?.value||'').toUpperCase()==='DXF'},
+    materials(){return this.getMaterials||[]},filteredMaterials(){const q=this.upload.material.toLowerCase();if(!q)return this.materials;return this.materials.filter((m)=>String(m.description||'').toLowerCase().includes(q))},
   },
-
-  computed: {
-    ...mapGetters('pmp', ['getPmp', 'errorMessage']),
-    ...mapGetters('factory', ['getFactory']),
-    ...mapGetters('materials', ['getMaterials']),
-    materials() {
-      return this.getMaterials || []
-    },
-    filteredMaterials() {
-      if (!this.fileData.material) return this.materials
-      const q = this.fileData.material.toLowerCase()
-      return this.materials.filter((m) =>
-        (m.description || '').toLowerCase().includes(q)
-      )
-    },
-  },
-
-  created() {
-    this.id = this.$route.query.id
-    if (this.id) {
-      this.loading = true
-      Promise.all([this.fetchPmp(this.id), this.fetchFactory()])
-        .catch((error) => this.$notify({ text: String(error), type: 'error' }))
-        .finally(() => (this.loading = false))
-    } else {
-      this.$notify({ text: 'ID-ն բացակայում է', type: 'error' })
-    }
-  },
-
-  methods: {
-    ...mapActions('pmp', ['fetchPmp', 'deleteFile', 'createPmpFilesByFactory']),
-    ...mapActions('factory', ['fetchFactory', 'downloadUploadedFile']),
-    ...mapActions('materials', ['fetchMaterials']),
-
-    n(v) {
-      return Number(v)
-    },
-    openMaterials() {
-      this.loading = true
-      this.fetchMaterials()
-        .then(() => (this.isSelectedMaterials = !this.isSelectedMaterials))
-        .catch((error) => this.$notify({ text: String(error), type: 'error' }))
-        .finally(() => (this.loading = false))
-    },
-
-    selectMaterial(material) {
-      this.fileData.material = material.description
-      this.fileData.thickness = material.thickness
-      this.isSelectedMaterials = false
-    },
-
-    showButton(id) {
-      this.hoveredFileId = id
-    },
-    hideButton(id) {
-      if (this.hoveredFileId === id) this.hoveredFileId = null
-    },
-
-    showFiles(number) {
-      this.isOpen = 'factories'
-      this.selectedRemoteNumber = number
-      this.selectedRemoteNumberId = this.n(number.id)
-      this.selectedFiles = (this.getPmp.files || []).filter(
-        (f) => this.n(f.remote_number_id) === this.selectedRemoteNumberId
-      )
-      this.dxfUrl = ''
-      this.fileType = null
-      this.selectedFile = null
-      this.isDxfFile = false
-      this.resetFileFields()
-      this.breadcrumb = [
-        this.getPmp?.group_name || 'PMP',
-        number.remote_number_name,
-      ]
-    },
-
-    selectFactory(factory) {
-      this.isDxfFile = factory.value === 'DXF'
-      this.loadingFactoryId = factory.id
-      this.loading = true
-      try {
-        this.isOpenFiles =
-          this.isOpenFiles === this.n(factory.id) ? null : this.n(factory.id)
-
-        this.selectedFactoryId = this.n(factory.id)
-        this.selectedFiles = (this.getPmp.files || []).filter(
-          (f) =>
-            this.n(f.factory_id) === this.selectedFactoryId &&
-            this.n(f.remote_number_id) === this.selectedRemoteNumberId
-        )
-
-        this.dxfUrl = ''
-        this.fileType = null
-        this.selectedFile = null
-
-        if (this.breadcrumb.length > 1)
-          this.breadcrumb.splice(1, 1, factory.value)
-        else this.breadcrumb.push(factory.value)
-      } finally {
-        this.loadingFactoryId = null
-        this.loading = false
-      }
-    },
-
-    handleFileChange(e) {
-      const file = e.target.files?.[0]
-      this.currentFile = file
-        ? { name: file.name, size: file.size }
-        : { name: '', size: 0 }
-      this.fileData.file = file
-    },
-
-    handleFileDrop(file) {
-      this.currentFile = { name: file.name, size: file.size }
-      this.fileData.file = file
-    },
-
-    async addFile() {
-      const { file, quantity, material, thickness } = this.fileData
-      const isDxf = this.isDxfFile
-
-      if (isDxf && (!file || !quantity || !material || !thickness)) {
-        this.$notify({ text: 'Բոլոր դաշտերը պարտադիր են', type: 'warning' })
-        return
-      }
-      if (!file) {
-        this.$notify({ text: 'Ընտրեք ֆայլ', type: 'warning' })
-        return
-      }
-
-      this.loading = true
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('pmp_id', this.getPmp.id)
-      formData.append('remote_number_id', this.selectedRemoteNumberId)
-      formData.append('factory_id', this.selectedFactoryId)
-      if (isDxf) {
-        formData.append('quantity', quantity)
-        formData.append('material_type', material)
-        formData.append('thickness', thickness)
-      }
-
-      try {
-        const ok = await this.createPmpFilesByFactory(formData)
-        if (ok) {
-          this.$notify({ text: 'Ֆայլը ավելացվեց', type: 'success' })
-          await this.fetchPmp(this.id)
-          this.selectedFiles = (this.getPmp.files || []).filter(
-            (f) =>
-              this.n(f.remote_number_id) === this.n(this.selectedRemoteNumberId) &&
-              this.n(f.factory_id) === this.n(this.selectedFactoryId)
-          )
-          this.isOpenAddFileModal = false
-          this.resetFileFields()
-        }
-      } finally {
-        this.loading = false
-      }
-    },
-
-    viewFile(filePath, file) {
-      if (!this.breadcrumb.includes(file.original_name)) {
-        if (this.breadcrumb.length > 2) this.breadcrumb.pop()
-        this.breadcrumb.push(file.original_name)
-      }
-      this.selectedFile = file
-      this.dxfUrl = filePath
-      this.isOpenFiles = this.n(file.factory_id)
-      this.isDxfFile =
-        this.n(file.factory_id) === this.selectedFactoryId && this.isDxfFile
-      this.fileType = this.getFileType(file.original_name || filePath)
-    },
-
-    async downloadFile(file) {
-      try {
-        await this.downloadUploadedFile(file)
-      } catch (error) {
-        this.$notify?.({
-          text:
-            error?.response?.data?.message ||
-            error?.message ||
-            'Ֆայլի ներբեռնումը ձախողվեց',
-          type: 'error',
-        })
-      }
-    },
-
-    fileUrl(file) {
-      if (!file) return null
-      if (file.id && this.$getPmpFileUrl) return this.$getPmpFileUrl(file)
-      return this.$getFileUrl ? this.$getFileUrl(file.path) : null
-    },
-
-    getFileType(name) {
-      const ext = String(name || '').toLowerCase().split('.').pop()
-      if (ext === 'dxf') return 'dxf'
-      if (ext === 'pdf') return 'pdf'
-      if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'eps'].includes(ext))
-        return 'image'
-      if (
-        ['step', 'stp', 'sldprt', 'sldasm', 'slddrw', 'solid', 'igs', 'iges', 'dwg'].includes(ext)
-      )
-        return 'cad'
-      return null
-    },
-
-    openDelete(id) {
-      this.toDeleteId = id
-      this.isOpenModal = true
-    },
-    closeModal() {
-      this.isOpenModal = false
-      this.toDeleteId = null
-    },
-
-    async deleteDxfFile() {
-      if (!this.toDeleteId) return
-      this.loading = true
-      try {
-        await this.deleteFile(this.toDeleteId)
-        await this.fetchPmp(this.id)
-        this.selectedFiles = this.selectedFiles.filter(
-          (f) => f.id !== this.toDeleteId
-        )
-        if (this.selectedFile?.id === this.toDeleteId) {
-          this.selectedFile = null
-          this.dxfUrl = ''
-          this.fileType = null
-        }
-        this.$notify({ text: 'Ֆայլը ջնջվեց', type: 'success' })
-      } finally {
-        this.isOpenModal = false
-        this.toDeleteId = null
-        this.loading = false
-      }
-    },
-
-    openAddFileModal() {
-      this.isOpenAddFileModal = !this.isOpenAddFileModal
-      if (!this.isOpenAddFileModal) this.resetFileFields()
-    },
-
-    resetFileFields() {
-      this.fileData = {
-        quantity: null,
-        material: '',
-        thickness: '',
-        file: null,
-      }
-      this.currentFile = { name: '', size: 0 }
-      this.isSelectedMaterials = false
-    },
-
-    selectBreadcrumb(index) {
-      this.breadcrumb = this.breadcrumb.slice(0, index + 1)
-      if (index === 0) {
-        this.isOpen = 'remote_number'
-        this.selectedFactoryId = null
-        this.selectedRemoteNumberId = null
-        this.dxfUrl = null
-        this.fileType = null
-        this.selectedFiles = []
-        this.selectedFile = null
-        this.isDxfFile = false
-        this.resetFileFields()
-      } else if (index === 1) {
-        this.isOpen = 'factories'
-        this.dxfUrl = null
-        this.fileType = null
-        this.selectedFile = null
-        this.isDxfFile = false
-        this.resetFileFields()
-        const rn = (this.getPmp.remote_number || []).find(
-          (n) => n.remote_number_name === this.breadcrumb[1]
-        )
-        if (rn) {
-          this.selectedRemoteNumberId = this.n(rn.id)
-          this.selectedFiles = (this.getPmp.files || []).filter(
-            (f) => this.n(f.remote_number_id) === this.selectedRemoteNumberId
-          )
-        }
-      } else if (index === 2) {
-        const fac = (this.getFactory || []).find(
-          (f) => f.value === this.breadcrumb[2]
-        )
-        if (fac) {
-          this.selectedFactoryId = this.n(fac.id)
-          this.isDxfFile = fac.value === 'DXF'
-          this.selectedFiles = (this.getPmp.files || []).filter(
-            (f) => this.n(f.factory_id) === this.selectedFactoryId
-          )
-          this.dxfUrl = null
-          this.fileType = null
-          this.selectedFile = null
-          this.resetFileFields()
-        }
-      }
-    },
-
-    hasFiles(factoryId) {
-      return (this.getPmp.files || []).some(
-        (f) => this.n(f.factory_id) === this.n(factoryId)
-      )
-    },
+  async created(){this.id=this.$route.query.id;if(!this.id){this.$notify?.({type:'error',text:this.t.idMissing});return}await this.reload()},
+  methods:{
+    ...mapActions('pmp',['fetchPmp','deleteFile','createPmpFilesByFactory']),...mapActions('factory',['fetchFactory','downloadUploadedFile']),...mapActions('materials',['fetchMaterials']),
+    async reload(){this.loading=true;try{await Promise.all([this.fetchPmp(this.id),this.$can('factory.view')?this.fetchFactory():Promise.resolve(true)]);if(!this.selectedFactoryId&&this.availableFactories.length)this.selectedFactoryId=this.availableFactories[0].id}catch(e){this.$notify?.({type:'error',text:this.t.loadError})}finally{this.loading=false}},
+    goBack(){this.$router.push(this.localePath('/engineer/files'))},selectFactory(factory){this.selectedFactoryId=factory.id;this.selectedFile=null},fileCount(id){return(this.getPmp?.files||[]).filter((f)=>Number(f.factory_id)===Number(id)).length},
+    extension(file){return String(file?.original_name||file?.path||'file').split('.').pop().slice(0,5).toUpperCase()},fileType(name){const ext=String(name||'').toLowerCase().split('.').pop();if(ext==='dxf')return'dxf';if(ext==='pdf')return'pdf';if(['jpg','jpeg','png','webp','gif','eps'].includes(ext))return'image';return'other'},
+    fileMetaLine(file){const parts=[];if(file.quantity)parts.push(`${this.t.quantity}: ${file.quantity}`);if(file.material_type)parts.push(file.material_type);if(file.thickness)parts.push(`${file.thickness}`);return parts.join(' · ')||this.extension(file)},viewFile(file){this.selectedFile=file},
+    async downloadFile(file){try{await this.downloadUploadedFile(file)}catch(e){this.$notify?.({type:'error',text:e?.response?.data?.message||e?.message||this.t.downloadError})}},
+    openUpload(){this.uploadOpen=true;this.resetUpload()},closeUpload(){this.uploadOpen=false;this.resetUpload()},handleFileChange(e){this.upload.file=e.target.files?.[0]||null},
+    async loadMaterials(){this.materialsOpen=true;if(!this.materials.length)try{await this.fetchMaterials()}catch(e){}},selectMaterial(material){this.upload.material=material.description||'';this.upload.thickness=material.thickness||'';this.materialsOpen=false},
+    async uploadFile(){if(!this.upload.file)return this.$notify?.({type:'warning',text:this.t.fileRequired});if(this.isDxfFactory&&(!this.upload.quantity||!this.upload.material||!this.upload.thickness))return this.$notify?.({type:'warning',text:this.t.dxfRequired});this.uploading=true;const fd=new FormData();fd.append('file',this.upload.file);fd.append('pmp_id',this.getPmp.id);fd.append('remote_number_id',this.remote?.id||this.id);fd.append('factory_id',this.selectedFactoryId);if(this.isDxfFactory){fd.append('quantity',this.upload.quantity);fd.append('material_type',this.upload.material);fd.append('thickness',this.upload.thickness)}try{const ok=await this.createPmpFilesByFactory(fd);if(!ok)throw new Error(this.t.uploadError);this.$notify?.({type:'success',text:this.t.uploaded});this.closeUpload();await this.reload()}catch(e){this.$notify?.({type:'error',text:e?.response?.data?.message||e?.message||this.t.uploadError})}finally{this.uploading=false}},
+    resetUpload(){this.upload={file:null,quantity:null,material:'',thickness:''};this.materialsOpen=false},askDelete(file){this.deleteTarget=file},
+    async confirmDelete(){if(!this.deleteTarget)return;const id=this.deleteTarget.id;try{const ok=await this.deleteFile(id);if(!ok)throw new Error(this.t.deleteError);if(this.selectedFile?.id===id)this.selectedFile=null;this.$notify?.({type:'success',text:this.t.deleted});this.deleteTarget=null;await this.reload()}catch(e){this.$notify?.({type:'error',text:e?.message||this.t.deleteError})}},
   },
 }
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.slide-down-enter-active,
-.slide-down-leave-active {
-  transition: all 0.3s ease;
-}
-.slide-down-enter-from,
-.slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.slide-up-enter-active {
-  animation: slideUp 0.4s ease;
-}
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-scale-enter-active {
-  animation: fadeScale 0.35s ease;
-}
-@keyframes fadeScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+.field{@apply w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-slate-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200}.field-label{@apply mb-1.5 block text-[10px] font-black uppercase tracking-[0.1em] text-slate-400}.meta-chip{@apply rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300}
 </style>
