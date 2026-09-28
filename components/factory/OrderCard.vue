@@ -3,7 +3,7 @@
     class="group relative flex flex-col rounded-2xl border bg-white p-4 text-sm shadow-sm transition-all dark:bg-slate-900"
     :class="[
       cardStatusClass,
-      isLocked ? 'cursor-default opacity-75' : 'cursor-move hover:-translate-y-0.5 hover:shadow-lg',
+      isLocked ? 'cursor-default opacity-80' : 'cursor-move hover:-translate-y-0.5 hover:shadow-lg',
     ]"
     :draggable="!isLocked"
     @dragstart="onDragStart"
@@ -28,11 +28,36 @@
 
     <p v-if="isTakenByOther" class="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-rose-500"><span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>{{ t.takenByOther }}</p>
     <p v-else-if="isCompleted" class="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-300"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>{{ t.completed }}</p>
-    <p v-else-if="!$can('factory.order_update')" class="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-slate-400"><span class="h-1.5 w-1.5 rounded-full bg-slate-300"></span>{{ t.noEditPermission }}</p>
+    <p v-else-if="!canUpdate" class="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-slate-400"><span class="h-1.5 w-1.5 rounded-full bg-slate-300"></span>{{ t.noEditPermission }}</p>
 
-    <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
-      <button type="button" class="flex items-center gap-1 text-xs font-bold text-slate-600 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white" @click.stop="$emit('view-details', order)">{{ t.details }} <span aria-hidden="true">→</span></button>
-      <button v-if="$can('factory.order_update')" type="button" :disabled="isWorkLocked" class="rounded-xl px-3 py-2 text-xs font-bold transition" :class="isWorkLocked ? 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800' : 'bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200'" @click.stop="!isWorkLocked && $emit('edit', order)">{{ t.edit }}</button>
+    <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+      <button type="button" class="flex items-center gap-1 text-xs font-bold text-slate-600 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white" @click.stop="$emit('view-details', order)">
+        {{ t.details }} <span aria-hidden="true">→</span>
+      </button>
+
+      <button
+        v-if="canUpdate && isUnassigned && !isCompleted"
+        type="button"
+        class="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-700"
+        @click.stop="$emit('start-work', order)"
+      >
+        {{ t.startWork }}
+      </button>
+
+      <button
+        v-else-if="canUpdate"
+        type="button"
+        :disabled="isWorkLocked"
+        class="rounded-xl px-3 py-2 text-xs font-bold transition"
+        :class="isWorkLocked ? 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800' : 'bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200'"
+        @click.stop="!isWorkLocked && $emit('edit', order)"
+      >
+        {{ t.changeStatus }}
+      </button>
+
+      <button v-else type="button" disabled class="cursor-not-allowed rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-400 dark:bg-slate-800">
+        {{ t.changeStatus }}
+      </button>
     </div>
 
     <div v-if="!isLocked" class="pointer-events-none absolute -left-1 top-1/2 hidden -translate-y-1/2 text-xs text-slate-300 group-hover:inline">☰</div>
@@ -41,9 +66,21 @@
 
 <script>
 const COPY = {
-  hy: { orderNumber: 'Պատվերի համար', order: 'Պատվեր', code: 'Կոդ', noDescription: 'Առանց նկարագրության', created: 'Ստեղծվել է', deadline: 'Ժամկետ', consider: 'Հաշվի առնել', creator: 'Ստեղծող', operator: 'Օպերատոր', unassigned: 'Չնշված', takenByOther: 'Պատվերը վերցված է այլ օպերատորի կողմից', completed: 'Առաջադրանքը ավարտված է', noEditPermission: 'Փոփոխման իրավունքը տրված չէ', details: 'Մանրամասներ', edit: 'Փոփոխել', noStatus: 'Առանց կարգավիճակի', statuses: { confirmed: 'Կատարվում է', canceled: 'Մերժված', date_changed: 'Ժամկետը փոխված է', finished: 'Ավարտված', pending: 'Սպասում է', waiting: 'Սպասում է', in_progress: 'Ընթացքում' } },
-  ru: { orderNumber: 'Номер заказа', order: 'Заказ', code: 'Код', noDescription: 'Без описания', created: 'Создан', deadline: 'Срок', consider: 'Уточнить', creator: 'Создатель', operator: 'Оператор', unassigned: 'Не назначен', takenByOther: 'Заказ взят другим оператором', completed: 'Задание завершено', noEditPermission: 'Нет права на изменение', details: 'Подробнее', edit: 'Изменить', noStatus: 'Без статуса', statuses: { confirmed: 'В работе', canceled: 'Отклонён', date_changed: 'Срок изменён', finished: 'Завершён', pending: 'Ожидает', waiting: 'Ожидает', in_progress: 'В работе' } },
-  en: { orderNumber: 'Order number', order: 'Order', code: 'Code', noDescription: 'No description', created: 'Created', deadline: 'Deadline', consider: 'Review', creator: 'Creator', operator: 'Operator', unassigned: 'Unassigned', takenByOther: 'Order is assigned to another operator', completed: 'Task completed', noEditPermission: 'Edit permission not granted', details: 'Details', edit: 'Edit', noStatus: 'No status', statuses: { confirmed: 'In progress', canceled: 'Rejected', date_changed: 'Date changed', finished: 'Finished', pending: 'Pending', waiting: 'Pending', in_progress: 'In progress' } },
+  hy: {
+    orderNumber: 'Պատվերի համար', order: 'Պատվեր', code: 'Կոդ', noDescription: 'Առանց նկարագրության', created: 'Ստեղծվել է', deadline: 'Ժամկետ', consider: 'Հաշվի առնել', creator: 'Ստեղծող', operator: 'Կատարող', unassigned: 'Չվերցված',
+    takenByOther: 'Պատվերը վերցված է այլ աշխատակցի կողմից', completed: 'Աշխատանքը ավարտված է', noEditPermission: 'Կարգավիճակ փոխելու թույլտվություն չկա', details: 'Մանրամասներ', startWork: 'Սկսել աշխատանքը', changeStatus: 'Փոխել կարգավիճակը', noStatus: 'Առանց կարգավիճակի',
+    statuses: { confirmed: 'Կատարվում է', canceled: 'Մերժված', date_changed: 'Ժամկետը փոխված է', finished: 'Ավարտված', pending: 'Սպասում է', waiting: 'Սպասում է', in_progress: 'Ընթացքում' },
+  },
+  ru: {
+    orderNumber: 'Номер заказа', order: 'Заказ', code: 'Код', noDescription: 'Без описания', created: 'Создан', deadline: 'Срок', consider: 'Уточнить', creator: 'Создатель', operator: 'Исполнитель', unassigned: 'Не взят',
+    takenByOther: 'Заказ взят другим сотрудником', completed: 'Работа завершена', noEditPermission: 'Нет разрешения на изменение статуса', details: 'Подробнее', startWork: 'Начать работу', changeStatus: 'Изменить статус', noStatus: 'Без статуса',
+    statuses: { confirmed: 'В работе', canceled: 'Отклонён', date_changed: 'Срок изменён', finished: 'Завершён', pending: 'Ожидает', waiting: 'Ожидает', in_progress: 'В работе' },
+  },
+  en: {
+    orderNumber: 'Order number', order: 'Order', code: 'Code', noDescription: 'No description', created: 'Created', deadline: 'Deadline', consider: 'Review', creator: 'Creator', operator: 'Assignee', unassigned: 'Unassigned',
+    takenByOther: 'Order is assigned to another employee', completed: 'Work is finished', noEditPermission: 'Status update permission is not granted', details: 'Details', startWork: 'Start work', changeStatus: 'Change status', noStatus: 'No status',
+    statuses: { confirmed: 'In progress', canceled: 'Rejected', date_changed: 'Date changed', finished: 'Finished', pending: 'Pending', waiting: 'Pending', in_progress: 'In progress' },
+  },
 }
 
 export default {
@@ -54,26 +91,28 @@ export default {
     currentUserId: { type: [Number, String], required: true },
   },
   computed: {
-    locale() { const code = String(this.$i18n?.locale || 'hy').toLowerCase().split('-')[0]; return ['hy','ru','en'].includes(code) ? code : 'hy' },
+    locale() { const code = String(this.$i18n?.locale || 'hy').toLowerCase().split('-')[0]; return ['hy', 'ru', 'en'].includes(code) ? code : 'hy' },
     t() { return COPY[this.locale] || COPY.hy },
+    canUpdate() { return this.$can('factory.order_update') },
     factoryOrder() {
-      if (!this.order.factory_orders) return null
-      return this.order.factory_orders.find((o) => String(o.factory_id) === String(this.factoryId))
+      if (!Array.isArray(this.order.factory_orders)) return null
+      return this.order.factory_orders.find((item) => String(item.factory_id) === String(this.factoryId)) || null
     },
     status() {
-      const s = this.factoryOrder?.status
-      if (!s || s === 'pending') return null
-      return s
+      const value = this.factoryOrder?.status
+      if (!value || ['pending', 'waiting'].includes(String(value))) return null
+      return value
     },
     operatorName() { return this.factoryOrder?.operator?.name || null },
+    isUnassigned() { return !this.factoryOrder?.operator_id },
     statusLabel() { return this.status ? (this.t.statuses[this.status] || this.status) : this.t.noStatus },
     isTakenByOther() {
-      const opId = this.factoryOrder?.operator_id
-      return Boolean(opId) && String(opId) !== String(this.currentUserId)
+      const operatorId = this.factoryOrder?.operator_id
+      return Boolean(operatorId) && String(operatorId) !== String(this.currentUserId)
     },
     isCompleted() { return ['finished', 'confirmed_done', 'completed'].includes(String(this.status || '').toLowerCase()) },
     isWorkLocked() { return this.isTakenByOther || this.isCompleted },
-    isLocked() { return this.isWorkLocked || !this.$can('factory.order_update') },
+    isLocked() { return this.isWorkLocked || !this.canUpdate },
     badgeClass() {
       const status = String(this.status || '').toLowerCase()
       if (['finished', 'confirmed_done', 'completed'].includes(status)) return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300'
@@ -89,9 +128,12 @@ export default {
     },
   },
   methods: {
-    onDragStart(e) {
-      if (this.isLocked) { e.preventDefault(); return }
-      e.dataTransfer.effectAllowed = 'move'
+    onDragStart(event) {
+      if (this.isLocked) {
+        event.preventDefault()
+        return
+      }
+      event.dataTransfer.effectAllowed = 'move'
       this.$emit('drag-start', this.order)
     },
   },
