@@ -116,7 +116,7 @@ export const actions = {
       return data || true
     } catch (error) {
       commit('SET_ERROR', error.response?.data || error.message)
-      return false
+      throw error
     }
   },
 
