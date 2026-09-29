@@ -11,15 +11,12 @@
       :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
       :aria-label="$t('admin_layout.navigation')"
     >
-      <div class="flex h-20 items-center justify-between border-b border-slate-100 px-5 dark:border-slate-900">
+      <div class="flex min-h-20 items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-900">
         <nuxt-link :to="localePath('/admin')" class="flex min-w-0 items-center gap-3" @click.native="closeSidebar">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950">
             <span class="text-sm font-black tracking-tight">MW</span>
           </div>
-          <div class="min-w-0">
-            <p class="truncate text-sm font-bold tracking-tight">MetalWorks</p>
-            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $t('admin_layout.operations_admin') }}</p>
-          </div>
+          <WorkspaceIdentity class="min-w-0 flex-1" />
         </nuxt-link>
         <button
           type="button"
@@ -47,9 +44,7 @@
             active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950"
             @click.native="closeSidebar"
           >
-            <span
-              class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-500 transition group-hover:bg-white dark:bg-slate-900 dark:text-slate-300 dark:group-hover:bg-slate-800"
-            >
+            <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-500 transition group-hover:bg-white dark:bg-slate-900 dark:text-slate-300 dark:group-hover:bg-slate-800">
               {{ item.short }}
             </span>
             <span class="min-w-0 flex-1 truncate">{{ navigationLabel(item) }}</span>
@@ -101,10 +96,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div class="min-w-0">
-              <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ $t('admin_layout.operations_management') }}</p>
-              <p class="hidden truncate text-xs text-slate-500 dark:text-slate-400 sm:block">{{ $t('admin_layout.operations_description') }}</p>
-            </div>
+            <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ pageTitle }}</p>
           </div>
           <div class="flex items-center gap-2">
             <div data-language-switcher class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -117,7 +109,6 @@
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4a1.65 1.65 0 0 0 1-1.51V2.4a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1.08 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.12.61.65 1.05 1.27 1.05H21a2 2 0 1 1 0 4h-.33c-.62 0-1.15.44-1.27 1.05Z" />
               </svg>
               <span class="hidden sm:inline">{{ $t('profile.settings') }}</span>
             </nuxt-link>
@@ -131,7 +122,10 @@
 </template>
 
 <script>
+import WorkspaceIdentity from '@/components/layout/WorkspaceIdentity.vue'
+
 export default {
+  components: { WorkspaceIdentity },
   middleware: ['role-guard'],
   meta: { role: 'admin' },
   data() {
@@ -151,6 +145,13 @@ export default {
     locale() {
       const code = String(this.$i18n?.locale || 'hy').toLowerCase().split('-')[0]
       return ['hy', 'ru', 'en'].includes(code) ? code : 'hy'
+    },
+    pageTitle() {
+      const path = this.$route.path
+      const item = this.navigation.find((entry) =>
+        entry.exact ? path === entry.to : path.startsWith(entry.to)
+      )
+      return item ? this.navigationLabel(item) : this.$t('admin_layout.dashboard')
     },
   },
   watch: {
