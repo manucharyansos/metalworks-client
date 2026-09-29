@@ -1,10 +1,24 @@
 <template>
   <div class="min-w-0">
-    <p class="truncate text-sm font-bold tracking-tight text-slate-900 dark:text-white" :title="displayName">
+    <p
+      class="truncate text-sm font-bold tracking-tight text-slate-900 dark:text-white"
+      :title="displayName"
+    >
       {{ displayName }}
     </p>
-    <p class="truncate text-xs text-slate-500 dark:text-slate-400" :title="secondary">
-      {{ secondary }}
+    <p
+      v-if="email"
+      class="truncate text-[11px] leading-4 text-slate-500 dark:text-slate-400"
+      :title="email"
+    >
+      {{ email }}
+    </p>
+    <p
+      v-if="phone"
+      class="truncate text-[11px] leading-4 text-slate-500 dark:text-slate-400"
+      :title="phone"
+    >
+      {{ phone }}
     </p>
   </div>
 </template>
@@ -30,16 +44,13 @@ export default {
         .join(' ')
         .trim()
 
-      return fallback || this.authUser.email || 'MetalWorks'
+      return fallback || this.email || 'MetalWorks'
     },
-    secondary() {
-      return String(
-        this.identity?.phone ||
-          this.authUser.phone ||
-          this.identity?.email ||
-          this.authUser.email ||
-          ''
-      ).trim()
+    email() {
+      return String(this.identity?.email || this.authUser.email || '').trim()
+    },
+    phone() {
+      return String(this.identity?.phone || this.authUser.phone || '').trim()
     },
   },
   watch: {
