@@ -52,7 +52,7 @@
             >
               {{ item.short }}
             </span>
-            <span class="min-w-0 flex-1 truncate">{{ $t(item.labelKey) }}</span>
+            <span class="min-w-0 flex-1 truncate">{{ navigationLabel(item) }}</span>
           </nuxt-link>
         </div>
       </nav>
@@ -141,10 +141,17 @@ export default {
         { to: '/admin', labelKey: 'admin_layout.dashboard', short: '01', exact: true },
         { to: '/admin/reports', labelKey: 'admin_layout.reports', short: '02', exact: false },
         { to: '/admin/workload', labelKey: 'admin_layout.workload', short: '03', exact: false },
-        { to: '/admin/users', labelKey: 'admin_layout.employees', short: '04', exact: false },
-        { to: '/admin/file-extension', labelKey: 'admin_layout.file_types', short: '05', exact: false },
+        { to: '/admin/activity', label: { hy: 'Աշխատակիցների գործունեություն', ru: 'Активность сотрудников', en: 'Employee activity' }, short: '04', exact: false },
+        { to: '/admin/users', labelKey: 'admin_layout.employees', short: '05', exact: false },
+        { to: '/admin/file-extension', labelKey: 'admin_layout.file_types', short: '06', exact: false },
       ],
     }
+  },
+  computed: {
+    locale() {
+      const code = String(this.$i18n?.locale || 'hy').toLowerCase().split('-')[0]
+      return ['hy', 'ru', 'en'].includes(code) ? code : 'hy'
+    },
   },
   watch: {
     '$route.fullPath'() {
@@ -152,6 +159,10 @@ export default {
     },
   },
   methods: {
+    navigationLabel(item) {
+      if (item.label) return item.label[this.locale] || item.label.hy
+      return this.$t(item.labelKey)
+    },
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen
     },
