@@ -18,11 +18,33 @@ export const getters = {
 
 export const actions = {
   async fetchFactoryFilePolicies({ commit }) {
-    const { data } = await this.$axios.get('/api/factory-file-policies')
-    if (!Array.isArray(data?.data))
-      throw new Error('Invalid factory upload policy response')
-    commit('SET_FACTORY', data.data)
-    return data.data
+    let factories
+    try {
+      const { data } = await this.$axios.get('/api/factory-file-policies')
+      if (!Array.isArray(data?.data))
+        throw new Error('Invalid factory upload policy response')
+      factories = data.data
+    } catch (error) {
+      if (![404, 405].includes(error.response?.status)) throw error
+      // Older deployed APIs expose the factory list but not this read endpoint.
+      // Their upload endpoint still enforces the configured formats. Do not
+      // substitute guessed defaults or treat auth/network errors as compatibility.
+      const { data } = await this.$axios.get('/api/factories/factory')
+      if (!Array.isArray(data)) throw new Error('Invalid factory list response')
+      factories = data.map((factory) => {
+        const hasConfigured = 'extensions' in factory || 'file_extensions' in factory
+        const configured = factory.extensions ?? factory.file_extensions
+        if (hasConfigured && !Array.isArray(configured))
+          throw new Error('Invalid factory upload policy response')
+        return {
+          ...factory,
+          extensions: hasConfigured ? configured : ['*'],
+          serverValidatedFormats: !hasConfigured,
+        }
+      })
+    }
+    commit('SET_FACTORY', factories)
+    return factories
   },
 
   async fetchFactory({ commit }, data) {

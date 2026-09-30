@@ -12,6 +12,16 @@
         {{ $t('file_upload.retry') }}
       </button>
     </div>
+    <div
+      v-if="factoryListError"
+      role="alert"
+      class="mb-4 rounded-lg bg-red-50 dark:bg-red-950 p-4 text-red-700 dark:text-red-300"
+    >
+      <p>{{ factoryListError }}</p>
+      <button type="button" class="mt-2 underline" @click="loadPage">
+        {{ $t('file_upload.retry') }}
+      </button>
+    </div>
     <transition name="fade">
       <div
         v-if="loading"
@@ -65,6 +75,7 @@
     </transition>
 
     <div
+      v-if="projectReady"
       class="grid grid-cols-1 lg:grid-cols-[minmax(300px,_1fr)_3fr] gap-6 xl:gap-8"
     >
       <aside class="space-y-6">
@@ -398,6 +409,7 @@
       :is-dxf-file="isDxfFile"
       :factory="selectedFactory"
       :extensions="allowedExtensions"
+      :server-validated-formats="serverValidatedFormats"
       :policy-loading="policyLoading"
       :policy-error="policyError"
       :upload-error="uploadError"
@@ -551,6 +563,8 @@ export default {
       loadingFactoryId: null,
       loading: false,
       pageError: '',
+      factoryListError: '',
+      projectReady: false,
       uploading: false,
       recording: false,
       factoryPolicies: [],
@@ -609,6 +623,11 @@ export default {
       )
       return normalizeExtensions(policy?.extensions)
     },
+    serverValidatedFormats() {
+      return !!this.factoryPolicies.find(
+        (factory) => this.n(factory.id) === this.selectedFactoryId
+      )?.serverValidatedFormats
+    },
     fileAccept() {
       return inputAccept(
         this.allowedExtensions,
@@ -655,6 +674,7 @@ export default {
     ...mapActions('pmp', ['fetchPmp', 'deleteFile', 'createPmpFilesByFactory']),
     ...mapActions('factory', [
       'fetchFactoryFilePolicies',
+      'fetchFactory',
       'downloadUploadedFile',
     ]),
     ...mapActions('materials', ['fetchMaterials']),
@@ -663,14 +683,32 @@ export default {
       if (this.loading) return
       this.loading = true
       this.pageError = ''
+      this.factoryListError = ''
+      this.projectReady = false
       try {
-        const [, policies] = await Promise.all([
+        const [project, policies] = await Promise.allSettled([
           this.fetchPmp(this.id),
           this.fetchFactoryFilePolicies(),
         ])
-        this.factoryPolicies = policies
+        if (project.status === 'fulfilled') {
+          const number = (this.getPmp.remote_number || []).find(
+            (remote) => this.n(remote.id) === this.n(this.id)
+          )
+          if (number) {
+            this.projectReady = true
+            this.showFiles(number)
+          } else this.pageError = this.$t('file_upload.project_failed')
+        } else this.pageError = this.$t('file_upload.project_failed')
+
+        if (policies.status === 'fulfilled') this.factoryPolicies = policies.value
+        else {
+          this.factoryPolicies = []
+          // A formats error must not hide an otherwise readable project.
+          if (!(await this.fetchFactory()))
+            this.factoryListError = this.$t('file_upload.factories_failed')
+        }
       } catch (error) {
-        this.pageError = this.$t('file_upload.page_failed')
+        this.factoryListError = this.$t('file_upload.factories_failed')
       } finally {
         this.loading = false
       }

@@ -189,6 +189,9 @@
     "recording_format_unavailable": "No recording format is available. Choose an existing file.",
     "microphone_denied": "Microphone access was denied. You can choose an audio file.",
     "recording_failed": "Recording failed. Choose an audio file or try again.",
-    "page_failed": "Could not load the project or factory formats. Please retry."
+    "page_failed": "Could not load the project or factory formats. Please retry.",
+    "server_formats": "Allowed formats are checked by the server when you add a file.",
+    "project_failed": "Could not open the selected subgroup. Please retry.",
+    "factories_failed": "Could not load the factory list. Please retry."
   }
 }

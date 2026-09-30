@@ -72,7 +72,8 @@
               v-else
               class="text-xs text-gray-500 dark:text-gray-400 break-words"
             >
-              {{ $t('file_upload.formats') }}: {{ formatLabel }} ·
+              <template v-if="serverValidatedFormats">{{ $t('file_upload.server_formats') }}</template>
+              <template v-else>{{ $t('file_upload.formats') }}: {{ formatLabel }}</template> ·
               {{ $t('file_upload.limit') }}
             </p>
             <fieldset
@@ -171,6 +172,7 @@ export default {
     isDxfFile: { type: Boolean, default: false },
     factory: { type: Object, default: null },
     extensions: { type: Array, default: () => [] },
+    serverValidatedFormats: { type: Boolean, default: false },
     policyLoading: { type: Boolean, default: false },
     policyError: { type: String, default: '' },
     uploadError: { type: String, default: '' },

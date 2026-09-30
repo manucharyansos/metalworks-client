@@ -6,7 +6,7 @@ Login retries the existing Sanctum cookie strategy once only for HTTP 419. Each 
 
 ## Dynamic factory uploads
 
-The engineer file page reads `/api/factory-file-policies`, the authenticated read-only policy endpoint already present in metalworks-server. Both the factory list and the upload picker use that response. Every opening reloads the rules to reflect admin changes. Missing or failed policies show an error with Retry and disable upload; an empty configured extension list permits no uploads.
+The engineer file page reads `/api/factory-file-policies`, the authenticated read-only policy endpoint already present in metalworks-server. When that endpoint exists, the upload picker uses its configured extensions. The currently deployed API returns HTTP 404 for it. Only HTTP 404/405 enables compatibility with the existing `/api/factories/factory` endpoint; its factory records and operators are retained. If this older response has no format metadata, the picker accepts safe candidate files and clearly states that the server will validate configured formats on save. Configured empty lists remain empty; auth, network, server and malformed-policy errors do not enable this compatibility mode. Every opening reloads the rules to reflect admin changes. Failed policies show an error with Retry and disable upload; an empty configured extension list permits no uploads.
 
 | Factory code | Modal behavior |
 | --- | --- |
@@ -23,14 +23,26 @@ The modal names the selected factory, lists its formats and size limit, supports
 
 PMP group/subgroup creation, file upload and deletion propagate errors instead of swallowing them. Failed saves retain input and display server validation. Successful upload does not become a second upload attempt merely because refreshing the list failed.
 
+## Group/subgroup selection and existing order flows
+
+The subgroup inputs and pickers stay disabled until an exact existing group is selected or fully typed. Matching uses the field currently being edited; the old counterpart cannot keep a stale group or subgroup selected. Partial codes remain editable. Selecting or changing a group fills its name and exposes only its subgroups; changing to another group clears the child selection.
+
+Typing a missing group or subgroup shows its Create action immediately, disabled until the required two fields are complete. An existing subgroup shows View instead of Create. Navigation uses the matching subgroup's server ID. New groups remain selected for the next step. Successful create responses update the group list without removing existing file data, so a failed refresh cannot offer another create for the saved record.
+
+Opening a subgroup selects it and displays its factories directly. Project loading and factory loading have separate errors; a format failure cannot hide a readable project. Failed project reads do not expose a previous project's stale files.
+
+Order creation keeps its existing server payload, selected-file quantities, all-files flag and operator assignment. Changing a group/subgroup clears file IDs from the former subgroup and retains client, date and description. Selecting all files in a factory now checks membership rather than the total count across factories; toggling affects only that factory and retains the other selections and quantities.
+
 ## Validation
 
-- 37 Node regression tests pass: installed CookieScheme CSRF handshake and retry limits; identity races; rules for all six factories; configured/empty policies; upload limits and dangerous types; UTF-8 text; failure retention; DXF zero thickness; duplicate submissions; preview races; numeric input rendering; voice stream cleanup and denied permission.
+- 63 Node regression tests pass: four role layouts and localized navigation; existing order selected/all-file payloads, operator assignments and failure retention; group/subgroup input transitions and native disabled fields; legacy API compatibility and permission/error boundaries; installed CookieScheme CSRF handshake and retry limits; identity races; rules for all six factories; configured/empty policies; upload limits and dangerous types; UTF-8 text; failure retention; DXF zero thickness; duplicate submissions; preview races; numeric input rendering; voice stream cleanup and denied permission.
 - Changed JavaScript/Vue sources pass ESLint with existing no-console warnings in the factory store.
 - `npm run generate:server` succeeds for `/work/` and the production API URL.
 - The reported mobile screenshot and responsive source were reviewed. Cloud-browser policy blocked an isolated local fixture. No actual mobile runtime verification is claimed.
 
 ## Live QA
+
+The current deployed engineer order list, order form/client selector and populated profile were also opened successfully during the compatibility investigation. No profile edits, email/code sends or live orders were submitted.
 
 A manager workspace's employee/access directories, creation options, required-name validation, materials, client editing and production sections were inspected. A marked QA material and thickness update persisted after reload. The client's temporary edit was restored. The selected manager account differed from the initially requested account; no claim is made that the requested manager identity was tested.
 
@@ -40,4 +52,4 @@ Fixtures created by `tests/helpers/create-qa-upload-fixtures.cjs` are disposable
 
 ## Release
 
-The client code is prepared in PR #20; the Apache `/work/` build is packaged separately. This session has no deployment path to the existing metalworks.am hosting, and no production release is claimed. The backend must already expose `/api/factory-file-policies` with the existing factory extension table and permission guards (metalworks-server commit 4c6bee6 or later). No server migration or file permission relaxation was introduced in this client change.
+The client code is prepared in PR #20; the Apache `/work/` build is packaged separately. This session has no deployment path to the existing metalworks.am hosting, and no production release is claimed. The fixed client supports the current older API without a backend update. Exposing `/api/factory-file-policies` (metalworks-server commit 4c6bee6 or later) additionally lets the browser display and filter the exact configured extension list before upload. Server-side format rules, upload limits and permission guards remain authoritative in both modes. No server migration or file permission relaxation was introduced in this client change.

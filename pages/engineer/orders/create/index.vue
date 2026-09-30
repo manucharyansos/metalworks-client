@@ -627,11 +627,12 @@ export default {
     },
   },
   watch: {
-    selectedPmp(newVal) {
-      if (!newVal) {
+    selectedPmp(newVal, oldVal) {
+      if (!newVal || newVal.id !== oldVal?.id) {
         this.selectedPmpRemoteNumber = null
         this.pmpNameSearch = ''
         this.remote_number_id = null
+        this.resetPmpFileSelection()
       }
     },
     selectedFactories(newFactories) {
@@ -666,18 +667,31 @@ export default {
     ]),
 
     selectPmpGroup(pmp) {
-      this.remote_number_id = pmp.id
+      if (this.selectedPmp?.id !== pmp.id) {
+        this.selectedPmpRemoteNumber = null
+        this.pmpNameSearch = ''
+        this.remote_number_id = null
+        this.resetPmpFileSelection()
+      }
       this.selectedPmp = pmp
       this.pmpGroupSearch = pmp.group
       this.isSelectPmpGroup = false
     },
 
     async selectPmpRemoteNumber(remoteNumber) {
+      if (Number(this.remote_number_id) !== Number(remoteNumber.id)) this.resetPmpFileSelection()
       this.selectedPmpRemoteNumber = remoteNumber.remote_number
       this.pmpNameSearch = remoteNumber.remote_number
       this.isSelectPmpName = false
       this.remote_number_id = remoteNumber.id
       await this.checkPmpByRemoteNumber(remoteNumber.id)
+    },
+
+    resetPmpFileSelection() {
+      this.selectedFiles = []
+      this.fileQuantities = {}
+      this.factoryOperators = {}
+      this.autoOpenFactoryId = null
     },
 
     filterPmpGroups() {

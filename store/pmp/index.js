@@ -8,6 +8,20 @@ export const mutations = {
   SET_PMPS(state, pmps) {
     state.pmps = pmps || {}
   },
+  UPSERT_GROUP(state, payload) {
+    const group = payload?.pmp || payload
+    if (!group?.id || !group.group) return
+    const list = Array.isArray(state.pmps.pmp) ? state.pmps.pmp : []
+    const existing = list.find((item) => item.id === group.id)
+    state.pmps = {
+      ...state.pmps,
+      pmp: existing
+        ? list.map((item) =>
+            item.id === group.id ? { ...item, ...group } : item
+          )
+        : [...list, group],
+    }
+  },
   SET_PMP(state, pmp) {
     state.pmp = (pmp && pmp.pmp) || pmp || {}
   },
@@ -31,6 +45,7 @@ export const actions = {
     try {
       const { data } = await this.$axios.post('/api/engineers/pmps', pmp)
       commit('SET_PMP', data)
+      commit('UPSERT_GROUP', data)
       commit('SET_ERROR', null)
       return data
     } catch (error) {
@@ -46,6 +61,7 @@ export const actions = {
         pmp
       )
       commit('SET_PMP', data)
+      commit('UPSERT_GROUP', data)
       commit('SET_ERROR', null)
       return data
     } catch (error) {

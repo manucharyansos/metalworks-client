@@ -443,7 +443,7 @@ export default {
         (remote) => remote.files
       )
       return (
-        allFiles.length > 0 && this.selectedFiles.length === allFiles.length
+        allFiles.length > 0 && allFiles.every((file) => this.selectedFiles.includes(file.id))
       )
     },
     areQuantitiesValid() {

@@ -21,27 +21,27 @@
 
           <div class="space-y-4">
             <div class="relative">
-              <label class="field-label">Ծածկագիր</label>
+              <label for="pmp-group-code" class="field-label">Ծածկագիր</label>
               <div class="relative">
-                <input v-model.trim="pmpGroup" type="text" maxlength="3" class="control pr-10 font-mono" placeholder="000" autocomplete="off" @focus="openDropdown('groupCode')" @input="onGroupCodeInput" />
-                <button type="button" class="picker-button" @click="toggleDropdown('groupCode')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
+                <input id="pmp-group-code" v-model.trim="pmpGroup" :disabled="saving" type="text" maxlength="3" class="control pr-10 font-mono" placeholder="000" autocomplete="off" @focus="openDropdown('groupCode')" @input="onGroupCodeInput" />
+                <button type="button" class="picker-button" :disabled="saving" @click="toggleDropdown('groupCode')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
                 <div v-if="isDD.groupCode && filteredGroupsByGroup.length" class="dropdown-card">
-                  <button v-for="p in filteredGroupsByGroup" :key="p.id" type="button" class="dropdown-row" @click="applyGroup(p)"><span class="font-mono font-black text-slate-900 dark:text-white">{{ p.group }}</span><span class="min-w-0 flex-1 truncate text-right text-xs text-slate-500 dark:text-slate-400">{{ p.group_name }}</span></button>
+                  <button v-for="p in filteredGroupsByGroup" :key="p.id" type="button" :disabled="saving" class="dropdown-row" @click="applyGroup(p)"><span class="font-mono font-black text-slate-900 dark:text-white">{{ p.group }}</span><span class="min-w-0 flex-1 truncate text-right text-xs text-slate-500 dark:text-slate-400">{{ p.group_name }}</span></button>
                 </div>
               </transition>
             </div>
 
             <div class="relative">
-              <label class="field-label">Անվանում</label>
+              <label for="pmp-group-name" class="field-label">Անվանում</label>
               <div class="relative">
-                <input v-model.trim="pmpGroupName" type="text" class="control pr-10" placeholder="Մուտքագրեք անվանում" autocomplete="off" @focus="openDropdown('groupName')" @input="onGroupNameInput" />
-                <button type="button" class="picker-button" @click="toggleDropdown('groupName')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
+                <input id="pmp-group-name" v-model.trim="pmpGroupName" :disabled="saving" type="text" class="control pr-10" placeholder="Մուտքագրեք անվանում" autocomplete="off" @focus="openDropdown('groupName')" @input="onGroupNameInput" />
+                <button type="button" class="picker-button" :disabled="saving" @click="toggleDropdown('groupName')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
                 <div v-if="isDD.groupName && filteredGroupsByName.length" class="dropdown-card">
-                  <button v-for="p in filteredGroupsByName" :key="p.id" type="button" class="dropdown-row" @click="applyGroup(p)"><span class="min-w-0 flex-1 truncate text-left font-bold text-slate-700 dark:text-slate-200">{{ p.group_name }}</span><span class="font-mono text-xs text-slate-400">{{ p.group }}</span></button>
+                  <button v-for="p in filteredGroupsByName" :key="p.id" type="button" :disabled="saving" class="dropdown-row" @click="applyGroup(p)"><span class="min-w-0 flex-1 truncate text-left font-bold text-slate-700 dark:text-slate-200">{{ p.group_name }}</span><span class="font-mono text-xs text-slate-400">{{ p.group }}</span></button>
                 </div>
               </transition>
             </div>
@@ -60,27 +60,27 @@
 
           <div class="space-y-4" :class="{ 'pointer-events-none': !isExistingGroup }">
             <div class="relative">
-              <label class="field-label">Համար</label>
+              <label for="pmp-remote-code" class="field-label">Համար</label>
               <div class="relative">
-                <input v-model.trim="pmpRemoteNumber" type="text" maxlength="2" :disabled="!isExistingGroup" class="control pr-10 font-mono" placeholder="00" autocomplete="off" @focus="openDropdown('remoteCode')" @input="onRemoteCodeInput" />
-                <button type="button" class="picker-button" :disabled="!isExistingGroup" @click="toggleDropdown('remoteCode')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
+                <input id="pmp-remote-code" v-model.trim="pmpRemoteNumber" type="text" maxlength="2" :disabled="saving || !isExistingGroup" class="control pr-10 font-mono" placeholder="00" autocomplete="off" @focus="openDropdown('remoteCode')" @input="onRemoteCodeInput" />
+                <button type="button" class="picker-button" :disabled="saving || !isExistingGroup" @click="toggleDropdown('remoteCode')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
                 <div v-if="isDD.remoteCode && filteredRemotesByNumber.length" class="dropdown-card">
-                  <button v-for="r in filteredRemotesByNumber" :key="r.id" type="button" class="dropdown-row" @click="applyRemote(r)"><span class="font-mono font-black text-slate-900 dark:text-white">{{ r.remote_number }}</span><span class="min-w-0 flex-1 truncate text-right text-xs text-slate-500 dark:text-slate-400">{{ r.remote_number_name }}</span></button>
+                  <button v-for="r in filteredRemotesByNumber" :key="r.id" type="button" :disabled="saving" class="dropdown-row" @click="applyRemote(r)"><span class="font-mono font-black text-slate-900 dark:text-white">{{ r.remote_number }}</span><span class="min-w-0 flex-1 truncate text-right text-xs text-slate-500 dark:text-slate-400">{{ r.remote_number_name }}</span></button>
                 </div>
               </transition>
             </div>
 
             <div class="relative">
-              <label class="field-label">Նկարագրություն</label>
+              <label for="pmp-remote-name" class="field-label">Նկարագրություն</label>
               <div class="relative">
-                <input v-model.trim="pmpRemoteNumberName" type="text" :disabled="!isExistingGroup" class="control pr-10" placeholder="Մուտքագրեք նկարագրություն" autocomplete="off" @focus="openDropdown('remoteName')" @input="onRemoteNameInput" />
-                <button type="button" class="picker-button" :disabled="!isExistingGroup" @click="toggleDropdown('remoteName')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
+                <input id="pmp-remote-name" v-model.trim="pmpRemoteNumberName" type="text" :disabled="saving || !isExistingGroup" class="control pr-10" placeholder="Մուտքագրեք նկարագրություն" autocomplete="off" @focus="openDropdown('remoteName')" @input="onRemoteNameInput" />
+                <button type="button" class="picker-button" :disabled="saving || !isExistingGroup" @click="toggleDropdown('remoteName')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
                 <div v-if="isDD.remoteName && filteredRemotesByName.length" class="dropdown-card">
-                  <button v-for="r in filteredRemotesByName" :key="r.id" type="button" class="dropdown-row" @click="applyRemote(r)"><span class="min-w-0 flex-1 truncate text-left font-bold text-slate-700 dark:text-slate-200">{{ r.remote_number_name }}</span><span class="font-mono text-xs text-slate-400">{{ r.remote_number }}</span></button>
+                  <button v-for="r in filteredRemotesByName" :key="r.id" type="button" :disabled="saving" class="dropdown-row" @click="applyRemote(r)"><span class="min-w-0 flex-1 truncate text-left font-bold text-slate-700 dark:text-slate-200">{{ r.remote_number_name }}</span><span class="font-mono text-xs text-slate-400">{{ r.remote_number }}</span></button>
                 </div>
               </transition>
             </div>
@@ -92,8 +92,8 @@
         <div class="panel-card flex flex-col">
           <div class="panel-heading"><span class="step-badge">03</span><div><h2 class="panel-title">Գործողություններ</h2></div></div>
           <div class="flex flex-1 flex-col justify-center gap-3">
-            <button v-if="showCreateGroup && $can('pmp.create')" type="button" :disabled="saving" class="action-button bg-emerald-600 text-white hover:bg-emerald-700" @click="addPmpGroup"><span class="action-icon">+</span><span><b>Ստեղծել խումբ</b><small>Պահպանել նոր PMP խումբ</small></span></button>
-            <button v-if="showCreateRemote && $can('pmp.create')" type="button" :disabled="saving" class="action-button bg-blue-600 text-white hover:bg-blue-700" @click="addPmpGroupRemoteNumber"><span class="action-icon">+</span><span><b>Ստեղծել ենթախումբ</b><small>Ավելացնել ընտրված խմբին</small></span></button>
+            <button v-if="showCreateGroup && $can('pmp.create')" type="button" :disabled="saving || !canCreateGroup" class="action-button bg-emerald-600 text-white hover:bg-emerald-700" @click="addPmpGroup"><span class="action-icon">+</span><span><b>Ստեղծել խումբ</b><small>Պահպանել նոր PMP խումբ</small></span></button>
+            <button v-if="showCreateRemote && $can('pmp.create')" type="button" :disabled="saving || !canCreateRemote" class="action-button bg-blue-600 text-white hover:bg-blue-700" @click="addPmpGroupRemoteNumber"><span class="action-icon">+</span><span><b>Ստեղծել ենթախումբ</b><small>Ավելացնել ընտրված խմբին</small></span></button>
             <button v-if="showView && $can('pmp_files.view')" type="button" :disabled="saving" class="action-button bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200" @click="viewFiles"><span class="action-icon">→</span><span><b>Դիտել ֆայլերը</b><small>Բացել ընտրված ենթախումբը</small></span></button>
             <div v-if="showView && !$can('pmp_files.view')" class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-300">Ենթախումբը ընտրված է, բայց ֆայլեր դիտելու ֆունկցիան ձեզ տրված չէ։</div>
             <div v-if="!showCreateGroup && !showCreateRemote && !showView" class="rounded-2xl border border-dashed border-slate-200 p-6 text-center dark:border-slate-800"><p class="text-sm font-bold text-slate-600 dark:text-slate-300">Ընտրեք տվյալները</p><p class="mt-1 text-xs leading-5 text-slate-400">Հասանելի գործողությունները կհայտնվեն այստեղ։</p></div>
@@ -121,6 +121,8 @@ export default {
       pmpGroupName: '',
       pmpRemoteNumber: '',
       pmpRemoteNumberName: '',
+      groupLookupField: 'code',
+      remoteLookupField: 'number',
       isDD: { groupCode: false, groupName: false, remoteCode: false, remoteName: false },
       pmpId: null,
       remoteNumberId: null,
@@ -143,11 +145,24 @@ export default {
     },
     existingGroup() {
       const list = this.getPmpes?.pmp || []
-      const code = this.pmpGroup ? this.pmpGroup.padStart(3, '0') : null
-      const name = this.pmpGroupName || null
-      return list.find((p) => (code && String(p.group) === code) || (name && String(p.group_name) === name)) || null
+      if (this.groupLookupField === 'name') {
+        const name = this.pmpGroupName.trim().toLowerCase()
+        return name ? list.find((p) => String(p.group_name).trim().toLowerCase() === name) || null : null
+      }
+      const code = this.pmpGroup.length === 3 ? this.pmpGroup : null
+      return code ? list.find((p) => String(p.group) === code) || null : null
     },
     isExistingGroup() { return !!this.existingGroup },
+    existingRemote() {
+      if (!this.isExistingGroup) return null
+      const list = this.existingGroup.remote_number || []
+      if (this.remoteLookupField === 'name') {
+        const name = this.pmpRemoteNumberName.trim().toLowerCase()
+        return name ? list.find((r) => String(r.remote_number_name).trim().toLowerCase() === name) || null : null
+      }
+      const number = this.pmpRemoteNumber.length === 2 ? this.pmpRemoteNumber : null
+      return number ? list.find((r) => String(r.remote_number) === number) || null : null
+    },
     filteredRemotesByNumber() {
       const q = (this.pmpRemoteNumber || '').toLowerCase()
       const list = this.pmpRemoteNumbers || []
@@ -160,39 +175,44 @@ export default {
       if (!q) return list
       return list.filter((r) => String(r.remote_number_name || '').toLowerCase().includes(q) || String(r.remote_number || '').toLowerCase().includes(q))
     },
-    showCreateGroup() { return !!this.pmpGroup && !!this.pmpGroupName && !this.isExistingGroup },
-    showCreateRemote() {
-      if (!this.isExistingGroup || !this.pmpRemoteNumber || !this.pmpRemoteNumberName) return false
-      const num = this.pmpRemoteNumber.padStart(2, '0')
-      return !(this.pmpRemoteNumbers || []).some((r) => String(r.remote_number) === String(num) || String(r.remote_number_name) === String(this.pmpRemoteNumberName))
+    showCreateGroup() { return !!(this.pmpGroup || this.pmpGroupName) && !this.isExistingGroup },
+    canCreateGroup() {
+      if (!this.showCreateGroup || !this.pmpGroup || !this.pmpGroupName) return false
+      return !(this.getPmpes?.pmp || []).some((p) => String(p.group) === this.pmpGroup.padStart(3, '0') || String(p.group_name).trim().toLowerCase() === this.pmpGroupName.toLowerCase())
     },
-    showView() { return this.isExistingGroup && !!this.remoteNumberId },
+    showCreateRemote() { return this.isExistingGroup && !!(this.pmpRemoteNumber || this.pmpRemoteNumberName) && !this.existingRemote },
+    canCreateRemote() {
+      if (!this.showCreateRemote || !this.pmpRemoteNumber || !this.pmpRemoteNumberName) return false
+      return !(this.pmpRemoteNumbers || []).some((r) => String(r.remote_number) === this.pmpRemoteNumber.padStart(2, '0') || String(r.remote_number_name).trim().toLowerCase() === this.pmpRemoteNumberName.toLowerCase())
+    },
+    showView() { return !!this.existingRemote },
   },
   watch: {
-    pmpGroup() { this.onGroupFieldsChanged() },
-    pmpGroupName() { this.onGroupFieldsChanged() },
-    pmpRemoteNumber() { this.linkRemoteByInputs() },
-    pmpRemoteNumberName() { this.linkRemoteByInputs() },
+    existingGroup() { this.onGroupFieldsChanged() },
+    existingRemote() { this.linkRemoteByInputs() },
   },
   created() { this.fetchPmps() },
   methods: {
     ...mapActions('pmp', ['fetchPmps', 'createPmp', 'rememberNumberPmp']),
     toggleDropdown(which) { Object.keys(this.isDD).forEach((k) => (this.isDD[k] = k === which ? !this.isDD[k] : false)) },
     openDropdown(which) { Object.keys(this.isDD).forEach((k) => (this.isDD[k] = k === which)) },
-    onGroupCodeInput() { this.isDD.groupCode = true },
-    onGroupNameInput() { this.isDD.groupName = true },
-    onRemoteCodeInput() { if (this.isExistingGroup) this.isDD.remoteCode = true },
-    onRemoteNameInput() { if (this.isExistingGroup) this.isDD.remoteName = true },
+    onGroupCodeInput() { this.groupLookupField = 'code'; this.openDropdown('groupCode'); this.onGroupFieldsChanged() },
+    onGroupNameInput() { this.groupLookupField = 'name'; this.openDropdown('groupName'); this.onGroupFieldsChanged() },
+    onRemoteCodeInput() { if (this.isExistingGroup) { this.remoteLookupField = 'number'; this.openDropdown('remoteCode'); this.linkRemoteByInputs() } },
+    onRemoteNameInput() { if (this.isExistingGroup) { this.remoteLookupField = 'name'; this.openDropdown('remoteName'); this.linkRemoteByInputs() } },
     applyGroup(p) {
-      this.pmpGroup = p.group
-      this.pmpGroupName = p.group_name
+      this.groupLookupField = 'code'
+      this.pmpGroup = String(p.group)
+      this.pmpGroupName = String(p.group_name)
       this.isDD.groupCode = false
       this.isDD.groupName = false
       this.onGroupFieldsChanged()
     },
     applyRemote(r) {
-      this.pmpRemoteNumber = r.remote_number
-      this.pmpRemoteNumberName = r.remote_number_name
+      if (!(this.pmpRemoteNumbers || []).some((part) => part.id === r.id)) return
+      this.remoteLookupField = 'number'
+      this.pmpRemoteNumber = String(r.remote_number)
+      this.pmpRemoteNumberName = String(r.remote_number_name)
       this.remoteNumberId = r.id
       this.isDD.remoteCode = false
       this.isDD.remoteName = false
@@ -200,25 +220,44 @@ export default {
     onGroupFieldsChanged() {
       const g = this.existingGroup
       if (g) {
+        if (this.pmpId !== g.id) this.resetRemote()
         this.pmpId = g.id
+        this.pmpGroup = String(g.group)
+        this.pmpGroupName = String(g.group_name)
         this.pmpRemoteNumbers = Array.isArray(g.remote_number) ? g.remote_number : []
         this.linkRemoteByInputs()
       } else {
+        if (this.pmpId) {
+          if (this.groupLookupField === 'code') this.pmpGroupName = ''
+          else this.pmpGroup = ''
+        }
         this.pmpId = null
         this.pmpRemoteNumbers = []
-        this.pmpRemoteNumber = ''
-        this.pmpRemoteNumberName = ''
-        this.remoteNumberId = null
+        this.resetRemote()
       }
     },
     linkRemoteByInputs() {
       if (!this.isExistingGroup) { this.remoteNumberId = null; return }
-      const list = this.pmpRemoteNumbers || []
-      const num = this.pmpRemoteNumber ? this.pmpRemoteNumber.padStart(2, '0') : null
-      const name = this.pmpRemoteNumberName || null
-      const hit = list.find((r) => (num && String(r.remote_number) === String(num)) || (name && String(r.remote_number_name) === String(name)))
-      if (hit) this.applyRemote(hit)
-      else this.remoteNumberId = null
+      const hit = this.existingRemote
+      if (hit) {
+        this.pmpRemoteNumber = String(hit.remote_number)
+        this.pmpRemoteNumberName = String(hit.remote_number_name)
+        this.remoteNumberId = hit.id
+      } else {
+        if (this.remoteNumberId) {
+          if (this.remoteLookupField === 'number') this.pmpRemoteNumberName = ''
+          else this.pmpRemoteNumber = ''
+        }
+        this.remoteNumberId = null
+      }
+    },
+    resetRemote() {
+      this.pmpRemoteNumber = ''
+      this.pmpRemoteNumberName = ''
+      this.remoteNumberId = null
+      this.remoteLookupField = 'number'
+      this.isDD.remoteCode = false
+      this.isDD.remoteName = false
     },
     async addPmpGroup() {
       if (this.saving) return
@@ -229,8 +268,12 @@ export default {
       try {
         await this.createPmp(payload)
         this.$notify({ type: 'success', text: 'Խումբը ստեղծվեց' })
-        this.resetAll()
-        await this.fetchPmps()
+        this.pmpGroup = payload.group
+        this.groupLookupField = 'code'
+        if (!(await this.fetchPmps())) this.$notify({ type: 'warning', text: 'Խումբը ստեղծվեց, բայց ցանկը չթարմացվեց։ Փորձեք թարմացնել էջը։' })
+        this.onGroupFieldsChanged()
+        this.isDD.groupCode = false
+        this.isDD.groupName = false
       } catch (e) { this.$notify({ type: 'error', text: uploadErrorMessage(e, 'Սխալ խումբ ստեղծելիս') }) } finally { this.saving = false }
     },
     async addPmpGroupRemoteNumber() {
@@ -244,7 +287,7 @@ export default {
       try {
         const res = await this.rememberNumberPmp({ id: this.existingGroup.id, group: this.pmpGroup.padStart(3, '0'), group_name: this.pmpGroupName, remote_number: num, remote_number_name: this.pmpRemoteNumberName })
         this.$notify({ type: 'success', text: 'Ենթախումբը ստեղծվեց' })
-        await this.fetchPmps()
+        if (!(await this.fetchPmps())) this.$notify({ type: 'warning', text: 'Ենթախումբը ստեղծվեց, բայց ցանկը չթարմացվեց։ Փորձեք թարմացնել էջը։' })
         const rid = res?.remote_number_id || this.findRemoteId(num, this.pmpRemoteNumberName)
         if (rid && this.$can('pmp_files.view')) this.$router.push({ path: this.localePath('/engineer/files/view'), query: { id: rid } })
         this.resetAll()
@@ -252,8 +295,8 @@ export default {
     },
     viewFiles() {
       if (!this.$can('pmp_files.view')) { this.$notify({ type: 'warning', text: 'Ֆայլեր դիտելու ֆունկցիան ձեզ տրված չէ' }); return }
-      if (!this.remoteNumberId) { this.$notify({ type: 'error', text: 'Ընտրեք ենթախումբ' }); return }
-      this.$router.push({ path: this.localePath('/engineer/files/view'), query: { id: this.remoteNumberId } })
+      if (!this.existingRemote) { this.$notify({ type: 'error', text: 'Ընտրեք ենթախումբ' }); return }
+      this.$router.push({ path: this.localePath('/engineer/files/view'), query: { id: this.existingRemote.id } })
     },
     findRemoteId(num, name) {
       const g = this.getPmpes?.pmp?.find((p) => p.id === this.existingGroup?.id)
@@ -265,6 +308,8 @@ export default {
       this.pmpGroupName = ''
       this.pmpRemoteNumber = ''
       this.pmpRemoteNumberName = ''
+      this.groupLookupField = 'code'
+      this.remoteLookupField = 'number'
       this.pmpId = null
       this.remoteNumberId = null
       this.pmpRemoteNumbers = []
@@ -285,7 +330,7 @@ export default {
 .picker-button { @apply absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 transition hover:text-slate-700 disabled:opacity-40 dark:hover:text-slate-200; }
 .dropdown-card { @apply absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900; }
 .dropdown-row { @apply flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800; }
-.action-button:disabled { opacity: 0.5; cursor: wait; }
+.action-button:disabled { opacity: 0.5; cursor: not-allowed; }
 .action-button { @apply flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left shadow-sm transition; }
 .action-button span:last-child { @apply flex min-w-0 flex-1 flex-col; }
 .action-button b { @apply text-sm; }
