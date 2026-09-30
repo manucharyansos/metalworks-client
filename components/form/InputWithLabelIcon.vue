@@ -25,7 +25,8 @@
         :value="value"
         :placeholder="placeholder === ' ' ? '' : placeholder"
         :disabled="disabled"
-        @input="$emit('input', $event.target.value)"
+        v-bind="$attrs"
+        v-on="inputListeners"
       />
 
       <button
@@ -51,6 +52,7 @@
 <script>
 export default {
   name: 'InputWithLabelIcon',
+  inheritAttrs: false,
   props: {
     label: {
       type: String,
@@ -96,6 +98,11 @@ export default {
     return {
       passwordVisible: false,
     }
+  },
+  computed: {
+    inputListeners() {
+      return { ...this.$listeners, input: event => this.$emit('input', event.target.value) }
+    },
   },
 }
 </script>

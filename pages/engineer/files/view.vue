@@ -2,6 +2,16 @@
   <main
     class="p-4 md:p-6 lg:p-8 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
   >
+    <div
+      v-if="pageError"
+      role="alert"
+      class="mb-4 rounded-lg bg-red-50 dark:bg-red-950 p-4 text-red-700 dark:text-red-300"
+    >
+      <p>{{ pageError }}</p>
+      <button type="button" class="mt-2 underline" @click="loadPage">
+        {{ $t('file_upload.retry') }}
+      </button>
+    </div>
     <transition name="fade">
       <div
         v-if="loading"
@@ -163,13 +173,13 @@
                   >
                     <div class="flex items-center justify-between">
                       <button
-                        class="text-left flex-1 truncate text-sm font-medium text-gray-800 dark:text-gray-200"
+                        class="text-left flex-1 min-w-0 truncate text-sm font-medium text-gray-800 dark:text-gray-200"
                         @click="viewFile(file.path, file)"
                       >
                         {{ file.original_name }}
                       </button>
                       <div
-                        class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        class="flex shrink-0 items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
                       >
                         <button
                           v-if="$can('pmp_files.view')"
@@ -179,10 +189,7 @@
                           Ներբեռնել
                         </button>
                         <button
-                          v-if="
-                            hoveredFileId === file.id &&
-                            $can('pmp_files.delete')
-                          "
+                          v-if="$can('pmp_files.delete')"
                           class="text-xs text-red-600 hover:underline"
                           @click.stop="openDelete(file.id)"
                         >
@@ -221,7 +228,7 @@
       </aside>
 
       <section
-        class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 lg:p-8 min-h-[70vh] flex flex-col"
+        class="min-w-0 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 min-h-[70vh] flex flex-col"
       >
         <transition name="fade">
           <div class="flex-1 flex flex-col">
@@ -286,15 +293,26 @@
                 />
               </div>
 
-              <div v-else-if="fileType === 'pdf'" class="flex-1">
+              <p v-else-if="previewLoading" role="status">
+                {{ $t('file_upload.loading_preview') }}
+              </p>
+              <p
+                v-else-if="previewError"
+                role="alert"
+                class="text-sm text-red-600"
+              >
+                {{ previewError }}
+              </p>
+
+              <div v-else-if="fileType === 'pdf' && previewUrl" class="flex-1">
                 <embed
-                  :src="fileUrl(selectedFile)"
+                  :src="previewUrl"
                   type="application/pdf"
                   class="w-full h-full min-h-[60vh] rounded-lg border"
                 />
                 <a
                   v-if="$can('pmp_files.view')"
-                  :href="fileUrl(selectedFile)"
+                  :href="previewUrl"
                   target="_blank"
                   rel="noopener"
                   class="mt-3 block text-center text-blue-600 hover:underline"
@@ -304,33 +322,47 @@
               </div>
 
               <div
-                v-else-if="fileType === 'image'"
+                v-else-if="fileType === 'image' && previewUrl"
                 class="flex justify-center items-center flex-1"
               >
-                <a :href="fileUrl(selectedFile)" target="_blank" rel="noopener">
+                <a :href="previewUrl" target="_blank" rel="noopener">
                   <img
-                    :src="fileUrl(selectedFile)"
+                    :src="previewUrl"
                     class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md"
                     :alt="selectedFile.original_name"
                   />
                 </a>
               </div>
 
-              <div v-else-if="fileType === 'cad'" class="text-center py-12">
-                <p class="text-gray-600 dark:text-gray-400 mb-4">
-                  {{ selectedFile.original_name }} ({{
-                    fileType.toUpperCase()
-                  }})
-                </p>
-                <button
-                  v-if="$can('pmp_files.view')"
-                  type="button"
-                  class="inline-block px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-lg hover:shadow-lg transition-all"
-                  @click="downloadFile(selectedFile)"
-                >
-                  Ներբեռնել
-                </button>
-              </div>
+              <audio
+                v-else-if="fileType === 'audio' && previewUrl"
+                :src="previewUrl"
+                controls
+                preload="metadata"
+                class="w-full"
+              />
+              <video
+                v-else-if="fileType === 'video' && previewUrl"
+                :src="previewUrl"
+                controls
+                preload="metadata"
+                class="w-full max-h-[60vh]"
+              />
+              <pre
+                v-else-if="fileType === 'text'"
+                class="whitespace-pre-wrap break-words rounded-lg bg-gray-50 dark:bg-gray-900 p-4 text-sm overflow-auto max-h-[60vh]"
+                >{{ previewText }}</pre
+              >
+              <p v-else class="text-sm text-gray-500 text-center py-6">
+                {{ $t('file_upload.download_to_view') }}
+              </p>
+              <button
+                type="button"
+                class="mt-4 self-center rounded-lg bg-blue-600 px-5 py-3 text-white"
+                @click="downloadFile(selectedFile)"
+              >
+                {{ $t('file_upload.download') }}
+              </button>
             </div>
             <div
               v-else
@@ -364,15 +396,53 @@
       :is-open-modal="isOpenAddFileModal"
       :file="currentFile"
       :is-dxf-file="isDxfFile"
-      text="Ընտրեք ֆայլը և լրացրեք դաշտերը"
+      :factory="selectedFactory"
+      :extensions="allowedExtensions"
+      :policy-loading="policyLoading"
+      :policy-error="policyError"
+      :upload-error="uploadError"
+      :busy="uploading"
+      :can-submit="canSubmitFile"
+      :show-uploader="!isInfoFactory || infoMode !== 'text'"
       @closeModal="openAddFileModal"
       @createFile="addFile"
+      @dropped="handleFileDrop"
+      @retry-policy="loadFactoryPolicy"
     >
+      <template v-if="isInfoFactory && isOpenAddFileModal" #info-content>
+        <InfoContentInput
+          :mode="infoMode"
+          :text="infoText"
+          :title="infoTitle"
+          :file="fileData.file"
+          :extensions="allowedExtensions"
+          :disabled="uploading || policyLoading || !!policyError"
+          @mode-change="changeInfoMode"
+          @text-change="
+            infoText = $event
+            uploadError = ''
+          "
+          @title-change="
+            infoTitle = $event
+            uploadError = ''
+          "
+          @file-selected="handleFileDrop"
+          @recording-change="recording = $event"
+        />
+      </template>
       <template #file-input>
         <input
+          :key="`${selectedFactoryId}-${infoMode}-${fileInputKey}`"
           type="file"
           class="hidden"
-          :disabled="loading"
+          :accept="fileAccept"
+          :disabled="
+            uploading ||
+            recording ||
+            policyLoading ||
+            !!policyError ||
+            !allowedExtensions.length
+          "
           @change="handleFileChange"
         />
       </template>
@@ -383,7 +453,7 @@
           type="number"
           name="quantity"
           label="Քանակ լրակազմում"
-          :disabled="loading"
+          :disabled="uploading"
           min="1"
         />
       </template>
@@ -395,13 +465,13 @@
             type="text"
             name="materialType"
             label="Նյութ"
-            :disabled="loading"
+            :disabled="uploading"
             @focus="openMaterials"
           />
           <button
             type="button"
             class="absolute inset-y-0 right-0 px-3 text-gray-500"
-            :disabled="loading"
+            :disabled="uploading"
             @click="openMaterials"
           >
             ▼
@@ -427,10 +497,12 @@
       <template v-if="isDxfFile" #thickness>
         <InputWithLabelIcon
           v-model="fileData.thickness"
-          type="text"
+          type="number"
           name="thickness"
           label="Հաստություն"
-          :disabled="loading"
+          :disabled="uploading"
+          min="0"
+          step="any"
         />
       </template>
     </AddFileModal>
@@ -450,10 +522,26 @@ import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 import PopupModal from '~/components/modals/popup-modal/PopupModal.vue'
 import AddFileModal from '~/components/modals/add-file/AddFile.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+import InfoContentInput from '~/components/modals/add-file/InfoContentInput.vue'
+import {
+  allowsExtension,
+  inputAccept,
+  normalizeExtensions,
+  previewType,
+  textAttachment,
+  uploadErrorMessage,
+  validateFactoryFile,
+} from '~/utils/factory-file-policy'
 
 export default {
   name: 'EngineerFilesView',
-  components: { InputWithLabelIcon, AddFileModal, PopupModal, DxfViewerModal },
+  components: {
+    InputWithLabelIcon,
+    AddFileModal,
+    PopupModal,
+    DxfViewerModal,
+    InfoContentInput,
+  },
   layout: 'engineer',
   middleware: ['role-guard'],
   meta: { role: 'engineer' },
@@ -462,6 +550,23 @@ export default {
     return {
       loadingFactoryId: null,
       loading: false,
+      pageError: '',
+      uploading: false,
+      recording: false,
+      factoryPolicies: [],
+      policyLoading: false,
+      policyError: '',
+      policyRequest: 0,
+      uploadError: '',
+      infoMode: 'file',
+      infoText: '',
+      infoTitle: '',
+      fileInputKey: 0,
+      previewLoading: false,
+      previewError: '',
+      previewUrl: '',
+      previewText: '',
+      previewRequest: 0,
       isOpen: 'remote_number',
       isOpenFiles: 'files_by_id',
       id: '',
@@ -488,6 +593,38 @@ export default {
     ...mapGetters('pmp', ['getPmp', 'errorMessage']),
     ...mapGetters('factory', ['getFactory']),
     ...mapGetters('materials', ['getMaterials']),
+    selectedFactory() {
+      return (
+        (this.getFactory || []).find(
+          (factory) => this.n(factory.id) === this.selectedFactoryId
+        ) || null
+      )
+    },
+    isInfoFactory() {
+      return this.selectedFactory?.value === 'INFO'
+    },
+    allowedExtensions() {
+      const policy = this.factoryPolicies.find(
+        (factory) => this.n(factory.id) === this.selectedFactoryId
+      )
+      return normalizeExtensions(policy?.extensions)
+    },
+    fileAccept() {
+      return inputAccept(
+        this.allowedExtensions,
+        this.isInfoFactory ? this.infoMode : 'file'
+      )
+    },
+    canSubmitFile() {
+      return (
+        !this.recording &&
+        this.allowedExtensions.length > 0 &&
+        (this.isInfoFactory && this.infoMode === 'text'
+          ? allowsExtension(this.allowedExtensions, 'txt') &&
+            !!this.infoText.trim()
+          : !!this.fileData.file)
+      )
+    },
     materials() {
       return this.getMaterials || []
     },
@@ -503,19 +640,41 @@ export default {
   created() {
     this.id = this.$route.query.id
     if (this.id) {
-      this.loading = true
-      Promise.all([this.fetchPmp(this.id), this.fetchFactory()])
-        .catch((error) => this.$notify({ text: String(error), type: 'error' }))
-        .finally(() => (this.loading = false))
+      this.loadPage()
     } else {
       this.$notify({ text: 'ID-ն բացակայում է', type: 'error' })
     }
   },
 
+  beforeDestroy() {
+    ++this.policyRequest
+    this.clearPreview()
+  },
+
   methods: {
     ...mapActions('pmp', ['fetchPmp', 'deleteFile', 'createPmpFilesByFactory']),
-    ...mapActions('factory', ['fetchFactory', 'downloadUploadedFile']),
+    ...mapActions('factory', [
+      'fetchFactoryFilePolicies',
+      'downloadUploadedFile',
+    ]),
     ...mapActions('materials', ['fetchMaterials']),
+
+    async loadPage() {
+      if (this.loading) return
+      this.loading = true
+      this.pageError = ''
+      try {
+        const [, policies] = await Promise.all([
+          this.fetchPmp(this.id),
+          this.fetchFactoryFilePolicies(),
+        ])
+        this.factoryPolicies = policies
+      } catch (error) {
+        this.pageError = this.$t('file_upload.page_failed')
+      } finally {
+        this.loading = false
+      }
+    },
 
     n(v) {
       return Number(v)
@@ -542,6 +701,7 @@ export default {
     },
 
     showFiles(number) {
+      this.clearPreview()
       this.isOpen = 'factories'
       this.selectedRemoteNumber = number
       this.selectedRemoteNumberId = this.n(number.id)
@@ -552,6 +712,7 @@ export default {
       this.fileType = null
       this.selectedFile = null
       this.isDxfFile = false
+      this.selectedFactoryId = null
       this.resetFileFields()
       this.breadcrumb = [
         this.getPmp?.group_name || 'PMP',
@@ -560,6 +721,8 @@ export default {
     },
 
     selectFactory(factory) {
+      this.clearPreview()
+      this.resetFileFields()
       this.isDxfFile = factory.value === 'DXF'
       this.loadingFactoryId = factory.id
       this.loading = true
@@ -589,31 +752,80 @@ export default {
 
     handleFileChange(e) {
       const file = e.target.files?.[0]
-      this.currentFile = file
-        ? { name: file.name, size: file.size }
-        : { name: '', size: 0 }
-      this.fileData.file = file
+      if (file) this.handleFileDrop(file)
+      // Selecting the same file again must trigger validation after a rejection.
+      e.target.value = ''
     },
 
     handleFileDrop(file) {
+      if (
+        this.uploading ||
+        this.recording ||
+        this.policyLoading ||
+        this.policyError
+      )
+        return
+      const error = validateFactoryFile(
+        file,
+        this.allowedExtensions,
+        this.isInfoFactory ? this.infoMode : 'file'
+      )
+      if (error) {
+        this.uploadError = this.$t(`file_upload.${error}`)
+        this.fileData.file = null
+        this.currentFile = { name: '', size: 0 }
+        return
+      }
+      this.uploadError = ''
       this.currentFile = { name: file.name, size: file.size }
       this.fileData.file = file
     },
 
     async addFile() {
-      const { file, quantity, material, thickness } = this.fileData
+      if (
+        this.uploading ||
+        this.recording ||
+        this.policyLoading ||
+        this.policyError
+      )
+        return
+      let { file } = this.fileData
+      const { quantity, material, thickness } = this.fileData
       const isDxf = this.isDxfFile
-
-      if (isDxf && (!file || !quantity || !material || !thickness)) {
-        this.$notify({ text: 'Բոլոր դաշտերը պարտադիր են', type: 'warning' })
+      this.uploadError = ''
+      if (this.isInfoFactory && this.infoMode === 'text') {
+        if (!this.infoText.trim()) {
+          this.uploadError = this.$t('file_upload.text_required')
+          return
+        }
+        file = textAttachment(
+          this.infoTitle || `info-${Date.now()}`,
+          this.infoText
+        )
+      }
+      const error = validateFactoryFile(
+        file,
+        this.allowedExtensions,
+        this.isInfoFactory ? this.infoMode : 'file'
+      )
+      if (error) {
+        this.uploadError = this.$t(`file_upload.${error}`)
         return
       }
-      if (!file) {
-        this.$notify({ text: 'Ընտրեք ֆայլ', type: 'warning' })
+      if (
+        isDxf &&
+        (!Number.isInteger(Number(quantity)) ||
+          Number(quantity) < 1 ||
+          !material.trim() ||
+          String(thickness).trim() === '' ||
+          !Number.isFinite(Number(thickness)) ||
+          Number(thickness) < 0)
+      ) {
+        this.uploadError = this.$t('file_upload.dxf_fields_required')
         return
       }
 
-      this.loading = true
+      this.uploading = true
       const formData = new FormData()
       formData.append('file', file)
       formData.append('pmp_id', this.getPmp.id)
@@ -621,29 +833,41 @@ export default {
       formData.append('factory_id', this.selectedFactoryId)
       if (isDxf) {
         formData.append('quantity', quantity)
-        formData.append('material_type', material)
+        formData.append('material_type', material.trim())
         formData.append('thickness', thickness)
       }
 
       try {
-        const ok = await this.createPmpFilesByFactory(formData)
-        if (ok) {
-          this.$notify({ text: 'Ֆայլը ավելացվեց', type: 'success' })
+        await this.createPmpFilesByFactory(formData)
+        this.$notify({ text: this.$t('file_upload.saved'), type: 'success' })
+        this.isOpenAddFileModal = false
+        this.resetFileFields()
+        try {
           await this.fetchPmp(this.id)
-          this.selectedFiles = (this.getPmp.files || []).filter(
-            (f) =>
-              this.n(f.remote_number_id) === this.n(this.selectedRemoteNumberId) &&
-              this.n(f.factory_id) === this.n(this.selectedFactoryId)
-          )
-          this.isOpenAddFileModal = false
-          this.resetFileFields()
+        } catch (error) {
+          this.$notify({
+            text: this.$t('file_upload.refresh_failed'),
+            type: 'warning',
+          })
         }
+        this.selectedFiles = (this.getPmp.files || []).filter(
+          (f) =>
+            this.n(f.remote_number_id) ===
+              this.n(this.selectedRemoteNumberId) &&
+            this.n(f.factory_id) === this.n(this.selectedFactoryId)
+        )
+      } catch (error) {
+        this.uploadError = uploadErrorMessage(
+          error,
+          this.$t('file_upload.save_failed')
+        )
       } finally {
-        this.loading = false
+        this.uploading = false
       }
     },
 
-    viewFile(filePath, file) {
+    async viewFile(filePath, file) {
+      this.clearPreview()
       if (!this.breadcrumb.includes(file.original_name)) {
         if (this.breadcrumb.length > 2) this.breadcrumb.pop()
         this.breadcrumb.push(file.original_name)
@@ -653,7 +877,44 @@ export default {
       this.isOpenFiles = this.n(file.factory_id)
       this.isDxfFile =
         this.n(file.factory_id) === this.selectedFactoryId && this.isDxfFile
-      this.fileType = this.getFileType(file.original_name || filePath)
+      this.fileType = previewType(file.original_name || filePath)
+      if (this.fileType === 'dxf' || this.fileType === 'file') return
+      const request = this.previewRequest
+      const type = this.fileType
+      this.previewLoading = true
+      try {
+        const { data } = await this.$axios.get(this.fileUrl(file), {
+          responseType: 'blob',
+        })
+        if (request !== this.previewRequest) return
+        if (!(data instanceof Blob) || data.size > 10 * 1024 * 1024)
+          throw new Error('Invalid preview')
+        if (type === 'video' && data.type.startsWith('audio/'))
+          this.fileType = 'audio'
+        if (type === 'text') {
+          const text = await data.text()
+          if (request === this.previewRequest) this.previewText = text
+        } else {
+          // Blob URLs preserve authenticated access without frame/cookie restrictions.
+          const blob =
+            type === 'pdf'
+              ? new Blob([data], { type: 'application/pdf' })
+              : data
+          this.previewUrl = URL.createObjectURL(blob)
+        }
+      } catch (error) {
+        if (request === this.previewRequest)
+          this.previewError = this.$t('file_upload.preview_failed')
+      } finally {
+        if (request === this.previewRequest) this.previewLoading = false
+      }
+    },
+
+    clearPreview() {
+      ++this.previewRequest
+      if (this.previewUrl) URL.revokeObjectURL(this.previewUrl)
+      this.previewUrl = this.previewText = this.previewError = ''
+      this.previewLoading = false
     },
 
     async downloadFile(file) {
@@ -676,19 +937,6 @@ export default {
       return this.$getFileUrl ? this.$getFileUrl(file.path) : null
     },
 
-    getFileType(name) {
-      const ext = String(name || '').toLowerCase().split('.').pop()
-      if (ext === 'dxf') return 'dxf'
-      if (ext === 'pdf') return 'pdf'
-      if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'eps'].includes(ext))
-        return 'image'
-      if (
-        ['step', 'stp', 'sldprt', 'sldasm', 'slddrw', 'solid', 'igs', 'iges', 'dwg'].includes(ext)
-      )
-        return 'cad'
-      return null
-    },
-
     openDelete(id) {
       this.toDeleteId = id
       this.isOpenModal = true
@@ -708,11 +956,17 @@ export default {
           (f) => f.id !== this.toDeleteId
         )
         if (this.selectedFile?.id === this.toDeleteId) {
+          this.clearPreview()
           this.selectedFile = null
           this.dxfUrl = ''
           this.fileType = null
         }
         this.$notify({ text: 'Ֆայլը ջնջվեց', type: 'success' })
+      } catch (error) {
+        this.$notify({
+          text: uploadErrorMessage(error, this.$t('file_upload.delete_failed')),
+          type: 'error',
+        })
       } finally {
         this.isOpenModal = false
         this.toDeleteId = null
@@ -721,8 +975,46 @@ export default {
     },
 
     openAddFileModal() {
+      if (this.uploading) return
       this.isOpenAddFileModal = !this.isOpenAddFileModal
-      if (!this.isOpenAddFileModal) this.resetFileFields()
+      if (this.isOpenAddFileModal) this.loadFactoryPolicy()
+      else {
+        ++this.policyRequest
+        this.policyLoading = false
+        this.resetFileFields()
+      }
+    },
+
+    async loadFactoryPolicy() {
+      const request = ++this.policyRequest
+      this.policyLoading = true
+      this.policyError = ''
+      this.factoryPolicies = []
+      try {
+        const policies = await this.fetchFactoryFilePolicies()
+        if (request !== this.policyRequest) return
+        if (
+          !policies.some(
+            (factory) => this.n(factory.id) === this.selectedFactoryId
+          )
+        )
+          throw new Error('Factory policy missing')
+        this.factoryPolicies = policies
+      } catch (error) {
+        if (request === this.policyRequest)
+          this.policyError = this.$t('file_upload.policy_failed')
+      } finally {
+        if (request === this.policyRequest) this.policyLoading = false
+      }
+    },
+
+    changeInfoMode(mode) {
+      if (this.uploading || this.recording) return
+      this.infoMode = mode
+      this.fileData.file = null
+      this.currentFile = { name: '', size: 0 }
+      this.uploadError = ''
+      ++this.fileInputKey
     },
 
     resetFileFields() {
@@ -734,9 +1026,14 @@ export default {
       }
       this.currentFile = { name: '', size: 0 }
       this.isSelectedMaterials = false
+      this.infoMode = 'file'
+      this.infoText = this.infoTitle = this.uploadError = ''
+      this.recording = false
+      ++this.fileInputKey
     },
 
     selectBreadcrumb(index) {
+      this.clearPreview()
       this.breadcrumb = this.breadcrumb.slice(0, index + 1)
       if (index === 0) {
         this.isOpen = 'remote_number'
@@ -784,7 +1081,9 @@ export default {
 
     hasFiles(factoryId) {
       return (this.getPmp.files || []).some(
-        (f) => this.n(f.factory_id) === this.n(factoryId)
+        (f) =>
+          this.n(f.factory_id) === this.n(factoryId) &&
+          this.n(f.remote_number_id) === this.selectedRemoteNumberId
       )
     },
   },

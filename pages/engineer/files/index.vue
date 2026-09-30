@@ -92,9 +92,9 @@
         <div class="panel-card flex flex-col">
           <div class="panel-heading"><span class="step-badge">03</span><div><h2 class="panel-title">Գործողություններ</h2></div></div>
           <div class="flex flex-1 flex-col justify-center gap-3">
-            <button v-if="showCreateGroup && $can('pmp.create')" type="button" class="action-button bg-emerald-600 text-white hover:bg-emerald-700" @click="addPmpGroup"><span class="action-icon">+</span><span><b>Ստեղծել խումբ</b><small>Պահպանել նոր PMP խումբ</small></span></button>
-            <button v-if="showCreateRemote && $can('pmp.create')" type="button" class="action-button bg-blue-600 text-white hover:bg-blue-700" @click="addPmpGroupRemoteNumber"><span class="action-icon">+</span><span><b>Ստեղծել ենթախումբ</b><small>Ավելացնել ընտրված խմբին</small></span></button>
-            <button v-if="showView && $can('pmp_files.view')" type="button" class="action-button bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200" @click="viewFiles"><span class="action-icon">→</span><span><b>Դիտել ֆայլերը</b><small>Բացել ընտրված ենթախումբը</small></span></button>
+            <button v-if="showCreateGroup && $can('pmp.create')" type="button" :disabled="saving" class="action-button bg-emerald-600 text-white hover:bg-emerald-700" @click="addPmpGroup"><span class="action-icon">+</span><span><b>Ստեղծել խումբ</b><small>Պահպանել նոր PMP խումբ</small></span></button>
+            <button v-if="showCreateRemote && $can('pmp.create')" type="button" :disabled="saving" class="action-button bg-blue-600 text-white hover:bg-blue-700" @click="addPmpGroupRemoteNumber"><span class="action-icon">+</span><span><b>Ստեղծել ենթախումբ</b><small>Ավելացնել ընտրված խմբին</small></span></button>
+            <button v-if="showView && $can('pmp_files.view')" type="button" :disabled="saving" class="action-button bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200" @click="viewFiles"><span class="action-icon">→</span><span><b>Դիտել ֆայլերը</b><small>Բացել ընտրված ենթախումբը</small></span></button>
             <div v-if="showView && !$can('pmp_files.view')" class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-300">Ենթախումբը ընտրված է, բայց ֆայլեր դիտելու ֆունկցիան ձեզ տրված չէ։</div>
             <div v-if="!showCreateGroup && !showCreateRemote && !showView" class="rounded-2xl border border-dashed border-slate-200 p-6 text-center dark:border-slate-800"><p class="text-sm font-bold text-slate-600 dark:text-slate-300">Ընտրեք տվյալները</p><p class="mt-1 text-xs leading-5 text-slate-400">Հասանելի գործողությունները կհայտնվեն այստեղ։</p></div>
           </div>
@@ -107,6 +107,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import { uploadErrorMessage } from '~/utils/factory-file-policy'
 
 export default {
   name: 'EngineerProjects',
@@ -115,6 +116,7 @@ export default {
   meta: { role: 'engineer' },
   data() {
     return {
+      saving: false,
       pmpGroup: '',
       pmpGroupName: '',
       pmpRemoteNumber: '',
@@ -219,35 +221,39 @@ export default {
       else this.remoteNumberId = null
     },
     async addPmpGroup() {
+      if (this.saving) return
       if (!this.pmpGroup || !this.pmpGroupName) { this.$notify({ type: 'error', text: 'Լրացրեք Խումբի երկու դաշտերն էլ' }); return }
       if ((this.pmpRemoteNumber && !this.pmpRemoteNumberName) || (!this.pmpRemoteNumber && this.pmpRemoteNumberName)) { this.$notify({ type: 'error', text: 'Ենթախմբի համարն ու նկարագրությունը լրացրեք միասին կամ թողեք դատարկ' }); return }
+      this.saving = true
       const payload = { group: this.pmpGroup.padStart(3, '0'), group_name: this.pmpGroupName, admin_confirmation: true, remote_number: this.pmpRemoteNumber ? this.pmpRemoteNumber.padStart(2, '0') : null, remote_number_name: this.pmpRemoteNumberName || null }
       try {
         await this.createPmp(payload)
         this.$notify({ type: 'success', text: 'Խումբը ստեղծվեց' })
         this.resetAll()
         await this.fetchPmps()
-      } catch (e) { this.$notify({ type: 'error', text: e?.response?.data?.message || 'Սխալ խումբ ստեղծելիս' }) }
+      } catch (e) { this.$notify({ type: 'error', text: uploadErrorMessage(e, 'Սխալ խումբ ստեղծելիս') }) } finally { this.saving = false }
     },
     async addPmpGroupRemoteNumber() {
+      if (this.saving) return
       if (!this.isExistingGroup) { this.$notify({ type: 'error', text: 'Սկզբում ընտրեք խումբ' }); return }
       if (!this.pmpRemoteNumber || !this.pmpRemoteNumberName) { this.$notify({ type: 'error', text: 'Լրացրեք Ենթախմբի երկու դաշտերն էլ' }); return }
       const num = this.pmpRemoteNumber.padStart(2, '0')
       const dup = (this.pmpRemoteNumbers || []).some((r) => String(r.remote_number) === String(num) || String(r.remote_number_name) === String(this.pmpRemoteNumberName))
       if (dup) { this.$notify({ type: 'error', text: 'Այդ համարը կամ անվանումն արդեն կա այս խմբում' }); return }
+      this.saving = true
       try {
         const res = await this.rememberNumberPmp({ id: this.existingGroup.id, group: this.pmpGroup.padStart(3, '0'), group_name: this.pmpGroupName, remote_number: num, remote_number_name: this.pmpRemoteNumberName })
         this.$notify({ type: 'success', text: 'Ենթախումբը ստեղծվեց' })
         await this.fetchPmps()
         const rid = res?.remote_number_id || this.findRemoteId(num, this.pmpRemoteNumberName)
-        if (rid && this.$can('pmp_files.view')) this.$router.push({ path: '/engineer/files/view', query: { id: rid } })
+        if (rid && this.$can('pmp_files.view')) this.$router.push({ path: this.localePath('/engineer/files/view'), query: { id: rid } })
         this.resetAll()
-      } catch (e) { this.$notify({ type: 'error', text: e?.response?.data?.message || 'Սխալ ենթախումբ ստեղծելիս' }) }
+      } catch (e) { this.$notify({ type: 'error', text: uploadErrorMessage(e, 'Սխալ ենթախումբ ստեղծելիս') }) } finally { this.saving = false }
     },
     viewFiles() {
       if (!this.$can('pmp_files.view')) { this.$notify({ type: 'warning', text: 'Ֆայլեր դիտելու ֆունկցիան ձեզ տրված չէ' }); return }
       if (!this.remoteNumberId) { this.$notify({ type: 'error', text: 'Ընտրեք ենթախումբ' }); return }
-      this.$router.push({ path: '/engineer/files/view', query: { id: this.remoteNumberId } })
+      this.$router.push({ path: this.localePath('/engineer/files/view'), query: { id: this.remoteNumberId } })
     },
     findRemoteId(num, name) {
       const g = this.getPmpes?.pmp?.find((p) => p.id === this.existingGroup?.id)
@@ -279,6 +285,7 @@ export default {
 .picker-button { @apply absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 transition hover:text-slate-700 disabled:opacity-40 dark:hover:text-slate-200; }
 .dropdown-card { @apply absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900; }
 .dropdown-row { @apply flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800; }
+.action-button:disabled { opacity: 0.5; cursor: wait; }
 .action-button { @apply flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left shadow-sm transition; }
 .action-button span:last-child { @apply flex min-w-0 flex-1 flex-col; }
 .action-button b { @apply text-sm; }

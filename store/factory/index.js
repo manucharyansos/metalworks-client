@@ -17,6 +17,14 @@ export const getters = {
 }
 
 export const actions = {
+  async fetchFactoryFilePolicies({ commit }) {
+    const { data } = await this.$axios.get('/api/factory-file-policies')
+    if (!Array.isArray(data?.data))
+      throw new Error('Invalid factory upload policy response')
+    commit('SET_FACTORY', data.data)
+    return data.data
+  },
+
   async fetchFactory({ commit }, data) {
     try {
       const res = await this.$axios.get('/api/factories/factory', data)
@@ -67,11 +75,16 @@ export const actions = {
     try {
       if (!file) throw new Error('File payload is missing')
 
-      const baseURL = String(this.$axios.defaults.baseURL || '').replace(/\/+$/, '')
+      const baseURL = String(this.$axios.defaults.baseURL || '').replace(
+        /\/+$/,
+        ''
+      )
       let url = null
 
       if (file.id) {
-        url = `${baseURL}/api/secure-files/pmp/${encodeURIComponent(file.id)}?download=1`
+        url = `${baseURL}/api/secure-files/pmp/${encodeURIComponent(
+          file.id
+        )}?download=1`
       } else if (file.path) {
         const normalizedPath = String(file.path)
           .replace(/\\/g, '/')
@@ -89,7 +102,10 @@ export const actions = {
         responseType: 'blob',
       })
 
-      const blob = response.data instanceof Blob ? response.data : new Blob([response.data])
+      const blob =
+        response.data instanceof Blob
+          ? response.data
+          : new Blob([response.data])
       const objectUrl = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = objectUrl

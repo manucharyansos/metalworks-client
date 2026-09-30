@@ -14,6 +14,16 @@ export const mutations = {
   SET_ERROR(state, error) {
     state.error = error || null
   },
+  ADD_FILE(state, file) {
+    if (!file?.id) return
+    state.pmp = {
+      ...state.pmp,
+      files: [
+        ...(state.pmp.files || []).filter((item) => item.id !== file.id),
+        file,
+      ],
+    }
+  },
 }
 
 export const actions = {
@@ -21,10 +31,11 @@ export const actions = {
     try {
       const { data } = await this.$axios.post('/api/engineers/pmps', pmp)
       commit('SET_PMP', data)
-      return true
+      commit('SET_ERROR', null)
+      return data
     } catch (error) {
       commit('SET_ERROR', error.response?.data || error.message)
-      return false
+      throw error
     }
   },
 
@@ -35,10 +46,11 @@ export const actions = {
         pmp
       )
       commit('SET_PMP', data)
-      return true
+      commit('SET_ERROR', null)
+      return data
     } catch (error) {
       commit('SET_ERROR', error.response?.data || error.message)
-      return false
+      throw error
     }
   },
 
@@ -62,7 +74,7 @@ export const actions = {
       return true
     } catch (err) {
       commit('SET_ERROR', err.response?.data || 'Failed to fetch pmp')
-      return false
+      throw err
     }
   },
 
@@ -113,20 +125,22 @@ export const actions = {
         '/api/engineers/uploadPmpFile',
         formData
       )
-      return data || true
+      commit('ADD_FILE', data?.file)
+      commit('SET_ERROR', null)
+      return data
     } catch (error) {
       commit('SET_ERROR', error.response?.data || error.message)
-      return false
+      throw error
     }
   },
 
   async deleteFile({ commit }, fileId) {
     try {
       const resp = await this.$axios.delete(`/api/engineers/pmpFiles/${fileId}`)
-      return resp.status === 200
+      return resp.status >= 200 && resp.status < 300
     } catch (e) {
       commit('SET_ERROR', e.response?.data || e.message)
-      return false
+      throw e
     }
   },
 }
