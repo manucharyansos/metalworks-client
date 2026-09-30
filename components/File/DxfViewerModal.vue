@@ -36,9 +36,9 @@
         {{ materialInfo }}
       </div>
       <div class="opacity-80">
-        {{ t.cutLength }}:
+        Գծամետրում՝
         <span class="font-semibold">{{ laserLengthMmRounded }}</span>
-        {{ t.unitMm }}
+        մմ
       </div>
     </div>
 
@@ -46,7 +46,7 @@
       v-if="error"
       class="absolute left-2 bottom-2 px-2 py-1 text-xs rounded bg-red-600 text-white"
     >
-      {{ t.dxfError }} — {{ error }}
+      DXF սխալ — {{ error }}
     </div>
     <notifications />
   </div>
@@ -56,39 +56,6 @@
 import * as THREE from 'three'
 import DxfParser from 'dxf-parser'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-
-const COPY = {
-  hy: {
-    cutLength: 'Գծամետրում',
-    unitMm: 'մմ',
-    dxfError: 'DXF սխալ',
-    emptyFile: 'Ֆայլի տվյալները դատարկ են',
-    loadError: 'Չհաջողվեց բեռնել DXF-ը',
-    viewerInit: 'Դիտիչը չի սկզբնավորվել',
-    emptyDrawing: 'DXF-ը դատարկ է կամ չի պարունակում գծագրեր',
-    parseError: 'DXF-ը չի կարող մշակվել',
-  },
-  ru: {
-    cutLength: 'Длина реза',
-    unitMm: 'мм',
-    dxfError: 'Ошибка DXF',
-    emptyFile: 'Файл не содержит данных',
-    loadError: 'Не удалось загрузить DXF',
-    viewerInit: 'Просмотрщик не инициализирован',
-    emptyDrawing: 'DXF пуст или не содержит чертежа',
-    parseError: 'Не удалось обработать DXF',
-  },
-  en: {
-    cutLength: 'Cut length',
-    unitMm: 'mm',
-    dxfError: 'DXF error',
-    emptyFile: 'The file contains no data',
-    loadError: 'Could not load DXF',
-    viewerInit: 'Viewer is not initialized',
-    emptyDrawing: 'DXF is empty or contains no drawing',
-    parseError: 'Could not process DXF',
-  },
-}
 
 export default {
   name: 'DxfCanvasViewer',
@@ -116,13 +83,6 @@ export default {
     }
   },
   computed: {
-    locale() {
-      const code = String(this.$i18n?.locale || 'hy').toLowerCase().split('-')[0]
-      return ['hy', 'ru', 'en'].includes(code) ? code : 'hy'
-    },
-    t() {
-      return COPY[this.locale] || COPY.hy
-    },
     laserLengthMmRounded() {
       if (!this.laserLengthMm) return 0
       return Number(this.laserLengthMm.toFixed(1))
@@ -289,14 +249,14 @@ export default {
         if (response.status !== 200) throw new Error(`HTTP ${response.status}`)
 
         const dxfText = this.normalizeDxfResponse(response.data)
-        if (!dxfText.trim()) throw new Error(this.t.emptyFile)
+        if (!dxfText.trim()) throw new Error('Ֆայլի տվյալները դատարկ են')
 
         await this.$nextTick()
         if (!this.scene || !this.camera || !this.renderer) this.initThree()
         this.parseDxf(dxfText)
       } catch (e) {
         console.error(e)
-        this.error = e?.response?.data?.message || e.message || this.t.loadError
+        this.error = e?.response?.data?.message || e.message || 'Չհաջողվեց բեռնել DXF-ը'
         this.$notify?.({ text: this.error, type: 'error', duration: 4000 })
       }
     },
@@ -307,7 +267,7 @@ export default {
         const dxf = parser.parseSync(dxfText)
 
         if (!this.scene) this.initThree()
-        if (!this.scene) throw new Error(this.t.viewerInit)
+        if (!this.scene) throw new Error('Viewer-ը չի սկզբնավորվել')
 
         if (this.dxfGroup) this.scene.remove(this.dxfGroup)
         this.dxfGroup = new THREE.Group()
@@ -464,11 +424,11 @@ export default {
           this.controls?.target?.set(0, 0, 0)
           this.controls?.update?.()
         } else {
-          this.error = this.t.emptyDrawing
+          this.error = 'DXF-ը դատարկ է կամ չի պարունակում գծագրեր'
         }
       } catch (e) {
         console.error('DXF parse error:', e)
-        this.error = e.message || this.t.parseError
+        this.error = e.message || 'DXF-ը չի կարող մշակվել'
         this.$notify?.({ text: this.error, type: 'error', duration: 5000 })
       }
     },
