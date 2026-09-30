@@ -39,10 +39,21 @@ export const actions = {
   async loginUser({ commit }, userData) {
     try {
       commit('setErrorMessage', null)
-      await this.$auth.loginWith('runtimeSanctum', userData)
+      try {
+        await this.$auth.loginWith('runtimeSanctum', userData)
+      } catch (error) {
+        if (error?.response?.status !== 419) throw error
+
+        // CookieScheme refreshes Sanctum's CSRF cookie before each login.
+        // A stale session after logout may require one fresh handshake.
+        await this.$auth.loginWith('runtimeSanctum', userData)
+      }
       return true
     } catch (err) {
-      commit('setErrorMessage', err?.response?.data?.error || 'Login failed')
+      commit(
+        'setErrorMessage',
+        err?.response?.data?.error || err?.response?.data?.message || 'Login failed'
+      )
       return false
     }
   },

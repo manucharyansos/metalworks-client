@@ -192,6 +192,7 @@ export default {
   methods: {
     ...mapActions('authCustom', ['loginUser']),
     async login() {
+      if (this.loading) return
       this.loading = true
       this.errorMessage.general = ''
       try {

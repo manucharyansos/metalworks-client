@@ -12,7 +12,7 @@
       :aria-label="$t('admin_layout.navigation')"
     >
       <div class="flex min-h-20 items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-900">
-        <nuxt-link :to="localePath('/admin')" class="flex min-w-0 items-center gap-3" @click.native="closeSidebar">
+        <nuxt-link :to="localePath('/admin')" class="flex min-w-0 flex-1 items-center gap-3" @click.native="closeSidebar">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950">
             <span class="text-sm font-black tracking-tight">MW</span>
           </div>
@@ -20,7 +20,7 @@
         </nuxt-link>
         <button
           type="button"
-          class="rounded-xl p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-900 dark:hover:text-white lg:hidden"
+          class="shrink-0 rounded-xl p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-900 dark:hover:text-white lg:hidden"
           :aria-label="$t('admin_layout.close_navigation')"
           @click="closeSidebar"
         >
@@ -59,10 +59,7 @@
           @click.native="closeSidebar"
         >
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4a1.65 1.65 0 0 0 1-1.51V2.4a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1.08 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.12.61.65 1.05 1.27 1.05H21a2 2 0 1 1 0 4h-.33c-.62 0-1.15.44-1.27 1.05Z" />
-            </svg>
+            <WorkspaceSettingsIcon class="h-5 w-5 shrink-0" />
           </div>
           <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-semibold">{{ $t('profile.settings') }}</p>
@@ -85,10 +82,10 @@
     <div class="min-h-screen lg:pl-72">
       <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/85">
         <div class="flex h-16 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-          <div class="flex min-w-0 items-center gap-3">
+          <div class="flex min-w-0 flex-1 items-center gap-3">
             <button
               type="button"
-              class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 lg:hidden"
+              class="shrink-0 rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 lg:hidden"
               :aria-label="$t('admin_layout.open_navigation')"
               @click="toggleSidebar"
             >
@@ -98,7 +95,7 @@
             </button>
             <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ pageTitle }}</p>
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex shrink-0 items-center gap-2">
             <div data-language-switcher class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <language-dropdown />
             </div>
@@ -107,9 +104,7 @@
               class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900"
               :aria-label="$t('profile.settings')"
             >
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-              </svg>
+              <WorkspaceSettingsIcon class="h-4 w-4 shrink-0" />
               <span class="hidden sm:inline">{{ $t('profile.settings') }}</span>
             </nuxt-link>
           </div>
@@ -123,9 +118,11 @@
 
 <script>
 import WorkspaceIdentity from '@/components/layout/WorkspaceIdentity.vue'
+import WorkspaceSettingsIcon from '@/components/layout/WorkspaceSettingsIcon.vue'
+import { isWorkspaceRouteActive } from '@/utils/workspace-route'
 
 export default {
-  components: { WorkspaceIdentity },
+  components: { WorkspaceIdentity, WorkspaceSettingsIcon },
   middleware: ['role-guard'],
   meta: { role: 'admin' },
   data() {
@@ -149,7 +146,7 @@ export default {
     pageTitle() {
       const path = this.$route.path
       const item = this.navigation.find((entry) =>
-        entry.exact ? path === entry.to : path.startsWith(entry.to)
+        isWorkspaceRouteActive(path, entry)
       )
       return item ? this.navigationLabel(item) : this.$t('admin_layout.dashboard')
     },

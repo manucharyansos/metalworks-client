@@ -4,11 +4,11 @@
 
     <aside class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:translate-x-0 lg:shadow-none" :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'">
       <div class="flex min-h-20 items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-800">
-        <nuxt-link :to="localePath('/manager')" class="flex min-w-0 items-center gap-3" @click.native="closeSidebar">
+        <nuxt-link :to="localePath('/manager')" class="flex min-w-0 flex-1 items-center gap-3" @click.native="closeSidebar">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
           <WorkspaceIdentity class="min-w-0 flex-1" />
         </nuxt-link>
-        <button type="button" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" @click="closeSidebar">✕</button>
+        <button type="button" class="shrink-0 rounded-xl p-2 text-slate-400 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" :aria-label="$t('workspace_layout.close_navigation')" @click="closeSidebar">✕</button>
       </div>
 
       <div class="flex-1 overflow-y-auto px-4 py-5">
@@ -35,15 +35,15 @@
       </div>
 
       <div class="border-t border-slate-100 p-4 dark:border-slate-800">
-        <nuxt-link :to="localePath('/profile')" class="mb-2 flex items-center gap-3 rounded-2xl p-3 transition hover:bg-slate-100 dark:hover:bg-slate-800" @click.native="closeSidebar"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /></svg></div><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">{{ $t('workspace_layout.settings') }}</p><p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $t('workspace_layout.account_settings') }}</p></div></nuxt-link>
+        <nuxt-link :to="localePath('/profile')" class="mb-2 flex items-center gap-3 rounded-2xl p-3 transition hover:bg-slate-100 dark:hover:bg-slate-800" @click.native="closeSidebar"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"><WorkspaceSettingsIcon class="h-5 w-5 shrink-0" /></div><div class="min-w-0 flex-1"><p class="truncate text-sm font-semibold">{{ $t('workspace_layout.settings') }}</p><p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $t('workspace_layout.account_settings') }}</p></div></nuxt-link>
         <button type="button" class="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 px-3 py-2.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50 dark:border-slate-700 dark:text-rose-300 dark:hover:bg-rose-950/20" @click="logout">{{ $t('logout') }}</button>
       </div>
     </aside>
 
     <div class="min-h-screen lg:pl-72">
       <header class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90 sm:px-6 lg:px-8">
-        <div class="flex items-center gap-3"><button type="button" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" @click="toggleSidebar">☰</button><p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ pageTitle }}</p></div>
-        <div class="flex items-center gap-2"><div data-language-switcher class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><language-dropdown /></div><nuxt-link :to="localePath('/profile')" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"><span class="hidden sm:inline">{{ $t('workspace_layout.settings') }}</span></nuxt-link></div>
+        <div class="flex min-w-0 flex-1 items-center gap-3"><button type="button" class="shrink-0 rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" :aria-label="$t('workspace_layout.open_navigation')" @click="toggleSidebar">☰</button><p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ pageTitle }}</p></div>
+        <div class="flex shrink-0 items-center gap-2"><div data-language-switcher class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><language-dropdown /></div><nuxt-link :to="localePath('/profile')" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" :aria-label="$t('workspace_layout.settings')"><WorkspaceSettingsIcon class="h-4 w-4 shrink-0" /><span class="hidden sm:inline">{{ $t('workspace_layout.settings') }}</span></nuxt-link></div>
       </header>
       <Nuxt />
     </div>
@@ -52,6 +52,8 @@
 
 <script>
 import WorkspaceIdentity from '@/components/layout/WorkspaceIdentity.vue'
+import WorkspaceSettingsIcon from '@/components/layout/WorkspaceSettingsIcon.vue'
+import { isWorkspaceRouteActive } from '@/utils/workspace-route'
 
 const PRODUCTION_COPY = {
   hy: { title: 'Արտադրամասեր', laser: 'Լազերային կտրում', bend: 'Կռում', powder: 'Փոշեներկում' },
@@ -61,7 +63,7 @@ const PRODUCTION_COPY = {
 
 export default {
   name: 'ManagerLayout',
-  components: { WorkspaceIdentity },
+  components: { WorkspaceIdentity, WorkspaceSettingsIcon },
   data() {
     return {
       isSidebarOpen: false,
@@ -87,9 +89,9 @@ export default {
     visibleNavItems() { return this.navItems.filter((item) => !item.permission || this.$can(item.permission)) },
     quickActions() { return this.actionItems.filter((item) => this.$can(item.permission)) },
     pageTitle() {
-      const production = this.productionItems.find((item) => this.$route.path.startsWith(item.to))
+      const production = this.productionItems.find((item) => isWorkspaceRouteActive(this.$route.path, item))
       if (production) return production.label
-      const found = this.navItems.find((item) => item.exact ? this.$route.path === item.to : this.$route.path.startsWith(item.to))
+      const found = this.navItems.find((item) => isWorkspaceRouteActive(this.$route.path, item))
       return found ? this.$t(found.labelKey) : this.$t('workspace_layout.workspace')
     },
   },

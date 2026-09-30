@@ -107,6 +107,7 @@
     "language": "Language"
   },
   "workspace_layout": {
+    "phone_not_set": "Phone not set",
     "navigation": "Navigation",
     "management": "Management",
     "work_sections": "Work sections",

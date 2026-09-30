@@ -106,6 +106,7 @@
     "language": "Լեզու"
   },
   "workspace_layout": {
+    "phone_not_set": "Հեռախոսը նշված չէ",
     "navigation": "Նավիգացիա",
     "management": "Կառավարում",
     "work_sections": "Աշխատանքային բաժիններ",

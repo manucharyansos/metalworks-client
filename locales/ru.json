@@ -105,6 +105,7 @@
     "language": "Язык"
   },
   "workspace_layout": {
+    "phone_not_set": "Телефон не указан",
     "navigation": "Навигация",
     "management": "Управление",
     "work_sections": "Рабочие разделы",
