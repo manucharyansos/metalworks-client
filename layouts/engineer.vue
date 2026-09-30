@@ -6,10 +6,13 @@
       class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:translate-x-0 lg:shadow-none"
       :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
     >
-      <div class="flex min-h-20 items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-800">
+      <div class="flex h-20 items-center justify-between border-b border-slate-100 px-5 dark:border-slate-800">
         <nuxt-link :to="localePath('/engineer')" class="flex min-w-0 items-center gap-3" @click.native="closeSidebar">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
-          <WorkspaceIdentity class="min-w-0 flex-1" />
+          <div class="min-w-0">
+            <p class="truncate text-sm font-black tracking-tight">MetalWorks</p>
+            
+          </div>
         </nuxt-link>
         <button type="button" class="rounded-xl p-2 text-slate-400 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" @click="closeSidebar">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18 18 6M6 6l12 12" /></svg>
@@ -62,7 +65,10 @@
           <button type="button" class="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm lg:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" @click="toggleSidebar">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16" /></svg>
           </button>
-          <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ pageTitle }}</p>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ pageTitle }}</p>
+            <p class="hidden truncate text-xs text-slate-500 dark:text-slate-400 sm:block">{{ $t('workspace_layout.functions_available', { count: grantedCount }) }}</p>
+          </div>
         </div>
         <div class="flex items-center gap-2">
           <div data-language-switcher class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><language-dropdown /></div>
@@ -78,11 +84,8 @@
 </template>
 
 <script>
-import WorkspaceIdentity from '@/components/layout/WorkspaceIdentity.vue'
-
 export default {
   name: 'EngineerLayout',
-  components: { WorkspaceIdentity },
   data() {
     return {
       isSidebarOpen: false,
@@ -95,7 +98,9 @@ export default {
     }
   },
   computed: {
+    currentUser() { return this.$auth.user || {} },
     visibleNavItems() { return this.navItems.filter((item) => !item.permission || this.$can(item.permission)) },
+    grantedCount() { return Array.isArray(this.currentUser.permissions) ? this.currentUser.permissions.length : 0 },
     pageTitle() {
       const found = this.navItems.find((item) => this.isRouteActive(item))
       return found ? this.$t(found.labelKey) : this.$t('workspace_layout.workspace')

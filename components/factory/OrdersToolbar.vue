@@ -2,8 +2,8 @@
   <div class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
     <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
       <div class="flex min-w-0 items-center gap-2">
-        <h2 class="text-lg font-black text-slate-950 dark:text-white">{{ t.title }}</h2>
-        <InfoTooltip>{{ t.help }}</InfoTooltip>
+        <h2 class="text-lg font-black text-slate-950 dark:text-white">Արտադրական պատվերներ</h2>
+        <InfoTooltip>Որոնեք պատվերը և ֆիլտրեք ընթացքի կարգավիճակով։</InfoTooltip>
       </div>
 
       <div class="relative w-full xl:w-[380px]">
@@ -12,14 +12,14 @@
           v-model="localSearch"
           type="text"
           class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-3 pr-10 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-900/5 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:border-slate-600"
-          :placeholder="t.search"
+          placeholder="Համար, անուն կամ կոդ..."
           @input="$emit('update:search', localSearch)"
         />
       </div>
     </div>
 
     <div v-if="statusOptions.length" class="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
-      <span class="mr-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">{{ t.status }}</span>
+      <span class="mr-1 text-[9px] font-black uppercase tracking-[0.14em] text-slate-400">Կարգավիճակ</span>
       <button
         v-for="(opt, index) in statusOptions"
         :key="opt.value || index"
@@ -38,19 +38,13 @@
         class="ml-auto rounded-full px-3 py-1.5 text-[10px] font-bold text-rose-600 transition hover:bg-rose-50 dark:text-rose-300 dark:hover:bg-rose-950/20"
         @click="clearFilters"
       >
-        {{ t.clear }}
+        Մաքրել ֆիլտրերը
       </button>
     </div>
   </div>
 </template>
 
 <script>
-const COPY = {
-  hy: { title: 'Արտադրական պատվերներ', help: 'Որոնեք պատվերը և ֆիլտրեք ընթացքի կարգավիճակով։', search: 'Համար, անուն կամ կոդ...', status: 'Կարգավիճակ', clear: 'Մաքրել ֆիլտրերը' },
-  ru: { title: 'Производственные заказы', help: 'Ищите заказ и фильтруйте по статусу выполнения.', search: 'Номер, название или код...', status: 'Статус', clear: 'Сбросить фильтры' },
-  en: { title: 'Production orders', help: 'Search orders and filter by production status.', search: 'Number, name or code...', status: 'Status', clear: 'Clear filters' },
-}
-
 export default {
   name: 'OrdersToolbar',
   props: {
@@ -58,18 +52,20 @@ export default {
     statusOptions: { type: Array, default: () => [] },
     selectedStatuses: { type: Array, default: () => [] },
   },
-  data() { return { localSearch: this.search } },
-  computed: {
-    locale() { const code = String(this.$i18n?.locale || 'hy').toLowerCase().split('-')[0]; return ['hy','ru','en'].includes(code) ? code : 'hy' },
-    t() { return COPY[this.locale] || COPY.hy },
+  data() {
+    return { localSearch: this.search }
   },
-  watch: { search(val) { this.localSearch = val } },
+  watch: {
+    search(val) { this.localSearch = val },
+  },
   methods: {
     isActive(opt) { return this.selectedStatuses.includes(opt.value) },
     toggleStatus(opt) {
       const value = opt.value
       const exists = this.selectedStatuses.includes(value)
-      const updated = exists ? this.selectedStatuses.filter((v) => v !== value) : [...this.selectedStatuses, value]
+      const updated = exists
+        ? this.selectedStatuses.filter((v) => v !== value)
+        : [...this.selectedStatuses, value]
       this.$emit('update:selected-statuses', updated)
     },
     clearFilters() { this.$emit('update:selected-statuses', []) },
