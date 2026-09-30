@@ -52,7 +52,7 @@ async function selection(list = groups()) {
 test('subgroups stay disabled until an exact existing group is entered', async () => {
   const { vm, enter } = await selection()
   assert.equal(vm.isExistingGroup, false)
-  assert.deepEqual(vm.pmpRemoteNumbers, [])
+  assert.equal(vm.pmpRemoteNumbers.length, 0)
   await enter('pmpGroup', '00', 'onGroupCodeInput')
   assert.equal(vm.isExistingGroup, false)
   assert.equal(vm.showCreateGroup, true)
