@@ -193,5 +193,13 @@
     "server_formats": "Allowed formats are checked by the server when you add a file.",
     "project_failed": "Could not open the selected subgroup. Please retry.",
     "factories_failed": "Could not load the factory list. Please retry."
+  },
+  "order_files": {
+    "loading": "Loading files for the selected subgroup…",
+    "load_failed": "Could not load subgroup files. An order can be created after the files load successfully.",
+    "empty_subgroup": "The selected PMP subgroup has no files. Add files before creating an order.",
+    "select_files": "Select at least one file to save the order.",
+    "wrong_subgroup": "One of the selected files belongs to a different subgroup. Select the files again.",
+    "retry": "Reload files"
   }
 }
