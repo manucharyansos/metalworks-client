@@ -1,3 +1,5 @@
+import prepareCadAssets from './build/prepare-cad-assets.cjs'
+
 const PRODUCTION_API_BASE_URL = 'https://api.metalworks.am'
 const configuredApiBaseURL =
   process.env.API_BASE_URL || process.env.BASE_URL || ''
@@ -181,6 +183,10 @@ export default {
     fallback: true,
   },
 
+  hooks: {
+    'build:before': () => prepareCadAssets(__dirname),
+  },
+
   build: {
     transpile: ['cad-preview'],
     extend(config, { isClient }) {
@@ -190,7 +196,7 @@ export default {
           use: [
             {
               loader: 'worker-loader',
-              options: { filename: 'cad-preview.[contenthash].worker.js' },
+              options: { filename: '[name].[contenthash].js' },
             },
           ],
         })

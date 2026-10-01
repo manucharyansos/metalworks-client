@@ -68,6 +68,9 @@ typings/
 # nuxt.js build output
 .nuxt
 
+# CAD runtime is copied from the pinned dependency before every build.
+/static/cad-vendor/
+
 # vuepress build output
 .vuepress/dist
 

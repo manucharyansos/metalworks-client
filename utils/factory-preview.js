@@ -5,6 +5,48 @@ function startsWith(bytes, signature) {
   return signature.every((value, index) => bytes[index] === value)
 }
 
+export function detectModelFormat(bytes, filename, text = '') {
+  const header = text || new TextDecoder().decode(bytes.subarray(0, 4096))
+  if (/(?:^|\n)\s*ISO-10303-21\s*;/i.test(header)) return 'step'
+  const records = header
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .slice(0, 20)
+  const iges = records.filter(
+    (line) =>
+      line.length === 80 &&
+      /[SGDPT]/.test(line[72]) &&
+      /^\s*\d+\s*$/.test(line.slice(73))
+  )
+  if (
+    iges.length >= 2 &&
+    iges.some((line) => line[72] === 'G' || line[72] === 'D')
+  )
+    return 'iges'
+  if (bytes.length >= 84) {
+    const triangles = new DataView(
+      bytes.buffer,
+      bytes.byteOffset,
+      bytes.byteLength
+    ).getUint32(80, true)
+    if (triangles > 0 && 84 + triangles * 50 === bytes.length) return 'stl'
+  }
+  if (/^\s*solid\b/i.test(header) && /\bfacet\s+normal\b/i.test(header))
+    return 'stl'
+  if (
+    text &&
+    /(?:^|\n)\s*v\s+[-+\d.]/.test(text) &&
+    /(?:^|\n)\s*f\s+-?\d+(?:\/[^\s]*)?\s+-?\d+(?:\/[^\s]*)?\s+-?\d+/m.test(text)
+  )
+    return 'obj'
+  // A known extension also routes damaged models to a clear import error.
+  const ext = String(filename).toLowerCase().split('.').pop()
+  if (['igs', 'iges'].includes(ext)) return 'iges'
+  if (['step', 'stp'].includes(ext)) return 'step'
+  if (['stl', 'obj'].includes(ext)) return ext
+  return null
+}
+
 // Inspect the payload as well as its name: a factory is a work stage, not a format.
 export async function inspectFactoryPreview(blob, filename, declaredType) {
   if (!(blob instanceof Blob) || !blob.size || blob.size > 10 * 1024 * 1024) {
@@ -33,6 +75,9 @@ export async function inspectFactoryPreview(blob, filename, declaredType) {
     return { type: 'image', blob: new Blob([blob], { type: imageMime }) }
   if (declaredType === 'image') return { type: 'image', blob }
 
+  const modelFormat = detectModelFormat(bytes, filename)
+  if (modelFormat) return { type: 'model', format: modelFormat, bytes }
+
   let text = null
   try {
     const encoding = startsWith(bytes, [255, 254])
@@ -55,6 +100,8 @@ export async function inspectFactoryPreview(blob, filename, declaredType) {
     if (!text.includes('\0') && controls <= Math.max(0, text.length * 0.005)) {
       if (/(?:^|\r?\n)\s*0\r?\n\s*SECTION\r?\n/.test(text))
         return { type: 'dxf' }
+      const textModel = detectModelFormat(bytes, filename, text)
+      if (textModel) return { type: 'model', format: textModel, bytes }
       return {
         type: 'text',
         text: text.slice(0, MAX_TEXT_CHARACTERS),
