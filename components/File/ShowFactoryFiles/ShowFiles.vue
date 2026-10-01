@@ -1,22 +1,24 @@
 <template>
   <div
-    class="p-4 md:p-5 bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60"
+    class="p-4 md:p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800"
   >
     <!-- Factory selection -->
     <div v-if="!selectedFactory" class="space-y-4">
       <div class="flex items-center justify-between">
-        <h2 class="text-xl md:text-2xl font-bold text-gray-800">
-          Ընտրեք արտադրամաս
+        <h2
+          class="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100"
+        >
+          {{ $t('order_create.choose_factory') }}
         </h2>
 
         <button
           type="button"
           class="p-2 hover:bg-gray-100 rounded-xl transition"
-          title="Հետ"
+          :title="$t('order_create.back')"
           @click="$emit('back')"
         >
           <svg
-            class="w-6 h-6 text-gray-500 hover:text-gray-700"
+            class="w-6 h-6 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-300"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -35,11 +37,11 @@
         <button
           v-for="factory in factoriesWithCount"
           :key="factory.id"
-          class="text-left p-4 border rounded-xl transition-colors flex items-center justify-between shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="text-left p-4 border rounded-xl transition-colors flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-500"
           :class="{
-            'hover:border-blue-300 border-green-200 bg-green-50 hover:bg-green-100':
+            'border-slate-200 bg-white hover:border-blue-400 dark:border-slate-700 dark:bg-slate-900':
               factory.fileCount > 0,
-            'border-gray-100 bg-gray-50 hover:bg-gray-100 opacity-70 cursor-not-allowed':
+            'border-gray-100 bg-slate-50 dark:bg-slate-800 hover:bg-gray-100 opacity-70 cursor-not-allowed':
               factory.fileCount === 0,
           }"
           :disabled="factory.fileCount === 0"
@@ -71,7 +73,9 @@
             </div>
             <div>
               <h3 class="font-semibold text-lg">{{ factory.name }}</h3>
-              <p class="text-gray-600 text-sm">{{ factory.value }}</p>
+              <p class="text-slate-600 dark:text-slate-400 text-sm">
+                {{ factory.value }}
+              </p>
             </div>
           </div>
           <span
@@ -81,7 +85,7 @@
             }"
             class="px-2 py-1 rounded-full text-sm font-medium"
           >
-            {{ factory.fileCount }} ֆայլ
+            {{ $t('order_create.file_count', { count: factory.fileCount }) }}
           </span>
         </button>
       </div>
@@ -91,18 +95,20 @@
     <div v-else class="w-full">
       <!-- Header with Back Button -->
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl md:text-2xl font-bold text-gray-800 truncate">
+        <h2
+          class="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100 truncate"
+        >
           {{ selectedFactory.name }}
         </h2>
 
         <button
           type="button"
           class="p-2 hover:bg-gray-100 rounded-xl transition-all duration-200 group"
-          title="Հետ գործարաններ"
+          :title="$t('order_create.back_factories')"
           @click="selectedFactory = null"
         >
           <svg
-            class="w-6 h-6 text-gray-500 group-hover:text-gray-700 transition-colors"
+            class="w-6 h-6 text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:text-slate-300 transition-colors"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -120,14 +126,20 @@
       <!-- PMP Group Header -->
       <div
         v-if="pmps.exists"
-        class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100 shadow-sm mb-5"
+        class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm mb-5"
       >
         <div
           class="flex flex-col md:flex-row md:items-center md:justify-between gap-3"
         >
           <div>
-            <h3 class="text-lg md:text-xl font-bold text-gray-800">
-              Խումբ: <span class="text-indigo-700">{{ pmps.pmp.group }}</span> —
+            <h3
+              class="text-lg md:text-xl font-bold text-slate-900 dark:text-slate-100"
+            >
+              {{ $t('order_create.group_code') }}:
+              <span class="text-blue-700 dark:text-blue-300">{{
+                pmps.pmp.group
+              }}</span>
+              —
               {{ pmps.pmp.group_name }}
             </h3>
           </div>
@@ -144,10 +156,16 @@
               {{ selectedFactory.name }}
             </span>
             <button
-              class="text-sm font-medium text-indigo-600 hover:text-indigo-800 underline-offset-2 hover:underline transition"
+              class="text-sm font-medium text-blue-600 dark:text-blue-300 hover:text-indigo-800 underline-offset-2 hover:underline transition"
               @click="toggleSelectAll"
             >
-              {{ allSelected ? 'Չեղարկել բոլորը' : 'Ընտրել բոլորը' }}
+              {{
+                $t(
+                  allSelected
+                    ? 'order_create.clear_all'
+                    : 'order_create.select_all'
+                )
+              }}
             </button>
           </div>
         </div>
@@ -156,7 +174,7 @@
       <!-- No PMP Data -->
       <div
         v-else
-        class="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-300"
+        class="text-center py-8 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 rounded-xl border border-dashed border-gray-300"
       >
         <svg
           class="w-12 h-12 mx-auto mb-2 text-gray-400"
@@ -171,7 +189,7 @@
             d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-4l-2 3h-4l-2-3H4"
           />
         </svg>
-        Տվյալներ չեն գտնվել
+        {{ $t('order_create.no_data') }}
       </div>
 
       <!-- Remote Numbers & Files (ONLY selected remote_number) -->
@@ -182,14 +200,16 @@
         <section
           v-for="remote in remoteNumbersWithFiles"
           :key="remote.id"
-          class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-5"
+          class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 md:p-5"
         >
           <h4
-            class="text-base md:text-lg font-semibold text-gray-700 mb-3 flex items-center"
+            class="text-base md:text-lg font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center"
           >
             <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>
-            Հեռակա համար:
-            <span class="text-indigo-600 ml-1">{{ remote.remote_number }}</span>
+            {{ $t('order_create.subgroup') }}:
+            <span class="text-blue-600 dark:text-blue-300 ml-1">{{
+              remote.remote_number
+            }}</span>
             — {{ remote.remote_number_name }}
           </h4>
 
@@ -197,7 +217,7 @@
             <article
               v-for="file in remote.files"
               :key="file.id"
-              class="p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200 hover:border-indigo-300 transition-all duration-200"
+              class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-indigo-300 transition-all duration-200"
               :class="{
                 'ring-2 ring-indigo-400 bg-indigo-50': selectedFiles.includes(
                   file.id
@@ -214,15 +234,15 @@
                     :id="'file_' + file.id"
                     type="checkbox"
                     :checked="selectedFiles.includes(file.id)"
-                    class="mt-1 h-5 w-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300"
+                    class="mt-1 h-5 w-5 text-blue-600 dark:text-blue-300 rounded focus:ring-indigo-500 border-gray-300"
                     @change="toggleFileSelection(file.id)"
                   />
                   <div class="ml-3 flex-1">
                     <p
-                      class="font-medium text-indigo-700 flex items-center text-sm md:text-base"
+                      class="font-medium text-blue-700 dark:text-blue-300 flex items-center text-sm md:text-base"
                     >
                       <svg
-                        class="w-5 h-5 mr-2 text-gray-500"
+                        class="w-5 h-5 mr-2 text-slate-500 dark:text-slate-400"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -238,7 +258,7 @@
                       {{ file.original_name }}
                     </p>
                     <p
-                      class="text-xs md:text-sm text-gray-500 mt-1 break-all font-mono"
+                      class="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1 break-all font-mono"
                     >
                       {{ file.path }}
                     </p>
@@ -248,9 +268,10 @@
                       <div v-if="selectedFiles.includes(file.id)" class="mt-3">
                         <label
                           :for="'quantity_' + file.id"
-                          class="block text-xs font-medium text-gray-700 mb-1"
+                          class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1"
                         >
-                          Քանակ <span class="text-red-500">*</span>
+                          {{ $t('order_create.quantity') }}
+                          <span class="text-red-500">*</span>
                         </label>
                         <div class="flex items-center gap-2">
                           <input
@@ -259,7 +280,7 @@
                             type="number"
                             min="1"
                             required
-                            class="w-20 p-2 text-sm border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                            class="w-20 p-2 text-sm border rounded-md bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
                             :class="{
                               'border-red-500 ring-1 ring-red-300':
                                 !isQuantityValid(file.id),
@@ -271,11 +292,11 @@
                           />
                           <span
                             v-if="isEditingMode && file.quantity"
-                            class="text-xs text-gray-600"
+                            class="text-xs text-slate-600 dark:text-slate-400"
                           >
                             <del class="text-gray-400">{{ file.quantity }}</del>
                             <span class="mx-1">→</span>
-                            <strong class="text-indigo-600">
+                            <strong class="text-blue-600 dark:text-blue-300">
                               {{ fileQuantities[file.id] || 1 }}
                             </strong>
                           </span>
@@ -284,7 +305,7 @@
                           v-if="!isQuantityValid(file.id)"
                           class="text-xs text-red-500 mt-1"
                         >
-                          Պետք է լինի 1 կամ ավելի
+                          {{ $t('order_create.positive_quantity') }}
                         </p>
                       </div>
                     </transition>
@@ -293,14 +314,23 @@
 
                 <!-- File Metadata -->
                 <div class="text-right space-y-1 text-xs md:text-sm">
-                  <p v-if="file.quantity" class="text-emerald-700 font-medium">
-                    Քանակ: {{ file.quantity }}
+                  <p
+                    v-if="file.quantity"
+                    class="text-emerald-700 dark:text-emerald-300 font-medium"
+                  >
+                    {{ $t('order_create.quantity') }}: {{ file.quantity }}
                   </p>
-                  <p v-if="file.material_type" class="text-purple-700">
-                    Նյութ: {{ file.material_type }}
+                  <p
+                    v-if="file.material_type"
+                    class="text-purple-700 dark:text-purple-300"
+                  >
+                    {{ $t('order_create.material') }}: {{ file.material_type }}
                   </p>
-                  <p v-if="file.thickness" class="text-orange-700">
-                    Հաստություն: {{ file.thickness }}
+                  <p
+                    v-if="file.thickness"
+                    class="text-orange-700 dark:text-orange-300"
+                  >
+                    {{ $t('order_create.thickness') }}: {{ file.thickness }}
                   </p>
                 </div>
               </div>
@@ -324,7 +354,7 @@
                   d="M9 17v-2m3 2v-4m3 4v-6M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2h-5l-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                 />
               </svg>
-              Ֆայլեր չեն գտնվել
+              {{ $t('order_create.no_files') }}
             </div>
           </div>
         </section>
@@ -337,11 +367,11 @@
           class="mt-8 sticky bottom-4 left-0 right-0 mx-4 md:mx-0"
         >
           <div
-            class="bg-white/95 backdrop-blur-lg p-4 rounded-2xl shadow-2xl border border-gray-200 flex flex-col sm:flex-row gap-3"
+            class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row gap-3"
           >
             <button
               :disabled="!areQuantitiesValid"
-              class="flex-1 py-3 px-6 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-xl shadow-md transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
+              class="flex-1 py-3 px-6 bg-slate-900 hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 text-white font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
               @click="submitSelectedFiles"
             >
               <svg
@@ -357,11 +387,13 @@
                   d="M5 13l4 4L19 7"
                 />
               </svg>
-              Հաստատել ({{ selectedFiles.length }})
+              {{ $t('order_create.confirm_files') }} ({{
+                selectedFiles.length
+              }})
             </button>
 
             <button
-              class="flex-1 py-3 px-6 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-md transition-all transform hover:scale-105 flex items-center justify-center"
+              class="flex-1 py-3 px-6 bg-slate-700 hover:bg-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-semibold rounded-xl transition-colors flex items-center justify-center"
               @click="selectedFactory = null"
             >
               <svg
@@ -377,7 +409,7 @@
                   d="M4 21h16M5 21V9a1 1 0 011-1h3V5a1 1 0 011-1h4a1 1 0 011 1v3h3a1 1 0 011 1v12"
                 />
               </svg>
-              Ընտրել այլ գործարանից
+              {{ $t('order_create.choose_other_factory') }}
             </button>
           </div>
         </div>
@@ -443,7 +475,8 @@ export default {
         (remote) => remote.files
       )
       return (
-        allFiles.length > 0 && allFiles.every((file) => this.selectedFiles.includes(file.id))
+        allFiles.length > 0 &&
+        allFiles.every((file) => this.selectedFiles.includes(file.id))
       )
     },
     areQuantitiesValid() {

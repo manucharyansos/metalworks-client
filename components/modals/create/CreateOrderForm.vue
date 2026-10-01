@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="flex flex-col items-center w-full p-5 md:p-6 bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60"
-  >
+  <div class="flex w-full flex-col gap-2">
     <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
       <div class="flex flex-col">
         <slot name="pmpGroup"></slot>
@@ -26,14 +24,12 @@
 
     <!-- Action buttons (with back) -->
     <div
-      class="mt-6 w-full flex flex-wrap gap-3 md:gap-4 justify-between items-center"
+      class="mt-6 w-full border-t border-slate-200 pt-5 dark:border-slate-800"
     >
-      <div
-        class="mt-6 w-full flex flex-wrap justify-between items-center gap-4"
-      >
+      <div class="flex w-full flex-wrap items-center justify-between gap-3">
         <!-- Cancel -->
         <button
-          class="py-3 px-6 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-full transition-all flex items-center"
+          class="flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           type="button"
           @click="$emit('cancelButton')"
         >
@@ -58,10 +54,10 @@
           <button
             :disabled="!canProceedToFiles"
             :class="[
-              'py-3 px-6 rounded-full font-semibold transition-all flex items-center',
+              'flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition',
               canProceedToFiles
-                ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md transform hover:scale-105'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed',
+                ? 'border border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
+                : 'bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800 dark:text-slate-500',
             ]"
             @click="$emit('selectFromOtherFactory')"
           >
@@ -78,17 +74,17 @@
                 d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
               />
             </svg>
-            Ընտրել ֆայլեր
+            {{ $t('order_create.choose_files') }}
           </button>
 
           <!--          &lt;!&ndash; Ընտրել ֆայլերը – ակտիվ միայն եթե պարտադիր դաշտերը լրացված են &ndash;&gt;-->
           <!--          <button-->
           <!--            :disabled="!canProceedToFiles"-->
           <!--            :class="[-->
-          <!--              'py-3 px-6 rounded-full font-semibold transition-all flex items-center',-->
+          <!--              'flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition',-->
           <!--              canProceedToFiles-->
-          <!--                ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md transform hover:scale-105'-->
-          <!--                : 'bg-gray-300 text-gray-500 cursor-not-allowed',-->
+          <!--                ? 'border border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'-->
+          <!--                : 'bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800 dark:text-slate-500',-->
           <!--            ]"-->
           <!--            type="button"-->
           <!--            @click="$emit('openFiles')"-->
@@ -106,7 +102,7 @@
           <!--                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"-->
           <!--              />-->
           <!--            </svg>-->
-          <!--            Ընտրել ֆայլերը-->
+          <!--            {{ $t('order_create.choose_files') }}ը-->
           <!--          </button>-->
 
           <!-- Հաստատել – ակտիվ միայն եթե բոլորը լրացված են (non-editing) -->
@@ -114,10 +110,10 @@
             v-if="!isEditingMode"
             :disabled="!canSubmit"
             :class="[
-              'py-3 px-6 rounded-full font-semibold transition-all flex items-center',
+              'flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition',
               canSubmit
-                ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md transform hover:scale-105'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed',
+                ? 'bg-slate-900 text-white hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200'
+                : 'bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800 dark:text-slate-500',
             ]"
             type="button"
             @click="$emit('addButton')"

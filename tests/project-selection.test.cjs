@@ -322,3 +322,30 @@ test('project and factory errors are distinct and failed projects cannot expose 
   assert.equal(vm.pageError, '')
   assert.equal(vm.factoryListError, 'file_upload.factories_failed')
 })
+
+
+test('file breadcrumbs retain both project codes and never show files from another subgroup', async () => {
+  const page = await component('pages/engineer/files/view.vue')
+  const pmp = { ...groups()[0], files: [
+    { id: 1, remote_number_id: 101, factory_id: 6, original_name: 'first.pdf' },
+    { id: 2, remote_number_id: 102, factory_id: 6, original_name: 'other.pdf' },
+  ] }
+  const vm = { ...page.data(), getPmp: pmp, getFactory: [{ id: 6, value: 'DLD' }], projectReady: true }
+  for (const [name, method] of Object.entries(page.methods)) vm[name] = method.bind(vm)
+  for (const [name, getter] of Object.entries(page.computed)) Object.defineProperty(vm, name, { get: getter.bind(vm) })
+  vm.showFiles(pmp.remote_number[0])
+  assert.deepEqual(vm.breadcrumb, ['001 — First group', '01 — First part'])
+  vm.selectFactory(vm.getFactory[0])
+  vm.selectedFile = pmp.files[0]
+  assert.deepEqual(vm.breadcrumb, ['001 — First group', '01 — First part', 'DLD', 'first.pdf'])
+  vm.selectBreadcrumb(2)
+  assert.equal(vm.selectedRemoteNumberId, 101)
+  assert.deepEqual(vm.selectedFiles.map(file => file.id), [1])
+  assert.equal(vm.selectedFile, null)
+  vm.selectBreadcrumb(1)
+  assert.equal(vm.selectedFactoryId, null)
+  assert.equal(vm.selectedRemoteNumberId, 101)
+  vm.selectBreadcrumb(0)
+  assert.equal(vm.selectedRemoteNumber, null)
+  assert.deepEqual(vm.breadcrumb, ['001 — First group'])
+})

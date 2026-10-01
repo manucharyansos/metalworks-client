@@ -93,10 +93,6 @@
         </div>
         <div class="flex shrink-0 items-center gap-2">
           <div data-language-switcher class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><language-dropdown /></div>
-          <nuxt-link :to="localePath('/profile')" class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" :aria-label="$t('workspace_layout.settings')">
-            <WorkspaceSettingsIcon class="h-4 w-4 shrink-0" />
-            <span class="hidden sm:inline">{{ $t('workspace_layout.settings') }}</span>
-          </nuxt-link>
         </div>
       </header>
       <Nuxt />
