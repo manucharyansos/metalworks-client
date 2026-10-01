@@ -53,6 +53,16 @@ jobs:
             exit 1
           }
 
+      - name: Verify CAD runtime and workers are included
+        run: |
+          test -s dist/cad-vendor/0.0.23/occt-import-js.js
+          test -s dist/cad-vendor/0.0.23/occt-import-js.wasm
+          test -s dist/cad-vendor/0.0.23/license.occt-import-js.txt
+          test -s dist/cad-vendor/0.0.23/license.occt.txt
+          test -s dist/cad-vendor/0.0.23/SOURCE.txt
+          test -s dist/_nuxt/cad-model.worker.*.js
+          test -s dist/_nuxt/cad-preview.worker.*.js
+
       - name: Upload source build artifact
         uses: actions/upload-artifact@v4
         with:

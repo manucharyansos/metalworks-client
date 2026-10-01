@@ -363,6 +363,13 @@
                 {{ previewError }}
               </p>
 
+              <ModelViewer
+                v-else-if="fileType === 'model' && previewModel"
+                :key="selectedFile.id"
+                :model="previewModel"
+                :filename="selectedFile.original_name"
+              />
+
               <div
                 v-else-if="fileType === 'pdf' && previewUrl"
                 class="flex min-w-0 flex-1 flex-col gap-3"
@@ -596,6 +603,8 @@ import AddFileModal from '~/components/modals/add-file/AddFile.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import InfoContentInput from '~/components/modals/add-file/InfoContentInput.vue'
 import CadPreviewWorker from '~/workers/cad-preview.worker.js'
+import CadModelWorker from '~/workers/cad-model.worker.js'
+import ModelViewer from '~/components/File/ModelViewer.vue'
 import { inspectFactoryPreview } from '~/utils/factory-preview'
 import {
   allowsExtension,
@@ -615,6 +624,7 @@ export default {
     PopupModal,
     DxfViewerModal,
     InfoContentInput,
+    ModelViewer,
   },
   layout: 'engineer',
   middleware: ['role-guard'],
@@ -642,6 +652,7 @@ export default {
       previewError: '',
       previewUrl: '',
       previewText: '',
+      previewModel: null,
       previewRequest: 0,
       previewTaskCancel: null,
       previewNote: '',
@@ -1005,7 +1016,17 @@ export default {
         )
         if (request !== this.previewRequest) return
         this.fileType = preview.type
-        if (preview.type === 'text') {
+        if (preview.type === 'model') {
+          const result = await this.importCadModel(
+            preview.bytes,
+            preview.format,
+            file.original_name || filePath
+          )
+          if (request !== this.previewRequest) return
+          if (result.model) this.previewModel = Object.freeze(result.model)
+          else
+            this.previewError = this.$t('model_preview.error_' + result.error)
+        } else if (preview.type === 'text') {
           this.previewText = preview.text
           if (preview.truncated) this.previewNote = 'file_preview.truncated'
         } else if (preview.type === 'cad') {
@@ -1040,6 +1061,35 @@ export default {
       this.previewUrl = this.previewText = this.previewError = ''
       this.previewNote = ''
       this.previewLoading = false
+      this.previewModel = null
+    },
+
+    importCadModel(bytes, format, filename) {
+      return new Promise((resolve) => {
+        let worker
+        let timer
+        let finished = false
+        const finish = (result) => {
+          if (finished) return
+          finished = true
+          clearTimeout(timer)
+          worker?.terminate()
+          this.previewTaskCancel = null
+          resolve(result)
+        }
+        this.previewTaskCancel = () => finish({ error: 'cancelled' })
+        try {
+          worker = new CadModelWorker()
+          worker.onmessage = ({ data }) => finish(data)
+          worker.onerror = () => finish({ error: 'unavailable' })
+          timer = setTimeout(() => finish({ error: 'timeout' }), 45000)
+          worker.postMessage({ buffer: bytes.buffer, format, filename }, [
+            bytes.buffer,
+          ])
+        } catch (_) {
+          finish({ error: 'unavailable' })
+        }
+      })
     },
 
     extractCadPreview(bytes, filename) {
@@ -1060,7 +1110,7 @@ export default {
           worker = new CadPreviewWorker()
           worker.onmessage = ({ data }) => finish(data)
           worker.onerror = () => finish(null)
-          timer = setTimeout(() => finish(null), 5000)
+          timer = setTimeout(() => finish(null), 10000)
           worker.postMessage({ buffer: bytes.buffer, filename }, [bytes.buffer])
         } catch (_) {
           finish(null)

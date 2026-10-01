@@ -208,11 +208,11 @@
   },
   "file_preview": {
     "saved_view": "Saved model image.",
-    "no_saved_view": "This file has no available saved image. Add a PDF or DXF export to preview the drawing. You can download the original.",
+    "no_saved_view": "No saved image is available in this file. Add a STEP or IGES export for 3D, or PDF or DXF for a drawing. You can download the original.",
     "truncated": "The beginning of the text is shown. Download the file to read its full contents.",
     "open_pdf_hint": "Open the PDF in a new tab if your browser cannot display it here.",
     "open_pdf": "Open PDF in a new tab",
-    "unsupported": "This format is available to download. Add a PDF or DXF export to preview the drawing."
+    "unsupported": "You can download this format. Add a STEP, IGES, STL or OBJ export for 3D, or PDF or DXF for a drawing."
   },
   "order_create": {
     "title": "New order",
@@ -260,5 +260,41 @@
     "no_files": "No files found",
     "confirm_files": "Confirm selection",
     "choose_other_factory": "Another factory"
+  },
+  "model_preview": {
+    "part_count": "Parts: {count}",
+    "views": "Model views",
+    "controls": "Model controls",
+    "isometric": "Isometric",
+    "top": "Top",
+    "front": "Front",
+    "right": "Right",
+    "zoom_in": "Zoom in",
+    "zoom_out": "Zoom out",
+    "fit": "Fit to view",
+    "wireframe": "Wireframe",
+    "bounds": "Bounds",
+    "fullscreen": "Full screen",
+    "exit_fullscreen": "Exit full screen",
+    "snapshot": "Save view as PNG",
+    "canvas": "3D model: {name}",
+    "no_visible_parts": "All parts are hidden. Select “Show all”.",
+    "navigation_hint": "Drag to rotate; scroll or pinch to zoom; right-drag to pan. Arrow keys pan, R fits the model to the view.",
+    "dimensions": "Full model dimensions",
+    "millimeters": "mm",
+    "file_units": "file units",
+    "parts": "Parts",
+    "show_all": "Show all",
+    "show_part": "Show part: {name}",
+    "isolate_part": "Show only: {name}",
+    "part": "Part {number}",
+    "webgl_failed": "The browser could not open the 3D view. You can download the original file.",
+    "error_empty": "No surfaces were found for a 3D view. You can download the original file.",
+    "error_too_complex": "The model is too complex for browser preview. Export a simplified model or download the original.",
+    "error_invalid": "The file geometry could not be read. Check the format or export the model as IGES, STEP, STL or OBJ.",
+    "error_timeout": "Preparing the model took too long. Try a simplified export.",
+    "error_unavailable": "The 3D viewer could not load. Reload the page or download the original.",
+    "error_cancelled": "Preview cancelled.",
+    "model_colors": "File colors"
   }
 }
