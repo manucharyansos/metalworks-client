@@ -6,6 +6,7 @@ const { test } = require('node:test')
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const policyUrl = moduleUrl(read('utils/factory-file-policy.js'))
+const previewUrl = moduleUrl(read('utils/factory-preview.js'))
 const policy = import(policyUrl)
 const voice = import(moduleUrl(read('utils/voice-recorder.js').replace("'./factory-file-policy'", `'${policyUrl}'`)))
 
@@ -13,6 +14,7 @@ async function component(file) {
   let source = read(file).match(/<script>([\s\S]*?)<\/script>/)[1]
   source = source.replace(/import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g, (_, names, specifier) => {
     if (specifier === '~/utils/factory-file-policy') return `import ${names} from '${policyUrl}'`
+    if (specifier === '~/utils/factory-preview') return `import ${names} from '${previewUrl}'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
     return `const ${names} = {}`
   })
@@ -259,15 +261,15 @@ test('recording respects configured audio formats and permission denial does not
 
 test('late text preview cannot replace the newly selected file', async () => {
   const { vm } = await uploadPage()
-  let resolveText
+  let resolveBytes
   const blob = new Blob(['old text'], { type: 'text/plain' })
-  blob.text = () => new Promise(done => { resolveText = done })
+  blob.arrayBuffer = () => new Promise(done => { resolveBytes = done })
   vm.$getPmpFileUrl = file => `/api/secure-files/pmp/${file.id}`
-  vm.$axios = { get: async () => ({ data: blob }) }
+  vm.$axios = { get: async url => ({ data: url.endsWith('/1') ? blob : new Blob([new Uint8Array([0, 1, 2, 3, 4])]) }) }
   const first = vm.viewFile('old.txt', { id: 1, factory_id: 6, original_name: 'old.txt' })
   await new Promise(done => setImmediate(done))
   await vm.viewFile('new.iqs', { id: 2, factory_id: 6, original_name: 'new.iqs' })
-  resolveText('old text'); await first
+  resolveBytes(new TextEncoder().encode('old text').buffer); await first
   assert.equal(vm.selectedFile.id, 2)
   assert.equal(vm.fileType, 'file')
   assert.equal(vm.previewText, '')

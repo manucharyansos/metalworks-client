@@ -1,8 +1,8 @@
 const PRODUCTION_API_BASE_URL = 'https://api.metalworks.am'
-const configuredApiBaseURL = process.env.API_BASE_URL || process.env.BASE_URL || ''
-const configuredApiIsLocal = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(
-  configuredApiBaseURL
-)
+const configuredApiBaseURL =
+  process.env.API_BASE_URL || process.env.BASE_URL || ''
+const configuredApiIsLocal =
+  /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(configuredApiBaseURL)
 const isProduction = process.env.NODE_ENV === 'production'
 const apiBaseURL = isProduction
   ? configuredApiIsLocal || !configuredApiBaseURL
@@ -25,7 +25,8 @@ export default {
       { name: 'format-detection', content: 'telephone=no' },
       {
         name: 'keywords',
-        content: "metalwork's, MetalWorks, production, manufacturing, metalworking",
+        content:
+          "metalwork's, MetalWorks, production, manufacturing, metalworking",
       },
       { name: 'robots', content: 'index, follow' },
       { name: 'author', content: 'MetalWorks' },
@@ -181,6 +182,20 @@ export default {
   },
 
   build: {
+    transpile: ['cad-preview'],
+    extend(config, { isClient }) {
+      if (isClient) {
+        config.module.rules.push({
+          test: /\.worker\.js$/,
+          use: [
+            {
+              loader: 'worker-loader',
+              options: { filename: 'cad-preview.[contenthash].worker.js' },
+            },
+          ],
+        })
+      }
+    },
     postcss: {
       plugins: {
         tailwindcss: {},

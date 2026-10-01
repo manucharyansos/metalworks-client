@@ -33,6 +33,45 @@
       </div>
     </transition>
 
+    <section
+      v-if="projectReady"
+      class="mb-5 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-2 sm:p-5"
+      aria-label="PMP"
+    >
+      <div class="min-w-0">
+        <p class="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+          {{ $t('project_context.group') }}
+        </p>
+        <div class="flex items-start gap-3">
+          <span
+            class="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-sm font-semibold text-slate-900 dark:bg-slate-800 dark:text-white"
+            >{{ groupCode }}</span
+          >
+          <p
+            class="min-w-0 break-words text-sm font-semibold text-slate-900 dark:text-white"
+          >
+            {{ getPmp.group_name || '—' }}
+          </p>
+        </div>
+      </div>
+      <div v-if="selectedRemoteNumber" class="min-w-0">
+        <p class="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+          {{ $t('project_context.subgroup') }}
+        </p>
+        <div class="flex items-start gap-3">
+          <span
+            class="shrink-0 rounded-lg bg-blue-50 px-2.5 py-1 font-mono text-sm font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-200"
+            >{{ subgroupCode }}</span
+          >
+          <p
+            class="min-w-0 break-words text-sm font-semibold text-slate-900 dark:text-white"
+          >
+            {{ selectedRemoteNumber.remote_number_name || '—' }}
+          </p>
+        </div>
+      </div>
+    </section>
+
     <transition name="slide-up">
       <nav v-if="breadcrumb.length" class="mb-6">
         <ol
@@ -65,9 +104,11 @@
                   stroke-linejoin="round"
                 />
               </svg>
-              <span class="truncate max-w-[150px] sm:max-w-[200px]">{{
-                item
-              }}</span>
+              <span
+                :title="item"
+                class="truncate max-w-[200px] sm:max-w-[280px]"
+                >{{ item }}</span
+              >
             </button>
           </li>
         </ol>
@@ -291,6 +332,13 @@
                 {{ selectedFile.original_name }}
               </h3>
 
+              <p
+                v-if="previewNote && !previewLoading"
+                class="mb-4 rounded-lg bg-slate-50 p-3 text-sm text-slate-600 dark:bg-slate-900 dark:text-slate-300"
+              >
+                {{ $t(previewNote) }}
+              </p>
+
               <div
                 v-if="fileType === 'dxf' && dxfUrl && $can('pmp_files.view')"
                 class="flex-1 min-h-0"
@@ -315,20 +363,28 @@
                 {{ previewError }}
               </p>
 
-              <div v-else-if="fileType === 'pdf' && previewUrl" class="flex-1">
-                <embed
-                  :src="previewUrl"
+              <div
+                v-else-if="fileType === 'pdf' && previewUrl"
+                class="flex min-w-0 flex-1 flex-col gap-3"
+              >
+                <object
+                  :data="previewUrl"
+                  :aria-label="selectedFile.original_name"
                   type="application/pdf"
-                  class="w-full h-full min-h-[60vh] rounded-lg border"
-                />
+                  class="w-full min-h-[60vh] flex-1 rounded-lg border"
+                >
+                  <p class="p-5 text-center text-sm text-slate-500">
+                    {{ $t('file_preview.open_pdf_hint') }}
+                  </p>
+                </object>
                 <a
                   v-if="$can('pmp_files.view')"
                   :href="previewUrl"
                   target="_blank"
                   rel="noopener"
-                  class="mt-3 block text-center text-blue-600 hover:underline"
+                  class="block shrink-0 text-center text-blue-600 hover:underline"
                 >
-                  Բացել նոր պատուհանում
+                  {{ $t('file_preview.open_pdf') }}
                 </a>
               </div>
 
@@ -341,6 +397,7 @@
                     :src="previewUrl"
                     class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md"
                     :alt="selectedFile.original_name"
+                    @error="previewError = $t('file_upload.preview_failed')"
                   />
                 </a>
               </div>
@@ -364,8 +421,11 @@
                 class="whitespace-pre-wrap break-words rounded-lg bg-gray-50 dark:bg-gray-900 p-4 text-sm overflow-auto max-h-[60vh]"
                 >{{ previewText }}</pre
               >
-              <p v-else class="text-sm text-gray-500 text-center py-6">
-                {{ $t('file_upload.download_to_view') }}
+              <p
+                v-else-if="!previewNote"
+                class="text-sm text-gray-500 text-center py-6"
+              >
+                {{ $t('file_preview.unsupported') }}
               </p>
               <button
                 type="button"
@@ -535,6 +595,8 @@ import PopupModal from '~/components/modals/popup-modal/PopupModal.vue'
 import AddFileModal from '~/components/modals/add-file/AddFile.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import InfoContentInput from '~/components/modals/add-file/InfoContentInput.vue'
+import CadPreviewWorker from '~/workers/cad-preview.worker.js'
+import { inspectFactoryPreview } from '~/utils/factory-preview'
 import {
   allowsExtension,
   inputAccept,
@@ -581,6 +643,8 @@ export default {
       previewUrl: '',
       previewText: '',
       previewRequest: 0,
+      previewTaskCancel: null,
+      previewNote: '',
       isOpen: 'remote_number',
       isOpenFiles: 'files_by_id',
       id: '',
@@ -591,7 +655,6 @@ export default {
       selectedRemoteNumberId: null,
       selectedFiles: [],
       selectedFile: null,
-      breadcrumb: [],
       hoveredFileId: null,
       isOpenModal: false,
       isOpenAddFileModal: false,
@@ -607,6 +670,27 @@ export default {
     ...mapGetters('pmp', ['getPmp', 'errorMessage']),
     ...mapGetters('factory', ['getFactory']),
     ...mapGetters('materials', ['getMaterials']),
+    groupCode() {
+      const code = String(this.getPmp?.group ?? '').trim()
+      return /^\d+$/.test(code) ? code.padStart(3, '0') : code || '—'
+    },
+    subgroupCode() {
+      const code = String(this.selectedRemoteNumber?.remote_number ?? '').trim()
+      return /^\d+$/.test(code) ? code.padStart(2, '0') : code || '—'
+    },
+    breadcrumb() {
+      if (!this.projectReady) return []
+      const trail = [`${this.groupCode} — ${this.getPmp.group_name || 'PMP'}`]
+      if (this.selectedRemoteNumber)
+        trail.push(
+          `${this.subgroupCode} — ${
+            this.selectedRemoteNumber.remote_number_name || ''
+          }`
+        )
+      if (this.selectedFactory) trail.push(this.selectedFactory.value)
+      if (this.selectedFile) trail.push(this.selectedFile.original_name)
+      return trail
+    },
     selectedFactory() {
       return (
         (this.getFactory || []).find(
@@ -700,7 +784,8 @@ export default {
           } else this.pageError = this.$t('file_upload.project_failed')
         } else this.pageError = this.$t('file_upload.project_failed')
 
-        if (policies.status === 'fulfilled') this.factoryPolicies = policies.value
+        if (policies.status === 'fulfilled')
+          this.factoryPolicies = policies.value
         else {
           this.factoryPolicies = []
           // A formats error must not hide an otherwise readable project.
@@ -752,10 +837,6 @@ export default {
       this.isDxfFile = false
       this.selectedFactoryId = null
       this.resetFileFields()
-      this.breadcrumb = [
-        this.getPmp?.group_name || 'PMP',
-        number.remote_number_name,
-      ]
     },
 
     selectFactory(factory) {
@@ -778,10 +859,6 @@ export default {
         this.dxfUrl = ''
         this.fileType = null
         this.selectedFile = null
-
-        if (this.breadcrumb.length > 1)
-          this.breadcrumb.splice(1, 1, factory.value)
-        else this.breadcrumb.push(factory.value)
       } finally {
         this.loadingFactoryId = null
         this.loading = false
@@ -906,17 +983,13 @@ export default {
 
     async viewFile(filePath, file) {
       this.clearPreview()
-      if (!this.breadcrumb.includes(file.original_name)) {
-        if (this.breadcrumb.length > 2) this.breadcrumb.pop()
-        this.breadcrumb.push(file.original_name)
-      }
       this.selectedFile = file
       this.dxfUrl = filePath
       this.isOpenFiles = this.n(file.factory_id)
       this.isDxfFile =
         this.n(file.factory_id) === this.selectedFactoryId && this.isDxfFile
       this.fileType = previewType(file.original_name || filePath)
-      if (this.fileType === 'dxf' || this.fileType === 'file') return
+      if (this.fileType === 'dxf') return
       const request = this.previewRequest
       const type = this.fileType
       this.previewLoading = true
@@ -925,20 +998,32 @@ export default {
           responseType: 'blob',
         })
         if (request !== this.previewRequest) return
-        if (!(data instanceof Blob) || data.size > 10 * 1024 * 1024)
-          throw new Error('Invalid preview')
-        if (type === 'video' && data.type.startsWith('audio/'))
-          this.fileType = 'audio'
-        if (type === 'text') {
-          const text = await data.text()
-          if (request === this.previewRequest) this.previewText = text
-        } else {
+        const preview = await inspectFactoryPreview(
+          data,
+          file.original_name || filePath,
+          type
+        )
+        if (request !== this.previewRequest) return
+        this.fileType = preview.type
+        if (preview.type === 'text') {
+          this.previewText = preview.text
+          if (preview.truncated) this.previewNote = 'file_preview.truncated'
+        } else if (preview.type === 'cad') {
+          const image = await this.extractCadPreview(
+            preview.bytes,
+            file.original_name || filePath
+          )
+          if (request !== this.previewRequest) return
+          if (image) {
+            this.fileType = 'image'
+            this.previewNote = 'file_preview.saved_view'
+            this.previewUrl = URL.createObjectURL(
+              new Blob([image.bytes], { type: `image/${image.format}` })
+            )
+          } else this.previewNote = 'file_preview.no_saved_view'
+        } else if (preview.blob) {
           // Blob URLs preserve authenticated access without frame/cookie restrictions.
-          const blob =
-            type === 'pdf'
-              ? new Blob([data], { type: 'application/pdf' })
-              : data
-          this.previewUrl = URL.createObjectURL(blob)
+          this.previewUrl = URL.createObjectURL(preview.blob)
         }
       } catch (error) {
         if (request === this.previewRequest)
@@ -950,9 +1035,37 @@ export default {
 
     clearPreview() {
       ++this.previewRequest
+      if (this.previewTaskCancel) this.previewTaskCancel()
       if (this.previewUrl) URL.revokeObjectURL(this.previewUrl)
       this.previewUrl = this.previewText = this.previewError = ''
+      this.previewNote = ''
       this.previewLoading = false
+    },
+
+    extractCadPreview(bytes, filename) {
+      return new Promise((resolve) => {
+        let worker
+        let timer
+        let finished = false
+        const finish = (result) => {
+          if (finished) return
+          finished = true
+          clearTimeout(timer)
+          if (worker) worker.terminate()
+          this.previewTaskCancel = null
+          resolve(result)
+        }
+        this.previewTaskCancel = () => finish(null)
+        try {
+          worker = new CadPreviewWorker()
+          worker.onmessage = ({ data }) => finish(data)
+          worker.onerror = () => finish(null)
+          timer = setTimeout(() => finish(null), 5000)
+          worker.postMessage({ buffer: bytes.buffer, filename }, [bytes.buffer])
+        } catch (_) {
+          finish(null)
+        }
+      })
     },
 
     async downloadFile(file) {
@@ -1071,11 +1184,12 @@ export default {
     },
 
     selectBreadcrumb(index) {
+      if (index === 3) return
       this.clearPreview()
-      this.breadcrumb = this.breadcrumb.slice(0, index + 1)
       if (index === 0) {
         this.isOpen = 'remote_number'
         this.selectedFactoryId = null
+        this.selectedRemoteNumber = null
         this.selectedRemoteNumberId = null
         this.dxfUrl = null
         this.fileType = null
@@ -1084,30 +1198,17 @@ export default {
         this.isDxfFile = false
         this.resetFileFields()
       } else if (index === 1) {
-        this.isOpen = 'factories'
-        this.dxfUrl = null
-        this.fileType = null
-        this.selectedFile = null
-        this.isDxfFile = false
-        this.resetFileFields()
-        const rn = (this.getPmp.remote_number || []).find(
-          (n) => n.remote_number_name === this.breadcrumb[1]
-        )
-        if (rn) {
-          this.selectedRemoteNumberId = this.n(rn.id)
-          this.selectedFiles = (this.getPmp.files || []).filter(
-            (f) => this.n(f.remote_number_id) === this.selectedRemoteNumberId
-          )
-        }
+        if (this.selectedRemoteNumber) this.showFiles(this.selectedRemoteNumber)
       } else if (index === 2) {
-        const fac = (this.getFactory || []).find(
-          (f) => f.value === this.breadcrumb[2]
-        )
+        const fac = this.selectedFactory
         if (fac) {
           this.selectedFactoryId = this.n(fac.id)
+          this.isOpenFiles = this.selectedFactoryId
           this.isDxfFile = fac.value === 'DXF'
           this.selectedFiles = (this.getPmp.files || []).filter(
-            (f) => this.n(f.factory_id) === this.selectedFactoryId
+            (f) =>
+              this.n(f.factory_id) === this.selectedFactoryId &&
+              this.n(f.remote_number_id) === this.selectedRemoteNumberId
           )
           this.dxfUrl = null
           this.fileType = null

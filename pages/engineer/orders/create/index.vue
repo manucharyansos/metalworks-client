@@ -1,22 +1,52 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
-    <div v-if="$can('orders.create')" class="max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-          {{
-            isEditingMode
-              ? 'Ստեղծել նոր պատվեր խմբագրելով'
-              : 'Ստեղծել նոր պատվեր'
-          }}
-        </h1>
-        <div class="w-24 h-1 bg-blue-600 rounded-full"></div>
+  <main
+    class="order-create-page min-h-screen bg-slate-50 p-4 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:p-6 lg:p-8"
+  >
+    <div v-if="$can('orders.create')" class="mx-auto max-w-7xl">
+      <div
+        class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight">
+            {{
+              $t(
+                isEditingMode ? 'order_create.edit_title' : 'order_create.title'
+              )
+            }}
+          </h1>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {{ $t('order_create.subtitle') }}
+          </p>
+        </div>
+        <div
+          class="flex items-center gap-2 text-xs font-medium"
+          aria-live="polite"
+        >
+          <span
+            class="rounded-lg px-3 py-2"
+            :class="
+              !isFiles
+                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+            "
+            >01 · {{ $t('order_create.details') }}</span
+          >
+          <span
+            class="rounded-lg px-3 py-2"
+            :class="
+              isFiles
+                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+            "
+            >02 · {{ $t('order_create.files') }}</span
+          >
+        </div>
       </div>
 
       <div
         v-if="orderFileIssue"
         role="status"
-        class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900"
+        class="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
       >
         <p>{{ $t(orderFileIssue) }}</p>
         <button
@@ -29,418 +59,316 @@
         </button>
       </div>
 
-      <!-- Main Form Grid -->
-      <div v-if="!isFiles" class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        <!-- Client Information Card -->
-        <div
-          class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 w"
+      <div
+        v-if="!isFiles"
+        class="grid items-start gap-5 lg:grid-cols-[minmax(260px,_1fr)_2fr]"
+      >
+        <section
+          class="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
         >
-          <div class="flex items-center mb-12 w-full">
-            <div class="w-2 h-8 bg-blue-500 rounded-full mr-3"></div>
-            <h2 class="text-xl font-semibold text-gray-900">
-              Հաճախորդի տվյալներ
-            </h2>
-          </div>
-
+          <h2 class="mb-5 text-base font-semibold">
+            {{ $t('order_create.client_details') }}
+          </h2>
           <select-with-label
             v-model="selectedClient"
             :data-value="users"
-            label="Ընտրել հաճախորդ"
+            name="orderClient"
+            :label="$t('order_create.choose_client')"
+            :placeholder="$t('order_create.choose_client')"
             :class="{
-              'border-red-500 ring-2 ring-red-200 rounded-xl py-4 px-1.5':
+              'rounded-xl ring-2 ring-red-400':
                 formSubmitted && !selectedClient,
             }"
-            class="mb-6"
           />
-
-          <div class="space-y-4">
-            <div
-              v-if="selectedClient"
-              class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 shadow-sm"
-            >
-              <div class="flex items-center mb-4">
-                <div
-                  class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg mr-3"
+          <div
+            v-if="selectedClient"
+            class="mt-5 min-w-0 rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50"
+          >
+            <div class="mb-5 flex items-start gap-3">
+              <span
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-sm font-semibold text-white dark:bg-slate-700"
+                >{{ selectedClient?.name?.charAt(0).toUpperCase() }}</span
+              >
+              <div class="min-w-0">
+                <h3 class="break-words text-sm font-semibold">
+                  {{ selectedClient?.name }}
+                  {{ selectedClient?.last_name || '' }}
+                </h3>
+                <p
+                  class="mt-1 break-words text-xs text-slate-500 dark:text-slate-400"
                 >
-                  {{ selectedClient?.name?.charAt(0).toUpperCase() }}
-                </div>
-                <div>
-                  <h3 class="text-xl font-bold text-gray-800">
-                    {{ selectedClient?.name }}
-                    {{ selectedClient?.last_name || '' }}
-                  </h3>
-                  <p class="text-sm text-blue-600 font-medium">
-                    {{ selectedClient?.company_name || 'Անհատ' }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex flex-col gap-4 mt-6 text-gray-700">
-                <!-- Phone -->
-                <div class="flex items-center space-x-3">
-                  <div
-                    class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center"
-                  >
-                    <svg
-                      class="w-5 h-5 text-green-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="text-xs text-gray-500">Հեռախոս</p>
-                    <p class="font-medium">
-                      {{ selectedClient?.phone || '—' }}
-                    </p>
-                    <p
-                      v-if="selectedClient?.second_phone"
-                      class="text-xs text-gray-500"
-                    >
-                      {{ selectedClient?.second_phone }}
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Email -->
-                <div class="flex items-center space-x-3">
-                  <div
-                    class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center"
-                  >
-                    <svg
-                      class="w-5 h-5 text-purple-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="text-xs text-gray-500">Էլ․ փոստ</p>
-                    <p class="font-medium">
-                      {{ selectedClient?.user.email || '—' }}
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Address -->
-                <div class="flex items-center space-x-3 sm:col-span-2">
-                  <div
-                    class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center"
-                  >
-                    <svg
-                      class="w-5 h-5 text-amber-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-xs text-gray-500">Հասցե</p>
-                    <p class="font-medium">
-                      {{ selectedClient?.address || '—' }}
-                    </p>
-                  </div>
-                </div>
+                  {{
+                    selectedClient?.company_name ||
+                    $t('order_create.individual')
+                  }}
+                </p>
               </div>
             </div>
-
-            <!-- No client selected -->
-            <div
-              v-else
-              class="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300"
-            >
-              <div class="text-gray-400 mb-3">
-                <svg
-                  class="w-16 h-16 mx-auto"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="1.5"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
+            <dl class="space-y-4 text-sm">
+              <div>
+                <dt class="text-xs text-slate-500 dark:text-slate-400">
+                  {{ $t('order_create.phone') }}
+                </dt>
+                <dd class="mt-1 break-words">
+                  {{ selectedClient?.phone || '—'
+                  }}<span
+                    v-if="selectedClient?.second_phone"
+                    class="mt-1 block"
+                    >{{ selectedClient.second_phone }}</span
+                  >
+                </dd>
               </div>
-              <p class="text-gray-600 font-medium">
-                Խնդրում ենք ընտրել հաճախորդ
-              </p>
-              <p class="text-sm text-gray-500 mt-1">
-                Սկսեք՝ ընտրելով հաճախորդ վերևի ցանկից
-              </p>
-            </div>
+              <div>
+                <dt class="text-xs text-slate-500 dark:text-slate-400">
+                  {{ $t('order_create.email') }}
+                </dt>
+                <dd class="mt-1 break-all">
+                  {{ selectedClient?.user?.email || '—' }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs text-slate-500 dark:text-slate-400">
+                  {{ $t('order_create.address') }}
+                </dt>
+                <dd class="mt-1 break-words">
+                  {{ selectedClient?.address || '—' }}
+                </dd>
+              </div>
+            </dl>
           </div>
-        </div>
+          <div
+            v-else
+            class="mt-5 rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center dark:border-slate-700"
+          >
+            <svg
+              class="mx-auto mb-3 h-8 w-8 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+              {{ $t('order_create.client_hint') }}
+            </p>
+          </div>
+        </section>
 
-        <!-- Order Form Card -->
-        <div
-          class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 lg:col-span-2"
+        <section
+          class="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
         >
-          <div class="flex items-center mb-6">
-            <div class="w-2 h-8 bg-indigo-500 rounded-full mr-3"></div>
-            <h2 class="text-xl font-semibold text-gray-900">
-              Պատվերի մանրամասներ
-            </h2>
-          </div>
-
+          <h2 class="mb-5 text-base font-semibold">
+            {{ $t('order_create.order_details') }}
+          </h2>
           <create-order-form
             :is-editing-mode="isEditingMode"
-            :success-button="'Հաստատել'"
-            :cancel-button="'Չեղարկել'"
-            class="space-y-6"
+            :success-button="$t('order_create.create')"
+            :cancel-button="$t('order_create.cancel')"
+            class="order-form"
             :can-proceed-to-files="canProceedToFiles"
             :can-submit="canSubmit"
             @addButton="pmpFiles"
             @cancelButton="cancelBack"
             @selectFromOtherFactory="selectFromOtherFactory"
           >
-            <!-- PMP Group Selection -->
             <template #pmpGroup>
               <div class="pmp-selector">
-                <label
-                  for="pmpGroup"
-                  class="block text-sm font-semibold text-gray-700 mb-2"
+                <label for="pmpGroup" class="order-label"
+                  >{{ $t('order_create.group_code') }}
+                  <span class="text-red-500">*</span></label
                 >
-                  Ծածկագիր <span class="text-red-500">*</span>
-                </label>
                 <div class="relative">
                   <input
                     id="pmpGroup"
                     v-model="pmpGroupSearch"
                     type="text"
-                    class="w-full pr-10 pl-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                    class="order-input pr-10"
                     :class="{
                       'border-red-500 ring-2 ring-red-100':
                         formSubmitted && !selectedPmp,
                     }"
-                    placeholder="Փնտրել ծածկագիր..."
+                    :placeholder="$t('order_create.search_group')"
                     @focus="isSelectPmpGroup = true"
                     @input="filterPmpGroups"
                   />
                   <button
                     type="button"
-                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors"
+                    class="absolute inset-y-0 right-0 px-3 text-slate-400"
+                    :aria-label="$t('order_create.show_options')"
+                    :aria-expanded="isSelectPmpGroup"
                     @click="isSelectPmpGroup = !isSelectPmpGroup"
                   >
                     <svg
-                      class="w-5 h-5"
+                      class="h-4 w-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      aria-hidden="true"
                     >
                       <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
+                        stroke-width="1.8"
+                        d="m6 9 6 6 6-6"
                       />
                     </svg>
                   </button>
                 </div>
-                <div
-                  v-if="isSelectPmpGroup"
-                  class="absolute z-20 mt-1 w-full bg-white rounded-xl shadow-xl border border-gray-200 max-h-60 overflow-auto"
-                >
-                  <ul class="py-2">
-                    <li
-                      v-for="pmp in filteredPmpGroups"
-                      :key="pmp.id"
-                      class="px-4 py-3 hover:bg-blue-50 cursor-pointer text-gray-700 transition-colors border-b border-gray-100 last:border-b-0"
-                      @click="selectPmpGroup(pmp)"
-                    >
-                      <div class="flex justify-between items-center">
-                        <div>
-                          <p class="font-medium text-gray-900">
-                            {{ pmp.group }}
-                          </p>
-                          <p class="text-sm text-gray-500">
-                            {{ pmp.group_name }}
-                          </p>
-                        </div>
-                        <div
-                          class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full"
+                <div v-if="isSelectPmpGroup" class="order-menu">
+                  <ul class="py-1">
+                    <li v-for="pmp in filteredPmpGroups" :key="pmp.id">
+                      <button
+                        type="button"
+                        class="order-option"
+                        @click="selectPmpGroup(pmp)"
+                      >
+                        <span class="font-mono text-sm font-semibold">{{
+                          pmp.group
+                        }}</span
+                        ><span
+                          class="mt-1 block text-xs text-slate-500 dark:text-slate-400"
+                          >{{ pmp.group_name }}</span
                         >
-                          Ընտրել
-                        </div>
-                      </div>
+                      </button>
                     </li>
                     <li
                       v-if="filteredPmpGroups.length === 0"
-                      class="px-4 py-3 text-gray-500 text-center"
+                      class="px-4 py-4 text-center text-sm text-slate-500"
                     >
-                      Չգտնվեց ծածկագիր
+                      {{ $t('order_create.group_missing') }}
                     </li>
                   </ul>
                 </div>
               </div>
             </template>
-
-            <!-- PMP Name Selection -->
             <template #pmpName>
               <div class="pmp-selector">
-                <label
-                  for="pmpRemoteNumberName"
-                  class="block text-sm font-semibold text-gray-700 mb-2"
+                <label for="pmpRemoteNumberName" class="order-label"
+                  >{{ $t('order_create.subgroup') }}
+                  <span class="text-red-500">*</span></label
                 >
-                  Ընտրել Անունը <span class="text-red-500">*</span>
-                </label>
                 <div class="relative">
                   <input
                     id="pmpRemoteNumberName"
                     v-model="pmpNameSearch"
                     type="text"
                     :disabled="!selectedPmp"
-                    class="w-full pr-10 pl-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+                    class="order-input pr-10"
                     :class="{
                       'border-red-500 ring-2 ring-red-100':
                         formSubmitted && !selectedPmpRemoteNumber,
-                      'cursor-not-allowed opacity-50': !selectedPmp,
                     }"
-                    placeholder="Փնտրել անուն..."
+                    :placeholder="$t('order_create.search_subgroup')"
                     @focus="isSelectPmpName = !!selectedPmp"
                     @input="filterPmpNames"
                   />
                   <button
                     type="button"
                     :disabled="!selectedPmp"
-                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                    class="absolute inset-y-0 right-0 px-3 text-slate-400 disabled:opacity-40"
+                    :aria-label="$t('order_create.show_options')"
+                    :aria-expanded="isSelectPmpName"
                     @click="isSelectPmpName = !isSelectPmpName"
                   >
                     <svg
-                      class="w-5 h-5"
+                      class="h-4 w-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
+                      aria-hidden="true"
                     >
                       <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 9l-7 7-7-7"
+                        stroke-width="1.8"
+                        d="m6 9 6 6 6-6"
                       />
                     </svg>
                   </button>
                 </div>
-                <div
-                  v-if="isSelectPmpName && selectedPmp"
-                  class="absolute z-20 mt-1 w-full bg-white rounded-xl shadow-xl border border-gray-200 max-h-60 overflow-auto"
-                >
-                  <ul class="py-2">
+                <div v-if="isSelectPmpName && selectedPmp" class="order-menu">
+                  <ul class="py-1">
                     <li
                       v-for="(remoteNumber, index) in filteredPmpNames"
                       :key="index"
-                      class="px-4 py-3 hover:bg-blue-50 cursor-pointer text-gray-700 transition-colors border-b border-gray-100 last:border-b-0"
-                      @click="selectPmpRemoteNumber(remoteNumber)"
                     >
-                      <div class="flex justify-between items-center">
-                        <div>
-                          <p class="font-medium text-gray-900">
-                            {{ remoteNumber.remote_number }}
-                          </p>
-                          <p class="text-sm text-gray-500">
-                            {{ remoteNumber.remote_number_name }}
-                          </p>
-                        </div>
-                        <div
-                          class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full"
+                      <button
+                        type="button"
+                        class="order-option"
+                        @click="selectPmpRemoteNumber(remoteNumber)"
+                      >
+                        <span class="font-mono text-sm font-semibold">{{
+                          remoteNumber.remote_number
+                        }}</span
+                        ><span
+                          class="mt-1 block text-xs text-slate-500 dark:text-slate-400"
+                          >{{ remoteNumber.remote_number_name }}</span
                         >
-                          Ընտրել
-                        </div>
-                      </div>
+                      </button>
                     </li>
                     <li
                       v-if="filteredPmpNames.length === 0"
-                      class="px-4 py-3 text-gray-500 text-center"
+                      class="px-4 py-4 text-center text-sm text-slate-500"
                     >
-                      Չգտնվեց անուն
+                      {{ $t('order_create.subgroup_missing') }}
                     </li>
                   </ul>
                 </div>
               </div>
             </template>
-
-            <!-- Finish Date -->
             <template #finishDate>
               <div>
-                <label
-                  for="finishDate"
-                  class="block text-sm font-semibold text-gray-700 mb-2"
+                <label for="finishDate" class="order-label"
+                  >{{ $t('order_create.finish_date') }}
+                  <span class="text-red-500">*</span></label
                 >
-                  Անհաժեշտ ավարտի ամսաթիվ <span class="text-red-500">*</span>
-                </label>
                 <input-with-labels
                   id="finishDate"
                   v-model="finishDate"
                   type="datetime-local"
-                  class="border-2 border-gray-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 rounded-xl"
+                  class="date-field"
                   :class="{
-                    'border-red-500 ring-2 ring-red-100':
+                    'rounded-xl ring-2 ring-red-400':
                       formSubmitted && !finishDate,
                   }"
                 />
               </div>
             </template>
-
-            <!-- Description -->
             <template #description>
               <div>
-                <label
-                  for="description"
-                  class="block text-sm font-semibold text-gray-700 mb-2"
+                <label for="description" class="order-label"
+                  >{{ $t('order_create.description') }}
+                  <span class="text-red-500">*</span></label
                 >
-                  Նկարագրություն <span class="text-red-500">*</span>
-                </label>
                 <textarea-with-label
-                  id="description"
                   v-model="description"
-                  type="text"
-                  class="border-2 border-gray-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 rounded-xl resize-none"
+                  textarea_id="description"
+                  class="description-field"
                   :class="{
-                    'border-red-500 ring-2 ring-red-100':
+                    'rounded-xl ring-2 ring-red-400':
                       formSubmitted && !description,
                   }"
                   :rows="4"
-                  placeholder="Մուտքագրեք պատվերի նկարագրությունը..."
+                  :placeholder="$t('order_create.description_placeholder')"
                 />
               </div>
             </template>
           </create-order-form>
-        </div>
+          <p class="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            {{ $t('order_create.files_hint') }}
+          </p>
+        </section>
       </div>
 
-      <!-- Files View -->
-      <div
+      <section
         v-else
-        class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
+        class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
       >
         <show-files
           :pmps="pmpsData"
@@ -449,30 +377,32 @@
           :selected-files.sync="selectedFiles"
           :file-quantities.sync="fileQuantities"
           :remote-number-id="remote_number_id"
+          class="order-files"
           @files-selected="handleFilesSelected"
           @back="isFiles = false"
         />
-
-        <!-- Ընտրել կատարող յուրաքանչյուր գործարանի համար -->
-        <div class="mt-8 space-y-4">
-          <h3 class="text-lg font-semibold text-gray-900">
-            Ընտրել կատարող յուրաքանչյուր գործարանի համար
+        <div class="mt-6 border-t border-slate-200 pt-5 dark:border-slate-800">
+          <h3 class="mb-4 text-sm font-semibold">
+            {{ $t('order_create.factory_operators') }}
           </h3>
-
           <div
             v-for="factory in selectedFactories"
             :key="factory.id"
-            class="flex flex-col sm:flex-row items-start sm:items-center gap-3"
+            class="mb-3 grid items-center gap-2 sm:grid-cols-[180px_1fr]"
           >
-            <div class="w-full sm:w-64 font-medium text-gray-700">
-              {{ factory.name }}
-            </div>
-
-            <select
-              v-model="factoryOperators[factory.id]"
-              class="w-full sm:flex-1 border-2 border-gray-200 rounded-xl px-3 py-2 focus:ring-4 focus:ring-blue-100 focus:border-blue-500"
+            <label
+              :for="'factory-operator-' + factory.id"
+              class="text-sm text-slate-600 dark:text-slate-300"
+              >{{ factory.name }}</label
             >
-              <option :value="null" disabled>Ընտրել կատարող</option>
+            <select
+              :id="'factory-operator-' + factory.id"
+              v-model="factoryOperators[factory.id]"
+              class="order-input"
+            >
+              <option :value="null" disabled>
+                {{ $t('order_create.choose_operator') }}
+              </option>
               <option
                 v-for="user in getFactoryOperatorsFor(factory)"
                 :key="user.id"
@@ -483,46 +413,46 @@
             </select>
           </div>
         </div>
-
-        <!-- Կոճակներ -->
-        <div class="mt-8 flex justify-end gap-3">
+        <div
+          class="mt-6 flex flex-wrap justify-end gap-3 border-t border-slate-200 pt-5 dark:border-slate-800"
+        >
           <button
             type="button"
-            class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50"
+            class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
             @click="isFiles = false"
           >
-            Վերադառնալ
+            {{ $t('order_create.back') }}
           </button>
           <button
             type="button"
             :disabled="!canSubmit || isLoading"
-            class="px-6 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
             @click="pmpFiles"
           >
-            Պահպանել պատվերը
+            {{ $t('order_create.save') }}
           </button>
         </div>
-      </div>
-
-      <!-- Loading Overlay -->
+      </section>
       <div
         v-if="isLoading"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm"
+        role="status"
       >
-        <div class="bg-white rounded-xl p-6 shadow-xl">
-          <div class="flex items-center space-x-3">
-            <div
-              class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
-            ></div>
-            <span class="text-gray-700 font-medium">Պահպանվում է...</span>
-          </div>
+        <div
+          class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+        >
+          <div
+            class="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900 dark:border-t-white"
+          ></div>
+          <span class="text-sm font-medium">{{
+            $t('order_create.saving')
+          }}</span>
         </div>
       </div>
-
       <notifications />
     </div>
     <PermissionDenied v-else />
-  </div>
+  </main>
 </template>
 
 <script>
@@ -589,7 +519,8 @@ export default {
     subgroupFiles() {
       if (!this.pmpsData.exists || !this.remote_number_id) return []
       return (this.orderPmp.files || []).filter(
-        (file) => Number(file.remote_number_id) === Number(this.remote_number_id)
+        (file) =>
+          Number(file.remote_number_id) === Number(this.remote_number_id)
       )
     },
 
@@ -603,11 +534,20 @@ export default {
     },
 
     validSelectedFiles() {
-      const allowedIds = new Set(this.subgroupFiles.map((file) => Number(file.id)))
-      return this.selectedFiles.length > 0 && this.selectedFiles.every((id) => {
-        const quantity = Number(this.fileQuantities[id])
-        return allowedIds.has(Number(id)) && Number.isInteger(quantity) && quantity > 0
-      })
+      const allowedIds = new Set(
+        this.subgroupFiles.map((file) => Number(file.id))
+      )
+      return (
+        this.selectedFiles.length > 0 &&
+        this.selectedFiles.every((id) => {
+          const quantity = Number(this.fileQuantities[id])
+          return (
+            allowedIds.has(Number(id)) &&
+            Number.isInteger(quantity) &&
+            quantity > 0
+          )
+        })
+      )
     },
 
     orderFileIssue() {
@@ -616,7 +556,8 @@ export default {
       if (this.pmpFilesLoadError) return 'order_files.load_failed'
       if (!this.pmpFilesReady) return null
       if (this.subgroupFiles.length === 0) return 'order_files.empty_subgroup'
-      if (this.files_existing && this.selectedFiles.length === 0) return 'order_files.select_files'
+      if (this.files_existing && this.selectedFiles.length === 0)
+        return 'order_files.select_files'
       return null
     },
 
@@ -655,8 +596,11 @@ export default {
 
     canSubmit() {
       // The existing API uses false for all subgroup files, true for a selection.
-      return this.canProceedToFiles && !this.isEditingMode &&
+      return (
+        this.canProceedToFiles &&
+        !this.isEditingMode &&
         (!this.files_existing || this.validSelectedFiles)
+      )
     },
 
     filteredPmpGroups() {
@@ -736,7 +680,8 @@ export default {
     },
 
     async selectPmpRemoteNumber(remoteNumber) {
-      if (Number(this.remote_number_id) !== Number(remoteNumber.id)) this.resetPmpFileSelection()
+      if (Number(this.remote_number_id) !== Number(remoteNumber.id))
+        this.resetPmpFileSelection()
       this.selectedPmpRemoteNumber = remoteNumber.remote_number
       this.pmpNameSearch = remoteNumber.remote_number
       this.isSelectPmpName = false
@@ -754,7 +699,11 @@ export default {
       try {
         const exists = await this.checkPmpByRemoteNumber(remoteId)
         if (requestId !== this.pmpFileRequestId) return
-        if (!exists || Number(this.getPmp?.id) !== Number(pmpId) || !Array.isArray(this.getPmp?.files)) {
+        if (
+          !exists ||
+          Number(this.getPmp?.id) !== Number(pmpId) ||
+          !Array.isArray(this.getPmp?.files)
+        ) {
           this.pmpFilesLoadError = true
           return
         }
@@ -844,7 +793,9 @@ export default {
       }
 
       const invalidFiles = this.selectedFiles.filter(
-        (id) => !Number.isInteger(Number(this.fileQuantities[id])) || Number(this.fileQuantities[id]) <= 0
+        (id) =>
+          !Number.isInteger(Number(this.fileQuantities[id])) ||
+          Number(this.fileQuantities[id]) <= 0
       )
       if (invalidFiles.length > 0) {
         this.$notify({
@@ -899,10 +850,15 @@ export default {
         this.resetForm()
         this.$router.push('/engineer')
       } catch (error) {
-        const validationMessage = Object.values(error.response?.data?.errors || {})
-          .flat().find((message) => typeof message === 'string')
+        const validationMessage = Object.values(
+          error.response?.data?.errors || {}
+        )
+          .flat()
+          .find((message) => typeof message === 'string')
         this.$notify({
-          text: `Սխալ՝ ${validationMessage || error.response?.data?.error || error.message}`,
+          text: `Սխալ՝ ${
+            validationMessage || error.response?.data?.error || error.message
+          }`,
           duration: 3000,
           speed: 1000,
           position: 'top',
@@ -938,8 +894,10 @@ export default {
       this.files_existing = true
       const factories = Array.isArray(this.getFactory) ? this.getFactory : []
 
-      const factoryWithFiles = factories.find(
-        (factory) => this.subgroupFiles.some((file) => Number(file.factory_id) === Number(factory.id))
+      const factoryWithFiles = factories.find((factory) =>
+        this.subgroupFiles.some(
+          (file) => Number(file.factory_id) === Number(factory.id)
+        )
       )
 
       this.autoOpenFactoryId = factoryWithFiles
@@ -953,11 +911,16 @@ export default {
       let issue = null
       if (this.pmpFilesLoading) issue = 'order_files.loading'
       else if (!this.pmpFilesReady) issue = 'order_files.load_failed'
-      else if (this.subgroupFiles.length === 0) issue = 'order_files.empty_subgroup'
-      else if (requireSelection && this.selectedFiles.length === 0) issue = 'order_files.select_files'
+      else if (this.subgroupFiles.length === 0)
+        issue = 'order_files.empty_subgroup'
+      else if (requireSelection && this.selectedFiles.length === 0)
+        issue = 'order_files.select_files'
       else {
-        const allowedIds = new Set(this.subgroupFiles.map((file) => Number(file.id)))
-        if (this.selectedFiles.some((id) => !allowedIds.has(Number(id)))) issue = 'order_files.wrong_subgroup'
+        const allowedIds = new Set(
+          this.subgroupFiles.map((file) => Number(file.id))
+        )
+        if (this.selectedFiles.some((id) => !allowedIds.has(Number(id))))
+          issue = 'order_files.wrong_subgroup'
       }
       if (!issue) return true
       this.$notify({ text: this.$t(issue), type: 'error', duration: 4000 })
@@ -989,38 +952,32 @@ export default {
 <style scoped>
 .pmp-selector {
   position: relative;
+  min-width: 0;
 }
-
-.min-h-screen {
-  min-height: calc(100vh - 4rem);
+.order-label {
+  @apply mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300;
 }
-
-/* Custom scrollbar for dropdowns */
-.overflow-auto::-webkit-scrollbar {
-  width: 6px;
+.order-input,
+.date-field ::v-deep input,
+.description-field ::v-deep textarea {
+  @apply block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:disabled:bg-slate-800;
 }
-
-.overflow-auto::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+.date-field ::v-deep label,
+.description-field ::v-deep label {
+  display: none;
 }
-
-.overflow-auto::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 10px;
+.order-menu {
+  @apply absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900;
 }
-
-.overflow-auto::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+.order-option {
+  @apply w-full break-words px-4 py-3 text-left transition hover:bg-slate-50 focus:bg-slate-50 dark:hover:bg-slate-800 dark:focus:bg-slate-800;
 }
-
-/* Smooth transitions */
-.transition-all {
-  transition: all 0.2s ease-in-out;
+.order-form {
+  @apply border-0 bg-transparent p-0 shadow-none;
+  backdrop-filter: none;
 }
-
-/* Focus states */
-.focus\:ring-4:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.order-files {
+  @apply border-0 bg-transparent p-0 shadow-none;
+  backdrop-filter: none;
 }
 </style>

@@ -49,7 +49,10 @@ for (const [role, links] of [
     assert.match(html, /555000/)
     assert.match(html, /Existing route content/)
     for (const link of links) assert.ok(html.includes(`href="/ru${link}"`), link)
-    assert.ok((html.match(/<circle/g) || []).length >= 2, 'settings gears render in header and sidebar')
+    const header = html.match(/<header[\s\S]*?<\/header>/)[0]
+    const sidebar = html.match(/<aside[\s\S]*?<\/aside>/)[0]
+    assert.doesNotMatch(header, /href="\/ru\/profile"/, 'header does not duplicate sidebar settings')
+    assert.match(sidebar, /href="\/ru\/profile"/, 'account settings remain accessible in the sidebar')
   })
 }
 
@@ -306,7 +309,7 @@ test('empty selected-file view renders a disabled Save button and a visible expl
   vm.isFiles = true
   const html = await require('vue-server-renderer').createRenderer().renderToString(vm)
   assert.match(html, /order_files.select_files/)
-  assert.match(html, /<button[^>]*disabled="disabled"[^>]*>\s*Պահպանել պատվերը/)
+  assert.match(html, /<button[^>]*disabled="disabled"[^>]*>\s*order_create.save/)
 })
 
 test('order file warnings and recovery text exist in all three languages', () => {
