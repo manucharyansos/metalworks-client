@@ -37,7 +37,7 @@ jobs:
         run: npm audit --omit=dev --audit-level=critical
 
       - name: Build production client
-        run: npm run build
+        run: npm run test:regression && npm run build
 
       - name: Generate deploy-ready /work bundle
         run: npm run generate:server

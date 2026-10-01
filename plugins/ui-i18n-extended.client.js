@@ -132,6 +132,7 @@ function translateValue(source, locale = currentLocale) {
 
 function shouldSkip(element) {
   if (!element || element.nodeType !== 1) return false
+  if (element.closest('[translate="no"]')) return true
   return ['SCRIPT', 'STYLE', 'CODE', 'PRE', 'NOSCRIPT'].includes(element.tagName)
 }
 

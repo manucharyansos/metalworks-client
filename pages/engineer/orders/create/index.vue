@@ -13,6 +13,22 @@
         <div class="w-24 h-1 bg-blue-600 rounded-full"></div>
       </div>
 
+      <div
+        v-if="orderFileIssue"
+        role="status"
+        class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900"
+      >
+        <p>{{ $t(orderFileIssue) }}</p>
+        <button
+          v-if="pmpFilesLoadError"
+          type="button"
+          class="mt-2 font-semibold underline"
+          @click="loadSelectedPmpFiles"
+        >
+          {{ $t('order_files.retry') }}
+        </button>
+      </div>
+
       <!-- Main Form Grid -->
       <div v-if="!isFiles" class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <!-- Client Information Card -->
@@ -479,7 +495,8 @@
           </button>
           <button
             type="button"
-            class="px-6 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700"
+            :disabled="!canSubmit || isLoading"
+            class="px-6 py-2 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             @click="pmpFiles"
           >
             Պահպանել պատվերը
@@ -549,6 +566,10 @@ export default {
       isLoading: false,
       files_existing: false,
       remote_number_id: null,
+      orderPmp: null,
+      pmpFilesLoading: false,
+      pmpFilesLoadError: false,
+      pmpFileRequestId: 0,
 
       factoryOperators: {},
     }
@@ -559,12 +580,44 @@ export default {
     ...mapGetters('pmp', ['getPmpes', 'getPmp']),
 
     pmpsData() {
-      const p = this.getPmp || {}
-      const exists =
-        !!p?.id ||
-        (!!p?.group && Array.isArray(p?.remote_number)) ||
-        Array.isArray(p?.files)
-      return exists ? { exists: true, pmp: p } : { exists: false }
+      const p = this.orderPmp
+      return p && Number(p.id) === Number(this.selectedPmp?.id)
+        ? { exists: true, pmp: p }
+        : { exists: false }
+    },
+
+    subgroupFiles() {
+      if (!this.pmpsData.exists || !this.remote_number_id) return []
+      return (this.orderPmp.files || []).filter(
+        (file) => Number(file.remote_number_id) === Number(this.remote_number_id)
+      )
+    },
+
+    pmpFilesReady() {
+      return !!(
+        this.pmpsData.exists &&
+        this.remote_number_id &&
+        !this.pmpFilesLoading &&
+        !this.pmpFilesLoadError
+      )
+    },
+
+    validSelectedFiles() {
+      const allowedIds = new Set(this.subgroupFiles.map((file) => Number(file.id)))
+      return this.selectedFiles.length > 0 && this.selectedFiles.every((id) => {
+        const quantity = Number(this.fileQuantities[id])
+        return allowedIds.has(Number(id)) && Number.isInteger(quantity) && quantity > 0
+      })
+    },
+
+    orderFileIssue() {
+      if (!this.remote_number_id) return null
+      if (this.pmpFilesLoading) return 'order_files.loading'
+      if (this.pmpFilesLoadError) return 'order_files.load_failed'
+      if (!this.pmpFilesReady) return null
+      if (this.subgroupFiles.length === 0) return 'order_files.empty_subgroup'
+      if (this.files_existing && this.selectedFiles.length === 0) return 'order_files.select_files'
+      return null
     },
 
     users() {
@@ -572,7 +625,7 @@ export default {
     },
 
     selectedFactories() {
-      const files = this.getPmp?.files || []
+      const files = this.subgroupFiles
       const factoryIds = new Set()
 
       this.selectedFiles.forEach((fileId) => {
@@ -594,12 +647,16 @@ export default {
         this.selectedPmp &&
         this.selectedPmpRemoteNumber &&
         this.finishDate &&
-        this.description
+        this.description &&
+        this.pmpFilesReady &&
+        this.subgroupFiles.length > 0
       )
     },
 
     canSubmit() {
-      return this.canProceedToFiles && !this.isEditingMode
+      // The existing API uses false for all subgroup files, true for a selection.
+      return this.canProceedToFiles && !this.isEditingMode &&
+        (!this.files_existing || this.validSelectedFiles)
     },
 
     filteredPmpGroups() {
@@ -627,11 +684,12 @@ export default {
     },
   },
   watch: {
-    selectedPmp(newVal) {
-      if (!newVal) {
+    selectedPmp(newVal, oldVal) {
+      if (!newVal || newVal.id !== oldVal?.id) {
         this.selectedPmpRemoteNumber = null
         this.pmpNameSearch = ''
         this.remote_number_id = null
+        this.resetPmpFileSelection()
       }
     },
     selectedFactories(newFactories) {
@@ -666,18 +724,59 @@ export default {
     ]),
 
     selectPmpGroup(pmp) {
-      this.remote_number_id = pmp.id
+      if (this.selectedPmp?.id !== pmp.id) {
+        this.selectedPmpRemoteNumber = null
+        this.pmpNameSearch = ''
+        this.remote_number_id = null
+        this.resetPmpFileSelection()
+      }
       this.selectedPmp = pmp
       this.pmpGroupSearch = pmp.group
       this.isSelectPmpGroup = false
     },
 
     async selectPmpRemoteNumber(remoteNumber) {
+      if (Number(this.remote_number_id) !== Number(remoteNumber.id)) this.resetPmpFileSelection()
       this.selectedPmpRemoteNumber = remoteNumber.remote_number
       this.pmpNameSearch = remoteNumber.remote_number
       this.isSelectPmpName = false
       this.remote_number_id = remoteNumber.id
-      await this.checkPmpByRemoteNumber(remoteNumber.id)
+      await this.loadSelectedPmpFiles()
+    },
+
+    async loadSelectedPmpFiles() {
+      if (!this.selectedPmp || !this.remote_number_id) return
+      const requestId = ++this.pmpFileRequestId
+      const pmpId = this.selectedPmp.id
+      const remoteId = this.remote_number_id
+      this.pmpFilesLoading = true
+      this.pmpFilesLoadError = false
+      try {
+        const exists = await this.checkPmpByRemoteNumber(remoteId)
+        if (requestId !== this.pmpFileRequestId) return
+        if (!exists || Number(this.getPmp?.id) !== Number(pmpId) || !Array.isArray(this.getPmp?.files)) {
+          this.pmpFilesLoadError = true
+          return
+        }
+        this.orderPmp = this.getPmp
+      } catch (error) {
+        if (requestId === this.pmpFileRequestId) this.pmpFilesLoadError = true
+      } finally {
+        if (requestId === this.pmpFileRequestId) this.pmpFilesLoading = false
+      }
+    },
+
+    resetPmpFileSelection() {
+      this.selectedFiles = []
+      this.fileQuantities = {}
+      this.factoryOperators = {}
+      this.autoOpenFactoryId = null
+      this.orderPmp = null
+      this.files_existing = false
+      this.isFiles = false
+      this.pmpFileRequestId++
+      this.pmpFilesLoading = false
+      this.pmpFilesLoadError = false
     },
 
     filterPmpGroups() {
@@ -717,6 +816,7 @@ export default {
         !this.selectedClient ||
         !this.selectedPmp ||
         !this.selectedPmpRemoteNumber ||
+        !this.remote_number_id ||
         !this.finishDate ||
         !this.description ||
         (this.isEditingMode &&
@@ -738,8 +838,13 @@ export default {
         return
       }
 
+      if (!this.validateOrderFiles()) {
+        this.isLoading = false
+        return
+      }
+
       const invalidFiles = this.selectedFiles.filter(
-        (id) => !this.fileQuantities[id] || this.fileQuantities[id] <= 0
+        (id) => !Number.isInteger(Number(this.fileQuantities[id])) || Number(this.fileQuantities[id]) <= 0
       )
       if (invalidFiles.length > 0) {
         this.$notify({
@@ -794,8 +899,10 @@ export default {
         this.resetForm()
         this.$router.push('/engineer')
       } catch (error) {
+        const validationMessage = Object.values(error.response?.data?.errors || {})
+          .flat().find((message) => typeof message === 'string')
         this.$notify({
-          text: `Սխալ՝ ${error.response?.data?.error || error.message}`,
+          text: `Սխալ՝ ${validationMessage || error.response?.data?.error || error.message}`,
           duration: 3000,
           speed: 1000,
           position: 'top',
@@ -808,7 +915,6 @@ export default {
 
     selectFromOtherFactory() {
       this.formSubmitted = true
-      this.files_existing = true
 
       if (
         !this.selectedClient ||
@@ -828,10 +934,12 @@ export default {
         return
       }
 
+      if (!this.validateOrderFiles(false)) return
+      this.files_existing = true
       const factories = Array.isArray(this.getFactory) ? this.getFactory : []
 
       const factoryWithFiles = factories.find(
-        (factory) => factory.files && factory.files.length > 0
+        (factory) => this.subgroupFiles.some((file) => Number(file.factory_id) === Number(factory.id))
       )
 
       this.autoOpenFactoryId = factoryWithFiles
@@ -839,6 +947,21 @@ export default {
         : factories[0]?.id || null
 
       this.isFiles = true
+    },
+
+    validateOrderFiles(requireSelection = this.files_existing) {
+      let issue = null
+      if (this.pmpFilesLoading) issue = 'order_files.loading'
+      else if (!this.pmpFilesReady) issue = 'order_files.load_failed'
+      else if (this.subgroupFiles.length === 0) issue = 'order_files.empty_subgroup'
+      else if (requireSelection && this.selectedFiles.length === 0) issue = 'order_files.select_files'
+      else {
+        const allowedIds = new Set(this.subgroupFiles.map((file) => Number(file.id)))
+        if (this.selectedFiles.some((id) => !allowedIds.has(Number(id)))) issue = 'order_files.wrong_subgroup'
+      }
+      if (!issue) return true
+      this.$notify({ text: this.$t(issue), type: 'error', duration: 4000 })
+      return false
     },
 
     cancelBack() {
@@ -856,12 +979,8 @@ export default {
       this.quantity = null
       this.formSubmitted = false
       this.isFiles = false
-      this.autoOpenFactoryId = null
       this.remote_number_id = null
-      this.selectedFiles = []
-      this.fileQuantities = {}
-      this.factoryOperators = {}
-      this.files_existing = false
+      this.resetPmpFileSelection()
     },
   },
 }

@@ -1,24 +1,23 @@
 <template>
-  <div class="min-w-0">
+  <div class="min-w-0" translate="no">
     <p
-      class="truncate text-sm font-bold tracking-tight text-slate-900 dark:text-white"
+      class="break-words text-sm font-bold tracking-tight text-slate-900 dark:text-white"
       :title="displayName"
     >
       {{ displayName }}
     </p>
     <p
       v-if="email"
-      class="truncate text-[11px] leading-4 text-slate-500 dark:text-slate-400"
+      class="break-all text-[11px] leading-4 text-slate-500 dark:text-slate-400"
       :title="email"
     >
       {{ email }}
     </p>
     <p
-      v-if="phone"
-      class="truncate text-[11px] leading-4 text-slate-500 dark:text-slate-400"
+      class="break-words text-[11px] leading-4 text-slate-500 dark:text-slate-400"
       :title="phone"
     >
-      {{ phone }}
+      {{ phone || $t('workspace_layout.phone_not_set') }}
     </p>
   </div>
 </template>
@@ -29,6 +28,7 @@ export default {
   data() {
     return {
       identity: null,
+      identityRequest: 0,
     }
   },
   computed: {
@@ -44,7 +44,7 @@ export default {
         .join(' ')
         .trim()
 
-      return fallback || this.email || 'MetalWorks'
+      return fallback || this.email
     },
     email() {
       return String(this.identity?.email || this.authUser.email || '').trim()
@@ -54,21 +54,27 @@ export default {
     },
   },
   watch: {
-    '$auth.user.id': {
+    '$auth.user': {
       immediate: true,
       handler() {
+        this.identity = null
         this.loadIdentity()
       },
     },
   },
   methods: {
     async loadIdentity() {
+      const request = ++this.identityRequest
+      const userId = this.authUser.id
       if (!process.client || !this.$auth?.loggedIn) return
 
       try {
-        this.identity = await this.$axios.$get('/api/profile/identity')
+        const identity = await this.$axios.$get('/api/profile/identity')
+        if (request === this.identityRequest && userId === this.authUser.id) {
+          this.identity = identity
+        }
       } catch (_) {
-        this.identity = null
+        if (request === this.identityRequest) this.identity = null
       }
     },
   },

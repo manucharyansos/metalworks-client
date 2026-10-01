@@ -17,6 +17,36 @@ export const getters = {
 }
 
 export const actions = {
+  async fetchFactoryFilePolicies({ commit }) {
+    let factories
+    try {
+      const { data } = await this.$axios.get('/api/factory-file-policies')
+      if (!Array.isArray(data?.data))
+        throw new Error('Invalid factory upload policy response')
+      factories = data.data
+    } catch (error) {
+      if (![404, 405].includes(error.response?.status)) throw error
+      // Older deployed APIs expose the factory list but not this read endpoint.
+      // Their upload endpoint still enforces the configured formats. Do not
+      // substitute guessed defaults or treat auth/network errors as compatibility.
+      const { data } = await this.$axios.get('/api/factories/factory')
+      if (!Array.isArray(data)) throw new Error('Invalid factory list response')
+      factories = data.map((factory) => {
+        const hasConfigured = 'extensions' in factory || 'file_extensions' in factory
+        const configured = factory.extensions ?? factory.file_extensions
+        if (hasConfigured && !Array.isArray(configured))
+          throw new Error('Invalid factory upload policy response')
+        return {
+          ...factory,
+          extensions: hasConfigured ? configured : ['*'],
+          serverValidatedFormats: !hasConfigured,
+        }
+      })
+    }
+    commit('SET_FACTORY', factories)
+    return factories
+  },
+
   async fetchFactory({ commit }, data) {
     try {
       const res = await this.$axios.get('/api/factories/factory', data)
@@ -67,11 +97,16 @@ export const actions = {
     try {
       if (!file) throw new Error('File payload is missing')
 
-      const baseURL = String(this.$axios.defaults.baseURL || '').replace(/\/+$/, '')
+      const baseURL = String(this.$axios.defaults.baseURL || '').replace(
+        /\/+$/,
+        ''
+      )
       let url = null
 
       if (file.id) {
-        url = `${baseURL}/api/secure-files/pmp/${encodeURIComponent(file.id)}?download=1`
+        url = `${baseURL}/api/secure-files/pmp/${encodeURIComponent(
+          file.id
+        )}?download=1`
       } else if (file.path) {
         const normalizedPath = String(file.path)
           .replace(/\\/g, '/')
@@ -89,7 +124,10 @@ export const actions = {
         responseType: 'blob',
       })
 
-      const blob = response.data instanceof Blob ? response.data : new Blob([response.data])
+      const blob =
+        response.data instanceof Blob
+          ? response.data
+          : new Blob([response.data])
       const objectUrl = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = objectUrl
