@@ -4,10 +4,15 @@
     <div
       v-if="isOpen"
       class="fixed inset-0 z-[9999] flex items-center justify-center px-4 py-8 overflow-y-auto bg-black/30 backdrop-blur-sm"
-      @click="$emit('close')"
+      @click.self="close"
+      @keydown.esc.stop.prevent="close"
     >
       <div
         class="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden"
+        role="dialog"
+        aria-modal="true"
+        :aria-labelledby="`factory-order-action-title-${_uid}`"
+        :aria-busy="saving ? 'true' : 'false'"
         @click.stop
       >
         <!-- Header -->
@@ -16,16 +21,31 @@
         >
           <div class="flex items-start justify-between">
             <div>
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                Գործողություն պատվերի վրա
+              <h3
+                :id="`factory-order-action-title-${_uid}`"
+                class="text-xl font-bold text-gray-900 dark:text-white"
+              >
+                {{ $t('factory_order_actions.title') }}
               </h3>
               <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Ընտրեք կարգավիճակը և լրացրեք անհրաժեշտ տվյալները
+                {{ $t('factory_order_actions.help') }}
+              </p>
+              <p
+                v-if="order.id"
+                class="mt-2 text-xs font-bold text-gray-700 dark:text-gray-300"
+              >
+                {{ order.order_number?.number || `#${order.id}` }}
+                <span v-if="order.prefix_code?.code"
+                  >· {{ order.prefix_code.code }}</span
+                >
               </p>
             </div>
             <button
+              type="button"
+              :disabled="saving"
+              :aria-label="$t('factory_order_actions.close')"
               class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors ml-4"
-              @click="$emit('close')"
+              @click="close"
             >
               <svg
                 class="w-6 h-6"
@@ -45,18 +65,21 @@
         </div>
 
         <!-- Body -->
-        <div class="p-6 space-y-6">
+        <form class="p-6 space-y-6" @submit.prevent="confirm">
           <!-- Գլխավոր գործողություն -->
           <div>
             <label
               class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
-              Գործողություն
+              {{ $t('factory_order_actions.action') }}
             </label>
             <SelectWithLabel
+              ref="actionSelect"
               v-model="localSelectedOption"
+              :name="`factory-order-action-${_uid}`"
               :data-value="actionOptions"
-              placeholder="Ընտրել գործողություն..."
+              :disabled="saving || !actionOptions.length"
+              :placeholder="$t('factory_order_actions.choose_action')"
             />
           </div>
 
@@ -69,12 +92,14 @@
               <label
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Մերժման պատճառ
+                {{ $t('factory_order_actions.reason') }}
               </label>
               <SelectWithLabel
                 v-model="localAdditionalOption"
-                :data-value="cancelReasons"
-                placeholder="Ընտրել պատճառ..."
+                :name="`factory-order-reason-${_uid}`"
+                :data-value="reasonOptions"
+                :disabled="saving"
+                :placeholder="$t('factory_order_actions.choose_reason')"
               />
             </div>
           </transition>
@@ -88,14 +113,19 @@
               <label
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
-                Նոր կատարման ամսաթիվ
+                {{ $t('factory_order_actions.new_date') }}
               </label>
               <input-with-label-icon
                 v-model="localChangeDate"
                 type="date"
                 :min="tomorrowDate"
+                :disabled="saving"
+                :label_-id="`factory-order-date-${_uid}`"
                 class="w-full"
               />
+              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                {{ $t('factory_order_actions.date_help') }}
+              </p>
             </div>
           </transition>
 
@@ -108,7 +138,7 @@
               <p class="text-center">
                 <span
                   class="text-sm text-emerald-700 dark:text-emerald-300 font-medium"
-                  >Ավարտի ամսաթիվը կլինի՝</span
+                  >{{ $t('factory_order_actions.finish_date') }}</span
                 >
                 <span
                   class="block text-2xl font-bold text-emerald-800 dark:text-emerald-400 mt-1"
@@ -121,22 +151,22 @@
 
           <!-- Հաստատել կոճակ -->
           <button
-            :disabled="!localSelectedOption"
+            type="submit"
+            :disabled="!canConfirm"
             class="w-full py-4 rounded-2xl font-bold text-white text-lg transition-all duration-200 transform active:scale-98 shadow-lg"
             :class="
-              localSelectedOption
+              canConfirm
                 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-indigo-500/30'
                 : 'bg-gray-400 cursor-not-allowed shadow-none'
             "
-            @click="confirm"
           >
             {{
-              localSelectedOption
-                ? 'Հաստատել գործողությունը'
-                : 'Ընտրեք գործողություն'
+              saving
+                ? $t('factory_order_actions.saving')
+                : $t('factory_order_actions.confirm')
             }}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   </transition>
@@ -145,6 +175,7 @@
 <script>
 import SelectWithLabel from '@/components/factory/SelectWithLabel.vue'
 import InputWithLabelIcon from '@/components/form/InputWithLabelIcon.vue'
+import { localFactoryTimestamp } from '@/utils/factory-order-status'
 
 export default {
   components: { SelectWithLabel, InputWithLabelIcon },
@@ -152,8 +183,13 @@ export default {
     isOpen: Boolean,
     actionOptions: { type: Array, required: true },
     cancelReasons: { type: Array, required: true },
-    todayFormatted: String,
-    tomorrowDate: String,
+    todayFormatted: { type: String, default: '' },
+    tomorrowDate: { type: String, default: '' },
+    order: { type: Object, default: () => ({}) },
+    initialStatus: { type: String, default: null },
+    initialReason: { type: String, default: '' },
+    initialDate: { type: String, default: '' },
+    saving: { type: Boolean, default: false },
   },
   emits: ['close', 'confirm'],
   data() {
@@ -163,34 +199,81 @@ export default {
       localChangeDate: null,
     }
   },
+  computed: {
+    reasonOptions() {
+      return this.cancelReasons.map((reason) => ({
+        ...reason,
+        label: ['unclear', 'wrong_data', 'no_material', 'other'].includes(
+          reason.value
+        )
+          ? this.$t(`factory_order_actions.reasons.${reason.value}`)
+          : reason.label || reason.value,
+      }))
+    },
+    canConfirm() {
+      const status = this.localSelectedOption?.value
+      if (
+        this.saving ||
+        !this.actionOptions.some((option) => option.value === status)
+      )
+        return false
+      if (status === 'canceled') return !!this.localAdditionalOption?.value
+      if (status === 'date_changed')
+        return (
+          /^\d{4}-\d{2}-\d{2}$/.test(this.localChangeDate || '') &&
+          this.localChangeDate >= this.tomorrowDate
+        )
+      return true
+    },
+  },
   watch: {
     isOpen(val) {
-      if (!val) this.reset()
+      this.reset()
+      if (val) {
+        this.localSelectedOption =
+          this.actionOptions.find(
+            (option) => option.value === this.initialStatus
+          ) || null
+        this.localAdditionalOption =
+          this.reasonOptions.find(
+            (option) => option.value === this.initialReason
+          ) || null
+        this.localChangeDate = this.initialDate
+          ? this.initialDate.slice(0, 10)
+          : null
+        this.$nextTick(() =>
+          this.$refs.actionSelect?.$el?.querySelector('select')?.focus()
+        )
+      }
     },
   },
   methods: {
+    close() {
+      if (!this.saving) this.$emit('close')
+    },
     reset() {
       this.localSelectedOption = null
       this.localAdditionalOption = null
       this.localChangeDate = null
     },
     confirm() {
-      if (!this.localSelectedOption) return
+      if (!this.canConfirm) return
 
       this.$emit('confirm', {
         status: this.localSelectedOption.value,
-        canceling: this.localAdditionalOption?.value || '',
+        canceling:
+          this.localSelectedOption.value === 'canceled'
+            ? this.localAdditionalOption.value
+            : '',
         cancel_date:
           this.localSelectedOption.value === 'date_changed'
             ? this.localChangeDate
             : null,
         operator_finish_date:
           this.localSelectedOption.value === 'finished'
-            ? new Date().toISOString().slice(0, 19).replace('T', ' ')
+            ? localFactoryTimestamp()
             : null,
       })
-
-      this.$emit('close')
     },
   },
 }

@@ -17,7 +17,7 @@
         :name="name"
         class="appearance-none w-full px-4 py-2.5 pr-10 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:focus:ring-blue-500 transition-all duration-200 ease-in-out hover:border-gray-400 dark:hover:border-gray-500 disabled:opacity-60 disabled:cursor-not-allowed"
         v-bind="$attrs"
-        :disabled="dataValue.length === 0"
+        :disabled="disabled || dataValue.length === 0"
       >
         <option value="" disabled selected hidden>
           {{ placeholder || 'Ընտրեք տարբերակը' }}
@@ -54,6 +54,7 @@
 <script>
 export default {
   props: {
+    disabled: { type: Boolean, default: false },
     displayField: {
       type: String,
       default: 'name',
