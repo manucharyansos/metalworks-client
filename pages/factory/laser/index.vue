@@ -20,7 +20,7 @@
               :key="column.id"
               class="flex flex-col rounded-2xl bg-gray-50/70 p-3 shadow-sm dark:bg-gray-800/60 h-[calc(100vh-260px)]"
               @dragover.prevent
-              @drop="onDrop(column)"
+              @drop.prevent="onDrop(column)"
             >
               <!-- Column header -->
               <div class="mb-2 flex items-center justify-between shrink-0">
@@ -57,7 +57,10 @@
                     :order="order"
                     :factory-id="currentFactoryId"
                     :current-user-id="currentUserId"
+                    :status-options="statusOptions"
+                    :saving="isSaving"
                     @drag-start="onDragStart(order, column)"
+                    @drag-end="clearDrag"
                     @view-details="toggleDetails"
                     @edit="updateOrder"
                   />
@@ -100,6 +103,11 @@
       :cancel-reasons="cancelReasons"
       :today-formatted="todayFormatted"
       :tomorrow-date="tomorrowDate"
+      :order="selectedOrder"
+      :initial-status="initialStatus"
+      :initial-reason="selectedFactoryOrder?.canceling || ''"
+      :initial-date="selectedFactoryOrder?.cancel_date || ''"
+      :saving="isSaving"
       @close="closeModal"
       @confirm="handleModalConfirm"
     />
@@ -110,7 +118,7 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       >
         <div
-          class="relative w-full max-w-4xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
+          class="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
         >
           <button
             class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
@@ -137,6 +145,18 @@
             @download-file="downloadFile"
             @close-dxf="dxfUrl = ''"
           />
+          <div
+            v-if="canUpdateDetails"
+            class="mt-4 flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700"
+          >
+            <button
+              type="button"
+              class="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white dark:bg-white dark:text-slate-950"
+              @click="updateOrder(details)"
+            >
+              {{ $t('factory_order_actions.change_status') }}
+            </button>
+          </div>
         </div>
       </div>
     </template>
@@ -147,6 +167,12 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import {
+  isFactoryOrderFinished,
+  normalizeFactoryOrderStatus,
+  localFactoryDate,
+  localFactoryTimestamp,
+} from '@/utils/factory-order-status'
 import OrdersToolbar from '@/components/factory/OrdersToolbar.vue'
 import OrderCard from '@/components/factory/OrderCard.vue'
 import Pagination from '@/components/ui/Pagination.vue'
@@ -168,6 +194,8 @@ export default {
     return {
       searchable: '',
       isModal: false,
+      isSaving: false,
+      initialStatus: null,
       isOpenDetails: false,
       selectedOrder: {},
       dxfUrl: '',
@@ -202,6 +230,22 @@ export default {
   },
   computed: {
     ...mapGetters('factory', ['getOrderByFactories']),
+
+    selectedFactoryOrder() {
+      return this.getFactoryOrderForCurrentFactory(this.selectedOrder)
+    },
+
+    canUpdateDetails() {
+      const fo = this.getFactoryOrderForCurrentFactory(this.details)
+      return (
+        !this.isSaving &&
+        this.$can('factory.order_update') &&
+        !!fo &&
+        !isFactoryOrderFinished(fo.status) &&
+        (!fo.operator_id ||
+          String(fo.operator_id) === String(this.currentUserId))
+      )
+    },
 
     allOrders() {
       const orders = this.getOrderByFactories?.orders
@@ -309,7 +353,7 @@ export default {
     tomorrowDate() {
       const d = new Date()
       d.setDate(d.getDate() + 1)
-      return d.toISOString().split('T')[0]
+      return localFactoryDate(d)
     },
   },
   async mounted() {
@@ -366,8 +410,7 @@ export default {
 
         if (fo) {
           const rawStatus = fo.status
-          const normalizedStatus =
-            !rawStatus || rawStatus === 'pending' ? null : rawStatus
+          const normalizedStatus = normalizeFactoryOrderStatus(rawStatus)
 
           return {
             ...fo,
@@ -415,10 +458,11 @@ export default {
       reader.readAsArrayBuffer(file)
     },
 
-    updateOrder(order) {
+    updateOrder(order, initialStatus) {
+      if (this.isSaving || !this.$can('factory.order_update')) return
       const fo = this.getFactoryOrderForCurrentFactory(order)
 
-      if (fo?.status === 'finished') {
+      if (isFactoryOrderFinished(fo?.status)) {
         this.$notify({ text: 'Այս առաջադրանքն արդեն ավարտված է', type: 'info' })
         return
       }
@@ -435,15 +479,26 @@ export default {
       }
 
       this.selectedOrder = order
+      this.initialStatus =
+        initialStatus === undefined ? fo?.status || null : initialStatus
+      this.isOpenDetails = false
       this.isModal = true
     },
 
     closeModal() {
+      if (this.isSaving) return
       this.isModal = false
       this.selectedOrder = {}
     },
 
     async handleModalConfirm(payload) {
+      if (
+        this.isSaving ||
+        !this.selectedOrder.id ||
+        !this.currentFactoryId ||
+        !this.$can('factory.order_update')
+      )
+        return
       const finalPayload = {
         id: this.selectedOrder.id,
         factory_id: this.currentFactoryId,
@@ -455,11 +510,24 @@ export default {
         },
       }
 
-      const success = await this.doneFinishedOrder(finalPayload)
+      this.isSaving = true
+      let success = false
+      try {
+        success = await this.doneFinishedOrder(finalPayload)
+        if (success) await this.fetchOrdersByFactory(this.currentFactoryId)
+      } catch (error) {
+        success = false
+      } finally {
+        this.isSaving = false
+      }
       if (success) {
         this.$notify({ text: 'Հաջողությամբ թարմացվեց', type: 'success' })
         this.closeModal()
-        await this.fetchOrdersByFactory(this.currentFactoryId)
+      } else {
+        this.$notify({
+          text: 'Չհաջողվեց թարմացնել պատվերը։ Փորձեք կրկին։',
+          type: 'error',
+        })
       }
     },
 
@@ -497,26 +565,30 @@ export default {
     },
 
     onDragStart(order, column) {
+      if (this.isSaving || !this.$can('factory.order_update')) return
       this.draggingOrder = order
       this.draggingFromColumnId = column.id
     },
 
-    async onDrop(targetColumn) {
-      if (!this.draggingOrder) return
-
-      const newStatusValue =
-        targetColumn.value === 'null' ? null : targetColumn.value
-
-      await this.updateOrderStatusByDrag(this.draggingOrder, newStatusValue)
-
+    clearDrag() {
       this.draggingOrder = null
       this.draggingFromColumnId = null
     },
 
-    async updateOrderStatusByDrag(order, newStatus) {
-      const fo = this.getFactoryOrderForCurrentFactory(order)
+    async onDrop(targetColumn) {
+      const order = this.draggingOrder
+      this.clearDrag()
+      if (!order || this.isSaving) return
+      const newStatusValue = normalizeFactoryOrderStatus(targetColumn.value)
+      await this.updateOrderStatusByDrag(order, newStatusValue)
+    },
 
-      if (fo && fo.status === 'finished') {
+    async updateOrderStatusByDrag(order, newStatus) {
+      if (this.isSaving || !this.$can('factory.order_update')) return
+      const fo = this.getFactoryOrderForCurrentFactory(order)
+      if (!fo || fo.status === newStatus) return
+
+      if (isFactoryOrderFinished(fo.status)) {
         this.$notify({
           text: 'Արդեն ավարտված պատվերի կարգավիճակը չի կարող փոխվել։',
           duration: 3000,
@@ -540,12 +612,10 @@ export default {
         return
       }
 
-      let cancelDate = null
-
-      if (newStatus === 'date_changed') {
-        const dt = new Date()
-        dt.setDate(dt.getDate() + 1)
-        cancelDate = dt.toISOString().slice(0, 19).replace('T', ' ')
+      // Ask for the action's required data instead of inventing a reason or date.
+      if (['canceled', 'date_changed'].includes(newStatus)) {
+        this.updateOrder(order, newStatus)
+        return
       }
 
       const payload = {
@@ -554,15 +624,22 @@ export default {
         factory_order: {
           status: newStatus,
           canceling: '',
-          cancel_date: cancelDate,
+          cancel_date: null,
           operator_finish_date:
-            newStatus === 'finished'
-              ? new Date().toISOString().slice(0, 19).replace('T', ' ')
-              : null,
+            newStatus === 'finished' ? localFactoryTimestamp() : null,
         },
       }
 
-      const res = await this.doneFinishedOrder(payload)
+      this.isSaving = true
+      let res = false
+      try {
+        res = await this.doneFinishedOrder(payload)
+        if (res) await this.fetchOrdersByFactory(this.currentFactoryId)
+      } catch (error) {
+        res = false
+      } finally {
+        this.isSaving = false
+      }
       if (res) {
         this.$notify({
           text: 'Կարգավիճակը հաջողությամբ թարմացվեց։',
@@ -570,7 +647,6 @@ export default {
           position: 'top',
           type: 'success',
         })
-        await this.fetchOrdersByFactory(this.currentFactoryId)
       } else {
         this.$notify({
           text: 'Սխալ տեղի ունեցավ կարգավիճակը թարմացնելիս։',

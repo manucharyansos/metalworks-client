@@ -296,5 +296,27 @@
     "error_unavailable": "The 3D viewer could not load. Reload the page or download the original.",
     "error_cancelled": "Preview cancelled.",
     "model_colors": "File colors"
+  },
+  "factory_order_actions": {
+    "title": "Order action",
+    "help": "Choose the status and enter the required details",
+    "change_status": "Change status",
+    "in_progress": "In progress",
+    "close": "Close",
+    "action": "Action",
+    "choose_action": "Choose an action...",
+    "reason": "Rejection reason",
+    "choose_reason": "Choose a reason...",
+    "new_date": "New completion date",
+    "date_help": "Choose a date from tomorrow onwards.",
+    "finish_date": "Completion date:",
+    "saving": "Saving...",
+    "confirm": "Confirm action",
+    "reasons": {
+      "unclear": "Unclear order",
+      "wrong_data": "Incorrect data",
+      "no_material": "No material",
+      "other": "Other reason"
+    }
   }
 }
