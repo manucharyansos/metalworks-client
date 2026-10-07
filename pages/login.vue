@@ -4,17 +4,8 @@
       <section
         class="grid w-full overflow-hidden rounded-[32px] border border-white/70 bg-white shadow-[0_30px_90px_-45px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-900 lg:grid-cols-[1.02fr_0.98fr]"
       >
-        <div class="flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
-          <div class="mb-10 flex items-center gap-3">
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black tracking-tight text-white shadow-sm dark:bg-white dark:text-slate-950">
-              MW
-            </div>
-            <div>
-              <p class="text-sm font-black tracking-tight text-slate-950 dark:text-white">MetalWorks</p>
-              
-            </div>
-          </div>
-
+        <WorkspaceBranding class="order-first lg:order-last" />
+        <div class="order-last flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-12 lg:order-first lg:px-14 lg:py-16">
           <div class="max-w-md">
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Անվտանգ մուտք</p>
             <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">Բարի վերադարձ</h1>
@@ -110,38 +101,6 @@
           </div>
         </div>
 
-        <aside class="login-visual relative hidden min-h-[720px] overflow-hidden lg:flex lg:flex-col lg:justify-between">
-          <div class="absolute inset-0 bg-gradient-to-br from-slate-950/25 via-slate-950/45 to-slate-950/85"></div>
-          <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
-
-          <div class="relative z-10 flex items-center justify-between p-8">
-            
-          </div>
-
-          <div class="relative z-10 max-w-lg p-10">
-            <p class="text-xs font-black uppercase tracking-[0.18em] text-white/60">MetalWorks</p>
-            <h2 class="mt-3 text-3xl font-black leading-tight tracking-tight text-white">
-              Միասնական աշխատանքային հարթակ ամբողջ արտադրական ընթացքի համար
-            </h2>
-            <p class="mt-4 max-w-md text-sm leading-6 text-white/70">
-              Պատվերներ, ինժեներական ֆայլեր, արտադրամասեր, աշխատակիցներ և վերահսկողություն՝ մեկ համակարգում։
-            </p>
-            <div class="mt-7 grid grid-cols-3 gap-3">
-              <div class="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-md">
-                <p class="text-[10px] font-bold uppercase tracking-wide text-white/50">Հասանելիություն</p>
-                <p class="mt-1 text-sm font-black text-white">Ըստ հաստիքի</p>
-              </div>
-              <div class="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-md">
-                <p class="text-[10px] font-bold uppercase tracking-wide text-white/50">Ֆայլեր</p>
-                <p class="mt-1 text-sm font-black text-white">Վերահսկվող</p>
-              </div>
-              <div class="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-md">
-                <p class="text-[10px] font-bold uppercase tracking-wide text-white/50">Գործընթաց</p>
-                <p class="mt-1 text-sm font-black text-white">Արտադրություն</p>
-              </div>
-            </div>
-          </div>
-        </aside>
       </section>
     </div>
   </main>
@@ -150,10 +109,11 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import inputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+import WorkspaceBranding from '~/components/auth/WorkspaceBranding.vue'
 
 export default {
   name: 'Login',
-  components: { inputWithLabelIcon },
+  components: { inputWithLabelIcon, WorkspaceBranding },
   layout: 'default',
   data() {
     return {
@@ -240,13 +200,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-.login-visual {
-  background-color: #0f172a;
-  background-image: url('/metalworks-logo.jpg');
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-</style>

@@ -318,5 +318,20 @@
       "no_material": "No material",
       "other": "Other reason"
     }
+  },
+  "auth": {
+    "workspace_title": "Work platform"
+  },
+  "operations_dashboard": {
+    "created": "Created tasks",
+    "overdue": "Overdue tasks",
+    "awaiting": "Awaiting confirmation",
+    "completed": "Completed",
+    "active_count": "Current tasks: {count}",
+    "overdue_description": "Tasks past their deadline",
+    "awaiting_description": "Completed production steps that have not been confirmed",
+    "canceled_count": "Canceled: {count}",
+    "attention_caption": "Overdue, unassigned or awaiting confirmation work",
+    "confirmation": "Confirmation"
   }
 }

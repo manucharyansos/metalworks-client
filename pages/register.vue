@@ -2,15 +2,8 @@
   <main class="min-h-screen bg-slate-100 px-4 py-6 dark:bg-slate-950 sm:px-6 lg:px-8">
     <div class="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl items-center justify-center">
       <section class="grid w-full overflow-hidden rounded-[32px] border border-white/70 bg-white shadow-[0_30px_90px_-45px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-900 lg:grid-cols-[1.02fr_0.98fr]">
-        <div class="flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
-          <div class="mb-9 flex items-center gap-3">
-            <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
-            <div>
-              <p class="text-sm font-black tracking-tight text-slate-950 dark:text-white">MetalWorks</p>
-              
-            </div>
-          </div>
-
+        <WorkspaceBranding class="order-first lg:order-last" />
+        <div class="order-last flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-12 lg:order-first lg:px-14 lg:py-16">
           <div class="max-w-md">
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Գրանցում</p>
             <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">Ստեղծեք ձեր հաշիվը</h1>
@@ -98,14 +91,6 @@
           </p>
         </div>
 
-        <aside class="register-visual relative hidden min-h-[760px] overflow-hidden lg:flex lg:flex-col lg:justify-end">
-          <div class="absolute inset-0 bg-gradient-to-br from-slate-950/20 via-slate-950/45 to-slate-950/90"></div>
-          <div class="relative z-10 p-10">
-            
-            <h2 class="mt-3 max-w-lg text-3xl font-black leading-tight tracking-tight text-white">Մեկ հաշիվ՝ ձեր ամբողջ աշխատանքային միջավայրի համար</h2>
-            <p class="mt-4 max-w-md text-sm leading-6 text-white/70">Հասանելիությունները վերահսկվում են հաստիքներով և թույլտվություններով, որպեսզի յուրաքանչյուր աշխատակից տեսնի միայն իր աշխատանքին անհրաժեշտը։</p>
-          </div>
-        </aside>
       </section>
     </div>
     <notifications />
@@ -115,10 +100,11 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import inputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
+import WorkspaceBranding from '~/components/auth/WorkspaceBranding.vue'
 
 export default {
   name: 'Register',
-  components: { inputWithLabelIcon },
+  components: { inputWithLabelIcon, WorkspaceBranding },
   layout: 'default',
   data() {
     return {
@@ -205,13 +191,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-.register-visual {
-  background-color: #0f172a;
-  background-image: url('/metalworks-logo.jpg');
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-</style>

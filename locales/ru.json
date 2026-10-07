@@ -316,5 +316,20 @@
       "no_material": "Нет материала",
       "other": "Другая причина"
     }
+  },
+  "auth": {
+    "workspace_title": "Рабочая платформа"
+  },
+  "operations_dashboard": {
+    "created": "Созданные задания",
+    "overdue": "Просроченные задания",
+    "awaiting": "Ожидают подтверждения",
+    "completed": "Завершённые",
+    "active_count": "Текущие задания: {count}",
+    "overdue_description": "Задания с истёкшим сроком",
+    "awaiting_description": "Завершённые этапы производства, которые ещё не подтверждены",
+    "canceled_count": "Отменённые: {count}",
+    "attention_caption": "Просроченные, неназначенные или ожидающие подтверждения работы",
+    "confirmation": "Подтверждение"
   }
 }

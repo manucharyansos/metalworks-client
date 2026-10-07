@@ -317,5 +317,20 @@
       "no_material": "Նյութի բացակայություն",
       "other": "Այլ պատճառ"
     }
+  },
+  "auth": {
+    "workspace_title": "Աշխատանքային հարթակ"
+  },
+  "operations_dashboard": {
+    "created": "Ստեղծված առաջադրանքներ",
+    "overdue": "Ուշացված առաջադրանքներ",
+    "awaiting": "Հաստատման սպասող",
+    "completed": "Ավարտված",
+    "active_count": "Ընթացիկ առաջադրանքներ՝ {count}",
+    "overdue_description": "Վերջնաժամկետն անցած առաջադրանքներ",
+    "awaiting_description": "Ավարտված արտադրամասային քայլեր, որոնք դեռ չեն հաստատվել",
+    "canceled_count": "Չեղարկված՝ {count}",
+    "attention_caption": "Ուշացած, չնշանակված կամ հաստատման սպասող աշխատանքներ",
+    "confirmation": "Հաստատում"
   }
 }
