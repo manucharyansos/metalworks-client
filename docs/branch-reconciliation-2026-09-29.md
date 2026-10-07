@@ -55,3 +55,11 @@ The Tailwind and vue-i18n proposals are major-version changes that are not drop-
 ## Rule for future work
 
 Feature work should be merged to `master` only after CI succeeds. When a temporary branch is superseded by a later squash merge, this document should be updated instead of re-merging stale code into production.
+
+## Follow-up audit — 2026-10-07
+
+The later employee-UI restoration overwrote the DXF localization described
+above. A fresh content comparison found and restored this specific regression.
+Other historical functional branches are still represented by equivalent or
+newer master code. See [the follow-up audit](workspace-branding-dashboard-2026-10-07.md)
+for the checked baselines and current interface changes.

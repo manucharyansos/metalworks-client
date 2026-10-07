@@ -31,7 +31,7 @@
       </section>
 
       <section v-if="dashboardLoading && !dashboardLoaded" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div v-for="n in 8" :key="n" class="h-36 animate-pulse rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"></div>
+        <div v-for="n in 4" :key="n" class="h-36 animate-pulse rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"></div>
       </section>
       <section v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
@@ -52,7 +52,7 @@
               <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-sm font-black text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">!</span>
               <h2 class="text-lg font-bold text-slate-950 dark:text-white">Ուշադրություն պահանջող պատվերներ</h2>
             </div>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ուշացած, չնշանակված կամ ադմինի հաստատման սպասող աշխատանքներ</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $t('operations_dashboard.attention_caption') }}</p>
           </div>
           <button class="text-xs font-semibold text-rose-700 hover:underline dark:text-rose-300" @click="applyAttentionFilter">
             Ցույց տալ ուշացածները ֆիլտրում
@@ -140,7 +140,7 @@
               </div>
               <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400">
                 <span>Այսօր՝ <strong class="text-slate-700 dark:text-slate-200">{{ factory.due_today }}</strong></span>
-                <span>Ադմինի սպասում՝ <strong class="text-slate-700 dark:text-slate-200">{{ factory.awaiting_admin_confirmation }}</strong></span>
+                <span>{{ $t('operations_dashboard.awaiting') }}՝ <strong class="text-slate-700 dark:text-slate-200">{{ factory.awaiting_admin_confirmation }}</strong></span>
                 <span>30 օրում ավարտված՝ <strong class="text-slate-700 dark:text-slate-200">{{ factory.completed_30d }}</strong></span>
               </div>
             </button>
@@ -272,7 +272,7 @@
               <option value="unassigned">Չի նշանակված</option>
             </select>
             <select v-model="filters.confirmation" class="control" @change="onPrimaryFilterChange">
-              <option value="">Ադմինի հաստատում</option>
+              <option value="">{{ $t('operations_dashboard.confirmation') }}</option>
               <option value="waiting">Սպասում է հաստատման</option>
               <option value="confirmed">Հաստատված է</option>
             </select>
@@ -486,14 +486,10 @@ export default {
   computed: {
     metrics() {
       return [
-        { key: 'active', label: 'Ակտիվ պատվերներ', value: this.summary.active_orders || 0, description: `Ընդհանուր՝ ${this.summary.total_orders || 0}`, icon: 'A', tone: 'blue' },
-        { key: 'overdue', label: 'Ուշացած', value: this.summary.overdue_orders || 0, description: 'Անցած վերջնաժամկետով ակտիվ պատվերներ', icon: '!', tone: 'red' },
-        { key: 'today', label: 'Այսօր ավարտվող', value: this.summary.due_today || 0, description: `Հաջորդ 7 օրը՝ ${this.summary.due_next_7_days || 0}`, icon: 'D', tone: 'amber' },
-        { key: 'unassigned', label: 'Չնշանակված քայլեր', value: this.summary.unassigned_factory_steps || 0, description: 'Արտադրամասային քայլեր առանց աշխատակցի', icon: 'U', tone: 'violet' },
-        { key: 'confirmation', label: 'Ադմինի հաստատման սպասող', value: this.summary.awaiting_admin_confirmation || 0, description: 'Ավարտված արտադրամասային քայլեր, որոնք դեռ չեն հաստատվել', icon: 'C', tone: 'amber' },
-        { key: 'complete', label: 'Ավարտված պատվերներ', value: this.summary.completed_orders || 0, description: `Չեղարկված՝ ${this.summary.canceled_orders || 0}`, icon: '✓', tone: 'green' },
-        { key: 'nodeadline', label: 'Առանց վերջնաժամկետի', value: this.summary.without_deadline || 0, description: 'Ակտիվ պատվերներ առանց finish date-ի', icon: '—', tone: 'neutral' },
-        { key: 'capacity', label: 'Արտադրական ցանց', value: this.summary.factories || 0, description: `${this.summary.factory_operators || 0} արտադրամասի աշխատակից`, icon: 'F', tone: 'neutral' },
+        { key: 'created', label: this.$t('operations_dashboard.created'), value: this.summary.total_orders || 0, description: this.$t('operations_dashboard.active_count', { count: this.summary.active_orders || 0 }), icon: '+', tone: 'blue' },
+        { key: 'overdue', label: this.$t('operations_dashboard.overdue'), value: this.summary.overdue_orders || 0, description: this.$t('operations_dashboard.overdue_description'), icon: '!', tone: 'red' },
+        { key: 'confirmation', label: this.$t('operations_dashboard.awaiting'), value: this.summary.awaiting_admin_confirmation || 0, description: this.$t('operations_dashboard.awaiting_description'), icon: '…', tone: 'amber' },
+        { key: 'complete', label: this.$t('operations_dashboard.completed'), value: this.summary.completed_orders || 0, description: this.$t('operations_dashboard.canceled_count', { count: this.summary.canceled_orders || 0 }), icon: '✓', tone: 'green' },
       ]
     },
     filteredFactories() {
