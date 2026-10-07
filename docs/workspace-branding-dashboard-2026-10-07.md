@@ -25,6 +25,9 @@ network summary cards are removed. Their detailed filters and production data
 remain available below. Skeleton loading also uses four cards. New copy is
 provided in HY/RU/EN.
 
+The dashboard heading's help tooltip is aligned inward so its hidden content
+does not create horizontal page scrolling on small screens.
+
 ## Branch audit
 
 Client master baseline: `cf3e06042a65d9e68826d315d3f4a33ff0cdbcbb`.

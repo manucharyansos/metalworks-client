@@ -7,7 +7,7 @@
             <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
               Կառավարման վահանակ
             </h1>
-            <InfoTooltip>
+            <InfoTooltip align="right">
               Արտադրամասերի վիճակ, աշխատակիցների ծանրաբեռնվածություն, ուշացումներ և պատվերների ամբողջական վերահսկում մեկ էջում։
             </InfoTooltip>
           </div>

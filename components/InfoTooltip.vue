@@ -9,7 +9,8 @@
     </button>
 
     <span
-      class="pointer-events-none absolute left-0 top-9 z-50 w-[min(440px,82vw)] -translate-y-1 rounded-2xl bg-slate-950 px-4 py-3 text-xs font-medium leading-5 text-white opacity-0 shadow-2xl transition duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:bg-white dark:text-slate-950"
+      class="pointer-events-none absolute top-9 z-50 w-[min(440px,82vw)] -translate-y-1 rounded-2xl bg-slate-950 px-4 py-3 text-xs font-medium leading-5 text-white opacity-0 shadow-2xl transition duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:bg-white dark:text-slate-950"
+      :class="align === 'right' ? 'right-0' : 'left-0'"
       role="tooltip"
     >
       <slot />
@@ -21,6 +22,7 @@
 export default {
   name: 'InfoTooltip',
   props: {
+    align: { type: String, default: 'left' },
     label: {
       type: String,
       default: '',
