@@ -1,30 +1,48 @@
 <template>
-  <div class="min-w-0" translate="no">
-    <p
-      class="break-words text-sm font-bold tracking-tight text-slate-900 dark:text-white"
-      :title="displayName"
+  <div class="flex min-w-0 items-center gap-3" translate="no">
+    <div
+      class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white p-0.5 shadow-sm"
     >
-      {{ displayName }}
-    </p>
-    <p
-      v-if="email"
-      class="break-all text-[11px] leading-4 text-slate-500 dark:text-slate-400"
-      :title="email"
-    >
-      {{ email }}
-    </p>
-    <p
-      class="break-words text-[11px] leading-4 text-slate-500 dark:text-slate-400"
-      :title="phone"
-    >
-      {{ phone || $t('workspace_layout.phone_not_set') }}
-    </p>
+      <img
+        :src="brandLogoUrl"
+        :alt="brand.name"
+        width="48"
+        height="48"
+        class="h-full w-full object-contain"
+      />
+    </div>
+    <div class="min-w-0 flex-1">
+      <p
+        class="break-words text-sm font-bold tracking-tight text-slate-900 dark:text-white"
+        :title="brand.name"
+      >
+        {{ brand.name }}
+      </p>
+      <p
+        class="break-words text-xs font-medium leading-4 text-slate-700 dark:text-slate-200"
+        :title="displayName"
+      >
+        {{ displayName }}
+      </p>
+      <p
+        v-if="email"
+        class="break-all text-[11px] leading-4 text-slate-500 dark:text-slate-400"
+        :title="email"
+      >
+        {{ email }}
+      </p>
+    </div>
   </div>
 </template>
 
 <script>
+import workspaceBrands from '~/config/workspace-brands'
+
 export default {
   name: 'WorkspaceIdentity',
+  props: {
+    brand: { type: Object, default: () => workspaceBrands[0] },
+  },
   data() {
     return {
       identity: null,
@@ -32,6 +50,13 @@ export default {
     }
   },
   computed: {
+    brandLogoUrl() {
+      const base = this.$router?.options?.base || '/'
+      return `${base.replace(/\/?$/, '/')}${this.brand.logo.replace(
+        /^\/+/,
+        ''
+      )}`
+    },
     authUser() {
       return this.$auth?.user || {}
     },
@@ -48,9 +73,6 @@ export default {
     },
     email() {
       return String(this.identity?.email || this.authUser.email || '').trim()
-    },
-    phone() {
-      return String(this.identity?.phone || this.authUser.phone || '').trim()
     },
   },
   watch: {

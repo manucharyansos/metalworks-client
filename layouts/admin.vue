@@ -13,9 +13,6 @@
     >
       <div class="flex min-h-20 items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-900">
         <nuxt-link :to="localePath('/admin')" class="flex min-w-0 flex-1 items-center gap-3" @click.native="closeSidebar">
-          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950">
-            <span class="text-sm font-black tracking-tight">MW</span>
-          </div>
           <WorkspaceIdentity class="min-w-0 flex-1" />
         </nuxt-link>
         <button

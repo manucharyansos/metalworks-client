@@ -5,7 +5,6 @@
     <aside class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:translate-x-0 lg:shadow-none" :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'">
       <div class="flex min-h-20 items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-800">
         <nuxt-link :to="localePath('/manager')" class="flex min-w-0 flex-1 items-center gap-3" @click.native="closeSidebar">
-          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
           <WorkspaceIdentity class="min-w-0 flex-1" />
         </nuxt-link>
         <button type="button" class="shrink-0 rounded-xl p-2 text-slate-400 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" :aria-label="$t('workspace_layout.close_navigation')" @click="closeSidebar">✕</button>

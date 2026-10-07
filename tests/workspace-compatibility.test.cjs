@@ -7,10 +7,12 @@ const compiler = require('vue-template-compiler')
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const routeUrl = moduleUrl(read('utils/workspace-route.js'))
+const brandsUrl = moduleUrl(read('config/workspace-brands.js'))
 async function component(file, render = false) {
   const parsed = compiler.parseComponent(read(file))
   const source = parsed.script.content.replace(/import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g, (_, names, specifier) => {
     if (specifier === '@/utils/workspace-route') return `import ${names} from '${routeUrl}'`
+    if (specifier === '~/config/workspace-brands') return `import ${names} from '${brandsUrl}'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
     return `const ${names} = {}`
   })
@@ -25,10 +27,11 @@ for (const [role, links] of [
   ['factory', ['/factory/laser', '/profile']],
 ]) {
   test(`${role} layout retains its navigation, identity, settings, and routed page`, async () => {
-    const auth = { loggedIn: true, user: { id: 1, name: 'QA User', email: 'qa@example.invalid', phone: '555000', role: { name: role === 'factory' ? 'laser' : role }, permissions: ['orders.view'] } }
+    const auth = { loggedIn: true, user: { id: 1, name: 'QA', last_name: 'User', email: 'qa@example.invalid', phone: '555000', role: { name: role === 'factory' ? 'laser' : role }, permissions: ['orders.view'] } }
     const context = { beforeCreate() {
       this.$auth = auth
       this.$route = { path: `/ru${links[0]}`, fullPath: `/ru${links[0]}` }
+      this.$router = { options: { base: '/work/' } }
       this.$i18n = { locale: 'ru' }
       this.$can = () => true
       this.$t = key => key
@@ -46,11 +49,14 @@ for (const [role, links] of [
     const html = await require('vue-server-renderer').createRenderer().renderToString(new Vue({ ...options, ...context }))
     assert.match(html, /QA User/)
     assert.match(html, /qa@example.invalid/)
-    assert.match(html, /555000/)
+    assert.doesNotMatch(html, /555000|workspace_layout.phone_not_set/)
     assert.match(html, /Existing route content/)
     for (const link of links) assert.ok(html.includes(`href="/ru${link}"`), link)
     const header = html.match(/<header[\s\S]*?<\/header>/)[0]
     const sidebar = html.match(/<aside[\s\S]*?<\/aside>/)[0]
+    assert.match(sidebar, /src="\/work\/logo.png" alt="MetalWorks"/)
+    const identityRows = [...sidebar.matchAll(/<p[^>]*>([^<]*)<\/p>/g)].slice(0, 3).map(match => match[1].trim())
+    assert.deepEqual(identityRows, ['MetalWorks', 'QA User', 'qa@example.invalid'])
     assert.doesNotMatch(header, /href="\/ru\/profile"/, 'header does not duplicate sidebar settings')
     assert.match(sidebar, /href="\/ru\/profile"/, 'account settings remain accessible in the sidebar')
   })
