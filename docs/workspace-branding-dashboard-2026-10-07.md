@@ -10,6 +10,20 @@ Additional companies can be added to `config/workspace-brands.js` with a unique
 both pages. Logos use a wrapping grid, preserve their aspect ratios, and resolve
 against the router base, including the production `/work/` base.
 
+The sidebar identity in all four workspace layouts uses the real company logo
+and shows three lines: company name, user first and last name, and email. Phone
+and placeholder initials are removed from this block. The profile's full name
+continues to come from `/api/profile/identity`, including the worker surname
+fallback; it also falls back to the authenticated user's name and surname.
+
+`WorkspaceIdentity` accepts the selected company as its `brand` prop so the name
+and logo always come from the same record. With the current single-company
+configuration, it defaults to the first company in `config/workspace-brands.js`.
+The company is independent of production departments such as laser or DXF;
+the existing department routing and permissions are unchanged. The logo keeps
+its aspect ratio and uses the router base; long names and emails wrap within
+the sidebar in both desktop and mobile layouts.
+
 The admin summary contains four cards:
 
 | Label (HY) | API field |
