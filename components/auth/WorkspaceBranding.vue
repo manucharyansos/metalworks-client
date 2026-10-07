@@ -133,6 +133,25 @@ export default {
   color: #cbd5e1;
 }
 
+@media (max-width: 359px) {
+  .workspace-branding {
+    padding-right: 1.25rem;
+    padding-left: 1.25rem;
+  }
+
+  .workspace-branding__content {
+    gap: 0.75rem;
+  }
+
+  .workspace-branding__logos {
+    width: 4rem;
+  }
+
+  .workspace-branding__title {
+    font-size: 1.125rem;
+  }
+}
+
 @media (min-width: 1024px) {
   .workspace-branding {
     padding: 3rem;
