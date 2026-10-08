@@ -1,5 +1,6 @@
 <template>
   <main
+    data-workspace-form
     class="order-create-page min-h-screen bg-slate-50 p-4 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:p-6 lg:p-8"
   >
     <div v-if="$can('orders.create')" class="mx-auto max-w-7xl">
@@ -668,6 +669,7 @@ export default {
     ]),
 
     selectPmpGroup(pmp) {
+      this.$workspace?.setDirty(true)
       if (this.selectedPmp?.id !== pmp.id) {
         this.selectedPmpRemoteNumber = null
         this.pmpNameSearch = ''
@@ -680,6 +682,7 @@ export default {
     },
 
     async selectPmpRemoteNumber(remoteNumber) {
+      this.$workspace?.setDirty(true)
       if (Number(this.remote_number_id) !== Number(remoteNumber.id))
         this.resetPmpFileSelection()
       this.selectedPmpRemoteNumber = remoteNumber.remote_number
@@ -737,6 +740,7 @@ export default {
     },
 
     handleFilesSelected(files) {
+      this.$workspace?.setDirty(true)
       this.selectedFiles = files.map((file) => file.id)
       this.fileQuantities = files.reduce((acc, file) => {
         acc[file.id] = file.quantity
@@ -932,6 +936,7 @@ export default {
     },
 
     resetForm() {
+      this.$workspace?.setDirty(false)
       this.selectedClient = null
       this.selectedPmp = null
       this.selectedPmpRemoteNumber = null

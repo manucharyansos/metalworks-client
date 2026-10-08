@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <WorkerFormModal v-if="$canAny(['workers.create','workers.update'])" :visible="isFormOpen" :worker="selectedWorker" :roles="formRoles" :factories="formFactories" :submitting="submitting" @close="closeForm" @submit="handleSubmit" />
+    <WorkerFormModal v-if="$canAny(['workers.create','workers.update'])" :visible="isFormOpen" :worker="selectedWorker" :roles="formRoles" :factories="formFactories" :companies="formCompanies" :can-manage-companies="canManageCompanies" :submitting="submitting" @close="closeForm" @submit="handleSubmit" />
 
     <div v-if="confirmDelete && $can('workers.delete')" class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm" @click.self="confirmDelete = null">
       <div class="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"><h3 class="text-lg font-black text-slate-950 dark:text-white">Ջնջե՞լ աշխատակցին</h3><p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">«{{ confirmDelete?.display_name || confirmDelete?.name }}» հաշիվը կհեռացվի։</p><div class="mt-6 flex justify-end gap-2"><button class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="confirmDelete = null">Չեղարկել</button><button class="rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-rose-700 disabled:opacity-50" :disabled="submitting" @click="doDelete">{{ submitting ? 'Կատարվում է…' : 'Ջնջել' }}</button></div></div>
@@ -86,7 +86,7 @@ export default {
   middleware: ['role-guard'],
   meta: { role: 'manager' },
   data() {
-    return { loading: false, workers: [], formRoles: [], formFactories: [], formOptionsLoaded: false, searchQuery: '', isFormOpen: false, selectedWorker: null, submitting: false, confirmDelete: null }
+    return { loading: false, workers: [], formRoles: [], formFactories: [], formCompanies: [], canManageCompanies: false, formOptionsLoaded: false, searchQuery: '', isFormOpen: false, selectedWorker: null, submitting: false, confirmDelete: null }
   },
   computed: {
     filtered() {
@@ -125,6 +125,8 @@ export default {
         const data = await this.$axios.$get('/api/staff/worker-options')
         this.formRoles = Array.isArray(data?.roles) ? data.roles : []
         this.formFactories = Array.isArray(data?.factories) ? data.factories : []
+        this.formCompanies = Array.isArray(data?.companies) ? data.companies : []
+        this.canManageCompanies = Boolean(data?.can_manage_companies)
         this.formOptionsLoaded = true
         return true
       } catch (e) {

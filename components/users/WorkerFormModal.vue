@@ -17,7 +17,7 @@
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label class="mb-1 block text-sm">{{ t.name }}</label>
-              <input v-model.trim="form.name" type="text" class="field" />
+              <input v-model.trim="form.name" :disabled="!canEditAccount" type="text" class="field" />
             </div>
 
             <div>
@@ -27,12 +27,12 @@
 
             <div>
               <label class="mb-1 block text-sm">{{ t.email }}</label>
-              <input v-model.trim="form.email" type="email" class="field" />
+              <input v-model.trim="form.email" :disabled="!canEditAccount" type="email" class="field" />
             </div>
 
             <div>
               <label class="mb-1 block text-sm">{{ t.position }}</label>
-              <select v-model="form.role_id" class="field">
+              <select v-model="form.role_id" :disabled="worker && worker.is_platform_admin" class="field">
                 <option disabled value="">{{ t.choosePosition }}</option>
                 <option v-for="r in allowedRoles" :key="r.id" :value="r.id">
                   {{ roleLabel(r) }}
@@ -76,7 +76,13 @@
             </div>
           </div>
 
-          <div v-if="!isEdit" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <p v-if="!canEditAccount" class="text-xs text-slate-500">{{ companyText.shared }}</p>
+          <CompanyAccessEditor v-if="canManageCompanies && !(worker && worker.is_platform_admin)" v-model="companyAccess" :companies="companies" :roles="allowedRoles" :current-company-id="currentCompanyId" :role-names="t.roles" :position-label="t.position" :workshop-label="t.factory" />
+          <label v-if="!isEdit && canManageCompanies" class="flex items-center gap-2 text-sm">
+            <input v-model="existingAccount" type="checkbox" /> {{ companyText.accountExists }}
+          </label>
+          <p v-if="existingAccount" class="text-xs text-slate-500">{{ companyText.accountHint }}</p>
+          <div v-if="!isEdit && !existingAccount" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label class="mb-1 block text-sm">{{ t.password }}</label>
               <input v-model="form.password" type="password" minlength="8" autocomplete="new-password" class="field" />
@@ -105,6 +111,8 @@
 </template>
 
 <script>
+import CompanyAccessEditor from '~/components/users/CompanyAccessEditor.vue'
+import { workspaceCopy } from '~/utils/company-copy'
 const ALLOWED_ROLE_NAMES = ['manager', 'bend', 'laser', 'powder_catting', 'engineer']
 const FACTORY_ROLE_NAMES = ['bend', 'laser', 'powder_catting']
 
@@ -122,15 +130,18 @@ const COPY = {
 
 export default {
   name: 'WorkerFormModal',
+  components: { CompanyAccessEditor },
   props: {
     visible: { type: Boolean, default: false },
     worker: { type: Object, default: null },
     roles: { type: Array, default: () => [] },
     factories: { type: Array, default: () => [] },
     submitting: { type: Boolean, default: false },
+    companies: { type: Array, default: () => [] },
+    canManageCompanies: { type: Boolean, default: false },
   },
   data() {
-    return { form: this.emptyForm() }
+    return { form: this.emptyForm(), companyAccess: [], existingAccount: false }
   },
   computed: {
     locale() {
@@ -138,8 +149,11 @@ export default {
       return ['hy', 'ru', 'en'].includes(code) ? code : 'hy'
     },
     t() { return COPY[this.locale] || COPY.hy },
+    companyText() { return workspaceCopy(this.locale) },
+    currentCompanyId() { return this.$auth?.user?.company?.id },
+    canEditAccount() { return !this.isEdit || this.worker.can_edit_account !== false },
     isEdit() { return !!(this.worker && this.worker.id) },
-    allowedRoles() { return (this.roles || []).filter((role) => ALLOWED_ROLE_NAMES.includes(role.name)) },
+    allowedRoles() { return (this.roles || []).filter((role) => ALLOWED_ROLE_NAMES.includes(role.name) || (this.canManageCompanies && role.name === 'admin')) },
     selectedRole() { return this.allowedRoles.find((role) => String(role.id) === String(this.form.role_id)) || null },
     requiresFactory() { return FACTORY_ROLE_NAMES.includes(this.selectedRole?.name) },
   },
@@ -148,12 +162,20 @@ export default {
     'form.role_id'() { if (!this.requiresFactory) this.form.factory_id = null },
   },
   methods: {
-    roleLabel(role) { return this.t.roles?.[role.name] || role.value || role.name },
+    roleLabel(role) { return role.name === 'admin' ? this.companyText.admin : this.t.roles?.[role.name] || role.value || role.name },
+    accessRows() {
+      return this.companies.map((company) => {
+        const saved = this.worker?.company_access?.find((row) => String(row.company_id) === String(company.id))
+        return saved ? { ...saved } : { company_id: company.id, enabled: String(company.id) === String(this.currentCompanyId), role_id: '', factory_id: null }
+      })
+    },
     emptyForm() {
       return { name: '', last_name: '', email: '', role_id: '', factory_id: null, phone: '', second_phone: '', address: '', password: '', password_confirmation: '' }
     },
     bootstrap() {
       if (!this.isEdit) return this.reset()
+      this.companyAccess = this.accessRows()
+      this.existingAccount = false
       const u = this.worker
       this.form = {
         name: u?.name || '',
@@ -168,14 +190,20 @@ export default {
         password_confirmation: '',
       }
     },
-    reset() { this.form = this.emptyForm() },
+    reset() { this.form = this.emptyForm(); this.companyAccess = this.accessRows(); this.existingAccount = false },
     validate() {
       if (!this.form.name.trim()) return this.t.nameRequired
       if (!this.form.email.trim()) return this.t.emailRequired
       if (!this.form.role_id || !this.selectedRole) return this.t.positionRequired
       if (this.requiresFactory && !this.form.factory_id) return this.t.factoryRequired
       if (!this.form.phone.trim()) return this.t.phoneRequired
-      if (!this.isEdit) {
+      for (const row of this.canManageCompanies ? this.companyAccess : []) {
+        if (!row.enabled || String(row.company_id) === String(this.currentCompanyId)) continue
+        const role = this.allowedRoles.find((item) => String(item.id) === String(row.role_id))
+        if (!role) return this.t.positionRequired
+        if (FACTORY_ROLE_NAMES.includes(role.name) && !row.factory_id) return this.t.factoryRequired
+      }
+      if (!this.isEdit && !this.existingAccount) {
         if (!this.form.password) return this.t.passwordRequired
         if (this.form.password.length < 8) return this.t.passwordMin
         if (this.form.password !== this.form.password_confirmation) return this.t.passwordMismatch
@@ -195,7 +223,10 @@ export default {
         second_phone: this.form.second_phone || null,
         address: this.form.address || null,
       }
-      if (!this.isEdit) {
+      if (this.canManageCompanies && !this.worker?.is_platform_admin) {
+        payload.company_access = this.companyAccess.map((row) => String(row.company_id) === String(this.currentCompanyId) ? { ...row, role_id: payload.role_id, factory_id: payload.factory_id } : { ...row })
+      }
+      if (!this.isEdit && !this.existingAccount) {
         payload.password = this.form.password
         payload.password_confirmation = this.form.password_confirmation
       }

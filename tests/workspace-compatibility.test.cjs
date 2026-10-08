@@ -8,11 +8,13 @@ const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const routeUrl = moduleUrl(read('utils/workspace-route.js'))
 const brandsUrl = moduleUrl(read('config/workspace-brands.js'))
+const companyCopyUrl = moduleUrl(read('utils/company-copy.js'))
 async function component(file, render = false) {
   const parsed = compiler.parseComponent(read(file))
   const source = parsed.script.content.replace(/import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g, (_, names, specifier) => {
     if (specifier === '@/utils/workspace-route') return `import ${names} from '${routeUrl}'`
     if (specifier === '~/config/workspace-brands') return `import ${names} from '${brandsUrl}'`
+    if (specifier === '~/utils/company-copy') return `import ${names} from '${companyCopyUrl}'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
     return `const ${names} = {}`
   })
@@ -30,6 +32,7 @@ for (const [role, links] of [
     const auth = { loggedIn: true, user: { id: 1, name: 'QA', last_name: 'User', email: 'qa@example.invalid', phone: '555000', role: { name: role === 'factory' ? 'laser' : role }, permissions: ['orders.view'] } }
     const context = { beforeCreate() {
       this.$auth = auth
+      this.$store = { state: { workspace: { company: null, companies: [], switching: false } } }
       this.$route = { path: `/ru${links[0]}`, fullPath: `/ru${links[0]}` }
       this.$router = { options: { base: '/work/' } }
       this.$i18n = { locale: 'ru' }
@@ -42,6 +45,8 @@ for (const [role, links] of [
       ...options.components,
       WorkspaceIdentity: { ...await component('components/layout/WorkspaceIdentity.vue', true), ...context },
       WorkspaceSettingsIcon: await component('components/layout/WorkspaceSettingsIcon.vue', true),
+      CompanySelector: { ...await component('components/layout/CompanySelector.vue', true), ...context },
+      WorkspaceTransition: { ...await component('components/layout/WorkspaceTransition.vue', true), ...context },
       NuxtLink: { props: ['to'], render(h) { return h('a', { attrs: { href: this.to } }, this.$slots.default) } },
       Nuxt: { render: h => h('main', 'Existing route content') },
       LanguageDropdown: { render: h => h('button', 'RU') },

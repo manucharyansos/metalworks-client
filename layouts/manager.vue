@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <WorkspaceTransition />
     <div v-if="isSidebarOpen" class="fixed inset-0 z-30 bg-slate-950/35 backdrop-blur-sm lg:hidden" @click="closeSidebar"></div>
 
     <aside class="fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-slate-200 bg-white shadow-xl transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:translate-x-0 lg:shadow-none" :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'">
@@ -10,6 +11,7 @@
         <button type="button" class="shrink-0 rounded-xl p-2 text-slate-400 hover:bg-slate-100 lg:hidden dark:hover:bg-slate-800" :aria-label="$t('workspace_layout.close_navigation')" @click="closeSidebar">✕</button>
       </div>
 
+      <CompanySelector />
       <div class="flex-1 overflow-y-auto px-4 py-5">
         <p class="px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">{{ $t('workspace_layout.management') }}</p>
         <nav class="mt-3 space-y-1.5">
@@ -51,6 +53,8 @@
 
 <script>
 import WorkspaceIdentity from '@/components/layout/WorkspaceIdentity.vue'
+import CompanySelector from '@/components/layout/CompanySelector.vue'
+import WorkspaceTransition from '@/components/layout/WorkspaceTransition.vue'
 import WorkspaceSettingsIcon from '@/components/layout/WorkspaceSettingsIcon.vue'
 import { isWorkspaceRouteActive } from '@/utils/workspace-route'
 
@@ -62,7 +66,7 @@ const PRODUCTION_COPY = {
 
 export default {
   name: 'ManagerLayout',
-  components: { WorkspaceIdentity, WorkspaceSettingsIcon },
+  components: { WorkspaceIdentity, WorkspaceSettingsIcon, CompanySelector, WorkspaceTransition },
   data() {
     return {
       isSidebarOpen: false,

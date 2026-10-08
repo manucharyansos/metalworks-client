@@ -5,18 +5,20 @@
     >
       <img
         :src="brandLogoUrl"
-        :alt="brand.name"
+        v-if="brandLogoUrl"
+        :alt="activeBrand.name"
         width="48"
         height="48"
         class="h-full w-full object-contain"
       />
+      <span v-else class="text-lg font-bold text-slate-700">{{ activeBrand.name.slice(0, 2).toUpperCase() }}</span>
     </div>
     <div class="min-w-0 flex-1">
       <p
         class="break-words text-sm font-bold tracking-tight text-slate-900 dark:text-white"
-        :title="brand.name"
+        :title="activeBrand.name"
       >
-        {{ brand.name }}
+        {{ activeBrand.name }}
       </p>
       <p
         class="break-words text-xs font-medium leading-4 text-slate-700 dark:text-slate-200"
@@ -41,7 +43,7 @@ import workspaceBrands from '~/config/workspace-brands'
 export default {
   name: 'WorkspaceIdentity',
   props: {
-    brand: { type: Object, default: () => workspaceBrands[0] },
+    brand: { type: Object, default: null },
   },
   data() {
     return {
@@ -50,9 +52,19 @@ export default {
     }
   },
   computed: {
+    activeBrand() {
+      if (this.brand) return this.brand
+      const company = this.$store?.state?.workspace?.company || this.authUser.company
+      if (!company) return workspaceBrands[0]
+      return { ...company, logo: company.logo || (company.slug === 'metalworks' ? workspaceBrands[0].logo : null) }
+    },
     brandLogoUrl() {
+      const logo = this.activeBrand.logo
+      if (!logo) return null
+      if (/^https?:\/\//i.test(logo)) return logo
+      if (logo.startsWith('/api/')) return `${String(this.$axios?.defaults?.baseURL || '').replace(/\/+$/, '')}${logo}`
       const base = this.$router?.options?.base || '/'
-      return `${base.replace(/\/?$/, '/')}${this.brand.logo.replace(
+      return `${base.replace(/\/?$/, '/')}${logo.replace(
         /^\/+/,
         ''
       )}`

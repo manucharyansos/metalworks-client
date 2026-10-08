@@ -55,6 +55,7 @@ export default {
   },
 
   auth: {
+    plugins: ['~/plugins/company-context.client.js'],
     redirect: {
       login: '/login',
       logout: '/login',

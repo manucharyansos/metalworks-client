@@ -1,6 +1,7 @@
 <template>
   <div
     v-if="visible"
+    data-workspace-form
     class="fixed inset-0 bg-black/40 flex items-center justify-center z-[1000] p-4"
     @click.self="$emit('close')"
   >
