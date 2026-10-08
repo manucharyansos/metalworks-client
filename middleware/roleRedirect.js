@@ -76,12 +76,17 @@ export default async function ({ app, route, redirect, $auth }) {
   if (currentPath === profilePath || currentPath.startsWith(profilePath + '/')) return
 
   const homePath = localePath(homeRaw)
-  const allowedPrefix = normalizePath(localePath(allowedBase))
+  // /factory is a section prefix, not a routable index page. Nuxt i18n
+  // returns an unlocalized path for it, which used to redirect RU/EN
+  // operators to their own home repeatedly. Compare section paths without
+  // the locale instead of asking localePath to resolve a nonexistent page.
+  const sectionPath = currentPath.replace(/^\/(hy|ru|en)(?=\/|$)/, '') || '/'
+  const allowedPrefix = normalizePath(allowedBase)
 
   if (currentPath === rootPath || isPublicAuthPath) return redirect(homePath)
 
   const isInAllowedSection =
-    currentPath === allowedPrefix || currentPath.startsWith(allowedPrefix + '/')
+    sectionPath === allowedPrefix || sectionPath.startsWith(allowedPrefix + '/')
 
   if (!isInAllowedSection) return redirect(homePath)
 }

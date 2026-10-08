@@ -16,7 +16,7 @@
         <p class="px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">{{ $t('workspace_layout.management') }}</p>
         <nav class="mt-3 space-y-1.5">
           <nuxt-link v-for="item in visibleNavItems" :key="item.to" :to="localePath(item.to)" class="nav-item group" active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950" :exact="item.exact" @click.native="closeSidebar">
-            <span class="nav-icon"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="iconPath(item.icon)" /></svg></span><span class="min-w-0 flex-1 truncate">{{ $t(item.labelKey) }}</span>
+            <span class="nav-icon"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="iconPath(item.icon)" /></svg></span><span class="min-w-0 flex-1 truncate">{{ navigationLabel(item) }}</span>
           </nuxt-link>
         </nav>
 
@@ -75,6 +75,7 @@ export default {
         { to: '/manager/clients', labelKey: 'workspace_layout.clients', permission: 'clients.view', icon: 'clients' },
         { to: '/manager/workers', labelKey: 'workspace_layout.employees', permission: 'workers.view', icon: 'workers' },
         { to: '/manager/users', labelKey: 'workspace_layout.access_users', permission: null, icon: 'workers' },
+        { to: '/manager/registration-requests', label: { hy: 'Գրանցման հարցումներ', ru: 'Заявки на регистрацию', en: 'Registration requests' }, permission: null, icon: 'workers' },
         { to: '/manager/materials', labelKey: 'workspace_layout.materials', permission: 'materials.view', icon: 'materials' },
       ],
       actionItems: [
@@ -95,11 +96,12 @@ export default {
       const production = this.productionItems.find((item) => isWorkspaceRouteActive(this.$route.path, item))
       if (production) return production.label
       const found = this.navItems.find((item) => isWorkspaceRouteActive(this.$route.path, item))
-      return found ? this.$t(found.labelKey) : this.$t('workspace_layout.workspace')
+      return found ? this.navigationLabel(found) : this.$t('workspace_layout.workspace')
     },
   },
   watch: { '$route.fullPath'() { this.closeSidebar() } },
   methods: {
+    navigationLabel(item) { return item.label ? item.label[this.locale] || item.label.hy : this.$t(item.labelKey) },
     toggleSidebar() { this.isSidebarOpen = !this.isSidebarOpen }, closeSidebar() { this.isSidebarOpen = false },
     iconPath(icon) { if(icon==='orders') return 'M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2Zm2 4h6M9 12h6M9 16h4'; if(icon==='clients') return 'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m7-10a4 4 0 100-8 4 4 0 000 8Z'; if(icon==='materials') return 'm12 3 8 4-8 4-8-4 8-4 8-4Zm-8 9 8 4 8-4M4 17l8 4 8-4'; return 'M12 12a4 4 0 100-8 4 4 0 000 8Zm-7 9a7 7 0 0114 0' },
     async logout() { await this.$auth.logout() },

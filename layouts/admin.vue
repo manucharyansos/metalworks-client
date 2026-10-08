@@ -128,6 +128,7 @@ export default {
         { to: '/admin/activity', label: { hy: 'Աշխատակիցների գործունեություն', ru: 'Активность сотрудников', en: 'Employee activity' }, short: '04', exact: false },
         { to: '/admin/users', label: { hy: 'Աշխատակիցների իրավունքներ', ru: 'Права сотрудников', en: 'Employee permissions' }, short: '05', exact: false },
         { to: '/admin/workers', label: { hy: 'Աշխատակիցներ', ru: 'Сотрудники', en: 'Employees' }, short: '06', exact: false },
+        { to: '/admin/registration-requests', label: { hy: 'Գրանցման հարցումներ', ru: 'Заявки на регистрацию', en: 'Registration requests' }, short: '08', exact: false },
         { to: '/admin/file-extension', labelKey: 'admin_layout.file_types', short: '07', exact: false },
       ],
     }

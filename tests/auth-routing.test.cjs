@@ -62,3 +62,20 @@ test('workspace permission checks use the same normalized route', async () => {
   })
   assert.deepEqual(redirects, ['/ru/profile?access=denied'])
 })
+
+for (const locale of ['', '/ru', '/en']) {
+  for (const [role, home] of [['laser', 'laser'], ['bend', 'bend'], ['powder_catting', 'powder']]) {
+    test(`${role} can enter ${locale || 'hy'} factory home when the section has no index route`, async () => {
+      const middleware = await load('middleware/roleRedirect.js')
+      const redirects = []
+      await middleware({
+        // This is Nuxt i18n's real behavior for an unmatched /factory page.
+        app: { localePath: path => path === '/factory' ? path : `${locale}${path}` },
+        route: { path: `${locale}/factory/${home}/` },
+        redirect: path => redirects.push(path),
+        $auth: { loggedIn: true, user: { role: { name: role }, factory_id: 7, permissions: [] } },
+      })
+      assert.deepEqual(redirects, [])
+    })
+  }
+}
