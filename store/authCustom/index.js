@@ -4,6 +4,7 @@ export const state = () => ({
   errorMessage: null,
   user: null,
   loadedOnce: false,
+  registrationErrors: {},
 })
 
 export const getters = {
@@ -12,6 +13,7 @@ export const getters = {
   getUser: (s) => s.user,
   isAuthenticated: (s) => !!s.user,
   isLoadedOnce: (s) => s.loadedOnce,
+  getRegistrationErrors: (s) => s.registrationErrors,
 }
 
 export const actions = {
@@ -59,16 +61,23 @@ export const actions = {
   },
 
   async registerUser({ commit }, userData) {
+    commit('setError', null)
+    commit('setErrorMessage', null)
+    commit('setRegistrationErrors', {})
     try {
-      await this.$axios.get('/sanctum/csrf-cookie')
-      const response = await this.$axios.post('/api/register', userData)
-      return response.status === 201 || response.status === 200
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          await this.$axios.get('/sanctum/csrf-cookie', { timeout: 15000 })
+          const response = await this.$axios.post('/api/register', userData, { timeout: 15000 })
+          return response.status === 202 && response.data?.status === 'pending' ? response.data : false
+        } catch (error) {
+          if (attempt === 0 && error?.response?.status === 419) continue
+          throw error
+        }
+      }
     } catch (error) {
-      commit('setError', error?.response?.data?.error || 'Registration failed')
-      commit(
-        'setErrorMessage',
-        error?.response?.data?.message || 'An error occurred'
-      )
+      commit('setRegistrationErrors', error?.response?.data?.errors || {})
+      commit('setErrorMessage', error?.response?.data?.message || 'Registration failed')
       return false
     }
   },
@@ -106,6 +115,9 @@ export const actions = {
 }
 
 export const mutations = {
+  setRegistrationErrors(state, errors) {
+    state.registrationErrors = errors || {}
+  },
   setError(state, error) {
     state.error = error || null
   },
