@@ -34,13 +34,13 @@
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                 <tr v-for="u in filtered" :key="u.id" class="transition hover:bg-slate-50/70 dark:hover:bg-slate-950/30">
                   <td class="px-6 py-4"><div class="flex items-center gap-3"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ initials(u.display_name || u.name) }}</div><div class="min-w-0"><p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ u.display_name || u.name }}</p><p class="mt-0.5 truncate text-[10px] text-slate-400">{{ u.email || '—' }}</p></div></div></td>
-                  <td class="px-4 py-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ roleLabel(u.role) }}</span></td>
-                  <td class="px-4 py-4"><span v-if="u.factory" class="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-blue-700 dark:bg-blue-950/35 dark:text-blue-300">{{ u.factory }}</span><span v-else class="text-xs text-slate-400">—</span></td>
+                  <td class="px-4 py-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ positionLabels(u) }}</span></td>
+                  <td class="px-4 py-4"><span v-if="workshopLabels(u)" class="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-blue-700 dark:bg-blue-950/35 dark:text-blue-300">{{ workshopLabels(u) }}</span><span v-else class="text-xs text-slate-400">—</span></td>
                   <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400">{{ u?.worker?.phone || '—' }}</td>
                   <td class="max-w-xs px-4 py-4 text-xs text-slate-500 dark:text-slate-400"><span class="block truncate">{{ u?.worker?.address || '—' }}</span></td>
                   <td v-if="$canAny(['workers.update','workers.delete'])" class="px-6 py-4 text-right whitespace-nowrap">
-                    <button v-if="canAssignCompanies && !u.is_platform_admin" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="accessTarget = u">{{ companyAccessCopy.button }}</button><button v-if="$can('workers.update')" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" @click="openEdit(u)">Խմբագրել</button>
-                    <button v-if="$can('workers.delete')" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-300 dark:hover:bg-rose-950/20" @click="askDelete(u)">Ջնջել</button>
+                    <button v-if="canAssignCompanies && canEditWorker(u)" type="button" class="app-button-secondary mr-2" @click="assignmentTarget = u">{{ staffCopy.edit }}</button><button v-if="canAssignCompanies && !u.is_platform_admin" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="accessTarget = u">{{ companyAccessCopy.button }}</button><button v-if="$can('workers.update') && canEditWorker(u)" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" @click="openEdit(u)">Խմբագրել</button>
+                    <button v-if="$can('workers.delete') && canEditWorker(u)" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-300 dark:hover:bg-rose-950/20" @click="askDelete(u)">Ջնջել</button>
                   </td>
                 </tr>
               </tbody>
@@ -49,9 +49,9 @@
 
           <div class="space-y-3 p-4 md:hidden">
             <article v-for="u in filtered" :key="u.id" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
-              <div class="flex items-start gap-3"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ initials(u.display_name || u.name) }}</div><div class="min-w-0 flex-1"><p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ u.display_name || u.name }}</p><p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ u.email || '—' }}</p></div><span class="rounded-full bg-slate-100 px-2 py-1 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ roleLabel(u.role) }}</span></div>
-              <div class="mt-3 grid grid-cols-2 gap-2 text-[10px] text-slate-400"><span>{{ u.factory || 'Առանց արտադրամասի' }}</span><span class="text-right">{{ u?.worker?.phone || '—' }}</span></div>
-              <div v-if="$canAny(['workers.update','workers.delete'])" class="mt-4 flex justify-end gap-2"><button v-if="canAssignCompanies && !u.is_platform_admin" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="accessTarget = u">{{ companyAccessCopy.button }}</button><button v-if="$can('workers.update')" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="openEdit(u)">Խմբագրել</button><button v-if="$can('workers.delete')" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 dark:border-rose-900/60 dark:text-rose-300" @click="askDelete(u)">Ջնջել</button></div>
+              <div class="flex min-w-0 flex-wrap items-start gap-3"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ initials(u.display_name || u.name) }}</div><div class="min-w-0 flex-1"><p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ u.display_name || u.name }}</p><p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ u.email || '—' }}</p></div><span class="max-w-full break-words rounded-full bg-slate-100 px-2 py-1 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ positionLabels(u) }}</span></div>
+              <div class="mt-3 grid grid-cols-2 gap-2 text-[10px] text-slate-400"><span>{{ workshopLabels(u) || 'Առանց արտադրամասի' }}</span><span class="text-right">{{ u?.worker?.phone || '—' }}</span></div>
+              <div v-if="$canAny(['workers.update','workers.delete'])" class="mt-4 flex flex-wrap justify-end gap-2"><button v-if="canAssignCompanies && canEditWorker(u)" type="button" class="app-button-secondary mr-2" @click="assignmentTarget = u">{{ staffCopy.edit }}</button><button v-if="canAssignCompanies && !u.is_platform_admin" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="accessTarget = u">{{ companyAccessCopy.button }}</button><button v-if="$can('workers.update') && canEditWorker(u)" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="openEdit(u)">Խմբագրել</button><button v-if="$can('workers.delete') && canEditWorker(u)" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 dark:border-rose-900/60 dark:text-rose-300" @click="askDelete(u)">Ջնջել</button></div>
             </article>
           </div>
         </template>
@@ -69,6 +69,7 @@
 
     <WorkerFormModal v-if="$canAny(['workers.create','workers.update'])" :visible="isFormOpen" :worker="selectedWorker" :roles="formRoles" :factories="formFactories" :companies="formCompanies" :can-manage-companies="canManageCompanies" :submitting="submitting" @close="closeForm" @submit="handleSubmit" />
 
+    <StaffAssignmentsModal v-if="assignmentTarget" :user="assignmentTarget" @close="assignmentTarget = null" @saved="loadWorkers" />
     <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" @saved="loadWorkers" />
 
     <div v-if="confirmDelete && $can('workers.delete')" class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm" @click.self="confirmDelete = null">
@@ -81,27 +82,30 @@
 import WorkerFormModal from '~/components/users/WorkerFormModal.vue'
 import CompanyMembershipModal from '~/components/users/CompanyMembershipModal.vue'
 import { membershipCopy } from '~/utils/membership-copy'
+import StaffAssignmentsModal from '~/components/users/StaffAssignmentsModal.vue'
+import { staffAccessCopy } from '~/utils/staff-assignments'
 
 const ROLE_LABELS = { manager: 'Մենեջեր', bend: 'Կռում', laser: 'Լազերային կտրում', powder_catting: 'Փոշեներկում', engineer: 'Ինժիներ', admin: 'Ադմինիստրատոր' }
 
 export default {
-  components: { WorkerFormModal, CompanyMembershipModal },
+  components: { WorkerFormModal, CompanyMembershipModal, StaffAssignmentsModal },
   layout: 'manager',
   middleware: ['role-guard'],
   meta: { role: 'manager' },
   data() {
-    return { loading: false, workers: [], formRoles: [], formFactories: [], formCompanies: [], canManageCompanies: false, formOptionsLoaded: false, searchQuery: '', isFormOpen: false, selectedWorker: null, submitting: false, confirmDelete: null, accessTarget: null }
+    return { loading: false, workers: [], formRoles: [], formFactories: [], formCompanies: [], canManageCompanies: false, formOptionsLoaded: false, searchQuery: '', isFormOpen: false, selectedWorker: null, submitting: false, confirmDelete: null, accessTarget: null, assignmentTarget: null }
   },
   computed: {
+    staffCopy() { return staffAccessCopy(this.$i18n?.locale) },
     companyAccessCopy() { return membershipCopy(this.$i18n?.locale) },
     canAssignCompanies() { return ['admin', 'manager'].includes(this.$auth?.user?.role?.name) },
     filtered() {
       const q = (this.searchQuery || '').toLowerCase().trim()
       if (!q) return this.workers
-      return this.workers.filter((u) => [u.name, u.email, u?.worker?.phone, u.factory].some((value) => String(value || '').toLowerCase().includes(q)))
+      return this.workers.filter((u) => [u.name, u.email, u?.worker?.phone, this.workshopLabels(u), this.positionLabels(u)].some((value) => String(value || '').toLowerCase().includes(q)))
     },
-    factoryAssignedCount() { return this.workers.filter((u) => Boolean(u.factory)).length },
-    rolesInUse() { return new Set(this.workers.map((u) => u.role).filter(Boolean)).size },
+    factoryAssignedCount() { return this.workers.filter((u) => Boolean(this.workshopLabels(u))).length },
+    rolesInUse() { return new Set(this.workers.flatMap(u => u.assignments?.length ? u.assignments.map(row => row.role?.name) : [u.role]).filter(Boolean)).size },
   },
   watch: {
     '$route.query.create'() { this.openFromQuery() },
@@ -112,8 +116,11 @@ export default {
     await this.openFromQuery()
   },
   methods: {
+    canEditWorker(user) { return !user.is_platform_admin && (this.$auth.user?.is_platform_admin || !(user.assignments || []).some(row => row.role?.name === 'admin') && user.role !== 'admin') },
+    positionLabels(user) { return user.assignments?.length ? [...new Set(user.assignments.map(row => this.roleLabel(row.role?.name)))].join(', ') : this.roleLabel(user.role) },
+    workshopLabels(user) { return user.assignments?.length ? [...new Set(user.assignments.map(row => row.factory?.name).filter(Boolean))].join(', ') : user.factory },
     initials(name) { return String(name || '?').split(/\s+/).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join('') },
-    roleLabel(role) { return ROLE_LABELS[role] || role || '—' },
+    roleLabel(role) { return this.companyAccessCopy.roles[role] || ROLE_LABELS[role] || role || '—' },
     async loadWorkers() {
       if (!this.$can('workers.view')) return
       this.loading = true
@@ -155,7 +162,7 @@ export default {
       document.documentElement.classList.add('overflow-hidden')
     },
     async openEdit(u) {
-      if (!this.$can('workers.update') || !(await this.ensureFormOptions())) return
+      if (!this.$can('workers.update') || !this.canEditWorker(u) || !(await this.ensureFormOptions())) return
       this.selectedWorker = u
       this.isFormOpen = true
       document.documentElement.classList.add('overflow-hidden')
@@ -176,6 +183,7 @@ export default {
       try {
         if (isEdit) await this.$axios.put(`/api/workers/${id}`, payload)
         else await this.$axios.post('/api/workers', payload)
+        if (isEdit && String(id) === String(this.$auth.user?.id)) { await this.$workspace.refreshAssignments(); return }
         if (this.$can('workers.view')) await this.loadWorkers()
         this.$notify?.({ type: 'success', text: isEdit ? 'Աշխատակիցը թարմացվեց' : 'Աշխատակիցը ստեղծվեց' })
         this.closeForm()

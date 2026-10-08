@@ -3,9 +3,9 @@
     <div class="mx-auto max-w-[1500px] space-y-6">
       <section class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատակիցների կառավարում</h1>
-            <div class="group relative inline-flex">
+          <div class="flex min-w-0 items-start gap-2">
+            <h1 class="min-w-0 flex-1 break-words text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատակիցների կառավարում</h1>
+            <div class="group relative inline-flex shrink-0">
               <button
                 type="button"
                 class="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-xs font-black text-slate-500 transition hover:border-slate-300 hover:text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:text-white"
@@ -13,11 +13,12 @@
               >
                 i
               </button>
-              <div class="pointer-events-none absolute left-0 top-9 z-30 w-[min(420px,80vw)] -translate-y-1 rounded-2xl bg-slate-950 px-4 py-3 text-xs font-medium leading-5 text-white opacity-0 shadow-2xl transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:bg-white dark:text-slate-950">
+              <div class="pointer-events-none absolute right-0 top-9 sm:left-0 sm:right-auto z-30 w-[min(420px,80vw)] -translate-y-1 rounded-2xl bg-slate-950 px-4 py-3 text-xs font-medium leading-5 text-white opacity-0 shadow-2xl transition group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 dark:bg-white dark:text-slate-950">
                 Ադմինիստրատոր և Մենեջեր հաստիքները ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Հաճախորդները այստեղ չեն ցուցադրվում։
               </div>
             </div>
           </div>
+          <nuxt-link :to="localePath(($auth.user?.role?.name === 'admin' ? '/admin' : '/manager') + '/registration-requests')" class="mt-2 inline-block text-xs font-semibold underline">{{ staffCopy.requests }} →</nuxt-link>
         </div>
         <button
           type="button"
@@ -90,7 +91,8 @@
                 </td>
                 <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400">{{ user.email }}</td>
                 <td class="px-6 py-4 text-right">
-                  <span v-if="isFullAccessRole(user.roleName)" class="inline-flex rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
+                  <div class="mb-2 flex flex-wrap justify-end gap-2"><button v-if="canEditAssignments(user)" type="button" class="app-button-secondary" @click="assignmentTarget = user">{{ staffCopy.edit }}</button><button v-if="!user.is_platform_admin" type="button" class="app-button-secondary" @click="accessTarget = user">{{ staffCopy.companies }}</button></div>
+                  <span v-if="user.fullAccess" class="inline-flex rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
                   <button
                     v-else
                     type="button"
@@ -112,15 +114,16 @@
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
                   <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ user.name }}</p>
-                  <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ user.roleLabel || '—' }}</span>
+                  <span class="max-w-full break-words rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ user.roleLabel || '—' }}</span>
                 </div>
                 <p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ user.email }}</p>
                 <p v-if="user.phone" class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ user.phone }}</p>
                 <p class="mt-2 text-[10px] font-semibold text-slate-400">{{ user.factoryName || 'Արտադրամաս նշված չէ' }}</p>
               </div>
             </div>
-            <div class="mt-4 flex justify-end">
-              <span v-if="isFullAccessRole(user.roleName)" class="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
+            <div class="mt-4 flex flex-wrap justify-end gap-2">
+              <button v-if="canEditAssignments(user)" type="button" class="app-button-secondary" @click="assignmentTarget = user">{{ staffCopy.edit }}</button><button v-if="!user.is_platform_admin" type="button" class="app-button-secondary" @click="accessTarget = user">{{ staffCopy.companies }}</button>
+              <span v-if="user.fullAccess" class="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
               <button v-else type="button" class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white dark:bg-white dark:text-slate-950" @click="openPermissionModal(user)">Խմբագրել ֆունկցիաները</button>
             </div>
           </article>
@@ -134,6 +137,8 @@
       </section>
     </div>
 
+    <StaffAssignmentsModal v-if="assignmentTarget" :user="assignmentTarget" @close="assignmentTarget = null" @saved="refreshUsers" />
+    <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" @saved="refreshUsers" />
     <UserPermissionsModal
       :show="showPermissionModal"
       :user="selectedUser"
@@ -156,9 +161,13 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 import UserPermissionsModal from '@/components/users/UserPermissionsModal.vue'
+import StaffAssignmentsModal from '~/components/users/StaffAssignmentsModal.vue'
+import CompanyMembershipModal from '~/components/users/CompanyMembershipModal.vue'
+import { staffAccessCopy } from '~/utils/staff-assignments'
+import { membershipCopy } from '~/utils/membership-copy'
 
 export default {
-  components: { UserPermissionsModal },
+  components: { UserPermissionsModal, StaffAssignmentsModal, CompanyMembershipModal },
   layout: 'admin',
   middleware: ['role-guard'],
   meta: { role: 'admin' },
@@ -171,6 +180,7 @@ export default {
   data() {
     return {
       search: '',
+      assignmentTarget: null, accessTarget: null,
       roleFilter: '',
       showPermissionModal: false,
       selectedUser: null,
@@ -190,23 +200,20 @@ export default {
         (role) => !['authenticatedUser', 'guestUser'].includes(role.name)
       )
     },
+    staffCopy() { return staffAccessCopy(this.$i18n?.locale) },
     normalizedUsers() {
-      return (this.users || [])
-        .filter(
-          (u) =>
-            !u.client &&
-            u.role &&
-            !['authenticatedUser', 'guestUser'].includes(u.role.name)
-        )
-        .map((u) => ({
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          phone: u.phone || u.worker?.phone || u.client?.phone || '',
-          roleName: u.role.name,
-          roleLabel: u.role.value || u.role.name,
-          factoryName: u.factory ? u.factory.name || u.factory.value : null,
-        }))
+      const names = membershipCopy(this.$i18n?.locale).roles
+      return (this.users || []).filter(u => u.role && !['authenticatedUser', 'guestUser'].includes(u.role.name)).map(u => {
+        const assignments = u.assignments?.length ? u.assignments : [{ role: u.role, factory: u.factory }]
+        const roleNames = [...new Set(assignments.map(row => row.role?.name).filter(Boolean))]
+        return {
+          id: u.id, name: u.name, email: u.email, phone: u.phone || u.worker?.phone || '', is_platform_admin: u.is_platform_admin,
+          assignments, roleNames, roleName: u.role.name,
+          roleLabel: roleNames.map(role => names[role] || role).join(', '),
+          factoryName: [...new Set(assignments.map(row => row.factory?.name).filter(Boolean))].join(', '),
+          fullAccess: roleNames.some(role => this.isFullAccessRole(role)),
+        }
+      })
     },
     filteredUsers() {
       const term = this.search.toLowerCase().trim()
@@ -216,15 +223,15 @@ export default {
           (user.name && user.name.toLowerCase().includes(term)) ||
           (user.email && user.email.toLowerCase().includes(term)) ||
           (user.phone && user.phone.toLowerCase().includes(term))
-        const matchRole = !this.roleFilter || user.roleName === this.roleFilter
+        const matchRole = !this.roleFilter || user.roleNames.includes(this.roleFilter)
         return matchSearch && matchRole
       })
     },
     stats() {
-      const fullAccess = this.normalizedUsers.filter((u) => this.isFullAccessRole(u.roleName)).length
+      const fullAccess = this.normalizedUsers.filter((u) => u.fullAccess).length
       const assignedFactories = this.normalizedUsers.filter((u) => Boolean(u.factoryName)).length
       const rolesInUse = new Set(
-        this.normalizedUsers.map((u) => u.roleName).filter(Boolean)
+        this.normalizedUsers.flatMap((u) => u.roleNames).filter(Boolean)
       ).size
       return [
         { label: 'Աշխատակիցներ', value: this.normalizedUsers.length, hint: 'աշխատակիցների հաշիվները' },
@@ -300,11 +307,12 @@ export default {
         .map((part) => part.charAt(0).toUpperCase())
         .join('')
     },
+    canEditAssignments(user) { return !user.is_platform_admin && (this.$auth.user?.is_platform_admin || !user.roleNames.includes('admin')) },
     isFullAccessRole(roleName) {
       return ['admin', 'manager'].includes(roleName)
     },
     async openPermissionModal(user) {
-      if (!user || this.isFullAccessRole(user.roleName)) return
+      if (!user || user.fullAccess) return
       this.selectedUser = user
       this.showPermissionModal = true
       await this.loadSelectedPermissions()

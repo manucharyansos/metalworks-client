@@ -3,6 +3,7 @@
     <h1 class="text-2xl font-black tracking-tight sm:text-3xl">{{ copy.requests }}</h1>
     <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{{ copy.reviewIntro }}</p>
     <p class="mt-2 break-words text-sm font-bold">{{ $auth.user?.company?.name }}</p>
+    <nuxt-link :to="localePath(($auth.user?.role?.name === 'admin' ? '/admin' : '/manager') + '/users')" class="mt-3 inline-block text-sm font-semibold underline">{{ staffCopy.permissions }} →</nuxt-link>
     <p v-if="notice" class="mt-4 rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800" role="status">{{ notice }}</p>
     <div class="mt-6 flex flex-wrap items-center gap-2" role="group" :aria-label="copy.requests">
       <button v-for="tab in statuses" :key="tab" type="button" class="rounded-xl border px-3 py-2 text-sm font-semibold" :class="status === tab ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="status === tab" @click="changeStatus(tab)">{{ copy[tab] }} <span class="ml-1 opacity-70">{{ counts[tab] }}</span></button>
@@ -24,13 +25,14 @@
         <p v-else class="mt-4 text-sm font-semibold" :class="request.status === 'approved' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'">{{ copy[request.status] }}</p>
         <div v-if="request.status === 'approved'" class="mt-3 space-y-3">
           <p class="text-xs leading-5 text-slate-500">{{ copy.notification[request.notification_status || 'pending'] }}</p>
-          <div class="flex flex-wrap gap-2"><button v-if="request.notification_status !== 'sent'" type="button" class="app-button-secondary" :disabled="Boolean(notifyBusy)" @click="sendNotification(request)">{{ notifyBusy === request.id ? copy.sending : copy.mailRetry }}</button><button type="button" class="app-button-secondary" @click="accessTarget = { id: request.user_id, name: fullName(request), email: request.email }">{{ companyAccessCopy.button }}</button></div>
+          <div class="flex flex-wrap gap-2"><button v-if="request.notification_status !== 'sent'" type="button" class="app-button-secondary" :disabled="Boolean(notifyBusy)" @click="sendNotification(request)">{{ notifyBusy === request.id ? copy.sending : copy.mailRetry }}</button><button v-if="request.type === 'employee'" type="button" class="app-button-secondary" @click="assignmentTarget = { id: request.user_id, name: fullName(request), email: request.email }">{{ staffCopy.edit }}</button><button type="button" class="app-button-secondary" @click="accessTarget = { id: request.user_id, name: fullName(request), email: request.email }">{{ companyAccessCopy.button }}</button></div>
         </div>
       </article>
     </div>
     <div v-if="!loading && !listError && lastPage > 1" class="mt-6 flex flex-wrap items-center gap-3 text-sm"><button type="button" class="app-button-secondary" :disabled="page <= 1" @click="page--; loadRequests()">{{ copy.previous }}</button><span>{{ copy.page }} {{ page }} / {{ lastPage }}</span><button type="button" class="app-button-secondary" :disabled="page >= lastPage" @click="page++; loadRequests()">{{ copy.next }}</button></div>
 
     <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" />
+    <StaffAssignmentsModal v-if="assignmentTarget" :user="assignmentTarget" @close="assignmentTarget = null" />
     <div v-if="selected" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4" @click.self="closeReview" @keydown.esc="closeReview">
       <section ref="dialog" role="dialog" aria-modal="true" aria-labelledby="request-review-title" tabindex="-1" class="mx-auto my-6 w-full max-w-lg rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:my-12 sm:p-8" @keydown.tab="trapFocus">
         <h2 id="request-review-title" class="text-xl font-black">{{ action === 'approve' ? copy.approve : copy.reject }}</h2>
@@ -42,8 +44,7 @@
             <p v-if="optionsLoading" role="status" class="text-sm text-slate-500">{{ copy.loading }}</p>
             <div v-else-if="optionsError" role="alert" class="text-sm text-rose-600">{{ optionsError }} <button type="button" class="font-bold underline" @click="loadOptions">{{ copy.retry }}</button></div>
             <template v-else>
-              <div><label for="request-role" class="field-label">{{ copy.position }}</label><select id="request-role" v-model="roleId" class="field-control" :disabled="busy" :aria-invalid="Boolean(errors.role_id)"><option value="">{{ copy.selectRole }}</option><option v-for="role in roles" :key="role.id" :value="role.id">{{ copy.roles[role.name] || role.value || role.name }}</option></select><p v-if="errors.role_id" class="field-error">{{ errors.role_id }}</p></div>
-              <div v-if="needsWorkshop"><label for="request-factory" class="field-label">{{ copy.workshop }}</label><select id="request-factory" v-model="factoryId" class="field-control" :disabled="busy" :aria-invalid="Boolean(errors.factory_id)"><option value="">{{ copy.selectFactory }}</option><option v-for="factory in factories" :key="factory.id" :value="factory.id">{{ factory.name }}</option></select><p v-if="errors.factory_id" class="field-error">{{ errors.factory_id }}</p></div>
+              <StaffAssignmentsEditor v-model="assignments" :roles="roles" :factories="factories" :role-names="copy.roles" :disabled="busy" id-prefix="request" />
               <p class="text-xs leading-5 text-slate-500">{{ copy.permissionsHint }}</p>
             </template>
           </template>
@@ -60,19 +61,21 @@
 import { registrationCopy } from '~/utils/registration-copy'
 import { membershipCopy } from '~/utils/membership-copy'
 import CompanyMembershipModal from '~/components/users/CompanyMembershipModal.vue'
+import StaffAssignmentsEditor from '~/components/users/StaffAssignmentsEditor.vue'
+import StaffAssignmentsModal from '~/components/users/StaffAssignmentsModal.vue'
+import { assignmentRows, assignmentError, assignmentCopy, staffAccessCopy } from '~/utils/staff-assignments'
 
 export default {
   name: 'RegistrationRequests',
-  components: { CompanyMembershipModal },
+  components: { CompanyMembershipModal, StaffAssignmentsEditor, StaffAssignmentsModal },
   data() {
-    return { statuses: ['pending', 'approved', 'rejected'], status: 'pending', type: '', page: 1, lastPage: 1, requests: [], counts: { pending: 0, approved: 0, rejected: 0 }, loading: true, listError: '', listSequence: 0, roles: [], factories: [], optionsLoading: false, optionsError: '', selected: null, action: '', roleId: '', factoryId: '', errors: {}, reviewError: '', busy: false, returnFocus: null, previousOverflow: '', notice: '', notifyBusy: null, accessTarget: null }
+    return { statuses: ['pending', 'approved', 'rejected'], status: 'pending', type: '', page: 1, lastPage: 1, requests: [], counts: { pending: 0, approved: 0, rejected: 0 }, loading: true, listError: '', listSequence: 0, roles: [], factories: [], optionsLoading: false, optionsError: '', selected: null, action: '', assignments: assignmentRows(), errors: {}, reviewError: '', busy: false, returnFocus: null, previousOverflow: '', notice: '', notifyBusy: null, accessTarget: null, assignmentTarget: null }
   },
   computed: {
     copy() { return registrationCopy(this.$i18n?.locale) },
     companyAccessCopy() { return membershipCopy(this.$i18n?.locale) },
-    needsWorkshop() { return ['laser', 'bend', 'powder_catting'].includes(this.roles.find(role => String(role.id) === String(this.roleId))?.name) },
+    staffCopy() { return staffAccessCopy(this.$i18n?.locale) },
   },
-  watch: { roleId() { this.factoryId = ''; this.errors = {} }, factoryId() { this.$delete(this.errors, 'factory_id') } },
   mounted() { this.loadRequests() },
   beforeDestroy() { if (this.selected) document.body.style.overflow = this.previousOverflow },
   methods: {
@@ -107,7 +110,7 @@ export default {
     },
     openReview(request, action) {
       this.returnFocus = document.activeElement; this.previousOverflow = document.body.style.overflow
-      this.selected = request; this.action = action; this.roleId = ''; this.factoryId = ''; this.errors = {}; this.reviewError = ''
+      this.selected = request; this.action = action; this.assignments = assignmentRows(); this.errors = {}; this.reviewError = ''
       document.body.style.overflow = 'hidden'
       this.$nextTick(() => this.$refs.dialog?.focus())
       if (action === 'approve' && request.type === 'employee') this.loadOptions()
@@ -129,20 +132,19 @@ export default {
       const employee = this.action === 'approve' && this.selected.type === 'employee'
       if (employee) {
         if (this.optionsLoading || this.optionsError) return
-        if (!this.roles.some(role => String(role.id) === String(this.roleId))) this.errors.role_id = this.copy.selectRole
-        if (this.needsWorkshop && !this.factories.some(factory => String(factory.id) === String(this.factoryId))) this.errors.factory_id = this.copy.selectFactory
-        if (Object.keys(this.errors).length) return
+        this.reviewError = assignmentError(this.assignments, this.roles, this.factories, assignmentCopy(this.$i18n?.locale)) || ''
+        if (this.reviewError) return
       }
       this.busy = true
       let completed = false
       try {
-        const response = await this.$axios.$post(`/api/registration-requests/${this.selected.id}/${this.action}`, employee ? { role_id: Number(this.roleId), factory_id: this.needsWorkshop ? Number(this.factoryId) : null } : {}, { timeout: 15000 })
+        const response = await this.$axios.$post(`/api/registration-requests/${this.selected.id}/${this.action}`, employee ? { assignments: assignmentRows(this.assignments) } : {}, { timeout: 15000 })
         if (this.action === 'approve') this.notice = `${this.copy.approvalSaved} ${this.copy.notification[response.notification_status || 'pending']}`
         completed = true
       } catch (error) {
         const data = error.response?.data
         this.errors = Object.fromEntries(Object.entries(data?.errors || {}).map(([key, values]) => [key, Array.isArray(values) ? values[0] : values]))
-        this.reviewError = this.errors.email || data?.message || this.copy.reviewFailed
+        this.reviewError = Object.values(this.errors)[0] || data?.message || this.copy.reviewFailed
         if (error.response?.status === 409) this.loadRequests()
       } finally { this.busy = false }
       if (completed) { this.closeReview(); this.loadRequests() }
