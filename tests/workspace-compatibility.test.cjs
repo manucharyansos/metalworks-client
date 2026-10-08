@@ -10,6 +10,8 @@ const routeUrl = moduleUrl(read('utils/workspace-route.js'))
 const brandsUrl = moduleUrl(read('config/workspace-brands.js'))
 const companyCopyUrl = moduleUrl(read('utils/company-copy.js'))
 const brandLogoUrl = moduleUrl(read('utils/brand-logo.js'))
+const staffAssignmentsUrl = moduleUrl(read('utils/staff-assignments.js'))
+const membershipUrl = moduleUrl(read('utils/membership-copy.js'))
 async function component(file, render = false) {
   const parsed = compiler.parseComponent(read(file))
   const source = parsed.script.content.replace(/import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g, (_, names, specifier) => {
@@ -17,6 +19,8 @@ async function component(file, render = false) {
     if (specifier === '~/config/workspace-brands') return `import ${names} from '${brandsUrl}'`
     if (specifier === '~/utils/company-copy') return `import ${names} from '${companyCopyUrl}'`
     if (specifier === '~/utils/brand-logo') return `import ${names} from '${brandLogoUrl}'`
+    if (specifier === '~/utils/staff-assignments') return `import ${names} from '${staffAssignmentsUrl}'`
+    if (specifier === '~/utils/membership-copy') return `import ${names} from '${membershipUrl}'`
     if (specifier === '~/static/logo.png') return `const ${names} = '/work/_nuxt/img/metalworks-test.png'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
     return `const ${names} = {}`

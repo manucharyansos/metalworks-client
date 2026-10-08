@@ -48,7 +48,8 @@ test('membership form requires the destination workshop and sends only reviewed 
   let source = read('components/users/CompanyMembershipModal.vue').match(/<script>([\s\S]*?)<\/script>/)[1]
   source = source.replace(/^import .*$/gm, '')
   const helpers = await load('utils/membership-copy.js')
-  const component = (await import(sourceURL(`const membershipCopy = () => ({}), changedCompanyAccess = () => [];\n${source}`))).default
+  const staffHelpers = sourceURL(read('utils/staff-assignments.js'))
+  const component = (await import(sourceURL(`import { assignmentRows, assignmentError, assignmentCopy } from '${staffHelpers}'; const StaffAssignmentsEditor = {}, membershipCopy = () => ({}), changedCompanyAccess = () => [];\n${source}`))).default
   const calls = [], events = []
   const old = [{ company_id: 1, enabled: true, role_id: 3, factory_id: null }, { company_id: 2, enabled: false, role_id: null, factory_id: null }]
   const vm = { ...component.data(), userId: 12, copy: helpers.membershipCopy('ru'), roles: [{ id: 7, name: 'laser' }], companies: [{ id: 1, read_only: true }, { id: 2, factories: [{ id: 9 }] }], originals: old, rows: [old[0], { company_id: 2, enabled: true, role_id: 7, factory_id: null }], $set: (object, key, value) => { object[key] = value }, $emit: (...event) => events.push(event), $axios: { $put: async (...call) => calls.push(call) } }

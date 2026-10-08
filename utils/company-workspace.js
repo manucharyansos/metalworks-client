@@ -8,8 +8,15 @@ export function readCompanySelection(storage, userId, companies) {
   } catch (_) { return null }
 }
 
-export function saveCompanySelection(storage, userId, companyId) {
-  try { storage.setItem(STORAGE_KEY, JSON.stringify({ userId, companyId })) } catch (_) {}
+export function readAssignmentSelection(storage, userId, companyId) {
+  try {
+    const saved = JSON.parse(storage.getItem(STORAGE_KEY) || 'null')
+    return String(saved?.userId) === String(userId) && String(saved?.companyId) === String(companyId) ? saved?.assignmentId || null : null
+  } catch (_) { return null }
+}
+
+export function saveCompanySelection(storage, userId, companyId, assignmentId = null) {
+  try { storage.setItem(STORAGE_KEY, JSON.stringify({ userId, companyId, assignmentId: assignmentId || null })) } catch (_) {}
 }
 
 export function clearCompanySelection(storage) {

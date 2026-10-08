@@ -11,10 +11,7 @@
         <fieldset v-for="company in companies" :key="company.id" class="min-w-0 rounded-2xl border border-slate-200 p-4 dark:border-slate-700" :disabled="busy || company.read_only" :data-company-id="company.id">
           <label class="flex items-center gap-3 break-words text-sm font-bold"><input type="checkbox" :checked="row(company.id).enabled" :aria-label="company.name" @change="change(company.id, 'enabled', $event.target.checked)" />{{ company.name }}</label>
           <p v-if="company.read_only" class="mt-2 text-xs leading-5 text-slate-500">{{ String(company.id) === String(currentCompanyId) ? copy.current : copy.protected }}</p>
-          <div v-else-if="row(company.id).enabled" class="mt-4 grid gap-3 sm:grid-cols-2">
-            <div><label :for="'company-role-' + company.id" class="field-label">{{ copy.role }}</label><select :id="'company-role-' + company.id" :value="row(company.id).role_id || ''" class="field-control" @change="change(company.id, 'role_id', Number($event.target.value) || null)"><option value="">{{ copy.chooseRole }}</option><option v-for="role in roles" :key="role.id" :value="role.id">{{ copy.roles[role.name] || role.value || role.name }}</option></select></div>
-            <div v-if="needsWorkshop(company.id)"><label :for="'company-workshop-' + company.id" class="field-label">{{ copy.workshop }}</label><select :id="'company-workshop-' + company.id" :value="row(company.id).factory_id || ''" class="field-control" @change="change(company.id, 'factory_id', Number($event.target.value) || null)"><option value="">{{ copy.chooseWorkshop }}</option><option v-for="factory in company.factories" :key="factory.id" :value="factory.id">{{ factory.name }}</option></select></div>
-          </div>
+          <StaffAssignmentsEditor v-else-if="row(company.id).enabled" class="mt-4" :value="assignmentRows(row(company.id).assignments, row(company.id).role_id, row(company.id).factory_id)" :roles="roles" :factories="company.factories" :role-names="copy.roles" :id-prefix="'company-' + company.id" @input="setAssignments(company.id, $event)" />
           <p v-if="errors[company.id]" class="mt-2 text-xs text-rose-600" role="alert">{{ errors[company.id] }}</p>
         </fieldset>
         <p v-if="saveError" class="text-sm text-rose-600" role="alert">{{ saveError }}</p>
@@ -27,8 +24,11 @@
 
 <script>
 import { membershipCopy, changedCompanyAccess } from '~/utils/membership-copy'
+import StaffAssignmentsEditor from '~/components/users/StaffAssignmentsEditor.vue'
+import { assignmentRows, assignmentError, assignmentCopy } from '~/utils/staff-assignments'
 
 export default {
+  components: { StaffAssignmentsEditor },
   props: { user: { type: Object, required: true } },
   data() { return { companies: [], roles: [], rows: [], originals: [], currentCompanyId: null, loading: true, loadError: '', saveError: '', errors: {}, busy: false, sequence: 0, returnFocus: null, previousOverflow: '' } },
   computed: {
@@ -42,6 +42,8 @@ export default {
   },
   beforeDestroy() { this.sequence++; document.body.style.overflow = this.previousOverflow; this.returnFocus?.focus() },
   methods: {
+    assignmentRows,
+    setAssignments(id, rows) { const row = this.row(id); this.$set(row, 'assignments', rows); this.change(id, 'role_id', rows[0]?.role_id || null); this.change(id, 'factory_id', rows[0]?.factory_id || null) },
     row(id) { return this.rows.find(row => String(row.company_id) === String(id)) || {} },
     needsWorkshop(id) { return ['laser', 'bend', 'powder_catting'].includes(this.roles.find(role => String(role.id) === String(this.row(id).role_id))?.name) },
     change(id, field, value) { const row = this.row(id); this.$set(row, field, value); if (field === 'role_id') row.factory_id = null; this.$delete(this.errors, id); this.saveError = '' },
@@ -67,6 +69,11 @@ export default {
       this.errors = {}; this.saveError = ''
       for (const row of this.changes) {
         if (!row.enabled) continue
+        if (row.assignments) {
+          const issue = assignmentError(row.assignments, this.roles, this.companies.find(company => String(company.id) === String(row.company_id))?.factories || [], assignmentCopy(this.$i18n?.locale))
+          if (issue) this.$set(this.errors, row.company_id, issue)
+          continue
+        }
         if (!this.roles.some(role => String(role.id) === String(row.role_id))) this.$set(this.errors, row.company_id, this.copy.chooseRole)
         else if (this.needsWorkshop(row.company_id) && !this.companies.find(company => String(company.id) === String(row.company_id))?.factories?.some(factory => String(factory.id) === String(row.factory_id))) this.$set(this.errors, row.company_id, this.copy.chooseWorkshop)
       }

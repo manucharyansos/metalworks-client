@@ -31,36 +31,6 @@
             </div>
 
             <div>
-              <label class="mb-1 block text-sm">{{ t.position }}</label>
-              <select v-model="form.role_id" :disabled="worker && worker.is_platform_admin" class="field">
-                <option disabled value="">{{ t.choosePosition }}</option>
-                <option v-for="r in allowedRoles" :key="r.id" :value="r.id">
-                  {{ roleLabel(r) }}
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <div class="mb-1 flex items-center justify-between gap-2">
-                <label class="block text-sm">{{ t.factory }}</label>
-                <span v-if="requiresFactory" class="text-[10px] font-bold text-rose-500">{{ t.required }}</span>
-              </div>
-              <select
-                v-model="form.factory_id"
-                class="field"
-                :disabled="!requiresFactory"
-                :class="!requiresFactory ? 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800' : ''"
-              >
-                <option :value="null">{{ requiresFactory ? t.chooseFactory : t.factoryNotNeeded }}</option>
-                <option v-for="f in factories" :key="f.id" :value="f.id">
-                  {{ f.name }}
-                </option>
-              </select>
-              <p v-if="requiresFactory && !factories.length" class="mt-1 text-xs text-rose-500">{{ t.noFactories }}</p>
-              <p v-else class="mt-1 text-xs text-slate-400">{{ requiresFactory ? t.factoryHint : t.factoryDisabledHint }}</p>
-            </div>
-
-            <div>
               <label class="mb-1 block text-sm">{{ t.phone }}</label>
               <input v-model.trim="form.phone" type="text" class="field" />
             </div>
@@ -76,6 +46,7 @@
             </div>
           </div>
 
+          <StaffAssignmentsEditor :value="assignments" :roles="allowedRoles" :factories="factories" :role-names="t.roles" :disabled="submitting || Boolean(worker && worker.is_platform_admin)" @input="setAssignments" />
           <p v-if="!canEditAccount" class="text-xs text-slate-500">{{ companyText.shared }}</p>
           <CompanyAccessEditor v-if="canManageCompanies && !(worker && worker.is_platform_admin)" v-model="companyAccess" :companies="companies" :roles="allowedRoles" :current-company-id="currentCompanyId" :role-names="t.roles" :position-label="t.position" :workshop-label="t.factory" />
           <label v-if="!isEdit && canManageCompanies" class="flex items-center gap-2 text-sm">
@@ -112,6 +83,8 @@
 
 <script>
 import CompanyAccessEditor from '~/components/users/CompanyAccessEditor.vue'
+import StaffAssignmentsEditor from '~/components/users/StaffAssignmentsEditor.vue'
+import { assignmentRows, assignmentError, assignmentCopy } from '~/utils/staff-assignments'
 import { workspaceCopy } from '~/utils/company-copy'
 const ALLOWED_ROLE_NAMES = ['manager', 'bend', 'laser', 'powder_catting', 'engineer']
 const FACTORY_ROLE_NAMES = ['bend', 'laser', 'powder_catting']
@@ -130,7 +103,7 @@ const COPY = {
 
 export default {
   name: 'WorkerFormModal',
-  components: { CompanyAccessEditor },
+  components: { CompanyAccessEditor, StaffAssignmentsEditor },
   props: {
     visible: { type: Boolean, default: false },
     worker: { type: Object, default: null },
@@ -141,7 +114,7 @@ export default {
     canManageCompanies: { type: Boolean, default: false },
   },
   data() {
-    return { form: this.emptyForm(), companyAccess: [], existingAccount: false }
+    return { form: this.emptyForm(), companyAccess: [], assignments: assignmentRows(), existingAccount: false }
   },
   computed: {
     locale() {
@@ -162,6 +135,7 @@ export default {
     'form.role_id'() { if (!this.requiresFactory) this.form.factory_id = null },
   },
   methods: {
+    setAssignments(rows) { this.assignments = rows; this.form.role_id = rows[0]?.role_id || ''; this.form.factory_id = rows[0]?.factory_id || null },
     roleLabel(role) { return role.name === 'admin' ? this.companyText.admin : this.t.roles?.[role.name] || role.value || role.name },
     accessRows() {
       return this.companies.map((company) => {
@@ -177,6 +151,7 @@ export default {
       this.companyAccess = this.accessRows()
       this.existingAccount = false
       const u = this.worker
+      this.assignments = assignmentRows(u.assignments, u.role_id, u.factory_id)
       this.form = {
         name: u?.name || '',
         last_name: u?.worker?.last_name || '',
@@ -190,18 +165,17 @@ export default {
         password_confirmation: '',
       }
     },
-    reset() { this.form = this.emptyForm(); this.companyAccess = this.accessRows(); this.existingAccount = false },
+    reset() { this.form = this.emptyForm(); this.assignments = assignmentRows(); this.companyAccess = this.accessRows(); this.existingAccount = false },
     validate() {
       if (!this.form.name.trim()) return this.t.nameRequired
       if (!this.form.email.trim()) return this.t.emailRequired
-      if (!this.form.role_id || !this.selectedRole) return this.t.positionRequired
-      if (this.requiresFactory && !this.form.factory_id) return this.t.factoryRequired
+      const assignmentIssue = assignmentError(this.assignments, this.allowedRoles, this.factories, assignmentCopy(this.locale))
+      if (assignmentIssue) return assignmentIssue
       if (!this.form.phone.trim()) return this.t.phoneRequired
       for (const row of this.canManageCompanies ? this.companyAccess : []) {
         if (!row.enabled || String(row.company_id) === String(this.currentCompanyId)) continue
-        const role = this.allowedRoles.find((item) => String(item.id) === String(row.role_id))
-        if (!role) return this.t.positionRequired
-        if (FACTORY_ROLE_NAMES.includes(role.name) && !row.factory_id) return this.t.factoryRequired
+        const issue = assignmentError(assignmentRows(row.assignments, row.role_id, row.factory_id), this.allowedRoles, this.companies.find(company => String(company.id) === String(row.company_id))?.factories || [], assignmentCopy(this.locale))
+        if (issue) return issue
       }
       if (!this.isEdit && !this.existingAccount) {
         if (!this.form.password) return this.t.passwordRequired
@@ -217,14 +191,15 @@ export default {
         name: this.form.name.trim(),
         last_name: this.form.last_name || null,
         email: this.form.email.trim().toLowerCase(),
-        role_id: this.form.role_id,
-        factory_id: this.requiresFactory ? this.form.factory_id : null,
+        role_id: this.assignments[0].role_id,
+        factory_id: this.assignments[0].factory_id || null,
+        assignments: assignmentRows(this.assignments),
         phone: this.form.phone.trim(),
         second_phone: this.form.second_phone || null,
         address: this.form.address || null,
       }
       if (this.canManageCompanies && !this.worker?.is_platform_admin) {
-        payload.company_access = this.companyAccess.map((row) => String(row.company_id) === String(this.currentCompanyId) ? { ...row, role_id: payload.role_id, factory_id: payload.factory_id } : { ...row })
+        payload.company_access = this.companyAccess.map((row) => String(row.company_id) === String(this.currentCompanyId) ? { ...row, role_id: payload.role_id, factory_id: payload.factory_id, assignments: payload.assignments } : { ...row })
       }
       if (!this.isEdit && !this.existingAccount) {
         payload.password = this.form.password

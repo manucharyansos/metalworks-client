@@ -18,6 +18,8 @@ export default ({ $axios, store }, inject) => {
     const params = []
     const companyId = store?.state?.workspace?.company?.id
     if (companyId) params.push(`company_id=${encodeURIComponent(companyId)}`)
+    const assignmentId = store?.state?.workspace?.assignmentId
+    if (assignmentId) params.push(`assignment_id=${encodeURIComponent(assignmentId)}`)
     if (download) params.push('download=1')
     return params.length ? `?${params.join('&')}` : ''
   }

@@ -28,8 +28,9 @@ const copy = {
 export function membershipCopy(locale) { return copy[String(locale || 'hy').split('-')[0]] || copy.hy }
 
 export function changedCompanyAccess(rows, originals) {
+  const assignments = row => (row.assignments || [{ role_id: row.role_id, factory_id: row.factory_id }]).map(item => ({ role_id: Number(item.role_id) || null, factory_id: Number(item.factory_id) || null }))
   return rows.filter(row => {
     const before = originals.find(item => String(item.company_id) === String(row.company_id))
-    return !before || Boolean(before.enabled) !== Boolean(row.enabled) || (Number(before.role_id) || 0) !== (Number(row.role_id) || 0) || (Number(before.factory_id) || 0) !== (Number(row.factory_id) || 0)
-  }).map(row => ({ company_id: Number(row.company_id), enabled: Boolean(row.enabled), role_id: Number(row.role_id) || null, factory_id: Number(row.factory_id) || null }))
+    return !before || Boolean(before.enabled) !== Boolean(row.enabled) || (Number(before.role_id) || 0) !== (Number(row.role_id) || 0) || (Number(before.factory_id) || 0) !== (Number(row.factory_id) || 0) || JSON.stringify(assignments(before)) !== JSON.stringify(assignments(row))
+  }).map(row => ({ company_id: Number(row.company_id), enabled: Boolean(row.enabled), role_id: Number(row.role_id) || null, factory_id: Number(row.factory_id) || null, ...(row.assignments ? { assignments: assignments(row) } : {}) }))
 }

@@ -8,26 +8,16 @@
         {{ company.name }}
       </label>
       <p v-if="String(company.id) === String(currentCompanyId)" class="mt-1 pl-6 text-xs text-slate-500">{{ t.current }}</p>
-      <div v-else-if="row(company.id).enabled" class="mt-3 grid gap-3 sm:grid-cols-2">
-        <label class="text-xs">{{ positionLabel }}
-          <select :value="row(company.id).role_id" class="mt-1 w-full rounded-lg border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-900" @change="change(company.id, 'role_id', Number($event.target.value))">
-            <option value="">—</option>
-            <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name === 'admin' ? t.admin : roleNames[role.name] || role.value || role.name }}</option>
-          </select>
-        </label>
-        <label v-if="needsWorkshop(company.id)" class="text-xs">{{ workshopLabel }}
-          <select :value="row(company.id).factory_id" class="mt-1 w-full rounded-lg border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-900" @change="change(company.id, 'factory_id', Number($event.target.value) || null)">
-            <option :value="null">—</option>
-            <option v-for="factory in company.factories" :key="factory.id" :value="factory.id">{{ factory.name }}</option>
-          </select>
-        </label>
-      </div>
+      <StaffAssignmentsEditor v-else-if="row(company.id).enabled" class="mt-3" :value="assignmentRows(row(company.id).assignments, row(company.id).role_id, row(company.id).factory_id)" :roles="roles" :factories="company.factories" :role-names="roleNames" @input="setAssignments(company.id, $event)" />
     </div>
   </fieldset>
 </template>
 <script>
 import { workspaceCopy } from '~/utils/company-copy'
+import StaffAssignmentsEditor from '~/components/users/StaffAssignmentsEditor.vue'
+import { assignmentRows } from '~/utils/staff-assignments'
 export default {
+  components: { StaffAssignmentsEditor },
   props: {
     value: { type: Array, default: () => [] }, companies: { type: Array, default: () => [] }, roles: { type: Array, default: () => [] },
     currentCompanyId: { type: [Number, String], default: null }, roleNames: { type: Object, default: () => ({}) },
@@ -35,6 +25,8 @@ export default {
   },
   computed: { t() { return workspaceCopy(this.$i18n?.locale) } },
   methods: {
+    assignmentRows,
+    setAssignments(id, assignments) { this.$emit('input', this.value.map(row => String(row.company_id) === String(id) ? { ...row, assignments, role_id: assignments[0]?.role_id || null, factory_id: assignments[0]?.factory_id || null } : { ...row })) },
     row(id) { return this.value.find((item) => String(item.company_id) === String(id)) || {} },
     needsWorkshop(id) { return ['laser', 'bend', 'powder_catting'].includes(this.roles.find((r) => String(r.id) === String(this.row(id).role_id))?.name) },
     change(id, field, value) {

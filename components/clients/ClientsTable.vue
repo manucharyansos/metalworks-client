@@ -53,7 +53,7 @@
             <span class="shrink-0 rounded-full px-2 py-1 text-[9px] font-bold" :class="c.type === 'legalEntity' ? 'bg-violet-50 text-violet-700' : 'bg-emerald-50 text-emerald-700'">{{ c.type === 'legalEntity' ? 'Իրավ.' : 'Ֆիզ.' }}</span>
           </div>
           <p class="mt-3 truncate text-xs text-slate-400">{{ c.address || 'Հասցե նշված չէ' }}</p>
-          <div v-if="$canAny(['clients.update', 'clients.delete'])" class="mt-4 flex justify-end gap-2">
+          <div v-if="$canAny(['clients.update', 'clients.delete'])" class="mt-4 flex flex-wrap justify-end gap-2">
             <button v-if="canAssignCompanies" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="$emit('access', c)">{{ companyAccessCopy.button }}</button><button v-if="$can('clients.update')" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="$emit('edit', c)">Խմբագրել</button>
             <button v-if="$can('clients.delete')" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 dark:border-rose-900/60 dark:text-rose-300" :disabled="submitting" @click="$emit('delete', c)">Ջնջել</button>
           </div>

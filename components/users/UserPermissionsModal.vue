@@ -511,6 +511,7 @@ export default {
       return this.permissionScope?.role || this.user?.roleName || ''
     },
     roleLabel() {
+      if (this.permissionScope?.roles?.length > 1) return this.permissionScope.roles.map(role => ROLE_COPY[this.locale]?.[role] || role).join(', ')
       return (
         ROLE_COPY[this.locale]?.[this.roleName] ||
         this.user?.roleLabel ||
@@ -519,6 +520,11 @@ export default {
       )
     },
     scopeDescription() {
+      if (this.permissionScope?.roles?.length > 1) return {
+        hy: 'Նշեք նշանակված բոլոր հաստիքների անհրաժեշտ ֆունկցիաները։ Աշխատակիցը յուրաքանչյուր պահին գործում է կողային ընտրացանկում ընտրված հաստիքով և արտադրամասով։',
+        ru: 'Выберите нужные функции для всех назначенных должностей. Действия сотрудника ограничены должностью и цехом, выбранными в боковом меню.',
+        en: 'Select the required functions for all assigned positions. Employee actions follow the position and workshop selected in the sidebar.',
+      }[this.locale]
       const factoryRoles = ['laser', 'bend', 'powder_catting']
       if (this.roleName === 'engineer') {
         return {
