@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <WorkspaceTransition />
     <div
       v-if="isSidebarOpen"
       class="fixed inset-0 z-40 bg-slate-950/40 backdrop-blur-sm lg:hidden"
@@ -27,6 +28,7 @@
         </button>
       </div>
 
+      <CompanySelector />
       <nav class="flex-1 overflow-y-auto px-4 py-5">
         <p class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
           {{ $t('admin_layout.management') }}
@@ -107,11 +109,13 @@
 
 <script>
 import WorkspaceIdentity from '@/components/layout/WorkspaceIdentity.vue'
+import CompanySelector from '@/components/layout/CompanySelector.vue'
+import WorkspaceTransition from '@/components/layout/WorkspaceTransition.vue'
 import WorkspaceSettingsIcon from '@/components/layout/WorkspaceSettingsIcon.vue'
 import { isWorkspaceRouteActive } from '@/utils/workspace-route'
 
 export default {
-  components: { WorkspaceIdentity, WorkspaceSettingsIcon },
+  components: { WorkspaceIdentity, WorkspaceSettingsIcon, CompanySelector, WorkspaceTransition },
   middleware: ['role-guard'],
   meta: { role: 'admin' },
   data() {
@@ -122,8 +126,9 @@ export default {
         { to: '/admin/reports', labelKey: 'admin_layout.reports', short: '02', exact: false },
         { to: '/admin/workload', labelKey: 'admin_layout.workload', short: '03', exact: false },
         { to: '/admin/activity', label: { hy: 'Աշխատակիցների գործունեություն', ru: 'Активность сотрудников', en: 'Employee activity' }, short: '04', exact: false },
-        { to: '/admin/users', labelKey: 'admin_layout.employees', short: '05', exact: false },
-        { to: '/admin/file-extension', labelKey: 'admin_layout.file_types', short: '06', exact: false },
+        { to: '/admin/users', label: { hy: 'Աշխատակիցների իրավունքներ', ru: 'Права сотрудников', en: 'Employee permissions' }, short: '05', exact: false },
+        { to: '/admin/workers', label: { hy: 'Աշխատակիցներ', ru: 'Сотрудники', en: 'Employees' }, short: '06', exact: false },
+        { to: '/admin/file-extension', labelKey: 'admin_layout.file_types', short: '07', exact: false },
       ],
     }
   },

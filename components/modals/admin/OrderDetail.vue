@@ -1,5 +1,5 @@
 <template>
-  <div v-if="localOrder" class="flex h-full min-h-0 flex-col bg-slate-50 dark:bg-slate-950">
+  <div v-if="localOrder" data-workspace-form class="flex h-full min-h-0 flex-col bg-slate-50 dark:bg-slate-950">
     <header class="shrink-0 border-b border-slate-200 bg-white/95 px-4 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:px-6">
       <div class="flex items-start justify-between gap-4">
         <div class="min-w-0">

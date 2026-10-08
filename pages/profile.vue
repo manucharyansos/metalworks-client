@@ -1,6 +1,11 @@
 <template>
   <main class="min-h-screen bg-slate-50 px-4 py-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8 lg:py-8">
+    <WorkspaceTransition />
     <div class="mx-auto max-w-6xl space-y-6">
+      <div v-if="$auth.user && $auth.user.role && $auth.user.role.name === 'authenticatedUser' && $auth.user.company" class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <WorkspaceIdentity class="p-4" /><CompanySelector />
+      </div>
+      <p v-if="$auth.user && Array.isArray($auth.user.companies) && !$auth.user.companies.length" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">{{ companyText.noAccess }}</p>
       <section class="relative overflow-visible rounded-[30px] bg-slate-950 p-6 text-white shadow-xl sm:p-8">
         <div class="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/5 blur-2xl"></div>
         <div class="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-slate-700/30 blur-3xl"></div>
@@ -256,8 +261,13 @@
 </template>
 
 <script>
+import WorkspaceTransition from '~/components/layout/WorkspaceTransition.vue'
+import CompanySelector from '~/components/layout/CompanySelector.vue'
+import WorkspaceIdentity from '~/components/layout/WorkspaceIdentity.vue'
+import { workspaceCopy } from '~/utils/company-copy'
 export default {
   name: 'ProfilePage',
+  components: { WorkspaceTransition, CompanySelector, WorkspaceIdentity },
   layout(context) {
     const role = context.$auth?.user?.role?.name
     if (role === 'admin') return 'admin'
@@ -303,6 +313,7 @@ export default {
     }
   },
   computed: {
+    companyText() { return workspaceCopy(this.$i18n?.locale) },
     roleName() {
       return this.profileUser?.role?.name || this.$auth.user?.role?.name || ''
     },

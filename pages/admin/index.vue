@@ -88,7 +88,7 @@
         </div>
       </section>
 
-      <section class="grid gap-6 2xl:grid-cols-[1.2fr_1fr]">
+      <section class="grid min-w-0 grid-cols-1 gap-6 2xl:grid-cols-[1.2fr_1fr]">
         <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -712,7 +712,7 @@ export default {
   @apply w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:bg-white focus:ring-2 focus:ring-slate-900/5 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:border-slate-600 dark:focus:bg-slate-950;
 }
 .small-control {
-  @apply w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-slate-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200;
+  @apply min-w-0 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-slate-400 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200;
 }
 .date-control {
   @apply flex min-w-0 flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-[10px] font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-950;

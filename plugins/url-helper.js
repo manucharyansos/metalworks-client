@@ -1,4 +1,4 @@
-export default ({ $axios }, inject) => {
+export default ({ $axios, store }, inject) => {
   const baseURL = String($axios.defaults.baseURL || '').replace(/\/+$/, '')
 
   const encodePath = (filePath) => {
@@ -14,11 +14,18 @@ export default ({ $axios }, inject) => {
       .join('/')
   }
 
+  const fileSuffix = (download) => {
+    const params = []
+    const companyId = store?.state?.workspace?.company?.id
+    if (companyId) params.push(`company_id=${encodeURIComponent(companyId)}`)
+    if (download) params.push('download=1')
+    return params.length ? `?${params.join('&')}` : ''
+  }
   const getFileUrl = (filePath, download = false) => {
     const encodedPath = encodePath(filePath)
     if (!encodedPath) return null
 
-    const suffix = download ? '?download=1' : ''
+    const suffix = fileSuffix(download)
     return `${baseURL}/api/secure-files/path/${encodedPath}${suffix}`
   }
 
@@ -29,7 +36,7 @@ export default ({ $axios }, inject) => {
       return getFileUrl(path, download)
     }
 
-    const suffix = download ? '?download=1' : ''
+    const suffix = fileSuffix(download)
     return `${baseURL}/api/secure-files/pmp/${encodeURIComponent(id)}${suffix}`
   }
 
@@ -40,7 +47,7 @@ export default ({ $axios }, inject) => {
       return getFileUrl(path, download)
     }
 
-    const suffix = download ? '?download=1' : ''
+    const suffix = fileSuffix(download)
     return `${baseURL}/api/secure-files/order/${encodeURIComponent(id)}${suffix}`
   }
 

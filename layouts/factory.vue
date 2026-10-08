@@ -1,5 +1,6 @@
 <template>
   <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <WorkspaceTransition />
     <div v-if="isSidebarOpen" class="fixed inset-0 z-30 bg-slate-950/35 backdrop-blur-sm lg:hidden" @click="closeSidebar"></div>
 
     <aside
@@ -15,6 +16,7 @@
         </button>
       </div>
 
+      <CompanySelector />
       <div class="flex-1 overflow-y-auto px-4 py-5">
         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/40">
           <p class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400">{{ $t('workspace_layout.workshop') }}</p>
@@ -101,11 +103,13 @@
 
 <script>
 import WorkspaceIdentity from '@/components/layout/WorkspaceIdentity.vue'
+import CompanySelector from '@/components/layout/CompanySelector.vue'
+import WorkspaceTransition from '@/components/layout/WorkspaceTransition.vue'
 import WorkspaceSettingsIcon from '@/components/layout/WorkspaceSettingsIcon.vue'
 
 export default {
   name: 'FactoryLayout',
-  components: { WorkspaceIdentity, WorkspaceSettingsIcon },
+  components: { WorkspaceIdentity, WorkspaceSettingsIcon, CompanySelector, WorkspaceTransition },
   data() {
     return { isSidebarOpen: false }
   },
