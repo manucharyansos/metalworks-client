@@ -37,7 +37,7 @@
                 <span class="rounded-full px-2.5 py-1 text-[10px] font-bold" :class="c.type === 'legalEntity' ? 'bg-violet-50 text-violet-700 dark:bg-violet-950/35 dark:text-violet-300' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300'">{{ c.type === 'legalEntity' ? 'Իրավաբանական անձ' : 'Ֆիզ․ անձ' }}</span>
               </td>
               <td v-if="$canAny(['clients.update', 'clients.delete'])" class="px-6 py-4 text-right whitespace-nowrap">
-                <button v-if="$can('clients.update')" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" @click="$emit('edit', c)">Խմբագրել</button>
+                <button v-if="canAssignCompanies" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="$emit('access', c)">{{ companyAccessCopy.button }}</button><button v-if="$can('clients.update')" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" @click="$emit('edit', c)">Խմբագրել</button>
                 <button v-if="$can('clients.delete')" type="button" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-50 disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-300 dark:hover:bg-rose-950/20" :disabled="submitting" @click="$emit('delete', c)">Ջնջել</button>
               </td>
             </tr>
@@ -54,7 +54,7 @@
           </div>
           <p class="mt-3 truncate text-xs text-slate-400">{{ c.address || 'Հասցե նշված չէ' }}</p>
           <div v-if="$canAny(['clients.update', 'clients.delete'])" class="mt-4 flex justify-end gap-2">
-            <button v-if="$can('clients.update')" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="$emit('edit', c)">Խմբագրել</button>
+            <button v-if="canAssignCompanies" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="$emit('access', c)">{{ companyAccessCopy.button }}</button><button v-if="$can('clients.update')" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="$emit('edit', c)">Խմբագրել</button>
             <button v-if="$can('clients.delete')" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 dark:border-rose-900/60 dark:text-rose-300" :disabled="submitting" @click="$emit('delete', c)">Ջնջել</button>
           </div>
         </article>
@@ -64,7 +64,9 @@
 </template>
 
 <script>
+import { membershipCopy } from '~/utils/membership-copy'
 export default {
+  computed: { companyAccessCopy() { return membershipCopy(this.$i18n?.locale) }, canAssignCompanies() { return ['admin', 'manager'].includes(this.$auth?.user?.role?.name) } },
   props: {
     rows: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false },

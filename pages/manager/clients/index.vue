@@ -2,7 +2,7 @@
   <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <div v-if="$can('clients.view')" class="mx-auto max-w-[1500px] space-y-6">
       <ClientsToolbar :search.sync="searchQuery" @create="openCreate" />
-      <ClientsTable :rows="filteredClients" :loading="loading" :submitting="submitting" @edit="openEdit" @delete="confirmDeleteClient" />
+      <ClientsTable :rows="filteredClients" :loading="loading" :submitting="submitting" @edit="openEdit" @delete="confirmDeleteClient" @access="accessTarget = $event" />
     </div>
 
     <div v-else class="mx-auto max-w-3xl">
@@ -26,6 +26,7 @@
       @submit="handleSubmit"
     />
 
+    <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" @saved="loadClients" />
     <ConfirmDelete v-if="$can('clients.delete')" :item="deleteTarget" :submitting="submitting" @close="deleteTarget = null" @confirm="doDelete" />
     <notifications />
   </main>
@@ -37,9 +38,10 @@ import ClientsToolbar from '~/components/clients/ClientsToolbar.vue'
 import ClientsTable from '~/components/clients/ClientsTable.vue'
 import ClientFormModal from '~/components/clients/ClientFormModal.vue'
 import ConfirmDelete from '~/components/clients/ConfirmDelete.vue'
+import CompanyMembershipModal from '~/components/users/CompanyMembershipModal.vue'
 
 export default {
-  components: { ClientsToolbar, ClientsTable, ClientFormModal, ConfirmDelete },
+  components: { ClientsToolbar, ClientsTable, ClientFormModal, ConfirmDelete, CompanyMembershipModal },
   layout: 'manager',
   middleware: ['role-guard'],
   meta: { role: 'manager' },
@@ -49,6 +51,7 @@ export default {
       submitting: false,
       isFormOpen: false,
       selectedClient: null,
+      accessTarget: null,
       deleteTarget: null,
       searchQuery: '',
       formErrors: {},

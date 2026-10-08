@@ -39,7 +39,7 @@
                   <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400">{{ u?.worker?.phone || '—' }}</td>
                   <td class="max-w-xs px-4 py-4 text-xs text-slate-500 dark:text-slate-400"><span class="block truncate">{{ u?.worker?.address || '—' }}</span></td>
                   <td v-if="$canAny(['workers.update','workers.delete'])" class="px-6 py-4 text-right whitespace-nowrap">
-                    <button v-if="$can('workers.update')" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" @click="openEdit(u)">Խմբագրել</button>
+                    <button v-if="canAssignCompanies && !u.is_platform_admin" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="accessTarget = u">{{ companyAccessCopy.button }}</button><button v-if="$can('workers.update')" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800" @click="openEdit(u)">Խմբագրել</button>
                     <button v-if="$can('workers.delete')" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-300 dark:hover:bg-rose-950/20" @click="askDelete(u)">Ջնջել</button>
                   </td>
                 </tr>
@@ -51,7 +51,7 @@
             <article v-for="u in filtered" :key="u.id" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
               <div class="flex items-start gap-3"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ initials(u.display_name || u.name) }}</div><div class="min-w-0 flex-1"><p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ u.display_name || u.name }}</p><p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ u.email || '—' }}</p></div><span class="rounded-full bg-slate-100 px-2 py-1 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ roleLabel(u.role) }}</span></div>
               <div class="mt-3 grid grid-cols-2 gap-2 text-[10px] text-slate-400"><span>{{ u.factory || 'Առանց արտադրամասի' }}</span><span class="text-right">{{ u?.worker?.phone || '—' }}</span></div>
-              <div v-if="$canAny(['workers.update','workers.delete'])" class="mt-4 flex justify-end gap-2"><button v-if="$can('workers.update')" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="openEdit(u)">Խմբագրել</button><button v-if="$can('workers.delete')" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 dark:border-rose-900/60 dark:text-rose-300" @click="askDelete(u)">Ջնջել</button></div>
+              <div v-if="$canAny(['workers.update','workers.delete'])" class="mt-4 flex justify-end gap-2"><button v-if="canAssignCompanies && !u.is_platform_admin" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="accessTarget = u">{{ companyAccessCopy.button }}</button><button v-if="$can('workers.update')" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="openEdit(u)">Խմբագրել</button><button v-if="$can('workers.delete')" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 dark:border-rose-900/60 dark:text-rose-300" @click="askDelete(u)">Ջնջել</button></div>
             </article>
           </div>
         </template>
@@ -69,6 +69,8 @@
 
     <WorkerFormModal v-if="$canAny(['workers.create','workers.update'])" :visible="isFormOpen" :worker="selectedWorker" :roles="formRoles" :factories="formFactories" :companies="formCompanies" :can-manage-companies="canManageCompanies" :submitting="submitting" @close="closeForm" @submit="handleSubmit" />
 
+    <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" @saved="loadWorkers" />
+
     <div v-if="confirmDelete && $can('workers.delete')" class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm" @click.self="confirmDelete = null">
       <div class="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"><h3 class="text-lg font-black text-slate-950 dark:text-white">Ջնջե՞լ աշխատակցին</h3><p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">«{{ confirmDelete?.display_name || confirmDelete?.name }}» հաշիվը կհեռացվի։</p><div class="mt-6 flex justify-end gap-2"><button class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="confirmDelete = null">Չեղարկել</button><button class="rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-rose-700 disabled:opacity-50" :disabled="submitting" @click="doDelete">{{ submitting ? 'Կատարվում է…' : 'Ջնջել' }}</button></div></div>
     </div>
@@ -77,18 +79,22 @@
 
 <script>
 import WorkerFormModal from '~/components/users/WorkerFormModal.vue'
+import CompanyMembershipModal from '~/components/users/CompanyMembershipModal.vue'
+import { membershipCopy } from '~/utils/membership-copy'
 
 const ROLE_LABELS = { manager: 'Մենեջեր', bend: 'Կռում', laser: 'Լազերային կտրում', powder_catting: 'Փոշեներկում', engineer: 'Ինժիներ', admin: 'Ադմինիստրատոր' }
 
 export default {
-  components: { WorkerFormModal },
+  components: { WorkerFormModal, CompanyMembershipModal },
   layout: 'manager',
   middleware: ['role-guard'],
   meta: { role: 'manager' },
   data() {
-    return { loading: false, workers: [], formRoles: [], formFactories: [], formCompanies: [], canManageCompanies: false, formOptionsLoaded: false, searchQuery: '', isFormOpen: false, selectedWorker: null, submitting: false, confirmDelete: null }
+    return { loading: false, workers: [], formRoles: [], formFactories: [], formCompanies: [], canManageCompanies: false, formOptionsLoaded: false, searchQuery: '', isFormOpen: false, selectedWorker: null, submitting: false, confirmDelete: null, accessTarget: null }
   },
   computed: {
+    companyAccessCopy() { return membershipCopy(this.$i18n?.locale) },
+    canAssignCompanies() { return ['admin', 'manager'].includes(this.$auth?.user?.role?.name) },
     filtered() {
       const q = (this.searchQuery || '').toLowerCase().trim()
       if (!q) return this.workers
