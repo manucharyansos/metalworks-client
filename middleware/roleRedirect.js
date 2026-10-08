@@ -1,5 +1,6 @@
 // middleware/roleRedirect.js
 const FACTORY_ROLES = ['laser', 'bend', 'powder_catting', 'operator']
+const normalizePath = (path = '') => path.replace(/\/+$/, '') || '/'
 
 const has = (user, permission) =>
   Array.isArray(user?.permissions) && user.permissions.includes(permission)
@@ -22,16 +23,16 @@ const factoryHome = (user) => {
 export default async function ({ app, route, redirect, $auth }) {
   const localePath = app.localePath
   const loginPath = localePath('/login')
-  const profilePath = localePath('/profile')
-  const rootPath = localePath('/')
+  const profilePath = normalizePath(localePath('/profile'))
+  const rootPath = normalizePath(localePath('/'))
   const publicAuthPaths = [
     localePath('/login'),
     localePath('/register'),
     localePath('/forgot-password'),
     localePath('/reset-password'),
-  ]
+  ].map(normalizePath)
 
-  const currentPath = route.path
+  const currentPath = normalizePath(route.path)
   const isPublicAuthPath = publicAuthPaths.includes(currentPath)
 
   if (!$auth.loggedIn) {
@@ -75,7 +76,7 @@ export default async function ({ app, route, redirect, $auth }) {
   if (currentPath === profilePath || currentPath.startsWith(profilePath + '/')) return
 
   const homePath = localePath(homeRaw)
-  const allowedPrefix = localePath(allowedBase)
+  const allowedPrefix = normalizePath(localePath(allowedBase))
 
   if (currentPath === rootPath || isPublicAuthPath) return redirect(homePath)
 
