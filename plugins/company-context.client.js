@@ -60,6 +60,9 @@ export default async ({ app, store, $axios, $auth }, inject) => {
       try { reloadWith(await fetchContext(currentId())) }
       catch (_) { store.commit('workspace/switching', false) }
     }
+    // Nuxt Axios treats a resolved promise from an error hook as recovery.
+    // Keep the request rejected so callers can fall back or show an error.
+    throw error
   })
 
   const bootstrap = (user) => {

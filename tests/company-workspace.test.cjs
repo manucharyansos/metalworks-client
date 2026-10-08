@@ -31,7 +31,10 @@ async function harness(callback, setup, overrides = {}) {
     onRequest: cb => { hooks.request = cb }, onResponse: cb => { hooks.response = cb }, onError: cb => { hooks.error = cb },
     async $get(url, config) {
       config = { ...config, url, method: 'get' }; hooks.request(config); calls.push(config)
-      if (overrides.response) return overrides.response(config)
+      if (overrides.response) {
+        try { return await overrides.response(config) }
+        catch (error) { error.config = config; return hooks.error(error) }
+      }
       const id = Number(config.headers['X-Company-ID'])
       const assignment = activeUser.assignments?.find(row => String(row.id) === String(config.headers['X-Assignment-ID'] || activeUser.assignment_id))
       const response = { ...activeUser, company: companies.find(c => c.id === id), role: id === 1 && assignment ? assignment.role : { name: id === 2 ? 'laser' : 'admin' }, factory_id: assignment?.factory_id || (id === 2 ? 11 : null), assignment_id: id === 1 ? assignment?.id : null }
@@ -208,6 +211,29 @@ test('a revoked saved assignment only refreshes the identity using the primary a
     if (config.headers['X-Assignment-ID']) throw new Error('Revoked assignment')
     return assignmentUser
   } })
+})
+
+test('rejected reads and writes stay rejected after the Nuxt Axios error hook', async () => {
+  await harness(async ({ hooks, state }) => {
+    const failure = { config: { url: '/api/orders', method: 'put' }, response: { status: 403, data: { message: 'Permission denied.' } } }
+    hooks.request(failure.config)
+    await assert.rejects(hooks.error(failure), error => error === failure)
+    assert.equal(state.auth.user.id, assignmentUser.id)
+    assert.equal(state.workspace.assignmentId, assignmentUser.assignment_id)
+  }, null, { user: assignmentUser })
+})
+
+test('revoking an active assignment refreshes identity without replaying the failed write', async () => {
+  await harness(async ({ hooks, calls, replacements }) => {
+    const failure = { config: { url: '/api/orders/5', method: 'put', data: { name: 'Unsaved draft' } }, response: { status: 403, data: { message: 'Position access denied.' } } }
+    hooks.request(failure.config)
+    await assert.rejects(hooks.error(failure), error => error === failure)
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0].url, '/api/user')
+    assert.equal(calls[0].method, 'get')
+    assert.equal(calls[0].headers['X-Assignment-ID'], undefined)
+    assert.deepEqual(replacements, ['/work/engineer'])
+  }, null, { user: assignmentUser })
 })
 
 test('private file URLs capture the chosen working assignment', async () => {
