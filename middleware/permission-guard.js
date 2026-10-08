@@ -1,5 +1,5 @@
 const normalizePath = (path = '') => {
-  const normalized = path.replace(/^\/(hy|ru|en)(?=\/|$)/, '')
+  const normalized = path.replace(/^\/(hy|ru|en)(?=\/|$)/, '').replace(/\/+$/, '')
   return normalized || '/'
 }
 

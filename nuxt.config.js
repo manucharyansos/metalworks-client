@@ -68,21 +68,25 @@ export default {
         endpoints: {
           csrf: {
             url: '/sanctum/csrf-cookie',
+            timeout: 15000,
             method: 'get',
             withCredentials: true,
           },
           login: {
             url: '/api/login',
+            timeout: 15000,
             method: 'post',
             withCredentials: true,
           },
           logout: {
             url: '/api/logout',
+            timeout: 15000,
             method: 'post',
             withCredentials: true,
           },
           user: {
             url: '/api/user',
+            timeout: 15000,
             method: 'get',
             withCredentials: true,
           },
