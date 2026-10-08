@@ -3,15 +3,7 @@
     <div
       class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white p-0.5 shadow-sm"
     >
-      <img
-        :src="brandLogoUrl"
-        v-if="brandLogoUrl"
-        :alt="activeBrand.name"
-        width="48"
-        height="48"
-        class="h-full w-full object-contain"
-      />
-      <span v-else class="text-lg font-bold text-slate-700">{{ activeBrand.name.slice(0, 2).toUpperCase() }}</span>
+      <WorkspaceLogo :brand="activeBrand" />
     </div>
     <div class="min-w-0 flex-1">
       <p
@@ -39,9 +31,11 @@
 
 <script>
 import workspaceBrands from '~/config/workspace-brands'
+import WorkspaceLogo from '~/components/auth/WorkspaceLogo.vue'
 
 export default {
   name: 'WorkspaceIdentity',
+  components: { WorkspaceLogo },
   props: {
     brand: { type: Object, default: null },
   },
@@ -57,17 +51,6 @@ export default {
       const company = this.$store?.state?.workspace?.company || this.authUser.company
       if (!company) return workspaceBrands[0]
       return { ...company, logo: company.logo || (company.slug === 'metalworks' ? workspaceBrands[0].logo : null) }
-    },
-    brandLogoUrl() {
-      const logo = this.activeBrand.logo
-      if (!logo) return null
-      if (/^https?:\/\//i.test(logo)) return logo
-      if (logo.startsWith('/api/')) return `${String(this.$axios?.defaults?.baseURL || '').replace(/\/+$/, '')}${logo}`
-      const base = this.$router?.options?.base || '/'
-      return `${base.replace(/\/?$/, '/')}${logo.replace(
-        /^\/+/,
-        ''
-      )}`
     },
     authUser() {
       return this.$auth?.user || {}

@@ -6,6 +6,7 @@ const { test } = require('node:test')
 function sourceModule(file, scriptOnly = false) {
   let source = fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
   if (scriptOnly) source = source.match(/<script>([\s\S]*?)<\/script>/)[1]
+  source = source.replace(/import WorkspaceLogo from ['"]~\/components\/auth\/WorkspaceLogo.vue['"]/g, 'const WorkspaceLogo = {}')
   source = source.replace(/(['"])~\/config\/workspace-brands\1/g, () => {
     const brands = fs.readFileSync(path.join(__dirname, '..', 'config/workspace-brands.js'), 'utf8')
     return `'data:text/javascript;base64,${Buffer.from(brands).toString('base64')}'`

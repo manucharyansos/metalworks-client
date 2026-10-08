@@ -1,22 +1,16 @@
 <template>
   <aside
     class="workspace-branding"
-    :class="{ 'workspace-branding--multiple': brands.length > 1 }"
+    :class="{ 'workspace-branding--multiple': activeBrands.length > 1 }"
   >
     <div class="workspace-branding__content">
       <div class="workspace-branding__logos">
         <figure
-          v-for="brand in brands"
+          v-for="brand in activeBrands"
           :key="brand.id"
           class="workspace-branding__brand"
         >
-          <img
-            :src="logoUrl(brand.logo)"
-            :alt="brand.name"
-            width="224"
-            height="224"
-            class="workspace-branding__logo"
-          />
+          <WorkspaceLogo :brand="brand" class="workspace-branding__logo" />
           <figcaption class="workspace-branding__name">
             {{ brand.name }}
           </figcaption>
@@ -31,16 +25,23 @@
 
 <script>
 import workspaceBrands from '~/config/workspace-brands'
+import WorkspaceLogo from '~/components/auth/WorkspaceLogo.vue'
 
 export default {
   name: 'WorkspaceBranding',
+  components: { WorkspaceLogo },
   props: {
-    brands: { type: Array, default: () => workspaceBrands },
+    brands: { type: Array, default: null },
   },
+  data() { return { publishedBrands: null } },
+  computed: { activeBrands() { return this.brands || this.publishedBrands || workspaceBrands } },
+  mounted() { if (!this.brands) this.loadBrands() },
   methods: {
-    logoUrl(logo) {
-      const base = this.$router.options.base || '/'
-      return `${base.replace(/\/?$/, '/')}${logo.replace(/^\/+/, '')}`
+    async loadBrands() {
+      try {
+        const data = await this.$axios.$get('/api/workspace/brands', { timeout: 15000 })
+        if (Array.isArray(data.brands)) this.publishedBrands = data.brands
+      } catch (_) { /* Keep bundled branding usable when the API is unavailable. */ }
     },
   },
 }
@@ -112,7 +113,22 @@ export default {
 
 .workspace-branding--multiple .workspace-branding__logos {
   width: 100%;
-  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  max-width: 22rem;
+  grid-template-columns: repeat(auto-fit, minmax(5rem, 1fr));
+}
+
+.workspace-branding--multiple .workspace-branding__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.workspace-branding--multiple .workspace-branding__logo {
+  max-width: 8rem;
+}
+
+.workspace-branding__name {
+  overflow-wrap: anywhere;
 }
 
 .workspace-branding--multiple .workspace-branding__title {

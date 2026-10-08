@@ -2,6 +2,8 @@
   <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
     <h1 class="text-2xl font-black tracking-tight sm:text-3xl">{{ copy.requests }}</h1>
     <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{{ copy.reviewIntro }}</p>
+    <p class="mt-2 break-words text-sm font-bold">{{ $auth.user?.company?.name }}</p>
+    <p v-if="notice" class="mt-4 rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800" role="status">{{ notice }}</p>
     <div class="mt-6 flex flex-wrap items-center gap-2" role="group" :aria-label="copy.requests">
       <button v-for="tab in statuses" :key="tab" type="button" class="rounded-xl border px-3 py-2 text-sm font-semibold" :class="status === tab ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="status === tab" @click="changeStatus(tab)">{{ copy[tab] }} <span class="ml-1 opacity-70">{{ counts[tab] }}</span></button>
     </div>
@@ -20,10 +22,15 @@
         <p class="mt-3 text-xs text-slate-400">{{ formatDate(request.created_at) }}</p>
         <div v-if="request.status === 'pending'" class="mt-5 flex flex-wrap gap-2"><button type="button" class="app-button-primary" @click="openReview(request, 'approve')">{{ copy.approve }}</button><button type="button" class="app-button-secondary text-rose-600 dark:text-rose-300" @click="openReview(request, 'reject')">{{ copy.reject }}</button></div>
         <p v-else class="mt-4 text-sm font-semibold" :class="request.status === 'approved' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'">{{ copy[request.status] }}</p>
+        <div v-if="request.status === 'approved'" class="mt-3 space-y-3">
+          <p class="text-xs leading-5 text-slate-500">{{ copy.notification[request.notification_status || 'pending'] }}</p>
+          <div class="flex flex-wrap gap-2"><button v-if="request.notification_status !== 'sent'" type="button" class="app-button-secondary" :disabled="Boolean(notifyBusy)" @click="sendNotification(request)">{{ notifyBusy === request.id ? copy.sending : copy.mailRetry }}</button><button type="button" class="app-button-secondary" @click="accessTarget = { id: request.user_id, name: fullName(request), email: request.email }">{{ companyAccessCopy.button }}</button></div>
+        </div>
       </article>
     </div>
     <div v-if="!loading && !listError && lastPage > 1" class="mt-6 flex flex-wrap items-center gap-3 text-sm"><button type="button" class="app-button-secondary" :disabled="page <= 1" @click="page--; loadRequests()">{{ copy.previous }}</button><span>{{ copy.page }} {{ page }} / {{ lastPage }}</span><button type="button" class="app-button-secondary" :disabled="page >= lastPage" @click="page++; loadRequests()">{{ copy.next }}</button></div>
 
+    <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" />
     <div v-if="selected" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4" @click.self="closeReview" @keydown.esc="closeReview">
       <section ref="dialog" role="dialog" aria-modal="true" aria-labelledby="request-review-title" tabindex="-1" class="mx-auto my-6 w-full max-w-lg rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:my-12 sm:p-8" @keydown.tab="trapFocus">
         <h2 id="request-review-title" class="text-xl font-black">{{ action === 'approve' ? copy.approve : copy.reject }}</h2>
@@ -51,20 +58,34 @@
 
 <script>
 import { registrationCopy } from '~/utils/registration-copy'
+import { membershipCopy } from '~/utils/membership-copy'
+import CompanyMembershipModal from '~/components/users/CompanyMembershipModal.vue'
 
 export default {
   name: 'RegistrationRequests',
+  components: { CompanyMembershipModal },
   data() {
-    return { statuses: ['pending', 'approved', 'rejected'], status: 'pending', type: '', page: 1, lastPage: 1, requests: [], counts: { pending: 0, approved: 0, rejected: 0 }, loading: true, listError: '', listSequence: 0, roles: [], factories: [], optionsLoading: false, optionsError: '', selected: null, action: '', roleId: '', factoryId: '', errors: {}, reviewError: '', busy: false, returnFocus: null, previousOverflow: '' }
+    return { statuses: ['pending', 'approved', 'rejected'], status: 'pending', type: '', page: 1, lastPage: 1, requests: [], counts: { pending: 0, approved: 0, rejected: 0 }, loading: true, listError: '', listSequence: 0, roles: [], factories: [], optionsLoading: false, optionsError: '', selected: null, action: '', roleId: '', factoryId: '', errors: {}, reviewError: '', busy: false, returnFocus: null, previousOverflow: '', notice: '', notifyBusy: null, accessTarget: null }
   },
   computed: {
     copy() { return registrationCopy(this.$i18n?.locale) },
+    companyAccessCopy() { return membershipCopy(this.$i18n?.locale) },
     needsWorkshop() { return ['laser', 'bend', 'powder_catting'].includes(this.roles.find(role => String(role.id) === String(this.roleId))?.name) },
   },
   watch: { roleId() { this.factoryId = ''; this.errors = {} }, factoryId() { this.$delete(this.errors, 'factory_id') } },
   mounted() { this.loadRequests() },
   beforeDestroy() { if (this.selected) document.body.style.overflow = this.previousOverflow },
   methods: {
+    async sendNotification(request) {
+      if (this.notifyBusy) return
+      this.notifyBusy = request.id; this.notice = ''
+      try {
+        const response = await this.$axios.$post(`/api/registration-requests/${request.id}/notify`, {}, { timeout: 15000 })
+        this.$set(request, 'notification_status', response.notification_status)
+        this.notice = this.copy.notification[response.notification_status] || this.copy.reviewFailed
+      } catch (error) { this.notice = error.response?.data?.message || this.copy.reviewFailed }
+      finally { this.notifyBusy = null }
+    },
     fullName(request) { return [request.name, request.last_name, request.patronymic].filter(Boolean).join(' ') },
     formatDate(value) { const date = new Date(value); return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(this.$i18n?.locale || 'hy', { year: 'numeric', month: 'short', day: 'numeric' }) },
     changeStatus(status) { this.status = status; this.page = 1; this.loadRequests() },
@@ -115,7 +136,8 @@ export default {
       this.busy = true
       let completed = false
       try {
-        await this.$axios.$post(`/api/registration-requests/${this.selected.id}/${this.action}`, employee ? { role_id: Number(this.roleId), factory_id: this.needsWorkshop ? Number(this.factoryId) : null } : {}, { timeout: 15000 })
+        const response = await this.$axios.$post(`/api/registration-requests/${this.selected.id}/${this.action}`, employee ? { role_id: Number(this.roleId), factory_id: this.needsWorkshop ? Number(this.factoryId) : null } : {}, { timeout: 15000 })
+        if (this.action === 'approve') this.notice = `${this.copy.approvalSaved} ${this.copy.notification[response.notification_status || 'pending']}`
         completed = true
       } catch (error) {
         const data = error.response?.data

@@ -9,16 +9,20 @@ const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).t
 const routeUrl = moduleUrl(read('utils/workspace-route.js'))
 const brandsUrl = moduleUrl(read('config/workspace-brands.js'))
 const companyCopyUrl = moduleUrl(read('utils/company-copy.js'))
+const brandLogoUrl = moduleUrl(read('utils/brand-logo.js'))
 async function component(file, render = false) {
   const parsed = compiler.parseComponent(read(file))
   const source = parsed.script.content.replace(/import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g, (_, names, specifier) => {
     if (specifier === '@/utils/workspace-route') return `import ${names} from '${routeUrl}'`
     if (specifier === '~/config/workspace-brands') return `import ${names} from '${brandsUrl}'`
     if (specifier === '~/utils/company-copy') return `import ${names} from '${companyCopyUrl}'`
+    if (specifier === '~/utils/brand-logo') return `import ${names} from '${brandLogoUrl}'`
+    if (specifier === '~/static/logo.png') return `const ${names} = '/work/_nuxt/img/metalworks-test.png'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
     return `const ${names} = {}`
   })
   const options = (await import(moduleUrl(source))).default
+  if (options.components?.WorkspaceLogo) options.components.WorkspaceLogo = await component('components/auth/WorkspaceLogo.vue', true)
   return render ? { ...options, ...compiler.compileToFunctions(parsed.template.content) } : options
 }
 
@@ -59,7 +63,7 @@ for (const [role, links] of [
     for (const link of links) assert.ok(html.includes(`href="/ru${link}"`), link)
     const header = html.match(/<header[\s\S]*?<\/header>/)[0]
     const sidebar = html.match(/<aside[\s\S]*?<\/aside>/)[0]
-    assert.match(sidebar, /src="\/work\/logo.png" alt="MetalWorks"/)
+    assert.match(sidebar, /src="\/work\/_nuxt\/img\/metalworks-test.png" alt="MetalWorks"/)
     const identityRows = [...sidebar.matchAll(/<p[^>]*>([^<]*)<\/p>/g)].slice(0, 3).map(match => match[1].trim())
     assert.deepEqual(identityRows, ['MetalWorks', 'QA User', 'qa@example.invalid'])
     assert.doesNotMatch(header, /href="\/ru\/profile"/, 'header does not duplicate sidebar settings')
