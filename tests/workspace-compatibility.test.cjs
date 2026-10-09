@@ -7,6 +7,7 @@ const compiler = require('vue-template-compiler')
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const taskUrl = moduleUrl(read('utils/task-workflow.js'))
+const taskRoutingUrl = moduleUrl(read('utils/task-routing.js'))
 const routeUrl = moduleUrl(read('utils/workspace-route.js'))
 const brandsUrl = moduleUrl(read('config/workspace-brands.js'))
 const companyCopyUrl = moduleUrl(read('utils/company-copy.js'))
@@ -24,6 +25,7 @@ async function component(file, render = false) {
     if (specifier === '~/utils/membership-copy') return `import ${names} from '${membershipUrl}'`
     if (specifier === '~/static/logo.png') return `const ${names} = '/work/_nuxt/img/metalworks-test.png'`
     if (specifier === '@/utils/task-workflow') return `import ${names} from '${taskUrl}'`
+    if (specifier === '@/utils/task-routing') return `import ${names} from '${taskRoutingUrl}'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
     return `const ${names} = {}`
   })

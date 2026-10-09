@@ -107,6 +107,7 @@
     "language": "Language"
   },
   "workspace_layout": {
+    "operator_workload": "Operator workload",
     "phone_not_set": "Phone not set",
     "navigation": "Navigation",
     "management": "Management",

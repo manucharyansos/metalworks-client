@@ -412,7 +412,7 @@
     <transition name="fade">
       <div v-if="selectedOrder" class="fixed inset-0 z-[80] flex items-stretch justify-end bg-slate-950/45 backdrop-blur-sm" @click.self="closeOrder">
         <div class="h-full w-full max-w-5xl overflow-hidden bg-white shadow-2xl dark:bg-slate-900">
-          <OrderDetail :order="selectedOrder" @close="closeOrder" @saved="handleOrderSaved" />
+          <OrderDetail :order="selectedOrder" @close="closeOrder" @saved="handleOrderSaved" @routing-updated="handleRoutingUpdated" />
         </div>
       </div>
     </transition>
@@ -618,6 +618,10 @@ export default {
     },
     async handleOrderSaved() {
       this.closeOrder()
+      await this.refreshAll()
+    },
+    async handleRoutingUpdated(order) {
+      this.selectedOrder = order
       await this.refreshAll()
     },
     orderNumber(order) {

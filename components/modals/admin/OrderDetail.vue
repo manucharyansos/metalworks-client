@@ -102,6 +102,8 @@
           </aside>
         </section>
 
+        <TaskRoutingPanel :order="localOrder" @updated="handleRoutingUpdated" />
+
         <section class="panel-card">
           <div class="panel-heading flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -194,11 +196,12 @@
 
 <script>
 import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
+import TaskRoutingPanel from '@/components/order/TaskRoutingPanel.vue'
 import { isStepCompleted } from '@/utils/task-workflow'
 export default {
-  components: { TaskCompletionProof },
+  components: { TaskCompletionProof, TaskRoutingPanel },
   props: { order: { type: Object, required: true } },
-  emits: ['close', 'saved'],
+  emits: ['close', 'saved', 'routing-updated'],
   data() {
     return {
       saving: false,
@@ -284,6 +287,10 @@ export default {
     this.resetLocal(this.order)
   },
   methods: {
+    handleRoutingUpdated(order) {
+      this.resetLocal(order)
+      this.$emit('routing-updated', order)
+    },
     normalizeStatus(raw) {
       if (!raw) return 'pending'
       const s = raw.toString().toLowerCase()

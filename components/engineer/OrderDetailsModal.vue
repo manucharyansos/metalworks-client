@@ -116,6 +116,7 @@
           </span>
         </div>
 
+        <TaskRoutingPanel :order="order" @updated="$emit('updated', $event)" />
         <div v-if="(order?.factory_orders || []).length" class="mb-6">
           <h4 class="text-sm font-semibold mb-2">Արտադրամասեր</h4>
           <div class="space-y-4">
@@ -193,12 +194,13 @@
 
 <script>
 import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
+import TaskRoutingPanel from '@/components/order/TaskRoutingPanel.vue'
 import { isStepCompleted, taskCopy } from '@/utils/task-workflow'
 import FileGallery from '~/components/engineer/FileGallery.vue'
 
 export default {
   name: 'OrderDetailsModal',
-  components: { FileGallery, TaskCompletionProof },
+  components: { FileGallery, TaskCompletionProof, TaskRoutingPanel },
   props: {
     visible: { type: Boolean, default: false },
     order: { type: Object, default: null },
