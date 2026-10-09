@@ -37,7 +37,7 @@
           <p class="metric-note">առնվազն մեկ ֆայլի տեսակ</p>
         </div>
         <div class="metric-card">
-          <p class="metric-label">Ընդհանուր պատվեր</p>
+          <p class="metric-label">Ընդհանուր առաջադրանք</p>
           <p class="metric-value">{{ globalExtensions.length }}</p>
           <p class="metric-note">արտադրամասից անկախ</p>
         </div>
@@ -111,7 +111,7 @@
 
       <section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
         <div class="mb-4">
-          <h2 class="mt-1 text-lg font-black text-slate-950 dark:text-white">Ընդհանուր պատվերի ֆայլերի տեսակներ</h2>
+          <h2 class="mt-1 text-lg font-black text-slate-950 dark:text-white">Ընդհանուր առաջադրանքի ֆայլերի տեսակներ</h2>
           <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
             Այս ցուցակը պահվում է առանձին՝ այն ֆայլերի համար, որոնք կապված չեն կոնկրետ արտադրամասի PMP վերբեռնման հետ։
           </p>

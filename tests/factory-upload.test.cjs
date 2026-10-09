@@ -5,6 +5,7 @@ const { test } = require('node:test')
 
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
+const taskUrl = moduleUrl(read('utils/task-workflow.js'))
 const policyUrl = moduleUrl(read('utils/factory-file-policy.js'))
 const previewUrl = moduleUrl(read('utils/factory-preview.js'))
 const policy = import(policyUrl)
@@ -15,6 +16,7 @@ async function component(file) {
   source = source.replace(/import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g, (_, names, specifier) => {
     if (specifier === '~/utils/factory-file-policy') return `import ${names} from '${policyUrl}'`
     if (specifier === '~/utils/factory-preview') return `import ${names} from '${previewUrl}'`
+    if (specifier === '@/utils/task-workflow') return `import ${names} from '${taskUrl}'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
     return `const ${names} = {}`
   })
@@ -102,7 +104,7 @@ test('unknown and CAD files always have a download fallback; text and audio have
 })
 
 test('policy requests use the engineer read-only endpoint and propagate failures', async () => {
-  const { actions } = await import(moduleUrl(read('store/factory/index.js')))
+  const { actions } = await import(moduleUrl(read('store/factory/index.js').replace("'@/utils/task-workflow'", `'${taskUrl}'`)))
   const commits = []
   const factories = [{ id: 6, value: 'INFO', extensions: [] }]
   const result = await actions.fetchFactoryFilePolicies.call({ $axios: { get: async url => { assert.equal(url, '/api/factory-file-policies'); return { data: { data: factories } } } } }, { commit: (...args) => commits.push(args) })

@@ -10,7 +10,7 @@
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Անվտանգ մուտք</p>
             <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">Բարի վերադարձ</h1>
             <p class="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
-              Մուտք գործեք ձեր աշխատանքային հաշիվ՝ պատվերների, ֆայլերի և արտադրական գործընթացների հետ աշխատելու համար։
+              Մուտք գործեք ձեր աշխատանքային հաշիվ՝ առաջադրանքների, ֆայլերի և արտադրական գործընթացների հետ աշխատելու համար։
             </p>
           </div>
 

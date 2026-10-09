@@ -8,7 +8,7 @@
             <span class="rounded-full px-2.5 py-1 text-[10px] font-bold" :class="overallStatusClass">{{ overallStatusText }}</span>
           </div>
           <h2 class="mt-2 truncate text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">
-            {{ localOrder.name || `Պատվեր #${localOrder.id}` }}
+            {{ localOrder.name || `Առաջադրանք #${localOrder.id}` }}
           </h2>
           <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
             <span>#{{ localOrder.order_number?.number || localOrder.id }}</span>
@@ -16,7 +16,7 @@
             <span>Ստեղծվել է՝ {{ formatDate(localOrder.created_at) }}</span>
           </div>
         </div>
-        <button type="button" class="shrink-0 rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Փակել պատվերը" @click="$emit('close')">
+        <button type="button" class="shrink-0 rounded-xl border border-slate-200 bg-white p-2.5 text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Փակել առաջադրանքը" @click="$emit('close')">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18 18 6M6 6l12 12" /></svg>
         </button>
       </div>
@@ -26,7 +26,7 @@
       <div class="mx-auto max-w-6xl space-y-5">
         <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div class="info-tile">
-            <p class="info-label">Պատվերի համար</p>
+            <p class="info-label">Առաջադրանքի համար</p>
             <p class="info-value">{{ localOrder.order_number?.number || `#${localOrder.id}` }}</p>
           </div>
           <div class="info-tile">
@@ -127,23 +127,14 @@
                   <p class="mt-1 font-semibold text-slate-700 dark:text-slate-200">{{ formatDate(fo.finish_date) }}</p>
                 </div>
                 <div class="rounded-xl bg-white p-2.5 dark:bg-slate-900">
-                  <p class="text-slate-400">Ադմինի հաստատում</p>
-                  <p class="mt-1 font-semibold" :class="fo.admin_confirmation_date ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'">{{ fo.admin_confirmation_date ? formatDate(fo.admin_confirmation_date) : 'Սպասում է' }}</p>
+                  <p class="text-slate-400">Ինժեների հաստատում</p>
+                  <p class="mt-1 font-semibold" :class="fo.engineer_confirmation_at ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'">{{ fo.confirmation_required ? (fo.engineer_confirmation_at ? formatDate(fo.engineer_confirmation_at) : 'Սպասում է') : 'Չի պահանջվում' }}</p>
                 </div>
               </div>
 
               <div v-if="fo.canceling" class="mt-3 rounded-xl bg-rose-50 px-3 py-2 text-[11px] font-medium text-rose-700 dark:bg-rose-950/30 dark:text-rose-300">Մերժման պատճառ՝ {{ fo.canceling }}</div>
 
-              <button
-                v-if="normalizeStatus(fo.status) === 'finished' && !fo.admin_confirmation_date"
-                type="button"
-                class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-3 py-2.5 text-xs font-bold text-white transition hover:bg-emerald-700 disabled:opacity-50"
-                :disabled="confirmingId === fo.id"
-                @click="confirmFactoryFinish(fo)"
-              >
-                <span v-if="confirmingId === fo.id" class="h-4 w-4 animate-spin rounded-full border-2 border-white/50 border-t-white"></span>
-                Հաստատել ավարտը
-              </button>
+              <TaskCompletionProof :step="fo" :creator-id="localOrder.creator_id" />
             </article>
           </div>
           <div v-else class="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-400 dark:border-slate-800">Դեռ արտադրամաս չի կցվել։</div>
@@ -188,7 +179,7 @@
 
     <footer class="shrink-0 border-t border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900 sm:px-6">
       <div class="mx-auto flex max-w-6xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p class="text-[10px] text-slate-400">Փոփոխությունները պահպանվելու են պատվերի ընթացիկ տվյալներում։</p>
+        <p class="text-[10px] text-slate-400">Փոփոխությունները պահպանվելու են առաջադրանքի ընթացիկ տվյալներում։</p>
         <div class="flex gap-2">
           <button type="button" class="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 sm:flex-none" @click="$emit('close')">Փակել</button>
           <button type="button" class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 sm:flex-none" :disabled="saving" @click="save">
@@ -202,7 +193,10 @@
 </template>
 
 <script>
+import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
+import { isStepCompleted } from '@/utils/task-workflow'
 export default {
+  components: { TaskCompletionProof },
   props: { order: { type: Object, required: true } },
   emits: ['close', 'saved'],
   data() {
@@ -246,7 +240,7 @@ export default {
       return fos.every((fo) => {
         const code = this.normalizeStatus(fo.status)
         if (code === 'canceled') return false
-        if (code === 'finished' || code === 'confirmed') return !!fo.admin_confirmation_date
+        if (code === 'finished') return isStepCompleted(fo)
         return false
       })
     },
@@ -305,7 +299,7 @@ export default {
       switch (code) {
         case 'finished': return 'Ավարտված'
         case 'canceled': return 'Մերժված'
-        case 'confirmed': return 'Հաստատված'
+        case 'confirmed': return 'Կատարվում է'
         case 'date_changed': return 'Ժամկետը փոփոխված'
         case 'pending':
         default: return 'Սպասում է'
@@ -350,27 +344,14 @@ export default {
         }
         const updated = await this.$store.dispatch('orders/updateOrder', { id: this.order.id, payload })
         this.$emit('saved', updated.order)
-        this.$notify({ type: 'success', message: updated.message || 'Պատվերը հաջողությամբ թարմացվեց' })
+        this.$notify({ type: 'success', message: updated.message || 'Առաջադրանքը հաջողությամբ թարմացվեց' })
       } catch (e) {
         this.$notify({ type: 'error', message: e?.response?.data?.message || e.message || 'Չհաջողվեց պահպանել' })
       } finally {
         this.saving = false
       }
     },
-    async confirmFactoryFinish(fo) {
-      if (!fo || !fo.factory_id) return
-      this.confirmingId = fo.id
-      try {
-        await this.$store.dispatch('factory/adminConfirmFactoryStatus', { id: this.order.id, factory_id: fo.factory_id })
-        const target = this.localOrder.factory_orders.find((x) => x.id === fo.id)
-        if (target) target.admin_confirmation_date = new Date().toISOString()
-        this.$notify({ type: 'success', message: `Գործարան "${fo.factory?.name || fo.factory_id}"-ի ավարտը հաստատված է` })
-      } catch (e) {
-        this.$notify({ type: 'error', message: e?.response?.data?.message || e.message || 'Չհաջողվեց հաստատել ավարտը' })
-      } finally {
-        this.confirmingId = null
-      }
-    },
+
   },
 }
 </script>

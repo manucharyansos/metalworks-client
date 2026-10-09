@@ -6,7 +6,7 @@
           <div class="flex items-center gap-2">
             <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Հաշվետվություններ</h1>
             <InfoTooltip>
-              Ստեղծեք պատվերների հաշվետվություն ըստ արտադրամասի, աշխատակցի, կարգավիճակի և ժամկետի, նախադիտեք արդյունքը և արտահանեք ամբողջ ֆիլտրված տվյալները CSV։
+              Ստեղծեք առաջադրանքների հաշվետվություն ըստ արտադրամասի, աշխատակցի, կարգավիճակի և ժամկետի, նախադիտեք արդյունքը և արտահանեք ամբողջ ֆիլտրված տվյալները CSV։
             </InfoTooltip>
           </div>
         </div>
@@ -59,7 +59,7 @@
             </select>
 
             <select v-model="filters.order_status" class="control">
-              <option value="">Պատվերի բոլոր կարգավիճակները</option>
+              <option value="">Առաջադրանքի բոլոր կարգավիճակները</option>
               <option v-for="status in options.order_statuses || []" :key="status" :value="status">{{ status }}</option>
             </select>
             <select v-model="filters.factory_status" class="control">
@@ -86,7 +86,7 @@
               <option value="unassigned">Չի նշանակված</option>
             </select>
             <select v-model="filters.confirmation" class="control">
-              <option value="">Ադմինի հաստատման բոլոր վիճակները</option>
+              <option value="">Ինժեների հաստատման բոլոր վիճակները</option>
               <option value="waiting">Սպասում է հաստատման</option>
               <option value="confirmed">Հաստատված է</option>
             </select>
@@ -115,7 +115,7 @@
           <div v-if="orders.length" class="hidden overflow-x-auto lg:block">
             <table class="w-full min-w-[980px] text-left">
               <thead class="bg-slate-50 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40">
-                <tr><th class="px-6 py-3.5">Պատվեր</th><th class="px-4 py-3.5">Հաճախորդ</th><th class="px-4 py-3.5">Արտադրամաս / աշխատակից</th><th class="px-4 py-3.5">Վերջնաժամկետ</th><th class="px-6 py-3.5">Կարգավիճակ</th></tr>
+                <tr><th class="px-6 py-3.5">Առաջադրանք</th><th class="px-4 py-3.5">Հաճախորդ</th><th class="px-4 py-3.5">Արտադրամաս / աշխատակից</th><th class="px-4 py-3.5">Վերջնաժամկետ</th><th class="px-6 py-3.5">Կարգավիճակ</th></tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                 <tr v-for="order in orders" :key="order.id" class="hover:bg-slate-50/70 dark:hover:bg-slate-950/30">
@@ -177,11 +177,11 @@ export default {
   computed: {
     presets() {
       return [
-        { key: 'overdue', label: 'Ուշացած պատվերներ', value: this.summary.overdue_orders || 0, hint: 'Ակտիվ պատվերներ անցած վերջնաժամկետով' },
+        { key: 'overdue', label: 'Ուշացած առաջադրանքներ', value: this.summary.overdue_orders || 0, hint: 'Ակտիվ առաջադրանքներ անցած վերջնաժամկետով' },
         { key: 'today', label: 'Այսօր ավարտվող', value: this.summary.due_today || 0, hint: 'Այսօրվա վերջնաժամկետով աշխատանքներ' },
         { key: 'unassigned', label: 'Չնշանակված', value: this.summary.unassigned_factory_steps || 0, hint: 'Արտադրամասային քայլեր առանց աշխատակցի' },
-        { key: 'confirmation', label: 'Ադմինի հաստատում', value: this.summary.awaiting_admin_confirmation || 0, hint: 'Ավարտված, բայց դեռ չհաստատված քայլեր' },
-        { key: 'nodeadline', label: 'Առանց ժամկետի', value: this.summary.without_deadline || 0, hint: 'Ակտիվ պատվերներ առանց վերջնաժամկետի' },
+        { key: 'confirmation', label: 'Ինժեների հաստատում', value: this.summary.awaiting_admin_confirmation || 0, hint: 'Ավարտված, բայց դեռ չհաստատված քայլեր' },
+        { key: 'nodeadline', label: 'Առանց ժամկետի', value: this.summary.without_deadline || 0, hint: 'Ակտիվ առաջադրանքներ առանց վերջնաժամկետի' },
       ]
     },
     operatorOptions() {

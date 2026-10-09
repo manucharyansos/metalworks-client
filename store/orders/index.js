@@ -77,7 +77,7 @@ export const actions = {
       return order
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || 'Չհաջողվեց ստեղծել պատվերը'
+        error.response?.data?.message || 'Չհաջողվեց ստեղծել առաջադրանքը'
       commit('ERROR', errorMessage)
       throw new Error(errorMessage)
     }

@@ -233,3 +233,85 @@ test('manager status form remains open after an API error and sends the selected
   assert.equal(vm.isEditOpen, false)
   vm.$destroy()
 })
+
+test('required completion evidence blocks empty text and validates photo type and size before submission', () => {
+  for (const method of ['text', 'photo']) {
+    const vm = component('components/factory/OrderActionModal.vue', {
+      propsData: { actionOptions: actions, cancelReasons: [], factoryOrder: { confirmation_required: true, confirmation_method: method } },
+    })
+    vm.localSelectedOption = actions[3]
+    const sent = []; vm.$emit = (...args) => sent.push(args)
+    vm.confirm(); assert.equal(sent.length, 0)
+    if (method === 'text') { vm.evidenceText = '  '; assert.equal(vm.canConfirm, false); vm.evidenceText = '  Work completed and checked  ' }
+    else {
+      const invalid = { target: { files: [{ type: 'image/svg+xml', size: 10 }], value: 'x' } }
+      vm.selectPhoto(invalid); assert.equal(vm.canConfirm, false); assert.equal(invalid.target.value, '')
+      vm.selectPhoto({ target: { files: [{ type: 'image/jpeg', size: 11 * 1024 * 1024 }], value: 'x' } }); assert.equal(vm.canConfirm, false)
+      vm.selectPhoto({ target: { files: [{ type: 'image/png', size: 12345 }], value: 'x' } })
+    }
+    assert.equal(vm.canConfirm, true); vm.confirm()
+    if (method === 'text') assert.equal(sent[0][1].evidence_text, 'Work completed and checked')
+    else assert.equal(sent[0][1].evidence_photo.type, 'image/png')
+    vm.reset(); assert.equal(vm.evidenceText, ''); assert.equal(vm.evidencePhoto, null)
+    vm.$destroy()
+  }
+})
+
+for (const name of ['pages/factory/laser/index.vue', 'pages/factory/bend/index.vue', 'components/factory/FactoryOrdersBoard.vue']) {
+  test(`${name}: finishing by drag requires the configured evidence dialog`, async () => {
+    let sends = 0
+    const item = order(); item.factory_orders[0].confirmation_required = true; item.factory_orders[0].confirmation_method = 'text'
+    const vm = component(name, { state: { currentFactoryId: 1, currentUserId: 7, actionOptions: actions }, methods: { doneFinishedOrder: async () => { sends++; return true } }, computed: { getOrderByFactories: () => ({ orders: [] }) } })
+    await vm.updateOrderStatusByDrag(item, 'finished')
+    assert.equal(sends, 0); assert.equal(vm.isModal, true); assert.equal(vm.initialStatus, 'finished')
+    vm.$destroy()
+  })
+}
+
+test('reference sharing exposes only production destinations and retains independent checkbox selections per file', () => {
+  const vm = component('components/engineer/TaskCreationOptions.vue', { propsData: {
+    files: [{ id: 10, factory_id: 1 }, { id: 11, factory_id: 2 }, { id: 12, factory_id: 3 }],
+    factories: [{ id: 1, value: 'INFO' }, { id: 2, value: 'DXF' }, { id: 3, value: 'DLD' }, { id: 4, value: 'PDF' }],
+    referenceVisibility: { 10: [2] },
+  } })
+  assert.deepEqual(vm.referenceFiles.map(file => file.id), [10])
+  assert.deepEqual(vm.workshops.map(factory => factory.id), [2, 3])
+  const sent = []; vm.$emit = (...args) => sent.push(args)
+  vm.selectWorkshop(10, 3, true)
+  assert.deepEqual(sent[0], ['update:referenceVisibility', { 10: [2, 3] }])
+  vm.selectWorkshop(10, 2, false)
+  assert.deepEqual(sent[1], ['update:referenceVisibility', { 10: [] }])
+  vm.$destroy()
+})
+
+test('evidence upload uses multipart POST while text and ordinary actions retain JSON PUT', () => {
+  const { taskActionBody } = load('utils/task-workflow.js')
+  const plain = { factory_id: 3, factory_order: { status: 'finished', evidence_text: 'Complete' } }
+  assert.deepEqual(taskActionBody(plain), { method: 'put', body: plain })
+  const photo = new Blob(['photo bytes'], { type: 'image/png' })
+  const upload = taskActionBody({ ...plain, evidence_photo: photo })
+  assert.equal(upload.method, 'post'); assert.equal(upload.body.get('factory_id'), '3')
+  assert.equal(upload.body.get('factory_order[status]'), 'finished'); assert.equal(upload.body.get('evidence_photo').type, 'image/png')
+})
+
+test('only the creating engineer sees the confirmation action and failed confirmation retains the proof', async () => {
+  for (const [role, id, allowed] of [['admin', 5, false], ['manager', 5, false], ['engineer', 6, false], ['engineer', 5, true]]) {
+    const vm = component('components/order/TaskCompletionProof.vue', { propsData: { step: { id: 3, awaiting_engineer_confirmation: true, confirmation_required: true, evidence_text: 'Complete' }, creatorId: 5 } })
+    vm.$auth = { user: { role: { name: role }, id } }
+    assert.equal(vm.canConfirm, allowed)
+    const sent = []; vm.$emit = (...args) => sent.push(args)
+    vm.$axios = { post: async () => { throw { response: { data: { message: 'Try again' } } } } }
+    await vm.confirm()
+    if (allowed) { assert.equal(vm.error, 'Try again'); assert.equal(vm.step.evidence_text, 'Complete'); assert.equal(vm.saving, false) }
+    assert.equal(sent.length, 0)
+    vm.$destroy()
+  }
+})
+
+test('in-progress confirmed steps cannot be counted as completed and evidence-required finishes wait for the engineer', () => {
+  const { isStepCompleted } = load('utils/task-workflow.js')
+  assert.equal(isStepCompleted({ status: 'confirmed' }), false)
+  assert.equal(isStepCompleted({ status: 'finished', confirmation_required: false }), true)
+  assert.equal(isStepCompleted({ status: 'finished', confirmation_required: true }), false)
+  assert.equal(isStepCompleted({ status: 'finished', confirmation_required: true, engineer_confirmation_at: '2026-10-09' }), true)
+})

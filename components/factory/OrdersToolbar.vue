@@ -2,8 +2,8 @@
   <div class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
     <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
       <div class="flex min-w-0 items-center gap-2">
-        <h2 class="text-lg font-black text-slate-950 dark:text-white">Արտադրական պատվերներ</h2>
-        <InfoTooltip>Որոնեք պատվերը և ֆիլտրեք ընթացքի կարգավիճակով։</InfoTooltip>
+        <h2 class="text-lg font-black text-slate-950 dark:text-white">Արտադրական առաջադրանքներ</h2>
+        <InfoTooltip>Որոնեք առաջադրանքը և ֆիլտրեք ընթացքի կարգավիճակով։</InfoTooltip>
       </div>
 
       <div class="relative w-full xl:w-[380px]">

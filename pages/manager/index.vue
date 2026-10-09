@@ -3,7 +3,7 @@
     <div class="mx-auto max-w-[1500px] space-y-6">
       <section class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div class="flex items-center gap-2">
-          <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Պատվերների կառավարում</h1>
+          <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Առաջադրանքների կառավարում</h1>
           <InfoTooltip>Աշխատանքային պատկերը՝ միայն ձեզ տրված ֆունկցիաների սահմաններում։</InfoTooltip>
         </div>
         <button type="button" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300" :disabled="loading" @click="refreshDashboard">
@@ -17,7 +17,7 @@
           <div class="metric-icon bg-blue-50 text-blue-700 dark:bg-blue-950/35 dark:text-blue-300">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2Zm2 4h6M9 12h6M9 16h4" /></svg>
           </div>
-          <div><p class="metric-label">Պատվերներ</p><p class="metric-value">{{ allOrders.length }}</p></div>
+          <div><p class="metric-label">Առաջադրանքներ</p><p class="metric-value">{{ allOrders.length }}</p></div>
         </div>
         <div class="metric-card" :class="!$can('materials.view') ? 'opacity-55' : ''">
           <div class="metric-icon bg-violet-50 text-violet-700 dark:bg-violet-950/35 dark:text-violet-300">
@@ -42,7 +42,7 @@
       <section class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex flex-col gap-3 border-b border-slate-100 p-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
-            <h2 class="mt-1 text-lg font-black text-slate-900 dark:text-white">Վերջին պատվերները</h2>
+            <h2 class="mt-1 text-lg font-black text-slate-900 dark:text-white">Վերջին առաջադրանքները</h2>
           </div>
           <div class="relative w-full sm:w-80">
             <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0Z" /></svg>
@@ -56,15 +56,15 @@
 
         <div v-else-if="!searchFilter.length" class="flex min-h-[260px] flex-col items-center justify-center px-6 text-center">
           <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">0</div>
-          <p class="mt-3 text-sm font-bold text-slate-700 dark:text-slate-200">Պատվեր չի գտնվել</p>
-          <p class="mt-1 text-xs text-slate-400">Փոխեք որոնումը կամ սպասեք նոր պատվերի։</p>
+          <p class="mt-3 text-sm font-bold text-slate-700 dark:text-slate-200">Առաջադրանք չի գտնվել</p>
+          <p class="mt-1 text-xs text-slate-400">Փոխեք որոնումը կամ սպասեք նոր առաջադրանքի։</p>
         </div>
 
         <template v-else>
           <div class="hidden overflow-x-auto md:block">
             <table class="w-full min-w-[820px] text-left">
               <thead class="bg-slate-50/80 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40">
-                <tr><th class="px-6 py-3.5">Պատվեր</th><th class="px-4 py-3.5">Կոդ</th><th class="px-4 py-3.5">Անվանում</th><th class="px-4 py-3.5">Ժամկետ</th><th class="px-4 py-3.5">Կարգավիճակ</th></tr>
+                <tr><th class="px-6 py-3.5">Առաջադրանք</th><th class="px-4 py-3.5">Կոդ</th><th class="px-4 py-3.5">Անվանում</th><th class="px-4 py-3.5">Ժամկետ</th><th class="px-4 py-3.5">Կարգավիճակ</th></tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                 <tr v-for="order in searchFilter" :key="order.id" class="transition hover:bg-slate-50/70 dark:hover:bg-slate-950/30">

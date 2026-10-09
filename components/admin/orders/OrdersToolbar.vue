@@ -5,7 +5,7 @@
     <div class="flex-1 space-y-4">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-          Պատվերներ
+          Առաջադրանքներ
         </h1>
       </div>
 

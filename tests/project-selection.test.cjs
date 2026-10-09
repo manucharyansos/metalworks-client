@@ -6,6 +6,7 @@ const Vue = require('vue')
 
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
+const taskUrl = moduleUrl(read('utils/task-workflow.js'))
 const policyUrl = moduleUrl(read('utils/factory-file-policy.js'))
 async function component(file) {
   let source = read(file).match(/<script>([\s\S]*?)<\/script>/)[1]
@@ -237,7 +238,7 @@ test('saved subgroups navigate by their server ID and preserve existing group fi
 })
 
 test('legacy API compatibility reads the real factory list and relies on existing server format validation', async () => {
-  const { actions } = await import(moduleUrl(read('store/factory/index.js')))
+  const { actions } = await import(moduleUrl(read('store/factory/index.js').replace("'@/utils/task-workflow'", `'${taskUrl}'`)))
   for (const status of [404, 405]) {
     const calls = [], commits = []
     const policies = await actions.fetchFactoryFilePolicies.call({ $axios: { get: async url => {
@@ -256,7 +257,7 @@ test('legacy API compatibility reads the real factory list and relies on existin
 })
 
 test('policy auth, network, and server errors never enable the compatibility picker', async () => {
-  const { actions } = await import(moduleUrl(read('store/factory/index.js')))
+  const { actions } = await import(moduleUrl(read('store/factory/index.js').replace("'@/utils/task-workflow'", `'${taskUrl}'`)))
   for (const status of [401, 403, 419, 422, 429, 500, undefined]) {
     const calls = []
     await assert.rejects(actions.fetchFactoryFilePolicies.call({ $axios: { get: async url => {

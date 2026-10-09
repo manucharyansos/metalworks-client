@@ -361,6 +361,13 @@
               </div>
             </template>
           </create-order-form>
+          <TaskCreationOptions
+            :confirmation-required.sync="confirmationRequired"
+            :confirmation-method.sync="confirmationMethod"
+            :reference-visibility.sync="referenceVisibility"
+            :files="effectiveFiles"
+            :factories="getFactory || []"
+          />
           <p class="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
             {{ $t('order_create.files_hint') }}
           </p>
@@ -381,6 +388,13 @@
           class="order-files"
           @files-selected="handleFilesSelected"
           @back="isFiles = false"
+        />
+        <TaskCreationOptions
+          :confirmation-required.sync="confirmationRequired"
+          :confirmation-method.sync="confirmationMethod"
+          :reference-visibility.sync="referenceVisibility"
+          :files="effectiveFiles"
+          :factories="getFactory || []"
         />
         <div class="mt-6 border-t border-slate-200 pt-5 dark:border-slate-800">
           <h3 class="mb-4 text-sm font-semibold">
@@ -458,6 +472,8 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import TaskCreationOptions from '@/components/engineer/TaskCreationOptions.vue'
+import { isReferenceFactory, taskCopy } from '@/utils/task-workflow'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import CreateOrderForm from '~/components/modals/create/CreateOrderForm.vue'
@@ -467,6 +483,7 @@ import PermissionDenied from '@/components/modals/permission/PermissionDenied.vu
 
 export default {
   components: {
+    TaskCreationOptions,
     PermissionDenied,
     InputWithLabels,
     SelectWithLabel,
@@ -503,6 +520,9 @@ export default {
       pmpFileRequestId: 0,
 
       factoryOperators: {},
+      confirmationRequired: false,
+      confirmationMethod: '',
+      referenceVisibility: {},
     }
   },
   computed: {
@@ -562,13 +582,20 @@ export default {
       return null
     },
 
+    effectiveFiles() {
+      return this.files_existing
+        ? this.subgroupFiles.filter((file) =>
+            this.selectedFiles.some((id) => Number(id) === Number(file.id))
+          )
+        : this.subgroupFiles
+    },
     users() {
       return this.allClients
     },
 
     selectedFactories() {
-      const files = this.subgroupFiles
-      const factoryIds = new Set()
+      const files = this.effectiveFiles
+      const factoryIds = new Set(files.map((file) => Number(file.factory_id)))
 
       this.selectedFiles.forEach((fileId) => {
         const file = files.find((f) => Number(f.id) === Number(fileId))
@@ -579,7 +606,7 @@ export default {
 
       const stores = Array.isArray(this.getFactory) ? this.getFactory : []
       return stores
-        .filter((f) => factoryIds.has(Number(f.id)))
+        .filter((f) => factoryIds.has(Number(f.id)) && !isReferenceFactory(f))
         .map((f) => ({ ...f, operators: f.operators || [] }))
     },
 
@@ -599,6 +626,9 @@ export default {
       // The existing API uses false for all subgroup files, true for a selection.
       return (
         this.canProceedToFiles &&
+        (!this.confirmationRequired ||
+          ['photo', 'text'].includes(this.confirmationMethod)) &&
+        this.selectedFactories.length > 0 &&
         !this.isEditingMode &&
         (!this.files_existing || this.validSelectedFiles)
       )
@@ -629,6 +659,9 @@ export default {
     },
   },
   watch: {
+    confirmationRequired(value) {
+      if (!value) this.confirmationMethod = ''
+    },
     selectedPmp(newVal, oldVal) {
       if (!newVal || newVal.id !== oldVal?.id) {
         this.selectedPmpRemoteNumber = null
@@ -722,6 +755,7 @@ export default {
       this.selectedFiles = []
       this.fileQuantities = {}
       this.factoryOperators = {}
+      this.referenceVisibility = {}
       this.autoOpenFactoryId = null
       this.orderPmp = null
       this.files_existing = false
@@ -748,7 +782,7 @@ export default {
       }, {})
 
       this.$notify({
-        text: 'Ֆայլերը ընտրված են, ընտրեք կատարող(ներ) և պահպանեք պատվերը։',
+        text: 'Ֆայլերը ընտրված են, ընտրեք կատարող(ներ) և պահպանեք առաջադրանքը։',
         duration: 3000,
         speed: 1000,
         position: 'top',
@@ -813,6 +847,17 @@ export default {
         return
       }
 
+      if (
+        this.confirmationRequired &&
+        !['photo', 'text'].includes(this.confirmationMethod)
+      ) {
+        this.$notify({
+          text: (taskCopy[this.$i18n?.locale] || taskCopy.hy).invalidMethod,
+          type: 'error',
+        })
+        this.isLoading = false
+        return
+      }
       const factoryOperatorsArray = Object.entries(this.factoryOperators)
         .filter(([factoryId, userId]) => !!userId)
         .map(([factoryId, userId]) => ({
@@ -821,6 +866,27 @@ export default {
         }))
 
       const data = {
+        confirmation_required: this.confirmationRequired,
+        confirmation_method: this.confirmationRequired
+          ? this.confirmationMethod
+          : null,
+        reference_file_visibility: this.effectiveFiles
+          .filter((file) =>
+            isReferenceFactory(
+              (this.getFactory || []).find(
+                (factory) => Number(factory.id) === Number(file.factory_id)
+              )
+            )
+          )
+          .map((file) => ({
+            file_id: file.id,
+            factory_ids: (this.referenceVisibility[file.id] || []).filter(
+              (id) =>
+                this.selectedFactories.some(
+                  (factory) => Number(factory.id) === Number(id)
+                )
+            ),
+          })),
         user_id: this.selectedClient.user.id,
         creator_id: this.$auth.user.id,
         name: `${this.selectedPmp.group}.${this.selectedPmpRemoteNumber}`,
@@ -841,7 +907,7 @@ export default {
       try {
         await this.createNewOrder(data)
         this.$notify({
-          text: `Պատվերը հաջողությամբ ստեղծվեց${
+          text: `Առաջադրանքը հաջողությամբ ստեղծվեց${
             this.selectedFiles.length > 0
               ? ` ${this.selectedFiles.length} ֆայլով`
               : ''
@@ -946,6 +1012,8 @@ export default {
       this.finishDate = ''
       this.quantity = null
       this.formSubmitted = false
+      this.confirmationRequired = false
+      this.confirmationMethod = ''
       this.isFiles = false
       this.remote_number_id = null
       this.resetPmpFileSelection()

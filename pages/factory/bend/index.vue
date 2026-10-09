@@ -71,18 +71,18 @@
                   v-if="!column.orders.length"
                   class="mt-2 flex items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white/60 p-3 text-center text-xs text-gray-400 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-500"
                 >
-                  Քաշեք պատվերներ այստեղ
+                  Քաշեք առաջադրանքներ այստեղ
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <!-- Եթե լրիվ պատվերներ չկան -->
+        <!-- Եթե լրիվ առաջադրանքներ չկան -->
         <div
           v-else
           class="mt-10 flex items-center justify-center rounded-2xl bg-white p-8 text-center text-sm text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-300"
         >
-          Պատվերներ չկան։
+          Առաջադրանքներ չկան։
         </div>
 
         <!-- Pagination -->
@@ -104,6 +104,7 @@
       :today-formatted="todayFormatted"
       :tomorrow-date="tomorrowDate"
       :order="selectedOrder"
+      :factory-order="selectedFactoryOrder"
       :initial-status="initialStatus"
       :initial-reason="selectedFactoryOrder?.canceling || ''"
       :initial-date="selectedFactoryOrder?.cancel_date || ''"
@@ -218,7 +219,7 @@ export default {
       statusOptions: [],
       actionOptions: [],
       cancelReasons: [
-        { label: 'Ոչ հստակ պատվեր', value: 'unclear' },
+        { label: 'Ոչ հստակ առաջադրանք', value: 'unclear' },
         { label: 'Սխալ տվյալներ', value: 'wrong_data' },
         { label: 'Նյութի բացակայություն', value: 'no_material' },
         { label: 'Այլ պատճառ', value: 'other' },
@@ -472,7 +473,7 @@ export default {
         String(fo.operator_id) !== String(this.currentUserId)
       ) {
         this.$notify({
-          text: 'Պատվերը զբաղված է այլ օպերատորի կողմից',
+          text: 'Առաջադրանքը զբաղված է այլ օպերատորի կողմից',
           type: 'warning',
         })
         return
@@ -510,6 +511,8 @@ export default {
         },
       }
 
+      if (payload.evidence_text) finalPayload.factory_order.evidence_text = payload.evidence_text
+      if (payload.evidence_photo) finalPayload.evidence_photo = payload.evidence_photo
       this.isSaving = true
       let success = false
       try {
@@ -525,7 +528,7 @@ export default {
         this.closeModal()
       } else {
         this.$notify({
-          text: 'Չհաջողվեց թարմացնել պատվերը։ Փորձեք կրկին։',
+          text: 'Չհաջողվեց թարմացնել առաջադրանքը։ Փորձեք կրկին։',
           type: 'error',
         })
       }
@@ -562,7 +565,7 @@ export default {
 
       if (isFactoryOrderFinished(fo.status)) {
         this.$notify({
-          text: 'Արդեն ավարտված պատվերի կարգավիճակը չի կարող փոխվել։',
+          text: 'Արդեն ավարտված առաջադրանքի կարգավիճակը չի կարող փոխվել։',
           duration: 3000,
           position: 'top',
           type: 'info',
@@ -576,7 +579,7 @@ export default {
         String(fo.operator_id) !== String(this.currentUserId)
       ) {
         this.$notify({
-          text: 'Պատվերը ընդունված է այլ օպերատորի կողմից, դուք չեք կարող փոխել։',
+          text: 'Առաջադրանքը ընդունված է այլ օպերատորի կողմից, դուք չեք կարող փոխել։',
           duration: 3000,
           position: 'top',
           type: 'warning',
@@ -585,7 +588,7 @@ export default {
       }
 
       // Ask for the action's required data instead of inventing a reason or date.
-      if (['canceled', 'date_changed'].includes(newStatus)) {
+      if (['canceled', 'date_changed'].includes(newStatus) || (newStatus === 'finished' && fo.confirmation_required)) {
         this.updateOrder(order, newStatus)
         return
       }

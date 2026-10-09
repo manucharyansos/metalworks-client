@@ -235,6 +235,7 @@
       :today-formatted="todayFormatted"
       :tomorrow-date="tomorrowDate"
       :order="selectedOrder"
+      :factory-order="factoryOrder(selectedOrder)"
       :initial-status="factoryOrder(selectedOrder)?.status || null"
       :initial-reason="factoryOrder(selectedOrder)?.canceling || ''"
       :initial-date="factoryOrder(selectedOrder)?.cancel_date || ''"
@@ -271,6 +272,7 @@
 </template>
 
 <script>
+import { taskActionBody } from '@/utils/task-workflow'
 import { mapActions } from 'vuex'
 import OrderActionModal from '@/components/factory/OrderActionModal.vue'
 import { localFactoryDate } from '@/utils/factory-order-status'
@@ -283,15 +285,15 @@ const COPY = {
     chooseFactory: 'Ընտրել արտադրամաս',
     refresh: 'Թարմացնել',
     factory: 'Արտադրամաս',
-    orders: 'Պատվերներ',
+    orders: 'Առաջադրանքներ',
     access: 'Հասանելիություն',
     fullAccess: 'Մենեջերի լիարժեք հասանելիություն',
-    factoryOrders: 'Արտադրամասի պատվերներ',
+    factoryOrders: 'Արտադրամասի առաջադրանքներ',
     search: 'Համար, անուն, կոդ...',
     loading: 'Բեռնվում է...',
     noFactory: 'Այս բաժնի համար համապատասխան արտադրամաս չի գտնվել։',
-    noOrders: 'Պատվեր չի գտնվել',
-    order: 'Պատվեր',
+    noOrders: 'Առաջադրանք չի գտնվել',
+    order: 'Առաջադրանք',
     code: 'Կոդ',
     name: 'Անվանում',
     operator: 'Օպերատոր',
@@ -300,17 +302,17 @@ const COPY = {
     unassigned: 'Չնշված',
     view: 'Դիտել',
     edit: 'Փոխել',
-    saved: 'Պատվերը թարմացվեց',
-    saveError: 'Չհաջողվեց թարմացնել պատվերը',
+    saved: 'Առաջադրանքը թարմացվեց',
+    saveError: 'Չհաջողվեց թարմացնել առաջադրանքը',
     titles: {
       laser: 'Լազերային կտրման կառավարում',
       bend: 'Կռման կառավարում',
       powder: 'Փոշեներկման կառավարում',
     },
     help: {
-      laser: 'Դիտեք և կառավարեք լազերային կտրման բոլոր բաց պատվերները։',
-      bend: 'Դիտեք և կառավարեք կռման բոլոր բաց պատվերները։',
-      powder: 'Դիտեք և կառավարեք փոշեներկման բոլոր բաց պատվերները։',
+      laser: 'Դիտեք և կառավարեք լազերային կտրման բոլոր բաց առաջադրանքները։',
+      bend: 'Դիտեք և կառավարեք կռման բոլոր բաց առաջադրանքները։',
+      powder: 'Դիտեք և կառավարեք փոշեներկման բոլոր բաց առաջադրանքները։',
     },
     statuses: {
       confirmed: 'Կատարվում է',
@@ -611,18 +613,11 @@ export default {
       this.isSaving = true
       let success = false
       try {
-        await this.$axios.put(
-          `/api/factories/updateOrder/${this.selectedOrder.id}`,
-          {
-            factory_id: this.selectedFactoryId,
-            factory_order: {
-              status: payload.status,
-              canceling: payload.canceling,
-              cancel_date: payload.cancel_date,
-              operator_finish_date: payload.operator_finish_date,
-            },
-          }
-        )
+        const order = { factory_id: this.selectedFactoryId, factory_order: { status: payload.status, canceling: payload.canceling, cancel_date: payload.cancel_date, operator_finish_date: payload.operator_finish_date } }
+        if (payload.evidence_text) order.factory_order.evidence_text = payload.evidence_text
+        if (payload.evidence_photo) order.evidence_photo = payload.evidence_photo
+        const { method, body } = taskActionBody(order)
+        await this.$axios[method](`/api/factories/updateOrder/${this.selectedOrder.id}`, body)
         success = true
         await this.loadOrders()
       } catch (e) {

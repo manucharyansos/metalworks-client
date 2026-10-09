@@ -12,7 +12,7 @@ export const state = () => ({
     prev_page_url: null,
   },
   filters: {
-    search: '',
+    search: '', confirmation: '',
   },
   loading: false,
   error: null,
@@ -47,6 +47,7 @@ export const mutations = {
     state.order = order || null
   },
 
+  SET_CONFIRMATION(state, value) { state.filters.confirmation = value || '' },
   SET_SEARCH(state, q) {
     state.filters.search = q || ''
   },
@@ -63,7 +64,8 @@ export const mutations = {
 }
 
 export const actions = {
-  async fetchOrders({ commit, state }, { page, perPage, search } = {}) {
+  async fetchOrders({ commit, state }, { page, perPage, search, confirmation } = {}) {
+    if (confirmation !== undefined) commit('SET_CONFIRMATION', confirmation)
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
@@ -73,6 +75,7 @@ export const actions = {
       }
       const q = typeof search === 'string' ? search : state.filters.search
       if (q) params.search = q
+      if (state.filters.confirmation) params.confirmation = state.filters.confirmation
 
       const { data } = await this.$axios.get('/api/engineers/engineer', {
         params,
@@ -82,7 +85,7 @@ export const actions = {
       return true
     } catch (e) {
       console.error(e)
-      commit('SET_ERROR', 'Չհաջողվեց բեռնել պատվերները')
+      commit('SET_ERROR', 'Չհաջողվեց բեռնել առաջադրանքները')
       return false
     } finally {
       commit('SET_LOADING', false)

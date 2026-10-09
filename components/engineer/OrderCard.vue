@@ -11,7 +11,7 @@
           {{ order.prefix_code?.code || '—' }}
         </div>
         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          {{ order.name || 'Անանուն պատվեր' }}
+          {{ order.name || 'Անանուն առաջադրանք' }}
         </h3>
       </div>
 
@@ -61,7 +61,11 @@
           class="px-3 py-1 rounded-full text-xs font-medium text-white"
           :class="factoryStatusClass(fo.status)"
         >
-          {{ formatStatus(fo.status) }}
+          {{
+            fo.awaiting_engineer_confirmation
+              ? (taskCopy[$i18n.locale] || taskCopy.hy).waiting
+              : formatStatus(fo.status)
+          }}
         </span>
       </div>
     </div>
@@ -149,12 +153,16 @@
 </template>
 
 <script>
+import { isStepCompleted, taskCopy } from '@/utils/task-workflow'
 export default {
   props: {
     order: { type: Object, required: true },
   },
 
   computed: {
+    taskCopy() {
+      return taskCopy
+    },
     filesCount() {
       const selected = (this.order.selected_files || []).reduce(
         (a, s) => a + (Number(s.quantity) || 1),
@@ -175,33 +183,26 @@ export default {
 
     // Ընդհանուր կարգավիճակ
     overallStatusText() {
-      const statuses = (this.order.factory_orders || []).map((fo) =>
-        fo.status?.toLowerCase().trim()
-      )
-      if (statuses.length === 0) return 'Չկա'
-
-      if (statuses.includes('canceled')) return 'Չեղարկված'
+      const t = taskCopy[this.$i18n?.locale] || taskCopy.hy
+      const steps = this.order.factory_orders || []
+      if (steps.some((step) => step.awaiting_engineer_confirmation))
+        return t.waiting
       if (
-        statuses.every(
-          (s) => s === 'done' || s === 'completed' || s === 'confirmed'
+        this.order.status === 'completed' ||
+        (steps.length && steps.every((step) => isStepCompleted(step)))
+      )
+        return t.completed
+      if (steps.some((step) => step.status === 'canceled')) return 'Չեղարկված'
+      return t.inProgress
+    },
+    overallStatusClass() {
+      if (
+        (this.order.factory_orders || []).some(
+          (step) => step.awaiting_engineer_confirmation
         )
       )
-        return 'Ավարտված'
-      if (statuses.some((s) => s === 'pending' || s === 'in_progress'))
-        return 'Ընթացքում'
-      return 'Այլ'
-    },
-
-    overallStatusClass() {
-      const statuses = (this.order.factory_orders || []).map((fo) =>
-        fo.status?.toLowerCase().trim()
-      )
-
-      if (statuses.includes('canceled')) return 'bg-rose-600'
-      if (statuses.every((s) => ['done', 'completed', 'confirmed'].includes(s)))
-        return 'bg-emerald-600'
-      if (statuses.some((s) => ['pending', 'in_progress'].includes(s)))
         return 'bg-amber-600'
+      if (this.order.status === 'completed') return 'bg-emerald-600'
       return 'bg-blue-600'
     },
 
@@ -269,7 +270,8 @@ export default {
         in_progress: 'Ընթացքում',
         done: 'Ավարտված',
         completed: 'Ավարտված',
-        confirmed: 'Հաստատված',
+        confirmed: 'Կատարվում է',
+        finished: 'Ավարտված',
         canceled: 'Չեղարկված',
         Ավարտել: 'Ավարտված',
       }
