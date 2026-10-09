@@ -400,6 +400,19 @@
           <h3 class="mb-4 text-sm font-semibold">
             {{ $t('order_create.factory_operators') }}
           </h3>
+          <p class="mb-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            {{ routingText.creationHelp }}
+          </p>
+          <div
+            v-if="workloadError"
+            class="mb-3 text-sm text-red-600"
+            role="alert"
+          >
+            {{ workloadError }}
+            <button type="button" class="ml-2 underline" @click="loadWorkload">
+              {{ routingText.refresh }}
+            </button>
+          </div>
           <div
             v-for="factory in selectedFactories"
             :key="factory.id"
@@ -415,15 +428,15 @@
               v-model="factoryOperators[factory.id]"
               class="order-input"
             >
-              <option :value="null" disabled>
-                {{ $t('order_create.choose_operator') }}
+              <option :value="null">
+                {{ routingText.unassigned }}
               </option>
               <option
                 v-for="user in getFactoryOperatorsFor(factory)"
                 :key="user.id"
                 :value="user.id"
               >
-                {{ user.name }}
+                {{ workloadLabel(user) }}
               </option>
             </select>
           </div>
@@ -474,6 +487,7 @@
 import { mapActions, mapGetters } from 'vuex'
 import TaskCreationOptions from '@/components/engineer/TaskCreationOptions.vue'
 import { isReferenceFactory, taskCopy } from '@/utils/task-workflow'
+import { routingCopy, operatorWorkloadLabel } from '@/utils/task-routing'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import CreateOrderForm from '~/components/modals/create/CreateOrderForm.vue'
@@ -520,12 +534,17 @@ export default {
       pmpFileRequestId: 0,
 
       factoryOperators: {},
+      workload: null,
+      workloadError: '',
       confirmationRequired: false,
       confirmationMethod: '',
       referenceVisibility: {},
     }
   },
   computed: {
+    routingText() {
+      return routingCopy[this.$i18n?.locale] || routingCopy.hy
+    },
     ...mapGetters('factory', ['getFactory']),
     ...mapGetters('clients', ['allClients']),
     ...mapGetters('pmp', ['getPmpes', 'getPmp']),
@@ -690,6 +709,7 @@ export default {
     this.fetchClients()
     this.fetchFactory()
     this.fetchPmps()
+    this.loadWorkload()
   },
   methods: {
     ...mapActions('factory', ['fetchFactory']),
@@ -791,7 +811,24 @@ export default {
     },
 
     getFactoryOperatorsFor(factory) {
-      return factory.operators || []
+      return (
+        this.workload?.factories.find(
+          (item) => Number(item.id) === Number(factory.id)
+        )?.operators ||
+        factory.operators ||
+        []
+      )
+    },
+    workloadLabel(operator) {
+      return operatorWorkloadLabel(operator, this.$i18n.locale)
+    },
+    async loadWorkload() {
+      this.workloadError = ''
+      try {
+        this.workload = await this.$axios.$get('/api/task-workload')
+      } catch (error) {
+        this.workloadError = this.routingText.loadFailed
+      }
     },
 
     async pmpFiles() {

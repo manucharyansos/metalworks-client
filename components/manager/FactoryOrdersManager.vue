@@ -169,6 +169,7 @@
                   <td class="px-6 py-4 text-right whitespace-nowrap">
                     <button
                       class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                      :disabled="detailsLoading"
                       @click="openDetails(order)"
                     >
                       {{ t.view }}</button
@@ -212,6 +213,7 @@
               <div class="mt-4 flex justify-end gap-2">
                 <button
                   class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300"
+                  :disabled="detailsLoading"
                   @click="openDetails(order)"
                 >
                   {{ t.view }}</button
@@ -256,8 +258,14 @@
           class="absolute right-4 top-4 z-10 rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
           @click="isDetailsOpen = false"
         >
-          ✕</button
-        ><component
+          ✕
+        </button>
+        <TaskRoutingPanel
+          :order="selectedOrder"
+          class="mb-5"
+          @updated="handleRoutingUpdated"
+        />
+        <component
           :is="detailsComponent"
           :details="selectedOrder"
           :dxf-url="dxfUrl"
@@ -279,6 +287,7 @@ import { localFactoryDate } from '@/utils/factory-order-status'
 import LaserOrderDetailsPanel from '@/components/factory/laser/LaserOrderDetailsPanel.vue'
 import BendOrderDetailsPanel from '@/components/factory/bend/BendOrderDetailsPanel.vue'
 import FactoryOrderDetailsPanel from '@/components/factory/FactoryOrderDetailsPanel.vue'
+import TaskRoutingPanel from '@/components/order/TaskRoutingPanel.vue'
 
 const COPY = {
   hy: {
@@ -304,6 +313,7 @@ const COPY = {
     edit: 'Փոխել',
     saved: 'Առաջադրանքը թարմացվեց',
     saveError: 'Չհաջողվեց թարմացնել առաջադրանքը',
+    detailsError: 'Չհաջողվեց բեռնել առաջադրանքի մանրամասները',
     titles: {
       laser: 'Լազերային կտրման կառավարում',
       bend: 'Կռման կառավարում',
@@ -347,6 +357,7 @@ const COPY = {
     edit: 'Изменить',
     saved: 'Заказ обновлён',
     saveError: 'Не удалось обновить заказ',
+    detailsError: 'Не удалось загрузить детали задания',
     titles: {
       laser: 'Управление лазерной резкой',
       bend: 'Управление гибкой',
@@ -392,6 +403,7 @@ const COPY = {
     edit: 'Edit',
     saved: 'Order updated',
     saveError: 'Could not update order',
+    detailsError: 'Could not load task details',
     titles: {
       laser: 'Laser cutting management',
       bend: 'Bending management',
@@ -417,6 +429,7 @@ const COPY = {
 export default {
   name: 'FactoryOrdersManager',
   components: {
+    TaskRoutingPanel,
     OrderActionModal,
     LaserOrderDetailsPanel,
     BendOrderDetailsPanel,
@@ -433,6 +446,7 @@ export default {
       isSaving: false,
       isEditOpen: false,
       isDetailsOpen: false,
+      detailsLoading: false,
       selectedOrder: {},
       dxfUrl: '',
       actionOptions: [],
@@ -507,6 +521,10 @@ export default {
     await Promise.all([this.loadFactories(), this.loadOptions()])
   },
   methods: {
+    async handleRoutingUpdated(order) {
+      this.selectedOrder = order
+      await this.loadOrders()
+    },
     ...mapActions('factory', ['downloadUploadedFile']),
     matchesKind(factory) {
       const value = String(factory?.value || '').toUpperCase()
@@ -591,10 +609,22 @@ export default {
       const key = String(status || 'none').toLowerCase()
       return this.t.statuses[key] || status || this.t.statuses.none
     },
-    openDetails(order) {
-      this.selectedOrder = order
-      this.isDetailsOpen = true
-      this.dxfUrl = ''
+    async openDetails(order) {
+      if (this.detailsLoading) return
+      this.detailsLoading = true
+      try {
+        const { data } = await this.$axios.get(`/api/orders/${order.id}`)
+        this.selectedOrder = data
+        this.isDetailsOpen = true
+        this.dxfUrl = ''
+      } catch (error) {
+        this.$notify({
+          type: 'error',
+          text: error.response?.data?.message || this.t.detailsError,
+        })
+      } finally {
+        this.detailsLoading = false
+      }
     },
     openEdit(order) {
       if (this.isSaving) return
@@ -613,11 +643,24 @@ export default {
       this.isSaving = true
       let success = false
       try {
-        const order = { factory_id: this.selectedFactoryId, factory_order: { status: payload.status, canceling: payload.canceling, cancel_date: payload.cancel_date, operator_finish_date: payload.operator_finish_date } }
-        if (payload.evidence_text) order.factory_order.evidence_text = payload.evidence_text
-        if (payload.evidence_photo) order.evidence_photo = payload.evidence_photo
+        const order = {
+          factory_id: this.selectedFactoryId,
+          factory_order: {
+            status: payload.status,
+            canceling: payload.canceling,
+            cancel_date: payload.cancel_date,
+            operator_finish_date: payload.operator_finish_date,
+          },
+        }
+        if (payload.evidence_text)
+          order.factory_order.evidence_text = payload.evidence_text
+        if (payload.evidence_photo)
+          order.evidence_photo = payload.evidence_photo
         const { method, body } = taskActionBody(order)
-        await this.$axios[method](`/api/factories/updateOrder/${this.selectedOrder.id}`, body)
+        await this.$axios[method](
+          `/api/factories/updateOrder/${this.selectedOrder.id}`,
+          body
+        )
         success = true
         await this.loadOrders()
       } catch (e) {

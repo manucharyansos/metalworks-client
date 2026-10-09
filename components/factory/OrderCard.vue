@@ -80,8 +80,14 @@
       v-if="isTakenByOther"
       class="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-rose-500"
     >
-      <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>Առաջադրանքը վերցված
-      է այլ օպերատորի կողմից
+      <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>Առաջադրանքը
+      վերցված է այլ օպերատորի կողմից
+    </p>
+    <p
+      v-else-if="factoryOrder?.is_blocked"
+      class="mt-3 text-xs font-semibold text-amber-700 dark:text-amber-300"
+    >
+      {{ routingText.blocked }}
     </p>
     <p
       v-else-if="isCompleted"
@@ -134,6 +140,7 @@
 </template>
 
 <script>
+import { routingCopy } from '@/utils/task-routing'
 import {
   isFactoryOrderFinished,
   normalizeFactoryOrderStatus,
@@ -149,6 +156,9 @@ export default {
     saving: { type: Boolean, default: false },
   },
   computed: {
+    routingText() {
+      return routingCopy[this.$i18n?.locale] || routingCopy.hy
+    },
     factoryOrder() {
       if (!this.order.factory_orders) return null
       return this.order.factory_orders.find(
@@ -178,7 +188,11 @@ export default {
       return isFactoryOrderFinished(this.status)
     },
     isWorkLocked() {
-      return this.isTakenByOther || this.isCompleted
+      return (
+        this.isTakenByOther ||
+        this.isCompleted ||
+        Boolean(this.factoryOrder?.is_blocked)
+      )
     },
     isLocked() {
       return (

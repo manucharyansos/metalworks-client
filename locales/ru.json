@@ -105,6 +105,7 @@
     "language": "Язык"
   },
   "workspace_layout": {
+    "operator_workload": "Загрузка операторов",
     "phone_not_set": "Телефон не указан",
     "navigation": "Навигация",
     "management": "Управление",

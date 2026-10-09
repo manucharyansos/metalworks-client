@@ -92,6 +92,7 @@ export default {
       isSidebarOpen: false,
       navItems: [
         { to: '/engineer', labelKey: 'workspace_layout.orders', permission: 'orders.view', icon: 'orders', exact: true },
+        { to: '/engineer/workload', labelKey: 'workspace_layout.operator_workload', permission: 'orders.view', icon: 'orders', exact: true },
         { to: '/engineer/files', labelKey: 'workspace_layout.projects_files', permission: 'pmp.view', icon: 'files', exact: false },
         { to: '/engineer/orders/create', labelKey: 'workspace_layout.create_order', permission: 'orders.create', icon: 'plus', exact: true },
         { to: '/profile', labelKey: 'workspace_layout.profile', permission: null, icon: 'profile', exact: true },
