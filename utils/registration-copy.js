@@ -72,9 +72,9 @@ const copy = {
 
 export function registrationCopy(locale) {
   const selection = {
-    hy: { allCompanies: 'Բոլոր ընկերությունները', reviewIntro: 'Աշխատակիցների և հաճախորդների հարցումները բոլոր այն ընկերություններից, որոնք կարող եք կառավարել։' },
-    ru: { allCompanies: 'Все компании', reviewIntro: 'Заявки сотрудников и клиентов всех компаний, которыми вы можете управлять.' },
-    en: { allCompanies: 'All companies', reviewIntro: 'Employee and client requests from all companies you can manage.' },
+    hy: { allCompanies: 'Բոլոր ընկերությունները', clientRequests: 'Հաճախորդների հայտեր', employeeRequests: 'Աշխատակիցների հայտեր', reviewIntro: 'Աշխատակիցների և հաճախորդների հարցումները բոլոր այն ընկերություններից, որոնք կարող եք կառավարել։' },
+    ru: { allCompanies: 'Все компании', clientRequests: 'Заявки клиентов', employeeRequests: 'Заявки сотрудников', reviewIntro: 'Заявки сотрудников и клиентов всех компаний, которыми вы можете управлять.' },
+    en: { allCompanies: 'All companies', clientRequests: 'Client requests', employeeRequests: 'Employee requests', reviewIntro: 'Employee and client requests from all companies you can manage.' },
   }
   const language = String(locale || 'hy').split('-')[0]
   return { ...(copy[language] || copy.hy), ...(selection[language] || selection.hy) }

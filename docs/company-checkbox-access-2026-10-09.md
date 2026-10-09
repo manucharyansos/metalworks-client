@@ -2,6 +2,8 @@
 
 Clients have company-only access controls. Employee controls expand into checkbox lists for companies, positions and workshops for each production position. A primary position/workshop determines the first workspace after login. Both administrators and managers can edit current-company assignments and assignments in other companies they manage.
 
+Client profiles omit position and workshop badges, and client workspace selection never displays employee assignments. Client company-access responses contain company selections only. The manager navigation names both client and employee applications explicitly; the common admin/manager queue has visible All / Client / Employee buttons, defaulting to both types.
+
 Registration requests include employees and clients from every company the reviewer manages, with company and type filters. Request approval uses the application's company options, and approved request cards edit that company's access without changing the reviewer's selected workspace. Unmanaged companies and workshops stay private.
 
 Approval automatically sends a localized company-branded email after account creation. The manual send-email button is removed; a failed mail transport is shown without undoing approval. The API server must have working SMTP settings for real delivery.

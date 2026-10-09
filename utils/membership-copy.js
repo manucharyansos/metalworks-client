@@ -27,9 +27,9 @@ const copy = {
 
 export function membershipCopy(locale) {
   const selection = {
-    hy: { intro: 'Նշեք աշխատակցի հասանելի ընկերությունները, հաստիքներն ու արտադրամասերը։', clientIntro: 'Նշեք այն ընկերությունները, որոնց հասանելիությունը ցանկանում եք տրամադրել հաճախորդին։', current: 'Ընթացիկ ընկերություն', chooseCompanies: 'Ընտրեք ընկերությունները', protectedEmployee: 'Այս ընկերությունում օգտատերն աշխատակից է։ Նրա հաստիքները կառավարեք աշխատակիցների բաժնից։' },
-    ru: { intro: 'Отметьте доступные сотруднику компании, должности и цеха.', clientIntro: 'Отметьте компании, к которым клиент должен получить доступ.', current: 'Текущая компания', chooseCompanies: 'Выберите компании', protectedEmployee: 'В этой компании пользователь — сотрудник. Управляйте его должностями в разделе сотрудников.' },
-    en: { intro: 'Select the employee’s companies, positions and workshops.', clientIntro: 'Select the companies the client should have access to.', current: 'Current company', chooseCompanies: 'Select companies', protectedEmployee: 'This user is an employee in this company. Manage their positions from the employee section.' },
+    hy: { intro: 'Նշեք աշխատակցի հասանելի ընկերությունները, հաստիքներն ու արտադրամասերը։', clientIntro: 'Նշեք այն ընկերությունները, որոնց հասանելիությունը ցանկանում եք տրամադրել հաճախորդին։', current: 'Ընթացիկ ընկերություն', chooseCompanies: 'Ընտրեք ընկերությունները', protectedEmployee: 'Այս ընկերության հասանելիությունը կառավարվում է առանձին։' },
+    ru: { intro: 'Отметьте доступные сотруднику компании, должности и цеха.', clientIntro: 'Отметьте компании, к которым клиент должен получить доступ.', current: 'Текущая компания', chooseCompanies: 'Выберите компании', protectedEmployee: 'Доступ к этой компании управляется отдельно.' },
+    en: { intro: 'Select the employee’s companies, positions and workshops.', clientIntro: 'Select the companies the client should have access to.', current: 'Current company', chooseCompanies: 'Select companies', protectedEmployee: 'Access to this company is managed separately.' },
   }
   const language = String(locale || 'hy').split('-')[0]
   return { ...(copy[language] || copy.hy), ...(selection[language] || selection.hy) }

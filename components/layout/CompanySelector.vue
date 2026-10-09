@@ -22,7 +22,7 @@ export default {
     t() { return workspaceCopy(this.$i18n?.locale) },
     companies() { return this.$store.state.workspace?.companies || [] },
     companyId() { return this.$store.state.workspace?.company?.id || '' },
-    assignments() { return this.$store.state.workspace?.assignments || [] },
+    assignments() { return this.$auth.user?.role?.name === 'authenticatedUser' ? [] : this.$store.state.workspace?.assignments || [] },
     assignmentId() { return this.$store.state.workspace?.assignmentId || '' },
     assignmentText() { return assignmentCopy(this.$i18n?.locale) },
     switching() { return this.$store.state.workspace?.switching || false },

@@ -7,13 +7,10 @@
     <div class="mt-6 flex flex-wrap items-center gap-2" role="group" :aria-label="copy.requests">
       <button v-for="tab in statuses" :key="tab" type="button" class="rounded-xl border px-3 py-2 text-sm font-semibold" :class="status === tab ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="status === tab" @click="changeStatus(tab)">{{ copy[tab] }} <span class="ml-1 opacity-70">{{ counts[tab] }}</span></button>
     </div>
-    <div class="mt-4 grid max-w-xl gap-3 sm:grid-cols-2">
-      <div><label for="request-company" class="sr-only">{{ copy.allCompanies }}</label><select id="request-company" v-model="companyId" class="field-control" @change="page = 1; loadRequests()"><option value="">{{ copy.allCompanies }}</option><option v-for="company in companies" :key="company.id" :value="company.id">{{ company.name }}</option></select></div>
-      <div>
-      <label for="request-type" class="sr-only">{{ copy.allTypes }}</label>
-      <select id="request-type" v-model="type" class="field-control" @change="page = 1; loadRequests()"><option value="">{{ copy.allTypes }}</option><option value="employee">{{ copy.staff }}</option><option value="client">{{ copy.client }}</option></select>
-      </div>
+    <div class="mt-4 grid gap-2 sm:max-w-2xl sm:grid-cols-3" role="group" :aria-label="copy.allTypes" data-request-types>
+      <button v-for="item in requestTypes" :key="item.value" type="button" class="min-w-0 rounded-xl border px-3 py-3 text-left text-sm font-semibold" :class="type === item.value ? 'border-blue-600 bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-200' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="type === item.value" :data-request-type="item.value || 'all'" @click="changeType(item.value)">{{ item.label }}</button>
     </div>
+    <div class="mt-4 max-w-sm"><label for="request-company" class="sr-only">{{ copy.allCompanies }}</label><select id="request-company" v-model="companyId" class="field-control" @change="page = 1; loadRequests()"><option value="">{{ copy.allCompanies }}</option><option v-for="company in companies" :key="company.id" :value="company.id">{{ company.name }}</option></select></div>
     <p v-if="loading" class="mt-6 text-sm text-slate-500" role="status">{{ copy.loading }}</p>
     <div v-else-if="listError" class="mt-6 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-200" role="alert">{{ listError }} <button type="button" class="ml-2 font-bold underline" @click="loadRequests">{{ copy.retry }}</button></div>
     <p v-else-if="!requests.length" class="mt-6 rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-500 dark:border-slate-700">{{ copy.empty }}</p>
@@ -22,7 +19,7 @@
         <div class="flex flex-wrap items-start justify-between gap-2"><h2 class="min-w-0 break-words text-base font-bold">{{ fullName(request) }}</h2><span class="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold dark:bg-slate-800">{{ request.type === 'employee' ? copy.staff : copy.client }}</span></div>
         <p class="mt-2 break-all text-sm text-slate-500 dark:text-slate-400">{{ request.email }}</p>
         <p class="mt-2 break-words text-sm font-semibold">{{ request.company?.name }}</p>
-        <p v-if="request.job_title" class="mt-3 break-words text-sm"><span class="text-slate-500">{{ copy.applicantJob }}:</span> {{ request.job_title }}</p>
+        <p v-if="request.type === 'employee' && request.job_title" class="mt-3 break-words text-sm"><span class="text-slate-500">{{ copy.applicantJob }}:</span> {{ request.job_title }}</p>
         <p class="mt-3 text-xs text-slate-400">{{ formatDate(request.created_at) }}</p>
         <div v-if="request.status === 'pending'" class="mt-5 flex flex-wrap gap-2"><button type="button" class="app-button-primary" @click="openReview(request, 'approve')">{{ copy.approve }}</button><button type="button" class="app-button-secondary text-rose-600 dark:text-rose-300" @click="openReview(request, 'reject')">{{ copy.reject }}</button></div>
         <p v-else class="mt-4 text-sm font-semibold" :class="request.status === 'approved' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'">{{ copy[request.status] }}</p>
@@ -40,7 +37,7 @@
         <h2 id="request-review-title" class="text-xl font-black">{{ action === 'approve' ? copy.approve : copy.reject }}</h2>
         <p class="mt-3 break-words font-bold">{{ fullName(selected) }}</p><p class="mt-1 break-all text-sm text-slate-500">{{ selected.email }}</p>
         <p class="mt-2 break-words text-sm font-semibold">{{ selected.company?.name }}</p>
-        <p v-if="selected.job_title" class="mt-3 break-words text-sm"><span class="text-slate-500">{{ copy.applicantJob }}:</span> {{ selected.job_title }}</p>
+        <p v-if="selected.type === 'employee' && selected.job_title" class="mt-3 break-words text-sm"><span class="text-slate-500">{{ copy.applicantJob }}:</span> {{ selected.job_title }}</p>
         <form class="mt-5 space-y-4" novalidate @submit.prevent="submitReview">
           <template v-if="action === 'approve' && selected.type === 'employee'">
             <p class="text-sm leading-6 text-slate-500">{{ copy.employeeReview }}</p>
@@ -77,6 +74,7 @@ export default {
     copy() { return registrationCopy(this.$i18n?.locale) },
     companyAccessCopy() { return membershipCopy(this.$i18n?.locale) },
     staffCopy() { return staffAccessCopy(this.$i18n?.locale) },
+    requestTypes() { return [{ value: '', label: this.copy.allTypes }, { value: 'client', label: this.copy.clientRequests }, { value: 'employee', label: this.copy.employeeRequests }] },
   },
   mounted() { this.loadRequests() },
   beforeDestroy() { this.listSequence++; this.optionsSequence++; if (this.selected) document.body.style.overflow = this.previousOverflow },
@@ -84,6 +82,7 @@ export default {
     fullName(request) { return [request.name, request.last_name, request.patronymic].filter(Boolean).join(' ') },
     formatDate(value) { const date = new Date(value); return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(this.$i18n?.locale || 'hy', { year: 'numeric', month: 'short', day: 'numeric' }) },
     changeStatus(status) { this.status = status; this.page = 1; this.loadRequests() },
+    changeType(type) { this.type = type; this.page = 1; return this.loadRequests() },
     async loadRequests() {
       const sequence = ++this.listSequence
       this.loading = true; this.listError = ''
