@@ -242,19 +242,48 @@ test('files in another subgroup cannot enable order creation or file picking', a
   assert.equal(requests.length, 0)
 })
 
-test('selected file mode requires at least one selected file and opens the populated factory', async () => {
+test('selected file mode requires a selection and retains both confirmation methods in the create payload', async () => {
   const { vm, requests } = await orderPage()
   assert.equal(vm.canSubmit, true)
   vm.selectFromOtherFactory()
   assert.equal(vm.isFiles, true)
-  assert.equal(vm.autoOpenFactoryId, 6)
   assert.equal(vm.canSubmit, false)
   await vm.pmpFiles()
   assert.equal(requests.length, 0)
   vm.handleFilesSelected([{ id: 1, quantity: 2 }])
+  vm.confirmationRequired = true
+  vm.confirmationMethod = ''
+  assert.equal(vm.canSubmit, false)
+  vm.confirmationMethod = 'photo_text'
   assert.equal(vm.canSubmit, true)
   await vm.pmpFiles()
   assert.deepEqual(requests[0].selected_files, [{ id: 1, quantity: 2 }])
+  assert.equal(requests[0].confirmation_method, 'photo_text')
+})
+
+test('file picker starts with workshop choices and keeps selections when returning to that list', async () => {
+  const options = await component('components/File/ShowFactoryFiles/ShowFiles.vue', true)
+  const vm = new Vue({ ...options, propsData: {
+    pmps: { exists: true, pmp: { group: '990', group_name: 'QA', remote_number: [{ id: 101, remote_number: '01' }], files: [
+      { id: 1, remote_number_id: 101, factory_id: 6, original_name: 'note.txt' },
+      { id: 2, remote_number_id: 101, factory_id: 3, original_name: 'part.dxf' },
+    ] } },
+    factories: [{ id: 6, value: 'INFO', name: 'Information' }, { id: 3, value: 'DXF', name: 'Laser' }],
+    remoteNumberId: 101, selectedFiles: [2], fileQuantities: { 2: 4 },
+  }, methods: { ...options.methods, $t: key => key, $formatDate: () => '' } })
+  const renderer = require('vue-server-renderer').createRenderer()
+  const first = await renderer.renderToString(vm)
+  assert.match(first, /order_create.choose_factory/)
+  assert.match(first, /Information/); assert.match(first, /Laser/)
+  assert.doesNotMatch(first, /note\.txt|part\.dxf/)
+  vm.selectFactory(vm.factories[1])
+  const files = await renderer.renderToString(vm)
+  assert.match(files, /part\.dxf/); assert.doesNotMatch(files, /note\.txt/)
+  vm.selectedFactory = null
+  const choices = await renderer.renderToString(vm)
+  assert.match(choices, /order_create.choose_factory/)
+  assert.deepEqual([...vm.selectedFiles], [2]); assert.equal(vm.fileQuantities[2], 4)
+  vm.$destroy()
 })
 
 test('stale file IDs and fractional quantities cannot be saved', async () => {
