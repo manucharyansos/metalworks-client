@@ -17,8 +17,8 @@ const copy = {
     applicantJob: 'Նշված պաշտոնը', employeeReview: 'Ընտրեք իրական հաստիքը և անհրաժեշտության դեպքում արտադրամասը։',
     clientReview: 'Հաստատումից հետո կստեղծվի հաճախորդի հաշիվ։', permissionsHint: 'Աշխատակցի անհատական իրավունքները կառավարեք «Աշխատակիցների իրավունքներ» բաժնում։',
     rejectHint: 'Մերժված հարցումը հաշիվ չի ստեղծում։', reviewFailed: 'Չհաջողվեց մշակել հարցումը։', listFailed: 'Չհաջողվեց բեռնել հարցումները։', optionsFailed: 'Չհաջողվեց բեռնել հաստիքներն ու արտադրամասերը։',
-    mailRetry: 'Ուղարկել հաստատման նամակը', approvalSaved: 'Գրանցումը հաստատված է։',
-    notification: { sent: 'Հաստատման նամակն ուղարկված է։', failed: 'Նամակը չհաջողվեց ուղարկել։ Հաշիվն արդեն հաստատված է։ Կարող եք կրկին փորձել։', unconfigured: 'Հաշիվը հաստատված է, բայց նամակների ուղարկումը սերվերում կարգավորված չէ։', pending: 'Հաստատման նամակը դեռ ուղարկված չէ։', sending: 'Նամակն ուղարկվում է…' },
+    approvalSaved: 'Գրանցումը հաստատված է։',
+    notification: { sent: 'Հաստատման նամակն ուղարկված է։', failed: 'Հաշիվը հաստատված է, բայց նամակի ուղարկումը չհաջողվեց։', unconfigured: 'Հաշիվը հաստատված է, բայց նամակների ուղարկումը սերվերում կարգավորված չէ։', pending: 'Հաստատման նամակը դեռ ուղարկված չէ։', sending: 'Նամակն ուղարկվում է…' },
     previous: 'Նախորդ', next: 'Հաջորդ', page: 'Էջ', rights: 'Իրավունքներ',
     roles: { admin: 'Ադմինիստրատոր', manager: 'Մենեջեր', engineer: 'Ինժիներ', laser: 'Լազերային կտրում', bend: 'Կռում', powder_catting: 'Փոշեներկում' },
   },
@@ -40,8 +40,8 @@ const copy = {
     applicantJob: 'Указанная должность', employeeReview: 'Назначьте рабочую должность и, если требуется, цех.',
     clientReview: 'После подтверждения появится аккаунт клиента.', permissionsHint: 'Индивидуальные права сотрудника назначаются в разделе «Права сотрудников».',
     rejectHint: 'Отклонение заявки не создаёт аккаунт.', reviewFailed: 'Не удалось обработать заявку.', listFailed: 'Не удалось загрузить заявки.', optionsFailed: 'Не удалось загрузить должности и цеха.',
-    mailRetry: 'Отправить письмо о подтверждении', approvalSaved: 'Регистрация подтверждена.',
-    notification: { sent: 'Письмо о подтверждении отправлено.', failed: 'Письмо не удалось отправить. Аккаунт уже подтверждён. Можно повторить отправку.', unconfigured: 'Аккаунт подтверждён, но отправка писем на сервере не настроена.', pending: 'Письмо о подтверждении ещё не отправлено.', sending: 'Письмо отправляется…' },
+    approvalSaved: 'Регистрация подтверждена.',
+    notification: { sent: 'Письмо о подтверждении отправлено.', failed: 'Аккаунт подтверждён, но письмо не удалось отправить.', unconfigured: 'Аккаунт подтверждён, но отправка писем на сервере не настроена.', pending: 'Письмо о подтверждении ещё не отправлено.', sending: 'Письмо отправляется…' },
     previous: 'Назад', next: 'Далее', page: 'Страница', rights: 'Права доступа',
     roles: { admin: 'Администратор', manager: 'Менеджер', engineer: 'Инженер', laser: 'Лазерная резка', bend: 'Гибка', powder_catting: 'Порошковая покраска' },
   },
@@ -63,11 +63,19 @@ const copy = {
     applicantJob: 'Stated job title', employeeReview: 'Assign a position and a workshop if required.',
     clientReview: 'Approval will create a client account.', permissionsHint: 'Assign individual employee permissions in Employee permissions.',
     rejectHint: 'Rejecting this request will not create an account.', reviewFailed: 'Could not review this request.', listFailed: 'Could not load requests.', optionsFailed: 'Could not load positions and workshops.',
-    mailRetry: 'Send approval email', approvalSaved: 'Registration approved.',
-    notification: { sent: 'Approval email sent.', failed: 'The email could not be sent. The account is already approved. You can retry delivery.', unconfigured: 'The account is approved, but outgoing email is not configured on the server.', pending: 'The approval email has not been sent yet.', sending: 'Sending email…' },
+    approvalSaved: 'Registration approved.',
+    notification: { sent: 'Approval email sent.', failed: 'The account is approved, but the email could not be sent.', unconfigured: 'The account is approved, but outgoing email is not configured on the server.', pending: 'The approval email has not been sent yet.', sending: 'Sending email…' },
     previous: 'Previous', next: 'Next', page: 'Page', rights: 'Permissions',
     roles: { admin: 'Administrator', manager: 'Manager', engineer: 'Engineer', laser: 'Laser cutting', bend: 'Bending', powder_catting: 'Powder coating' },
   },
 }
 
-export const registrationCopy = locale => copy[String(locale || 'hy').split('-')[0]] || copy.hy
+export function registrationCopy(locale) {
+  const selection = {
+    hy: { allCompanies: 'Բոլոր ընկերությունները', reviewIntro: 'Աշխատակիցների և հաճախորդների հարցումները բոլոր այն ընկերություններից, որոնք կարող եք կառավարել։' },
+    ru: { allCompanies: 'Все компании', reviewIntro: 'Заявки сотрудников и клиентов всех компаний, которыми вы можете управлять.' },
+    en: { allCompanies: 'All companies', reviewIntro: 'Employee and client requests from all companies you can manage.' },
+  }
+  const language = String(locale || 'hy').split('-')[0]
+  return { ...(copy[language] || copy.hy), ...(selection[language] || selection.hy) }
+}
