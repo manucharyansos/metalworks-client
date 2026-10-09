@@ -381,7 +381,6 @@
         <show-files
           :pmps="pmpsData"
           :factories="getFactory"
-          :auto-open-factory-id="autoOpenFactoryId"
           :selected-files.sync="selectedFiles"
           :file-quantities.sync="fileQuantities"
           :remote-number-id="remote_number_id"
@@ -524,7 +523,6 @@ export default {
       isFiles: false,
       selectedFiles: [],
       fileQuantities: {},
-      autoOpenFactoryId: null,
       isLoading: false,
       files_existing: false,
       remote_number_id: null,
@@ -646,7 +644,7 @@ export default {
       return (
         this.canProceedToFiles &&
         (!this.confirmationRequired ||
-          ['photo', 'text'].includes(this.confirmationMethod)) &&
+          ['photo', 'text', 'photo_text'].includes(this.confirmationMethod)) &&
         this.selectedFactories.length > 0 &&
         !this.isEditingMode &&
         (!this.files_existing || this.validSelectedFiles)
@@ -776,7 +774,6 @@ export default {
       this.fileQuantities = {}
       this.factoryOperators = {}
       this.referenceVisibility = {}
-      this.autoOpenFactoryId = null
       this.orderPmp = null
       this.files_existing = false
       this.isFiles = false
@@ -886,7 +883,7 @@ export default {
 
       if (
         this.confirmationRequired &&
-        !['photo', 'text'].includes(this.confirmationMethod)
+        !['photo', 'text', 'photo_text'].includes(this.confirmationMethod)
       ) {
         this.$notify({
           text: (taskCopy[this.$i18n?.locale] || taskCopy.hy).invalidMethod,
@@ -999,18 +996,6 @@ export default {
 
       if (!this.validateOrderFiles(false)) return
       this.files_existing = true
-      const factories = Array.isArray(this.getFactory) ? this.getFactory : []
-
-      const factoryWithFiles = factories.find((factory) =>
-        this.subgroupFiles.some(
-          (file) => Number(file.factory_id) === Number(factory.id)
-        )
-      )
-
-      this.autoOpenFactoryId = factoryWithFiles
-        ? factoryWithFiles.id
-        : factories[0]?.id || null
-
       this.isFiles = true
     },
 

@@ -122,10 +122,13 @@
             class="space-y-3"
             data-completion-evidence
           >
-            <label class="block text-sm font-semibold">
-              {{ t.evidence }} · {{ t[factoryOrder.confirmation_method] }}
+            <p class="text-sm font-semibold">{{ t.evidence }}</p>
+            <label
+              v-if="evidenceMethods.includes('text')"
+              class="block text-sm font-semibold"
+            >
+              {{ t.text }}
               <textarea
-                v-if="factoryOrder.confirmation_method === 'text'"
                 v-model="evidenceText"
                 data-evidence-text
                 rows="4"
@@ -134,8 +137,13 @@
                 :placeholder="t.textPlaceholder"
                 class="mt-2 block w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               />
+            </label>
+            <label
+              v-if="evidenceMethods.includes('photo')"
+              class="block text-sm font-semibold"
+            >
+              {{ t.photo }}
               <input
-                v-else-if="factoryOrder.confirmation_method === 'photo'"
                 data-evidence-photo
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -146,7 +154,7 @@
             </label>
             <p class="text-xs text-slate-500">{{ t.evidenceHelp }}</p>
             <p
-              v-if="factoryOrder.confirmation_method === 'photo'"
+              v-if="evidenceMethods.includes('photo')"
               class="text-xs text-slate-500"
             >
               {{ t.photoHelp }}
@@ -228,7 +236,7 @@
 import SelectWithLabel from '@/components/factory/SelectWithLabel.vue'
 import InputWithLabelIcon from '@/components/form/InputWithLabelIcon.vue'
 import { localFactoryTimestamp } from '@/utils/factory-order-status'
-import { taskCopy } from '@/utils/task-workflow'
+import { confirmationMethods, taskCopy } from '@/utils/task-workflow'
 
 export default {
   components: { SelectWithLabel, InputWithLabelIcon },
@@ -260,6 +268,9 @@ export default {
     t() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
+    evidenceMethods() {
+      return confirmationMethods(this.factoryOrder.confirmation_method)
+    },
     reasonOptions() {
       return this.cancelReasons.map((reason) => ({
         ...reason,
@@ -284,11 +295,14 @@ export default {
           this.localChangeDate >= this.tomorrowDate
         )
       if (status === 'finished' && this.factoryOrder.confirmation_required) {
-        if (this.factoryOrder.confirmation_method === 'text')
-          return !!this.evidenceText.trim()
-        if (this.factoryOrder.confirmation_method === 'photo')
-          return !!this.evidencePhoto && !this.photoError
-        return false
+        return (
+          this.evidenceMethods.length > 0 &&
+          this.evidenceMethods.every((method) =>
+            method === 'text'
+              ? !!this.evidenceText.trim()
+              : !!this.evidencePhoto && !this.photoError
+          )
+        )
       }
       return true
     },
@@ -363,9 +377,10 @@ export default {
         payload.status === 'finished' &&
         this.factoryOrder.confirmation_required
       ) {
-        if (this.factoryOrder.confirmation_method === 'text')
+        if (this.evidenceMethods.includes('text'))
           payload.evidence_text = this.evidenceText.trim()
-        else payload.evidence_photo = this.evidencePhoto
+        if (this.evidenceMethods.includes('photo'))
+          payload.evidence_photo = this.evidencePhoto
       }
       this.$emit('confirm', payload)
     },

@@ -17,22 +17,29 @@
       <p class="mt-2 text-sm text-slate-500">
         {{ confirmationRequired ? t.requiredHelp : t.optional }}
       </p>
-      <label
+      <fieldset
         v-if="confirmationRequired"
         class="mt-4 block text-sm font-semibold"
       >
-        {{ t.method }}
-        <select
-          :value="confirmationMethod"
-          data-confirmation-method
-          class="mt-2 block w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-          @change="$emit('update:confirmationMethod', $event.target.value)"
+        <legend>{{ t.methods }}</legend>
+        <label
+          v-for="method in ['photo', 'text']"
+          :key="method"
+          class="mt-2 flex cursor-pointer items-center gap-3 rounded-xl border border-slate-300 p-3 dark:border-slate-700"
         >
-          <option value="" disabled>{{ t.choose }}</option>
-          <option value="photo">{{ t.photo }}</option>
-          <option value="text">{{ t.text }}</option>
-        </select>
-      </label>
+          <input
+            type="checkbox"
+            :checked="selectedMethods.includes(method)"
+            :data-confirmation-method="method"
+            class="h-5 w-5 shrink-0"
+            @change="selectMethod(method, $event.target.checked)"
+          />
+          {{ t[method] }}
+        </label>
+        <p class="mt-2 text-xs font-normal text-slate-500">
+          {{ t.methodsHelp }}
+        </p>
+      </fieldset>
     </div>
     <div v-if="referenceFiles.length && workshops.length" class="space-y-3">
       <h3 class="font-semibold">{{ t.references }}</h3>
@@ -73,7 +80,11 @@
   </section>
 </template>
 <script>
-import { isReferenceFactory, taskCopy } from '@/utils/task-workflow'
+import {
+  confirmationMethods,
+  isReferenceFactory,
+  taskCopy,
+} from '@/utils/task-workflow'
 export default {
   props: {
     confirmationRequired: Boolean,
@@ -83,6 +94,9 @@ export default {
     factories: { type: Array, default: () => [] },
   },
   computed: {
+    selectedMethods() {
+      return confirmationMethods(this.confirmationMethod)
+    },
     t() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
@@ -103,6 +117,15 @@ export default {
     },
   },
   methods: {
+    selectMethod(method, checked) {
+      const methods = new Set(this.selectedMethods)
+      if (checked) methods.add(method)
+      else methods.delete(method)
+      this.$emit(
+        'update:confirmationMethod',
+        methods.size === 2 ? 'photo_text' : [...methods][0] || ''
+      )
+    },
     selectWorkshop(fileId, factoryId, checked) {
       const ids = new Set(this.referenceVisibility[fileId] || [])
       if (checked) ids.add(Number(factoryId))

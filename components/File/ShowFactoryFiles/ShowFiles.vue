@@ -424,7 +424,6 @@ export default {
   props: {
     pmps: { type: Object, default: () => ({ exists: false }) },
     factories: { type: Array, default: () => [] },
-    autoOpenFactoryId: { type: [String, Number], default: null },
     selectedFiles: { type: Array, default: () => [] },
     fileQuantities: { type: Object, default: () => ({}) },
     isEditingMode: { type: Boolean, default: false },
@@ -482,23 +481,6 @@ export default {
     areQuantitiesValid() {
       return this.selectedFiles.every((id) => this.isQuantityValid(id))
     },
-  },
-  mounted() {
-    this.$nextTick(() => {
-      if (!this.factories?.length || !this.pmps?.exists) return
-
-      if (this.autoOpenFactoryId) {
-        const f = (this.factoriesWithCount || []).find(
-          (x) => x.id === this.autoOpenFactoryId
-        )
-        if (f && f.fileCount > 0) this.selectFactory(f)
-      } else {
-        const firstWith = (this.factoriesWithCount || []).find(
-          (f) => f.fileCount > 0
-        )
-        if (firstWith) this.selectFactory(firstWith)
-      }
-    })
   },
   methods: {
     close() {

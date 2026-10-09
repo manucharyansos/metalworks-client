@@ -284,6 +284,41 @@ test('reference sharing exposes only production destinations and retains indepen
   vm.$destroy()
 })
 
+test('combined completion evidence requires both inputs and emits both without losing either on an error', () => {
+  const vm = component('components/factory/OrderActionModal.vue', {
+    propsData: { actionOptions: actions, cancelReasons: [], factoryOrder: { confirmation_required: true, confirmation_method: 'photo_text' } },
+  })
+  vm.localSelectedOption = actions[3]
+  const sent = []; vm.$emit = (...args) => sent.push(args)
+  assert.deepEqual(vm.evidenceMethods, ['photo', 'text'])
+  vm.evidenceText = '  Dimensions checked  '
+  vm.confirm(); assert.equal(sent.length, 0)
+  const photo = { type: 'image/png', size: 12345 }
+  vm.selectPhoto({ target: { files: [photo], value: 'proof.png' } })
+  vm.evidenceText = '  '; vm.confirm(); assert.equal(sent.length, 0)
+  vm.evidenceText = '  Dimensions checked  '
+  assert.equal(vm.canConfirm, true); vm.confirm()
+  assert.equal(sent[0][1].evidence_text, 'Dimensions checked')
+  assert.equal(sent[0][1].evidence_photo, photo)
+  vm.saving = true; assert.equal(vm.canConfirm, false)
+  vm.saving = false; assert.equal(vm.canConfirm, true)
+  assert.equal(vm.evidenceText, '  Dimensions checked  '); assert.equal(vm.evidencePhoto, photo)
+  vm.$destroy()
+})
+
+test('confirmation checkboxes independently support photo, text, both, and neither in either selection order', () => {
+  const vm = component('components/engineer/TaskCreationOptions.vue', { propsData: { confirmationRequired: true } })
+  const sent = []; vm.$emit = (name, value) => { sent.push([name, value]); vm.confirmationMethod = value }
+  vm.selectMethod('photo', true); assert.deepEqual(vm.selectedMethods, ['photo'])
+  vm.selectMethod('text', true); assert.deepEqual(vm.selectedMethods, ['photo', 'text'])
+  vm.selectMethod('photo', false); assert.deepEqual(vm.selectedMethods, ['text'])
+  vm.selectMethod('text', false); assert.deepEqual(vm.selectedMethods, [])
+  vm.selectMethod('text', true); vm.selectMethod('photo', true)
+  assert.equal(sent.at(-1)[1], 'photo_text')
+  assert.deepEqual(sent.map(item => item[1]), ['photo', 'photo_text', 'text', '', 'text', 'photo_text'])
+  vm.$destroy()
+})
+
 test('evidence upload uses multipart POST while text and ordinary actions retain JSON PUT', () => {
   const { taskActionBody } = load('utils/task-workflow.js')
   const plain = { factory_id: 3, factory_order: { status: 'finished', evidence_text: 'Complete' } }
@@ -292,6 +327,7 @@ test('evidence upload uses multipart POST while text and ordinary actions retain
   const upload = taskActionBody({ ...plain, evidence_photo: photo })
   assert.equal(upload.method, 'post'); assert.equal(upload.body.get('factory_id'), '3')
   assert.equal(upload.body.get('factory_order[status]'), 'finished'); assert.equal(upload.body.get('evidence_photo').type, 'image/png')
+  assert.equal(upload.body.get('factory_order[evidence_text]'), 'Complete')
 })
 
 test('only the creating engineer sees the confirmation action and failed confirmation retains the proof', async () => {

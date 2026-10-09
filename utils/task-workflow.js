@@ -2,9 +2,13 @@ export const taskCopy = {
   hy: {
     required: 'Անհրաժեշտ է ինժեների հաստատումը',
     method: 'Հավաստման մեթոդ',
+    methods: 'Հավաստման մեթոդներ',
+    methodsHelp:
+      'Երկու մեթոդ ընտրելիս օպերատորը պետք է ներկայացնի և՛ նկար, և՛ տեքստ։',
     choose: 'Ընտրեք մեթոդը',
     photo: 'Նկար',
     text: 'Տեքստ',
+    photo_text: 'Նկար և տեքստ',
     optional: 'Ավարտվում է օպերատորի հաստատմամբ',
     requiredHelp: 'Օպերատորը կուղարկի հավաստումը, իսկ դուք կհաստատեք ավարտը։',
     references: 'Տեղեկատու ֆայլերի տեսանելիություն',
@@ -29,9 +33,13 @@ export const taskCopy = {
   ru: {
     required: 'Требуется подтверждение инженера',
     method: 'Способ подтверждения',
+    methods: 'Способы подтверждения',
+    methodsHelp:
+      'Если выбраны оба способа, оператор должен отправить и фото, и текст.',
     choose: 'Выберите способ',
     photo: 'Фото',
     text: 'Текст',
+    photo_text: 'Фото и текст',
     optional: 'Завершается оператором',
     requiredHelp:
       'Оператор отправит подтверждение выполненной работы, а вы подтвердите завершение.',
@@ -58,9 +66,13 @@ export const taskCopy = {
   en: {
     required: 'Engineer confirmation required',
     method: 'Evidence method',
+    methods: 'Evidence methods',
+    methodsHelp:
+      'When both methods are selected, the operator must submit both a photo and text.',
     choose: 'Choose a method',
     photo: 'Photo',
     text: 'Text',
+    photo_text: 'Photo and text',
     optional: 'Completed by the operator',
     requiredHelp: 'The operator submits evidence and you confirm completion.',
     references: 'Reference file access',
@@ -83,6 +95,11 @@ export const taskCopy = {
     inProgress: 'In progress',
     invalidMethod: 'Choose an evidence method',
   },
+}
+
+export function confirmationMethods(method) {
+  if (method === 'photo_text') return ['photo', 'text']
+  return ['photo', 'text'].includes(method) ? [method] : []
 }
 
 export function isReferenceFactory(factory) {
