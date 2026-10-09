@@ -25,7 +25,15 @@ const copy = {
   },
 }
 
-export function membershipCopy(locale) { return copy[String(locale || 'hy').split('-')[0]] || copy.hy }
+export function membershipCopy(locale) {
+  const selection = {
+    hy: { intro: 'Նշեք աշխատակցի հասանելի ընկերությունները, հաստիքներն ու արտադրամասերը։', clientIntro: 'Նշեք այն ընկերությունները, որոնց հասանելիությունը ցանկանում եք տրամադրել հաճախորդին։', current: 'Ընթացիկ ընկերություն', chooseCompanies: 'Ընտրեք ընկերությունները', protectedEmployee: 'Այս ընկերությունում օգտատերն աշխատակից է։ Նրա հաստիքները կառավարեք աշխատակիցների բաժնից։' },
+    ru: { intro: 'Отметьте доступные сотруднику компании, должности и цеха.', clientIntro: 'Отметьте компании, к которым клиент должен получить доступ.', current: 'Текущая компания', chooseCompanies: 'Выберите компании', protectedEmployee: 'В этой компании пользователь — сотрудник. Управляйте его должностями в разделе сотрудников.' },
+    en: { intro: 'Select the employee’s companies, positions and workshops.', clientIntro: 'Select the companies the client should have access to.', current: 'Current company', chooseCompanies: 'Select companies', protectedEmployee: 'This user is an employee in this company. Manage their positions from the employee section.' },
+  }
+  const language = String(locale || 'hy').split('-')[0]
+  return { ...(copy[language] || copy.hy), ...(selection[language] || selection.hy) }
+}
 
 export function changedCompanyAccess(rows, originals) {
   const assignments = row => (row.assignments || [{ role_id: row.role_id, factory_id: row.factory_id }]).map(item => ({ role_id: Number(item.role_id) || null, factory_id: Number(item.factory_id) || null }))

@@ -4,14 +4,16 @@
       <h2 id="company-membership-title" class="text-xl font-black">{{ copy.title }}</h2>
       <p class="mt-2 break-words font-semibold">{{ user.name || user.display_name }}</p>
       <p class="mt-1 break-all text-sm text-slate-500">{{ user.email || user.user?.email }}</p>
-      <p class="mt-4 text-sm text-slate-500">{{ copy.intro }}</p><p class="mt-1 text-xs leading-5 text-slate-400">{{ copy.rights }}</p>
+      <p class="mt-4 text-sm text-slate-500">{{ isClient ? copy.clientIntro : copy.intro }}</p><p class="mt-1 text-xs leading-5 text-slate-400">{{ copy.rights }}</p>
       <p v-if="loading" class="mt-6 text-sm" role="status">{{ copy.loading }}</p>
       <div v-else-if="loadError" class="mt-6 text-sm text-rose-600" role="alert">{{ loadError }} <button type="button" class="font-bold underline" @click="load">{{ copy.retry }}</button></div>
       <form v-else data-workspace-form class="mt-6 space-y-3" novalidate @submit.prevent="save">
-        <fieldset v-for="company in companies" :key="company.id" class="min-w-0 rounded-2xl border border-slate-200 p-4 dark:border-slate-700" :disabled="busy || company.read_only" :data-company-id="company.id">
-          <label class="flex items-center gap-3 break-words text-sm font-bold"><input type="checkbox" :checked="row(company.id).enabled" :aria-label="company.name" @change="change(company.id, 'enabled', $event.target.checked)" />{{ company.name }}</label>
-          <p v-if="company.read_only" class="mt-2 text-xs leading-5 text-slate-500">{{ String(company.id) === String(currentCompanyId) ? copy.current : copy.protected }}</p>
-          <StaffAssignmentsEditor v-else-if="row(company.id).enabled" class="mt-4" :value="assignmentRows(row(company.id).assignments, row(company.id).role_id, row(company.id).factory_id)" :roles="roles" :factories="company.factories" :role-names="copy.roles" :id-prefix="'company-' + company.id" @input="setAssignments(company.id, $event)" />
+        <CheckboxSelect :value="selectedCompanyIds" :options="companyOptions" :label="copy.button" :placeholder="copy.chooseCompanies" :disabled="busy" id-prefix="membership-companies" @input="setCompanyIds" />
+        <fieldset v-for="company in selectedCompanies" :key="company.id" class="min-w-0 rounded-2xl border border-slate-200 p-4 dark:border-slate-700" :disabled="busy || company.read_only" :data-company-id="company.id">
+          <h3 class="break-words text-sm font-bold">{{ company.name }}</h3>
+          <p v-if="company.read_only" class="mt-2 text-xs leading-5 text-slate-500">{{ isClient ? copy.protectedEmployee : copy.protected }}</p>
+          <p v-else-if="String(company.id) === String(currentCompanyId)" class="mt-2 text-xs text-slate-500">{{ copy.current }}</p>
+          <StaffAssignmentsEditor v-if="!isClient && !company.read_only" class="mt-4" :value="assignmentRows(row(company.id).assignments, row(company.id).role_id, row(company.id).factory_id)" :roles="roles" :factories="company.factories" :role-names="copy.roles" :disabled="busy" :id-prefix="'company-' + company.id" @input="setAssignments(company.id, $event)" />
           <p v-if="errors[company.id]" class="mt-2 text-xs text-rose-600" role="alert">{{ errors[company.id] }}</p>
         </fieldset>
         <p v-if="saveError" class="text-sm text-rose-600" role="alert">{{ saveError }}</p>
@@ -25,16 +27,21 @@
 <script>
 import { membershipCopy, changedCompanyAccess } from '~/utils/membership-copy'
 import StaffAssignmentsEditor from '~/components/users/StaffAssignmentsEditor.vue'
+import CheckboxSelect from '~/components/ui/CheckboxSelect.vue'
 import { assignmentRows, assignmentError, assignmentCopy } from '~/utils/staff-assignments'
 
 export default {
-  components: { StaffAssignmentsEditor },
-  props: { user: { type: Object, required: true } },
-  data() { return { companies: [], roles: [], rows: [], originals: [], currentCompanyId: null, loading: true, loadError: '', saveError: '', errors: {}, busy: false, sequence: 0, returnFocus: null, previousOverflow: '' } },
+  components: { StaffAssignmentsEditor, CheckboxSelect },
+  props: { user: { type: Object, required: true }, sourceCompanyId: { type: [Number, String], default: null } },
+  data() { return { companies: [], roles: [], rows: [], originals: [], targetType: 'employee', currentCompanyId: null, loading: true, loadError: '', saveError: '', errors: {}, busy: false, sequence: 0, returnFocus: null, previousOverflow: '' } },
   computed: {
     copy() { return membershipCopy(this.$i18n?.locale) },
     userId() { return this.user.user_id || this.user.user?.id || this.user.id },
-    changes() { return changedCompanyAccess(this.rows, this.originals) },
+    isClient() { return this.targetType === 'client' },
+    selectedCompanyIds() { return this.rows.filter(row => row.enabled).map(row => row.company_id) },
+    selectedCompanies() { return this.companies.filter(company => this.row(company.id).enabled) },
+    companyOptions() { return this.companies.map(company => ({ id: company.id, label: company.name, disabled: Boolean(company.selection_locked || company.read_only), note: company.read_only ? (this.isClient ? this.copy.protectedEmployee : this.copy.protected) : String(company.id) === String(this.currentCompanyId) ? this.copy.current : '' })) },
+    changes() { const rows = changedCompanyAccess(this.rows, this.originals); return this.isClient ? rows.map(row => ({ company_id: row.company_id, enabled: row.enabled })) : rows },
   },
   mounted() {
     this.returnFocus = document.activeElement; this.previousOverflow = document.body.style.overflow
@@ -43,6 +50,13 @@ export default {
   beforeDestroy() { this.sequence++; document.body.style.overflow = this.previousOverflow; this.returnFocus?.focus() },
   methods: {
     assignmentRows,
+    requestConfig() { return { timeout: 15000, ...(this.sourceCompanyId ? { params: { source_company_id: this.sourceCompanyId } } : {}) } },
+    setCompanyIds(ids) {
+      for (const company of this.companies) {
+        if (company.selection_locked || company.read_only) continue
+        this.change(company.id, 'enabled', ids.some(id => String(id) === String(company.id)))
+      }
+    },
     setAssignments(id, rows) { const row = this.row(id); this.$set(row, 'assignments', rows); this.change(id, 'role_id', rows[0]?.role_id || null); this.change(id, 'factory_id', rows[0]?.factory_id || null) },
     row(id) { return this.rows.find(row => String(row.company_id) === String(id)) || {} },
     needsWorkshop(id) { return ['laser', 'bend', 'powder_catting'].includes(this.roles.find(role => String(role.id) === String(this.row(id).role_id))?.name) },
@@ -57,10 +71,10 @@ export default {
     async load() {
       const sequence = ++this.sequence; this.loading = true; this.loadError = ''
       try {
-        const data = await this.$axios.$get(`/api/company-access/${this.userId}`, { timeout: 15000 })
+        const data = await this.$axios.$get(`/api/company-access/${this.userId}`, this.requestConfig())
         if (sequence !== this.sequence) return
-        this.companies = data.companies || []; this.roles = data.roles || []; this.currentCompanyId = data.current_company_id
-        this.rows = this.companies.map(company => ({ ...company.access })); this.originals = this.rows.map(row => ({ ...row }))
+        this.companies = data.companies || []; this.roles = data.roles || []; this.currentCompanyId = data.current_company_id; this.targetType = data.user?.type || 'employee'
+        this.rows = this.companies.map(company => ({ ...company.access })); this.originals = this.rows.map(row => ({ ...row, ...(row.assignments ? { assignments: row.assignments.map(item => ({ ...item })) } : {}) }))
       } catch (_) { if (sequence === this.sequence) this.loadError = this.copy.failed }
       finally { if (sequence === this.sequence) this.loading = false }
     },
@@ -68,7 +82,7 @@ export default {
       if (this.busy || !this.changes.length) return
       this.errors = {}; this.saveError = ''
       for (const row of this.changes) {
-        if (!row.enabled) continue
+        if (!row.enabled || this.isClient) continue
         if (row.assignments) {
           const issue = assignmentError(row.assignments, this.roles, this.companies.find(company => String(company.id) === String(row.company_id))?.factories || [], assignmentCopy(this.$i18n?.locale))
           if (issue) this.$set(this.errors, row.company_id, issue)
@@ -79,7 +93,11 @@ export default {
       }
       if (Object.keys(this.errors).length) return
       this.busy = true
-      try { await this.$axios.$put(`/api/company-access/${this.userId}`, { access: this.changes }, { timeout: 15000 }); this.$emit('saved'); this.$emit('close') }
+      try {
+        await this.$axios.$put(`/api/company-access/${this.userId}`, { access: this.changes }, this.requestConfig())
+        if (String(this.userId) === String(this.$auth?.user?.id)) { await this.$workspace.refreshAssignments(); return }
+        this.$emit('saved'); this.$emit('close')
+      }
       catch (error) { this.saveError = Object.values(error.response?.data?.errors || {}).flat()[0] || error.response?.data?.message || this.copy.saveFailed }
       finally { this.busy = false }
     },

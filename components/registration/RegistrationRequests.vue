@@ -2,15 +2,17 @@
   <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
     <h1 class="text-2xl font-black tracking-tight sm:text-3xl">{{ copy.requests }}</h1>
     <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{{ copy.reviewIntro }}</p>
-    <p class="mt-2 break-words text-sm font-bold">{{ $auth.user?.company?.name }}</p>
     <nuxt-link :to="localePath(($auth.user?.role?.name === 'admin' ? '/admin' : '/manager') + '/users')" class="mt-3 inline-block text-sm font-semibold underline">{{ staffCopy.permissions }} →</nuxt-link>
     <p v-if="notice" class="mt-4 rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800" role="status">{{ notice }}</p>
     <div class="mt-6 flex flex-wrap items-center gap-2" role="group" :aria-label="copy.requests">
       <button v-for="tab in statuses" :key="tab" type="button" class="rounded-xl border px-3 py-2 text-sm font-semibold" :class="status === tab ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="status === tab" @click="changeStatus(tab)">{{ copy[tab] }} <span class="ml-1 opacity-70">{{ counts[tab] }}</span></button>
     </div>
-    <div class="mt-4 max-w-xs">
+    <div class="mt-4 grid max-w-xl gap-3 sm:grid-cols-2">
+      <div><label for="request-company" class="sr-only">{{ copy.allCompanies }}</label><select id="request-company" v-model="companyId" class="field-control" @change="page = 1; loadRequests()"><option value="">{{ copy.allCompanies }}</option><option v-for="company in companies" :key="company.id" :value="company.id">{{ company.name }}</option></select></div>
+      <div>
       <label for="request-type" class="sr-only">{{ copy.allTypes }}</label>
       <select id="request-type" v-model="type" class="field-control" @change="page = 1; loadRequests()"><option value="">{{ copy.allTypes }}</option><option value="employee">{{ copy.staff }}</option><option value="client">{{ copy.client }}</option></select>
+      </div>
     </div>
     <p v-if="loading" class="mt-6 text-sm text-slate-500" role="status">{{ copy.loading }}</p>
     <div v-else-if="listError" class="mt-6 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-200" role="alert">{{ listError }} <button type="button" class="ml-2 font-bold underline" @click="loadRequests">{{ copy.retry }}</button></div>
@@ -19,24 +21,25 @@
       <article v-for="request in requests" :key="request.id" class="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900" :data-request-id="request.id">
         <div class="flex flex-wrap items-start justify-between gap-2"><h2 class="min-w-0 break-words text-base font-bold">{{ fullName(request) }}</h2><span class="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold dark:bg-slate-800">{{ request.type === 'employee' ? copy.staff : copy.client }}</span></div>
         <p class="mt-2 break-all text-sm text-slate-500 dark:text-slate-400">{{ request.email }}</p>
+        <p class="mt-2 break-words text-sm font-semibold">{{ request.company?.name }}</p>
         <p v-if="request.job_title" class="mt-3 break-words text-sm"><span class="text-slate-500">{{ copy.applicantJob }}:</span> {{ request.job_title }}</p>
         <p class="mt-3 text-xs text-slate-400">{{ formatDate(request.created_at) }}</p>
         <div v-if="request.status === 'pending'" class="mt-5 flex flex-wrap gap-2"><button type="button" class="app-button-primary" @click="openReview(request, 'approve')">{{ copy.approve }}</button><button type="button" class="app-button-secondary text-rose-600 dark:text-rose-300" @click="openReview(request, 'reject')">{{ copy.reject }}</button></div>
         <p v-else class="mt-4 text-sm font-semibold" :class="request.status === 'approved' ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'">{{ copy[request.status] }}</p>
         <div v-if="request.status === 'approved'" class="mt-3 space-y-3">
           <p class="text-xs leading-5 text-slate-500">{{ copy.notification[request.notification_status || 'pending'] }}</p>
-          <div class="flex flex-wrap gap-2"><button v-if="request.notification_status !== 'sent'" type="button" class="app-button-secondary" :disabled="Boolean(notifyBusy)" @click="sendNotification(request)">{{ notifyBusy === request.id ? copy.sending : copy.mailRetry }}</button><button v-if="request.type === 'employee'" type="button" class="app-button-secondary" @click="assignmentTarget = { id: request.user_id, name: fullName(request), email: request.email }">{{ staffCopy.edit }}</button><button type="button" class="app-button-secondary" @click="accessTarget = { id: request.user_id, name: fullName(request), email: request.email }">{{ companyAccessCopy.button }}</button></div>
+          <button type="button" class="app-button-secondary" @click="accessTarget = { id: request.user_id, name: fullName(request), email: request.email, company_id: request.company_id }">{{ request.type === 'employee' ? staffCopy.companies + ', ' + staffCopy.edit : companyAccessCopy.button }}</button>
         </div>
       </article>
     </div>
     <div v-if="!loading && !listError && lastPage > 1" class="mt-6 flex flex-wrap items-center gap-3 text-sm"><button type="button" class="app-button-secondary" :disabled="page <= 1" @click="page--; loadRequests()">{{ copy.previous }}</button><span>{{ copy.page }} {{ page }} / {{ lastPage }}</span><button type="button" class="app-button-secondary" :disabled="page >= lastPage" @click="page++; loadRequests()">{{ copy.next }}</button></div>
 
-    <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" />
-    <StaffAssignmentsModal v-if="assignmentTarget" :user="assignmentTarget" @close="assignmentTarget = null" />
+    <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" :source-company-id="accessTarget.company_id" @close="accessTarget = null" @saved="loadRequests" />
     <div v-if="selected" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4" @click.self="closeReview" @keydown.esc="closeReview">
       <section ref="dialog" role="dialog" aria-modal="true" aria-labelledby="request-review-title" tabindex="-1" class="mx-auto my-6 w-full max-w-lg rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:my-12 sm:p-8" @keydown.tab="trapFocus">
         <h2 id="request-review-title" class="text-xl font-black">{{ action === 'approve' ? copy.approve : copy.reject }}</h2>
         <p class="mt-3 break-words font-bold">{{ fullName(selected) }}</p><p class="mt-1 break-all text-sm text-slate-500">{{ selected.email }}</p>
+        <p class="mt-2 break-words text-sm font-semibold">{{ selected.company?.name }}</p>
         <p v-if="selected.job_title" class="mt-3 break-words text-sm"><span class="text-slate-500">{{ copy.applicantJob }}:</span> {{ selected.job_title }}</p>
         <form class="mt-5 space-y-4" novalidate @submit.prevent="submitReview">
           <template v-if="action === 'approve' && selected.type === 'employee'">
@@ -62,14 +65,13 @@ import { registrationCopy } from '~/utils/registration-copy'
 import { membershipCopy } from '~/utils/membership-copy'
 import CompanyMembershipModal from '~/components/users/CompanyMembershipModal.vue'
 import StaffAssignmentsEditor from '~/components/users/StaffAssignmentsEditor.vue'
-import StaffAssignmentsModal from '~/components/users/StaffAssignmentsModal.vue'
 import { assignmentRows, assignmentError, assignmentCopy, staffAccessCopy } from '~/utils/staff-assignments'
 
 export default {
   name: 'RegistrationRequests',
-  components: { CompanyMembershipModal, StaffAssignmentsEditor, StaffAssignmentsModal },
+  components: { CompanyMembershipModal, StaffAssignmentsEditor },
   data() {
-    return { statuses: ['pending', 'approved', 'rejected'], status: 'pending', type: '', page: 1, lastPage: 1, requests: [], counts: { pending: 0, approved: 0, rejected: 0 }, loading: true, listError: '', listSequence: 0, roles: [], factories: [], optionsLoading: false, optionsError: '', selected: null, action: '', assignments: assignmentRows(), errors: {}, reviewError: '', busy: false, returnFocus: null, previousOverflow: '', notice: '', notifyBusy: null, accessTarget: null, assignmentTarget: null }
+    return { statuses: ['pending', 'approved', 'rejected'], status: 'pending', type: '', companyId: '', companies: [], page: 1, lastPage: 1, requests: [], counts: { pending: 0, approved: 0, rejected: 0 }, loading: true, listError: '', listSequence: 0, roles: [], factories: [], optionsLoading: false, optionsError: '', optionsSequence: 0, selected: null, action: '', assignments: assignmentRows(), errors: {}, reviewError: '', busy: false, returnFocus: null, previousOverflow: '', notice: '', accessTarget: null }
   },
   computed: {
     copy() { return registrationCopy(this.$i18n?.locale) },
@@ -77,18 +79,8 @@ export default {
     staffCopy() { return staffAccessCopy(this.$i18n?.locale) },
   },
   mounted() { this.loadRequests() },
-  beforeDestroy() { if (this.selected) document.body.style.overflow = this.previousOverflow },
+  beforeDestroy() { this.listSequence++; this.optionsSequence++; if (this.selected) document.body.style.overflow = this.previousOverflow },
   methods: {
-    async sendNotification(request) {
-      if (this.notifyBusy) return
-      this.notifyBusy = request.id; this.notice = ''
-      try {
-        const response = await this.$axios.$post(`/api/registration-requests/${request.id}/notify`, {}, { timeout: 15000 })
-        this.$set(request, 'notification_status', response.notification_status)
-        this.notice = this.copy.notification[response.notification_status] || this.copy.reviewFailed
-      } catch (error) { this.notice = error.response?.data?.message || this.copy.reviewFailed }
-      finally { this.notifyBusy = null }
-    },
     fullName(request) { return [request.name, request.last_name, request.patronymic].filter(Boolean).join(' ') },
     formatDate(value) { const date = new Date(value); return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(this.$i18n?.locale || 'hy', { year: 'numeric', month: 'short', day: 'numeric' }) },
     changeStatus(status) { this.status = status; this.page = 1; this.loadRequests() },
@@ -96,17 +88,22 @@ export default {
       const sequence = ++this.listSequence
       this.loading = true; this.listError = ''
       try {
-        const response = await this.$axios.$get('/api/registration-requests', { params: { status: this.status, page: this.page, ...(this.type ? { type: this.type } : {}) }, timeout: 15000 })
+        const response = await this.$axios.$get('/api/registration-requests', { params: { status: this.status, page: this.page, ...(this.type ? { type: this.type } : {}), ...(this.companyId ? { company_id: this.companyId } : {}) }, timeout: 15000 })
         if (sequence !== this.listSequence) return
-        this.requests = response.data || []; this.counts = response.counts; this.lastPage = response.meta.last_page
+        this.requests = response.data || []; this.counts = response.counts; this.lastPage = response.meta.last_page; this.companies = response.companies || []
       } catch (_) { if (sequence === this.listSequence) this.listError = this.copy.listFailed }
       finally { if (sequence === this.listSequence) this.loading = false }
     },
     async loadOptions() {
+      const sequence = ++this.optionsSequence
       this.optionsLoading = true; this.optionsError = ''
-      try { const response = await this.$axios.$get('/api/registration-requests/options', { timeout: 15000 }); this.roles = response.roles || []; this.factories = response.factories || [] }
-      catch (_) { this.optionsError = this.copy.optionsFailed }
-      finally { this.optionsLoading = false }
+      try {
+        const response = await this.$axios.$get('/api/registration-requests/options', { params: { company_id: this.selected.company_id }, timeout: 15000 })
+        if (sequence !== this.optionsSequence) return
+        this.roles = response.roles || []; this.factories = response.factories || []
+      }
+      catch (_) { if (sequence === this.optionsSequence) this.optionsError = this.copy.optionsFailed }
+      finally { if (sequence === this.optionsSequence) this.optionsLoading = false }
     },
     openReview(request, action) {
       this.returnFocus = document.activeElement; this.previousOverflow = document.body.style.overflow
@@ -117,6 +114,7 @@ export default {
     },
     closeReview() {
       if (this.busy) return
+      this.optionsSequence++
       document.body.style.overflow = this.previousOverflow; this.selected = null
       this.returnFocus?.focus()
     },
