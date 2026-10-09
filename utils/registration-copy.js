@@ -71,11 +71,16 @@ const copy = {
 }
 
 export function registrationCopy(locale) {
+  const serverUpdate = {
+    hy: 'Սերվերի հին տարբերակը դեռ աջակցում է միայն առանձին կարգավիճակների ցուցակին։ Բացվել են սպասող հայտերը։ Բոլոր հայտերի ընդհանուր ցուցակի համար թարմացրեք API սերվերը։',
+    ru: 'На сервере пока прежняя версия списка заявок. Открыты ожидающие заявки. Для общего списка всех статусов обновите API сервер.',
+    en: 'The server still has the previous request list version. Pending requests are open. Update the API server to view all statuses together.',
+  }
   const selection = {
-    hy: { allCompanies: 'Բոլոր ընկերությունները', clientRequests: 'Հաճախորդների հայտեր', employeeRequests: 'Աշխատակիցների հայտեր', reviewIntro: 'Աշխատակիցների և հաճախորդների հարցումները բոլոր այն ընկերություններից, որոնք կարող եք կառավարել։' },
-    ru: { allCompanies: 'Все компании', clientRequests: 'Заявки клиентов', employeeRequests: 'Заявки сотрудников', reviewIntro: 'Заявки сотрудников и клиентов всех компаний, которыми вы можете управлять.' },
-    en: { allCompanies: 'All companies', clientRequests: 'Client requests', employeeRequests: 'Employee requests', reviewIntro: 'Employee and client requests from all companies you can manage.' },
+    hy: { allStatuses: 'Բոլոր կարգավիճակները', allCompanies: 'Բոլոր հասանելի ընկերությունները', clientRequests: 'Հաճախորդների հայտեր', employeeRequests: 'Աշխատակիցների հայտեր', reviewIntro: 'Աշխատակիցների և հաճախորդների բոլոր հայտերը՝ սպասող, հաստատված և մերժված, այն ընկերություններից, որոնք կարող եք կառավարել։' },
+    ru: { allStatuses: 'Все статусы', allCompanies: 'Все доступные компании', clientRequests: 'Заявки клиентов', employeeRequests: 'Заявки сотрудников', reviewIntro: 'Все заявки сотрудников и клиентов: ожидающие, подтверждённые и отклонённые — из компаний, которыми вы можете управлять.' },
+    en: { allStatuses: 'All statuses', allCompanies: 'All accessible companies', clientRequests: 'Client requests', employeeRequests: 'Employee requests', reviewIntro: 'All employee and client requests, including pending, approved and rejected, from companies you can manage.' },
   }
   const language = String(locale || 'hy').split('-')[0]
-  return { ...(copy[language] || copy.hy), ...(selection[language] || selection.hy) }
+  return { ...(copy[language] || copy.hy), ...(selection[language] || selection.hy), serverUpdate: serverUpdate[language] || serverUpdate.hy }
 }

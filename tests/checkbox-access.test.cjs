@@ -10,8 +10,9 @@ async function component(file) {
   return (await import(moduleUrl(source))).default
 }
 function vmFor(options, extra) {
-  const vm = { ...options.data(), $i18n: { locale: 'ru' }, $set: (object, key, value) => { object[key] = value }, $delete: (object, key) => { delete object[key] }, ...extra }
+  const vm = { $i18n: { locale: 'ru' }, $set: (object, key, value) => { object[key] = value }, $delete: (object, key) => { delete object[key] }, ...extra }
   for (const [key, method] of Object.entries(options.methods)) vm[key] = method.bind(vm)
+  Object.assign(vm, options.data.call(vm), extra)
   for (const [key, getter] of Object.entries(options.computed || {})) Object.defineProperty(vm, key, { get: () => getter.call(vm) })
   return vm
 }
@@ -99,4 +100,63 @@ test('client company selection cannot expose staff assignments left in workspace
   assert.deepEqual(options.computed.assignments.call(vm), [])
   vm.$auth.user.role.name = 'laser'
   assert.deepEqual(options.computed.assignments.call(vm), assignments)
+})
+
+test('enabling another employee company opens its production roles without copying source workshops', async () => {
+  const options = await component('components/users/CompanyAccessEditor.vue')
+  const events = []
+  const vm = { currentCompanyId: 1, roles, defaultAssignments: [{ role_id: 2, factory_id: 10 }, { role_id: 2, factory_id: 11 }, { role_id: 1, factory_id: null }], value: [{ company_id: 1, enabled: true, role_id: 2, factory_id: 10 }, { company_id: 2, enabled: false, role_id: '', factory_id: null }, { company_id: 3, enabled: true, role_id: 3, factory_id: 30, read_only: true }], $emit: (_, rows) => events.push(rows) }
+  options.methods.selectCompanies.call(vm, [1, 2])
+  assert.deepEqual(events[0][1], { company_id: 2, enabled: true, role_id: 2, factory_id: null, assignments: [{ role_id: 2, factory_id: null }, { role_id: 1, factory_id: null }] })
+  assert.deepEqual(events[0][2], vm.value[2])
+  assert.equal(vm.value[1].enabled, false)
+})
+
+test('worker editing saves only changed destinations and preserves protected and mixed company memberships', async () => {
+  const options = await component('components/users/WorkerFormModal.vue')
+  const events = []
+  const vm = vmFor(options, { visible: true, canManageCompanies: true, roles, factories, companies: [{ id: 1, factories }, { id: 2, factories: [{ id: 20 }, { id: 21 }] }, { id: 3, factories: [] }], $auth: { user: { is_platform_admin: false, company: { id: 1 } } }, worker: { id: 15, name: 'Worker', email: 'worker@example.invalid', role_id: 2, factory_id: 10, assignments: [{ role_id: 2, factory_id: 10 }], worker: { phone: '123' }, company_access: [{ company_id: 1, enabled: true, role_id: 2, factory_id: 10 }, { company_id: 2, enabled: true, role_id: 2, factory_id: 20, assignments: [{ role_id: 2, factory_id: 20 }] }, { company_id: 3, enabled: true, role_id: 99, factory_id: null, read_only: true }] }, $emit: (_, value) => events.push(value) })
+  vm.bootstrap()
+  vm.form.phone = '456'
+  vm.submit()
+  assert.equal('company_access' in events[0].payload, false)
+  vm.companyAccess[1].assignments.push({ role_id: 2, factory_id: 21 })
+  vm.submit()
+  assert.deepEqual(events[1].payload.company_access, [{ company_id: 2, enabled: true, role_id: 2, factory_id: 20, assignments: [{ role_id: 2, factory_id: 20 }, { role_id: 2, factory_id: 21 }] }])
+  assert.equal(vm.originalAccess[1].assignments.length, 1)
+  assert.equal(vm.worker.company_access[1].assignments.length, 1)
+  assert.equal(vm.originalAccess[2].role_id, 99)
+})
+
+test('requests open all statuses and show separate type counts with unavailable company names disabled', async () => {
+  const options = await component('components/registration/RegistrationRequests.vue')
+  const calls = []
+  const vm = vmFor(options, { $axios: { $get: async (_, config) => { calls.push(config.params); return { data: [{ id: 1, type: 'employee', status: 'approved' }], counts: { pending: 1, approved: 2, rejected: 0 }, type_counts: { client: 1, employee: 2 }, meta: { last_page: 1 }, companies: [{ id: 1 }], unmanaged_companies: [{ id: 2, name: 'Second' }] } } } })
+  await vm.loadRequests()
+  assert.deepEqual(calls[0], { status: 'all', page: 1 })
+  assert.equal(vm.requests[0].status, 'approved')
+  assert.deepEqual(vm.requestTypes.map(item => item.count), [3, 1, 2])
+  assert.equal(vm.totalCount, 3)
+  assert.deepEqual(vm.unmanagedCompanies, [{ id: 2, name: 'Second' }])
+  const membership = await component('components/users/CompanyMembershipModal.vue')
+  const clientVm = vmFor(membership, { user: { id: 1 }, targetType: 'client', unmanagedCompanies: vm.unmanagedCompanies })
+  assert.equal(clientVm.companyOptions[0].disabled, true)
+  assert.equal('access' in clientVm.companyOptions[0], false)
+})
+
+test('an older API keeps its pending list usable and reports that all-status support needs a server update', async () => {
+  const options = await component('components/registration/RegistrationRequests.vue')
+  const calls = []
+  const vm = vmFor(options, { $axios: { $get: async (_, config) => {
+    calls.push(config.params)
+    if (config.params.status === 'all') throw { response: { status: 422, data: { errors: { status: ['Invalid status'] } } } }
+    return { data: [{ type: 'employee' }], counts: { pending: 1, approved: 1, rejected: 0 }, meta: { last_page: 1 }, companies: [] }
+  } } })
+  await vm.loadRequests()
+  assert.deepEqual(calls, [{ status: 'all', page: 1 }, { status: 'pending', page: 1 }])
+  assert.equal(vm.status, 'pending')
+  assert.equal(vm.requests[0].type, 'employee')
+  assert.equal(vm.notice, vm.copy.serverUpdate)
+  assert.equal(vm.listError, '')
+  assert.equal(vm.requestTypes[2].count, null)
 })

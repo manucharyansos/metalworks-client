@@ -9,6 +9,11 @@ export function selectedRoleIds(rows) {
   return [...new Set(rows.map(row => Number(row.role_id)).filter(Boolean))]
 }
 
+export function newCompanyAssignments(rows, roles) {
+  return selectedRoleIds(rows).filter(id => roles.some(role => Number(role.id) === id && role.name !== 'authenticatedUser'))
+    .map(role_id => ({ role_id, factory_id: null }))
+}
+
 export function selectAssignmentRoles(rows, ids) {
   const selected = [...new Set(ids.map(Number).filter(Boolean))]
   const result = rows.filter(row => selected.includes(Number(row.role_id))).map(row => ({ ...row }))
@@ -55,9 +60,9 @@ export function assignmentCopy(locale) {
     en: { title: 'Positions and workshops', add: 'Add position', remove: 'Remove', primary: 'Primary', makePrimary: 'Make primary', role: 'Position', workshop: 'Workshop', chooseRole: 'Select a position', chooseWorkshop: 'Select a workshop', duplicate: 'This position and workshop are already selected.', clientOnly: 'Client access cannot be combined with employee positions in one company.', hint: 'Add the required positions and workshops. The primary position opens after sign-in; others are available in the sidebar.', select: 'Working position and workshop' },
   }
   const selection = {
-    hy: { roles: 'Հաստիքներ', workshopsFor: 'Արտադրամասեր՝', noWorkshops: 'Այս ընկերությունում արտադրամասեր դեռ չկան։', workshopHint: 'Նշեք այս հաստիքի հասանելի արտադրամասերը։', hint: 'Նշեք անհրաժեշտ հաստիքները, ապա յուրաքանչյուր արտադրական հաստիքի արտադրամասերը։ Հիմնական նշանակումը բացվում է մուտքից հետո։' },
-    ru: { roles: 'Должности', workshopsFor: 'Цеха для должности:', noWorkshops: 'В этой компании пока нет цехов.', workshopHint: 'Отметьте цеха, доступные для этой должности.', hint: 'Отметьте должности, затем цеха для каждой производственной должности. Основное назначение открывается после входа.' },
-    en: { roles: 'Positions', workshopsFor: 'Workshops for:', noWorkshops: 'This company has no workshops yet.', workshopHint: 'Select the workshops available for this position.', hint: 'Select positions, then workshops for each production position. The primary assignment opens after sign-in.' },
+    hy: { roles: 'Հաստիքներ', workshopsFor: 'Արտադրամասեր՝', noWorkshops: 'Այս ընկերությունում արտադրամասեր դեռ չկան։', workshopHint: 'Նշեք այս հաստիքի հասանելի արտադրամասերը։', productionHint: 'Արտադրամասերը ընտրելու համար նշեք արտադրական հաստիքը՝ լազերային կտրում, կռում կամ փոշեներկում։', hint: 'Նշեք անհրաժեշտ հաստիքները, ապա յուրաքանչյուր արտադրական հաստիքի արտադրամասերը։ Հիմնական նշանակումը բացվում է մուտքից հետո։' },
+    ru: { roles: 'Должности', workshopsFor: 'Цеха для должности:', noWorkshops: 'В этой компании пока нет цехов.', workshopHint: 'Отметьте цеха, доступные для этой должности.', productionHint: 'Для выбора цехов отметьте производственную должность: лазерная резка, гибка или порошковая покраска.', hint: 'Отметьте должности, затем цеха для каждой производственной должности. Основное назначение открывается после входа.' },
+    en: { roles: 'Positions', workshopsFor: 'Workshops for:', noWorkshops: 'This company has no workshops yet.', workshopHint: 'Select the workshops available for this position.', productionHint: 'To select workshops, check a production position: laser cutting, bending or powder coating.', hint: 'Select positions, then workshops for each production position. The primary assignment opens after sign-in.' },
   }
   const language = String(locale || 'hy').split('-')[0]
   return { ...(copy[language] || copy.hy), ...(selection[language] || selection.hy) }

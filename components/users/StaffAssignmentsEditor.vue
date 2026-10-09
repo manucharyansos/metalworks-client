@@ -3,6 +3,7 @@
     <legend class="px-1 text-sm font-bold">{{ copy.title }}</legend>
     <p class="text-xs leading-5 text-slate-500">{{ copy.hint }}</p>
     <CheckboxSelect :value="roleIds" :options="roleOptions" :label="copy.roles" :placeholder="copy.chooseRole" :disabled="disabled" :id-prefix="prefix + '-roles'" @input="selectRoles" />
+    <p v-if="!operatorRoles.length" class="text-xs leading-5 text-slate-500">{{ copy.productionHint }}</p>
     <div v-for="role in operatorRoles" :key="role.id" class="min-w-0 rounded-xl bg-slate-50 p-3 dark:bg-slate-950" :data-workshop-role="role.name">
       <CheckboxSelect :value="workshopIds(role.id)" :options="workshopOptions" :label="copy.workshopsFor + ' ' + roleLabel(role)" :placeholder="copy.chooseWorkshop" :empty-label="copy.noWorkshops" :disabled="disabled" :id-prefix="prefix + '-workshops-' + role.id" @input="selectWorkshops(role.id, $event)" />
       <p class="mt-2 text-xs leading-5 text-slate-500">{{ copy.workshopHint }}</p>

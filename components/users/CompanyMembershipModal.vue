@@ -9,6 +9,7 @@
       <div v-else-if="loadError" class="mt-6 text-sm text-rose-600" role="alert">{{ loadError }} <button type="button" class="font-bold underline" @click="load">{{ copy.retry }}</button></div>
       <form v-else data-workspace-form class="mt-6 space-y-3" novalidate @submit.prevent="save">
         <CheckboxSelect :value="selectedCompanyIds" :options="companyOptions" :label="copy.button" :placeholder="copy.chooseCompanies" :disabled="busy" id-prefix="membership-companies" @input="setCompanyIds" />
+        <p v-if="unmanagedCompanies.length" class="text-xs leading-5 text-slate-500">{{ copy.managementHint }}</p>
         <fieldset v-for="company in selectedCompanies" :key="company.id" class="min-w-0 rounded-2xl border border-slate-200 p-4 dark:border-slate-700" :disabled="busy || company.read_only" :data-company-id="company.id">
           <h3 class="break-words text-sm font-bold">{{ company.name }}</h3>
           <p v-if="company.read_only" class="mt-2 text-xs leading-5 text-slate-500">{{ isClient ? copy.protectedEmployee : copy.protected }}</p>
@@ -28,19 +29,19 @@
 import { membershipCopy, changedCompanyAccess } from '~/utils/membership-copy'
 import StaffAssignmentsEditor from '~/components/users/StaffAssignmentsEditor.vue'
 import CheckboxSelect from '~/components/ui/CheckboxSelect.vue'
-import { assignmentRows, assignmentError, assignmentCopy } from '~/utils/staff-assignments'
+import { assignmentRows, assignmentError, assignmentCopy, newCompanyAssignments } from '~/utils/staff-assignments'
 
 export default {
   components: { StaffAssignmentsEditor, CheckboxSelect },
   props: { user: { type: Object, required: true }, sourceCompanyId: { type: [Number, String], default: null } },
-  data() { return { companies: [], roles: [], rows: [], originals: [], targetType: 'employee', currentCompanyId: null, loading: true, loadError: '', saveError: '', errors: {}, busy: false, sequence: 0, returnFocus: null, previousOverflow: '' } },
+  data() { return { companies: [], unmanagedCompanies: [], roles: [], rows: [], originals: [], targetType: 'employee', currentCompanyId: null, loading: true, loadError: '', saveError: '', errors: {}, busy: false, sequence: 0, returnFocus: null, previousOverflow: '' } },
   computed: {
     copy() { return membershipCopy(this.$i18n?.locale) },
     userId() { return this.user.user_id || this.user.user?.id || this.user.id },
     isClient() { return this.targetType === 'client' },
     selectedCompanyIds() { return this.rows.filter(row => row.enabled).map(row => row.company_id) },
     selectedCompanies() { return this.companies.filter(company => this.row(company.id).enabled) },
-    companyOptions() { return this.companies.map(company => ({ id: company.id, label: company.name, disabled: Boolean(company.selection_locked || company.read_only), note: company.read_only ? (this.isClient ? this.copy.protectedEmployee : this.copy.protected) : String(company.id) === String(this.currentCompanyId) ? this.copy.current : '' })) },
+    companyOptions() { return [...this.companies.map(company => ({ id: company.id, label: company.name, disabled: Boolean(company.selection_locked || company.read_only), note: company.read_only ? (this.isClient ? this.copy.protectedEmployee : this.copy.protected) : String(company.id) === String(this.currentCompanyId) ? this.copy.current : '' })), ...this.unmanagedCompanies.map(company => ({ id: company.id, label: company.name, disabled: true, note: this.copy.notManaged }))] },
     changes() { const rows = changedCompanyAccess(this.rows, this.originals); return this.isClient ? rows.map(row => ({ company_id: row.company_id, enabled: row.enabled })) : rows },
   },
   mounted() {
@@ -54,7 +55,13 @@ export default {
     setCompanyIds(ids) {
       for (const company of this.companies) {
         if (company.selection_locked || company.read_only) continue
-        this.change(company.id, 'enabled', ids.some(id => String(id) === String(company.id)))
+        const enabled = ids.some(id => String(id) === String(company.id))
+        const row = this.row(company.id)
+        if (enabled && !this.isClient && !row.role_id) {
+          const source = this.row(this.currentCompanyId)
+          this.setAssignments(company.id, newCompanyAssignments(assignmentRows(source.assignments, source.role_id, source.factory_id), this.roles))
+        }
+        this.change(company.id, 'enabled', enabled)
       }
     },
     setAssignments(id, rows) { const row = this.row(id); this.$set(row, 'assignments', rows); this.change(id, 'role_id', rows[0]?.role_id || null); this.change(id, 'factory_id', rows[0]?.factory_id || null) },
@@ -73,7 +80,7 @@ export default {
       try {
         const data = await this.$axios.$get(`/api/company-access/${this.userId}`, this.requestConfig())
         if (sequence !== this.sequence) return
-        this.companies = data.companies || []; this.roles = data.roles || []; this.currentCompanyId = data.current_company_id; this.targetType = data.user?.type || 'employee'
+        this.companies = data.companies || []; this.unmanagedCompanies = data.unmanaged_companies || []; this.roles = data.roles || []; this.currentCompanyId = data.current_company_id; this.targetType = data.user?.type || 'employee'
         this.rows = this.companies.map(company => ({ ...company.access })); this.originals = this.rows.map(row => ({ ...row, ...(row.assignments ? { assignments: row.assignments.map(item => ({ ...item })) } : {}) }))
       } catch (_) { if (sequence === this.sequence) this.loadError = this.copy.failed }
       finally { if (sequence === this.sequence) this.loading = false }

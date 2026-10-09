@@ -4,9 +4,9 @@
     class="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4"
     @click.self="$emit('close')"
   >
-    <div class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
+    <div role="dialog" aria-modal="true" aria-labelledby="worker-form-title" class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
       <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800">
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+        <h3 id="worker-form-title" class="text-lg font-semibold text-slate-900 dark:text-white">
           {{ isEdit ? t.editTitle : t.createTitle }}
         </h3>
         <button class="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" @click="$emit('close')">✕</button>
@@ -32,7 +32,7 @@
 
             <div>
               <label class="mb-1 block text-sm">{{ t.phone }}</label>
-              <input v-model.trim="form.phone" type="text" class="field" />
+              <input v-model.trim="form.phone" name="phone" type="text" class="field" />
             </div>
 
             <div>
@@ -46,10 +46,11 @@
             </div>
           </div>
 
-          <StaffAssignmentsEditor :value="assignments" :roles="allowedRoles" :factories="factories" :role-names="t.roles" :disabled="submitting || Boolean(worker && worker.is_platform_admin)" @input="setAssignments" />
+          <p class="text-sm font-semibold">{{ $auth.user?.company?.name }}</p>
+          <StaffAssignmentsEditor :value="assignments" :roles="allowedRoles" :factories="factories" :role-names="t.roles" :disabled="submitting || Boolean(worker && worker.is_platform_admin)" :id-prefix="'worker-source-' + currentCompanyId" @input="setAssignments" />
           <p v-if="!canEditAccount" class="text-xs text-slate-500">{{ companyText.shared }}</p>
-          <CompanyAccessEditor v-if="canManageCompanies && !(worker && worker.is_platform_admin)" v-model="companyAccess" :companies="companies" :roles="allowedRoles" :current-company-id="currentCompanyId" :role-names="t.roles" :position-label="t.position" :workshop-label="t.factory" />
-          <label v-if="!isEdit && canManageCompanies" class="flex items-center gap-2 text-sm">
+          <CompanyAccessEditor v-if="canManageCompanies && !(worker && worker.is_platform_admin)" v-model="companyAccess" :companies="companies" :roles="allowedRoles" :current-company-id="currentCompanyId" :role-names="t.roles" :position-label="t.position" :workshop-label="t.factory" :default-assignments="assignments" :disabled="submitting" />
+          <label v-if="!isEdit && $auth.user?.is_platform_admin" class="flex items-center gap-2 text-sm">
             <input v-model="existingAccount" type="checkbox" /> {{ companyText.accountExists }}
           </label>
           <p v-if="existingAccount" class="text-xs text-slate-500">{{ companyText.accountHint }}</p>
@@ -86,6 +87,7 @@ import CompanyAccessEditor from '~/components/users/CompanyAccessEditor.vue'
 import StaffAssignmentsEditor from '~/components/users/StaffAssignmentsEditor.vue'
 import { assignmentRows, assignmentError, assignmentCopy } from '~/utils/staff-assignments'
 import { workspaceCopy } from '~/utils/company-copy'
+import { changedCompanyAccess } from '~/utils/membership-copy'
 const ALLOWED_ROLE_NAMES = ['manager', 'bend', 'laser', 'powder_catting', 'engineer']
 const FACTORY_ROLE_NAMES = ['bend', 'laser', 'powder_catting']
 
@@ -114,7 +116,7 @@ export default {
     canManageCompanies: { type: Boolean, default: false },
   },
   data() {
-    return { form: this.emptyForm(), companyAccess: [], assignments: assignmentRows(), existingAccount: false }
+    return { form: this.emptyForm(), companyAccess: [], originalAccess: [], assignments: assignmentRows(), existingAccount: false }
   },
   computed: {
     locale() {
@@ -126,9 +128,10 @@ export default {
     currentCompanyId() { return this.$auth?.user?.company?.id },
     canEditAccount() { return !this.isEdit || this.worker.can_edit_account !== false },
     isEdit() { return !!(this.worker && this.worker.id) },
-    allowedRoles() { return (this.roles || []).filter((role) => ALLOWED_ROLE_NAMES.includes(role.name) || (this.canManageCompanies && role.name === 'admin')) },
+    allowedRoles() { return (this.roles || []).filter((role) => ALLOWED_ROLE_NAMES.includes(role.name) || (this.$auth?.user?.is_platform_admin && role.name === 'admin')) },
     selectedRole() { return this.allowedRoles.find((role) => String(role.id) === String(this.form.role_id)) || null },
     requiresFactory() { return FACTORY_ROLE_NAMES.includes(this.selectedRole?.name) },
+    accessChanges() { return changedCompanyAccess(this.companyAccess.filter(row => !row.read_only && String(row.company_id) !== String(this.currentCompanyId)), this.originalAccess) },
   },
   watch: {
     visible(v) { v ? this.bootstrap() : this.reset() },
@@ -140,7 +143,7 @@ export default {
     accessRows() {
       return this.companies.map((company) => {
         const saved = this.worker?.company_access?.find((row) => String(row.company_id) === String(company.id))
-        return saved ? { ...saved } : { company_id: company.id, enabled: String(company.id) === String(this.currentCompanyId), role_id: '', factory_id: null }
+        return saved ? { ...saved, ...(saved.assignments ? { assignments: saved.assignments.map(row => ({ ...row })) } : {}) } : { company_id: company.id, enabled: String(company.id) === String(this.currentCompanyId), role_id: '', factory_id: null }
       })
     },
     emptyForm() {
@@ -149,6 +152,7 @@ export default {
     bootstrap() {
       if (!this.isEdit) return this.reset()
       this.companyAccess = this.accessRows()
+      this.originalAccess = this.accessRows()
       this.existingAccount = false
       const u = this.worker
       this.assignments = assignmentRows(u.assignments, u.role_id, u.factory_id)
@@ -165,14 +169,14 @@ export default {
         password_confirmation: '',
       }
     },
-    reset() { this.form = this.emptyForm(); this.assignments = assignmentRows(); this.companyAccess = this.accessRows(); this.existingAccount = false },
+    reset() { this.form = this.emptyForm(); this.assignments = assignmentRows(); this.companyAccess = this.accessRows(); this.originalAccess = this.accessRows(); this.existingAccount = false },
     validate() {
       if (!this.form.name.trim()) return this.t.nameRequired
       if (!this.form.email.trim()) return this.t.emailRequired
       const assignmentIssue = assignmentError(this.assignments, this.allowedRoles, this.factories, assignmentCopy(this.locale))
       if (assignmentIssue) return assignmentIssue
       if (!this.form.phone.trim()) return this.t.phoneRequired
-      for (const row of this.canManageCompanies ? this.companyAccess : []) {
+      for (const row of this.canManageCompanies ? this.accessChanges : []) {
         if (!row.enabled || String(row.company_id) === String(this.currentCompanyId)) continue
         const issue = assignmentError(assignmentRows(row.assignments, row.role_id, row.factory_id), this.allowedRoles, this.companies.find(company => String(company.id) === String(row.company_id))?.factories || [], assignmentCopy(this.locale))
         if (issue) return issue
@@ -198,8 +202,8 @@ export default {
         second_phone: this.form.second_phone || null,
         address: this.form.address || null,
       }
-      if (this.canManageCompanies && !this.worker?.is_platform_admin) {
-        payload.company_access = this.companyAccess.map((row) => String(row.company_id) === String(this.currentCompanyId) ? { ...row, role_id: payload.role_id, factory_id: payload.factory_id, assignments: payload.assignments } : { ...row })
+      if (this.canManageCompanies && !this.worker?.is_platform_admin && this.accessChanges.length) {
+        payload.company_access = this.accessChanges
       }
       if (!this.isEdit && !this.existingAccount) {
         payload.password = this.form.password
