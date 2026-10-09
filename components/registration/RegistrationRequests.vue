@@ -5,12 +5,13 @@
     <nuxt-link :to="localePath(($auth.user?.role?.name === 'admin' ? '/admin' : '/manager') + '/users')" class="mt-3 inline-block text-sm font-semibold underline">{{ staffCopy.permissions }} →</nuxt-link>
     <p v-if="notice" class="mt-4 rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800" role="status">{{ notice }}</p>
     <div class="mt-6 flex flex-wrap items-center gap-2" role="group" :aria-label="copy.requests">
-      <button v-for="tab in statuses" :key="tab" type="button" class="rounded-xl border px-3 py-2 text-sm font-semibold" :class="status === tab ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="status === tab" @click="changeStatus(tab)">{{ copy[tab] }} <span class="ml-1 opacity-70">{{ counts[tab] }}</span></button>
+      <button v-for="tab in statuses" :key="tab" type="button" class="rounded-xl border px-3 py-2 text-sm font-semibold" :class="status === tab ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="status === tab" :data-request-status="tab" @click="changeStatus(tab)">{{ tab === 'all' ? copy.allStatuses : copy[tab] }} <span class="ml-1 opacity-70">{{ tab === 'all' ? totalCount : counts[tab] }}</span></button>
     </div>
     <div class="mt-4 grid gap-2 sm:max-w-2xl sm:grid-cols-3" role="group" :aria-label="copy.allTypes" data-request-types>
-      <button v-for="item in requestTypes" :key="item.value" type="button" class="min-w-0 rounded-xl border px-3 py-3 text-left text-sm font-semibold" :class="type === item.value ? 'border-blue-600 bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-200' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="type === item.value" :data-request-type="item.value || 'all'" @click="changeType(item.value)">{{ item.label }}</button>
+      <button v-for="item in requestTypes" :key="item.value" type="button" class="min-w-0 rounded-xl border px-3 py-3 text-left text-sm font-semibold" :class="type === item.value ? 'border-blue-600 bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-200' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="type === item.value" :data-request-type="item.value || 'all'" @click="changeType(item.value)">{{ item.label }} <span v-if="item.count !== null" class="ml-1 opacity-70">{{ item.count }}</span></button>
     </div>
-    <div class="mt-4 max-w-sm"><label for="request-company" class="sr-only">{{ copy.allCompanies }}</label><select id="request-company" v-model="companyId" class="field-control" @change="page = 1; loadRequests()"><option value="">{{ copy.allCompanies }}</option><option v-for="company in companies" :key="company.id" :value="company.id">{{ company.name }}</option></select></div>
+    <div class="mt-4 max-w-sm"><label for="request-company" class="sr-only">{{ copy.allCompanies }}</label><select id="request-company" v-model="companyId" class="field-control" @change="page = 1; loadRequests()"><option value="">{{ copy.allCompanies }}</option><option v-for="company in companies" :key="company.id" :value="company.id">{{ company.name }}</option><option v-for="company in unmanagedCompanies" :key="company.id" :value="company.id" disabled>{{ company.name }} — {{ companyAccessCopy.notManaged }}</option></select></div>
+    <p v-if="unmanagedCompanies.length" class="mt-2 max-w-xl text-xs leading-5 text-slate-500">{{ companyAccessCopy.managementHint }}</p>
     <p v-if="loading" class="mt-6 text-sm text-slate-500" role="status">{{ copy.loading }}</p>
     <div v-else-if="listError" class="mt-6 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-200" role="alert">{{ listError }} <button type="button" class="ml-2 font-bold underline" @click="loadRequests">{{ copy.retry }}</button></div>
     <p v-else-if="!requests.length" class="mt-6 rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-500 dark:border-slate-700">{{ copy.empty }}</p>
@@ -68,28 +69,39 @@ export default {
   name: 'RegistrationRequests',
   components: { CompanyMembershipModal, StaffAssignmentsEditor },
   data() {
-    return { statuses: ['pending', 'approved', 'rejected'], status: 'pending', type: '', companyId: '', companies: [], page: 1, lastPage: 1, requests: [], counts: { pending: 0, approved: 0, rejected: 0 }, loading: true, listError: '', listSequence: 0, roles: [], factories: [], optionsLoading: false, optionsError: '', optionsSequence: 0, selected: null, action: '', assignments: assignmentRows(), errors: {}, reviewError: '', busy: false, returnFocus: null, previousOverflow: '', notice: '', accessTarget: null }
+    return { statuses: ['all', 'pending', 'approved', 'rejected'], status: 'all', type: '', companyId: '', companies: [], unmanagedCompanies: [], page: 1, lastPage: 1, requests: [], counts: { pending: 0, approved: 0, rejected: 0 }, typeCounts: { client: 0, employee: 0 }, loading: true, listError: '', listSequence: 0, roles: [], factories: [], optionsLoading: false, optionsError: '', optionsSequence: 0, selected: null, action: '', assignments: assignmentRows(), errors: {}, reviewError: '', busy: false, returnFocus: null, previousOverflow: '', notice: '', accessTarget: null }
   },
   computed: {
     copy() { return registrationCopy(this.$i18n?.locale) },
     companyAccessCopy() { return membershipCopy(this.$i18n?.locale) },
     staffCopy() { return staffAccessCopy(this.$i18n?.locale) },
-    requestTypes() { return [{ value: '', label: this.copy.allTypes }, { value: 'client', label: this.copy.clientRequests }, { value: 'employee', label: this.copy.employeeRequests }] },
+    totalCount() { return ['pending', 'approved', 'rejected'].reduce((sum, status) => sum + Number(this.counts[status] || 0), 0) },
+    requestTypes() { return [{ value: '', label: this.copy.allTypes, count: this.typeCounts.client === null || this.typeCounts.employee === null ? null : this.typeCounts.client + this.typeCounts.employee }, { value: 'client', label: this.copy.clientRequests, count: this.typeCounts.client }, { value: 'employee', label: this.copy.employeeRequests, count: this.typeCounts.employee }] },
   },
   mounted() { this.loadRequests() },
   beforeDestroy() { this.listSequence++; this.optionsSequence++; if (this.selected) document.body.style.overflow = this.previousOverflow },
   methods: {
     fullName(request) { return [request.name, request.last_name, request.patronymic].filter(Boolean).join(' ') },
     formatDate(value) { const date = new Date(value); return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(this.$i18n?.locale || 'hy', { year: 'numeric', month: 'short', day: 'numeric' }) },
-    changeStatus(status) { this.status = status; this.page = 1; this.loadRequests() },
+    changeStatus(status) { this.status = status; this.page = 1; return this.loadRequests() },
     changeType(type) { this.type = type; this.page = 1; return this.loadRequests() },
     async loadRequests() {
       const sequence = ++this.listSequence
       this.loading = true; this.listError = ''
       try {
-        const response = await this.$axios.$get('/api/registration-requests', { params: { status: this.status, page: this.page, ...(this.type ? { type: this.type } : {}), ...(this.companyId ? { company_id: this.companyId } : {}) }, timeout: 15000 })
+        const params = { status: this.status, page: this.page, ...(this.type ? { type: this.type } : {}), ...(this.companyId ? { company_id: this.companyId } : {}) }
+        let response
+        try { response = await this.$axios.$get('/api/registration-requests', { params, timeout: 15000 }) }
+        catch (error) {
+          if (params.status !== 'all' || error.response?.status !== 422 || !error.response?.data?.errors?.status) throw error
+          if (sequence !== this.listSequence) return
+          response = await this.$axios.$get('/api/registration-requests', { params: { ...params, status: 'pending', page: 1 }, timeout: 15000 })
+          if (sequence !== this.listSequence) return
+          this.status = 'pending'; this.page = 1; this.notice = this.copy.serverUpdate
+        }
         if (sequence !== this.listSequence) return
         this.requests = response.data || []; this.counts = response.counts; this.lastPage = response.meta.last_page; this.companies = response.companies || []
+        this.unmanagedCompanies = response.unmanaged_companies || []; this.typeCounts = response.type_counts || { client: null, employee: null }
       } catch (_) { if (sequence === this.listSequence) this.listError = this.copy.listFailed }
       finally { if (sequence === this.listSequence) this.loading = false }
     },

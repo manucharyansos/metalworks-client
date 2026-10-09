@@ -4,7 +4,11 @@ Clients have company-only access controls. Employee controls expand into checkbo
 
 Client profiles omit position and workshop badges, and client workspace selection never displays employee assignments. Client company-access responses contain company selections only. The manager navigation names both client and employee applications explicitly; the common admin/manager queue has visible All / Client / Employee buttons, defaulting to both types.
 
-Registration requests include employees and clients from every company the reviewer manages, with company and type filters. Request approval uses the application's company options, and approved request cards edit that company's access without changing the reviewer's selected workspace. Unmanaged companies and workshops stay private.
+Registration requests include employees and clients from every company the reviewer manages, with company, type and status filters. All statuses open by default, with separate client/employee counts, so reviewed employee requests remain visible. Older API versions that reject the all-status filter keep their pending list usable and display an update notice. Request approval uses the application's company options, and approved request cards edit that company's access without changing the reviewer's selected workspace.
+
+Employee create/edit forms and the Companies modal share the same managed-company scope for admins and managers. Each selected company has its own position/workshop editor. Adding a company starts with the source positions but clears every workshop selection; workshops must be chosen from the destination. Unchanged and protected memberships are omitted from worker saves. Editing source-company contact details preserves other companies' access.
+
+Unassigned company names, already public at registration, appear as disabled choices with a management-access hint. Their requests, employees and workshops stay private. To grant a manager another company, the platform admin opens that manager in `/admin/users`, selects Companies, checks the destination and assigns Manager. This enables both application types and client/employee assignment for that company without opening it to unrelated managers.
 
 Approval automatically sends a localized company-branded email after account creation. The manual send-email button is removed; a failed mail transport is shown without undoing approval. The API server must have working SMTP settings for real delivery.
 
