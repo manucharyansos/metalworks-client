@@ -75,3 +75,28 @@ test('changing the reviewed company cannot be overwritten by an older workshop r
   assert.deepEqual(vm.factories, [{ id: 20 }])
   assert.equal(vm.optionsLoading, false)
 })
+
+test('request type switches reset pagination while preserving company and review status', async () => {
+  const options = await component('components/registration/RegistrationRequests.vue')
+  const calls = []
+  const vm = vmFor(options, { page: 3, status: 'approved', companyId: 2, $axios: { $get: async (_, config) => { calls.push(config.params); return { data: [], counts: {}, meta: { last_page: 1 }, companies: [] } } } })
+  assert.deepEqual(vm.requestTypes.map(item => item.value), ['', 'client', 'employee'])
+  await vm.changeType('client')
+  await vm.changeType('employee')
+  await vm.changeType('')
+  assert.deepEqual(calls, [
+    { status: 'approved', page: 1, company_id: 2, type: 'client' },
+    { status: 'approved', page: 1, company_id: 2, type: 'employee' },
+    { status: 'approved', page: 1, company_id: 2 },
+  ])
+  assert.equal(vm.loading, false)
+})
+
+test('client company selection cannot expose staff assignments left in workspace state', async () => {
+  const options = await component('components/layout/CompanySelector.vue')
+  const assignments = [{ id: 1, role: { name: 'laser' }, factory: { name: 'Workshop A' } }, { id: 2, role: { name: 'bend' }, factory: { name: 'Workshop B' } }]
+  const vm = { $auth: { user: { role: { name: 'authenticatedUser' } } }, $store: { state: { workspace: { assignments } } } }
+  assert.deepEqual(options.computed.assignments.call(vm), [])
+  vm.$auth.user.role.name = 'laser'
+  assert.deepEqual(options.computed.assignments.call(vm), assignments)
+})

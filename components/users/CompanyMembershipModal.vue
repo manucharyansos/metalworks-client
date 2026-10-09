@@ -4,7 +4,7 @@
       <h2 id="company-membership-title" class="text-xl font-black">{{ copy.title }}</h2>
       <p class="mt-2 break-words font-semibold">{{ user.name || user.display_name }}</p>
       <p class="mt-1 break-all text-sm text-slate-500">{{ user.email || user.user?.email }}</p>
-      <p class="mt-4 text-sm text-slate-500">{{ isClient ? copy.clientIntro : copy.intro }}</p><p class="mt-1 text-xs leading-5 text-slate-400">{{ copy.rights }}</p>
+      <p v-if="!loading && !loadError" class="mt-4 text-sm text-slate-500">{{ isClient ? copy.clientIntro : copy.intro }}</p><p class="mt-1 text-xs leading-5 text-slate-400">{{ copy.rights }}</p>
       <p v-if="loading" class="mt-6 text-sm" role="status">{{ copy.loading }}</p>
       <div v-else-if="loadError" class="mt-6 text-sm text-rose-600" role="alert">{{ loadError }} <button type="button" class="font-bold underline" @click="load">{{ copy.retry }}</button></div>
       <form v-else data-workspace-form class="mt-6 space-y-3" novalidate @submit.prevent="save">

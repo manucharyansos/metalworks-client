@@ -16,7 +16,7 @@
         <p class="px-3 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">{{ $t('workspace_layout.management') }}</p>
         <nav class="mt-3 space-y-1.5">
           <nuxt-link v-for="item in visibleNavItems" :key="item.to" :to="localePath(item.to)" class="nav-item group" active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950" :exact="item.exact" @click.native="closeSidebar">
-            <span class="nav-icon"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="iconPath(item.icon)" /></svg></span><span class="min-w-0 flex-1 truncate">{{ navigationLabel(item) }}</span>
+            <span class="nav-icon"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" :d="iconPath(item.icon)" /></svg></span><span class="min-w-0 flex-1" :class="item.wrap ? 'whitespace-normal leading-5' : 'truncate'">{{ navigationLabel(item) }}</span>
           </nuxt-link>
         </nav>
 
@@ -75,7 +75,7 @@ export default {
         { to: '/manager/clients', labelKey: 'workspace_layout.clients', permission: 'clients.view', icon: 'clients' },
         { to: '/manager/workers', labelKey: 'workspace_layout.employees', permission: 'workers.view', icon: 'workers' },
         { to: '/manager/users', labelKey: 'workspace_layout.access_users', permission: null, icon: 'workers' },
-        { to: '/manager/registration-requests', label: { hy: 'Գրանցման հարցումներ', ru: 'Заявки на регистрацию', en: 'Registration requests' }, permission: null, icon: 'workers' },
+        { to: '/manager/registration-requests', label: { hy: 'Հաճախորդների և աշխատակիցների հայտեր', ru: 'Заявки клиентов и сотрудников', en: 'Client and employee requests' }, permission: null, icon: 'workers', wrap: true },
         { to: '/manager/materials', labelKey: 'workspace_layout.materials', permission: 'materials.view', icon: 'materials' },
       ],
       actionItems: [
