@@ -1,3 +1,4 @@
+import { taskActionBody } from '@/utils/task-workflow'
 export const state = () => ({
   factory: null,
   orderByFactory: null,
@@ -68,27 +69,12 @@ export const actions = {
 
   async doneFinishedOrder({ commit }, order) {
     try {
-      const res = await this.$axios.put(
-        `api/factories/updateOrder/${order.id}`,
-        order
-      )
+      const { method, body } = taskActionBody(order)
+      const res = await this.$axios[method](`api/factories/updateOrder/${order.id}`, body)
       commit('SET_ORDER', res.data)
       return true
     } catch (err) {
       console.log(err)
-      return false
-    }
-  },
-
-  async adminConfirmFactoryStatus({ commit }, confirmData) {
-    try {
-      await this.$axios.put(
-        `api/factories/confirmOrderStatus/${confirmData.id}`,
-        { factory_id: confirmData.factory_id }
-      )
-      return true
-    } catch (err) {
-      console.error(err.response ? err.response.data : err)
       return false
     }
   },

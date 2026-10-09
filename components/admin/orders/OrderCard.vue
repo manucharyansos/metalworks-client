@@ -71,6 +71,7 @@
 </template>
 
 <script>
+import { isStepCompleted } from '@/utils/task-workflow'
 export default {
   props: { order: { type: Object, required: true } },
 
@@ -109,9 +110,7 @@ export default {
 
         if (code === 'canceled') return false
 
-        if (code === 'finished' || code === 'confirmed') {
-          return !!fo.admin_confirmation_date
-        }
+        if (code === 'finished') return isStepCompleted(fo)
 
         return false
       })

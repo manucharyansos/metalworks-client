@@ -6,6 +6,7 @@ const Vue = require('vue')
 const compiler = require('vue-template-compiler')
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
+const taskUrl = moduleUrl(read('utils/task-workflow.js'))
 const routeUrl = moduleUrl(read('utils/workspace-route.js'))
 const brandsUrl = moduleUrl(read('config/workspace-brands.js'))
 const companyCopyUrl = moduleUrl(read('utils/company-copy.js'))
@@ -22,10 +23,12 @@ async function component(file, render = false) {
     if (specifier === '~/utils/staff-assignments') return `import ${names} from '${staffAssignmentsUrl}'`
     if (specifier === '~/utils/membership-copy') return `import ${names} from '${membershipUrl}'`
     if (specifier === '~/static/logo.png') return `const ${names} = '/work/_nuxt/img/metalworks-test.png'`
+    if (specifier === '@/utils/task-workflow') return `import ${names} from '${taskUrl}'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
     return `const ${names} = {}`
   })
   const options = (await import(moduleUrl(source))).default
+  if (options.components?.TaskCreationOptions) options.components.TaskCreationOptions = await component('components/engineer/TaskCreationOptions.vue', true)
   if (options.components?.WorkspaceLogo) options.components.WorkspaceLogo = await component('components/auth/WorkspaceLogo.vue', true)
   return render ? { ...options, ...compiler.compileToFunctions(parsed.template.content) } : options
 }
@@ -123,7 +126,7 @@ async function orderPage() {
   }
   const vm = new Vue({
     ...options, mounted() {},
-    data: () => ({ ...options.data(), getFactory: [{ id: 6, value: 'INFO', operators: [{ id: 40, name: 'QA Operator' }] }], getPmpes: { pmp: [] }, getPmp: projects[10], allClients: [] }),
+    data: () => ({ ...options.data(), getFactory: [{ id: 6, value: 'IQS', operators: [{ id: 40, name: 'QA Operator' }] }], getPmpes: { pmp: [] }, getPmp: projects[10], allClients: [] }),
     methods: { ...options.methods, $notify: item => notifications.push(item), async checkPmpByRemoteNumber() { this.getPmp = projects[this.selectedPmp.id]; return true }, createNewOrder: async payload => { requests.push(payload); return true } },
   })
   vm.$route = { path: '/engineer/orders/create' }
@@ -203,7 +206,7 @@ test('failed order saves retain the selected files, quantities, and entered deta
 })
 
 test('legacy factory compatibility retains operators needed by order creation', async () => {
-  const { actions } = await import(moduleUrl(read('store/factory/index.js')))
+  const { actions } = await import(moduleUrl(read('store/factory/index.js').replace("'@/utils/task-workflow'", `'${taskUrl}'`)))
   const policies = await actions.fetchFactoryFilePolicies.call({ $axios: { get: async url => {
     if (url === '/api/factory-file-policies') throw { response: { status: 404 } }
     return { data: [{ id: 6, value: 'INFO', operators: [{ id: 40, name: 'QA Operator' }] }] }

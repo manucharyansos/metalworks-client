@@ -53,6 +53,7 @@ export default ({ $axios, store }, inject) => {
     return `${baseURL}/api/secure-files/order/${encodeURIComponent(id)}${suffix}`
   }
 
+  inject('getTaskEvidenceUrl', (id) => `${baseURL}/api/secure-files/evidence/${encodeURIComponent(id)}${fileSuffix(false)}`)
   inject('getFileUrl', getFileUrl)
   inject('getPmpFileUrl', getPmpFileUrl)
   inject('getOrderFileUrl', getOrderFileUrl)

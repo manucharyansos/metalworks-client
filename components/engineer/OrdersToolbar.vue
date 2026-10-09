@@ -6,7 +6,7 @@
         :value="search"
         class="w-full rounded-xl border px-4 py-2.5 dark:bg-gray-800 dark:text-gray-100"
         :placeholder="
-          $t?.('search') || 'Որոնել պատվեր… (անուն, նկարագրություն, համար, կոդ)'
+          $t?.('search') || 'Որոնել առաջադրանք… (անուն, նկարագրություն, համար, կոդ)'
         "
         @input="onSearchInput"
       />

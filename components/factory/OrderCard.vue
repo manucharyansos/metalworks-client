@@ -16,12 +16,12 @@
         <p
           class="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400"
         >
-          Պատվերի համար
+          Առաջադրանքի համար
         </p>
         <h3
           class="mt-1 truncate text-sm font-black text-slate-900 dark:text-white"
         >
-          {{ order.order_number?.number || `Պատվեր #${order.id}` }}
+          {{ order.order_number?.number || `Առաջադրանք #${order.id}` }}
         </h3>
         <p class="mt-1 truncate text-[10px] text-slate-400">
           Կոդ՝
@@ -80,7 +80,7 @@
       v-if="isTakenByOther"
       class="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-rose-500"
     >
-      <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>Պատվերը վերցված
+      <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>Առաջադրանքը վերցված
       է այլ օպերատորի կողմից
     </p>
     <p

@@ -7,12 +7,25 @@
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div class="flex items-center gap-2">
           <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Իմ պատվերները
+            Իմ առաջադրանքները
           </h1>
-          <InfoTooltip>Փնտրեք, դիտեք և կառավարեք ձեր ստեղծած պատվերները։</InfoTooltip>
+          <InfoTooltip
+            >Փնտրեք, դիտեք և կառավարեք ձեր ստեղծած առաջադրանքները։</InfoTooltip
+          >
         </div>
       </div>
 
+      <label class="mt-5 block text-sm font-semibold">
+        <select
+          v-model="confirmationFilter"
+          data-engineer-confirmation-filter
+          class="w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+          @change="refreshOrders"
+        >
+          <option value="">{{ t.all }}</option>
+          <option value="waiting">{{ t.pending }}</option>
+        </select>
+      </label>
       <div class="mt-6">
         <OrdersToolbar
           :search="filters.search"
@@ -75,9 +88,9 @@
               />
             </svg>
           </div>
-          <h3 class="text-lg font-semibold mb-1">Պատվերներ չկան</h3>
+          <h3 class="text-lg font-semibold mb-1">Առաջադրանքներ չկան</h3>
           <p class="text-sm text-gray-500">
-            Սկսեք նոր պատվերից կամ փոխեք որոնման դաշտը
+            Սկսեք նոր առաջադրանքից կամ փոխեք որոնման դաշտը
           </p>
         </div>
 
@@ -112,12 +125,14 @@
       :visible="isDetailsOpen && $can('orders.view')"
       :order="selectedOrder"
       @close="isDetailsOpen = false"
+      @updated="onTaskUpdated"
     />
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import { taskCopy } from '@/utils/task-workflow'
 import OrdersToolbar from '~/components/engineer/OrdersToolbar.vue'
 import OrderCard from '~/components/engineer/OrderCard.vue'
 import Pagination from '~/components/ui/Pagination.vue'
@@ -137,9 +152,14 @@ export default {
   meta: { role: 'engineer' },
   data: () => ({
     isDetailsOpen: false,
+    confirmationFilter: '',
+    refreshTimer: null,
     selectedOrder: null,
   }),
   computed: {
+    t() {
+      return taskCopy[this.$i18n?.locale] || taskCopy.hy
+    },
     ...mapGetters('engineer', [
       'getOrders',
       'getPagination',
@@ -165,10 +185,35 @@ export default {
   },
   created() {
     this.fetchOrders().catch(() => {
-      this.$notify?.({ type: 'error', text: 'Չհաջողվեց բեռնել պատվերները' })
+      this.$notify?.({ type: 'error', text: 'Չհաջողվեց բեռնել առաջադրանքները' })
     })
   },
+  mounted() {
+    this.refreshTimer = setInterval(() => {
+      if (!document.hidden && !this.loading) this.refreshOrders()
+    }, 30000)
+    window.addEventListener('focus', this.refreshOrders)
+  },
+  beforeDestroy() {
+    clearInterval(this.refreshTimer)
+    window.removeEventListener('focus', this.refreshOrders)
+  },
+  watch: {
+    orders(rows) {
+      if (this.selectedOrder)
+        this.selectedOrder =
+          rows.find((row) => row.id === this.selectedOrder.id) ||
+          this.selectedOrder
+    },
+  },
   methods: {
+    refreshOrders() {
+      return this.fetchOrders({ confirmation: this.confirmationFilter })
+    },
+    onTaskUpdated(order) {
+      this.selectedOrder = order
+      this.refreshOrders()
+    },
     ...mapActions('engineer', [
       'fetchOrders',
       'setSearch',

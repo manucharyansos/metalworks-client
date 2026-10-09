@@ -15,7 +15,7 @@
         <div class="flex items-start justify-between gap-3 mb-4">
           <div>
             <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Պատվեր #{{ number || order?.id || '—' }}
+              Առաջադրանք #{{ number || order?.id || '—' }}
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400">
               <span v-if="code">Կոդ — {{ code }}</span>
@@ -141,11 +141,42 @@
                 </div>
               </div>
 
+              <TaskCompletionProof
+                :step="fo"
+                :creator-id="order.creator_id"
+                @updated="$emit('updated', $event)"
+              />
+              <p class="my-3 text-sm">
+                {{
+                  fo.awaiting_engineer_confirmation
+                    ? t.waiting
+                    : isStepCompleted(fo)
+                    ? t.completed
+                    : fo.status === 'confirmed'
+                    ? t.inProgress
+                    : fo.status
+                }}
+              </p>
               <FileGallery :items="fo.files || []" />
             </div>
           </div>
         </div>
 
+        <section
+          v-if="order?.logs?.length"
+          class="mt-4 space-y-2"
+          data-task-history
+        >
+          <h4 class="text-sm font-semibold">Գործողությունների պատմություն</h4>
+          <p
+            v-for="log in order.logs"
+            :key="log.id"
+            class="break-words rounded-lg bg-slate-50 p-3 text-sm dark:bg-slate-800"
+          >
+            {{ log.user?.name }} · {{ log.message }} ·
+            {{ safeDateTime(log.created_at) }}
+          </p>
+        </section>
         <div class="mt-6 flex justify-end">
           <button
             class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition"
@@ -161,16 +192,21 @@
 </template>
 
 <script>
+import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
+import { isStepCompleted, taskCopy } from '@/utils/task-workflow'
 import FileGallery from '~/components/engineer/FileGallery.vue'
 
 export default {
   name: 'OrderDetailsModal',
-  components: { FileGallery },
+  components: { FileGallery, TaskCompletionProof },
   props: {
     visible: { type: Boolean, default: false },
     order: { type: Object, default: null },
   },
   computed: {
+    t() {
+      return taskCopy[this.$i18n?.locale] || taskCopy.hy
+    },
     number() {
       return this.order?.order_number?.number
     },
@@ -221,6 +257,7 @@ export default {
     },
   },
   methods: {
+    isStepCompleted,
     safeDate(d) {
       if (!d) return '—'
       const dt = new Date(d)

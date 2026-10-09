@@ -8,7 +8,7 @@
       @keydown.esc.stop.prevent="close"
     >
       <div
-        class="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden"
+        class="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-3xl shadow-2xl"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="`factory-order-action-title-${_uid}`"
@@ -66,6 +66,16 @@
 
         <!-- Body -->
         <form class="p-6 space-y-6" @submit.prevent="confirm">
+          <p
+            class="rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-800"
+            data-task-confirmation-hint
+          >
+            {{
+              factoryOrder.confirmation_required
+                ? `${t.method}: ${t[factoryOrder.confirmation_method] || '—'}`
+                : t.optional
+            }}
+          </p>
           <!-- Գլխավոր գործողություն -->
           <div>
             <label
@@ -103,6 +113,48 @@
               />
             </div>
           </transition>
+
+          <div
+            v-if="
+              localSelectedOption?.value === 'finished' &&
+              factoryOrder.confirmation_required
+            "
+            class="space-y-3"
+            data-completion-evidence
+          >
+            <label class="block text-sm font-semibold">
+              {{ t.evidence }} · {{ t[factoryOrder.confirmation_method] }}
+              <textarea
+                v-if="factoryOrder.confirmation_method === 'text'"
+                v-model="evidenceText"
+                data-evidence-text
+                rows="4"
+                maxlength="10000"
+                :disabled="saving"
+                :placeholder="t.textPlaceholder"
+                class="mt-2 block w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              />
+              <input
+                v-else-if="factoryOrder.confirmation_method === 'photo'"
+                data-evidence-photo
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                :disabled="saving"
+                class="mt-2 block w-full text-sm"
+                @change="selectPhoto"
+              />
+            </label>
+            <p class="text-xs text-slate-500">{{ t.evidenceHelp }}</p>
+            <p
+              v-if="factoryOrder.confirmation_method === 'photo'"
+              class="text-xs text-slate-500"
+            >
+              {{ t.photoHelp }}
+            </p>
+            <p v-if="photoError" role="alert" class="text-sm text-red-600">
+              {{ photoError }}
+            </p>
+          </div>
 
           <!-- Նոր ամսաթիվ -->
           <transition name="slide-fade">
@@ -176,6 +228,7 @@
 import SelectWithLabel from '@/components/factory/SelectWithLabel.vue'
 import InputWithLabelIcon from '@/components/form/InputWithLabelIcon.vue'
 import { localFactoryTimestamp } from '@/utils/factory-order-status'
+import { taskCopy } from '@/utils/task-workflow'
 
 export default {
   components: { SelectWithLabel, InputWithLabelIcon },
@@ -190,6 +243,7 @@ export default {
     initialReason: { type: String, default: '' },
     initialDate: { type: String, default: '' },
     saving: { type: Boolean, default: false },
+    factoryOrder: { type: Object, default: () => ({}) },
   },
   emits: ['close', 'confirm'],
   data() {
@@ -197,9 +251,15 @@ export default {
       localSelectedOption: null,
       localAdditionalOption: null,
       localChangeDate: null,
+      evidenceText: '',
+      evidencePhoto: null,
+      photoError: '',
     }
   },
   computed: {
+    t() {
+      return taskCopy[this.$i18n?.locale] || taskCopy.hy
+    },
     reasonOptions() {
       return this.cancelReasons.map((reason) => ({
         ...reason,
@@ -223,6 +283,13 @@ export default {
           /^\d{4}-\d{2}-\d{2}$/.test(this.localChangeDate || '') &&
           this.localChangeDate >= this.tomorrowDate
         )
+      if (status === 'finished' && this.factoryOrder.confirmation_required) {
+        if (this.factoryOrder.confirmation_method === 'text')
+          return !!this.evidenceText.trim()
+        if (this.factoryOrder.confirmation_method === 'photo')
+          return !!this.evidencePhoto && !this.photoError
+        return false
+      }
       return true
     },
   },
@@ -255,11 +322,29 @@ export default {
       this.localSelectedOption = null
       this.localAdditionalOption = null
       this.localChangeDate = null
+      this.evidenceText = ''
+      this.evidencePhoto = null
+      this.photoError = ''
+    },
+    selectPhoto(event) {
+      const file = event.target.files?.[0]
+      this.photoError = ''
+      this.evidencePhoto = null
+      if (!file) return
+      if (
+        !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+        file.size > 10 * 1024 * 1024
+      ) {
+        this.photoError = this.t.photoHelp
+        event.target.value = ''
+        return
+      }
+      this.evidencePhoto = file
     },
     confirm() {
       if (!this.canConfirm) return
 
-      this.$emit('confirm', {
+      const payload = {
         status: this.localSelectedOption.value,
         canceling:
           this.localSelectedOption.value === 'canceled'
@@ -273,7 +358,16 @@ export default {
           this.localSelectedOption.value === 'finished'
             ? localFactoryTimestamp()
             : null,
-      })
+      }
+      if (
+        payload.status === 'finished' &&
+        this.factoryOrder.confirmation_required
+      ) {
+        if (this.factoryOrder.confirmation_method === 'text')
+          payload.evidence_text = this.evidenceText.trim()
+        else payload.evidence_photo = this.evidencePhoto
+      }
+      this.$emit('confirm', payload)
     },
   },
 }

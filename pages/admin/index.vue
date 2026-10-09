@@ -8,7 +8,7 @@
               Կառավարման վահանակ
             </h1>
             <InfoTooltip align="right">
-              Արտադրամասերի վիճակ, աշխատակիցների ծանրաբեռնվածություն, ուշացումներ և պատվերների ամբողջական վերահսկում մեկ էջում։
+              Արտադրամասերի վիճակ, աշխատակիցների ծանրաբեռնվածություն, ուշացումներ և առաջադրանքների ամբողջական վերահսկում մեկ էջում։
             </InfoTooltip>
           </div>
         </div>
@@ -50,7 +50,7 @@
           <div>
             <div class="flex items-center gap-2">
               <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-sm font-black text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">!</span>
-              <h2 class="text-lg font-bold text-slate-950 dark:text-white">Ուշադրություն պահանջող պատվերներ</h2>
+              <h2 class="text-lg font-bold text-slate-950 dark:text-white">Ուշադրություն պահանջող առաջադրանքներ</h2>
             </div>
             <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ $t('operations_dashboard.attention_caption') }}</p>
           </div>
@@ -153,7 +153,7 @@
         <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div class="mb-5">
             <h2 class="mt-1 text-lg font-bold text-slate-950 dark:text-white">Աշխատակիցների ծանրաբեռնվածություն</h2>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ցուցիչը հիմնված է ակտիվ և ուշացած պատվերների իրական քանակի վրա</p>
+            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ցուցիչը հիմնված է ակտիվ և ուշացած առաջադրանքների իրական քանակի վրա</p>
           </div>
 
           <div class="mb-4 grid gap-2 sm:grid-cols-3">
@@ -209,7 +209,7 @@
         <div class="border-b border-slate-100 p-5 dark:border-slate-800 sm:p-6">
           <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <h2 class="mt-1 text-xl font-bold text-slate-950 dark:text-white">Պատվերների ամբողջական որոնում</h2>
+              <h2 class="mt-1 text-xl font-bold text-slate-950 dark:text-white">Առաջադրանքների ամբողջական որոնում</h2>
               <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ pagination.total || 0 }} արդյունք · {{ activeFilterCount }} ակտիվ ֆիլտր</p>
             </div>
             <div class="flex flex-wrap gap-2">
@@ -259,7 +259,7 @@
 
           <div v-if="showAdvanced" class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <select v-model="filters.order_status" class="control" @change="onPrimaryFilterChange">
-              <option value="">Պատվերի բոլոր կարգավիճակները</option>
+              <option value="">Առաջադրանքի բոլոր կարգավիճակները</option>
               <option v-for="status in filterOptions.order_statuses || []" :key="status" :value="status">{{ status }}</option>
             </select>
             <select v-model="filters.factory_status" class="control" @change="onPrimaryFilterChange">
@@ -318,7 +318,7 @@
             <table class="w-full min-w-[1050px] text-left">
               <thead class="bg-slate-50/80 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40">
                 <tr>
-                  <th class="px-6 py-3.5">Պատվեր</th>
+                  <th class="px-6 py-3.5">Առաջադրանք</th>
                   <th class="px-4 py-3.5">Հաճախորդ</th>
                   <th class="px-4 py-3.5">Արտադրամաս / աշխատակից</th>
                   <th class="px-4 py-3.5">Վերջնաժամկետ</th>
@@ -385,7 +385,7 @@
 
           <div v-if="!ordersLoading && !orders.length" class="flex min-h-[260px] flex-col items-center justify-center px-6 text-center">
             <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-lg font-black text-slate-400 dark:bg-slate-800">0</div>
-            <p class="mt-4 text-sm font-bold text-slate-700 dark:text-slate-200">Պատվեր չի գտնվել</p>
+            <p class="mt-4 text-sm font-bold text-slate-700 dark:text-slate-200">Առաջադրանք չի գտնվել</p>
             <p class="mt-1 max-w-md text-xs text-slate-400">Փոխեք որոնումը կամ ֆիլտրերը։</p>
           </div>
         </div>
@@ -488,7 +488,7 @@ export default {
       return [
         { key: 'created', label: this.$t('operations_dashboard.created'), value: this.summary.total_orders || 0, description: this.$t('operations_dashboard.active_count', { count: this.summary.active_orders || 0 }), icon: '+', tone: 'blue' },
         { key: 'overdue', label: this.$t('operations_dashboard.overdue'), value: this.summary.overdue_orders || 0, description: this.$t('operations_dashboard.overdue_description'), icon: '!', tone: 'red' },
-        { key: 'confirmation', label: this.$t('operations_dashboard.awaiting'), value: this.summary.awaiting_admin_confirmation || 0, description: this.$t('operations_dashboard.awaiting_description'), icon: '…', tone: 'amber' },
+        { key: 'confirmation', label: this.$t('operations_dashboard.awaiting'), value: this.summary.awaiting_engineer_confirmation ?? this.summary.awaiting_admin_confirmation ?? 0, description: this.$t('operations_dashboard.awaiting_description'), icon: '…', tone: 'amber' },
         { key: 'complete', label: this.$t('operations_dashboard.completed'), value: this.summary.completed_orders || 0, description: this.$t('operations_dashboard.canceled_count', { count: this.summary.canceled_orders || 0 }), icon: '✓', tone: 'green' },
       ]
     },
@@ -573,7 +573,7 @@ export default {
         this.pagination = data.pagination || this.pagination
       } catch (error) {
         this.orders = []
-        this.$notify?.({ type: 'error', text: error?.response?.data?.message || 'Չհաջողվեց բեռնել պատվերները' })
+        this.$notify?.({ type: 'error', text: error?.response?.data?.message || 'Չհաջողվեց բեռնել առաջադրանքները' })
       } finally {
         this.ordersLoading = false
       }

@@ -334,10 +334,11 @@
             <p v-else class="py-3 text-center text-[10px] text-slate-400">
               Ֆայլեր չկան։
             </p>
+            <TaskCompletionProof :step="order" :creator-id="details.creator_id" />
           </article>
         </div>
         <div v-else class="p-8 text-center text-xs text-slate-400">
-          Այս պատվերի համար ֆայլեր չկան։
+          Այս առաջադրանքի համար ֆայլեր չկան։
         </div>
       </section>
     </div>
@@ -345,11 +346,12 @@
 </template>
 
 <script>
+import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
 import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 
 export default {
   name: 'ProductionOrderDetailsPanel',
-  components: { DxfViewerModal },
+  components: { DxfViewerModal, TaskCompletionProof },
   props: {
     details: { type: Object, required: true },
     previewUrl: { type: String, default: '' },
@@ -385,7 +387,7 @@ export default {
       const value = String(this.previewUrl || '')
         .split('?')[0]
         .toLowerCase()
-      if (value.endsWith('.dxf') || this.mode === 'laser') return 'dxf'
+      if (value.endsWith('.dxf')) return 'dxf'
       if (value.endsWith('.pdf')) return 'pdf'
       if (/\.(png|jpe?g|webp|gif)$/.test(value)) return 'image'
       return 'file'
