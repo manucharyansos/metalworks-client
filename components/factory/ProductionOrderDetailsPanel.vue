@@ -350,6 +350,13 @@
           Այս առաջադրանքի համար ֆայլեր չկան։
         </div>
       </section>
+      <TaskFileVersions
+        v-if="
+          !['admin', 'manager', 'engineer'].includes($auth?.user?.role?.name) &&
+          canDownload
+        "
+        :order="details"
+      />
     </div>
   </div>
 </template>
@@ -357,11 +364,17 @@
 <script>
 import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
 import TaskChangeRequestPanel from '@/components/order/TaskChangeRequestPanel.vue'
+import TaskFileVersions from '@/components/order/TaskFileVersions.vue'
 import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 
 export default {
   name: 'ProductionOrderDetailsPanel',
-  components: { DxfViewerModal, TaskCompletionProof, TaskChangeRequestPanel },
+  components: {
+    DxfViewerModal,
+    TaskCompletionProof,
+    TaskChangeRequestPanel,
+    TaskFileVersions,
+  },
   props: {
     details: { type: Object, required: true },
     previewUrl: { type: String, default: '' },
@@ -394,9 +407,11 @@ export default {
         : this.previewUrl
     },
     previewKind() {
-      const value = String(this.previewUrl || '')
-        .split('?')[0]
-        .toLowerCase()
+      const source = String(this.previewUrl || '')
+      const name = source.includes('?')
+        ? new URLSearchParams(source.split('?')[1]).get('filename')
+        : null
+      const value = (name || source.split('?')[0]).toLowerCase()
       if (value.endsWith('.dxf')) return 'dxf'
       if (value.endsWith('.pdf')) return 'pdf'
       if (/\.(png|jpe?g|webp|gif)$/.test(value)) return 'image'

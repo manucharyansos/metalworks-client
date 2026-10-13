@@ -1,6 +1,7 @@
 // Notifications are stored with a machine-readable `type` and `data`. The text
 // is built here so it follows the interface language; the server's Armenian
 // `message` is only a fallback for types this file does not know yet.
+import { taskCopy } from '@/utils/task-workflow'
 
 export const notificationCopy = {
   hy: {
@@ -11,6 +12,7 @@ export const notificationCopy = {
     loadFailed: 'Չհաջողվեց բեռնել ծանուցումները',
     markFailed: 'Չհաջողվեց նշել կարդացված։ Կրկին փորձեք։',
     task: 'Առաջադրանք',
+    supplement: ' Լրացրեք հավաստումը և կրկին ուղարկեք ավարտը։',
     statuses: {
       pending: 'Սպասում',
       confirmed: 'Կատարվում է',
@@ -28,6 +30,12 @@ export const notificationCopy = {
       other: 'Այլ պատճառ',
     },
     types: {
+      'step.evidence_requirements_changed':
+        '«{factory}» արտադրամաս · հավաստման պահանջները փոխվել են՝ {evidence}։{supplement}',
+      'step.settings_changed':
+        '«{factory}» արտադրամաս · աշխատանքի կարգավորումները փոխվել են։ Հավաստում՝ {evidence} · ժամկետ՝ {deadline} · առաջնահերթություն՝ {priority}։{supplement}',
+      'step.file_version_changed':
+        '«{factory}» արտադրամաս · «{fileName}» ֆայլի գործող տարբերակը փոխվել է՝ v{version}',
       'step.status_changed':
         '«{factory}» արտադրամաս · {actor}՝ կարգավիճակը փոխել է՝ {from} → {to}',
       'step.finished_review':
@@ -55,6 +63,7 @@ export const notificationCopy = {
     loadFailed: 'Не удалось загрузить уведомления',
     markFailed: 'Не удалось отметить прочитанными. Попробуйте ещё раз.',
     task: 'Задание',
+    supplement: ' Дополните подтверждение и отправьте завершение ещё раз.',
     statuses: {
       pending: 'Ожидание',
       confirmed: 'Выполняется',
@@ -72,6 +81,12 @@ export const notificationCopy = {
       other: 'Другая причина',
     },
     types: {
+      'step.evidence_requirements_changed':
+        'Цех «{factory}» · требования к подтверждению изменены: {evidence}.{supplement}',
+      'step.settings_changed':
+        'Цех «{factory}» · настройки работы изменены. Подтверждение: {evidence} · срок: {deadline} · приоритет: {priority}.{supplement}',
+      'step.file_version_changed':
+        'Цех «{factory}» · текущая версия файла «{fileName}» изменена: v{version}',
       'step.status_changed':
         'Цех «{factory}» · {actor} изменил(а) статус: {from} → {to}',
       'step.finished_review':
@@ -97,6 +112,7 @@ export const notificationCopy = {
     loadFailed: 'Could not load notifications',
     markFailed: 'Could not mark as read. Please try again.',
     task: 'Task',
+    supplement: ' Add the missing evidence and submit completion again.',
     statuses: {
       pending: 'Waiting',
       confirmed: 'In progress',
@@ -114,6 +130,12 @@ export const notificationCopy = {
       other: 'Other reason',
     },
     types: {
+      'step.evidence_requirements_changed':
+        '“{factory}” · evidence requirements changed: {evidence}.{supplement}',
+      'step.settings_changed':
+        '“{factory}” · job settings changed. Evidence: {evidence} · deadline: {deadline} · priority: {priority}.{supplement}',
+      'step.file_version_changed':
+        '“{factory}” · the current version of “{fileName}” changed: v{version}',
       'step.status_changed':
         '“{factory}” · {actor} changed the status: {from} → {to}',
       'step.finished_review':
@@ -162,6 +184,7 @@ export function describeNotification(notification, locale = 'hy') {
   const status = (value, label) =>
     t.statuses[value] || label || value || t.statuses.pending
   const note = data.decision_note ? `. ${data.decision_note}` : ''
+  const task = taskCopy[locale] || taskCopy.hy
   return {
     ref,
     text: fill(template, {
@@ -173,6 +196,14 @@ export function describeNotification(notification, locale = 'hy') {
       date: formatDate(data.proposed_date, locale),
       note,
       noteText: data.note || '',
+      evidence: data.confirmation_required
+        ? task[data.confirmation_method] || '—'
+        : task.optional,
+      deadline: data.deadline ? formatDate(data.deadline, locale) : '—',
+      priority: task[data.priority || 'normal'],
+      supplement: data.needs_supplement ? t.supplement : '',
+      fileName: data.file_name || '',
+      version: data.version || '',
     }),
   }
 }

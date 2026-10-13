@@ -19,7 +19,8 @@ export default ({ $axios, store }, inject) => {
     const companyId = store?.state?.workspace?.company?.id
     if (companyId) params.push(`company_id=${encodeURIComponent(companyId)}`)
     const assignmentId = store?.state?.workspace?.assignmentId
-    if (assignmentId) params.push(`assignment_id=${encodeURIComponent(assignmentId)}`)
+    if (assignmentId)
+      params.push(`assignment_id=${encodeURIComponent(assignmentId)}`)
     if (download) params.push('download=1')
     return params.length ? `?${params.join('&')}` : ''
   }
@@ -32,6 +33,15 @@ export default ({ $axios, store }, inject) => {
   }
 
   const getPmpFileUrl = (fileOrId, download = false) => {
+    const revision =
+      typeof fileOrId === 'object'
+        ? fileOrId?.task_file_revision_id ||
+          fileOrId?.pivot?.task_file_revision_id
+        : null
+    if (revision)
+      return `${baseURL}/api/secure-files/task-revisions/${encodeURIComponent(
+        revision
+      )}${fileSuffix(download)}`
     const id = typeof fileOrId === 'object' ? fileOrId?.id : fileOrId
     if (!id) {
       const path = typeof fileOrId === 'object' ? fileOrId?.path : null
@@ -50,10 +60,25 @@ export default ({ $axios, store }, inject) => {
     }
 
     const suffix = fileSuffix(download)
-    return `${baseURL}/api/secure-files/order/${encodeURIComponent(id)}${suffix}`
+    return `${baseURL}/api/secure-files/order/${encodeURIComponent(
+      id
+    )}${suffix}`
   }
 
-  inject('getTaskEvidenceUrl', (id) => `${baseURL}/api/secure-files/evidence/${encodeURIComponent(id)}${fileSuffix(false)}`)
+  inject(
+    'getTaskEvidenceUrl',
+    (id) =>
+      `${baseURL}/api/secure-files/evidence/${encodeURIComponent(
+        id
+      )}${fileSuffix(false)}`
+  )
+  inject(
+    'getTaskRevisionUrl',
+    (id, download = false) =>
+      `${baseURL}/api/secure-files/task-revisions/${encodeURIComponent(
+        id
+      )}${fileSuffix(download)}`
+  )
   inject('getFileUrl', getFileUrl)
   inject('getPmpFileUrl', getPmpFileUrl)
   inject('getOrderFileUrl', getOrderFileUrl)

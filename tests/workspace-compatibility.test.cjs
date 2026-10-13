@@ -8,7 +8,7 @@ const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const taskUrl = moduleUrl(read('utils/task-workflow.js'))
 const taskRoutingUrl = moduleUrl(read('utils/task-routing.js'))
-const taskNotificationsUrl = moduleUrl(read('utils/task-notifications.js'))
+const taskNotificationsUrl = moduleUrl(read('utils/task-notifications.js').replace("'@/utils/task-workflow'", JSON.stringify(taskUrl)))
 const routeUrl = moduleUrl(read('utils/workspace-route.js'))
 const brandsUrl = moduleUrl(read('config/workspace-brands.js'))
 const companyCopyUrl = moduleUrl(read('utils/company-copy.js'))
@@ -33,6 +33,7 @@ async function component(file, render = false) {
   })
   const options = (await import(moduleUrl(source))).default
   if (options.components?.TaskCreationOptions) options.components.TaskCreationOptions = await component('components/engineer/TaskCreationOptions.vue', true)
+  if (options.components?.TaskWorkshopOptions) options.components.TaskWorkshopOptions = await component('components/engineer/TaskWorkshopOptions.vue', true)
   if (options.components?.WorkspaceLogo) options.components.WorkspaceLogo = await component('components/auth/WorkspaceLogo.vue', true)
   return render ? { ...options, ...compiler.compileToFunctions(parsed.template.content) } : options
 }

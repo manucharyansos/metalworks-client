@@ -10,8 +10,15 @@
           : t.optional
       }}
     </p>
-    <template v-if="step.confirmation_required">
+    <template
+      v-if="
+        step.confirmation_required ||
+        step.evidence_text ||
+        step.has_evidence_photo
+      "
+    >
       <p
+        v-if="step.confirmation_required"
         :class="
           step.awaiting_engineer_confirmation
             ? 'text-amber-700 dark:text-amber-300'

@@ -143,6 +143,15 @@
               class="block text-sm font-semibold"
             >
               {{ t.photo }}
+              <a
+                v-if="factoryOrder.has_evidence_photo"
+                :href="$getTaskEvidenceUrl(factoryOrder.id)"
+                target="_blank"
+                rel="noopener"
+                class="mt-2 block font-normal text-blue-600 underline"
+                data-existing-evidence-photo
+                >{{ t.existingPhoto }}</a
+              >
               <input
                 data-evidence-photo
                 type="file"
@@ -338,7 +347,9 @@ export default {
           this.evidenceMethods.every((method) =>
             method === 'text'
               ? !!this.evidenceText.trim()
-              : !!this.evidencePhoto && !this.photoError
+              : !!(
+                  this.evidencePhoto || this.factoryOrder.has_evidence_photo
+                ) && !this.photoError
           )
         )
       }
@@ -346,6 +357,10 @@ export default {
     },
   },
   watch: {
+    factoryOrder(value) {
+      if (!this.evidenceText.trim() && value.evidence_text)
+        this.evidenceText = value.evidence_text
+    },
     isOpen(val) {
       this.reset()
       if (val) {
@@ -360,6 +375,7 @@ export default {
         this.localChangeDate = this.initialDate
           ? this.initialDate.slice(0, 10)
           : null
+        this.evidenceText = this.factoryOrder.evidence_text || ''
         this.$nextTick(() =>
           this.$refs.actionSelect?.$el?.querySelector('select')?.focus()
         )
@@ -423,7 +439,7 @@ export default {
       ) {
         if (this.evidenceMethods.includes('text'))
           payload.evidence_text = this.evidenceText.trim()
-        if (this.evidenceMethods.includes('photo'))
+        if (this.evidenceMethods.includes('photo') && this.evidencePhoto)
           payload.evidence_photo = this.evidencePhoto
       }
       this.$emit('confirm', payload)

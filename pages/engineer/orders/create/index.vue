@@ -367,6 +367,12 @@
             :reference-visibility.sync="referenceVisibility"
             :files="effectiveFiles"
             :factories="getFactory || []"
+            :disabled="isLoading"
+          />
+          <TaskWorkshopOptions
+            v-model="workshopSettings"
+            :factories="selectedFactories"
+            :disabled="isLoading"
           />
           <p class="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
             {{ $t('order_create.files_hint') }}
@@ -394,6 +400,12 @@
           :reference-visibility.sync="referenceVisibility"
           :files="effectiveFiles"
           :factories="getFactory || []"
+          :disabled="isLoading"
+        />
+        <TaskWorkshopOptions
+          v-model="workshopSettings"
+          :factories="selectedFactories"
+          :disabled="isLoading"
         />
         <div class="mt-6 border-t border-slate-200 pt-5 dark:border-slate-800">
           <h3 class="mb-4 text-sm font-semibold">
@@ -485,7 +497,13 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import TaskCreationOptions from '@/components/engineer/TaskCreationOptions.vue'
-import { isReferenceFactory, taskCopy } from '@/utils/task-workflow'
+import TaskWorkshopOptions from '@/components/engineer/TaskWorkshopOptions.vue'
+import {
+  confirmationMethods,
+  isReferenceFactory,
+  taskCopy,
+  workshopSettingsPayload,
+} from '@/utils/task-workflow'
 import { routingCopy, operatorWorkloadLabel } from '@/utils/task-routing'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
@@ -497,6 +515,7 @@ import PermissionDenied from '@/components/modals/permission/PermissionDenied.vu
 export default {
   components: {
     TaskCreationOptions,
+    TaskWorkshopOptions,
     PermissionDenied,
     InputWithLabels,
     SelectWithLabel,
@@ -537,6 +556,7 @@ export default {
       confirmationRequired: false,
       confirmationMethod: '',
       referenceVisibility: {},
+      workshopSettings: {},
     }
   },
   computed: {
@@ -899,7 +919,28 @@ export default {
           user_id: userId,
         }))
 
+      const workshopSettings = workshopSettingsPayload(
+        this.selectedFactories,
+        this.workshopSettings,
+        this.confirmationRequired,
+        this.confirmationMethod
+      )
+      if (
+        workshopSettings.some(
+          (row) =>
+            row.confirmation_required &&
+            !confirmationMethods(row.confirmation_method).length
+        )
+      ) {
+        this.$notify({
+          text: (taskCopy[this.$i18n?.locale] || taskCopy.hy).invalidMethod,
+          type: 'error',
+        })
+        this.isLoading = false
+        return
+      }
       const data = {
+        workshop_settings: workshopSettings,
         confirmation_required: this.confirmationRequired,
         confirmation_method: this.confirmationRequired
           ? this.confirmationMethod
