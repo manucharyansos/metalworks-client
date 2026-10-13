@@ -636,7 +636,8 @@ test('old file-version reads are ignored on company change, and invalid extensio
   await Vue.nextTick()
   resolve({ data: { files: [file] } })
   await read
-  assert.deepEqual(vm.files, [])
+  // Vue augments array prototypes; the empty-list contract is the same on Node 20 and 24.
+  assert.equal(vm.files.length, 0)
   assert.equal(vm.loaded, false)
   assert.equal(vm.loading, false)
   for (const upload of [
