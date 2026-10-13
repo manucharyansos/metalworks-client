@@ -1,6 +1,39 @@
 export const taskCopy = {
   hy: {
     required: 'Անհրաժեշտ է ինժեների հաստատումը',
+    editEvidence: 'Բոլոր արտադրամասերի հավաստման պահանջները',
+    editEvidenceHelp:
+      'Փոփոխությունը կկիրառվի չհաստատված աշխատանքներին։ Պակասող հավաստումը կվերադարձվի լրացման՝ նախկին ֆայլերն ու տեքստը պահպանելով։ Կատարողները կծանուցվեն։',
+    workshopSettings: 'Արտադրամասի կարգավորումներ',
+    workshopHelp:
+      'Այս արտադրամասի առանձին պահանջները, ժամկետն ու առաջնահերթությունը։ Կատարողը կծանուցվի փոփոխության մասին։',
+    inheritEvidence: 'Օգտագործել ընդհանուր հավաստման պահանջները',
+    deadline: 'Արտադրամասի ժամկետ',
+    deadlineHelp: 'Դատարկ թողնելիս գործում է առաջադրանքի ընդհանուր ժամկետը։',
+    priority: 'Առաջնահերթություն',
+    normal: 'Սովորական',
+    high: 'Բարձր',
+    urgent: 'Շտապ',
+    evidenceSave: 'Պահպանել փոփոխությունները',
+    evidenceSaving: 'Պահպանվում է…',
+    evidenceSaved: 'Փոփոխությունները պահպանվեցին, կատարողները կծանուցվեն',
+    evidenceSaveFailed: 'Չհաջողվեց պահպանել փոփոխությունները',
+    evidenceReset: 'Չեղարկել փոփոխությունները',
+    existingPhoto: 'Նախորդ նկարը պահպանված է։ Նորը ավելացնելը պարտադիր չէ։',
+    fileVersions: 'Ֆայլերի տարբերակներ',
+    fileVersionsHelp:
+      'Նոր տարբերակը գործում է միայն այս առաջադրանքի ընթացիկ աշխատանքներում։ Հաստատված և հաստատման ներկայացված աշխատանքների ֆայլերը պահպանվում են։',
+    version: 'Տարբերակ',
+    currentVersion: 'Գործող',
+    originalVersion: 'Սկզբնական տարբերակ',
+    uploadVersion: 'Ավելացնել նոր տարբերակ',
+    versionNote: 'Փոփոխության նկարագրություն (ըստ ցանկության)',
+    activateVersion: 'Դարձնել գործող',
+    versionSaved: 'Ֆայլի գործող տարբերակը փոխվեց, կատարողները կծանուցվեն',
+    versionUploadHelp: 'Նույն ֆայլի տեսակը · մինչև 10 ՄԲ',
+    view: 'Դիտել',
+    download: 'Ներբեռնել',
+    refresh: 'Թարմացնել',
     method: 'Հավաստման մեթոդ',
     methods: 'Հավաստման մեթոդներ',
     methodsHelp:
@@ -65,6 +98,39 @@ export const taskCopy = {
   },
   ru: {
     required: 'Требуется подтверждение инженера',
+    editEvidence: 'Подтверждение для всех цехов',
+    editEvidenceHelp:
+      'Изменения применятся к работам без подтверждения инженера. Недостающие доказательства будут запрошены повторно; прежние файлы и текст сохранятся. Исполнители получат уведомление.',
+    workshopSettings: 'Настройки цеха',
+    workshopHelp:
+      'Отдельные требования, срок и приоритет этого цеха. Исполнитель получит уведомление об изменении.',
+    inheritEvidence: 'Использовать общие требования к подтверждению',
+    deadline: 'Срок цеха',
+    deadlineHelp: 'Если поле пустое, используется общий срок задания.',
+    priority: 'Приоритет',
+    normal: 'Обычный',
+    high: 'Высокий',
+    urgent: 'Срочно',
+    evidenceSave: 'Сохранить изменения',
+    evidenceSaving: 'Сохранение…',
+    evidenceSaved: 'Изменения сохранены, исполнители получат уведомление',
+    evidenceSaveFailed: 'Не удалось сохранить изменения',
+    evidenceReset: 'Отменить изменения',
+    existingPhoto: 'Прежнее фото сохранено. Новое фото необязательно.',
+    fileVersions: 'Версии файлов',
+    fileVersionsHelp:
+      'Новая версия действует только для текущих работ этого задания. Файлы подтверждённых и отправленных на проверку работ сохраняются.',
+    version: 'Версия',
+    currentVersion: 'Текущая',
+    originalVersion: 'Исходная версия',
+    uploadVersion: 'Добавить новую версию',
+    versionNote: 'Описание изменений (необязательно)',
+    activateVersion: 'Сделать текущей',
+    versionSaved: 'Текущая версия изменена, исполнители получат уведомление',
+    versionUploadHelp: 'Тот же формат · до 10 МБ',
+    view: 'Просмотреть',
+    download: 'Скачать',
+    refresh: 'Обновить',
     method: 'Способ подтверждения',
     methods: 'Способы подтверждения',
     methodsHelp:
@@ -131,6 +197,39 @@ export const taskCopy = {
   },
   en: {
     required: 'Engineer confirmation required',
+    editEvidence: 'Evidence requirements for all workshops',
+    editEvidenceHelp:
+      'Changes apply to jobs not yet approved by the engineer. Missing evidence will be requested again; previous files and text are retained. Operators will be notified.',
+    workshopSettings: 'Workshop settings',
+    workshopHelp:
+      'Separate evidence requirements, deadline and priority for this workshop. The operator will be notified of changes.',
+    inheritEvidence: 'Use the task’s evidence requirements',
+    deadline: 'Workshop deadline',
+    deadlineHelp: 'Leave blank to use the task deadline.',
+    priority: 'Priority',
+    normal: 'Normal',
+    high: 'High',
+    urgent: 'Urgent',
+    evidenceSave: 'Save changes',
+    evidenceSaving: 'Saving…',
+    evidenceSaved: 'Changes saved; operators will be notified',
+    evidenceSaveFailed: 'Could not save changes',
+    evidenceReset: 'Discard changes',
+    existingPhoto: 'The previous photo is retained. A new photo is optional.',
+    fileVersions: 'File versions',
+    fileVersionsHelp:
+      'The new version applies only to this task’s active jobs. Approved jobs and jobs submitted for review retain their files.',
+    version: 'Version',
+    currentVersion: 'Current',
+    originalVersion: 'Original version',
+    uploadVersion: 'Add a new version',
+    versionNote: 'Change description (optional)',
+    activateVersion: 'Make current',
+    versionSaved: 'Current version changed; operators will be notified',
+    versionUploadHelp: 'Same file format · up to 10 MB',
+    view: 'View',
+    download: 'Download',
+    refresh: 'Refresh',
     method: 'Evidence method',
     methods: 'Evidence methods',
     methodsHelp:
@@ -249,4 +348,30 @@ export function apiErrorMessage(error, fallback = '') {
     error?.message ||
     ''
   )
+}
+
+export function workshopSettingsPayload(
+  factories = [],
+  drafts = {},
+  required = false,
+  method = ''
+) {
+  return factories.map((factory) => {
+    const row = drafts[factory.id] || {}
+    const inherited = row.inherit !== false
+    const needsEvidence = inherited
+      ? required
+      : Boolean(row.confirmation_required)
+    return {
+      factory_id: Number(factory.id),
+      deadline: row.deadline || null,
+      priority: row.priority || 'normal',
+      confirmation_required: needsEvidence,
+      confirmation_method: needsEvidence
+        ? inherited
+          ? method
+          : row.confirmation_method || ''
+        : null,
+    }
+  })
 }

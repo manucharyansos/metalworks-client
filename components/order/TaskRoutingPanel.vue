@@ -21,6 +21,17 @@
     <p v-if="error" role="alert" class="mt-3 break-words text-sm text-red-600">
       {{ error }}
     </p>
+    <details class="mt-4" data-all-evidence-settings>
+      <summary class="cursor-pointer font-semibold">
+        {{ workflowText.editEvidence }}
+      </summary>
+      <TaskEvidenceSettings
+        :order="order"
+        :disabled="loading || saving"
+        @busy="savingEvidence = $event"
+        @updated="$emit('updated', $event)"
+      />
+    </details>
     <div
       v-for="step in order.factory_orders || []"
       :key="step.id"
@@ -28,6 +39,32 @@
       :data-assignment-step="step.id"
     >
       <p class="font-semibold">{{ step.factory?.name }}</p>
+      <p class="mt-1 text-xs text-slate-500">
+        {{ workflowText.deadline }}:
+        {{ step.deadline || (order.dates?.finish_date || '—').slice(0, 10) }} ·
+        {{ workflowText.priority }}:
+        {{ workflowText[step.priority || 'normal'] }}
+      </p>
+      <details
+        v-if="
+          !step.engineer_confirmation_at &&
+          !['canceled', 'cancelled'].includes(step.status) &&
+          !isCanceled
+        "
+        class="mt-3"
+        :data-step-settings="step.id"
+      >
+        <summary class="cursor-pointer text-sm font-semibold">
+          {{ workflowText.workshopSettings }}
+        </summary>
+        <TaskEvidenceSettings
+          :order="order"
+          :step="step"
+          :disabled="loading || saving"
+          @busy="savingEvidence = $event"
+          @updated="handleSettingsUpdated"
+        />
+      </details>
       <p
         v-if="step.is_blocked"
         class="mt-1 text-xs text-amber-700 dark:text-amber-300"
@@ -96,6 +133,13 @@
           </select>
         </label>
         <template v-if="factoryId">
+          <TaskWorkshopOptions
+            v-model="newWorkSettings"
+            :factories="[
+              { id: Number(factoryId), name: workflowText.workshopSettings },
+            ]"
+            :disabled="saving"
+          />
           <label class="block text-sm font-semibold"
             >{{ t.operator }}
             <select
@@ -181,10 +225,24 @@
         </template>
       </form>
     </details>
+    <TaskFileVersions
+      :order="order"
+      :disabled="loading || saving"
+      @busy="savingFiles = $event"
+      @updated="$emit('updated', $event)"
+    />
   </section>
 </template>
 
 <script>
+import TaskEvidenceSettings from '@/components/order/TaskEvidenceSettings.vue'
+import TaskFileVersions from '@/components/order/TaskFileVersions.vue'
+import TaskWorkshopOptions from '@/components/engineer/TaskWorkshopOptions.vue'
+import {
+  confirmationMethods,
+  taskCopy,
+  workshopSettingsPayload,
+} from '@/utils/task-workflow'
 import {
   assignmentLocked,
   canManageTask,
@@ -193,6 +251,7 @@ import {
   taskFiles,
 } from '@/utils/task-routing'
 export default {
+  components: { TaskEvidenceSettings, TaskFileVersions, TaskWorkshopOptions },
   props: { order: { type: Object, required: true } },
   data: () => ({
     workload: null,
@@ -202,13 +261,19 @@ export default {
     previousOperators: {},
     savingStepId: null,
     savingWork: false,
+    savingEvidence: false,
+    savingFiles: false,
     factoryId: '',
     newOperatorId: '',
     dependsOnId: '',
     selectedFileIds: [],
     quantities: {},
+    newWorkSettings: {},
   }),
   computed: {
+    workflowText() {
+      return taskCopy[this.$i18n?.locale] || taskCopy.hy
+    },
     t() {
       return routingCopy[this.$i18n?.locale] || routingCopy.hy
     },
@@ -220,7 +285,12 @@ export default {
       )
     },
     saving() {
-      return this.savingStepId != null || this.savingWork
+      return (
+        this.savingStepId != null ||
+        this.savingWork ||
+        this.savingEvidence ||
+        this.savingFiles
+      )
     },
     isCanceled() {
       return ['canceled', 'cancelled'].includes(this.order.status)
@@ -254,6 +324,11 @@ export default {
           this.workload &&
           this.factoryId &&
           this.selectedFileIds.length &&
+          this.newSettings.every(
+            (row) =>
+              !row.confirmation_required ||
+              confirmationMethods(row.confirmation_method).length
+          ) &&
           this.selectedFileIds.every(
             (id) =>
               this.availableFiles.some((file) => file.id === id) &&
@@ -261,6 +336,14 @@ export default {
               this.quantities[id] > 0 &&
               this.quantities[id] <= 1000000
           )
+      )
+    },
+    newSettings() {
+      return workshopSettingsPayload(
+        [{ id: this.factoryId }],
+        this.newWorkSettings,
+        this.order.confirmation_required,
+        this.order.confirmation_method
       )
     },
   },
@@ -273,6 +356,17 @@ export default {
     },
     factoryId() {
       const step = this.existingStep(this.factoryId)
+      this.newWorkSettings = {
+        [this.factoryId]: {
+          inherit: false,
+          deadline: step?.deadline || '',
+          priority: step?.priority || 'normal',
+          confirmation_required: Boolean(
+            (step || this.order).confirmation_required
+          ),
+          confirmation_method: (step || this.order).confirmation_method || '',
+        },
+      }
       this.newOperatorId = step?.operator_id ? String(step.operator_id) : ''
       this.dependsOnId = step
         ? step.depends_on_id
@@ -290,6 +384,10 @@ export default {
     if (this.canManage) this.loadWorkload()
   },
   methods: {
+    handleSettingsUpdated(order) {
+      this.$emit('updated', order)
+      this.$nextTick(() => this.loadWorkload())
+    },
     locked(step) {
       return this.isCanceled || assignmentLocked(step)
     },
@@ -379,6 +477,7 @@ export default {
         const { data } = await this.$axios.post(
           `/api/tasks/${this.order.id}/workshops`,
           {
+            ...this.newSettings[0],
             factory_id: Number(this.factoryId),
             operator_id: this.newOperatorId ? Number(this.newOperatorId) : null,
             depends_on_id: this.dependsOnId ? Number(this.dependsOnId) : null,

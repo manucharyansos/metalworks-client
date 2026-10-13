@@ -34,13 +34,21 @@ function load(name) {
 
 function component(
   name,
-  { propsData = {}, state = {}, methods = {}, computed = {}, can = true } = {}
+  {
+    propsData = {},
+    state = {},
+    methods = {},
+    computed = {},
+    hooks = {},
+    can = true,
+  } = {}
 ) {
   const definition = load(name).default
   const vm = new Vue({
     ...definition,
     mounted: [],
     beforeDestroy: [],
+    ...hooks,
     propsData,
     data: () => ({ ...definition.data?.(), ...state }),
     methods: { ...definition.methods, ...methods },
@@ -202,6 +210,10 @@ test('new workshop reuses existing files, defaults to the preceding job, and sen
         factory_id: 2,
         operator_id: null,
         depends_on_id: 30,
+        confirmation_required: false,
+        confirmation_method: null,
+        deadline: null,
+        priority: 'normal',
         files: [{ id: 60, quantity: 2 }],
       },
     },
@@ -343,5 +355,390 @@ test('manager details fetch every workshop and task file before displaying routi
   await vm.openDetails({ id: 21 })
   assert.equal(vm.isDetailsOpen, false)
   assert.equal(vm.detailsLoading, false)
+  vm.$destroy()
+})
+
+function taskSettings(step = null) {
+  return component('components/order/TaskEvidenceSettings.vue', {
+    propsData: {
+      order: {
+        ...routingOrder(),
+        company_id: 1,
+        confirmation_required: false,
+        confirmation_method: null,
+      },
+      step,
+    },
+    hooks: {
+      beforeCreate() {
+        this.$auth = { user: { id: 5, role: { name: 'engineer' } } }
+        this.$store = {
+          state: Vue.observable({ workspace: { company: { id: 1 } } }),
+        }
+        this.$can = () => true
+      },
+    },
+  })
+}
+
+test('existing-task requirements retain failed input and lock duplicate submissions until the API responds', async () => {
+  const vm = taskSettings(),
+    events = [],
+    calls = []
+  vm.$emit = (...args) => events.push(args)
+  vm.required = true
+  vm.method = 'photo_text'
+  let finish
+  vm.$axios = {
+    put: (url, data) => {
+      calls.push({ url, data })
+      return new Promise((resolve, reject) => {
+        finish = { resolve, reject }
+      })
+    },
+  }
+  const first = vm.save()
+  await vm.save()
+  assert.equal(vm.saving, true)
+  assert.equal(calls.length, 1)
+  assert.deepEqual(calls[0], {
+    url: '/api/tasks/20/evidence-requirements',
+    data: {
+      confirmation_required: true,
+      confirmation_method: 'photo_text',
+      previous_confirmation_required: false,
+      previous_confirmation_method: null,
+    },
+  })
+  finish.reject({ response: { data: { message: 'Temporary server failure' } } })
+  await first
+  assert.equal(vm.required, true)
+  assert.equal(vm.method, 'photo_text')
+  assert.match(vm.error, /Temporary server failure/)
+  assert.equal(vm.saving, false)
+  const next = vm.save()
+  finish.resolve({
+    data: {
+      order: {
+        ...vm.order,
+        confirmation_required: true,
+        confirmation_method: 'photo_text',
+      },
+    },
+  })
+  await next
+  assert.equal(vm.dirty, false)
+  assert.ok(
+    events.some(
+      ([event, data]) =>
+        event === 'updated' && data.confirmation_method === 'photo_text'
+    )
+  )
+  vm.$destroy()
+})
+
+test('workshop edits preserve draft requirements during refresh and send independent deadline and priority', async () => {
+  const step = {
+    ...routingOrder().factory_orders[0],
+    confirmation_required: true,
+    confirmation_method: 'text',
+    deadline: '2026-10-18',
+    priority: 'high',
+  }
+  const vm = taskSettings(step),
+    calls = []
+  vm.method = 'photo_text'
+  vm.priority = 'urgent'
+  vm.order = { ...vm.order, description: 'A fresh status read' }
+  await Vue.nextTick()
+  assert.equal(vm.method, 'photo_text')
+  vm.$axios = {
+    put: async (url, data) => {
+      calls.push({ url, data })
+      throw {
+        response: {
+          status: 409,
+          data: { message: 'Changed in another session; refresh first' },
+        },
+      }
+    },
+  }
+  await vm.save()
+  assert.equal(calls[0].url, '/api/tasks/20/workshops/30/settings')
+  assert.equal(calls[0].data.deadline, '2026-10-18')
+  assert.equal(calls[0].data.priority, 'urgent')
+  assert.equal(calls[0].data.previous_priority, 'high')
+  assert.match(vm.error, /another session/)
+  assert.equal(vm.method, 'photo_text')
+  vm.reset()
+  assert.equal(vm.method, 'text')
+  assert.equal(vm.priority, 'high')
+  vm.step = { ...step, engineer_confirmation_at: '2026-10-13' }
+  await Vue.nextTick()
+  assert.equal(vm.canManage, false)
+  vm.$destroy()
+})
+
+test('a late settings response cannot replace a different task or company', async () => {
+  const vm = taskSettings(),
+    events = []
+  vm.$emit = (...args) => events.push(args)
+  vm.required = true
+  vm.method = 'text'
+  let resolve
+  vm.$axios = {
+    put: () =>
+      new Promise((done) => {
+        resolve = done
+      }),
+  }
+  const request = vm.save()
+  vm.$store.state.workspace.company.id = 2
+  vm.order = { ...vm.order, id: 21, company_id: 2 }
+  await Vue.nextTick()
+  resolve({
+    data: {
+      order: {
+        ...routingOrder(),
+        confirmation_required: true,
+        confirmation_method: 'text',
+      },
+    },
+  })
+  await request
+  assert.equal(vm.required, false)
+  assert.equal(vm.saving, false)
+  assert.equal(events.filter(([event]) => event === 'updated').length, 0)
+  vm.$destroy()
+})
+
+test('workshop creation inherits common evidence but accepts independent methods, deadline and priority', () => {
+  const { workshopSettingsPayload } = load('utils/task-workflow.js')
+  const result = workshopSettingsPayload(
+    [{ id: 1 }, { id: 2 }],
+    {
+      2: {
+        inherit: false,
+        confirmation_required: true,
+        confirmation_method: 'photo_text',
+        deadline: '2026-10-19',
+        priority: 'urgent',
+      },
+      99: { priority: 'urgent' },
+    },
+    true,
+    'photo'
+  )
+  assert.deepEqual(result, [
+    {
+      factory_id: 1,
+      confirmation_required: true,
+      confirmation_method: 'photo',
+      deadline: null,
+      priority: 'normal',
+    },
+    {
+      factory_id: 2,
+      confirmation_required: true,
+      confirmation_method: 'photo_text',
+      deadline: '2026-10-19',
+      priority: 'urgent',
+    },
+  ])
+})
+
+function fileVersions() {
+  return component('components/order/TaskFileVersions.vue', {
+    propsData: { order: { ...routingOrder(), company_id: 1 } },
+    hooks: {
+      beforeCreate() {
+        this.$auth = { user: { id: 5, role: { name: 'engineer' } } }
+        this.$store = {
+          state: Vue.observable({ workspace: { company: { id: 1 } } }),
+        }
+        this.$can = () => true
+      },
+    },
+  })
+}
+
+test('failed version upload keeps the chosen file and note, and a retry sends the current revision guard', async () => {
+  const vm = fileVersions(),
+    events = [],
+    calls = []
+  const file = {
+    id: 60,
+    original_name: 'drawing.txt',
+    task_file_revision_id: 4,
+    can_update: true,
+    versions: [{ id: 4, version: 2 }],
+  }
+  vm.files = [file]
+  vm.$emit = (...args) => events.push(args)
+  const upload = new File(['New dimensions'], 'drawing.txt', {
+    type: 'text/plain',
+  })
+  vm.select(file, { target: { files: [upload] } })
+  vm.$set(vm.notes, 60, 'Corrected width')
+  vm.$axios = {
+    post: async (url, data) => {
+      calls.push({
+        url,
+        file: data.get('file').name,
+        note: data.get('note'),
+        previous: data.get('previous_revision_id'),
+      })
+      throw { response: { data: { message: 'Upload interrupted' } } }
+    },
+  }
+  await vm.change(file)
+  assert.equal(vm.uploads[60], upload)
+  assert.equal(vm.notes[60], 'Corrected width')
+  assert.match(vm.error, /interrupted/)
+  assert.deepEqual(calls[0], {
+    url: '/api/tasks/20/files/60/versions',
+    file: 'drawing.txt',
+    note: 'Corrected width',
+    previous: '4',
+  })
+  vm.$axios.post = async () => ({
+    data: {
+      order: vm.order,
+      files: [
+        {
+          ...file,
+          task_file_revision_id: 5,
+          versions: [{ id: 5, version: 3 }],
+        },
+      ],
+    },
+  })
+  await vm.change(file)
+  assert.equal(vm.uploads[60], undefined)
+  assert.equal(vm.notes[60], undefined)
+  assert.equal(vm.currentVersion(vm.files[0]), 3)
+  assert.equal(events.filter(([event]) => event === 'updated').length, 1)
+  vm.$destroy()
+})
+
+test('old file-version reads are ignored on company change, and invalid extension/oversize selections stay blocked', async () => {
+  const vm = fileVersions(),
+    file = { id: 60, original_name: 'drawing.txt' }
+  let resolve
+  vm.$axios = {
+    get: () =>
+      new Promise((done) => {
+        resolve = done
+      }),
+  }
+  const read = vm.load()
+  vm.$store.state.workspace.company.id = 2
+  await Vue.nextTick()
+  resolve({ data: { files: [file] } })
+  await read
+  // Vue augments array prototypes; the empty-list contract is the same on Node 20 and 24.
+  assert.equal(vm.files.length, 0)
+  assert.equal(vm.loaded, false)
+  assert.equal(vm.loading, false)
+  for (const upload of [
+    { name: 'file.pdf', size: 2 },
+    { name: 'file.txt', size: 10 * 1024 * 1024 + 1 },
+  ]) {
+    vm.select(file, { target: { files: [upload], value: 'file' } })
+    assert.equal(vm.uploads[60], null)
+    assert.ok(vm.error)
+  }
+  vm.$destroy()
+})
+
+test('evidence and file changes have localized notification text in all interface languages', () => {
+  const { describeNotification } = load('utils/task-notifications.js')
+  for (const locale of ['hy', 'ru', 'en']) {
+    const proof = describeNotification(
+      {
+        type: 'step.settings_changed',
+        data: {
+          factory: 'Laser',
+          confirmation_required: true,
+          confirmation_method: 'photo_text',
+          priority: 'urgent',
+          deadline: '2026-10-18',
+          needs_supplement: true,
+        },
+      },
+      locale
+    )
+    assert.ok(proof.text.includes('Laser'))
+    assert.ok(!proof.text.includes('{'))
+    assert.ok(!proof.text.includes('photo_text'))
+    const file = describeNotification(
+      {
+        type: 'step.file_version_changed',
+        data: { factory: 'Laser', file_name: 'drawing.dxf', version: 3 },
+      },
+      locale
+    )
+    assert.ok(file.text.includes('drawing.dxf'))
+    assert.ok(file.text.includes('v3'))
+  }
+})
+
+test('operator boards show urgent work first and then the nearest workshop deadline without mutating the source', () => {
+  const { sortWorkshopTasks } = load('utils/task-routing.js')
+  const jobs = [
+    {
+      id: 1,
+      dates: { finish_date: '2026-10-20' },
+      factory_orders: [{ factory_id: 1, priority: 'normal' }],
+    },
+    {
+      id: 2,
+      factory_orders: [
+        { factory_id: 1, priority: 'urgent', deadline: '2026-10-19' },
+      ],
+    },
+    {
+      id: 3,
+      factory_orders: [
+        { factory_id: 1, priority: 'urgent', deadline: '2026-10-18' },
+      ],
+    },
+  ]
+  assert.deepEqual(
+    sortWorkshopTasks(jobs, 1).map((row) => row.id),
+    [3, 2, 1]
+  )
+  assert.deepEqual(
+    jobs.map((row) => row.id),
+    [1, 2, 3]
+  )
+})
+
+test('supplementing photo evidence reuses the retained image and pre-fills the previous text', async () => {
+  const vm = component('components/factory/OrderActionModal.vue', {
+    propsData: {
+      actionOptions: [{ value: 'finished' }],
+      cancelReasons: [],
+      factoryOrder: {
+        id: 30,
+        confirmation_required: true,
+        confirmation_method: 'photo_text',
+        has_evidence_photo: true,
+        evidence_text: 'Checked measurements',
+      },
+    },
+  })
+  vm.isOpen = true
+  await Vue.nextTick()
+  vm.localSelectedOption = { value: 'finished' }
+  assert.equal(vm.evidenceText, 'Checked measurements')
+  assert.equal(vm.canConfirm, true)
+  let result
+  vm.$emit = (event, value) => {
+    if (event === 'confirm') result = value
+  }
+  vm.confirm()
+  assert.equal(result.evidence_text, 'Checked measurements')
+  assert.equal('evidence_photo' in result, false)
   vm.$destroy()
 })

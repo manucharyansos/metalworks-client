@@ -168,6 +168,7 @@ export function taskFiles(task) {
       files.set(selected.pmp_file.id, {
         ...selected.pmp_file,
         quantity: selected.quantity || 1,
+        task_file_revision_id: selected.task_file_revision_id || null,
       })
   }
   for (const step of task?.factory_orders || [])
@@ -176,4 +177,26 @@ export function taskFiles(task) {
         files.set(file.id, { ...file, quantity: file.pivot?.quantity || 1 })
     }
   return [...files.values()]
+}
+
+export function sortWorkshopTasks(tasks, factoryId) {
+  const step = (order) =>
+    (order.factory_orders || []).find(
+      (row) => String(row.factory_id) === String(factoryId)
+    ) || {}
+  const rank = { urgent: 2, high: 1, normal: 0 }
+  const deadline = (order, row) => {
+    const date = Date.parse(row.deadline || order.dates?.finish_date || '')
+    return Number.isFinite(date) ? date : Infinity
+  }
+  return [...tasks].sort((a, b) => {
+    const left = step(a)
+    const right = step(b)
+    return (
+      (rank[right.priority] || 0) - (rank[left.priority] || 0) ||
+      (deadline(a, left) === deadline(b, right)
+        ? 0
+        : deadline(a, left) - deadline(b, right))
+    )
+  })
 }

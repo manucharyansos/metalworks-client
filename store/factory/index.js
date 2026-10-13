@@ -4,6 +4,7 @@ export const state = () => ({
   orderByFactory: null,
   finishedOrder: null,
   actionError: '',
+  actionConflictOrder: null,
 })
 
 export const getters = {
@@ -16,6 +17,7 @@ export const getters = {
   getActionError(state) {
     return state.actionError
   },
+  getActionConflictOrder: (state) => state.actionConflictOrder,
   getFinishedOrder(state) {
     return state.finishedOrder
   },
@@ -37,7 +39,8 @@ export const actions = {
       const { data } = await this.$axios.get('/api/factories/factory')
       if (!Array.isArray(data)) throw new Error('Invalid factory list response')
       factories = data.map((factory) => {
-        const hasConfigured = 'extensions' in factory || 'file_extensions' in factory
+        const hasConfigured =
+          'extensions' in factory || 'file_extensions' in factory
         const configured = factory.extensions ?? factory.file_extensions
         if (hasConfigured && !Array.isArray(configured))
           throw new Error('Invalid factory upload policy response')
@@ -75,15 +78,21 @@ export const actions = {
   // deadline was sent to the engineer as a request instead of being applied.
   async doneFinishedOrder({ commit }, order) {
     commit('SET_ACTION_ERROR', '')
+    commit('SET_ACTION_CONFLICT_ORDER', null)
     try {
       const { method, body } = taskActionBody(order)
-      const res = await this.$axios[method](`api/factories/updateOrder/${order.id}`, body)
+      const res = await this.$axios[method](
+        `api/factories/updateOrder/${order.id}`,
+        body
+      )
       commit('SET_ORDER', res.data)
       return res.data?.change_request
         ? { changeRequest: res.data.change_request }
         : true
     } catch (err) {
       console.log(err)
+      if (err.response?.status === 409 && err.response.data?.order)
+        commit('SET_ACTION_CONFLICT_ORDER', err.response.data.order)
       commit('SET_ACTION_ERROR', apiErrorMessage(err))
       return false
     }
@@ -99,7 +108,13 @@ export const actions = {
       )
       let url = null
 
-      if (file.id) {
+      const revision =
+        file.task_file_revision_id || file.pivot?.task_file_revision_id
+      if (revision) {
+        url = `${baseURL}/api/secure-files/task-revisions/${encodeURIComponent(
+          revision
+        )}?download=1`
+      } else if (file.id) {
         url = `${baseURL}/api/secure-files/pmp/${encodeURIComponent(
           file.id
         )}?download=1`
@@ -141,6 +156,9 @@ export const actions = {
 }
 
 export const mutations = {
+  SET_ACTION_CONFLICT_ORDER(state, order) {
+    state.actionConflictOrder = order
+  },
   SET_FACTORY(state, factory) {
     if (!Array.isArray(factory)) {
       state.factory = factory

@@ -56,8 +56,8 @@
         <p class="text-slate-400">Ժամկետ</p>
         <p class="mt-1 truncate font-bold text-slate-700 dark:text-slate-200">
           {{
-            order.dates?.finish_date
-              ? $formatDate(order.dates.finish_date)
+            factoryOrder?.deadline || order.dates?.finish_date
+              ? $formatDate(factoryOrder?.deadline || order.dates.finish_date)
               : 'Հաշվի առնել'
           }}
         </p>
@@ -76,6 +76,16 @@
       </div>
     </div>
 
+    <p
+      class="mt-3 text-xs font-bold"
+      :class="
+        factoryOrder?.priority === 'urgent' ? 'text-rose-600' : 'text-slate-500'
+      "
+      data-workshop-priority
+    >
+      {{ taskText.priority }} ·
+      {{ taskText[factoryOrder?.priority || 'normal'] }}
+    </p>
     <p
       v-if="pendingRequest"
       data-pending-request

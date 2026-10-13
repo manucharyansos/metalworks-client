@@ -168,6 +168,7 @@
 </template>
 
 <script>
+import { sortWorkshopTasks } from '@/utils/task-routing'
 import { mapActions, mapGetters } from 'vuex'
 import {
   isFactoryOrderFinished,
@@ -233,7 +234,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('factory', ['getOrderByFactories', 'getActionError']),
+    ...mapGetters('factory', [
+      'getOrderByFactories',
+      'getActionError',
+      'getActionConflictOrder',
+    ]),
 
     taskText() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
@@ -257,7 +262,10 @@ export default {
 
     allOrders() {
       const orders = this.getOrderByFactories?.orders
-      return Array.isArray(orders) ? orders : []
+      return sortWorkshopTasks(
+        Array.isArray(orders) ? orders : [],
+        this.currentFactoryId
+      )
     },
 
     filteredByStatus() {
@@ -396,7 +404,13 @@ export default {
   },
   methods: {
     async refreshQuietly() {
-      if (document.hidden || this.isSaving || this.isModal || !this.currentFactoryId) return
+      if (
+        document.hidden ||
+        this.isSaving ||
+        this.isModal ||
+        !this.currentFactoryId
+      )
+        return
       try {
         await this.fetchOrdersByFactory(this.currentFactoryId)
         this.rebindDetails()
@@ -557,13 +571,37 @@ export default {
         },
       }
 
-      if (payload.request_note) finalPayload.factory_order.request_note = payload.request_note
-      if (payload.evidence_text) finalPayload.factory_order.evidence_text = payload.evidence_text
-      if (payload.evidence_photo) finalPayload.evidence_photo = payload.evidence_photo
+      if (payload.status === 'finished') {
+        const step = this.getFactoryOrderForCurrentFactory(this.selectedOrder)
+        finalPayload.factory_order.expected_file_versions = JSON.stringify(
+          Object.fromEntries(
+            (step?.files || []).map((file) => [
+              file.id,
+              Number(file.pivot?.task_file_revision_id || 0),
+            ])
+          )
+        )
+        finalPayload.factory_order.expected_confirmation_required =
+          step?.confirmation_required ? 1 : 0
+        if (step?.confirmation_required)
+          finalPayload.factory_order.expected_confirmation_method =
+            step.confirmation_method
+      }
+      if (payload.request_note)
+        finalPayload.factory_order.request_note = payload.request_note
+      if (payload.evidence_text)
+        finalPayload.factory_order.evidence_text = payload.evidence_text
+      if (payload.evidence_photo)
+        finalPayload.evidence_photo = payload.evidence_photo
       this.isSaving = true
       let success = false
       try {
         success = await this.doneFinishedOrder(finalPayload)
+        if (
+          !success &&
+          this.getActionConflictOrder?.id === this.selectedOrder.id
+        )
+          this.selectedOrder = this.getActionConflictOrder
         if (success) await this.fetchOrdersByFactory(this.currentFactoryId)
       } catch (error) {
         success = false
@@ -647,7 +685,10 @@ export default {
       }
 
       // Ask for the action's required data instead of inventing a reason or date.
-      if (['canceled', 'date_changed'].includes(newStatus) || (newStatus === 'finished' && fo.confirmation_required)) {
+      if (
+        ['canceled', 'date_changed'].includes(newStatus) ||
+        (newStatus === 'finished' && fo.confirmation_required)
+      ) {
         this.updateOrder(order, newStatus)
         return
       }
@@ -683,7 +724,8 @@ export default {
         })
       } else {
         this.$notify({
-          text: this.getActionError || 'Սխալ տեղի ունեցավ կարգավիճակը թարմացնելիս։',
+          text:
+            this.getActionError || 'Սխալ տեղի ունեցավ կարգավիճակը թարմացնելիս։',
           duration: 3000,
           position: 'top',
           type: 'error',

@@ -22,7 +22,20 @@ export default {
   },
   methods: {
     handleViewFile(file) {
-      this.$emit('view-file', file && file.path ? file.path : file)
+      const revision =
+        file?.task_file_revision_id || file?.pivot?.task_file_revision_id
+      const url =
+        revision && this.$getPmpFileUrl ? this.$getPmpFileUrl(file) : null
+      this.$emit(
+        'view-file',
+        url
+          ? `${url}${
+              url.includes('?') ? '&' : '?'
+            }filename=${encodeURIComponent(file.original_name)}`
+          : file && file.path
+          ? file.path
+          : file
+      )
     },
     handleDownloadFile(file) {
       this.$emit('download-file', file)

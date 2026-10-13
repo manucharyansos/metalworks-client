@@ -9,6 +9,7 @@
           type="checkbox"
           class="mt-1 h-5 w-5 shrink-0"
           :checked="confirmationRequired"
+          :disabled="disabled"
           data-confirmation-required
           @change="$emit('update:confirmationRequired', $event.target.checked)"
         />
@@ -30,6 +31,7 @@
           <input
             type="checkbox"
             :checked="selectedMethods.includes(method)"
+            :disabled="disabled"
             :data-confirmation-method="method"
             class="h-5 w-5 shrink-0"
             @change="selectMethod(method, $event.target.checked)"
@@ -61,6 +63,7 @@
           >
             <input
               type="checkbox"
+              :disabled="disabled"
               class="h-5 w-5"
               :checked="
                 (referenceVisibility[file.id] || []).includes(
@@ -88,6 +91,7 @@ import {
 export default {
   props: {
     confirmationRequired: Boolean,
+    disabled: Boolean,
     confirmationMethod: { type: String, default: '' },
     referenceVisibility: { type: Object, default: () => ({}) },
     files: { type: Array, default: () => [] },
@@ -118,6 +122,7 @@ export default {
   },
   methods: {
     selectMethod(method, checked) {
+      if (this.disabled) return
       const methods = new Set(this.selectedMethods)
       if (checked) methods.add(method)
       else methods.delete(method)
@@ -127,6 +132,7 @@ export default {
       )
     },
     selectWorkshop(fileId, factoryId, checked) {
+      if (this.disabled) return
       const ids = new Set(this.referenceVisibility[fileId] || [])
       if (checked) ids.add(Number(factoryId))
       else ids.delete(Number(factoryId))
