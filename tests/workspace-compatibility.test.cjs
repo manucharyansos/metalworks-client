@@ -8,6 +8,7 @@ const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const taskUrl = moduleUrl(read('utils/task-workflow.js'))
 const taskRoutingUrl = moduleUrl(read('utils/task-routing.js'))
+const taskNotificationsUrl = moduleUrl(read('utils/task-notifications.js'))
 const routeUrl = moduleUrl(read('utils/workspace-route.js'))
 const brandsUrl = moduleUrl(read('config/workspace-brands.js'))
 const companyCopyUrl = moduleUrl(read('utils/company-copy.js'))
@@ -26,6 +27,7 @@ async function component(file, render = false) {
     if (specifier === '~/static/logo.png') return `const ${names} = '/work/_nuxt/img/metalworks-test.png'`
     if (specifier === '@/utils/task-workflow') return `import ${names} from '${taskUrl}'`
     if (specifier === '@/utils/task-routing') return `import ${names} from '${taskRoutingUrl}'`
+    if (specifier === '@/utils/task-notifications') return `import ${names} from '${taskNotificationsUrl}'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
     return `const ${names} = {}`
   })
@@ -60,6 +62,7 @@ for (const [role, links] of [
       WorkspaceSettingsIcon: await component('components/layout/WorkspaceSettingsIcon.vue', true),
       CompanySelector: { ...await component('components/layout/CompanySelector.vue', true), ...context },
       WorkspaceTransition: { ...await component('components/layout/WorkspaceTransition.vue', true), ...context },
+      NotificationBell: { ...await component('components/layout/NotificationBell.vue', true), ...context },
       NuxtLink: { props: ['to'], render(h) { return h('a', { attrs: { href: this.to } }, this.$slots.default) } },
       Nuxt: { render: h => h('main', 'Existing route content') },
       LanguageDropdown: { render: h => h('button', 'RU') },

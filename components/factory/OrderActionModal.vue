@@ -189,6 +189,31 @@
             </div>
           </transition>
 
+          <!-- Մերժումը և ժամկետի փոփոխությունը հարցում են՝ ինժեների համաձայնությամբ -->
+          <div
+            v-if="requestMode"
+            data-request-notice
+            class="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/20"
+          >
+            <p class="text-sm text-amber-900 dark:text-amber-200">
+              {{ t.requestNotice }}
+            </p>
+            <label
+              class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+            >
+              {{ t.requestNote }}
+              <textarea
+                v-model="requestNote"
+                data-request-note
+                rows="2"
+                maxlength="1000"
+                :disabled="saving"
+                :placeholder="t.requestNotePlaceholder"
+                class="mt-2 block w-full rounded-xl border border-gray-300 bg-white p-3 text-sm font-normal text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+              />
+            </label>
+          </div>
+
           <!-- Ավարտված է -->
           <transition name="slide-fade">
             <div
@@ -223,6 +248,8 @@
             {{
               saving
                 ? $t('factory_order_actions.saving')
+                : requestMode
+                ? t.requestSubmit
                 : $t('factory_order_actions.confirm')
             }}
           </button>
@@ -262,9 +289,20 @@ export default {
       evidenceText: '',
       evidencePhoto: null,
       photoError: '',
+      requestNote: '',
     }
   },
   computed: {
+    // Operators only ask: a rejection or a new deadline needs the creating
+    // engineer's consent. Admin and manager still apply changes directly.
+    requestMode() {
+      const role = this.$auth?.user?.role?.name
+      return (
+        ['canceled', 'date_changed'].includes(
+          this.localSelectedOption?.value
+        ) && !['admin', 'manager'].includes(role)
+      )
+    },
     t() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
@@ -339,6 +377,7 @@ export default {
       this.evidenceText = ''
       this.evidencePhoto = null
       this.photoError = ''
+      this.requestNote = ''
     },
     selectPhoto(event) {
       const file = event.target.files?.[0]
@@ -373,6 +412,11 @@ export default {
             ? localFactoryTimestamp()
             : null,
       }
+      if (
+        this.requestNote.trim() &&
+        ['canceled', 'date_changed'].includes(payload.status)
+      )
+        payload.request_note = this.requestNote.trim()
       if (
         payload.status === 'finished' &&
         this.factoryOrder.confirmation_required

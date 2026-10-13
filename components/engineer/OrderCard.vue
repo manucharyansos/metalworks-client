@@ -62,7 +62,9 @@
           :class="factoryStatusClass(fo.status)"
         >
           {{
-            fo.awaiting_engineer_confirmation
+            fo.pending_request
+              ? (taskCopy[$i18n.locale] || taskCopy.hy).requestAnswerNeeded
+              : fo.awaiting_engineer_confirmation
               ? (taskCopy[$i18n.locale] || taskCopy.hy).waiting
               : formatStatus(fo.status)
           }}
@@ -185,6 +187,8 @@ export default {
     overallStatusText() {
       const t = taskCopy[this.$i18n?.locale] || taskCopy.hy
       const steps = this.order.factory_orders || []
+      // An operator's request blocks that job until the engineer answers.
+      if (steps.some((step) => step.pending_request)) return t.requestAnswerNeeded
       if (steps.some((step) => step.awaiting_engineer_confirmation))
         return t.waiting
       if (
@@ -198,7 +202,7 @@ export default {
     overallStatusClass() {
       if (
         (this.order.factory_orders || []).some(
-          (step) => step.awaiting_engineer_confirmation
+          (step) => step.awaiting_engineer_confirmation || step.pending_request
         )
       )
         return 'bg-amber-600'

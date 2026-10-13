@@ -1,8 +1,9 @@
-import { taskActionBody } from '@/utils/task-workflow'
+import { apiErrorMessage, taskActionBody } from '@/utils/task-workflow'
 export const state = () => ({
   factory: null,
   orderByFactory: null,
   finishedOrder: null,
+  actionError: '',
 })
 
 export const getters = {
@@ -11,6 +12,9 @@ export const getters = {
   },
   getOrderByFactories(state) {
     return state.orderByFactory
+  },
+  getActionError(state) {
+    return state.actionError
   },
   getFinishedOrder(state) {
     return state.finishedOrder
@@ -67,14 +71,20 @@ export const actions = {
     }
   },
 
+  // Resolves to true, false, or { changeRequest } when a rejection or a new
+  // deadline was sent to the engineer as a request instead of being applied.
   async doneFinishedOrder({ commit }, order) {
+    commit('SET_ACTION_ERROR', '')
     try {
       const { method, body } = taskActionBody(order)
       const res = await this.$axios[method](`api/factories/updateOrder/${order.id}`, body)
       commit('SET_ORDER', res.data)
-      return true
+      return res.data?.change_request
+        ? { changeRequest: res.data.change_request }
+        : true
     } catch (err) {
       console.log(err)
+      commit('SET_ACTION_ERROR', apiErrorMessage(err))
       return false
     }
   },
@@ -149,5 +159,8 @@ export const mutations = {
   },
   SET_ORDER(state, finishedOrder) {
     state.finishedOrder = finishedOrder
+  },
+  SET_ACTION_ERROR(state, message) {
+    state.actionError = message || ''
   },
 }

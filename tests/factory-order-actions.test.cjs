@@ -26,10 +26,10 @@ function load(name) {
   return module.exports
 }
 
-function component(name, { propsData = {}, state = {}, methods = {}, computed = {}, can = true } = {}) {
+function component(name, { propsData = {}, state = {}, methods = {}, computed = {}, hooks = {}, can = true } = {}) {
   const definition = load(name).default
   const vm = new Vue({
-    ...definition, mounted: [], propsData,
+    ...definition, mounted: [], ...hooks, propsData,
     data: () => ({ ...definition.data?.(), ...state }),
     methods: { ...definition.methods, ...methods },
     computed: { ...definition.computed, ...computed },
@@ -122,7 +122,7 @@ for (const name of ['pages/factory/laser/index.vue', 'pages/factory/bend/index.v
     return component(name, {
       state: { currentFactoryId: 1, currentUserId: 7, actionOptions: actions, statusOptions: actions, ...options.state },
       methods: { fetchOrdersByFactory: async () => true, ...options.methods },
-      computed: { getOrderByFactories: () => ({ orders: [] }), ...options.computed },
+      computed: { getOrderByFactories: () => ({ orders: [] }), getActionError: () => '', ...options.computed },
       can: options.can ?? true,
     })
   }
@@ -350,4 +350,120 @@ test('in-progress confirmed steps cannot be counted as completed and evidence-re
   assert.equal(isStepCompleted({ status: 'finished', confirmation_required: false }), true)
   assert.equal(isStepCompleted({ status: 'finished', confirmation_required: true }), false)
   assert.equal(isStepCompleted({ status: 'finished', confirmation_required: true, engineer_confirmation_at: '2026-10-09' }), true)
+})
+
+test('operator rejection and deadline dialogs send an optional explanation and keep it after a failed save', () => {
+  const vm = component('components/factory/OrderActionModal.vue', { propsData: { actionOptions: actions, cancelReasons: [] } })
+  vm.$auth = { user: { id: 7, role: { name: 'laser' } } }
+  vm.localSelectedOption = actions[1]; vm.localAdditionalOption = { value: 'other' }; vm.requestNote = '  No capacity this week  '
+  assert.equal(vm.requestMode, true)
+  const sent = []; vm.$emit = (...args) => sent.push(args)
+  vm.confirm(); assert.equal(sent[0][1].request_note, 'No capacity this week')
+  vm.saving = true; vm.saving = false
+  assert.equal(vm.requestNote, '  No capacity this week  ')
+  vm.$auth.user.role.name = 'manager'
+  vm.localSelectedOption = actions[2]
+  assert.equal(vm.requestMode, false)
+  vm.reset(); assert.equal(vm.requestNote, '')
+  vm.$destroy()
+})
+
+test('request decisions belong to the creator, retain reassignment choices on failure, and send the selected replacement', async () => {
+  const step = { id: 15, factory_id: 1, pending_request: { id: 12, type: 'reject', requested_by: 7, reason: 'no_material' } }
+  const vm = component('components/order/TaskChangeRequestPanel.vue', { propsData: { step, creatorId: 5 } })
+  vm.$auth = { user: { id: 5, role: { name: 'engineer' } } }
+  assert.equal(vm.isCreator, true); assert.equal(vm.canWithdraw, false)
+  vm.resolution = 'reassigned'; assert.equal(vm.canApprove, false)
+  vm.operatorId = '9'; vm.decisionNote = '  Take over cutting  '; assert.equal(vm.canApprove, true)
+  let failing = true
+  const requests = [], sent = []; vm.$emit = (...args) => sent.push(args)
+  vm.$axios = { post: async (url, body) => { requests.push({ url, body }); if (failing) throw { response: { data: { errors: { operator_id: ['Choose an available operator'] } } } }; return { data: { order: { id: 10 } } } } }
+  await vm.decide('approve')
+  assert.equal(vm.error, 'Choose an available operator'); assert.equal(vm.operatorId, '9'); assert.equal(sent.length, 0); assert.equal(vm.saving, false)
+  failing = false; await vm.decide('approve')
+  assert.deepEqual(requests[1], { url: '/api/engineers/task-requests/12/decision', body: { decision: 'approve', note: 'Take over cutting', resolution: 'reassigned', operator_id: 9 } })
+  assert.deepEqual(sent[0], ['updated', { id: 10 }]); vm.$destroy()
+  for (const [role, id, creator, withdraw] of [['engineer', 6, false, false], ['laser', 7, false, true], ['manager', 6, false, true], ['admin', 6, false, true]]) {
+    const other = component('components/order/TaskChangeRequestPanel.vue', { propsData: { step, creatorId: 5 } })
+    other.$auth = { user: { id, role: { name: role } } }
+    assert.equal(other.isCreator, creator); assert.equal(other.canWithdraw, withdraw); other.$destroy()
+  }
+})
+
+test('returning completion proof requires a note and preserves that note when the API rejects the action', async () => {
+  const vm = component('components/order/TaskCompletionProof.vue', { propsData: { step: { id: 15, awaiting_engineer_confirmation: true }, creatorId: 5 } })
+  vm.$auth = { user: { id: 5, role: { name: 'engineer' } } }
+  const requests = [], sent = []; let failing = true
+  vm.$emit = (...args) => sent.push(args)
+  vm.$axios = { post: async (url, body) => { requests.push({ url, body }); if (failing) throw { response: { data: { message: 'Try again' } } }; return { data: { order: { id: 10 } } } } }
+  await vm.sendBack(); assert.equal(requests.length, 0)
+  vm.returning = true; vm.returnNote = '  Check hole dimensions  '
+  await vm.sendBack(); assert.equal(vm.error, 'Try again'); assert.equal(vm.returning, true); assert.equal(vm.returnNote, '  Check hole dimensions  ')
+  failing = false; await vm.sendBack()
+  assert.deepEqual(requests[1], { url: '/api/engineers/factory-orders/15/return', body: { note: 'Check hole dimensions' } })
+  assert.equal(vm.returnNote, ''); assert.equal(vm.returning, false); assert.equal(sent.length, 1); vm.$destroy()
+})
+
+function notificationBell() {
+  return component('components/layout/NotificationBell.vue', { hooks: {
+    beforeCreate() { this.$auth = { loggedIn: true, user: { id: 5, role: { name: 'engineer' } } }; this.$store = Vue.observable({ state: { workspace: { company: { id: 10 } } } }) },
+    beforeDestroy() { this.refreshVersion++; clearTimeout(this.toastTimer) },
+  } })
+}
+
+test('switching company discards an in-flight notification response and clears the previous toast', async () => {
+  const vm = notificationBell(), pending = []
+  vm.$axios = { get: () => new Promise(resolve => pending.push(resolve)) }
+  const old = vm.refresh()
+  vm.toast = { view: { text: 'Private company 10' } }
+  vm.$store.state.workspace.company = { id: 20 }
+  await Vue.nextTick()
+  assert.equal(pending.length, 2); assert.equal(vm.toast, null); assert.deepEqual([...vm.items], [])
+  pending[1]({ data: { data: [{ id: 9, message: 'Company 20' }], unread_count: 1 } }); await Vue.nextTick()
+  pending[0]({ data: { data: [{ id: 100, message: 'Private company 10' }], unread_count: 9 } }); await old
+  assert.equal(vm.items[0].id, 9); assert.equal(vm.unread, 1); assert.equal(vm.lastSeenId, 9); vm.$destroy()
+})
+
+test('failed mark-read requests keep unread notifications and a retry updates them', async () => {
+  const vm = notificationBell()
+  vm.items = [{ id: 1, read_at: null }, { id: 2, read_at: null }]; vm.unread = 2
+  vm.$axios = { post: async () => { throw Error('Offline') } }
+  assert.equal(await vm.markAll(), false); assert.equal(vm.unread, 2); assert.ok(vm.items.every(item => !item.read_at)); assert.equal(vm.error, vm.t.markFailed)
+  vm.$axios.post = async () => ({ data: { unread_count: 0 } })
+  assert.equal(await vm.markAll(), true); assert.equal(vm.unread, 0); assert.ok(vm.items.every(item => item.read_at)); assert.equal(vm.error, ''); vm.$destroy()
+})
+
+test('notification messages use the selected language and links respect the current workspace role', () => {
+  const { describeNotification, notificationTarget } = load('utils/task-notifications.js')
+  const item = { order_id: 10, type: 'request.submitted', data: { order_name: '990.01', factory: 'Laser', actor: 'Operator', request_type: 'deadline', proposed_date: '2026-10-20' } }
+  assert.match(describeNotification(item, 'hy').text, /ժամկետը/)
+  assert.match(describeNotification(item, 'ru').text, /перенести срок/)
+  assert.match(describeNotification(item, 'en').text, /move the deadline/)
+  assert.deepEqual(notificationTarget(item, 'engineer'), { path: '/engineer', query: { order: '10' } })
+  assert.deepEqual(notificationTarget(item, 'laser'), { path: '/factory/laser', query: {} })
+})
+
+test('factory action store distinguishes pending requests and retains the server validation error', async () => {
+  const { actions, mutations, state } = load('store/factory/index.js'), values = state()
+  const commit = (name, value) => mutations[name](values, value)
+  const context = { $axios: { put: async () => ({ data: { id: 10, change_request: { id: 12, status: 'pending' } } }) } }
+  const body = { id: 10, factory_id: 1, factory_order: payload }
+  assert.deepEqual(await actions.doneFinishedOrder.call(context, { commit }, body), { changeRequest: { id: 12, status: 'pending' } })
+  context.$axios.put = async () => { throw { response: { data: { errors: { cancel_date: ['Choose a future date'] } } } } }
+  assert.equal(await actions.doneFinishedOrder.call(context, { commit }, body), false); assert.equal(values.actionError, 'Choose a future date')
+})
+
+test('an older notification task read cannot reopen the wrong task or remove unrelated query filters', async () => {
+  const opened = [], replaced = [], pending = []
+  const vm = component('pages/engineer/index.vue', {
+    hooks: { created: [], beforeDestroy: [] }, computed: { orders: () => [] }, methods: { openOrder: order => opened.push(order.id) },
+  })
+  vm.$route = { path: '/engineer', query: { order: '10', filter: 'waiting' } }
+  vm.$store = { state: { workspace: { company: { id: 10 } } } }
+  vm.$router = { replace: value => replaced.push(value) }
+  vm.$axios = { get: () => new Promise(resolve => pending.push(resolve)) }
+  const old = vm.openFromQuery(); vm.$route.query.order = '11'; const next = vm.openFromQuery()
+  pending[1]({ data: { order: { id: 11 } } }); await next
+  pending[0]({ data: { order: { id: 10 } } }); await old
+  assert.deepEqual(opened, [11]); assert.deepEqual(replaced, [{ path: '/engineer', query: { filter: 'waiting' } }]); vm.$destroy()
 })

@@ -334,7 +334,16 @@
             <p v-else class="py-3 text-center text-[10px] text-slate-400">
               Ֆայլեր չկան։
             </p>
-            <TaskCompletionProof :step="order" :creator-id="details.creator_id" />
+            <TaskChangeRequestPanel
+              :step="order"
+              :creator-id="details.creator_id"
+              @updated="$emit('updated', $event)"
+            />
+            <TaskCompletionProof
+              :step="order"
+              :creator-id="details.creator_id"
+              @updated="$emit('updated', $event)"
+            />
           </article>
         </div>
         <div v-else class="p-8 text-center text-xs text-slate-400">
@@ -347,11 +356,12 @@
 
 <script>
 import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
+import TaskChangeRequestPanel from '@/components/order/TaskChangeRequestPanel.vue'
 import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 
 export default {
   name: 'ProductionOrderDetailsPanel',
-  components: { DxfViewerModal, TaskCompletionProof },
+  components: { DxfViewerModal, TaskCompletionProof, TaskChangeRequestPanel },
   props: {
     details: { type: Object, required: true },
     previewUrl: { type: String, default: '' },

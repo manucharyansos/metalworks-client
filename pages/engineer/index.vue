@@ -132,7 +132,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { taskCopy } from '@/utils/task-workflow'
+import { apiErrorMessage, taskCopy } from '@/utils/task-workflow'
 import OrdersToolbar from '~/components/engineer/OrdersToolbar.vue'
 import OrderCard from '~/components/engineer/OrderCard.vue'
 import Pagination from '~/components/ui/Pagination.vue'
@@ -155,6 +155,7 @@ export default {
     confirmationFilter: '',
     refreshTimer: null,
     selectedOrder: null,
+    openQueryVersion: 0,
   }),
   computed: {
     t() {
@@ -187,6 +188,7 @@ export default {
     this.fetchOrders().catch(() => {
       this.$notify?.({ type: 'error', text: 'Չհաջողվեց բեռնել առաջադրանքները' })
     })
+    this.openFromQuery()
   },
   mounted() {
     this.refreshTimer = setInterval(() => {
@@ -195,10 +197,14 @@ export default {
     window.addEventListener('focus', this.refreshOrders)
   },
   beforeDestroy() {
+    this.openQueryVersion++
     clearInterval(this.refreshTimer)
     window.removeEventListener('focus', this.refreshOrders)
   },
   watch: {
+    '$route.query.order'() {
+      this.openFromQuery()
+    },
     orders(rows) {
       if (this.selectedOrder)
         this.selectedOrder =
@@ -207,6 +213,36 @@ export default {
     },
   },
   methods: {
+    // A notification opens its task directly: /engineer?order=<id>
+    async openFromQuery() {
+      const version = ++this.openQueryVersion
+      const id = Number(this.$route.query.order)
+      if (!id) return
+      const companyId = this.$store?.state?.workspace?.company?.id
+      const current = () =>
+        version === this.openQueryVersion &&
+        !this._isDestroyed &&
+        Number(this.$route.query.order) === id &&
+        this.$store?.state?.workspace?.company?.id === companyId
+      let order = (this.orders || []).find((row) => row.id === id)
+      if (!order) {
+        try {
+          const { data } = await this.$axios.get(
+            `/api/engineers/engineer/${id}`
+          )
+          order = data.order
+        } catch (error) {
+          if (current())
+            this.$notify?.({ type: 'error', text: apiErrorMessage(error) })
+        }
+      }
+      if (!current()) return
+      if (order) this.openOrder(order)
+      // The link is single-use, so a refresh does not reopen the task.
+      const { order: _order, ...query } = this.$route.query
+      const result = this.$router.replace({ path: this.$route.path, query })
+      if (result && result.catch) result.catch(() => {})
+    },
     refreshOrders() {
       return this.fetchOrders({ confirmation: this.confirmationFilter })
     },
