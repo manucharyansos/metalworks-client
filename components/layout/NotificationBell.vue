@@ -320,6 +320,19 @@ export default {
       const time = new Date(value).getTime()
       if (Number.isNaN(time)) return ''
       const seconds = Math.round((time - Date.now()) / 1000)
+      if (this.locale === 'hy') {
+        for (const [unit, size] of [
+          ['օր', 86400],
+          ['ժամ', 3600],
+          ['րոպե', 60],
+        ]) {
+          if (Math.abs(seconds) >= size)
+            return `${Math.round(Math.abs(seconds) / size)} ${unit} ${
+              seconds > 0 ? 'հետո' : 'առաջ'
+            }`
+        }
+        return 'Հիմա'
+      }
       try {
         const rtf = new Intl.RelativeTimeFormat(
           this.locale === 'hy' ? 'hy-AM' : this.locale,

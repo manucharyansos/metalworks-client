@@ -441,6 +441,10 @@ test('notification messages use the selected language and links respect the curr
   assert.match(describeNotification(item, 'en').text, /move the deadline/)
   assert.deepEqual(notificationTarget(item, 'engineer'), { path: '/engineer', query: { order: '10' } })
   assert.deepEqual(notificationTarget(item, 'laser'), { path: '/factory/laser', query: {} })
+  const bell = notificationBell()
+  assert.equal(bell.when(new Date().toISOString()), 'Հիմա')
+  assert.equal(bell.when(new Date(Date.now() - 60000).toISOString()), '1 րոպե առաջ')
+  bell.$destroy()
 })
 
 test('factory action store distinguishes pending requests and retains the server validation error', async () => {
