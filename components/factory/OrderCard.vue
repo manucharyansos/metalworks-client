@@ -77,6 +77,26 @@
     </div>
 
     <p
+      v-if="pendingRequest"
+      data-pending-request
+      class="mt-3 rounded-xl bg-amber-50 p-2 text-[11px] font-bold text-amber-800 dark:bg-amber-950/30 dark:text-amber-300"
+    >
+      {{
+        pendingRequest.type === 'reject'
+          ? taskText.requestReject
+          : taskText.requestDeadline
+      }}
+      · {{ taskText.requestWaiting }}
+    </p>
+    <p
+      v-if="factoryOrder && factoryOrder.return_note && !awaitingEngineer"
+      data-return-note
+      class="mt-3 rounded-xl bg-rose-50 p-2 text-[11px] text-rose-800 dark:bg-rose-950/30 dark:text-rose-200"
+    >
+      <span class="block font-bold">{{ taskText.returnedNote }}</span
+      >{{ factoryOrder.return_note }}
+    </p>
+    <p
       v-if="isTakenByOther"
       class="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-rose-500"
     >
@@ -88,6 +108,22 @@
       class="mt-3 text-xs font-semibold text-amber-700 dark:text-amber-300"
     >
       {{ routingText.blocked }}
+    </p>
+    <p
+      v-else-if="awaitingEngineer"
+      data-awaiting-engineer
+      class="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-amber-700 dark:text-amber-300"
+    >
+      <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span
+      >{{ taskText.waiting }}
+    </p>
+    <p
+      v-else-if="isRejected"
+      data-rejected-final
+      class="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-rose-600 dark:text-rose-300"
+    >
+      <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span
+      >{{ taskText.rejectedFinal }}
     </p>
     <p
       v-else-if="isCompleted"
@@ -141,6 +177,7 @@
 
 <script>
 import { routingCopy } from '@/utils/task-routing'
+import { isStepRejected, taskCopy } from '@/utils/task-workflow'
 import {
   isFactoryOrderFinished,
   normalizeFactoryOrderStatus,
@@ -158,6 +195,19 @@ export default {
   computed: {
     routingText() {
       return routingCopy[this.$i18n?.locale] || routingCopy.hy
+    },
+    taskText() {
+      return taskCopy[this.$i18n?.locale] || taskCopy.hy
+    },
+    pendingRequest() {
+      return this.factoryOrder?.pending_request || null
+    },
+    awaitingEngineer() {
+      return Boolean(this.factoryOrder?.awaiting_engineer_confirmation)
+    },
+    // A rejection the engineer agreed to is final for the operator.
+    isRejected() {
+      return isStepRejected(this.factoryOrder)
     },
     factoryOrder() {
       if (!this.order.factory_orders) return null
@@ -191,6 +241,7 @@ export default {
       return (
         this.isTakenByOther ||
         this.isCompleted ||
+        this.isRejected ||
         Boolean(this.factoryOrder?.is_blocked)
       )
     },

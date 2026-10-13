@@ -93,7 +93,7 @@
           </div>
         </div>
         <div class="flex shrink-0 items-center gap-2">
-          <div data-language-switcher class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><language-dropdown /></div>
+          <notification-bell /><div data-language-switcher class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"><language-dropdown /></div>
         </div>
       </header>
       <Nuxt />
@@ -105,11 +105,12 @@
 import WorkspaceIdentity from '@/components/layout/WorkspaceIdentity.vue'
 import CompanySelector from '@/components/layout/CompanySelector.vue'
 import WorkspaceTransition from '@/components/layout/WorkspaceTransition.vue'
+import NotificationBell from '@/components/layout/NotificationBell.vue'
 import WorkspaceSettingsIcon from '@/components/layout/WorkspaceSettingsIcon.vue'
 
 export default {
   name: 'FactoryLayout',
-  components: { WorkspaceIdentity, WorkspaceSettingsIcon, CompanySelector, WorkspaceTransition },
+  components: { WorkspaceIdentity, WorkspaceSettingsIcon, CompanySelector, WorkspaceTransition, NotificationBell },
   data() {
     return { isSidebarOpen: false }
   },

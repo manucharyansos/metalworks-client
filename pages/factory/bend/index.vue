@@ -145,6 +145,7 @@
             @view-file="viewFile"
             @download-file="downloadFile"
             @close-dxf="dxfUrl = ''"
+            @updated="onRequestChanged"
           />
           <div
             v-if="canUpdateDetails"
@@ -174,6 +175,7 @@ import {
   localFactoryDate,
   localFactoryTimestamp,
 } from '@/utils/factory-order-status'
+import { isStepRejected, taskCopy } from '@/utils/task-workflow'
 import OrdersToolbar from '@/components/factory/OrdersToolbar.vue'
 import OrderCard from '@/components/factory/OrderCard.vue'
 import Pagination from '@/components/ui/Pagination.vue'
@@ -196,6 +198,7 @@ export default {
       searchable: '',
       isModal: false,
       isSaving: false,
+      refreshTimer: null,
       initialStatus: null,
       isOpenDetails: false,
       selectedOrder: {},
@@ -230,7 +233,11 @@ export default {
     }
   },
   computed: {
-    ...mapGetters('factory', ['getOrderByFactories']),
+    ...mapGetters('factory', ['getOrderByFactories', 'getActionError']),
+
+    taskText() {
+      return taskCopy[this.$i18n?.locale] || taskCopy.hy
+    },
 
     selectedFactoryOrder() {
       return this.getFactoryOrderForCurrentFactory(this.selectedOrder)
@@ -380,9 +387,38 @@ export default {
 
     if (this.currentFactoryId) {
       await this.fetchOrdersByFactory(this.currentFactoryId)
+      // The engineer answers requests and returns work at any moment.
+      this.refreshTimer = setInterval(this.refreshQuietly, 30000)
     }
   },
+  beforeDestroy() {
+    clearInterval(this.refreshTimer)
+  },
   methods: {
+    async refreshQuietly() {
+      if (document.hidden || this.isSaving || this.isModal || !this.currentFactoryId) return
+      try {
+        await this.fetchOrdersByFactory(this.currentFactoryId)
+        this.rebindDetails()
+      } catch (error) {
+        // Quiet: the next tick tries again.
+      }
+    },
+
+    // Keep the open details panel pointing at the freshly loaded order.
+    rebindDetails() {
+      if (!this.isOpenDetails || !this.details?.id) return
+      const rows = this.getOrderByFactories?.orders || []
+      const fresh = rows.find((row) => row.id === this.details.id)
+      if (fresh) this.details = fresh
+    },
+
+    async onRequestChanged() {
+      if (!this.currentFactoryId) return
+      await this.fetchOrdersByFactory(this.currentFactoryId)
+      this.rebindDetails()
+    },
+
     ...mapActions('factory', [
       'fetchOrdersByFactory',
       'doneFinishedOrder',
@@ -463,8 +499,18 @@ export default {
       if (this.isSaving || !this.$can('factory.order_update')) return
       const fo = this.getFactoryOrderForCurrentFactory(order)
 
+      if (isStepRejected(fo)) {
+        this.$notify({ text: this.taskText.rejectedFinal, type: 'info' })
+        return
+      }
+
       if (isFactoryOrderFinished(fo?.status)) {
-        this.$notify({ text: 'Այս առաջադրանքն արդեն ավարտված է', type: 'info' })
+        this.$notify({
+          text: fo?.awaiting_engineer_confirmation
+            ? this.taskText.waiting
+            : 'Այս առաջադրանքն արդեն ավարտված է',
+          type: 'info',
+        })
         return
       }
 
@@ -511,6 +557,7 @@ export default {
         },
       }
 
+      if (payload.request_note) finalPayload.factory_order.request_note = payload.request_note
       if (payload.evidence_text) finalPayload.factory_order.evidence_text = payload.evidence_text
       if (payload.evidence_photo) finalPayload.evidence_photo = payload.evidence_photo
       this.isSaving = true
@@ -524,11 +571,18 @@ export default {
         this.isSaving = false
       }
       if (success) {
-        this.$notify({ text: 'Հաջողությամբ թարմացվեց', type: 'success' })
+        this.$notify({
+          text: success.changeRequest
+            ? this.taskText.requestSent
+            : 'Հաջողությամբ թարմացվեց',
+          type: 'success',
+        })
         this.closeModal()
       } else {
         this.$notify({
-          text: 'Չհաջողվեց թարմացնել առաջադրանքը։ Փորձեք կրկին։',
+          text:
+            this.getActionError ||
+            'Չհաջողվեց թարմացնել առաջադրանքը։ Փորձեք կրկին։',
           type: 'error',
         })
       }
@@ -562,6 +616,11 @@ export default {
       if (this.isSaving || !this.$can('factory.order_update')) return
       const fo = this.getFactoryOrderForCurrentFactory(order)
       if (!fo || fo.status === newStatus) return
+
+      if (isStepRejected(fo)) {
+        this.$notify({ text: this.taskText.rejectedFinal, type: 'info' })
+        return
+      }
 
       if (isFactoryOrderFinished(fo.status)) {
         this.$notify({
@@ -624,7 +683,7 @@ export default {
         })
       } else {
         this.$notify({
-          text: 'Սխալ տեղի ունեցավ կարգավիճակը թարմացնելիս։',
+          text: this.getActionError || 'Սխալ տեղի ունեցավ կարգավիճակը թարմացնելիս։',
           duration: 3000,
           position: 'top',
           type: 'error',

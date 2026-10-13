@@ -6,6 +6,7 @@
     @view-file="handleViewFile"
     @download-file="handleDownloadFile"
     @close-preview="handleClosePreview"
+    @updated="$emit('updated', $event)"
   />
 </template>
 

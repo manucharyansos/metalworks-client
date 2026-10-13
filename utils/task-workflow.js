@@ -29,6 +29,39 @@ export const taskCopy = {
     completed: 'Ավարտված',
     inProgress: 'Կատարվում է',
     invalidMethod: 'Ընտրեք հավաստման մեթոդը',
+    requestReject: 'Աշխատանքը մերժելու հարցում',
+    requestDeadline: 'Ժամկետը փոխելու հարցում',
+    requestWaiting: 'Սպասում է ստեղծող ինժեների համաձայնությանը',
+    requestAnswerNeeded: 'Հարցում՝ սպասում է ձեր պատասխանին',
+    requestNotice:
+      'Մերժումը և ժամկետի փոփոխությունը կիրառվում են միայն աշխատանքը ստեղծած ինժեների համաձայնությամբ։ Մինչ պատասխանը աշխատանքը մնում է նույն կարգավիճակում։',
+    requestSubmit: 'Ուղարկել հարցումը',
+    requestSent: 'Հարցումն ուղարկվել է ինժեներին',
+    requestNote: 'Մեկնաբանություն (ըստ ցանկության)',
+    requestNotePlaceholder: 'Օրինակ՝ ինչու է դա անհրաժեշտ',
+    requestBy: 'Հարցրել է',
+    requestReason: 'Պատճառ',
+    requestCurrentDeadline: 'Ընթացիկ ժամկետ',
+    requestNewDeadline: 'Առաջարկվող ժամկետ',
+    withdraw: 'Հետ վերցնել հարցումը',
+    withdrawn: 'Հարցումը հետ է վերցվել',
+    approve: 'Համաձայնել',
+    decline: 'Չհամաձայնել',
+    decisionNote: 'Մեկնաբանություն օպերատորին (ըստ ցանկության)',
+    resolution: 'Ինչ անել աշխատանքի հետ',
+    resolutionCancel: 'Մերժել այս արտադրամասի աշխատանքը',
+    resolutionReassign: 'Փոխանցել մեկ այլ կատարողի',
+    chooseOperator: 'Ընտրեք կատարողին',
+    noOtherOperators: 'Այս արտադրամասում այլ կատարող չկա',
+    approvedToast: 'Համաձայնությունը գրանցվեց',
+    declinedToast: 'Հարցումը մերժվեց',
+    rejectedFinal: 'Մերժված է ինժեների համաձայնությամբ',
+    returnTitle: 'Վերադարձնել վերանայման',
+    returnNote: 'Ինչը պետք է շտկվի',
+    returnSend: 'Վերադարձնել օպերատորին',
+    returnedToast: 'Աշխատանքը վերադարձվեց օպերատորին',
+    returnedNote: 'Ինժեների նշումը',
+    back: 'Հետ',
   },
   ru: {
     required: 'Требуется подтверждение инженера',
@@ -62,6 +95,39 @@ export const taskCopy = {
     completed: 'Завершено',
     inProgress: 'В работе',
     invalidMethod: 'Выберите способ подтверждения',
+    requestReject: 'Запрос на отказ от работы',
+    requestDeadline: 'Запрос на перенос срока',
+    requestWaiting: 'Ожидает согласия инженера, создавшего задание',
+    requestAnswerNeeded: 'Запрос ждёт вашего ответа',
+    requestNotice:
+      'Отказ и перенос срока применяются только с согласия инженера, создавшего задание. До ответа работа остаётся в прежнем статусе.',
+    requestSubmit: 'Отправить запрос',
+    requestSent: 'Запрос отправлен инженеру',
+    requestNote: 'Комментарий (по желанию)',
+    requestNotePlaceholder: 'Например, почему это нужно',
+    requestBy: 'Запросил',
+    requestReason: 'Причина',
+    requestCurrentDeadline: 'Текущий срок',
+    requestNewDeadline: 'Предложенный срок',
+    withdraw: 'Отозвать запрос',
+    withdrawn: 'Запрос отозван',
+    approve: 'Согласиться',
+    decline: 'Отклонить',
+    decisionNote: 'Комментарий оператору (по желанию)',
+    resolution: 'Что сделать с работой',
+    resolutionCancel: 'Отказаться от работы этого цеха',
+    resolutionReassign: 'Передать другому исполнителю',
+    chooseOperator: 'Выберите исполнителя',
+    noOtherOperators: 'В этом цехе нет другого исполнителя',
+    approvedToast: 'Согласие записано',
+    declinedToast: 'Запрос отклонён',
+    rejectedFinal: 'Отказ согласован с инженером',
+    returnTitle: 'Вернуть на доработку',
+    returnNote: 'Что нужно исправить',
+    returnSend: 'Вернуть оператору',
+    returnedToast: 'Работа возвращена оператору',
+    returnedNote: 'Замечание инженера',
+    back: 'Назад',
   },
   en: {
     required: 'Engineer confirmation required',
@@ -94,6 +160,39 @@ export const taskCopy = {
     completed: 'Completed',
     inProgress: 'In progress',
     invalidMethod: 'Choose an evidence method',
+    requestReject: 'Request to reject the job',
+    requestDeadline: 'Request to move the deadline',
+    requestWaiting: 'Waiting for the creating engineer’s consent',
+    requestAnswerNeeded: 'A request is waiting for your answer',
+    requestNotice:
+      'Rejecting a job or moving its deadline takes effect only with the consent of the engineer who created the task. Until they answer, the job keeps its current status.',
+    requestSubmit: 'Send request',
+    requestSent: 'Request sent to the engineer',
+    requestNote: 'Comment (optional)',
+    requestNotePlaceholder: 'For example, why it is needed',
+    requestBy: 'Requested by',
+    requestReason: 'Reason',
+    requestCurrentDeadline: 'Current deadline',
+    requestNewDeadline: 'Proposed deadline',
+    withdraw: 'Withdraw request',
+    withdrawn: 'Request withdrawn',
+    approve: 'Approve',
+    decline: 'Decline',
+    decisionNote: 'Comment to the operator (optional)',
+    resolution: 'What to do with the job',
+    resolutionCancel: 'Reject this workshop’s job',
+    resolutionReassign: 'Hand over to another operator',
+    chooseOperator: 'Choose an operator',
+    noOtherOperators: 'No other operator in this workshop',
+    approvedToast: 'Consent recorded',
+    declinedToast: 'Request declined',
+    rejectedFinal: 'Rejected with the engineer’s consent',
+    returnTitle: 'Send back for rework',
+    returnNote: 'What needs fixing',
+    returnSend: 'Send back to the operator',
+    returnedToast: 'Job sent back to the operator',
+    returnedNote: 'Engineer’s note',
+    back: 'Back',
   },
 }
 
@@ -127,5 +226,27 @@ export function isStepCompleted(step) {
     Boolean(step?.completed_at) ||
     (['finished', 'completed', 'done'].includes(step?.status) &&
       (!step.confirmation_required || Boolean(step.engineer_confirmation_at)))
+  )
+}
+
+// A workshop job that was rejected with the engineer's consent is final for the operator.
+export function isStepRejected(step) {
+  return ['canceled', 'cancelled'].includes(step?.status)
+}
+
+export function requestIsPending(step) {
+  return Boolean(step?.pending_request)
+}
+
+// The server sends the first validation message (or a plain message) for any failure.
+export function apiErrorMessage(error, fallback = '') {
+  const data = error?.response?.data
+  return (
+    Object.values(data?.errors || {}).flat()[0] ||
+    data?.message ||
+    data?.error ||
+    fallback ||
+    error?.message ||
+    ''
   )
 }

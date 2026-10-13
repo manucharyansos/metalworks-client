@@ -272,6 +272,7 @@
           @view-file="viewFile"
           @download-file="downloadFile"
           @close-dxf="dxfUrl = ''"
+          @updated="loadOrders"
         />
       </div>
     </div>

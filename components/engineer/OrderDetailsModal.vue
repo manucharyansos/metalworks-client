@@ -142,6 +142,11 @@
                 </div>
               </div>
 
+              <TaskChangeRequestPanel
+                :step="fo"
+                :creator-id="order.creator_id"
+                @updated="$emit('updated', $event)"
+              />
               <TaskCompletionProof
                 :step="fo"
                 :creator-id="order.creator_id"
@@ -194,13 +199,19 @@
 
 <script>
 import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
+import TaskChangeRequestPanel from '@/components/order/TaskChangeRequestPanel.vue'
 import TaskRoutingPanel from '@/components/order/TaskRoutingPanel.vue'
 import { isStepCompleted, taskCopy } from '@/utils/task-workflow'
 import FileGallery from '~/components/engineer/FileGallery.vue'
 
 export default {
   name: 'OrderDetailsModal',
-  components: { FileGallery, TaskCompletionProof, TaskRoutingPanel },
+  components: {
+    FileGallery,
+    TaskCompletionProof,
+    TaskChangeRequestPanel,
+    TaskRoutingPanel,
+  },
   props: {
     visible: { type: Boolean, default: false },
     order: { type: Object, default: null },
