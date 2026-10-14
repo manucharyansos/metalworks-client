@@ -374,6 +374,41 @@
             :factories="selectedFactories"
             :disabled="isLoading"
           />
+          <TaskOperatorPicker
+            v-model="factoryOperators"
+            :factories="selectedFactories"
+            :workload="workload"
+            :error="workloadError"
+            :loading="workloadLoading"
+            :disabled="isLoading"
+            @refresh="loadWorkload"
+          />
+          <div
+            v-if="pmpFilesReady"
+            class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-800/50"
+            data-files-mode
+          >
+            <template v-if="usesSelectedFiles">
+              <span>{{
+                $t('order_create.files_mode_selected', {
+                  count: selectedFiles.length,
+                })
+              }}</span>
+              <button
+                type="button"
+                class="font-semibold underline"
+                data-use-whole-subgroup
+                @click="useWholeSubgroup"
+              >
+                {{ $t('order_create.use_whole_subgroup') }}
+              </button>
+            </template>
+            <span v-else>{{
+              $t('order_create.files_mode_whole', {
+                count: subgroupFiles.length,
+              })
+            }}</span>
+          </div>
           <p class="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
             {{ $t('order_create.files_hint') }}
           </p>
@@ -392,7 +427,7 @@
           :remote-number-id="remote_number_id"
           class="order-files"
           @files-selected="handleFilesSelected"
-          @back="isFiles = false"
+          @back="backToDetails"
         />
         <TaskCreationOptions
           :confirmation-required.sync="confirmationRequired"
@@ -407,58 +442,22 @@
           :factories="selectedFactories"
           :disabled="isLoading"
         />
-        <div class="mt-6 border-t border-slate-200 pt-5 dark:border-slate-800">
-          <h3 class="mb-4 text-sm font-semibold">
-            {{ $t('order_create.factory_operators') }}
-          </h3>
-          <p class="mb-3 text-xs leading-5 text-slate-500 dark:text-slate-400">
-            {{ routingText.creationHelp }}
-          </p>
-          <div
-            v-if="workloadError"
-            class="mb-3 text-sm text-red-600"
-            role="alert"
-          >
-            {{ workloadError }}
-            <button type="button" class="ml-2 underline" @click="loadWorkload">
-              {{ routingText.refresh }}
-            </button>
-          </div>
-          <div
-            v-for="factory in selectedFactories"
-            :key="factory.id"
-            class="mb-3 grid items-center gap-2 sm:grid-cols-[180px_1fr]"
-          >
-            <label
-              :for="'factory-operator-' + factory.id"
-              class="text-sm text-slate-600 dark:text-slate-300"
-              >{{ factory.name }}</label
-            >
-            <select
-              :id="'factory-operator-' + factory.id"
-              v-model="factoryOperators[factory.id]"
-              class="order-input"
-            >
-              <option :value="null">
-                {{ routingText.unassigned }}
-              </option>
-              <option
-                v-for="user in getFactoryOperatorsFor(factory)"
-                :key="user.id"
-                :value="user.id"
-              >
-                {{ workloadLabel(user) }}
-              </option>
-            </select>
-          </div>
-        </div>
+        <TaskOperatorPicker
+          v-model="factoryOperators"
+          :factories="selectedFactories"
+          :workload="workload"
+          :error="workloadError"
+          :loading="workloadLoading"
+          :disabled="isLoading"
+          @refresh="loadWorkload"
+        />
         <div
           class="mt-6 flex flex-wrap justify-end gap-3 border-t border-slate-200 pt-5 dark:border-slate-800"
         >
           <button
             type="button"
             class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-            @click="isFiles = false"
+            @click="backToDetails"
           >
             {{ $t('order_create.back') }}
           </button>
@@ -498,13 +497,14 @@
 import { mapActions, mapGetters } from 'vuex'
 import TaskCreationOptions from '@/components/engineer/TaskCreationOptions.vue'
 import TaskWorkshopOptions from '@/components/engineer/TaskWorkshopOptions.vue'
+import TaskOperatorPicker from '@/components/engineer/TaskOperatorPicker.vue'
 import {
   confirmationMethods,
   isReferenceFactory,
   taskCopy,
   workshopSettingsPayload,
 } from '@/utils/task-workflow'
-import { routingCopy, operatorWorkloadLabel } from '@/utils/task-routing'
+import { routingCopy, workshopOperators } from '@/utils/task-routing'
 import InputWithLabels from '~/components/form/InputWithIcon.vue'
 import SelectWithLabel from '~/components/form/SelectWithLabel.vue'
 import CreateOrderForm from '~/components/modals/create/CreateOrderForm.vue'
@@ -516,6 +516,7 @@ export default {
   components: {
     TaskCreationOptions,
     TaskWorkshopOptions,
+    TaskOperatorPicker,
     PermissionDenied,
     InputWithLabels,
     SelectWithLabel,
@@ -553,6 +554,8 @@ export default {
       factoryOperators: {},
       workload: null,
       workloadError: '',
+      workloadLoading: false,
+      workloadRequestId: 0,
       confirmationRequired: false,
       confirmationMethod: '',
       referenceVisibility: {},
@@ -560,9 +563,6 @@ export default {
     }
   },
   computed: {
-    routingText() {
-      return routingCopy[this.$i18n?.locale] || routingCopy.hy
-    },
     ...mapGetters('factory', ['getFactory']),
     ...mapGetters('clients', ['allClients']),
     ...mapGetters('pmp', ['getPmpes', 'getPmp']),
@@ -617,6 +617,21 @@ export default {
       if (this.files_existing && this.selectedFiles.length === 0)
         return 'order_files.select_files'
       return null
+    },
+
+    // Every workshop this subgroup could send work to, whatever files are chosen.
+    subgroupFactories() {
+      const ids = new Set(
+        this.subgroupFiles.map((file) => Number(file.factory_id))
+      )
+      return (Array.isArray(this.getFactory) ? this.getFactory : [])
+        .filter((f) => ids.has(Number(f.id)) && !isReferenceFactory(f))
+        .map((f) => ({ ...f, operators: f.operators || [] }))
+    },
+
+    // True when the engineer chose individual files and still keeps that choice.
+    usesSelectedFiles() {
+      return this.files_existing && this.validSelectedFiles
     },
 
     effectiveFiles() {
@@ -708,14 +723,17 @@ export default {
       }
     },
     selectedFactories(newFactories) {
-      const allowedIds = new Set(newFactories.map((factory) => factory.id))
-
       newFactories.forEach((factory) => {
         if (!(factory.id in this.factoryOperators)) {
           this.$set(this.factoryOperators, factory.id, null)
         }
       })
-
+    },
+    // Choices follow the subgroup, not the momentary file selection: opening the
+    // file picker (nothing selected yet) or deselecting a file must not erase
+    // them. Only the workshops the task really uses are sent on creation.
+    subgroupFactories(allFactories) {
+      const allowedIds = new Set(allFactories.map((factory) => Number(factory.id)))
       Object.keys(this.factoryOperators).forEach((factoryId) => {
         if (!allowedIds.has(Number(factoryId))) {
           this.$delete(this.factoryOperators, factoryId)
@@ -827,25 +845,63 @@ export default {
       })
     },
 
-    getFactoryOperatorsFor(factory) {
-      return (
-        this.workload?.factories.find(
-          (item) => Number(item.id) === Number(factory.id)
-        )?.operators ||
-        factory.operators ||
-        []
-      )
-    },
-    workloadLabel(operator) {
-      return operatorWorkloadLabel(operator, this.$i18n.locale)
-    },
+    // Live counts are only a hint: the page can stay open for minutes, so they
+    // are reloaded on demand and when the files step opens. A late answer never
+    // replaces a newer one, and a chosen operator who disappeared is dropped.
     async loadWorkload() {
+      const requestId = ++this.workloadRequestId
       this.workloadError = ''
+      this.workloadLoading = true
       try {
-        this.workload = await this.$axios.$get('/api/task-workload')
+        const workload = await this.$axios.$get('/api/task-workload')
+        if (requestId !== this.workloadRequestId) return
+        this.workload = workload
+        this.pruneUnavailableOperators()
       } catch (error) {
-        this.workloadError = this.routingText.loadFailed
+        if (requestId !== this.workloadRequestId) return
+        this.workloadError = (
+          routingCopy[this.$i18n?.locale] || routingCopy.hy
+        ).loadFailed
+      } finally {
+        if (requestId === this.workloadRequestId) this.workloadLoading = false
       }
+    },
+
+    pruneUnavailableOperators() {
+      const next = { ...this.factoryOperators }
+      let changed = false
+      this.subgroupFactories.forEach((factory) => {
+        const chosen = next[factory.id]
+        if (
+          chosen != null &&
+          !workshopOperators(factory, this.workload).some(
+            (operator) => Number(operator.id) === Number(chosen)
+          )
+        ) {
+          next[factory.id] = null
+          changed = true
+        }
+      })
+      if (changed) this.factoryOperators = next
+    },
+
+    // Leaving the file picker must not leave "chosen files" mode switched on
+    // without a valid choice: the Create button would stay disabled and mean
+    // something else than it says.
+    backToDetails() {
+      if (!this.validSelectedFiles) {
+        this.files_existing = false
+        this.selectedFiles = []
+        this.fileQuantities = {}
+      }
+      this.isFiles = false
+    },
+
+    useWholeSubgroup() {
+      this.files_existing = false
+      this.selectedFiles = []
+      this.fileQuantities = {}
+      this.referenceVisibility = {}
     },
 
     async pmpFiles() {
@@ -912,8 +968,11 @@ export default {
         this.isLoading = false
         return
       }
+      const inTask = new Set(
+        this.selectedFactories.map((factory) => Number(factory.id))
+      )
       const factoryOperatorsArray = Object.entries(this.factoryOperators)
-        .filter(([factoryId, userId]) => !!userId)
+        .filter(([factoryId, userId]) => !!userId && inTask.has(Number(factoryId)))
         .map(([factoryId, userId]) => ({
           factory_id: Number(factoryId),
           user_id: userId,
@@ -1038,6 +1097,7 @@ export default {
       if (!this.validateOrderFiles(false)) return
       this.files_existing = true
       this.isFiles = true
+      this.loadWorkload()
     },
 
     validateOrderFiles(requireSelection = this.files_existing) {

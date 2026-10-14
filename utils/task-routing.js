@@ -42,6 +42,14 @@ export const routingCopy = {
     noResults: 'Համապատասխան աշխատակից չկա։',
     creationHelp:
       'Կարող եք թողնել չնշանակված և հետո կատարող ընտրել առաջադրանքի մանրամասներից։',
+    autoBalance: 'Ընտրել ամենաքիչ զբաղվածներին',
+    clearChoices: 'Մաքրել ընտրությունը',
+    recommended: 'առաջարկվում է',
+    balanceHelp:
+      'Ամեն արտադրամասում կընտրվի ամենաքիչ բաց աշխատանք ունեցող կատարողը։',
+    noOperatorsHere:
+      'Այս արտադրամասում կատարող չկա։ Աշխատանքը կմնա չնշանակված։',
+    poolJobs: 'Չնշանակված բաց աշխատանքներ',
   },
   ru: {
     workload: 'Загрузка операторов',
@@ -87,6 +95,14 @@ export const routingCopy = {
     noResults: 'Подходящие сотрудники не найдены.',
     creationHelp:
       'Можно оставить без исполнителя и назначить его позже в деталях задания.',
+    autoBalance: 'Выбрать наименее загруженных',
+    clearChoices: 'Сбросить выбор',
+    recommended: 'рекомендуется',
+    balanceHelp:
+      'В каждом цехе будет выбран исполнитель с наименьшим числом открытых работ.',
+    noOperatorsHere:
+      'В этом цехе нет исполнителей. Работа останется без исполнителя.',
+    poolJobs: 'Открытых работ без исполнителя',
   },
   en: {
     workload: 'Operator workload',
@@ -131,7 +147,54 @@ export const routingCopy = {
     noResults: 'No matching operators.',
     creationHelp:
       'You can leave the job unassigned and choose an operator later in the task details.',
+    autoBalance: 'Pick the least busy',
+    clearChoices: 'Clear choices',
+    recommended: 'recommended',
+    balanceHelp:
+      'In each workshop the operator with the fewest open jobs is chosen.',
+    noOperatorsHere:
+      'This workshop has no operators. The job will stay unassigned.',
+    poolJobs: 'Open jobs without an operator',
   },
+}
+
+const loadRank = (operator) => [
+  Number(operator?.active_tasks) || 0,
+  Number(operator?.overdue_tasks) || 0,
+  Number(operator?.urgent_tasks) || 0,
+]
+
+// The operator with the lightest load: fewest open jobs, then fewest overdue,
+// then fewest urgent ones, then by name so the answer never flickers.
+export function leastBusyOperator(operators = []) {
+  return (
+    [...(operators || [])].sort((a, b) => {
+      const left = loadRank(a)
+      const right = loadRank(b)
+      for (let i = 0; i < left.length; i += 1)
+        if (left[i] !== right[i]) return left[i] - right[i]
+      return String(a?.name || '').localeCompare(String(b?.name || ''))
+    })[0] || null
+  )
+}
+
+// The operators of one workshop, with the live counts when they are loaded.
+export function workshopOperators(factory, workload) {
+  return (
+    workload?.factories?.find((item) => Number(item.id) === Number(factory?.id))
+      ?.operators ||
+    factory?.operators ||
+    []
+  )
+}
+
+// { [factoryId]: operatorId | null }: the least busy operator of every workshop.
+export function balancedAssignments(factories = [], workload = null) {
+  const result = {}
+  for (const factory of factories || [])
+    result[factory.id] =
+      leastBusyOperator(workshopOperators(factory, workload))?.id ?? null
+  return result
 }
 
 export function canManageTask(user, task, allowed) {

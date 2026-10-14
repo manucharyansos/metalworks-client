@@ -34,6 +34,7 @@ async function component(file, render = false) {
   const options = (await import(moduleUrl(source))).default
   if (options.components?.TaskCreationOptions) options.components.TaskCreationOptions = await component('components/engineer/TaskCreationOptions.vue', true)
   if (options.components?.TaskWorkshopOptions) options.components.TaskWorkshopOptions = await component('components/engineer/TaskWorkshopOptions.vue', true)
+  if (options.components?.TaskOperatorPicker) options.components.TaskOperatorPicker = await component('components/engineer/TaskOperatorPicker.vue', true)
   if (options.components?.WorkspaceLogo) options.components.WorkspaceLogo = await component('components/auth/WorkspaceLogo.vue', true)
   return render ? { ...options, ...compiler.compileToFunctions(parsed.template.content) } : options
 }
