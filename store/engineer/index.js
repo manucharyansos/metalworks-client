@@ -12,8 +12,12 @@ export const state = () => ({
     prev_page_url: null,
   },
   filters: {
-    search: '', confirmation: '',
+    search: '',
+    confirmation: '',
+    stage: '',
   },
+  stageCounts: { created: 0, accepted: 0, in_progress: 0, completed: 0 },
+  requestVersion: 0,
   loading: false,
   error: null,
   laserFiles: [],
@@ -25,11 +29,27 @@ export const getters = {
   getOrder: (s) => s.order,
   getPagination: (s) => s.pagination,
   getFilters: (s) => s.filters,
+  getStageCounts: (s) => s.stageCounts,
   isLoading: (s) => s.loading,
   getError: (s) => s.error,
 }
 
 export const mutations = {
+  START_REQUEST(state) {
+    state.requestVersion++
+  },
+  SET_STAGE(state, value) {
+    state.filters.stage = value || ''
+  },
+  SET_STAGE_COUNTS(state, value) {
+    state.stageCounts = {
+      created: 0,
+      accepted: 0,
+      in_progress: 0,
+      completed: 0,
+      ...(value || {}),
+    }
+  },
   SET_LOADING(state, v) {
     state.loading = !!v
   },
@@ -47,7 +67,9 @@ export const mutations = {
     state.order = order || null
   },
 
-  SET_CONFIRMATION(state, value) { state.filters.confirmation = value || '' },
+  SET_CONFIRMATION(state, value) {
+    state.filters.confirmation = value || ''
+  },
   SET_SEARCH(state, q) {
     state.filters.search = q || ''
   },
@@ -64,8 +86,18 @@ export const mutations = {
 }
 
 export const actions = {
-  async fetchOrders({ commit, state }, { page, perPage, search, confirmation } = {}) {
+  async fetchOrders(
+    { commit, state, rootState },
+    { page, perPage, search, confirmation, stage } = {}
+  ) {
     if (confirmation !== undefined) commit('SET_CONFIRMATION', confirmation)
+    if (stage !== undefined) commit('SET_STAGE', stage)
+    commit('START_REQUEST')
+    const version = state.requestVersion
+    const companyId = rootState?.workspace?.company?.id
+    const current = () =>
+      version === state.requestVersion &&
+      companyId === rootState?.workspace?.company?.id
     commit('SET_LOADING', true)
     commit('SET_ERROR', null)
     try {
@@ -75,20 +107,23 @@ export const actions = {
       }
       const q = typeof search === 'string' ? search : state.filters.search
       if (q) params.search = q
-      if (state.filters.confirmation) params.confirmation = state.filters.confirmation
+      if (state.filters.confirmation)
+        params.confirmation = state.filters.confirmation
+      if (state.filters.stage) params.stage = state.filters.stage
 
       const { data } = await this.$axios.get('/api/engineers/engineer', {
         params,
       })
+      if (!current()) return false
       commit('SET_ORDERS', data.orders)
       commit('SET_PAGINATION', data.pagination)
+      commit('SET_STAGE_COUNTS', data.stage_counts)
       return true
     } catch (e) {
-      console.error(e)
-      commit('SET_ERROR', 'Չհաջողվեց բեռնել առաջադրանքները')
+      if (current()) commit('SET_ERROR', 'Չհաջողվեց բեռնել առաջադրանքները')
       return false
     } finally {
-      commit('SET_LOADING', false)
+      if (current()) commit('SET_LOADING', false)
     }
   },
 
@@ -108,15 +143,8 @@ export const actions = {
   },
 
   async createNewOrder({ commit }, payload) {
-    try {
-      const { data } = await this.$axios.post(
-        '/api/engineers/engineer',
-        payload
-      )
-      commit('ADD_ORDER', data.order)
-      return true
-    } catch (e) {
-      throw e
-    }
+    const { data } = await this.$axios.post('/api/engineers/engineer', payload)
+    commit('ADD_ORDER', data.order)
+    return true
   },
 }

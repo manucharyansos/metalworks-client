@@ -15,6 +15,7 @@ export const notificationCopy = {
     supplement: ' Լրացրեք հավաստումը և կրկին ուղարկեք ավարտը։',
     statuses: {
       pending: 'Սպասում',
+      accepted: 'Ընդունված',
       confirmed: 'Կատարվում է',
       finished: 'Ավարտված',
       completed: 'Ավարտված',
@@ -44,6 +45,8 @@ export const notificationCopy = {
         '«{factory}» արտադրամաս · {actor}՝ խնդրում է մերժել աշխատանքը ({reason})։ Սպասում է ձեր համաձայնությանը',
       'request.submitted.deadline':
         '«{factory}» արտադրամաս · {actor}՝ խնդրում է ժամկետը փոխել մինչև {date}։ Սպասում է ձեր համաձայնությանը',
+      'request.submitted.reopen':
+        '«{factory}» արտադրամաս · {actor}՝ խնդրում է վերաբացել աշխատանքը՝ {requestedStatus}։ Սպասում է ձեր համաձայնությանը',
       'request.withdrawn':
         '«{factory}» արտադրամաս · {actor}՝ հետ է վերցրել իր հարցումը',
       'request.approved': 'Ինժեները համաձայնել է ձեր հարցմանը{note}',
@@ -66,6 +69,7 @@ export const notificationCopy = {
     supplement: ' Дополните подтверждение и отправьте завершение ещё раз.',
     statuses: {
       pending: 'Ожидание',
+      accepted: 'Принято',
       confirmed: 'Выполняется',
       finished: 'Завершено',
       completed: 'Завершено',
@@ -95,6 +99,8 @@ export const notificationCopy = {
         'Цех «{factory}» · {actor} просит отказаться от работы ({reason}). Ожидает вашего согласия',
       'request.submitted.deadline':
         'Цех «{factory}» · {actor} просит перенести срок до {date}. Ожидает вашего согласия',
+      'request.submitted.reopen':
+        'Цех «{factory}» · {actor} просит возобновить работу: {requestedStatus}. Ожидает вашего согласия',
       'request.withdrawn': 'Цех «{factory}» · {actor} отозвал(а) свой запрос',
       'request.approved': 'Инженер согласился с вашим запросом{note}',
       'request.declined': 'Инженер отклонил ваш запрос{note}',
@@ -115,6 +121,7 @@ export const notificationCopy = {
     supplement: ' Add the missing evidence and submit completion again.',
     statuses: {
       pending: 'Waiting',
+      accepted: 'Accepted',
       confirmed: 'In progress',
       finished: 'Finished',
       completed: 'Finished',
@@ -144,6 +151,8 @@ export const notificationCopy = {
         '“{factory}” · {actor} asks to reject the job ({reason}). Waiting for your consent',
       'request.submitted.deadline':
         '“{factory}” · {actor} asks to move the deadline to {date}. Waiting for your consent',
+      'request.submitted.reopen':
+        '“{factory}” · {actor} asks to reopen the job as {requestedStatus}. Waiting for your consent',
       'request.withdrawn': '“{factory}” · {actor} withdrew their request',
       'request.approved': 'The engineer approved your request{note}',
       'request.declined': 'The engineer declined your request{note}',
@@ -176,7 +185,9 @@ export function describeNotification(notification, locale = 'hy') {
   const key =
     notification?.type === 'request.submitted'
       ? `request.submitted.${
-          data.request_type === 'deadline' ? 'deadline' : 'reject'
+          ['deadline', 'reopen'].includes(data.request_type)
+            ? data.request_type
+            : 'reject'
         }`
       : notification?.type
   const template = t.types[key]
@@ -192,6 +203,7 @@ export function describeNotification(notification, locale = 'hy') {
       factory: data.factory || '',
       from: status(data.from_status, data.from_label),
       to: status(data.to_status, data.to_label),
+      requestedStatus: status(data.requested_status),
       reason: t.reasons[data.reason] || data.reason || '',
       date: formatDate(data.proposed_date, locale),
       note,

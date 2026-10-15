@@ -328,7 +328,7 @@ export function isStepCompleted(step) {
   )
 }
 
-// A workshop job that was rejected with the engineer's consent is final for the operator.
+// Rejected work stays rejected until the creating engineer approves reopening it.
 export function isStepRejected(step) {
   return ['canceled', 'cancelled'].includes(step?.status)
 }

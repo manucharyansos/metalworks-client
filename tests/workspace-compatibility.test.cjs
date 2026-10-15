@@ -7,6 +7,7 @@ const compiler = require('vue-template-compiler')
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const taskUrl = moduleUrl(read('utils/task-workflow.js'))
+const taskBoardUrl = moduleUrl(read('utils/task-board.js').replace("'@/utils/task-workflow'", JSON.stringify(taskUrl)))
 const taskRoutingUrl = moduleUrl(read('utils/task-routing.js'))
 const taskNotificationsUrl = moduleUrl(read('utils/task-notifications.js').replace("'@/utils/task-workflow'", JSON.stringify(taskUrl)))
 const routeUrl = moduleUrl(read('utils/workspace-route.js'))
@@ -26,6 +27,7 @@ async function component(file, render = false) {
     if (specifier === '~/utils/membership-copy') return `import ${names} from '${membershipUrl}'`
     if (specifier === '~/static/logo.png') return `const ${names} = '/work/_nuxt/img/metalworks-test.png'`
     if (specifier === '@/utils/task-workflow') return `import ${names} from '${taskUrl}'`
+    if (specifier === '@/utils/task-board') return `import ${names} from '${taskBoardUrl}'`
     if (specifier === '@/utils/task-routing') return `import ${names} from '${taskRoutingUrl}'`
     if (specifier === '@/utils/task-notifications') return `import ${names} from '${taskNotificationsUrl}'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'

@@ -87,8 +87,8 @@
               ref="actionSelect"
               v-model="localSelectedOption"
               :name="`factory-order-action-${_uid}`"
-              :data-value="actionOptions"
-              :disabled="saving || !actionOptions.length"
+              :data-value="availableActions"
+              :disabled="saving || !availableActions.length"
               :placeholder="$t('factory_order_actions.choose_action')"
             />
           </div>
@@ -205,7 +205,7 @@
             class="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/20"
           >
             <p class="text-sm text-amber-900 dark:text-amber-200">
-              {{ t.requestNotice }}
+              {{ reopenMode ? boardText.reopenHelp : t.requestNotice }}
             </p>
             <label
               class="block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -272,7 +272,12 @@
 import SelectWithLabel from '@/components/factory/SelectWithLabel.vue'
 import InputWithLabelIcon from '@/components/form/InputWithLabelIcon.vue'
 import { localFactoryTimestamp } from '@/utils/factory-order-status'
-import { confirmationMethods, taskCopy } from '@/utils/task-workflow'
+import {
+  confirmationMethods,
+  isStepRejected,
+  taskCopy,
+} from '@/utils/task-workflow'
+import { boardCopy } from '@/utils/task-board'
 
 export default {
   components: { SelectWithLabel, InputWithLabelIcon },
@@ -302,14 +307,33 @@ export default {
     }
   },
   computed: {
+    boardText() {
+      return boardCopy[this.$i18n?.locale] || boardCopy.hy
+    },
+    reopenMode() {
+      return (
+        isStepRejected(this.factoryOrder) &&
+        !['admin', 'manager'].includes(this.$auth?.user?.role?.name)
+      )
+    },
+    availableActions() {
+      if (!this.reopenMode) return this.actionOptions
+      return [
+        { value: 'pending', label: this.boardText.created },
+        { value: 'accepted', label: this.boardText.accepted },
+        { value: 'confirmed', label: this.boardText.in_progress },
+      ]
+    },
     // Operators only ask: a rejection or a new deadline needs the creating
     // engineer's consent. Admin and manager still apply changes directly.
     requestMode() {
       const role = this.$auth?.user?.role?.name
       return (
-        ['canceled', 'date_changed'].includes(
-          this.localSelectedOption?.value
-        ) && !['admin', 'manager'].includes(role)
+        (this.reopenMode ||
+          ['canceled', 'date_changed'].includes(
+            this.localSelectedOption?.value
+          )) &&
+        !['admin', 'manager'].includes(role)
       )
     },
     t() {
@@ -332,7 +356,7 @@ export default {
       const status = this.localSelectedOption?.value
       if (
         this.saving ||
-        !this.actionOptions.some((option) => option.value === status)
+        !this.availableActions.some((option) => option.value === status)
       )
         return false
       if (status === 'canceled') return !!this.localAdditionalOption?.value
@@ -365,7 +389,7 @@ export default {
       this.reset()
       if (val) {
         this.localSelectedOption =
-          this.actionOptions.find(
+          this.availableActions.find(
             (option) => option.value === this.initialStatus
           ) || null
         this.localAdditionalOption =
@@ -430,7 +454,8 @@ export default {
       }
       if (
         this.requestNote.trim() &&
-        ['canceled', 'date_changed'].includes(payload.status)
+        (this.reopenMode ||
+          ['canceled', 'date_changed'].includes(payload.status))
       )
         payload.request_note = this.requestNote.trim()
       if (

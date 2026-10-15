@@ -24,6 +24,16 @@
         </dt>
         <dd class="font-semibold">{{ reasonLabel }}</dd>
       </div>
+      <div
+        v-else-if="req.type === 'reopen'"
+        class="flex gap-2"
+        data-reopen-target
+      >
+        <dt class="shrink-0 text-slate-500 dark:text-slate-400">
+          {{ boardText.reopenTarget }}
+        </dt>
+        <dd class="font-semibold">{{ requestedStatusText }}</dd>
+      </div>
       <template v-else>
         <div v-if="req.previous_deadline" class="flex gap-2">
           <dt class="shrink-0 text-slate-500 dark:text-slate-400">
@@ -156,6 +166,7 @@
 <script>
 import { operatorWorkloadLabel } from '@/utils/task-routing'
 import { apiErrorMessage, taskCopy } from '@/utils/task-workflow'
+import { boardCopy, stepStatusText } from '@/utils/task-board'
 
 const KNOWN_REASONS = ['unclear', 'wrong_data', 'no_material', 'other']
 
@@ -175,6 +186,15 @@ export default {
     operatorsLoaded: false,
   }),
   computed: {
+    boardText() {
+      return boardCopy[this.$i18n?.locale] || boardCopy.hy
+    },
+    requestedStatusText() {
+      return stepStatusText(
+        { status: this.req?.requested_status },
+        this.$i18n?.locale
+      )
+    },
     t() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
@@ -206,6 +226,7 @@ export default {
       return Boolean(this.operatorId)
     },
     title() {
+      if (this.req?.type === 'reopen') return this.boardText.reopen
       return this.req?.type === 'reject'
         ? this.t.requestReject
         : this.t.requestDeadline

@@ -10,7 +10,7 @@ export function normalizeFactoryOrderStatus(status) {
 }
 
 export function isFactoryOrderFinished(status) {
-  return ['finished', 'ավարտել', 'ավարտված'].includes(
+  return ['finished', 'completed', 'done', 'ավարտել', 'ավարտված'].includes(
     String(status || '').toLowerCase()
   )
 }
