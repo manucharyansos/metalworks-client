@@ -6,11 +6,18 @@
         <!-- Toolbar -->
         <OrdersToolbar
           :search="searchable"
-          :status-options="statusOptions"
+          :status-options="boardStatusOptions"
           :selected-statuses="selectedStatuses"
           @update:search="(v) => (searchable = v)"
           @update:selected-statuses="(v) => (selectedStatuses = v)"
         />
+
+        <p
+          class="mt-3 text-xs text-slate-500 dark:text-slate-400"
+          data-board-retention
+        >
+          {{ boardText.recentHelp }}
+        </p>
 
         <!-- Kanban board -->
         <div v-if="boardColumns.length" class="mt-4 flex-1">
@@ -18,6 +25,7 @@
             <div
               v-for="column in boardColumns"
               :key="column.id"
+              :data-board-column="column.value"
               class="flex flex-col rounded-2xl bg-gray-50/70 p-3 shadow-sm dark:bg-gray-800/60 h-[calc(100vh-260px)]"
               @dragover.prevent
               @drop.prevent="onDrop(column)"
@@ -57,7 +65,7 @@
                     :order="order"
                     :factory-id="currentFactoryId"
                     :current-user-id="currentUserId"
-                    :status-options="statusOptions"
+                    :status-options="boardStatusOptions"
                     :saving="isSaving"
                     @drag-start="onDragStart(order, column)"
                     @drag-end="clearDrag"
@@ -89,9 +97,8 @@
         <div class="mt-8 flex justify-center">
           <Pagination
             v-if="paginationMeta.total > perPage"
-            :pagination="paginationMeta"
-            meta=""
-            @page-changed="handlePageChange"
+            :meta="paginationMeta"
+            @change="handlePageChange"
           />
         </div>
       </div>
@@ -168,8 +175,13 @@
 </template>
 
 <script>
-import { sortWorkshopTasks } from '@/utils/task-routing'
 import { mapActions, mapGetters } from 'vuex'
+import {
+  boardColumnForStep,
+  factoryBoardColumns,
+  boardCopy,
+} from '@/utils/task-board'
+import { sortWorkshopTasks } from '@/utils/task-routing'
 import {
   isFactoryOrderFinished,
   normalizeFactoryOrderStatus,
@@ -240,6 +252,9 @@ export default {
       'getActionConflictOrder',
     ]),
 
+    boardText() {
+      return boardCopy[this.$i18n?.locale] || boardCopy.hy
+    },
     taskText() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
@@ -275,7 +290,7 @@ export default {
         const fo = this.getFactoryOrderForCurrentFactory(order)
         if (!fo) return false
 
-        const statusKey = fo.status ?? 'null'
+        const statusKey = boardColumnForStep(fo)
         return this.selectedStatuses.includes(statusKey)
       })
     },
@@ -317,45 +332,21 @@ export default {
         last_page: lastPage,
       }
     },
+    boardStatusOptions() {
+      return factoryBoardColumns(
+        [],
+        this.currentFactoryId,
+        this.statusOptions,
+        this.$i18n?.locale
+      )
+    },
     boardColumns() {
-      const ordersSource = Array.isArray(this.paginatedOrders)
-        ? this.paginatedOrders
-        : []
-
-      const baseColumns = [
-        {
-          id: 'no_status',
-          label: 'Առանց կարգավիճակի',
-          value: 'null',
-          icon: '•',
-          color: '#9CA3AF',
-        },
-      ]
-
-      const statusOptions = Array.isArray(this.statusOptions)
-        ? this.statusOptions
-        : []
-
-      const dynamicColumns = statusOptions.map((s) => ({
-        id: s.value,
-        label: s.label,
-        value: s.value,
-        icon: this.mapStatusIcon(s.icon),
-        color: s.color || '#6B7280',
-      }))
-
-      const columnsConfig = [...baseColumns, ...dynamicColumns]
-
-      return columnsConfig.map((col) => {
-        const orders = ordersSource.filter((order) => {
-          const fo = this.getFactoryOrderForCurrentFactory(order)
-          if (!fo) return false
-
-          const statusKey = fo.status ?? 'null'
-          return statusKey === col.value
-        })
-        return { ...col, orders }
-      })
+      return factoryBoardColumns(
+        this.paginatedOrders || [],
+        this.currentFactoryId,
+        this.statusOptions,
+        this.$i18n?.locale
+      )
     },
 
     finishDate() {
@@ -513,8 +504,8 @@ export default {
       if (this.isSaving || !this.$can('factory.order_update')) return
       const fo = this.getFactoryOrderForCurrentFactory(order)
 
-      if (isStepRejected(fo)) {
-        this.$notify({ text: this.taskText.rejectedFinal, type: 'info' })
+      if (isStepRejected(fo) && fo.pending_request) {
+        this.$notify({ text: this.taskText.requestWaiting, type: 'info' })
         return
       }
 
@@ -683,8 +674,8 @@ export default {
       const fo = this.getFactoryOrderForCurrentFactory(order)
       if (!fo || fo.status === newStatus) return
 
-      if (isStepRejected(fo)) {
-        this.$notify({ text: this.taskText.rejectedFinal, type: 'info' })
+      if (isStepRejected(fo) && fo.pending_request) {
+        this.$notify({ text: this.taskText.requestWaiting, type: 'info' })
         return
       }
 
@@ -709,6 +700,11 @@ export default {
           position: 'top',
           type: 'warning',
         })
+        return
+      }
+
+      if (isStepRejected(fo)) {
+        this.updateOrder(order, newStatus || 'pending')
         return
       }
 

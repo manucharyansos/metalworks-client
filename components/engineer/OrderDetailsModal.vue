@@ -53,7 +53,7 @@
               class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium"
               :class="statusBadge"
             >
-              {{ (order?.status || '—').toUpperCase() }}
+              {{ statusLabel }}
             </span>
           </div>
 
@@ -152,17 +152,7 @@
                 :creator-id="order.creator_id"
                 @updated="$emit('updated', $event)"
               />
-              <p class="my-3 text-sm">
-                {{
-                  fo.awaiting_engineer_confirmation
-                    ? t.waiting
-                    : isStepCompleted(fo)
-                    ? t.completed
-                    : fo.status === 'confirmed'
-                    ? t.inProgress
-                    : fo.status
-                }}
-              </p>
+              <p class="my-3 text-sm">{{ stepLabel(fo) }}</p>
               <FileGallery :items="fo.files || []" />
             </div>
           </div>
@@ -201,7 +191,8 @@
 import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
 import TaskChangeRequestPanel from '@/components/order/TaskChangeRequestPanel.vue'
 import TaskRoutingPanel from '@/components/order/TaskRoutingPanel.vue'
-import { isStepCompleted, taskCopy } from '@/utils/task-workflow'
+import { isStepRejected, taskCopy } from '@/utils/task-workflow'
+import { boardCopy, stepStatusText, taskStage } from '@/utils/task-board'
 import FileGallery from '~/components/engineer/FileGallery.vue'
 
 export default {
@@ -217,6 +208,32 @@ export default {
     order: { type: Object, default: null },
   },
   computed: {
+    boardText() {
+      return boardCopy[this.$i18n?.locale] || boardCopy.hy
+    },
+    workflowStage() {
+      return taskStage(this.order)
+    },
+    needsAnswer() {
+      return (this.order?.factory_orders || []).some(
+        (step) => step.pending_request || step.awaiting_engineer_confirmation
+      )
+    },
+    allRejected() {
+      const steps = (this.order?.factory_orders || []).filter(
+        (step) => !step.factory?.is_reference
+      )
+      return steps.length > 0 && steps.every(isStepRejected)
+    },
+    statusLabel() {
+      if (
+        (this.order?.factory_orders || []).some((step) => step.pending_request)
+      )
+        return this.t.requestAnswerNeeded
+      if (this.needsAnswer) return this.boardText.review
+      if (this.allRejected) return this.boardText.rejected
+      return this.boardText[this.workflowStage]
+    },
     t() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
@@ -259,18 +276,19 @@ export default {
       return this.selectedCount + this.factoryCount
     },
     statusBadge() {
-      const s = (this.order?.status || '').toLowerCase()
-      if (s === 'pending')
+      if (this.needsAnswer)
         return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
-      if (s === 'done' || s === 'completed')
-        return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-      if (s === 'canceled')
+      if (this.allRejected)
         return 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300'
-      return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+      if (this.workflowStage === 'completed')
+        return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+      return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
     },
   },
   methods: {
-    isStepCompleted,
+    stepLabel(step) {
+      return stepStatusText(step, this.$i18n?.locale)
+    },
     safeDate(d) {
       if (!d) return '—'
       const dt = new Date(d)

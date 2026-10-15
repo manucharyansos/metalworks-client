@@ -1,25 +1,26 @@
 <template>
   <article
-    class="group relative flex flex-col rounded-2xl border bg-white p-4 text-sm shadow-sm transition-all dark:bg-slate-900"
+    :data-task-id="order.id"
+    class="group relative flex min-w-0 flex-col rounded-2xl border bg-white p-4 text-sm shadow-sm transition-all dark:bg-slate-900"
     :class="[
       cardStatusClass,
       isLocked
-        ? 'cursor-default opacity-75'
+        ? 'cursor-default'
         : 'cursor-move hover:-translate-y-0.5 hover:shadow-lg',
     ]"
     :draggable="!isLocked"
     @dragstart="onDragStart"
     @dragend="$emit('drag-end')"
   >
-    <div class="mb-3 flex items-start justify-between gap-3">
-      <div class="min-w-0">
+    <div class="mb-3 flex min-w-0 flex-col items-start gap-2">
+      <div class="w-full min-w-0">
         <p
           class="text-[9px] font-black uppercase tracking-[0.14em] text-slate-400"
         >
           Առաջադրանքի համար
         </p>
         <h3
-          class="mt-1 truncate text-sm font-black text-slate-900 dark:text-white"
+          class="mt-1 break-words text-xs font-black text-slate-900 dark:text-white"
         >
           {{ order.order_number?.number || `Առաջադրանք #${order.id}` }}
         </h3>
@@ -32,14 +33,14 @@
         </p>
       </div>
       <span
-        class="shrink-0 rounded-full px-2.5 py-1 text-[9px] font-black"
+        class="max-w-full rounded-full px-2.5 py-1 text-[10px] font-bold"
         :class="badgeClass"
         >{{ statusLabel }}</span
       >
     </div>
 
     <p
-      class="line-clamp-2 min-h-[36px] text-xs leading-5 text-slate-500 dark:text-slate-400"
+      class="line-clamp-2 min-h-[36px] break-words text-xs leading-5 text-slate-500 dark:text-slate-400"
       :title="order.description"
     >
       {{ order.description || 'Առանց նկարագրության' }}
@@ -47,9 +48,9 @@
 
     <div class="mt-4 grid grid-cols-2 gap-2 text-[10px]">
       <div class="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-950/50">
-        <p class="text-slate-400">Ստեղծվել է</p>
+        <p class="text-slate-400">Ֆայլեր</p>
         <p class="mt-1 truncate font-bold text-slate-700 dark:text-slate-200">
-          {{ order.created_at || '—' }}
+          {{ factoryOrder?.files?.length || 0 }}
         </p>
       </div>
       <div class="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-950/50">
@@ -57,27 +58,36 @@
         <p class="mt-1 truncate font-bold text-slate-700 dark:text-slate-200">
           {{
             factoryOrder?.deadline || order.dates?.finish_date
-              ? $formatDate(factoryOrder?.deadline || order.dates.finish_date)
-              : 'Հաշվի առնել'
+              ? $formatDate(
+                  factoryOrder?.deadline || order.dates.finish_date,
+                  'dd.MM.yyyy'
+                )
+              : '—'
           }}
         </p>
       </div>
       <div class="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-950/50">
         <p class="text-slate-400">Ստեղծող</p>
-        <p class="mt-1 truncate font-bold text-slate-700 dark:text-slate-200">
+        <p
+          :title="order.creator?.name"
+          class="mt-1 truncate font-bold text-slate-700 dark:text-slate-200"
+        >
           {{ order.creator?.name || '—' }}
         </p>
       </div>
       <div class="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-950/50">
         <p class="text-slate-400">Օպերատոր</p>
-        <p class="mt-1 truncate font-bold text-slate-700 dark:text-slate-200">
+        <p
+          :title="operatorName"
+          class="mt-1 truncate font-bold text-slate-700 dark:text-slate-200"
+        >
           {{ operatorName || 'Չնշված' }}
         </p>
       </div>
     </div>
 
     <p
-      class="mt-3 text-xs font-bold"
+      class="mt-3 break-words text-xs font-bold"
       :class="
         factoryOrder?.priority === 'urgent' ? 'text-rose-600' : 'text-slate-500'
       "
@@ -87,12 +97,29 @@
       {{ taskText[factoryOrder?.priority || 'normal'] }}
     </p>
     <p
+      v-if="factoryOrder?.confirmation_required"
+      data-required-evidence
+      class="mt-2 rounded-xl bg-indigo-50 p-2 text-[11px] text-indigo-800 dark:bg-indigo-950/30 dark:text-indigo-200"
+    >
+      {{ taskText.method }} · {{ evidenceLabel }}
+    </p>
+    <p
+      v-if="factoryOrder?.completed_at"
+      data-completed-at
+      class="mt-2 text-[11px] text-emerald-700 dark:text-emerald-300"
+    >
+      {{ boardText.approvedAt }} ·
+      {{ $formatDate(factoryOrder.completed_at, 'dd.MM.yyyy HH:mm') }}
+    </p>
+    <p
       v-if="pendingRequest"
       data-pending-request
       class="mt-3 rounded-xl bg-amber-50 p-2 text-[11px] font-bold text-amber-800 dark:bg-amber-950/30 dark:text-amber-300"
     >
       {{
-        pendingRequest.type === 'reject'
+        pendingRequest.type === 'reopen'
+          ? boardText.reopen
+          : pendingRequest.type === 'reject'
           ? taskText.requestReject
           : taskText.requestDeadline
       }}
@@ -133,7 +160,7 @@
       class="mt-3 flex items-center gap-1.5 text-[10px] font-bold text-rose-600 dark:text-rose-300"
     >
       <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span
-      >{{ taskText.rejectedFinal }}
+      >{{ boardText.reopenHelp }}
     </p>
     <p
       v-else-if="isCompleted"
@@ -151,11 +178,11 @@
     </p>
 
     <div
-      class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800"
+      class="mt-4 flex flex-col items-stretch gap-2 border-t border-slate-100 pt-3 dark:border-slate-800"
     >
       <button
         type="button"
-        class="flex items-center gap-1 text-xs font-bold text-slate-600 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"
+        class="flex items-center justify-center gap-1 text-xs font-bold text-slate-600 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"
         @click.stop="$emit('view-details', order)"
       >
         Մանրամասներ <span aria-hidden="true">→</span>
@@ -164,7 +191,7 @@
         v-if="$can('factory.order_update')"
         type="button"
         :disabled="isLocked"
-        class="rounded-xl px-3 py-2 text-xs font-bold transition"
+        class="min-w-0 whitespace-normal rounded-xl px-3 py-2 text-[11px] font-bold transition"
         :class="
           isLocked
             ? 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-800'
@@ -172,7 +199,11 @@
         "
         @click.stop="!isLocked && $emit('edit', order)"
       >
-        {{ $t('factory_order_actions.change_status') }}
+        {{
+          isRejected
+            ? boardText.reopen
+            : $t('factory_order_actions.change_status')
+        }}
       </button>
     </div>
 
@@ -186,8 +217,13 @@
 </template>
 
 <script>
+import { boardCopy, stepStatusText } from '@/utils/task-board'
 import { routingCopy } from '@/utils/task-routing'
-import { isStepRejected, taskCopy } from '@/utils/task-workflow'
+import {
+  confirmationMethods,
+  isStepRejected,
+  taskCopy,
+} from '@/utils/task-workflow'
 import {
   isFactoryOrderFinished,
   normalizeFactoryOrderStatus,
@@ -203,6 +239,14 @@ export default {
     saving: { type: Boolean, default: false },
   },
   computed: {
+    boardText() {
+      return boardCopy[this.$i18n?.locale] || boardCopy.hy
+    },
+    evidenceLabel() {
+      return confirmationMethods(this.factoryOrder?.confirmation_method)
+        .map((method) => this.taskText[method])
+        .join(' + ')
+    },
     routingText() {
       return routingCopy[this.$i18n?.locale] || routingCopy.hy
     },
@@ -215,7 +259,7 @@ export default {
     awaitingEngineer() {
       return Boolean(this.factoryOrder?.awaiting_engineer_confirmation)
     },
-    // A rejection the engineer agreed to is final for the operator.
+    // Reopening is a request, so a rejected card may be moved while no request is waiting.
     isRejected() {
       return isStepRejected(this.factoryOrder)
     },
@@ -232,14 +276,9 @@ export default {
       return this.factoryOrder?.operator?.name || null
     },
     statusLabel() {
-      const configured = this.statusOptions.find(
-        (option) => option.value === this.status
-      )
-      if (configured) return configured.label
-      if (this.status === 'confirmed')
-        return this.$t('factory_order_actions.in_progress')
-      return this.status || 'Առանց կարգավիճակի'
+      return stepStatusText(this.factoryOrder, this.$i18n?.locale)
     },
+
     isTakenByOther() {
       const opId = this.factoryOrder?.operator_id
       return Boolean(opId) && String(opId) !== String(this.currentUserId)
@@ -251,8 +290,8 @@ export default {
       return (
         this.isTakenByOther ||
         this.isCompleted ||
-        this.isRejected ||
-        Boolean(this.factoryOrder?.is_blocked)
+        (this.isRejected && Boolean(this.pendingRequest)) ||
+        (Boolean(this.factoryOrder?.is_blocked) && !this.isRejected)
       )
     },
     isLocked() {
@@ -262,6 +301,8 @@ export default {
     },
     badgeClass() {
       const status = String(this.status || '').toLowerCase()
+      if (this.awaitingEngineer)
+        return 'bg-amber-50 text-amber-800 dark:bg-amber-950/35 dark:text-amber-300'
       if (isFactoryOrderFinished(status))
         return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300'
       if (['մերժել', 'rejected', 'canceled', 'cancelled'].includes(status))
@@ -273,6 +314,8 @@ export default {
       return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
     },
     cardStatusClass() {
+      if (this.awaitingEngineer) return 'border-amber-300 dark:border-amber-800'
+      if (this.isRejected) return 'border-rose-200 dark:border-rose-900/70'
       if (this.isCompleted)
         return 'border-emerald-200 dark:border-emerald-900/70'
       if (
