@@ -9,6 +9,7 @@ const read = (file) => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = (source) =>
   `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const workflowUrl = moduleUrl(read('utils/task-workflow.js'))
+const catalogUrl = moduleUrl(read('utils/workshop-catalog.js').replace("'@/utils/task-workflow'", JSON.stringify(workflowUrl)))
 const routingUrl = moduleUrl(read('utils/task-routing.js'))
 
 // Loads a single-file component: its script becomes real code, its template a render function.
@@ -17,6 +18,7 @@ async function component(file, { render = false } = {}) {
   const source = parsed.script.content.replace(
     /import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g,
     (_, names, specifier) => {
+      if (specifier === '@/utils/workshop-catalog') return `import ${names} from '${catalogUrl}'`
       if (specifier === '@/utils/task-workflow') return `import ${names} from '${workflowUrl}'`
       if (specifier === '@/utils/task-routing') return `import ${names} from '${routingUrl}'`
       if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
@@ -24,6 +26,7 @@ async function component(file, { render = false } = {}) {
     }
   )
   const options = (await import(moduleUrl(source))).default
+  if (options.components?.TaskFileRouting) options.components.TaskFileRouting = await component('components/engineer/TaskFileRouting.vue', { render: true })
   return render ? { ...options, ...compiler.compileToFunctions(parsed.template.content) } : options
 }
 
@@ -335,4 +338,16 @@ test('a slow workload answer cannot overwrite a newer one, and failures are show
   pending[3].resolve(second)
   await ok
   assert.equal(vm.workloadError, '')
+})
+
+
+test('typing a task project search before the catalog response arrives stays usable', async () => {
+  const options = await component('pages/engineer/orders/create/index.vue')
+  const filter = options.computed.filteredPmpGroups
+  for (const getPmpes of [undefined, {}, { pmp: null }, { pmp: {} }]) {
+    assert.deepEqual(filter.call({ getPmpes, pmpGroupSearch: '987' }), [])
+  }
+  const groups = [{ id: 1, group: 987, group_name: null }, { id: 2, group: '988', group_name: 'Powder parts' }]
+  assert.deepEqual(filter.call({ getPmpes: { pmp: groups }, pmpGroupSearch: '987' }), [groups[0]])
+  assert.deepEqual(filter.call({ getPmpes: { pmp: groups }, pmpGroupSearch: 'powder' }), [groups[1]])
 })

@@ -252,7 +252,7 @@ test('legacy API compatibility reads the real factory list and relies on existin
     assert.deepEqual(policies[1].extensions, ['dxf'])
     assert.equal(policies[1].serverValidatedFormats, false)
     assert.deepEqual(policies[2].extensions, [])
-    assert.deepEqual(commits, [['SET_FACTORY', policies]])
+    assert.deepEqual(commits, [['SET_FILE_CATEGORIES', policies]])
   }
 })
 
@@ -277,7 +277,7 @@ async function filesPage() {
     ...options,
     created() {},
     data: () => ({ ...options.data(), id: 101, getPmp: { ...groups()[0], files: [{ id: 1, remote_number_id: 101 }] }, getFactory: ['SW', 'DLD', 'DXF', 'IQS', 'INFO', 'PDF'].map((value, i) => ({ id: i + 1, value })), getMaterials: [] }),
-    methods: { ...options.methods, $t: key => key, fetchPmp: async () => true, fetchFactory: async () => true },
+    methods: { ...options.methods, $t: key => key, fetchPmp: async () => true, fetchFileCategories: async () => true },
   })
   return vm
 }
@@ -317,7 +317,7 @@ test('project and factory errors are distinct and failed projects cannot expose 
   assert.equal(vm.factoryListError, '')
   vm.fetchPmp = async () => true
   vm.fetchFactoryFilePolicies = async () => { throw { response: { status: 500 } } }
-  vm.fetchFactory = async () => false
+  vm.fetchFileCategories = async () => false
   await vm.loadPage()
   assert.equal(vm.projectReady, true)
   assert.equal(vm.pageError, '')

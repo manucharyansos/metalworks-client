@@ -38,6 +38,6 @@ export function companyHome(user) {
 }
 
 export function isCompanyRequest(url) {
-  const path = String(url || '').replace(/^https?:\/\/[^/]+/, '').split('?')[0]
+  const path = '/' + String(url || '').replace(/^https?:\/\/[^/]+/, '').split('?')[0].replace(/^\/+/, '')
   return path.startsWith('/api/') && !/^\/api\/(login|register(?:\/|$)|registration\/companies(?:\/|$)|workspace\/brands(?:\/|$)|logout|companies(?:\/|$)|password(?:\/|$)|forgot-password|reset-password)/.test(path)
 }

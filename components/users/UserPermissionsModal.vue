@@ -309,6 +309,7 @@ const UI = {
 const ROLE_COPY = {
   hy: {
     engineer: 'Ինժեներ',
+    operator: 'Օպերատոր',
     laser: 'Լազերային կտրում',
     bend: 'Կռում',
     powder_catting: 'Փոշեներկում',
@@ -317,6 +318,7 @@ const ROLE_COPY = {
   },
   ru: {
     engineer: 'Инженер',
+    operator: 'Оператор',
     laser: 'Лазерная резка',
     bend: 'Гибка',
     powder_catting: 'Порошковая покраска',
@@ -325,6 +327,7 @@ const ROLE_COPY = {
   },
   en: {
     engineer: 'Engineer',
+    operator: 'Operator',
     laser: 'Laser cutting',
     bend: 'Bending',
     powder_catting: 'Powder coating',
@@ -525,7 +528,7 @@ export default {
         ru: 'Выберите нужные функции для всех назначенных должностей. Действия сотрудника ограничены должностью и цехом, выбранными в боковом меню.',
         en: 'Select the required functions for all assigned positions. Employee actions follow the position and workshop selected in the sidebar.',
       }[this.locale]
-      const factoryRoles = ['laser', 'bend', 'powder_catting']
+      const factoryRoles = ['laser', 'bend', 'powder_catting', 'operator']
       if (this.roleName === 'engineer') {
         return {
           hy: 'Միայն ինժեների աշխատանքին վերաբերող առաջադրանքների, PMP-ի և անհրաժեշտ տեղեկատու տվյալների հասանելիություններ։',

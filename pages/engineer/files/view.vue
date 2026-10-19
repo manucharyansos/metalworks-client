@@ -178,7 +178,14 @@
                 }"
                 @click="selectFactory(factory)"
               >
-                <span class="font-medium">{{ factory.value }}</span>
+                <span class="font-medium"
+                  >{{ factory.name || factory.value }}
+                  <span
+                    v-if="factory.is_active === false"
+                    class="ml-2 text-xs opacity-70"
+                    >{{ $t('file_upload.archived_section_short') }}</span
+                  ></span
+                >
                 <span
                   v-if="loadingFactoryId === factory.id"
                   class="animate-spin"
@@ -251,9 +258,15 @@
                     </div>
                   </div>
 
+                  <p
+                    v-if="selectedFactory?.is_active === false"
+                    class="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200"
+                  >
+                    {{ $t('file_upload.archived_section') }}
+                  </p>
                   <button
                     v-if="$can('pmp_files.upload')"
-                    :disabled="loading"
+                    :disabled="loading || selectedFactory?.is_active === false"
                     class="w-full mt-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
                     @click="openAddFileModal"
                   >
@@ -679,7 +692,7 @@ export default {
 
   computed: {
     ...mapGetters('pmp', ['getPmp', 'errorMessage']),
-    ...mapGetters('factory', ['getFactory']),
+    ...mapGetters('factory', { getFactory: 'getFileCategories' }),
     ...mapGetters('materials', ['getMaterials']),
     groupCode() {
       const code = String(this.getPmp?.group ?? '').trim()
@@ -731,6 +744,7 @@ export default {
     },
     canSubmitFile() {
       return (
+        this.selectedFactory?.is_active !== false &&
         !this.recording &&
         this.allowedExtensions.length > 0 &&
         (this.isInfoFactory && this.infoMode === 'text'
@@ -769,7 +783,7 @@ export default {
     ...mapActions('pmp', ['fetchPmp', 'deleteFile', 'createPmpFilesByFactory']),
     ...mapActions('factory', [
       'fetchFactoryFilePolicies',
-      'fetchFactory',
+      'fetchFileCategories',
       'downloadUploadedFile',
     ]),
     ...mapActions('materials', ['fetchMaterials']),
@@ -800,7 +814,7 @@ export default {
         else {
           this.factoryPolicies = []
           // A formats error must not hide an otherwise readable project.
-          if (!(await this.fetchFactory()))
+          if (!(await this.fetchFileCategories()))
             this.factoryListError = this.$t('file_upload.factories_failed')
         }
       } catch (error) {
@@ -957,6 +971,11 @@ export default {
       formData.append('pmp_id', this.getPmp.id)
       formData.append('remote_number_id', this.selectedRemoteNumberId)
       formData.append('factory_id', this.selectedFactoryId)
+      if (this.selectedFactory?.file_category_id)
+        formData.append(
+          'file_category_id',
+          this.selectedFactory.file_category_id
+        )
       if (isDxf) {
         formData.append('quantity', quantity)
         formData.append('material_type', material.trim())
@@ -1176,7 +1195,11 @@ export default {
     },
 
     openAddFileModal() {
-      if (this.uploading) return
+      if (
+        this.uploading ||
+        (!this.isOpenAddFileModal && this.selectedFactory?.is_active === false)
+      )
+        return
       this.isOpenAddFileModal = !this.isOpenAddFileModal
       if (this.isOpenAddFileModal) this.loadFactoryPolicy()
       else {

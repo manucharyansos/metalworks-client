@@ -382,7 +382,7 @@ export default {
   },
   watch: {
     factoryOrder(value) {
-      if (!this.evidenceText.trim() && value.evidence_text)
+      if (!this.evidenceText.trim() && value?.evidence_text)
         this.evidenceText = value.evidence_text
     },
     isOpen(val) {

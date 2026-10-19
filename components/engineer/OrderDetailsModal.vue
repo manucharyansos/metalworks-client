@@ -221,7 +221,8 @@ export default {
     },
     allRejected() {
       const steps = (this.order?.factory_orders || []).filter(
-        (step) => !step.factory?.is_reference
+        (step) =>
+          !step.factory?.is_reference && step.factory?.is_workshop !== false
       )
       return steps.length > 0 && steps.every(isStepRejected)
     },

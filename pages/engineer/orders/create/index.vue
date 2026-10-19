@@ -361,10 +361,17 @@
               </div>
             </template>
           </create-order-form>
+          <TaskFileRouting
+            v-model="fileRouting"
+            :files="effectiveFiles"
+            :factories="getFactory || []"
+            :disabled="isLoading"
+          />
           <TaskCreationOptions
             :confirmation-required.sync="confirmationRequired"
             :confirmation-method.sync="confirmationMethod"
             :reference-visibility.sync="referenceVisibility"
+            :selected-workshops="selectedFactories"
             :files="effectiveFiles"
             :factories="getFactory || []"
             :disabled="isLoading"
@@ -421,7 +428,9 @@
       >
         <show-files
           :pmps="pmpsData"
-          :factories="getFactory"
+          :factories="
+            getFileCategories?.length ? getFileCategories : getFactory
+          "
           :selected-files.sync="selectedFiles"
           :file-quantities.sync="fileQuantities"
           :remote-number-id="remote_number_id"
@@ -429,10 +438,17 @@
           @files-selected="handleFilesSelected"
           @back="backToDetails"
         />
+        <TaskFileRouting
+          v-model="fileRouting"
+          :files="effectiveFiles"
+          :factories="getFactory || []"
+          :disabled="isLoading"
+        />
         <TaskCreationOptions
           :confirmation-required.sync="confirmationRequired"
           :confirmation-method.sync="confirmationMethod"
           :reference-visibility.sync="referenceVisibility"
+          :selected-workshops="selectedFactories"
           :files="effectiveFiles"
           :factories="getFactory || []"
           :disabled="isLoading"
@@ -495,12 +511,17 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import TaskFileRouting from '@/components/engineer/TaskFileRouting.vue'
+import {
+  fileRoutingPayload,
+  isReferenceFile,
+  isWorkshop,
+} from '@/utils/workshop-catalog'
 import TaskCreationOptions from '@/components/engineer/TaskCreationOptions.vue'
 import TaskWorkshopOptions from '@/components/engineer/TaskWorkshopOptions.vue'
 import TaskOperatorPicker from '@/components/engineer/TaskOperatorPicker.vue'
 import {
   confirmationMethods,
-  isReferenceFactory,
   taskCopy,
   workshopSettingsPayload,
 } from '@/utils/task-workflow'
@@ -514,6 +535,7 @@ import PermissionDenied from '@/components/modals/permission/PermissionDenied.vu
 
 export default {
   components: {
+    TaskFileRouting,
     TaskCreationOptions,
     TaskWorkshopOptions,
     TaskOperatorPicker,
@@ -559,11 +581,12 @@ export default {
       confirmationRequired: false,
       confirmationMethod: '',
       referenceVisibility: {},
+      fileRouting: {},
       workshopSettings: {},
     }
   },
   computed: {
-    ...mapGetters('factory', ['getFactory']),
+    ...mapGetters('factory', ['getFactory', 'getFileCategories']),
     ...mapGetters('clients', ['allClients']),
     ...mapGetters('pmp', ['getPmpes', 'getPmp']),
 
@@ -621,12 +644,9 @@ export default {
 
     // Every workshop this subgroup could send work to, whatever files are chosen.
     subgroupFactories() {
-      const ids = new Set(
-        this.subgroupFiles.map((file) => Number(file.factory_id))
-      )
       return (Array.isArray(this.getFactory) ? this.getFactory : [])
-        .filter((f) => ids.has(Number(f.id)) && !isReferenceFactory(f))
-        .map((f) => ({ ...f, operators: f.operators || [] }))
+        .filter(isWorkshop)
+        .map((factory) => ({ ...factory, operators: factory.operators || [] }))
     },
 
     // True when the engineer chose individual files and still keeps that choice.
@@ -646,20 +666,16 @@ export default {
     },
 
     selectedFactories() {
-      const files = this.effectiveFiles
-      const factoryIds = new Set(files.map((file) => Number(file.factory_id)))
-
-      this.selectedFiles.forEach((fileId) => {
-        const file = files.find((f) => Number(f.id) === Number(fileId))
-        if (file && file.factory_id != null) {
-          factoryIds.add(Number(file.factory_id))
-        }
-      })
-
-      const stores = Array.isArray(this.getFactory) ? this.getFactory : []
-      return stores
-        .filter((f) => factoryIds.has(Number(f.id)) && !isReferenceFactory(f))
-        .map((f) => ({ ...f, operators: f.operators || [] }))
+      const ids = new Set(
+        fileRoutingPayload(
+          this.effectiveFiles,
+          this.getFactory || [],
+          this.fileRouting
+        ).flatMap((row) => row.factory_ids)
+      )
+      return (this.getFactory || [])
+        .filter((factory) => ids.has(Number(factory.id)) && isWorkshop(factory))
+        .map((factory) => ({ ...factory, operators: factory.operators || [] }))
     },
 
     canProceedToFiles() {
@@ -687,12 +703,17 @@ export default {
     },
 
     filteredPmpGroups() {
-      if (!this.pmpGroupSearch) return this.getPmpes?.pmp || []
+      const groups = Array.isArray(this.getPmpes?.pmp) ? this.getPmpes.pmp : []
+      if (!this.pmpGroupSearch) return groups
       const searchTerm = this.pmpGroupSearch.toLowerCase()
-      return this.getPmpes?.pmp.filter(
+      return groups.filter(
         (pmp) =>
-          pmp.group.toLowerCase().includes(searchTerm) ||
-          pmp.group_name.toLowerCase().includes(searchTerm)
+          String(pmp.group || '')
+            .toLowerCase()
+            .includes(searchTerm) ||
+          String(pmp.group_name || '')
+            .toLowerCase()
+            .includes(searchTerm)
       )
     },
 
@@ -733,7 +754,9 @@ export default {
     // file picker (nothing selected yet) or deselecting a file must not erase
     // them. Only the workshops the task really uses are sent on creation.
     subgroupFactories(allFactories) {
-      const allowedIds = new Set(allFactories.map((factory) => Number(factory.id)))
+      const allowedIds = new Set(
+        allFactories.map((factory) => Number(factory.id))
+      )
       Object.keys(this.factoryOperators).forEach((factoryId) => {
         if (!allowedIds.has(Number(factoryId))) {
           this.$delete(this.factoryOperators, factoryId)
@@ -744,11 +767,12 @@ export default {
   mounted() {
     this.fetchClients()
     this.fetchFactory()
+    this.fetchFileCategories().catch(() => {})
     this.fetchPmps()
     this.loadWorkload()
   },
   methods: {
-    ...mapActions('factory', ['fetchFactory']),
+    ...mapActions('factory', ['fetchFactory', 'fetchFileCategories']),
     ...mapActions('clients', ['fetchClients']),
     ...mapActions('engineer', ['createNewOrder']),
     ...mapActions('pmp', [
@@ -812,6 +836,7 @@ export default {
       this.fileQuantities = {}
       this.factoryOperators = {}
       this.referenceVisibility = {}
+      this.fileRouting = {}
       this.orderPmp = null
       this.files_existing = false
       this.isFiles = false
@@ -902,6 +927,7 @@ export default {
       this.selectedFiles = []
       this.fileQuantities = {}
       this.referenceVisibility = {}
+      this.fileRouting = {}
     },
 
     async pmpFiles() {
@@ -972,7 +998,9 @@ export default {
         this.selectedFactories.map((factory) => Number(factory.id))
       )
       const factoryOperatorsArray = Object.entries(this.factoryOperators)
-        .filter(([factoryId, userId]) => !!userId && inTask.has(Number(factoryId)))
+        .filter(
+          ([factoryId, userId]) => !!userId && inTask.has(Number(factoryId))
+        )
         .map(([factoryId, userId]) => ({
           factory_id: Number(factoryId),
           user_id: userId,
@@ -999,6 +1027,11 @@ export default {
         return
       }
       const data = {
+        file_routing: fileRoutingPayload(
+          this.effectiveFiles,
+          this.getFactory || [],
+          this.fileRouting
+        ),
         workshop_settings: workshopSettings,
         confirmation_required: this.confirmationRequired,
         confirmation_method: this.confirmationRequired
@@ -1006,10 +1039,11 @@ export default {
           : null,
         reference_file_visibility: this.effectiveFiles
           .filter((file) =>
-            isReferenceFactory(
-              (this.getFactory || []).find(
-                (factory) => Number(factory.id) === Number(file.factory_id)
-              )
+            isReferenceFile(
+              file,
+              this.getFileCategories?.length
+                ? this.getFileCategories
+                : this.getFactory || []
             )
           )
           .map((file) => ({

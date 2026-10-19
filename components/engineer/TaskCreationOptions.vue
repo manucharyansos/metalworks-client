@@ -83,11 +83,8 @@
   </section>
 </template>
 <script>
-import {
-  confirmationMethods,
-  isReferenceFactory,
-  taskCopy,
-} from '@/utils/task-workflow'
+import { confirmationMethods, taskCopy } from '@/utils/task-workflow'
+import { isReferenceFile, isWorkshop } from '@/utils/workshop-catalog'
 export default {
   props: {
     confirmationRequired: Boolean,
@@ -95,6 +92,7 @@ export default {
     confirmationMethod: { type: String, default: '' },
     referenceVisibility: { type: Object, default: () => ({}) },
     files: { type: Array, default: () => [] },
+    selectedWorkshops: { type: Array, default: null },
     factories: { type: Array, default: () => [] },
   },
   computed: {
@@ -105,18 +103,22 @@ export default {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
     referenceFiles() {
-      return this.files.filter((file) =>
-        isReferenceFactory(
-          this.factories.find(
-            (factory) => Number(factory.id) === Number(file.factory_id)
+      return this.files.filter((file) => isReferenceFile(file, this.factories))
+    },
+    workshops() {
+      if (this.selectedWorkshops !== null)
+        return this.selectedWorkshops.filter(isWorkshop)
+      const ids = new Set(
+        this.files.map((file) =>
+          Number(
+            file.routing_factory_id === undefined
+              ? file.factory_id
+              : file.routing_factory_id
           )
         )
       )
-    },
-    workshops() {
-      const ids = new Set(this.files.map((file) => Number(file.factory_id)))
       return this.factories.filter(
-        (factory) => ids.has(Number(factory.id)) && !isReferenceFactory(factory)
+        (factory) => ids.has(Number(factory.id)) && isWorkshop(factory)
       )
     },
   },

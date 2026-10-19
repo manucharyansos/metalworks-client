@@ -281,8 +281,8 @@
 </template>
 
 <script>
-import { taskActionBody } from '@/utils/task-workflow'
 import { mapActions } from 'vuex'
+import { taskActionBody } from '@/utils/task-workflow'
 import OrderActionModal from '@/components/factory/OrderActionModal.vue'
 import { localFactoryDate } from '@/utils/factory-order-status'
 import LaserOrderDetailsPanel from '@/components/factory/laser/LaserOrderDetailsPanel.vue'
@@ -471,7 +471,9 @@ export default {
       return COPY[this.locale] || COPY.hy
     },
     title() {
-      return this.t.titles[this.kind] || this.t.titles.laser
+      return this.kind === 'all'
+        ? this.selectedFactoryName
+        : this.t.titles[this.kind] || this.t.titles.laser
     },
     helpText() {
       return this.t.help[this.kind] || ''
@@ -518,6 +520,17 @@ export default {
       return localFactoryDate(d)
     },
   },
+  watch: {
+    '$route.query.factory_id'(value) {
+      if (
+        this.isSaving ||
+        !this.matchingFactories.some((row) => String(row.id) === String(value))
+      )
+        return
+      this.selectedFactoryId = String(value)
+      this.loadOrders()
+    },
+  },
   async mounted() {
     await Promise.all([this.loadFactories(), this.loadOptions()])
   },
@@ -528,6 +541,8 @@ export default {
     },
     ...mapActions('factory', ['downloadUploadedFile']),
     matchesKind(factory) {
+      if (this.kind === 'all')
+        return factory.is_workshop !== false && factory.is_active !== false
       const value = String(factory?.value || '').toUpperCase()
       const name = String(factory?.name || '').toLowerCase()
       if (this.kind === 'laser')
