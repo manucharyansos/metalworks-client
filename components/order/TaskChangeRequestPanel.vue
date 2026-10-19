@@ -1,7 +1,7 @@
 <template>
   <section
     v-if="req"
-    class="mt-3 space-y-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-slate-900 dark:border-amber-700 dark:bg-amber-950/20 dark:text-slate-100"
+    class="work-decision mt-3 space-y-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-slate-900 dark:border-amber-700 dark:bg-amber-950/20 dark:text-slate-100"
     data-change-request
   >
     <header>

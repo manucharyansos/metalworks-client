@@ -46,7 +46,7 @@
       </div>
 
       <div class="space-y-3 p-4 md:hidden">
-        <article v-for="c in rows" :key="c.id" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
+        <article v-for="c in rows" :key="c.id" class="work-card rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
           <div class="flex items-start gap-3">
             <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ initials(c.name) }}</div>
             <div class="min-w-0 flex-1"><p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ c.name || '—' }}</p><p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ c.phone || 'Հեռախոս նշված չէ' }}</p></div>
@@ -66,12 +66,12 @@
 <script>
 import { membershipCopy } from '~/utils/membership-copy'
 export default {
-  computed: { companyAccessCopy() { return membershipCopy(this.$i18n?.locale) }, canAssignCompanies() { return ['admin', 'manager'].includes(this.$auth?.user?.role?.name) } },
   props: {
     rows: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false },
     submitting: { type: Boolean, default: false },
   },
+  computed: { companyAccessCopy() { return membershipCopy(this.$i18n?.locale) }, canAssignCompanies() { return ['admin', 'manager'].includes(this.$auth?.user?.role?.name) } },
   methods: {
     initials(name) {
       return String(name || '?').split(/\s+/).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join('')

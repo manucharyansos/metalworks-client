@@ -130,7 +130,7 @@
           </div>
 
           <div v-if="orders.length" class="space-y-3 p-4 lg:hidden">
-            <article v-for="order in orders" :key="order.id" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
+            <article v-for="order in orders" :key="order.id" class="work-card work-task-card">
               <div class="flex items-start justify-between gap-3"><div class="min-w-0"><p class="text-[10px] font-bold text-slate-400">#{{ order.order_number?.number || order.id }}</p><p class="mt-1 truncate text-sm font-bold text-slate-900 dark:text-white">{{ order.name || '—' }}</p><p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ clientName(order) }}</p></div><span class="shrink-0 rounded-full px-2 py-1 text-[9px] font-bold" :class="deadlineClass(order)">{{ deadlineLabel(order) }}</span></div>
               <div class="mt-3 flex flex-wrap gap-1.5"><span v-for="fo in order.factory_orders || []" :key="fo.id" class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ fo.factory?.name || '—' }} · {{ fo.operator?.name || 'չնշ.' }}</span></div>
             </article>

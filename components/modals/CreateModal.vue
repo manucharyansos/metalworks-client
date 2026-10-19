@@ -5,7 +5,7 @@
   >
     <div class="relative p-4 w-full max-w-2xl h-auto">
       <!-- Modal content -->
-      <div class="relative bg-neutral-500 p-4 rounded-lg shadow sm:p-5">
+      <div class="work-modal p-5 sm:p-6" role="dialog" aria-modal="true" aria-label="Նոր առաջադրանք" data-work-modal>
         <!-- Modal header -->
         <div
           class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600"

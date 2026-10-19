@@ -1,16 +1,21 @@
 <template>
   <div
     v-if="item"
-    class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
+    class="work-modal-backdrop fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]"
   >
-    <div class="bg-white p-6 rounded-lg w-full max-w-sm">
+    <div
+      class="work-modal w-full max-w-sm p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Հաստատել ջնջումը"
+      data-work-modal
+    >
       <p class="mb-4 text-gray-800">Հաստատե՞լ ջնջումը</p>
       <div class="flex justify-end gap-3">
-        <button class="px-4 py-2 border rounded-lg" @click="$emit('close')">
-          Չեղարկել
-        </button>
+        <button class="work-button" @click="$emit('close')">Չեղարկել</button>
         <button
-          class="px-4 py-2 bg-red-600 text-white rounded-lg"
+          class="work-button"
+          data-variant="danger"
           @click="$emit('confirm')"
         >
           {{ submitting ? 'Կատարվում է...' : 'Ջնջել' }}

@@ -1,18 +1,18 @@
 <template>
   <div
     v-if="visible"
-    class="fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4"
+    class="work-modal-backdrop fixed inset-0 z-[1100] flex items-center justify-center bg-black/50 p-4"
     @click.self="$emit('close')"
   >
-    <div role="dialog" aria-modal="true" aria-labelledby="worker-form-title" class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
-      <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+    <div data-work-modal role="dialog" aria-modal="true" aria-labelledby="worker-form-title" class="work-modal work-modal--structured flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
+      <div class="work-modal__header flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-800">
         <h3 id="worker-form-title" class="text-lg font-semibold text-slate-900 dark:text-white">
           {{ isEdit ? t.editTitle : t.createTitle }}
         </h3>
         <button class="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" @click="$emit('close')">✕</button>
       </div>
 
-      <div class="overflow-y-auto px-5 py-4">
+      <div class="work-modal__body overflow-y-auto px-5 py-4">
         <form class="space-y-4" @submit.prevent="submit">
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
@@ -68,7 +68,7 @@
         </form>
       </div>
 
-      <div class="flex justify-end gap-3 border-t border-slate-200 px-5 py-4 dark:border-slate-800">
+      <div class="work-modal__footer flex justify-end gap-3 border-t border-slate-200 px-5 py-4 dark:border-slate-800">
         <button class="rounded-lg border border-slate-200 px-4 py-2 text-slate-700 dark:border-slate-700 dark:text-slate-300" @click="$emit('close')">{{ t.close }}</button>
         <button
           class="rounded-lg bg-slate-950 px-4 py-2 text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-950"

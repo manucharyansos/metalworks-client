@@ -1,6 +1,6 @@
 <template>
-  <div class="fixed inset-0 z-[1000] overflow-y-auto bg-slate-950/50 p-4" @click.self="close" @keydown.esc="close">
-    <section ref="dialog" role="dialog" aria-modal="true" aria-labelledby="company-membership-title" tabindex="-1" class="mx-auto my-6 max-w-xl rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:p-8" @keydown.tab="trapFocus">
+  <div class="work-modal-backdrop fixed inset-0 z-[1000] overflow-y-auto bg-slate-950/50 p-4" @click.self="close" @keydown.esc="close">
+    <section ref="dialog" data-work-modal role="dialog" aria-modal="true" aria-labelledby="company-membership-title" tabindex="-1" class="work-modal mx-auto my-6 max-w-xl rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:p-8" @keydown.tab="trapFocus">
       <h2 id="company-membership-title" class="text-xl font-black">{{ copy.title }}</h2>
       <p class="mt-2 break-words font-semibold">{{ user.name || user.display_name }}</p>
       <p class="mt-1 break-all text-sm text-slate-500">{{ user.email || user.user?.email }}</p>

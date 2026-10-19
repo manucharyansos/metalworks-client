@@ -24,22 +24,22 @@
       </section>
 
       <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="metric-card">
+        <div class="work-card metric-card">
           <p class="metric-label">Չնշանակված քայլեր</p>
           <p class="metric-value text-amber-600 dark:text-amber-300">{{ summary.unassigned_factory_steps || 0 }}</p>
           <p class="metric-hint">պահանջում են աշխատակից</p>
         </div>
-        <div class="metric-card">
+        <div class="work-card metric-card">
           <p class="metric-label">Գերբեռնված</p>
           <p class="metric-value text-rose-600 dark:text-rose-300">{{ overloadedCount }}</p>
           <p class="metric-hint">աշխատակից</p>
         </div>
-        <div class="metric-card">
+        <div class="work-card metric-card">
           <p class="metric-label">Ակտիվ աշխատանք</p>
           <p class="metric-value">{{ totalActiveWork }}</p>
           <p class="metric-hint">արտադրամասային քայլ</p>
         </div>
-        <div class="metric-card">
+        <div class="work-card metric-card">
           <p class="metric-label">Ուշացած աշխատանք</p>
           <p class="metric-value text-rose-600 dark:text-rose-300">{{ totalOverdueWork }}</p>
           <p class="metric-hint">աշխատակիցներին նշանակված</p>
@@ -47,7 +47,7 @@
       </section>
 
       <section class="grid gap-6 2xl:grid-cols-[1.05fr_1.25fr]">
-        <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <div class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 class="section-title">Աշխատակիցների ծանրաբեռնվածություն</h2>
@@ -123,7 +123,7 @@
 
             <div v-if="queueLoading" class="flex min-h-[180px] items-center justify-center"><span class="h-6 w-6 animate-spin rounded-full border-2 border-amber-300 border-t-amber-700"></span></div>
             <div v-else-if="unassignedSteps.length" class="space-y-3">
-              <article v-for="step in unassignedSteps" :key="step.id" class="rounded-2xl border border-amber-200/80 bg-white p-4 shadow-sm dark:border-amber-950/60 dark:bg-slate-900">
+              <article v-for="step in unassignedSteps" :key="step.id" class="work-card rounded-2xl border border-amber-200/80 bg-white p-4 shadow-sm dark:border-amber-950/60 dark:bg-slate-900">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
@@ -168,7 +168,7 @@
             </div>
           </section>
 
-          <section v-if="selectedOperator" class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+          <section v-if="selectedOperator" class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
             <div class="mb-4 flex items-start justify-between gap-3">
               <div>
                 <p class="eyebrow">Ընտրված աշխատակից</p>

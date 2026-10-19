@@ -1,7 +1,7 @@
 <template>
   <main class="min-h-screen bg-slate-100 px-4 py-8 dark:bg-slate-950 sm:px-6">
     <div class="mx-auto flex min-h-[calc(100vh-4rem)] max-w-lg items-center justify-center">
-      <section class="w-full rounded-[30px] border border-white/70 bg-white p-6 shadow-[0_30px_90px_-45px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-900 sm:p-9">
+      <section class="work-card w-full rounded-[30px] border border-white/70 bg-white p-6 shadow-[0_30px_90px_-45px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-900 sm:p-9">
         <div class="mb-8 flex items-center gap-3">
           <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-950 text-sm font-black text-white dark:bg-white dark:text-slate-950">MW</div>
           <div>

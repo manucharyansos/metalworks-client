@@ -1,5 +1,5 @@
 <template>
-  <div class="group rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03] transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+  <div class="work-card group rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03] transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
     <div class="flex items-start justify-between gap-4">
       <div class="min-w-0">
         <p class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">

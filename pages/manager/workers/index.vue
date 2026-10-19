@@ -16,9 +16,9 @@
       </section>
 
       <section class="grid gap-3 sm:grid-cols-3">
-        <div class="metric"><p class="metric-label">Ընդամենը</p><p class="metric-value">{{ workers.length }}</p></div>
-        <div class="metric"><p class="metric-label">Արտադրամասով</p><p class="metric-value">{{ factoryAssignedCount }}</p></div>
-        <div class="metric"><p class="metric-label">Հաստիքներ</p><p class="metric-value">{{ rolesInUse }}</p></div>
+        <div class="work-card metric"><p class="metric-label">Ընդամենը</p><p class="metric-value">{{ workers.length }}</p></div>
+        <div class="work-card metric"><p class="metric-label">Արտադրամասով</p><p class="metric-value">{{ factoryAssignedCount }}</p></div>
+        <div class="work-card metric"><p class="metric-label">Հաստիքներ</p><p class="metric-value">{{ rolesInUse }}</p></div>
       </section>
 
       <section class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -48,7 +48,7 @@
           </div>
 
           <div class="space-y-3 p-4 md:hidden">
-            <article v-for="u in filtered" :key="u.id" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
+            <article v-for="u in filtered" :key="u.id" class="work-card rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
               <div class="flex min-w-0 flex-wrap items-start gap-3"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ initials(u.display_name || u.name) }}</div><div class="min-w-0 flex-1"><p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ u.display_name || u.name }}</p><p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ u.email || '—' }}</p></div><span class="max-w-full break-words rounded-full bg-slate-100 px-2 py-1 text-[9px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ positionLabels(u) }}</span></div>
               <div class="mt-3 grid grid-cols-2 gap-2 text-[10px] text-slate-400"><span>{{ workshopLabels(u) || 'Առանց արտադրամասի' }}</span><span class="text-right">{{ u?.worker?.phone || '—' }}</span></div>
               <div v-if="$canAny(['workers.update','workers.delete'])" class="mt-4 flex flex-wrap justify-end gap-2"><button v-if="canAssignCompanies && canEditWorker(u)" type="button" class="app-button-secondary mr-2" @click="assignmentTarget = u">{{ staffCopy.edit }}</button><button v-if="canAssignCompanies && !u.is_platform_admin" type="button" class="mr-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="accessTarget = u">{{ companyAccessCopy.button }}</button><button v-if="$can('workers.update') && canEditWorker(u)" class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="openEdit(u)">Խմբագրել</button><button v-if="$can('workers.delete') && canEditWorker(u)" class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-600 dark:border-rose-900/60 dark:text-rose-300" @click="askDelete(u)">Ջնջել</button></div>
@@ -59,7 +59,7 @@
     </div>
 
     <div v-else class="mx-auto max-w-3xl">
-      <div class="rounded-[28px] border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <div class="work-card rounded-[28px] border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/35 dark:text-blue-300">+</div>
         <h1 class="mt-4 text-xl font-black text-slate-950 dark:text-white">Նոր աշխատակից</h1>
         <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Ձեզ տրված է աշխատակից ստեղծելու ֆունկցիան, բայց աշխատակիցների ամբողջ ցուցակը դիտելու իրավունքը տրված չէ։</p>
@@ -72,8 +72,8 @@
     <StaffAssignmentsModal v-if="assignmentTarget" :user="assignmentTarget" @close="assignmentTarget = null" @saved="loadWorkers" />
     <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" @saved="loadWorkers" />
 
-    <div v-if="confirmDelete && $can('workers.delete')" class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm" @click.self="confirmDelete = null">
-      <div class="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"><h3 class="text-lg font-black text-slate-950 dark:text-white">Ջնջե՞լ աշխատակցին</h3><p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">«{{ confirmDelete?.display_name || confirmDelete?.name }}» հաշիվը կհեռացվի։</p><div class="mt-6 flex justify-end gap-2"><button class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="confirmDelete = null">Չեղարկել</button><button class="rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-rose-700 disabled:opacity-50" :disabled="submitting" @click="doDelete">{{ submitting ? 'Կատարվում է…' : 'Ջնջել' }}</button></div></div>
+    <div v-if="confirmDelete && $can('workers.delete')" class="work-modal-backdrop fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm" @click.self="confirmDelete = null">
+      <div data-work-modal role="dialog" aria-modal="true" class="work-modal w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"><h3 class="text-lg font-black text-slate-950 dark:text-white">Ջնջե՞լ աշխատակցին</h3><p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">«{{ confirmDelete?.display_name || confirmDelete?.name }}» հաշիվը կհեռացվի։</p><div class="mt-6 flex justify-end gap-2"><button class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 dark:border-slate-700 dark:text-slate-300" @click="confirmDelete = null">Չեղարկել</button><button class="rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-rose-700 disabled:opacity-50" :disabled="submitting" @click="doDelete">{{ submitting ? 'Կատարվում է…' : 'Ջնջել' }}</button></div></div>
     </div>
   </main>
 </template>

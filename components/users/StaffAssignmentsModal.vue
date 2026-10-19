@@ -1,6 +1,6 @@
 <template>
-  <div class="fixed inset-0 z-[1100] overflow-y-auto bg-slate-950/50 p-4" @click.self="close" @keydown.esc="close">
-    <section ref="dialog" role="dialog" aria-modal="true" aria-labelledby="staff-assignment-title" tabindex="-1" class="mx-auto my-6 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:p-8" @keydown.tab="trapFocus">
+  <div class="work-modal-backdrop fixed inset-0 z-[1100] overflow-y-auto bg-slate-950/50 p-4" @click.self="close" @keydown.esc="close">
+    <section ref="dialog" data-work-modal role="dialog" aria-modal="true" aria-labelledby="staff-assignment-title" tabindex="-1" class="work-modal mx-auto my-6 w-full max-w-xl rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:p-8" @keydown.tab="trapFocus">
       <h2 id="staff-assignment-title" class="text-xl font-black">{{ copy.edit }}</h2>
       <p class="mt-3 break-words font-bold">{{ user.name || user.display_name }}</p><p class="mt-1 break-all text-sm text-slate-500">{{ user.email }}</p>
       <p v-if="loading" class="mt-6 text-sm" role="status">{{ copy.loading }}</p>
@@ -30,7 +30,7 @@ export default {
     close() { if (!this.busy) this.$emit('close') },
     trapFocus(event) {
       const controls = Array.from(this.$refs.dialog.querySelectorAll('button:not(:disabled), select:not(:disabled), input:not(:disabled)'))
-      const first = controls[0], last = controls[controls.length - 1]
+      const first = controls[0]; const last = controls[controls.length - 1]
       if (event.shiftKey && (document.activeElement === first || document.activeElement === this.$refs.dialog)) { event.preventDefault(); last?.focus() }
       else if (!event.shiftKey && (document.activeElement === last || document.activeElement === this.$refs.dialog)) { event.preventDefault(); first?.focus() }
     },

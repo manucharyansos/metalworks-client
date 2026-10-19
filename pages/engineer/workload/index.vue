@@ -44,7 +44,7 @@
     <section
       v-for="factory in filteredFactories"
       :key="factory.id"
-      class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
+      class="work-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
       :data-workload-factory="factory.id"
     >
       <div class="flex flex-wrap items-center justify-between gap-2">
@@ -57,7 +57,7 @@
         <article
           v-for="operator in factory.operators"
           :key="operator.id"
-          class="rounded-xl border border-slate-200 p-3 dark:border-slate-700"
+          class="work-card rounded-xl border border-slate-200 p-3 dark:border-slate-700"
           :data-workload-operator="operator.id"
         >
           <h3 class="break-words font-semibold">{{ operator.name }}</h3>

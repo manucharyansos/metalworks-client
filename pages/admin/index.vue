@@ -89,7 +89,7 @@
       </section>
 
       <section class="grid min-w-0 grid-cols-1 gap-6 2xl:grid-cols-[1.2fr_1fr]">
-        <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <div class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 class="mt-1 text-lg font-bold text-slate-950 dark:text-white">Արտադրամասերի վիճակ</h2>
@@ -150,7 +150,7 @@
           </div>
         </div>
 
-        <div class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <div class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div class="mb-5">
             <h2 class="mt-1 text-lg font-bold text-slate-950 dark:text-white">Աշխատակիցների ծանրաբեռնվածություն</h2>
             <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Ցուցիչը հիմնված է ակտիվ և ուշացած առաջադրանքների իրական քանակի վրա</p>
@@ -359,28 +359,8 @@
             </table>
           </div>
 
-          <div v-if="orders.length" class="space-y-3 p-4 lg:hidden">
-            <button
-              v-for="order in orders"
-              :key="order.id"
-              type="button"
-              class="w-full rounded-2xl border border-slate-200 p-4 text-left shadow-sm dark:border-slate-800"
-              @click="openOrder(order)"
-            >
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0">
-                  <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ orderNumber(order) }}</p>
-                  <p class="mt-1 truncate text-sm font-bold text-slate-900 dark:text-white">{{ order.name || 'Առանց անվանման' }}</p>
-                  <p class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{{ clientName(order) }}</p>
-                </div>
-                <span class="shrink-0 rounded-full px-2 py-1 text-[10px] font-bold" :class="deadlineClass(order)">{{ deadlineLabel(order) }}</span>
-              </div>
-              <div class="mt-3 flex flex-wrap gap-1.5">
-                <span v-for="fo in order.factory_orders || []" :key="fo.id" class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                  {{ fo.factory?.name || '—' }} · {{ fo.operator?.name || 'չնշանակված' }}
-                </span>
-              </div>
-            </button>
+          <div v-if="orders.length" class="grid gap-4 p-4 md:grid-cols-2 lg:hidden">
+            <AdminOrderCard v-for="order in orders" :key="order.id" :order="order" @edit="openOrder" />
           </div>
 
           <div v-if="!ordersLoading && !orders.length" class="flex min-h-[260px] flex-col items-center justify-center px-6 text-center">
@@ -410,8 +390,8 @@
     </div>
 
     <transition name="fade">
-      <div v-if="selectedOrder" class="fixed inset-0 z-[80] flex items-stretch justify-end bg-slate-950/45 backdrop-blur-sm" @click.self="closeOrder">
-        <div class="h-full w-full max-w-5xl overflow-hidden bg-white shadow-2xl dark:bg-slate-900">
+      <div v-if="selectedOrder" class="work-modal-backdrop fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/45 backdrop-blur-sm" @click.self="closeOrder">
+        <div data-work-modal role="dialog" aria-modal="true" class="work-modal work-modal--structured h-[92vh] w-full max-w-5xl overflow-hidden bg-white shadow-2xl dark:bg-slate-900">
           <OrderDetail :order="selectedOrder" @close="closeOrder" @saved="handleOrderSaved" @routing-updated="handleRoutingUpdated" />
         </div>
       </div>
@@ -420,6 +400,7 @@
 </template>
 
 <script>
+import AdminOrderCard from '@/components/admin/orders/OrderCard.vue'
 import MetricCard from '~/components/admin/dashboard/MetricCard.vue'
 import OrderDetail from '~/components/modals/admin/OrderDetail.vue'
 
@@ -443,7 +424,7 @@ const emptyFilters = () => ({
 
 export default {
   name: 'AdminOperationsDashboard',
-  components: { MetricCard, OrderDetail },
+  components: { MetricCard, OrderDetail, AdminOrderCard },
   layout: 'admin',
   middleware: ['role-guard'],
   meta: { role: 'admin' },

@@ -7,7 +7,7 @@
       </div>
       <p v-if="error" role="alert" class="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">{{ error }}</p>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <article v-for="company in companies" :key="company.id" class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <article v-for="company in companies" :key="company.id" class="work-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div class="flex items-center gap-3">
             <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white p-1">
               <img v-if="logo(company)" :src="logo(company)" :alt="company.name" class="h-full w-full object-contain" />
@@ -23,8 +23,8 @@
       </div>
       <p v-if="!loading && !companies.length" class="text-sm text-slate-500">{{ t.empty }}</p>
     </div>
-    <div v-if="formOpen" class="fixed inset-0 z-[1100] flex items-center justify-center bg-black/40 p-4" @click.self="close">
-      <form class="max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900" @submit.prevent="save">
+    <div v-if="formOpen" class="work-modal-backdrop fixed inset-0 z-[1100] flex items-center justify-center bg-black/40 p-4" @click.self="close">
+      <form data-work-modal role="dialog" aria-modal="true" class="work-modal max-h-[90vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900" @submit.prevent="save">
         <h2 class="text-xl font-bold">{{ editing ? t.edit : t.add }}</h2>
         <label class="block text-sm">{{ t.name }}<input v-model.trim="form.name" required maxlength="255" class="field mt-1" /></label>
         <label class="block text-sm">{{ t.logo }}<input type="file" accept="image/png,image/jpeg,image/webp" class="mt-2 block w-full text-xs" @change="chooseLogo" /></label>

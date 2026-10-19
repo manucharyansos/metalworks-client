@@ -3,25 +3,22 @@
     <section v-if="dxfFiles.length">
       <h4 class="text-sm font-semibold mb-2">DXF ֆայլեր</h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          v-for="f in dxfFiles"
-          :key="keyOf(f)"
-          class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 bg-gray-50 dark:bg-gray-800/40"
-        >
+        <div v-for="f in dxfFiles" :key="keyOf(f)" class="work-file-row">
           <div class="text-sm font-medium truncate mb-2">
             {{ f.original_name }}
           </div>
           <div class="flex items-center gap-2">
             <button
               v-if="$can('pmp_files.view')"
-              class="flex-1 h-10 rounded-lg bg-gray-900 text-white dark:bg-gray-700 hover:bg-black/80 transition"
+              class="work-button flex-1"
+              data-variant="dark"
               @click="downloadFile(f)"
             >
               Ներբեռնել
             </button>
             <button
               v-if="$can('pmp_files.view')"
-              class="flex-1 h-10 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
+              class="work-button flex-1"
               @click="openDxf(f)"
             >
               Դիտել
@@ -97,17 +94,14 @@
     <section v-if="cadFiles.length">
       <h4 class="text-sm font-semibold mb-2">CAD ֆայլեր</h4>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          v-for="f in cadFiles"
-          :key="keyOf(f)"
-          class="rounded-xl border border-gray-200 dark:border-gray-800 p-4 bg-white dark:bg-gray-900"
-        >
+        <div v-for="f in cadFiles" :key="keyOf(f)" class="work-file-row">
           <div class="text-sm font-medium truncate mb-3">
             {{ f.original_name }}
           </div>
           <button
             v-if="$can('pmp_files.view')"
-            class="w-full h-10 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
+            class="work-button w-full"
+            data-variant="dark"
             @click="downloadFile(f)"
           >
             Ներբեռնել
@@ -116,12 +110,43 @@
       </div>
     </section>
 
-    <DxfViewerModal
+    <div
       v-if="showDxf"
-      :dxf-url="currentDxfPath"
-      :file-meta="currentDxfFile"
-      @close="closeDxf"
-    />
+      class="work-modal-backdrop fixed inset-0 z-[1500] flex items-center justify-center"
+      @click.self="closeDxf"
+      @keydown.esc.stop="closeDxf"
+    >
+      <section
+        data-work-modal
+        class="work-modal work-modal--structured flex w-full max-w-5xl flex-col"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Ֆայլի դիտում"
+      >
+        <header
+          class="work-modal__header flex items-center justify-between gap-3"
+        >
+          <h4 class="work-section__title break-all">
+            {{ currentDxfFile?.original_name || 'DXF' }}
+          </h4>
+          <button
+            type="button"
+            class="work-modal__close"
+            aria-label="Փակել ֆայլը"
+            @click="closeDxf"
+          >
+            ✕
+          </button>
+        </header>
+        <div class="h-[360px] min-h-[240px] sm:h-[560px]">
+          <DxfViewerModal
+            :dxf-url="currentDxfPath"
+            :file-meta="currentDxfFile"
+            @close="closeDxf"
+          />
+        </div>
+      </section>
+    </div>
     <notifications />
   </div>
 </template>

@@ -4,7 +4,7 @@
     <transition name="fade">
       <div
         v-if="isOpenModal"
-        class="fixed inset-0 bg-black/50 z-40"
+        class="work-modal-backdrop fixed inset-0 bg-black/50 z-40"
         aria-hidden="true"
       />
     </transition>
@@ -13,16 +13,17 @@
     <transition name="zoom">
       <div
         v-if="isOpenModal"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        class="work-modal-frame fixed inset-0 z-50 flex items-center justify-center p-4"
         role="dialog"
         aria-modal="true"
       >
         <div
-          class="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
+          data-work-modal
+          class="work-modal relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
         >
           <button
             type="button"
-            class="absolute top-3 right-3 z-40 text-gray-600 hover:text-gray-800 transition-colors bg-white rounded-full p-2 shadow-sm"
+            class="work-modal__close absolute top-3 right-3 z-40 text-gray-600 hover:text-gray-800 transition-colors bg-white rounded-full p-2 shadow-sm"
             aria-label="Close"
             @click="$emit('close-modal')"
           >

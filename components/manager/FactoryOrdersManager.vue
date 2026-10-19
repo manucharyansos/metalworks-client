@@ -40,7 +40,7 @@
       </section>
 
       <section class="grid gap-3 sm:grid-cols-3">
-        <div class="metric">
+        <div class="work-card metric">
           <p class="metric-label">{{ t.factory }}</p>
           <p
             class="mt-2 truncate text-sm font-black text-slate-950 dark:text-white"
@@ -48,11 +48,11 @@
             {{ selectedFactoryName }}
           </p>
         </div>
-        <div class="metric">
+        <div class="work-card metric">
           <p class="metric-label">{{ t.orders }}</p>
           <p class="metric-value">{{ filteredOrders.length }}</p>
         </div>
-        <div class="metric">
+        <div class="work-card metric">
           <p class="metric-label">{{ t.access }}</p>
           <p
             class="mt-2 text-sm font-black text-emerald-600 dark:text-emerald-300"
@@ -188,7 +188,7 @@
             <article
               v-for="order in filteredOrders"
               :key="order.id"
-              class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"
+              class="work-card work-task-card"
             >
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
@@ -248,11 +248,12 @@
 
     <div
       v-if="isDetailsOpen"
-      class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm"
+      class="work-modal-backdrop fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm"
       @click.self="isDetailsOpen = false"
     >
       <div
-        class="relative max-h-[92vh] w-full max-w-5xl overflow-y-auto rounded-[28px] bg-white p-5 shadow-2xl dark:bg-slate-900 sm:p-7"
+data-work-modal role="dialog" aria-modal="true"
+        class="work-modal relative max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-[28px] bg-white p-5 shadow-2xl dark:bg-slate-900 sm:p-7"
       >
         <button
           class="absolute right-4 top-4 z-10 rounded-xl p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"

@@ -13,25 +13,25 @@
       </section>
 
       <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="metric-card">
+        <div class="work-card metric-card">
           <div class="metric-icon bg-blue-50 text-blue-700 dark:bg-blue-950/35 dark:text-blue-300">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2Zm2 4h6M9 12h6M9 16h4" /></svg>
           </div>
           <div><p class="metric-label">Առաջադրանքներ</p><p class="metric-value">{{ allOrders.length }}</p></div>
         </div>
-        <div class="metric-card" :class="!$can('materials.view') ? 'opacity-55' : ''">
+        <div class="work-card metric-card" :class="!$can('materials.view') ? 'opacity-55' : ''">
           <div class="metric-icon bg-violet-50 text-violet-700 dark:bg-violet-950/35 dark:text-violet-300">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m12 3 8 4-8 4-8-4 8-4Zm-8 9 8 4 8-4M4 17l8 4 8-4" /></svg>
           </div>
           <div><p class="metric-label">Նյութեր</p><p class="metric-value">{{ $can('materials.view') ? materials.length : '—' }}</p></div>
         </div>
-        <div class="metric-card" :class="!$can('workers.view') ? 'opacity-55' : ''">
+        <div class="work-card metric-card" :class="!$can('workers.view') ? 'opacity-55' : ''">
           <div class="metric-icon bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 12a4 4 0 100-8 4 4 0 000 8Zm-7 9a7 7 0 0114 0m2-8v6m-3-3h6" /></svg>
           </div>
           <div><p class="metric-label">Աշխատակիցներ</p><p class="metric-value">{{ $can('workers.view') ? workers.length : '—' }}</p></div>
         </div>
-        <div class="metric-card">
+        <div class="work-card metric-card">
           <div class="metric-icon bg-amber-50 text-amber-700 dark:bg-amber-950/35 dark:text-amber-300">
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 2m6-2a9 9 0 11-18 0 9 9 0 0118 0Z" /></svg>
           </div>
@@ -79,7 +79,7 @@
           </div>
 
           <div class="space-y-3 p-4 md:hidden">
-            <article v-for="order in searchFilter" :key="order.id" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
+            <article v-for="order in searchFilter" :key="order.id" class="work-card work-task-card">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0"><p class="text-xs font-black text-slate-900 dark:text-white">{{ order.order_number?.number || `#${order.id}` }}</p><p class="mt-1 truncate text-sm font-semibold text-slate-700 dark:text-slate-200">{{ order.name || '—' }}</p></div>
                 <span class="rounded-full px-2 py-1 text-[9px] font-bold" :class="statusClass(order.status)">{{ statusLabel(order.status) }}</span>

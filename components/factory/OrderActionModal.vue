@@ -3,12 +3,13 @@
   <transition name="modal-backdrop">
     <div
       v-if="isOpen"
-      class="fixed inset-0 z-[9999] flex items-center justify-center px-4 py-8 overflow-y-auto bg-black/30 backdrop-blur-sm"
+      class="work-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center px-4 py-8 overflow-y-auto bg-black/30 backdrop-blur-sm"
       @click.self="close"
       @keydown.esc.stop.prevent="close"
     >
       <div
-        class="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-3xl shadow-2xl"
+        data-work-modal
+        class="work-modal relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-3xl shadow-2xl"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="`factory-order-action-title-${_uid}`"
@@ -44,7 +45,7 @@
               type="button"
               :disabled="saving"
               :aria-label="$t('factory_order_actions.close')"
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors ml-4"
+              class="work-modal__close text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors ml-4"
               @click="close"
             >
               <svg
@@ -247,12 +248,9 @@
           <button
             type="submit"
             :disabled="!canConfirm"
-            class="w-full py-4 rounded-2xl font-bold text-white text-lg transition-all duration-200 transform active:scale-98 shadow-lg"
-            :class="
-              canConfirm
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-indigo-500/30'
-                : 'bg-gray-400 cursor-not-allowed shadow-none'
-            "
+            class="work-button w-full"
+            :data-variant="requestMode ? 'answer' : 'primary'"
+            :class="canConfirm ? '' : 'cursor-not-allowed opacity-50'"
           >
             {{
               saving

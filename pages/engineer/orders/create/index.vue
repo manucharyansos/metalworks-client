@@ -65,7 +65,7 @@
         class="grid items-start gap-5 lg:grid-cols-[minmax(260px,_1fr)_2fr]"
       >
         <section
-          class="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
+          class="work-card min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
         >
           <h2 class="mb-5 text-base font-semibold">
             {{ $t('order_create.client_details') }}
@@ -162,7 +162,7 @@
         </section>
 
         <section
-          class="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
+          class="work-card min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
         >
           <h2 class="mb-5 text-base font-semibold">
             {{ $t('order_create.order_details') }}
@@ -424,7 +424,7 @@
 
       <section
         v-else
-        class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
+        class="work-card min-w-0 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
       >
         <show-files
           :pmps="pmpsData"
@@ -493,7 +493,7 @@
         role="status"
       >
         <div
-          class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900"
+          class="work-card flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-700 dark:bg-slate-900"
         >
           <div
             class="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900 dark:border-t-white"

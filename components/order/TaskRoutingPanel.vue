@@ -1,7 +1,7 @@
 <template>
   <section
     v-if="canManage"
-    class="my-5 rounded-2xl border border-blue-200 bg-blue-50/30 p-4 dark:border-blue-900 dark:bg-blue-950/20"
+    class="work-routing work-card my-5 rounded-2xl border border-blue-200 bg-blue-50/30 p-4 dark:border-blue-900 dark:bg-blue-950/20"
     data-task-routing
   >
     <div class="flex flex-wrap items-start justify-between gap-3">
