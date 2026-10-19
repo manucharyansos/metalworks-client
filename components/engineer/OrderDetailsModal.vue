@@ -61,6 +61,7 @@
             </div>
           </header>
           <div
+            ref="body"
             class="work-modal__body space-y-5 bg-slate-50/60 dark:bg-slate-950/30"
           >
             <section class="work-card work-section">
@@ -96,14 +97,12 @@
                 </p>
               </div>
             </section>
-            <section
-              v-if="(order?.factory_orders || []).length"
-              class="space-y-3"
-            >
+            <section v-if="steps.length" class="space-y-3">
               <h4 class="work-section__title">Արտադրամասեր</h4>
               <article
-                v-for="fo in order.factory_orders"
+                v-for="fo in steps"
                 :key="fo.id"
+                :data-task-step="fo.id"
                 class="work-card work-section"
               >
                 <div class="work-step-summary">
@@ -140,6 +139,14 @@
                 />
                 <FileGallery :items="fo.files || []" />
               </article>
+            </section>
+            <section
+              v-if="unroutedFiles.length"
+              class="work-card work-section"
+              data-task-attachments
+            >
+              <h4 class="work-section__title">Կցված ֆայլեր</h4>
+              <FileGallery :items="unroutedFiles" />
             </section>
             <TaskRoutingPanel
               :order="order"
@@ -182,7 +189,13 @@ import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
 import TaskChangeRequestPanel from '@/components/order/TaskChangeRequestPanel.vue'
 import TaskRoutingPanel from '@/components/order/TaskRoutingPanel.vue'
 import { isStepRejected, taskCopy } from '@/utils/task-workflow'
-import { boardCopy, stepStatusText, taskStage } from '@/utils/task-board'
+import {
+  boardCopy,
+  stepStatusText,
+  taskStage,
+  workshopSteps,
+  taskActionTarget,
+} from '@/utils/task-board'
 import FileGallery from '~/components/engineer/FileGallery.vue'
 
 export default {
@@ -198,8 +211,23 @@ export default {
   props: {
     visible: { type: Boolean, default: false },
     order: { type: Object, default: null },
+    focusTarget: { type: Object, default: null },
   },
+  data: () => ({ focusVersion: 0 }),
   computed: {
+    steps() {
+      return workshopSteps(this.order)
+    },
+    unroutedFiles() {
+      const routed = new Set(
+        this.steps.flatMap((step) =>
+          (step.files || []).map((file) => String(file.id))
+        )
+      )
+      return (this.order?.selected_files || [])
+        .map((selected) => selected.pmp_file)
+        .filter((file) => file?.id && !routed.has(String(file.id)))
+    },
     customerName() {
       return (
         this.order?.client?.company_name ||
@@ -209,13 +237,13 @@ export default {
       )
     },
     answerCount() {
-      return (this.order?.factory_orders || []).filter(
+      return this.steps.filter(
         (step) => step.pending_request || step.awaiting_engineer_confirmation
       ).length
     },
     fileCount() {
       return new Set([
-        ...(this.order?.factory_orders || []).flatMap((step) =>
+        ...this.steps.flatMap((step) =>
           (step.files || []).map((file) => file.id)
         ),
         ...(this.order?.selected_files || []).map(
@@ -230,21 +258,16 @@ export default {
       return taskStage(this.order)
     },
     needsAnswer() {
-      return (this.order?.factory_orders || []).some(
+      return this.steps.some(
         (step) => step.pending_request || step.awaiting_engineer_confirmation
       )
     },
     allRejected() {
-      const steps = (this.order?.factory_orders || []).filter(
-        (step) =>
-          !step.factory?.is_reference && step.factory?.is_workshop !== false
-      )
+      const steps = this.steps
       return steps.length > 0 && steps.every(isStepRejected)
     },
     statusLabel() {
-      if (
-        (this.order?.factory_orders || []).some((step) => step.pending_request)
-      )
+      if (this.steps.some((step) => step.pending_request))
         return this.t.requestAnswerNeeded
       if (this.needsAnswer) return this.boardText.review
       if (this.allRejected) return this.boardText.rejected
@@ -278,7 +301,7 @@ export default {
       return arr.reduce((a, s) => a + (Number(s.quantity) || 1), 0)
     },
     factoryCount() {
-      const fos = this.order?.factory_orders || []
+      const fos = this.steps
       return fos.reduce((acc, fo) => {
         const sum = (fo.files || []).reduce((b, f) => {
           const q =
@@ -301,7 +324,46 @@ export default {
       return 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300'
     },
   },
+  watch: {
+    visible(value) {
+      if (value) this.focusAction()
+      else this.focusVersion++
+    },
+    focusTarget() {
+      if (this.visible) this.focusAction()
+    },
+  },
   methods: {
+    focusAction() {
+      const version = ++this.focusVersion
+      this.$nextTick(() => {
+        if (!this.visible || version !== this.focusVersion) return
+        const body = this.$refs.body
+        if (!body) return
+        const target = taskActionTarget(this.order, this.focusTarget)
+        if (!target) {
+          body.scrollTop = 0
+          return
+        }
+        const article = Array.from(
+          body.querySelectorAll('[data-task-step]')
+        ).find((el) => el.dataset.taskStep === String(target.stepId))
+        if (!article) return
+        const panel =
+          (target.kind === 'request'
+            ? article.querySelector('[data-change-request]')
+            : target.kind === 'proof'
+            ? article.querySelector('[data-task-proof]')
+            : null) || article
+        panel.setAttribute('data-notification-focus', '')
+        panel.tabIndex = -1
+        panel.focus({ preventScroll: true })
+        body.scrollTop +=
+          panel.getBoundingClientRect().top -
+          body.getBoundingClientRect().top -
+          12
+      })
+    },
     stepLabel(step) {
       return stepStatusText(step, this.$i18n?.locale)
     },

@@ -439,7 +439,7 @@ test('notification messages use the selected language and links respect the curr
   assert.match(describeNotification(item, 'hy').text, /ժամկետը/)
   assert.match(describeNotification(item, 'ru').text, /перенести срок/)
   assert.match(describeNotification(item, 'en').text, /move the deadline/)
-  assert.deepEqual(notificationTarget(item, 'engineer'), { path: '/engineer', query: { order: '10' } })
+  assert.deepEqual(notificationTarget(item, 'engineer'), { path: '/engineer', query: { order: '10', action: 'request' } })
   assert.deepEqual(notificationTarget(item, 'laser'), { path: '/factory/laser', query: {} })
   const bell = notificationBell()
   assert.equal(bell.when(new Date().toISOString()), 'Հիմա')

@@ -115,14 +115,20 @@ export const catalogCopy = {
 export function catalogText(locale) {
   return catalogCopy[String(locale || 'hy').split('-')[0]] || catalogCopy.hy
 }
-export function isWorkshop(factory) {
+export function isProductionWorkshop(factory) {
   return (
     factory &&
     factory.is_workshop !== false &&
-    factory.is_active !== false &&
     !isReferenceFactory(factory) &&
-    String(factory.value || '').toUpperCase() !== 'SW'
+    !['SW', 'INFO', 'PDF'].includes(
+      String(factory.value || '')
+        .trim()
+        .toUpperCase()
+    )
   )
+}
+export function isWorkshop(factory) {
+  return isProductionWorkshop(factory) && factory.is_active !== false
 }
 export function isReferenceFile(file, factories = []) {
   if (typeof file?.is_reference_file === 'boolean')

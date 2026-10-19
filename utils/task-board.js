@@ -1,7 +1,42 @@
 import { isStepCompleted, isStepRejected } from '@/utils/task-workflow'
+import { isProductionWorkshop } from '@/utils/workshop-catalog'
+
+export function workshopSteps(order) {
+  return (order?.factory_orders || []).filter(
+    (step) => !step.factory || isProductionWorkshop(step.factory)
+  )
+}
+
+export function taskActionTarget(order, target) {
+  if (!target?.enabled) return null
+  const steps = workshopSteps(order)
+  const step =
+    steps.find((step) => String(step.id) === String(target.stepId)) ||
+    steps.find(
+      (step) => step.pending_request || step.awaiting_engineer_confirmation
+    ) ||
+    steps[0]
+  if (!step) return null
+  const kind =
+    target.action === 'proof' && step.awaiting_engineer_confirmation
+      ? 'proof'
+      : step.pending_request
+      ? 'request'
+      : step.awaiting_engineer_confirmation
+      ? 'proof'
+      : 'step'
+  return { stepId: step.id, kind }
+}
 
 export const boardCopy = {
   hy: {
+    loading: 'Բեռնվում է…',
+    retry: 'Կրկին փորձել',
+    loadFailed: 'Չհաջողվեց բեռնել սյունակը',
+    empty: 'Այս կարգավիճակով առաջադրանքներ չկան',
+    previousPage: 'Նախորդ էջ',
+    nextPage: 'Հաջորդ էջ',
+    perColumn: 'Յուրաքանչյուր սյունակում',
     shortCreated: 'Ստեղծված',
     created: 'Ստեղծված առաջադրանքներ',
     accepted: 'Ընդունված',
@@ -27,6 +62,13 @@ export const boardCopy = {
     stage: 'Առաջադրանքների փուլերը',
   },
   ru: {
+    loading: 'Загрузка…',
+    retry: 'Повторить',
+    loadFailed: 'Не удалось загрузить колонку',
+    empty: 'Нет задач с этим статусом',
+    previousPage: 'Предыдущая страница',
+    nextPage: 'Следующая страница',
+    perColumn: 'В каждой колонке',
     shortCreated: 'Созданные',
     created: 'Созданные задания',
     accepted: 'Принятые',
@@ -52,6 +94,13 @@ export const boardCopy = {
     stage: 'Этапы заданий',
   },
   en: {
+    loading: 'Loading…',
+    retry: 'Try again',
+    loadFailed: 'Could not load this column',
+    empty: 'No tasks with this status',
+    previousPage: 'Previous page',
+    nextPage: 'Next page',
+    perColumn: 'Per column',
     shortCreated: 'Created',
     created: 'Created tasks',
     accepted: 'Accepted',
@@ -79,9 +128,7 @@ export const boardCopy = {
 }
 
 export function taskStage(order) {
-  const steps = (order?.factory_orders || []).filter(
-    (step) => !step.factory?.is_reference && step.factory?.is_workshop !== false
-  )
+  const steps = workshopSteps(order)
   const active = steps.filter((step) => !isStepRejected(step))
   if (
     order?.status === 'completed' ||

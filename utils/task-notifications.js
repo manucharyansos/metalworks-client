@@ -231,11 +231,19 @@ const FACTORY_HOME = {
 // task itself; everyone else lands on their own workspace.
 export function notificationTarget(notification, role) {
   if (role === 'engineer') {
+    const query = notification?.order_id
+      ? { order: String(notification.order_id) }
+      : {}
+    if (query.order) {
+      const step = Number(notification?.factory_order_id)
+      if (Number.isSafeInteger(step) && step > 0) query.step = String(step)
+      if (notification?.type === 'step.finished_review') query.action = 'proof'
+      else if (notification?.type === 'request.submitted')
+        query.action = 'request'
+    }
     return {
       path: '/engineer',
-      query: notification?.order_id
-        ? { order: String(notification.order_id) }
-        : {},
+      query,
     }
   }
   if (FACTORY_HOME[role]) return { path: FACTORY_HOME[role], query: {} }

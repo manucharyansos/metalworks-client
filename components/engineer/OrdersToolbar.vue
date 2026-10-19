@@ -6,7 +6,8 @@
         :value="search"
         class="w-full rounded-xl border px-4 py-2.5 dark:bg-gray-800 dark:text-gray-100"
         :placeholder="
-          $t?.('search') || 'Որոնել առաջադրանք… (անուն, նկարագրություն, համար, կոդ)'
+          $t?.('search') ||
+          'Որոնել առաջադրանք… (անուն, նկարագրություն, համար, կոդ)'
         "
         @input="onSearchInput"
       />
@@ -40,7 +41,7 @@
 
     <!-- per page -->
     <div class="flex items-center gap-2">
-      <label class="text-sm opacity-80">Էջում</label>
+      <label class="text-sm opacity-80">{{ perPageLabel }}</label>
 
       <select
         v-if="!showCustom"
@@ -75,6 +76,7 @@
 export default {
   name: 'OrdersToolbar',
   props: {
+    perPageLabel: { type: String, default: 'Էջում' },
     search: { type: String, default: '' },
     perPage: { type: Number, default: 12 },
   },

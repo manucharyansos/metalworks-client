@@ -1,191 +1,162 @@
 <template>
-  <div class="min-h-screen w-full bg-gray-50 dark:bg-gray-950">
-    <div
-      v-if="$can('orders.view')"
-      class="container mx-auto px-4 sm:px-6 lg:px-8 py-8"
-    >
-      <div class="flex items-center justify-between gap-3 flex-wrap">
-        <div class="flex items-center gap-2">
-          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Իմ առաջադրանքները
-          </h1>
-          <InfoTooltip
-            >Փնտրեք, դիտեք և կառավարեք ձեր ստեղծած առաջադրանքները։</InfoTooltip
-          >
-        </div>
-      </div>
-
-      <nav class="mt-6" :aria-label="boardText.stage" data-task-stage-filters>
-        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <button
-            v-for="stage in stages"
-            :key="stage"
-            type="button"
-            :data-task-stage="stage"
-            :aria-pressed="filters.stage === stage ? 'true' : 'false'"
-            class="min-w-0 rounded-2xl border p-4 text-left transition"
-            :class="
-              filters.stage === stage
-                ? 'border-indigo-500 bg-indigo-50 text-indigo-900 dark:bg-indigo-950/30 dark:text-indigo-100'
-                : 'border-slate-200 bg-white text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200'
-            "
-            @click="selectStage(stage)"
-          >
-            <span class="block text-2xl font-black">{{
-              getStageCounts[stage] || 0
-            }}</span>
-            <span class="mt-1 block text-xs font-semibold sm:text-sm">{{
-              stage === 'created' ? boardText.shortCreated : boardText[stage]
-            }}</span>
-          </button>
-        </div>
-        <button
-          type="button"
-          data-task-stage=""
-          :aria-pressed="!filters.stage ? 'true' : 'false'"
-          class="mt-3 rounded-xl px-3 py-2 text-sm font-bold"
-          :class="
-            !filters.stage ? 'bg-slate-200 dark:bg-slate-800' : 'text-slate-500'
-          "
-          @click="selectStage('')"
+  <main class="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
+    <div v-if="$can('orders.view')" class="w-full px-4 py-6 sm:px-6 lg:px-8">
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">
+          Իմ առաջադրանքները
+        </h1>
+        <InfoTooltip
+          >Ձեր ստեղծած առաջադրանքները՝ ըստ աշխատանքի ընթացքի։</InfoTooltip
         >
-          {{ boardText.all }}
-        </button>
-      </nav>
-      <label class="mt-5 block text-sm font-semibold">
+      </div>
+      <div class="mt-5 flex flex-wrap items-end gap-4">
+        <div class="min-w-0 flex-1">
+          <OrdersToolbar
+            data-engineer-toolbar
+            :search="filters.search"
+            :per-page="getBoardPerPage"
+            :per-page-label="boardText.perColumn"
+            @update:search="onSetSearch"
+            @update:per-page="onSetPerPage"
+          />
+        </div>
         <select
           v-model="confirmationFilter"
           data-engineer-confirmation-filter
-          class="w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+          :aria-label="t.pending"
+          class="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:w-auto sm:max-w-xs"
           @change="selectConfirmation"
         >
           <option value="">{{ t.all }}</option>
           <option value="waiting">{{ t.pending }}</option>
         </select>
-      </label>
-      <div class="mt-6">
-        <OrdersToolbar
-          :search="filters.search"
-          :per-page="pagination.per_page"
-          @update:search="onSetSearch"
-          @update:per-page="onSetPerPage"
-        />
       </div>
-      <div class="mt-6">
-        <div
-          v-if="error"
-          class="p-4 rounded-xl bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-200"
+      <div
+        class="mt-6 grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-4"
+        data-engineer-board
+      >
+        <section
+          v-for="stage in stages"
+          :key="stage"
+          :data-engineer-board-stage="stage"
+          class="work-card engineer-board-column flex min-w-0 flex-col overflow-hidden"
+          :aria-label="boardText[stage]"
+          :aria-busy="columns[stage].loading ? 'true' : 'false'"
         >
-          {{ error }}
-        </div>
-
-        <!-- skeletons -->
-        <div
-          v-if="loading"
-          class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
-        >
-          <div
-            v-for="i in 8"
-            :key="i"
-            class="work-card animate-pulse bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5"
+          <header
+            class="flex shrink-0 items-center justify-between gap-2 border-b border-slate-200 px-4 py-4 dark:border-slate-800"
           >
-            <div
-              class="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded mb-3"
-            ></div>
-            <div
-              class="h-5 w-40 bg-gray-200 dark:bg-gray-800 rounded mb-2"
-            ></div>
-            <div class="h-20 bg-gray-200 dark:bg-gray-800 rounded mb-4"></div>
-            <div class="flex justify-between">
-              <div class="h-8 w-24 bg-gray-200 dark:bg-gray-800 rounded"></div>
-              <div class="h-8 w-20 bg-gray-200 dark:bg-gray-800 rounded"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- empty -->
-        <div
-          v-else-if="!orders || !orders.length"
-          class="rounded-2xl bg-white dark:bg-gray-900 border border-dashed border-gray-300 dark:border-gray-700 p-10 text-center"
-        >
-          <div
-            class="mx-auto w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 grid place-items-center mb-3"
-          >
-            <svg
-              class="w-6 h-6 opacity-60"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
+            <h2 class="min-w-0 text-sm font-bold">{{ boardText[stage] }}</h2>
+            <span
+              class="work-status shrink-0"
+              :data-tone="stageTone(stage)"
+              data-stage-count
+              >{{ columns[stage].pagination.total }}</span
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 7l9 4 9-4-9-4-9 4ZM3 7v10l9 4 9-4V7"
-              />
-            </svg>
+          </header>
+          <div
+            class="engineer-board-column__body min-h-0 flex-1 space-y-4 overflow-y-auto bg-slate-50/60 p-3 dark:bg-slate-950/20"
+          >
+            <p
+              v-if="columns[stage].loading && !columns[stage].loaded"
+              role="status"
+              class="py-8 text-center text-sm text-slate-500"
+            >
+              {{ boardText.loading }}
+            </p>
+            <div
+              v-if="columns[stage].error"
+              role="alert"
+              class="rounded-xl bg-rose-50 p-4 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-300"
+            >
+              <p>{{ boardText.loadFailed }}</p>
+              <button
+                type="button"
+                class="mt-2 font-bold underline"
+                :disabled="columns[stage].loading"
+                @click="
+                  changePage(stage, columns[stage].pagination.current_page)
+                "
+              >
+                {{ boardText.retry }}
+              </button>
+            </div>
+            <p
+              v-else-if="columns[stage].loaded && !columns[stage].orders.length"
+              class="rounded-xl border border-dashed border-slate-200 px-3 py-8 text-center text-sm text-slate-500 dark:border-slate-700"
+            >
+              {{ boardText.empty }}
+            </p>
+            <OrderCard
+              v-for="order in columns[stage].orders"
+              :key="order.id"
+              :order="order"
+              @open="openOrder"
+            />
           </div>
-          <h3 class="text-lg font-semibold mb-1">Առաջադրանքներ չկան</h3>
-          <p class="text-sm text-gray-500">
-            Սկսեք նոր առաջադրանքից կամ փոխեք որոնման դաշտը
-          </p>
-        </div>
-
-        <!-- grid -->
-        <transition-group
-          v-if="!loading"
-          name="card"
-          tag="div"
-          class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
-        >
-          <OrderCard
-            v-for="o in orders"
-            :key="o.id"
-            :order="o"
-            @open="openOrder"
-          />
-        </transition-group>
-      </div>
-
-      <div class="mt-6">
-        <Pagination :meta="pagination" @change="onGoPage" />
+          <footer
+            class="flex shrink-0 items-center justify-between gap-2 border-t border-slate-200 p-3 text-xs dark:border-slate-800"
+          >
+            <button
+              type="button"
+              class="work-button"
+              :aria-label="boardText.previousPage"
+              :disabled="
+                columns[stage].loading ||
+                columns[stage].pagination.current_page <= 1
+              "
+              data-column-previous
+              @click="
+                changePage(stage, columns[stage].pagination.current_page - 1)
+              "
+            >
+              ‹
+            </button>
+            <span class="text-slate-500 dark:text-slate-400"
+              >{{ columns[stage].pagination.current_page }} /
+              {{ columns[stage].pagination.last_page }}</span
+            >
+            <button
+              type="button"
+              class="work-button"
+              :aria-label="boardText.nextPage"
+              :disabled="
+                columns[stage].loading ||
+                columns[stage].pagination.current_page >=
+                  columns[stage].pagination.last_page
+              "
+              data-column-next
+              @click="
+                changePage(stage, columns[stage].pagination.current_page + 1)
+              "
+            >
+              ›
+            </button>
+          </footer>
+        </section>
       </div>
     </div>
-    <div
-      v-else
-      class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 px-4"
-    >
-      <PermissionDenied />
-    </div>
-
-    <!-- DETAILS MODAL -->
+    <PermissionDenied v-else />
     <OrderDetailsModal
       :visible="isDetailsOpen && $can('orders.view')"
       :order="selectedOrder"
+      :focus-target="focusTarget"
       @close="isDetailsOpen = false"
       @updated="onTaskUpdated"
     />
-  </div>
+  </main>
 </template>
-
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import { apiErrorMessage, taskCopy } from '@/utils/task-workflow'
 import { boardCopy } from '@/utils/task-board'
 import OrdersToolbar from '~/components/engineer/OrdersToolbar.vue'
 import OrderCard from '~/components/engineer/OrderCard.vue'
-import Pagination from '~/components/ui/Pagination.vue'
 import OrderDetailsModal from '~/components/engineer/OrderDetailsModal.vue'
 import PermissionDenied from '@/components/modals/permission/PermissionDenied.vue'
 
 export default {
-  components: {
-    PermissionDenied,
-    OrdersToolbar,
-    OrderCard,
-    Pagination,
-    OrderDetailsModal,
-  },
+  components: { PermissionDenied, OrdersToolbar, OrderCard, OrderDetailsModal },
   layout: 'engineer',
   middleware: ['role-guard'],
   meta: { role: 'engineer' },
@@ -194,6 +165,7 @@ export default {
     confirmationFilter: '',
     refreshTimer: null,
     selectedOrder: null,
+    focusTarget: null,
     openQueryVersion: 0,
     stages: ['created', 'accepted', 'in_progress', 'completed'],
   }),
@@ -205,31 +177,25 @@ export default {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
     ...mapGetters('engineer', [
-      'getOrders',
-      'getPagination',
+      'getBoardColumns',
+      'getBoardPerPage',
       'getFilters',
-      'getStageCounts',
-      'isLoading',
-      'getError',
     ]),
-    orders() {
-      return this.getOrders
-    },
-    pagination() {
-      return this.getPagination
+    columns() {
+      return this.getBoardColumns
     },
     filters() {
       return this.getFilters
     },
-    loading() {
-      return this.isLoading
+    orders() {
+      return this.stages.flatMap((stage) => this.columns[stage].orders)
     },
-    error() {
-      return this.getError
+    loading() {
+      return this.stages.some((stage) => this.columns[stage].loading)
     },
   },
   watch: {
-    '$route.query.order'() {
+    '$route.query'() {
       this.openFromQuery()
     },
     orders(rows) {
@@ -241,9 +207,7 @@ export default {
   },
   created() {
     this.confirmationFilter = this.filters.confirmation || ''
-    this.fetchOrders().catch(() => {
-      this.$notify?.({ type: 'error', text: 'Չհաջողվեց բեռնել առաջադրանքները' })
-    })
+    this.fetchBoard({ reset: true })
     this.openFromQuery()
   },
   mounted() {
@@ -254,91 +218,91 @@ export default {
   },
   beforeDestroy() {
     this.openQueryVersion++
+    this.$store.commit('engineer/INVALIDATE_BOARD')
     clearInterval(this.refreshTimer)
     window.removeEventListener('focus', this.refreshOrders)
   },
   methods: {
-    selectStage(stage) {
-      return this.fetchOrders({
-        page: 1,
-        stage,
-        confirmation: this.confirmationFilter,
-      })
+    ...mapActions('engineer', ['fetchBoard', 'fetchBoardColumn']),
+    stageTone(stage) {
+      return {
+        created: 'neutral',
+        accepted: 'blue',
+        in_progress: 'blue',
+        completed: 'green',
+      }[stage]
     },
     selectConfirmation() {
-      return this.fetchOrders({
-        page: 1,
+      return this.fetchBoard({
         confirmation: this.confirmationFilter,
+        reset: true,
       })
     },
-    // A notification opens its task directly: /engineer?order=<id>
     async openFromQuery() {
       const version = ++this.openQueryVersion
       const id = Number(this.$route.query.order)
-      if (!id) return
+      if (!Number.isSafeInteger(id) || id <= 0) return
       const companyId = this.$store?.state?.workspace?.company?.id
       const current = () =>
         version === this.openQueryVersion &&
         !this._isDestroyed &&
         Number(this.$route.query.order) === id &&
         this.$store?.state?.workspace?.company?.id === companyId
-      let order = (this.orders || []).find((row) => row.id === id)
-      if (!order) {
-        try {
-          const { data } = await this.$axios.get(
-            `/api/engineers/engineer/${id}`
-          )
-          order = data.order
-        } catch (error) {
-          if (current())
-            this.$notify?.({ type: 'error', text: apiErrorMessage(error) })
-        }
+      // A notification always resolves fresh state, including a task outside the
+      // currently visible column page or a decision already handled elsewhere.
+      let order
+      try {
+        const { data } = await this.$axios.get(`/api/engineers/engineer/${id}`)
+        order = data.order
+      } catch (error) {
+        if (current())
+          this.$notify?.({ type: 'error', text: apiErrorMessage(error) })
       }
       if (!current()) return
-      if (order) this.openOrder(order)
-      // The link is single-use, so a refresh does not reopen the task.
-      const { order: _order, ...query } = this.$route.query
+      const target = {
+        stepId: Number(this.$route.query.step) || null,
+        action: this.$route.query.action,
+        enabled: true,
+      }
+      if (order) this.openOrder(order, target)
+      const query = { ...this.$route.query }
+      for (const key of ['order', 'step', 'action']) delete query[key]
       const result = this.$router.replace({ path: this.$route.path, query })
       if (result && result.catch) result.catch(() => {})
     },
     refreshOrders() {
-      return this.fetchOrders({ confirmation: this.confirmationFilter })
+      if (!this.loading)
+        return this.fetchBoard({ confirmation: this.confirmationFilter })
     },
     onTaskUpdated(order) {
       this.selectedOrder = order
-      this.refreshOrders()
+      this.fetchBoard({ confirmation: this.confirmationFilter })
     },
-    ...mapActions('engineer', [
-      'fetchOrders',
-      'setSearch',
-      'setPerPage',
-      'goPage',
-    ]),
-    onSetSearch(q) {
-      this.setSearch(q)
+    onSetSearch(search) {
+      return this.fetchBoard({ search, reset: true })
     },
-    onSetPerPage(n) {
-      this.setPerPage(n)
+    onSetPerPage(perPage) {
+      return this.fetchBoard({ perPage, reset: true })
     },
-    onGoPage(p) {
-      this.goPage(p)
+    changePage(stage, page) {
+      return this.fetchBoardColumn({ stage, page })
     },
-    openOrder(order) {
+    openOrder(order, target = null) {
       this.selectedOrder = order
+      this.focusTarget = target
       this.isDetailsOpen = true
     },
   },
 }
 </script>
-
-<style>
-.card-enter-active,
-.card-leave-active {
-  transition: all 0.18s ease;
+<style scoped>
+@media (min-width: 768px) {
+  .engineer-board-column {
+    height: clamp(440px, calc(100vh - 245px), 1100px);
+    height: clamp(440px, calc(100dvh - 245px), 1100px);
+  }
 }
-.card-enter,
-.card-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
+.engineer-board-column__body > .work-task-card {
+  height: auto;
 }
 </style>

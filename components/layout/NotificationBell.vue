@@ -62,6 +62,7 @@
           <button
             type="button"
             data-notification-item
+            :data-notification-id="row.id"
             class="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800"
             :class="row.read_at ? '' : 'bg-indigo-50/60 dark:bg-indigo-950/20'"
             @click="go(row)"

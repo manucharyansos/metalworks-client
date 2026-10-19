@@ -1,3 +1,21 @@
+const STAGES = ['created', 'accepted', 'in_progress', 'completed']
+const scopeKey = (root) =>
+  `${root?.auth?.user?.id || ''}:${root?.workspace?.company?.id || ''}`
+const emptyColumns = () =>
+  Object.fromEntries(
+    STAGES.map((stage) => [
+      stage,
+      {
+        orders: [],
+        pagination: { current_page: 1, total: 0, per_page: 4, last_page: 1 },
+        loading: false,
+        loaded: false,
+        error: null,
+        requestVersion: 0,
+      },
+    ])
+  )
+
 export const state = () => ({
   orders: [],
   order: null,
@@ -18,6 +36,10 @@ export const state = () => ({
   },
   stageCounts: { created: 0, accepted: 0, in_progress: 0, completed: 0 },
   requestVersion: 0,
+  boardVersion: 0,
+  boardScope: '',
+  boardPerPage: 4,
+  boardColumns: emptyColumns(),
   loading: false,
   error: null,
   laserFiles: [],
@@ -25,6 +47,9 @@ export const state = () => ({
 })
 
 export const getters = {
+  getBoardColumns: (s, _getters, root) =>
+    s.boardScope === scopeKey(root) ? s.boardColumns : emptyColumns(),
+  getBoardPerPage: (s) => s.boardPerPage,
   getOrders: (s) => s.orders,
   getOrder: (s) => s.order,
   getPagination: (s) => s.pagination,
@@ -35,6 +60,35 @@ export const getters = {
 }
 
 export const mutations = {
+  START_BOARD(state, { scope, reset }) {
+    state.boardVersion++
+    if (reset || state.boardScope !== scope) state.boardColumns = emptyColumns()
+    state.boardScope = scope
+  },
+  SET_BOARD_PER_PAGE(state, value) {
+    state.boardPerPage = Math.max(1, Math.min(100, Number(value) || 4))
+  },
+  START_COLUMN(state, stage) {
+    const column = state.boardColumns[stage]
+    column.requestVersion++
+    column.loading = true
+    column.error = null
+  },
+  SET_COLUMN(state, { stage, data, error }) {
+    const column = state.boardColumns[stage]
+    if (data) {
+      column.orders = data.orders || []
+      column.pagination = data.pagination
+      column.loaded = true
+    }
+    column.error = error || null
+    column.loading = false
+  },
+  INVALIDATE_BOARD(state) {
+    state.boardVersion++
+    for (const column of Object.values(state.boardColumns))
+      column.loading = false
+  },
   START_REQUEST(state) {
     state.requestVersion++
   },
@@ -86,6 +140,60 @@ export const mutations = {
 }
 
 export const actions = {
+  async fetchBoard(
+    { commit, dispatch, rootState },
+    { search, confirmation, perPage, reset = false } = {}
+  ) {
+    if (search !== undefined) commit('SET_SEARCH', search)
+    if (confirmation !== undefined) commit('SET_CONFIRMATION', confirmation)
+    if (perPage !== undefined) commit('SET_BOARD_PER_PAGE', perPage)
+    commit('START_BOARD', { scope: scopeKey(rootState), reset })
+    const results = await Promise.all(
+      STAGES.map((stage) => dispatch('fetchBoardColumn', { stage }))
+    )
+    return results.every(Boolean)
+  },
+  async fetchBoardColumn({ commit, state, rootState }, { stage, page } = {}) {
+    if (!STAGES.includes(stage)) return false
+    const scope = scopeKey(rootState)
+    if (state.boardScope !== scope) return false
+    const boardVersion = state.boardVersion
+    commit('START_COLUMN', stage)
+    const column = state.boardColumns[stage]
+    const requestVersion = column.requestVersion
+    const current = () =>
+      state.boardVersion === boardVersion &&
+      column.requestVersion === requestVersion &&
+      state.boardScope === scope &&
+      scopeKey(rootState) === scope
+    const params = {
+      stage,
+      page: Math.max(1, Number(page) || column.pagination.current_page || 1),
+      per_page: state.boardPerPage,
+    }
+    if (state.filters.search) params.search = state.filters.search
+    if (state.filters.confirmation)
+      params.confirmation = state.filters.confirmation
+    try {
+      let { data } = await this.$axios.get('/api/engineers/engineer', {
+        params,
+      })
+      if (!current()) return false
+      if (params.page > data.pagination.last_page) {
+        params.page = data.pagination.last_page
+        const response = await this.$axios.get('/api/engineers/engineer', {
+          params,
+        })
+        data = response.data
+        if (!current()) return false
+      }
+      commit('SET_COLUMN', { stage, data })
+      return true
+    } catch (_) {
+      if (current()) commit('SET_COLUMN', { stage, error: 'loadFailed' })
+      return false
+    }
+  },
   async fetchOrders(
     { commit, state, rootState },
     { page, perPage, search, confirmation, stage } = {}
