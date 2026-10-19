@@ -99,7 +99,7 @@ export const actions = {
     try {
       const { method, body } = taskActionBody(order)
       const res = await this.$axios[method](
-        `api/factories/updateOrder/${order.id}`,
+        `/api/factories/updateOrder/${order.id}`,
         body
       )
       commit('SET_ORDER', res.data)

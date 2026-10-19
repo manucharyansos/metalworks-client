@@ -244,3 +244,21 @@ test('private file URLs capture the chosen working assignment', async () => {
   store.state.workspace.assignmentId = 21
   assert.ok(helpers.getOrderFileUrl(7).includes('assignment_id=21')); assert.ok(old.includes('assignment_id=22'))
 })
+
+
+test('relative business URLs preserve the selected company and secondary workshop assignment', async () => {
+  await harness(({ hooks, state }) => {
+    state.workspace.assignmentId = 22
+    for (const url of ['api/factories/updateOrder/10', '/api/factories/updateOrder/10', 'https://api.example.invalid/api/factories/updateOrder/10']) {
+      const request = { url, method: 'put' }
+      hooks.request(request)
+      assert.equal(request.headers['X-Company-ID'], '1')
+      assert.equal(request.headers['X-Assignment-ID'], '22')
+      hooks.response({ config: request })
+    }
+    const publicRequest = { url: 'api/workspace/brands', method: 'get', headers: { 'X-Company-ID': '1', 'X-Assignment-ID': '22' } }
+    hooks.request(publicRequest)
+    assert.equal(publicRequest.headers['X-Company-ID'], undefined)
+    assert.equal(publicRequest.headers['X-Assignment-ID'], undefined)
+  }, null, { user: assignmentUser })
+})
