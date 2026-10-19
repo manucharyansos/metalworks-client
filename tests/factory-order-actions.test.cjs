@@ -471,3 +471,15 @@ test('an older notification task read cannot reopen the wrong task or remove unr
   pending[0]({ data: { order: { id: 10 } } }); await old
   assert.deepEqual(opened, [11]); assert.deepEqual(replaced, [{ path: '/engineer', query: { filter: 'waiting' } }]); vm.$destroy()
 })
+
+
+test('closing an operator action tolerates a cleared workshop and preserves an entered proof on refresh', () => {
+  const modal = load('components/factory/OrderActionModal.vue').default
+  const state = { evidenceText: '' }
+  assert.doesNotThrow(() => modal.watch.factoryOrder.call(state, null))
+  modal.watch.factoryOrder.call(state, { evidence_text: 'Saved proof' })
+  assert.equal(state.evidenceText, 'Saved proof')
+  state.evidenceText = 'Current draft'
+  modal.watch.factoryOrder.call(state, { evidence_text: 'Older proof' })
+  assert.equal(state.evidenceText, 'Current draft')
+})
