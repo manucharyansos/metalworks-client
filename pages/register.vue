@@ -1,7 +1,7 @@
 <template>
   <main class="min-h-screen bg-slate-100 px-4 py-6 dark:bg-slate-950 sm:px-6 lg:px-8">
     <div class="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl items-center justify-center">
-      <section class="grid w-full overflow-hidden rounded-[32px] border border-white/70 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900 lg:grid-cols-[1.02fr_0.98fr]">
+      <section class="work-card grid w-full overflow-hidden rounded-[32px] border border-white/70 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900 lg:grid-cols-[1.02fr_0.98fr]">
         <WorkspaceBranding class="order-first lg:order-last" />
         <div class="order-last px-6 py-8 sm:px-10 sm:py-12 lg:order-first lg:px-14 lg:py-16">
           <div v-if="accepted" class="max-w-md" role="status" aria-live="polite">

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="p-4 md:p-5 bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60"
+    class="work-card p-4 md:p-5 bg-white/90 backdrop-blur rounded-2xl shadow-lg border border-white/60"
   >
     <!-- Factory selection -->
     <div v-if="!selectedFactory" class="space-y-4">
@@ -197,7 +197,7 @@
             <article
               v-for="file in remote.files"
               :key="file.id"
-              class="p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200 hover:border-indigo-300 transition-all duration-200"
+              class="work-card p-4 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-200 hover:border-indigo-300 transition-all duration-200"
               :class="{
                 'ring-2 ring-indigo-400 bg-indigo-50': selectedFiles.includes(
                   file.id
@@ -337,7 +337,7 @@
           class="mt-8 sticky bottom-4 left-0 right-0 mx-4 md:mx-0"
         >
           <div
-            class="bg-white/95 backdrop-blur-lg p-4 rounded-2xl shadow-2xl border border-gray-200 flex flex-col sm:flex-row gap-3"
+            class="work-card bg-white/95 backdrop-blur-lg p-4 rounded-2xl shadow-2xl border border-gray-200 flex flex-col sm:flex-row gap-3"
           >
             <button
               :disabled="!areQuantitiesValid"

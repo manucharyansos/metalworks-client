@@ -82,12 +82,12 @@
         <!-- skeletons -->
         <div
           v-if="loading"
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+          class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
         >
           <div
             v-for="i in 8"
             :key="i"
-            class="animate-pulse bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5"
+            class="work-card animate-pulse bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5"
           >
             <div
               class="h-4 w-24 bg-gray-200 dark:bg-gray-800 rounded mb-3"
@@ -136,7 +136,7 @@
           v-if="!loading"
           name="card"
           tag="div"
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
+          class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
         >
           <OrderCard
             v-for="o in orders"

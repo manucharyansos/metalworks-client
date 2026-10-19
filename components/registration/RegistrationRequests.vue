@@ -16,7 +16,7 @@
     <div v-else-if="listError" class="mt-6 rounded-2xl bg-rose-50 p-4 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-200" role="alert">{{ listError }} <button type="button" class="ml-2 font-bold underline" @click="loadRequests">{{ copy.retry }}</button></div>
     <p v-else-if="!requests.length" class="mt-6 rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-500 dark:border-slate-700">{{ copy.empty }}</p>
     <div v-else class="mt-6 grid gap-4 sm:grid-cols-2">
-      <article v-for="request in requests" :key="request.id" class="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900" :data-request-id="request.id">
+      <article v-for="request in requests" :key="request.id" class="work-card min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900" :data-request-id="request.id">
         <div class="flex flex-wrap items-start justify-between gap-2"><h2 class="min-w-0 break-words text-base font-bold">{{ fullName(request) }}</h2><span class="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold dark:bg-slate-800">{{ request.type === 'employee' ? copy.staff : copy.client }}</span></div>
         <p class="mt-2 break-all text-sm text-slate-500 dark:text-slate-400">{{ request.email }}</p>
         <p class="mt-2 break-words text-sm font-semibold">{{ request.company?.name }}</p>
@@ -33,8 +33,8 @@
     <div v-if="!loading && !listError && lastPage > 1" class="mt-6 flex flex-wrap items-center gap-3 text-sm"><button type="button" class="app-button-secondary" :disabled="page <= 1" @click="page--; loadRequests()">{{ copy.previous }}</button><span>{{ copy.page }} {{ page }} / {{ lastPage }}</span><button type="button" class="app-button-secondary" :disabled="page >= lastPage" @click="page++; loadRequests()">{{ copy.next }}</button></div>
 
     <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" :source-company-id="accessTarget.company_id" @close="accessTarget = null" @saved="loadRequests" />
-    <div v-if="selected" class="fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4" @click.self="closeReview" @keydown.esc="closeReview">
-      <section ref="dialog" role="dialog" aria-modal="true" aria-labelledby="request-review-title" tabindex="-1" class="mx-auto my-6 w-full max-w-lg rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:my-12 sm:p-8" @keydown.tab="trapFocus">
+    <div v-if="selected" class="work-modal-backdrop fixed inset-0 z-50 overflow-y-auto bg-slate-950/50 p-4" @click.self="closeReview" @keydown.esc="closeReview">
+      <section ref="dialog" data-work-modal role="dialog" aria-modal="true" aria-labelledby="request-review-title" tabindex="-1" class="work-modal mx-auto my-6 w-full max-w-lg rounded-3xl bg-white p-5 shadow-2xl dark:bg-slate-900 sm:my-12 sm:p-8" @keydown.tab="trapFocus">
         <h2 id="request-review-title" class="text-xl font-black">{{ action === 'approve' ? copy.approve : copy.reject }}</h2>
         <p class="mt-3 break-words font-bold">{{ fullName(selected) }}</p><p class="mt-1 break-all text-sm text-slate-500">{{ selected.email }}</p>
         <p class="mt-2 break-words text-sm font-semibold">{{ selected.company?.name }}</p>

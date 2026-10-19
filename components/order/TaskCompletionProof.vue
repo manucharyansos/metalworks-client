@@ -1,6 +1,6 @@
 <template>
   <div
-    class="mt-3 space-y-3 rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-700"
+    class="work-proof mt-3 space-y-3 rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-700"
     data-task-proof
   >
     <p class="font-semibold">

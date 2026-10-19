@@ -84,7 +84,12 @@ export const actions = {
   },
   async updateOrder({ commit }, { id, payload }) {
     try {
-      const response = await this.$axios.put(`/api/orders/order/${id}`, payload)
+      const resource =
+        this.$auth?.user?.role?.name === 'admin' ? 'admin' : 'orders'
+      const response = await this.$axios.put(
+        `/api/${resource}/order/${id}`,
+        payload
+      )
       const order = response.data?.order || response.data
       commit('SET_ORDER', order)
       return response.data

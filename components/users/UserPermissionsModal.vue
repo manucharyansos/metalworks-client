@@ -2,11 +2,11 @@
   <transition name="permission-fade">
     <div
       v-if="show"
-      class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/55 p-3 backdrop-blur-sm sm:p-6"
+      class="work-modal-backdrop fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/55 p-3 backdrop-blur-sm sm:p-6"
       @click.self="$emit('close')"
     >
-      <div class="flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-        <header class="border-b border-slate-100 bg-white px-5 py-5 dark:border-slate-800 dark:bg-slate-900 sm:px-7">
+      <div data-work-modal role="dialog" aria-modal="true" class="work-modal work-modal--structured flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+        <header class="work-modal__header border-b border-slate-100 bg-white px-5 py-5 dark:border-slate-800 dark:bg-slate-900 sm:px-7">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0 flex-1">
               <p class="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
@@ -19,7 +19,7 @@
 
             <button
               type="button"
-              class="rounded-xl p-2.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-white"
+              class="work-modal__close rounded-xl p-2.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-white"
               :aria-label="ui.close"
               @click="$emit('close')"
             >
@@ -86,7 +86,7 @@
 
           <div v-else class="space-y-5">
             <section class="grid gap-3 sm:grid-cols-3">
-              <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div class="work-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <p class="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{{ ui.available }}</p>
                 <p class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">{{ totalPermissions }}</p>
                 <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{{ ui.availableHint }}</p>
@@ -98,7 +98,7 @@
                 <p class="mt-1 text-[11px] text-emerald-700/75 dark:text-emerald-300/75">{{ ui.grantedHint }}</p>
               </div>
 
-              <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div class="work-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
                 <p class="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{{ ui.logic }}</p>
                 <p class="mt-2 text-xs font-black leading-5 text-slate-800 dark:text-slate-100">{{ ui.logicTitle }}</p>
                 <p class="mt-1 text-[11px] leading-5 text-slate-500 dark:text-slate-400">{{ ui.logicHint }}</p>
@@ -208,7 +208,7 @@
           </div>
         </div>
 
-        <footer class="flex flex-col-reverse gap-3 border-t border-slate-100 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+        <footer class="work-modal__footer flex flex-col-reverse gap-3 border-t border-slate-100 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between sm:px-7">
           <p class="max-w-2xl text-[10px] leading-4 text-slate-400">
             {{ ui.footer }}
           </p>

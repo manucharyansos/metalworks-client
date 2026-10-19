@@ -3,7 +3,7 @@
     <transition name="fade">
       <div
         v-if="isOpenModal"
-        class="fixed inset-0 bg-black/50 z-40"
+        class="work-modal-backdrop fixed inset-0 bg-black/50 z-40"
         aria-hidden="true"
       />
     </transition>
@@ -21,11 +21,12 @@
       >
         <div
           ref="dialog"
+          data-work-modal
           tabindex="-1"
-          class="relative w-full max-w-4xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-2xl shadow-2xl flex flex-col overflow-hidden file-modal"
+          class="work-modal work-modal--structured relative w-full max-w-4xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-2xl shadow-2xl flex flex-col overflow-hidden file-modal"
         >
           <div
-            class="flex items-start justify-between gap-3 border-b border-gray-200 dark:border-gray-700 p-4 sm:p-6"
+            class="work-modal__header flex items-start justify-between gap-3 border-b border-gray-200 dark:border-gray-700 p-4 sm:p-6"
           >
             <h2
               id="add-file-title"
@@ -37,7 +38,7 @@
             <button
               type="button"
               :disabled="busy"
-              class="shrink-0 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
+              class="work-modal__close shrink-0 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-50"
               :aria-label="$t('file_upload.close')"
               @click="$emit('closeModal')"
             >
@@ -51,7 +52,9 @@
               </svg>
             </button>
           </div>
-          <div class="flex-1 min-h-0 p-4 sm:p-6 space-y-5 overflow-y-auto">
+          <div
+            class="work-modal__body flex-1 min-h-0 space-y-5 overflow-y-auto"
+          >
             <p v-if="policyLoading" role="status" class="text-sm">
               {{ $t('file_upload.loading_formats') }}
             </p>
@@ -73,8 +76,13 @@
               v-else
               class="text-xs text-gray-500 dark:text-gray-400 break-words"
             >
-              <template v-if="serverValidatedFormats">{{ $t('file_upload.server_formats') }}</template>
-              <template v-else>{{ $t('file_upload.formats') }}: {{ formatLabel }}</template> ·
+              <template v-if="serverValidatedFormats">{{
+                $t('file_upload.server_formats')
+              }}</template>
+              <template v-else
+                >{{ $t('file_upload.formats') }}: {{ formatLabel }}</template
+              >
+              ·
               {{ $t('file_upload.limit') }}
             </p>
             <fieldset

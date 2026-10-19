@@ -6,7 +6,7 @@
     </div>
 
     <div v-else class="mx-auto max-w-3xl">
-      <div class="rounded-[28px] border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <div class="work-card rounded-[28px] border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/35 dark:text-blue-300">+</div>
         <h1 class="mt-4 text-xl font-black text-slate-950 dark:text-white">Նոր հաճախորդ</h1>
         <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Ձեզ տրված է հաճախորդ ստեղծելու ֆունկցիան, բայց հաճախորդների ամբողջ ցուցակը դիտելու իրավունքը տրված չէ։</p>
@@ -68,13 +68,13 @@ export default {
       return this.clients.filter((c) => [c.name, c.phone, c.address, c.user?.email].some((value) => String(value || '').toLowerCase().includes(q)))
     },
   },
-  async mounted() {
-    if (this.$can('clients.view')) await this.loadClients()
-    await this.openFromQuery()
-  },
   watch: {
     '$route.query.create'() { this.openFromQuery() },
     '$route.query.edit'() { this.openFromQuery() },
+  },
+  async mounted() {
+    if (this.$can('clients.view')) await this.loadClients()
+    await this.openFromQuery()
   },
   methods: {
     ...mapActions('clients', ['fetchClients']),
@@ -87,6 +87,7 @@ export default {
         this.$notify?.({ type: 'error', text: e.response?.data?.message || 'Չհաջողվեց բեռնել հաճախորդներին' })
       } finally { this.loading = false }
     },
+    // eslint-disable-next-line require-await -- Preserve the existing asynchronous caller contract.
     async openFromQuery() {
       if (this.$route.query.create === '1' && this.$can('clients.create')) {
         this.openCreate()

@@ -31,7 +31,7 @@
       </div>
 
       <div class="space-y-3 p-4 md:hidden">
-        <article v-for="m in items" :key="m.id" class="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
+        <article v-for="m in items" :key="m.id" class="work-card rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
           <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ m.description || '—' }}</p>
           <div class="mt-3 grid grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400">
             <span>Լայն՝ <b>{{ m.width ?? '—' }}</b></span><span>Երկար՝ <b>{{ m.length ?? '—' }}</b></span><span>Բարձր՝ <b>{{ m.height ?? '—' }}</b></span><span>Հաստ՝ <b>{{ m.thickness ?? '—' }}</b></span>

@@ -1,7 +1,7 @@
 <template>
   <transition name="modal">
-    <div v-if="isOpen" class="modal-overlay" @click.self="close">
-      <div class="modal-container">
+    <div v-if="isOpen" class="work-modal-backdrop modal-overlay" @click.self="close">
+      <div data-work-modal role="dialog" aria-modal="true" class="work-modal modal-container">
         <slot />
       </div>
     </div>
@@ -31,14 +31,14 @@ export default {
   background: rgba(0, 0, 0, 0.3);
   z-index: 50;
   display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  padding: 4rem 1rem 1rem;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
 }
 
 .modal-container {
   background: white;
-  border-radius: 8px;
+  border-radius: 20px;
   max-width: 90%;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }

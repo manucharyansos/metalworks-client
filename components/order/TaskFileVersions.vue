@@ -1,6 +1,6 @@
 <template>
   <details
-    class="mt-5 rounded-xl border border-slate-200 p-4 dark:border-slate-700"
+    class="work-card mt-5 rounded-xl border border-slate-200 p-4 dark:border-slate-700"
     data-task-file-versions
     @toggle="onToggle"
   >
@@ -21,7 +21,7 @@
     <article
       v-for="file in files"
       :key="file.id"
-      class="mt-4 space-y-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700"
+      class="work-card mt-4 space-y-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700"
       :data-file-versions="file.id"
     >
       <p class="break-all font-semibold">{{ file.original_name }}</p>

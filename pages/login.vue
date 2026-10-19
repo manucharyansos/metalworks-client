@@ -2,7 +2,7 @@
   <main class="login-page min-h-screen bg-slate-100 px-4 py-6 dark:bg-slate-950 sm:px-6 lg:px-8">
     <div class="mx-auto flex min-h-[calc(100vh-3rem)] max-w-6xl items-center justify-center">
       <section
-        class="grid w-full overflow-hidden rounded-[32px] border border-white/70 bg-white shadow-[0_30px_90px_-45px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-900 lg:grid-cols-[1.02fr_0.98fr]"
+        class="work-card grid w-full overflow-hidden rounded-[32px] border border-white/70 bg-white shadow-[0_30px_90px_-45px_rgba(15,23,42,0.45)] dark:border-slate-800 dark:bg-slate-900 lg:grid-cols-[1.02fr_0.98fr]"
       >
         <WorkspaceBranding class="order-first lg:order-last" />
         <div class="order-last flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-12 lg:order-first lg:px-14 lg:py-16">

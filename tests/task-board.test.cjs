@@ -12,8 +12,9 @@ function load(file) {
   if (file.endsWith('.vue')) source = compiler.parseComponent(source).script.content
   const code = transformSync(source, { configFile: false, babelrc: false, plugins: [require('@babel/plugin-transform-modules-commonjs')] }).code
   const module = { exports: {} }
-  const dependency = name => name.endsWith('.vue') ? {} : name.startsWith('@/') ? load(name.slice(2) + '.js') : require(name)
+  const dependency = name => ['@/components/ui/PersonAvatar.vue', '@/components/ui/TaskDeadline.vue'].includes(name) ? load(name.slice(2)) : name.endsWith('.vue') ? {} : name.startsWith('@/') ? load(name.slice(2) + '.js') : require(name)
   new Function('require', 'module', 'exports', code)(dependency, module, module.exports)
+  if (['components/ui/PersonAvatar.vue', 'components/ui/TaskDeadline.vue'].includes(file)) Object.assign(module.exports.default, compiler.compileToFunctions(compiler.parseComponent(fs.readFileSync(path.join(__dirname, '..', file), 'utf8')).template.content))
   modules.set(file, module.exports)
   return module.exports
 }

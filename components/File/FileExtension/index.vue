@@ -1,5 +1,5 @@
 <template>
-  <section class="flex h-full flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+  <section class="work-card flex h-full flex-col overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
     <div class="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">

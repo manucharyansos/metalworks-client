@@ -1,14 +1,16 @@
 <template>
-  <div class="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+  <div
+    class="work-production-detail grid items-start gap-5 xl:grid-cols-[0.9fr_1.1fr]"
+  >
     <section
-      class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      class="work-card overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
     >
       <div
         class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800"
       >
         <div>
           <p
-            class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400"
+            class="text-sm font-bold uppercase tracking-[0.16em] text-slate-400"
           >
             File preview
           </p>
@@ -19,7 +21,7 @@
         <button
           v-if="previewUrl && canDownload"
           type="button"
-          class="rounded-xl border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-500 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-500 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           @click="$emit('close-preview')"
         >
           Փակել
@@ -142,23 +144,25 @@
           <p class="mt-4 text-sm font-bold text-slate-700 dark:text-slate-200">
             Ընտրեք ֆայլ
           </p>
-          <p class="mt-1 text-xs text-slate-400">Preview-ը կհայտնվի այստեղ։</p>
+          <p class="mt-1 text-sm text-slate-400">
+            Նախադիտումը կհայտնվի այստեղ։
+          </p>
         </div>
       </div>
     </section>
 
     <div class="space-y-5">
       <section
-        class="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6"
+        class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6"
       >
         <div
           class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
         >
           <div class="min-w-0">
             <p
-              class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400"
+              class="text-sm font-bold uppercase tracking-[0.16em] text-slate-400"
             >
-              Production task
+              Առաջադրանքի տվյալներ
             </p>
             <div class="mt-1 flex flex-wrap items-center gap-2">
               <h3
@@ -168,7 +172,7 @@
               </h3>
               <span
                 v-if="details?.order_number?.number"
-                class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                class="rounded-full bg-slate-100 px-2.5 py-1 text-sm font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                 >{{ details.order_number.number }}</span
               >
             </div>
@@ -180,7 +184,7 @@
             </p>
           </div>
           <span
-            class="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-black"
+            class="shrink-0 rounded-full px-3 py-1.5 text-sm font-bold"
             :class="deadlineClass"
             >{{ deadlineText }}</span
           >
@@ -189,7 +193,7 @@
         <div class="mt-5 grid gap-3 sm:grid-cols-2">
           <div class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/45">
             <p
-              class="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400"
+              class="text-xs font-bold uppercase tracking-[0.12em] text-slate-400"
             >
               Ստեղծվել է
             </p>
@@ -201,7 +205,7 @@
           </div>
           <div class="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950/45">
             <p
-              class="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400"
+              class="text-xs font-bold uppercase tracking-[0.12em] text-slate-400"
             >
               Վերջնաժամկետ
             </p>
@@ -217,7 +221,7 @@
           class="mt-4 rounded-2xl border border-slate-100 p-4 dark:border-slate-800"
         >
           <p
-            class="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400"
+            class="text-xs font-bold uppercase tracking-[0.12em] text-slate-400"
           >
             Նկարագրություն
           </p>
@@ -230,16 +234,16 @@
       </section>
 
       <section
-        class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        class="work-card overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
         <div
           class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6"
         >
           <div>
             <p
-              class="text-[9px] font-black uppercase tracking-[0.16em] text-slate-400"
+              class="text-sm font-bold uppercase tracking-[0.16em] text-slate-400"
             >
-              Files
+              Ֆայլեր
             </p>
             <h3 class="mt-1 text-sm font-black text-slate-900 dark:text-white">
               Արտադրամասի ֆայլեր
@@ -247,7 +251,7 @@
           </div>
           <span
             v-if="canDownload"
-            class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-300"
+            class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-300"
             >{{ totalFiles }} ֆայլ</span
           >
         </div>
@@ -257,31 +261,34 @@
             Ֆայլերի ցանկը հասանելի չէ այս աշխատակցին։
           </p>
         </div>
-        <div
-          v-else-if="factoryOrders.length"
-          class="max-h-[430px] space-y-3 overflow-y-auto p-4 sm:p-5"
-        >
+        <div v-else-if="factoryOrders.length" class="space-y-3 p-4 sm:p-5">
           <article
             v-for="order in factoryOrders"
             :key="order.id"
-            class="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-950/35"
+            class="work-card rounded-2xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-950/35"
           >
             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p
-                  class="text-xs font-black text-slate-800 dark:text-slate-100"
-                >
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-100">
                   {{ order.factory?.name || 'Արտադրամաս' }}
                 </p>
-                <p class="mt-0.5 text-[10px] text-slate-400">
+                <p class="mt-0.5 text-xs text-slate-400">
                   Օպերատոր՝ {{ order.operator?.name || '—' }}
                 </p>
               </div>
               <span
                 v-if="order.status"
-                class="rounded-full px-2.5 py-1 text-[9px] font-black"
-                :class="statusClass(order.status)"
-                >{{ statusLabel(order.status) }}</span
+                class="rounded-full px-2.5 py-1 text-sm font-bold"
+                :class="
+                  order.awaiting_engineer_confirmation
+                    ? 'bg-amber-50 text-amber-800 dark:bg-amber-950/35 dark:text-amber-300'
+                    : statusClass(order.status)
+                "
+                >{{
+                  order.awaiting_engineer_confirmation
+                    ? 'Սպասում է ինժեների հաստատմանը'
+                    : statusLabel(order.status)
+                }}</span
               >
             </div>
 
@@ -289,7 +296,7 @@
               <div
                 v-for="file in order.files"
                 :key="file.id"
-                class="rounded-xl border border-slate-100 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
+                class="work-file-row"
               >
                 <div
                   class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
@@ -302,7 +309,7 @@
                       {{ file.original_name || 'Ֆայլ' }}
                     </p>
                     <div
-                      class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-400"
+                      class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400"
                     >
                       <span>Քանակ՝ {{ selectedQuantity(file) }}</span
                       ><span v-if="file.material_type"
@@ -315,14 +322,14 @@
                   <div class="flex shrink-0 gap-2">
                     <button
                       type="button"
-                      class="rounded-xl border border-slate-200 px-3 py-2 text-[10px] font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                      class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                       @click="$emit('view-file', file)"
                     >
                       Դիտել
                     </button>
                     <button
                       type="button"
-                      class="rounded-xl bg-slate-950 px-3 py-2 text-[10px] font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+                      class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
                       @click="$emit('download-file', file)"
                     >
                       Ներբեռնել
@@ -331,7 +338,7 @@
                 </div>
               </div>
             </div>
-            <p v-else class="py-3 text-center text-[10px] text-slate-400">
+            <p v-else class="py-3 text-center text-xs text-slate-400">
               Ֆայլեր չկան։
             </p>
             <TaskChangeRequestPanel

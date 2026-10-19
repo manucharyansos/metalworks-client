@@ -1,6 +1,6 @@
 <template>
   <div v-if="localOrder" data-workspace-form class="flex h-full min-h-0 flex-col bg-slate-50 dark:bg-slate-950">
-    <header class="shrink-0 border-b border-slate-200 bg-white/95 px-4 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:px-6">
+    <header class="work-modal__header shrink-0 border-b border-slate-200 bg-white/95 px-4 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:px-6">
       <div class="flex items-start justify-between gap-4">
         <div class="min-w-0">
           <div class="flex flex-wrap items-center gap-2">
@@ -22,29 +22,29 @@
       </div>
     </header>
 
-    <div class="custom-scroll min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+    <div class="work-modal__body custom-scroll">
       <div class="mx-auto max-w-6xl space-y-5">
         <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div class="info-tile">
+          <div class="work-card info-tile">
             <p class="info-label">Առաջադրանքի համար</p>
             <p class="info-value">{{ localOrder.order_number?.number || `#${localOrder.id}` }}</p>
           </div>
-          <div class="info-tile">
+          <div class="work-card info-tile">
             <p class="info-label">Կոդ</p>
             <p class="info-value">{{ localOrder.prefix_code?.code || '—' }}</p>
           </div>
-          <div class="info-tile" :class="isOverdue ? '!border-rose-200 !bg-rose-50/70 dark:!border-rose-950/70 dark:!bg-rose-950/20' : isNear ? '!border-amber-200 !bg-amber-50/70 dark:!border-amber-950/70 dark:!bg-amber-950/20' : ''">
+          <div class="work-card info-tile" :class="isOverdue ? '!border-rose-200 !bg-rose-50/70 dark:!border-rose-950/70 dark:!bg-rose-950/20' : isNear ? '!border-amber-200 !bg-amber-50/70 dark:!border-amber-950/70 dark:!bg-amber-950/20' : ''">
             <p class="info-label">Վերջնաժամկետ</p>
             <p class="info-value" :class="isOverdue ? 'text-rose-600 dark:text-rose-300' : isNear ? 'text-amber-600 dark:text-amber-300' : ''">{{ formatDate(localOrder.dates?.finish_date) }}</p>
           </div>
-          <div class="info-tile">
+          <div class="work-card info-tile">
             <p class="info-label">Արտադրամասային քայլեր</p>
             <p class="info-value">{{ factoryOrders.length }}</p>
           </div>
         </section>
 
-        <section class="grid gap-5 xl:grid-cols-[1.35fr_0.85fr]">
-          <div class="panel-card">
+        <section class="space-y-5">
+          <div class="work-card panel-card">
             <div class="panel-heading">
               <div>
                 
@@ -77,7 +77,7 @@
             </div>
           </div>
 
-          <aside class="panel-card">
+          <aside class="work-card panel-card">
             <div class="panel-heading">
               <div>
                 
@@ -97,14 +97,14 @@
               <div class="detail-row"><dt>Հեռախոս</dt><dd>{{ localOrder.client?.phone || localOrder.user?.phone || '—' }}</dd></div>
               <div class="detail-row"><dt>Էլ․ փոստ</dt><dd class="break-all">{{ customerEmail }}</dd></div>
               <div class="detail-row"><dt>Ստեղծող</dt><dd>{{ localOrder.creator?.name || '—' }}</dd></div>
-              <div class="detail-row"><dt>Ընդհանուր կարգավիճակ</dt><dd>{{ localOrder.status || 'pending' }}</dd></div>
+              <div class="detail-row"><dt>Ընդհանուր կարգավիճակ</dt><dd>{{ overallStatusText }}</dd></div>
             </dl>
           </aside>
         </section>
 
         <TaskRoutingPanel :order="localOrder" @updated="handleRoutingUpdated" />
 
-        <section class="panel-card">
+        <section class="work-card panel-card">
           <div class="panel-heading flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               
@@ -114,7 +114,7 @@
           </div>
 
           <div v-if="factoryOrders.length" class="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-            <article v-for="fo in factoryOrders" :key="fo.id" class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-950/35">
+            <article v-for="fo in factoryOrders" :key="fo.id" class="work-card rounded-2xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-950/35">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ fo.factory?.name || 'Անհայտ արտադրամաս' }}</p>
@@ -143,7 +143,7 @@
         </section>
 
         <section class="grid gap-5 xl:grid-cols-2">
-          <div class="panel-card">
+          <div class="work-card panel-card">
             <div class="panel-heading">
               <div><h3 class="panel-title">Ընտրված ֆայլեր</h3></div>
               <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-300">{{ localOrder.selected_files?.length || 0 }}</span>
@@ -157,7 +157,7 @@
             <p v-else class="py-8 text-center text-xs text-slate-400">Ընտրված ֆայլեր չկան։</p>
           </div>
 
-          <div class="panel-card">
+          <div class="work-card panel-card">
             <div class="panel-heading">
               <div><h3 class="panel-title">Վերջին գործողությունները</h3></div>
             </div>
@@ -179,7 +179,7 @@
       </div>
     </div>
 
-    <footer class="shrink-0 border-t border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900 sm:px-6">
+    <footer class="work-modal__footer shrink-0 border-t border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900 sm:px-6">
       <div class="mx-auto flex max-w-6xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
         <p class="text-[10px] text-slate-400">Փոփոխությունները պահպանվելու են առաջադրանքի ընթացիկ տվյալներում։</p>
         <div class="flex gap-2">

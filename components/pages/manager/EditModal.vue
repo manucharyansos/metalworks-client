@@ -7,7 +7,7 @@
     <div class="relative p-4 w-full max-w-4xl h-full md:h-auto">
       <!-- Modal content -->
       <div
-        class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5"
+        class="work-modal relative p-5 sm:p-6" role="dialog" aria-modal="true" aria-label="Փոփոխել առաջադրանքը" data-work-modal
       >
         <!-- Modal header -->
         <div

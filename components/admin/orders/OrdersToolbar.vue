@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col lg:flex-row gap-5 mb-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-5"
+    class="work-card flex flex-col lg:flex-row gap-5 mb-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-5"
   >
     <div class="flex-1 space-y-4">
       <div class="flex items-center justify-between">

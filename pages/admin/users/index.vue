@@ -33,7 +33,7 @@
       </section>
 
       <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div v-for="stat in stats" :key="stat.label" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div v-for="stat in stats" :key="stat.label" class="work-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">{{ stat.label }}</p>
           <p class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">{{ stat.value }}</p>
           <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{{ stat.hint }}</p>
@@ -108,7 +108,7 @@
         </div>
 
         <div class="space-y-3 p-4 md:hidden">
-          <article v-for="user in filteredUsers" :key="user.id" class="w-full rounded-2xl border border-slate-200 p-4 shadow-sm dark:border-slate-800">
+          <article v-for="user in filteredUsers" :key="user.id" class="work-card w-full rounded-2xl border border-slate-200 p-4 shadow-sm dark:border-slate-800">
             <div class="flex items-start gap-3">
               <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-xs font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ initials(user.name) }}</div>
               <div class="min-w-0 flex-1">

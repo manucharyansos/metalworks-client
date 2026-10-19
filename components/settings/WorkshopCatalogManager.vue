@@ -9,7 +9,7 @@
       </p>
     </header>
     <form
-      class="mb-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
+      class="work-card mb-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
       :aria-busy="saving ? 'true' : 'false'"
       data-catalog-form
       @submit.prevent="save"
@@ -119,7 +119,7 @@
         v-for="item in items"
         :key="item.id"
         :data-catalog-item="item.id"
-        class="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-5"
+        class="work-card min-w-0 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-5"
       >
         <header class="flex flex-wrap items-start justify-between gap-2">
           <h2 class="break-words font-bold">{{ item.name }}</h2>

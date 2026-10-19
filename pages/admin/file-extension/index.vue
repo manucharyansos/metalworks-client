@@ -26,24 +26,24 @@
       </section>
 
       <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <div class="metric-card">
+        <div class="work-card metric-card">
           <p class="metric-label">Ֆայլերի բաժիներ</p>
           <p class="metric-value">{{ factoryGroups.length }}</p>
           <p class="metric-note">բոլորը տեսանելի են այստեղ</p>
         </div>
-        <div class="metric-card">
+        <div class="work-card metric-card">
           <p class="metric-label">Կարգավորված</p>
           <p class="metric-value">{{ configuredFactoriesCount }}/{{ factoryGroups.length }}</p>
           <p class="metric-note">առնվազն մեկ ֆայլի տեսակ</p>
         </div>
-        <div class="metric-card">
+        <div class="work-card metric-card">
           <p class="metric-label">Ընդհանուր առաջադրանք</p>
           <p class="metric-value">{{ globalExtensions.length }}</p>
           <p class="metric-note">ֆայլերի բաժնից անկախ</p>
         </div>
       </section>
 
-      <section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+      <section class="work-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 class="mt-1 text-lg font-black text-slate-950 dark:text-white">Ֆայլերի բաժիների ֆայլերի տեսակներ</h2>
@@ -109,7 +109,7 @@
         </div>
       </section>
 
-      <section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+      <section class="work-card rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
         <div class="mb-4">
           <h2 class="mt-1 text-lg font-black text-slate-950 dark:text-white">Ընդհանուր առաջադրանքի ֆայլերի տեսակներ</h2>
           <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">

@@ -9,7 +9,7 @@
         @create="openCreate"
       />
       <MaterialsTable :items="materials" @remove="confirmDelete" @edit="openEdit" />
-      <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+      <div class="work-card flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 sm:flex-row sm:items-center sm:justify-between">
         <span>Ընդամենը՝ <b class="text-slate-800 dark:text-slate-200">{{ pagination.total }}</b> · Էջ {{ pagination.current_page }} / {{ pagination.last_page }}</span>
         <div class="flex gap-2">
           <button class="rounded-xl border border-slate-200 px-3 py-2 font-bold transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800" :disabled="pagination.current_page <= 1 || loading" @click="goPage(pagination.current_page - 1)">Նախորդ</button>
@@ -19,7 +19,7 @@
     </div>
 
     <div v-else class="mx-auto max-w-3xl">
-      <div class="rounded-[28px] border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <div class="work-card rounded-[28px] border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600 dark:bg-violet-950/35 dark:text-violet-300">+</div>
         <h1 class="mt-4 text-xl font-black text-slate-950 dark:text-white">Նոր նյութ</h1>
         <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Ձեզ տրված է նյութ ստեղծելու ֆունկցիան, բայց նյութերի ամբողջ ցուցակը դիտելու իրավունքը տրված չէ։</p>
@@ -27,8 +27,8 @@
       </div>
     </div>
 
-    <div v-if="pendingDelete && $can('materials.delete')" class="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm" @click.self="pendingDelete = null">
-      <div class="w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+    <div v-if="pendingDelete && $can('materials.delete')" class="work-modal-backdrop fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm" @click.self="pendingDelete = null">
+      <div data-work-modal role="dialog" aria-modal="true" class="work-modal w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
         <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-300"><svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 7h12m-10 0 1 13h6l1-13M9 7V4h6v3" /></svg></div>
         <h3 class="mt-4 text-lg font-black text-slate-950 dark:text-white">Ջնջե՞լ նյութը</h3>
         <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{{ pendingDelete?.description || '—' }}</p>

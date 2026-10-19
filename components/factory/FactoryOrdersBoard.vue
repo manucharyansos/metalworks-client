@@ -26,7 +26,7 @@
               v-for="column in boardColumns"
               :key="column.id"
               :data-board-column="column.value"
-              class="flex flex-col rounded-2xl bg-gray-50/70 p-3 shadow-sm dark:bg-gray-800/60 h-[calc(100vh-260px)]"
+              class="work-board-column flex h-[calc(100vh-260px)] flex-col rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60"
               @dragover.prevent
               @drop.prevent="onDrop(column)"
             >
@@ -124,10 +124,11 @@
     <!-- Details Modal -->
     <template v-if="isOpenDetails">
       <div
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        class="work-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       >
         <div
-          class="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
+data-work-modal role="dialog" aria-modal="true"
+          class="work-modal relative max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
         >
           <button
             class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"

@@ -12,13 +12,13 @@
       </section>
 
       <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="metric-card"><p class="metric-label">{{ t.today }}</p><p class="metric-value">{{ summary.today || 0 }}</p><p class="metric-hint">{{ t.actions }}</p></div>
-        <div class="metric-card"><p class="metric-label">{{ t.last7 }}</p><p class="metric-value">{{ summary.last_7_days || 0 }}</p><p class="metric-hint">{{ t.actions }}</p></div>
-        <div class="metric-card"><p class="metric-label">{{ t.filesToday }}</p><p class="metric-value">{{ summary.files_today || 0 }}</p><p class="metric-hint">{{ t.fileChanges }}</p></div>
-        <div class="metric-card"><p class="metric-label">{{ t.ordersToday }}</p><p class="metric-value">{{ summary.orders_today || 0 }}</p><p class="metric-hint">{{ t.orderChanges }}</p></div>
+        <div class="work-card metric-card"><p class="metric-label">{{ t.today }}</p><p class="metric-value">{{ summary.today || 0 }}</p><p class="metric-hint">{{ t.actions }}</p></div>
+        <div class="work-card metric-card"><p class="metric-label">{{ t.last7 }}</p><p class="metric-value">{{ summary.last_7_days || 0 }}</p><p class="metric-hint">{{ t.actions }}</p></div>
+        <div class="work-card metric-card"><p class="metric-label">{{ t.filesToday }}</p><p class="metric-value">{{ summary.files_today || 0 }}</p><p class="metric-hint">{{ t.fileChanges }}</p></div>
+        <div class="work-card metric-card"><p class="metric-label">{{ t.ordersToday }}</p><p class="metric-value">{{ summary.orders_today || 0 }}</p><p class="metric-hint">{{ t.orderChanges }}</p></div>
       </section>
 
-      <section class="rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+      <section class="work-card rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
         <div class="flex flex-wrap gap-2 border-b border-slate-100 pb-4 dark:border-slate-800">
           <button v-for="preset in presets" :key="preset.key" type="button" class="rounded-xl px-3 py-2 text-xs font-bold transition" :class="activePreset === preset.key ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'" @click="applyPreset(preset.key)">{{ preset.label }}</button>
         </div>
@@ -45,7 +45,7 @@
         <div v-for="group in groupedLogs" :key="group.key" class="space-y-3">
           <div class="sticky top-16 z-10 flex items-center gap-3 bg-slate-50/95 py-2 backdrop-blur dark:bg-slate-950/95"><div class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div><p class="rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-black text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">{{ group.label }}</p><div class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div></div>
 
-          <article v-for="log in group.items" :key="log.id" class="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+          <article v-for="log in group.items" :key="log.id" class="work-card rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
             <div class="flex flex-col gap-4 lg:flex-row">
               <div class="shrink-0 lg:w-28"><p class="font-mono text-sm font-black text-slate-900 dark:text-white">{{ formatTime(log.created_at) }}</p><p class="mt-1 text-[10px] font-bold text-slate-400">#{{ log.id }}</p></div>
               <div class="min-w-0 flex-1">

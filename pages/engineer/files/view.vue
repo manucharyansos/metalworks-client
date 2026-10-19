@@ -35,7 +35,7 @@
 
     <section
       v-if="projectReady"
-      class="mb-5 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-2 sm:p-5"
+      class="work-card mb-5 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-2 sm:p-5"
       aria-label="PMP"
     >
       <div class="min-w-0">

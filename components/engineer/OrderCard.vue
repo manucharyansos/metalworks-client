@@ -1,131 +1,144 @@
 <template>
   <article
     data-engineer-task-card
-    class="group flex h-full min-w-0 flex-col rounded-2xl border bg-white p-4 text-sm shadow-sm transition hover:shadow-lg dark:bg-slate-900"
-    :class="cardBorderClass"
+    class="work-card work-task-card"
+    :data-tone="cardTone"
   >
-    <header class="min-w-0">
-      <p
-        class="break-words text-[10px] font-bold uppercase tracking-wide text-slate-400"
-      >
-        {{ order.order_number?.number || `#${order.id}` }} ·
-        {{ order.prefix_code?.code || '—' }}
+    <div v-if="needsAnswer" class="work-alert" data-answer-needed>
+      <span aria-hidden="true">⚠</span
+      ><span class="font-semibold">{{ decisionText }}</span
+      ><span class="work-alert__count">{{ answerCount }}</span>
+    </div>
+    <header class="work-task-card__header">
+      <div class="work-task-card__top">
+        <p class="work-task-card__meta">
+          #{{ order.order_number?.number || order.id }} ·
+          {{ order.prefix_code?.code || '—' }}
+        </p>
+        <span
+          class="work-status"
+          :data-tone="badgeTone"
+          data-task-stage-label
+          >{{ overallStatusText }}</span
+        >
+      </div>
+      <h3 class="work-task-card__title">{{ order.name || 'Առաջադրանք' }}</h3>
+      <p v-if="customerName" class="work-task-card__customer">
+        <svg
+          class="h-4 w-4 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="7" r="4" stroke-width="1.6" />
+          <path d="M4 21v-2a8 8 0 0116 0v2" stroke-width="1.6" /></svg
+        ><span>{{ customerName }}</span>
       </p>
-      <h3
-        class="mt-1 break-words text-base font-black text-slate-900 dark:text-white"
-      >
-        {{ order.name || 'Առաջադրանք' }}
-      </h3>
-      <span
-        class="mt-2 inline-block max-w-full rounded-full px-2.5 py-1 text-[11px] font-bold text-white"
-        :class="overallStatusClass"
-        data-task-stage-label
-        >{{ overallStatusText }}</span
-      >
     </header>
-    <p
-      class="mt-3 min-h-[40px] break-words text-xs leading-5 text-slate-500 line-clamp-2 dark:text-slate-400"
-      :title="order.description"
-    >
+    <p class="work-task-card__description" :title="order.description">
       {{ order.description || '—' }}
     </p>
-
-    <div class="mt-4 space-y-2" data-workshop-summaries>
+    <div class="work-task-card__steps" data-workshop-summaries>
       <section
         v-for="step in steps"
         :key="step.id || step.factory_id"
-        class="min-w-0 rounded-xl bg-slate-50 p-3 dark:bg-slate-950/50"
+        class="work-step-summary"
       >
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <h4
-            class="min-w-0 break-words text-xs font-bold text-slate-800 dark:text-slate-200"
+        <PersonAvatar :name="step.operator?.name || ''" ring />
+        <div class="work-step-summary__body">
+          <div class="work-step-summary__heading">
+            <h4>{{ step.factory?.name || '—' }}</h4>
+            <span class="work-status" :data-tone="stepTone(step)">{{
+              statusText(step)
+            }}</span>
+          </div>
+          <p
+            class="work-meta"
+            :class="!step.operator ? 'text-amber-700 dark:text-amber-300' : ''"
           >
-            {{ step.factory?.name || '—' }}
-          </h4>
-          <span
-            class="rounded-full px-2 py-1 text-[10px] font-semibold"
-            :class="stepClass(step)"
-            >{{ statusText(step) }}</span
+            {{ step.operator?.name || boardText.noOperator }}
+          </p>
+          <p class="work-meta">
+            {{ date(step.deadline || order.dates?.finish_date) }} ·
+            <span
+              :class="
+                step.priority === 'urgent' ? 'font-bold text-rose-600' : ''
+              "
+              >{{ t[step.priority || 'normal'] }}</span
+            >
+          </p>
+          <p
+            v-if="step.confirmation_required"
+            class="work-meta text-indigo-700 dark:text-indigo-300"
+            data-required-evidence
           >
+            {{ t.method }} · {{ methods(step) }}
+          </p>
+          <p
+            v-if="step.pending_request"
+            class="work-alert mt-2"
+            data-pending-request
+          >
+            {{ requestText(step) }} · {{ t.requestAnswerNeeded }}
+          </p>
+          <p v-else-if="step.is_blocked" class="work-alert mt-2">
+            {{ routingText.blocked }}
+          </p>
         </div>
-        <p
-          class="mt-2 break-words text-[11px] text-slate-500 dark:text-slate-400"
-        >
-          {{ boardText.operator }} ·
-          <span class="font-semibold text-slate-700 dark:text-slate-200">{{
-            step.operator?.name || boardText.noOperator
-          }}</span>
-        </p>
-        <p
-          class="mt-1 break-words text-[11px] text-slate-500 dark:text-slate-400"
-        >
-          {{ boardText.deadline }} ·
-          {{ date(step.deadline || order.dates?.finish_date) }}
-          <span
-            class="font-bold"
-            :class="step.priority === 'urgent' ? 'text-rose-600' : ''"
-          >
-            · {{ t[step.priority || 'normal'] }}</span
-          >
-        </p>
-        <p
-          v-if="step.confirmation_required"
-          class="mt-1 text-[11px] text-indigo-700 dark:text-indigo-300"
-          data-required-evidence
-        >
-          {{ t.method }} · {{ methods(step) }}
-        </p>
-        <p
-          v-if="step.pending_request"
-          class="mt-2 rounded-lg bg-amber-100 p-2 text-[11px] font-bold text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
-          data-pending-request
-        >
-          {{ requestText(step) }} · {{ t.requestAnswerNeeded }}
-        </p>
-        <p
-          v-else-if="step.is_blocked"
-          class="mt-2 text-[11px] text-amber-700 dark:text-amber-300"
-        >
-          {{ routingText.blocked }}
-        </p>
       </section>
     </div>
-
     <div
-      class="mt-4 grid grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400"
-    >
-      <p>
-        {{ boardText.files }} · <span class="font-bold">{{ filesCount }}</span>
-      </p>
-      <p>
-        {{ boardText.completed }} ·
-        <span class="font-bold">{{ completedSteps }}/{{ steps.length }}</span>
-      </p>
-      <p class="col-span-2 break-words">
-        {{ boardText.deadline }} ·
-        <span :class="deadlineClass">{{ date(order.dates?.finish_date) }}</span>
-      </p>
-    </div>
-    <footer
-      class="mt-auto flex items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800"
+      v-if="steps.length"
+      class="work-task-progress"
+      :aria-label="
+        boardText.completed + ': ' + completedSteps + '/' + steps.length
+      "
     >
       <span
-        class="min-w-0 truncate text-[11px] text-slate-500"
-        :title="order.creator?.name"
-        >{{ order.creator?.name || '—' }}</span
+        v-for="step in steps"
+        :key="step.id || step.factory_id"
+        class="work-task-progress__segment"
+        :data-tone="progressTone(step)"
+      /><span class="work-task-progress__count"
+        >{{ completedSteps }}/{{ steps.length }}</span
       >
+    </div>
+    <footer class="work-task-card__footer">
+      <div class="min-w-0 flex-1">
+        <TaskDeadline
+          :value="order.dates?.finish_date || ''"
+          :completed="stage === 'completed'"
+          :rejected="allRejected"
+        />
+        <p class="work-task-card__meta mt-1">
+          {{ date(order.dates?.finish_date) }} · {{ boardText.files }}:
+          {{ filesCount }}
+        </p>
+        <p
+          v-if="order.creator?.name"
+          class="work-task-card__meta"
+          :title="order.creator.name"
+        >
+          {{ order.creator.name }}
+        </p>
+      </div>
       <button
+        v-if="!readOnly"
         type="button"
-        class="shrink-0 rounded-xl bg-slate-950 px-4 py-2 text-xs font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950"
+        class="work-button"
+        :data-variant="needsAnswer ? 'answer' : 'open'"
         @click="$emit('open', order)"
       >
-        Բացել
+        {{ openLabel }}
       </button>
     </footer>
   </article>
 </template>
 
 <script>
+import PersonAvatar from '@/components/ui/PersonAvatar.vue'
+import TaskDeadline from '@/components/ui/TaskDeadline.vue'
 import {
   confirmationMethods,
   isStepCompleted,
@@ -136,8 +149,60 @@ import { boardCopy, stepStatusText, taskStage } from '@/utils/task-board'
 import { routingCopy } from '@/utils/task-routing'
 
 export default {
-  props: { order: { type: Object, required: true } },
+  components: { PersonAvatar, TaskDeadline },
+  props: { order: { type: Object, required: true }, readOnly: Boolean },
   computed: {
+    isManagement() {
+      return ['admin', 'manager'].includes(this.$auth?.user?.role?.name)
+    },
+    decisionText() {
+      return this.isManagement ? this.boardText.review : this.overallStatusText
+    },
+    openLabel() {
+      const labels = {
+        hy: ['Բացել', 'Պատասխանել'],
+        ru: ['Открыть', 'Ответить'],
+        en: ['Open', 'Respond'],
+      }
+      return (labels[this.$i18n?.locale] || labels.hy)[
+        this.needsAnswer && !this.isManagement ? 1 : 0
+      ]
+    },
+    customerName() {
+      return (
+        this.order.client?.company_name ||
+        this.order.client?.name ||
+        this.order.user?.name ||
+        ''
+      )
+    },
+    answerCount() {
+      return this.steps.filter(
+        (step) => step.pending_request || step.awaiting_engineer_confirmation
+      ).length
+    },
+    cardTone() {
+      return this.needsAnswer
+        ? 'amber'
+        : this.allRejected
+        ? 'neutral'
+        : this.stage === 'completed'
+        ? 'green'
+        : this.isOverdue
+        ? 'red'
+        : 'blue'
+    },
+    badgeTone() {
+      return this.needsAnswer
+        ? 'amber'
+        : this.allRejected
+        ? 'red'
+        : this.stage === 'completed'
+        ? 'green'
+        : this.stage === 'created'
+        ? 'neutral'
+        : 'blue'
+    },
     t() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
@@ -215,6 +280,32 @@ export default {
     },
   },
   methods: {
+    stepTone(step) {
+      return step.pending_request || step.awaiting_engineer_confirmation
+        ? 'amber'
+        : isStepCompleted(step)
+        ? 'green'
+        : isStepRejected(step)
+        ? 'red'
+        : ['accepted', 'confirmed', 'in_progress', 'date_changed'].includes(
+            step.status
+          )
+        ? 'blue'
+        : 'neutral'
+    },
+    progressTone(step) {
+      return isStepRejected(step)
+        ? 'neutral'
+        : isStepCompleted(step)
+        ? 'green'
+        : step.pending_request || step.awaiting_engineer_confirmation
+        ? 'amber'
+        : ['accepted', 'confirmed', 'in_progress', 'date_changed'].includes(
+            step.status
+          )
+        ? 'blue'
+        : 'neutral'
+    },
     date(value) {
       return value ? this.$formatDate(value, 'dd.MM.yyyy') : '—'
     },

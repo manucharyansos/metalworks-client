@@ -2,11 +2,12 @@
   <transition name="fade">
     <div
       v-if="visible"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+      class="work-modal-frame fixed inset-0 z-50 flex items-center justify-center p-4"
     >
       <div class="absolute inset-0 bg-slate-950/45 backdrop-blur-sm" @click="$emit('close')"></div>
       <div
-        class="relative w-full max-w-2xl overflow-y-auto rounded-[28px] border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:p-6"
+data-work-modal role="dialog" aria-modal="true"
+        class="work-modal relative w-full max-w-2xl overflow-y-auto rounded-[28px] border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:p-6"
         style="max-height: 92vh"
       >
         <div class="mb-5 flex items-start justify-between gap-4">
@@ -18,7 +19,7 @@
           <button type="button" class="rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-500 transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800" @click="$emit('close')">✕</button>
         </div>
 
-        <form @submit.prevent="submit" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <form class="grid grid-cols-1 gap-4 md:grid-cols-2" @submit.prevent="submit">
           <div class="md:col-span-2">
             <label class="mb-1.5 block text-xs font-bold text-slate-600 dark:text-slate-300">Նկարագրություն</label>
             <textarea v-model="form.description" class="field min-h-[96px] resize-y"></textarea>
@@ -77,7 +78,7 @@
         </form>
 
         <div v-if="categoryManagerOpen" class="absolute inset-0 z-20 flex items-center justify-center rounded-[28px] bg-slate-950/50 p-4 backdrop-blur-sm" @click.self="closeCategoryManager">
-          <div class="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+          <div data-work-modal role="dialog" aria-modal="true" class="work-modal w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
             <div class="flex items-start justify-between gap-3">
               <div>
                 <div class="flex items-center gap-2">

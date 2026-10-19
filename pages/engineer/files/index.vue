@@ -13,7 +13,7 @@
       </section>
 
       <section class="grid gap-5 xl:grid-cols-[1fr_1fr_0.72fr]">
-        <div class="panel-card">
+        <div class="work-card panel-card">
           <div class="panel-heading">
             <span class="step-badge">01</span>
             <div><h2 class="panel-title">Խումբ</h2></div>
@@ -52,7 +52,7 @@
           </div>
         </div>
 
-        <div class="panel-card" :class="{ 'opacity-60': !isExistingGroup }">
+        <div class="work-card panel-card" :class="{ 'opacity-60': !isExistingGroup }">
           <div class="panel-heading">
             <span class="step-badge">02</span>
             <div><h2 class="panel-title">Ենթախումբ</h2></div>
@@ -89,7 +89,7 @@
           </div>
         </div>
 
-        <div class="panel-card flex flex-col">
+        <div class="work-card panel-card flex flex-col">
           <div class="panel-heading"><span class="step-badge">03</span><div><h2 class="panel-title">Գործողություններ</h2></div></div>
           <div class="flex flex-1 flex-col justify-center gap-3">
             <button v-if="showCreateGroup && $can('pmp.create')" type="button" :disabled="saving || !canCreateGroup" class="action-button bg-emerald-600 text-white hover:bg-emerald-700" @click="addPmpGroup"><span class="action-icon">+</span><span><b>Ստեղծել խումբ</b><small>Պահպանել նոր PMP խումբ</small></span></button>
