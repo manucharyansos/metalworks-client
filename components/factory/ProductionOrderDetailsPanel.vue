@@ -369,6 +369,7 @@
 </template>
 
 <script>
+import { workshopSteps } from '@/utils/task-board'
 import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
 import TaskChangeRequestPanel from '@/components/order/TaskChangeRequestPanel.vue'
 import TaskFileVersions from '@/components/order/TaskFileVersions.vue'
@@ -392,9 +393,7 @@ export default {
       return this.$can('factory.download')
     },
     factoryOrders() {
-      return Array.isArray(this.details?.factory_orders)
-        ? this.details.factory_orders
-        : []
+      return workshopSteps(this.details)
     },
     totalFiles() {
       return this.factoryOrders.reduce(

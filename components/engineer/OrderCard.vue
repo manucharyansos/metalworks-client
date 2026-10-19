@@ -145,7 +145,12 @@ import {
   isStepRejected,
   taskCopy,
 } from '@/utils/task-workflow'
-import { boardCopy, stepStatusText, taskStage } from '@/utils/task-board'
+import {
+  boardCopy,
+  stepStatusText,
+  taskStage,
+  workshopSteps,
+} from '@/utils/task-board'
 import { routingCopy } from '@/utils/task-routing'
 
 export default {
@@ -213,10 +218,7 @@ export default {
       return routingCopy[this.$i18n?.locale] || routingCopy.hy
     },
     steps() {
-      return (this.order.factory_orders || []).filter(
-        (step) =>
-          !step.factory?.is_reference && step.factory?.is_workshop !== false
-      )
+      return workshopSteps(this.order)
     },
     stage() {
       return taskStage(this.order)

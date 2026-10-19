@@ -110,6 +110,26 @@
       </div>
     </section>
 
+    <section v-if="otherFiles.length">
+      <h4 class="text-sm font-semibold mb-2">Այլ ֆայլեր</h4>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div v-for="f in otherFiles" :key="keyOf(f)" class="work-file-row">
+          <div class="text-sm font-medium truncate mb-3">
+            {{ f.original_name }}
+          </div>
+          <button
+            v-if="$can('pmp_files.view')"
+            type="button"
+            class="work-button w-full"
+            data-variant="dark"
+            @click="downloadFile(f)"
+          >
+            Ներբեռնել
+          </button>
+        </div>
+      </div>
+    </section>
+
     <div
       v-if="showDxf"
       class="work-modal-backdrop fixed inset-0 z-[1500] flex items-center justify-center"
@@ -169,6 +189,15 @@ export default {
     }
   },
   computed: {
+    otherFiles() {
+      const categorized = new Set([
+        ...this.images,
+        ...this.pdfs,
+        ...this.dxfFiles,
+        ...this.cadFiles,
+      ])
+      return this.items.filter((file) => !categorized.has(file))
+    },
     images() {
       return this.items.filter((f) =>
         this.hasExt(f, ['.jpg', '.jpeg', '.png', '.webp', '.gif'])

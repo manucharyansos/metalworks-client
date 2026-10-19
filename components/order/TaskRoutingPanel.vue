@@ -33,7 +33,7 @@
       />
     </details>
     <div
-      v-for="step in order.factory_orders || []"
+      v-for="step in workshopSteps(order)"
       :key="step.id"
       class="mt-4 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
       :data-assignment-step="step.id"
@@ -235,6 +235,7 @@
 </template>
 
 <script>
+import { workshopSteps } from '@/utils/task-board'
 import TaskEvidenceSettings from '@/components/order/TaskEvidenceSettings.vue'
 import TaskFileVersions from '@/components/order/TaskFileVersions.vue'
 import TaskWorkshopOptions from '@/components/engineer/TaskWorkshopOptions.vue'
@@ -312,7 +313,7 @@ export default {
       return taskFiles(this.order).filter((file) => !attached.has(file.id))
     },
     predecessors() {
-      return (this.order.factory_orders || []).filter(
+      return workshopSteps(this.order).filter(
         (step) =>
           String(step.factory_id) !== this.factoryId &&
           !['canceled', 'cancelled'].includes(step.status)
@@ -384,6 +385,7 @@ export default {
     if (this.canManage) this.loadWorkload()
   },
   methods: {
+    workshopSteps,
     handleSettingsUpdated(order) {
       this.$emit('updated', order)
       this.$nextTick(() => this.loadWorkload())
@@ -395,7 +397,7 @@ export default {
       return step.operator_id ? String(step.operator_id) : ''
     },
     existingStep(id) {
-      return (this.order.factory_orders || []).find(
+      return workshopSteps(this.order).find(
         (step) => String(step.factory_id) === String(id)
       )
     },
@@ -411,13 +413,12 @@ export default {
     },
     predecessorName(step) {
       return (
-        (this.order.factory_orders || []).find(
-          (row) => row.id === step.depends_on_id
-        )?.factory?.name || ''
+        workshopSteps(this.order).find((row) => row.id === step.depends_on_id)
+          ?.factory?.name || ''
       )
     },
     syncDrafts() {
-      for (const step of this.order.factory_orders || []) {
+      for (const step of workshopSteps(this.order)) {
         if (
           !(step.id in this.assignmentDrafts) ||
           this.assignmentDrafts[step.id] === this.previousOperators[step.id]

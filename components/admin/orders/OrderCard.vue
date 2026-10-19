@@ -3,6 +3,7 @@
 </template>
 
 <script>
+import { workshopSteps } from '@/utils/task-board'
 import TaskCard from '@/components/engineer/OrderCard.vue'
 import { isStepCompleted } from '@/utils/task-workflow'
 export default {
@@ -11,7 +12,7 @@ export default {
 
   computed: {
     factoryOrders() {
-      return this.order.factory_orders || []
+      return workshopSteps(this.order)
     },
     factoryCount() {
       return this.factoryOrders.length

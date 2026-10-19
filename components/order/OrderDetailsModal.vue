@@ -43,12 +43,12 @@
 
         <!-- File List -->
         <div
-          v-if="details.factory_orders && details.factory_orders.length > 0"
+          v-if="workshopSteps(details).length > 0"
           class="flex flex-col items-center justify-center w-full"
         >
           <h4 class="text-lg font-bold mt-4">Ֆայլեր</h4>
           <ul class="w-full">
-            <li v-for="order in details.factory_orders" :key="order.id">
+            <li v-for="order in workshopSteps(details)" :key="order.id">
               <div v-if="order.files && order.files.length > 0">
                 <div class="flex items-center justify-between mb-2 px-1">
                   <div class="text-sm font-semibold">
@@ -128,6 +128,7 @@
 </template>
 
 <script>
+import { workshopSteps } from '@/utils/task-board'
 export default {
   name: 'OrderDetailsModal',
   props: {
@@ -150,6 +151,7 @@ export default {
   },
   emits: ['close', 'view-file', 'download-file'],
   methods: {
+    workshopSteps,
     getSelectedFileQuantity(file) {
       const selectedFile = this.details.selectedFiles?.find(
         (sf) => sf.pmp_file_id === file.id
