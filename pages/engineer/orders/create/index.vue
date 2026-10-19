@@ -703,12 +703,17 @@ export default {
     },
 
     filteredPmpGroups() {
-      if (!this.pmpGroupSearch) return this.getPmpes?.pmp || []
+      const groups = Array.isArray(this.getPmpes?.pmp) ? this.getPmpes.pmp : []
+      if (!this.pmpGroupSearch) return groups
       const searchTerm = this.pmpGroupSearch.toLowerCase()
-      return this.getPmpes?.pmp.filter(
+      return groups.filter(
         (pmp) =>
-          pmp.group.toLowerCase().includes(searchTerm) ||
-          pmp.group_name.toLowerCase().includes(searchTerm)
+          String(pmp.group || '')
+            .toLowerCase()
+            .includes(searchTerm) ||
+          String(pmp.group_name || '')
+            .toLowerCase()
+            .includes(searchTerm)
       )
     },
 

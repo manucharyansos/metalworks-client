@@ -339,3 +339,15 @@ test('a slow workload answer cannot overwrite a newer one, and failures are show
   await ok
   assert.equal(vm.workloadError, '')
 })
+
+
+test('typing a task project search before the catalog response arrives stays usable', async () => {
+  const options = await component('pages/engineer/orders/create/index.vue')
+  const filter = options.computed.filteredPmpGroups
+  for (const getPmpes of [undefined, {}, { pmp: null }, { pmp: {} }]) {
+    assert.deepEqual(filter.call({ getPmpes, pmpGroupSearch: '987' }), [])
+  }
+  const groups = [{ id: 1, group: 987, group_name: null }, { id: 2, group: '988', group_name: 'Powder parts' }]
+  assert.deepEqual(filter.call({ getPmpes: { pmp: groups }, pmpGroupSearch: '987' }), [groups[0]])
+  assert.deepEqual(filter.call({ getPmpes: { pmp: groups }, pmpGroupSearch: 'powder' }), [groups[1]])
+})
