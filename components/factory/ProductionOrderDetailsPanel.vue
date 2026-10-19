@@ -1,5 +1,7 @@
 <template>
-  <div class="work-production-detail grid items-start gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+  <div
+    class="work-production-detail grid items-start gap-5 xl:grid-cols-[0.9fr_1.1fr]"
+  >
     <section
       class="work-card overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
     >
@@ -142,7 +144,9 @@
           <p class="mt-4 text-sm font-bold text-slate-700 dark:text-slate-200">
             Ընտրեք ֆայլ
           </p>
-          <p class="mt-1 text-sm text-slate-400">Նախադիտումը կհայտնվի այստեղ։</p>
+          <p class="mt-1 text-sm text-slate-400">
+            Նախադիտումը կհայտնվի այստեղ։
+          </p>
         </div>
       </div>
     </section>
@@ -257,10 +261,7 @@
             Ֆայլերի ցանկը հասանելի չէ այս աշխատակցին։
           </p>
         </div>
-        <div
-          v-else-if="factoryOrders.length"
-          class="space-y-3 p-4 sm:p-5"
-        >
+        <div v-else-if="factoryOrders.length" class="space-y-3 p-4 sm:p-5">
           <article
             v-for="order in factoryOrders"
             :key="order.id"
@@ -268,9 +269,7 @@
           >
             <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p
-                  class="text-sm font-bold text-slate-800 dark:text-slate-100"
-                >
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-100">
                   {{ order.factory?.name || 'Արտադրամաս' }}
                 </p>
                 <p class="mt-0.5 text-xs text-slate-400">
@@ -280,8 +279,16 @@
               <span
                 v-if="order.status"
                 class="rounded-full px-2.5 py-1 text-sm font-bold"
-                :class="statusClass(order.status)"
-                >{{ statusLabel(order.status) }}</span
+                :class="
+                  order.awaiting_engineer_confirmation
+                    ? 'bg-amber-50 text-amber-800 dark:bg-amber-950/35 dark:text-amber-300'
+                    : statusClass(order.status)
+                "
+                >{{
+                  order.awaiting_engineer_confirmation
+                    ? 'Սպասում է ինժեների հաստատմանը'
+                    : statusLabel(order.status)
+                }}</span
               >
             </div>
 
