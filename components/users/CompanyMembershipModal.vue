@@ -66,12 +66,12 @@ export default {
     },
     setAssignments(id, rows) { const row = this.row(id); this.$set(row, 'assignments', rows); this.change(id, 'role_id', rows[0]?.role_id || null); this.change(id, 'factory_id', rows[0]?.factory_id || null) },
     row(id) { return this.rows.find(row => String(row.company_id) === String(id)) || {} },
-    needsWorkshop(id) { return ['laser', 'bend', 'powder_catting'].includes(this.roles.find(role => String(role.id) === String(this.row(id).role_id))?.name) },
+    needsWorkshop(id) { return ['laser', 'bend', 'powder_catting', 'operator'].includes(this.roles.find(role => String(role.id) === String(this.row(id).role_id))?.name) },
     change(id, field, value) { const row = this.row(id); this.$set(row, field, value); if (field === 'role_id') row.factory_id = null; this.$delete(this.errors, id); this.saveError = '' },
     close() { if (!this.busy) this.$emit('close') },
     trapFocus(event) {
       const controls = Array.from(this.$refs.dialog.querySelectorAll('button:not([disabled]), select:not(:disabled), input:not(:disabled)'))
-      const first = controls[0], last = controls[controls.length - 1]
+      const first = controls[0]; const last = controls[controls.length - 1]
       if (event.shiftKey && (document.activeElement === first || document.activeElement === this.$refs.dialog)) { event.preventDefault(); last?.focus() }
       else if (!event.shiftKey && (document.activeElement === last || document.activeElement === this.$refs.dialog)) { event.preventDefault(); first?.focus() }
     },

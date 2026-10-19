@@ -193,7 +193,9 @@
     "page_failed": "Could not load the project or factory formats. Please retry.",
     "server_formats": "Allowed formats are checked by the server when you add a file.",
     "project_failed": "Could not open the selected subgroup. Please retry.",
-    "factories_failed": "Could not load the factory list. Please retry."
+    "factories_failed": "Could not load the file sections. Please retry.",
+    "archived_section": "This section is archived. Existing files remain available to view.",
+    "archived_section_short": "Archived"
   },
   "order_files": {
     "loading": "Loading files for the selected subgroup…",

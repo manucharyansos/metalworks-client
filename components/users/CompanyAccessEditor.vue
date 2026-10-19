@@ -45,7 +45,7 @@ export default {
     },
     setAssignments(id, assignments) { this.$emit('input', this.value.map(row => String(row.company_id) === String(id) ? { ...row, assignments, role_id: assignments[0]?.role_id || null, factory_id: assignments[0]?.factory_id || null } : { ...row })) },
     row(id) { return this.value.find((item) => String(item.company_id) === String(id)) || {} },
-    needsWorkshop(id) { return ['laser', 'bend', 'powder_catting'].includes(this.roles.find((r) => String(r.id) === String(this.row(id).role_id))?.name) },
+    needsWorkshop(id) { return ['laser', 'bend', 'powder_catting', 'operator'].includes(this.roles.find((r) => String(r.id) === String(this.row(id).role_id))?.name) },
     change(id, field, value) {
       const rows = this.value.map((row) => String(row.company_id) === String(id) ? { ...row, [field]: value, ...(field === 'role_id' ? { factory_id: null } : {}) } : { ...row })
       this.$emit('input', rows)

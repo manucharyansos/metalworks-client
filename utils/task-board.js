@@ -80,7 +80,7 @@ export const boardCopy = {
 
 export function taskStage(order) {
   const steps = (order?.factory_orders || []).filter(
-    (step) => !step.factory?.is_reference
+    (step) => !step.factory?.is_reference && step.factory?.is_workshop !== false
   )
   const active = steps.filter((step) => !isStepRejected(step))
   if (

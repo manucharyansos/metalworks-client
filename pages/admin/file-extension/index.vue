@@ -6,13 +6,13 @@
           <div class="flex items-center gap-2">
             <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Նախագծերի թղթապանակ</h1>
             <InfoTooltip>
-              Այստեղ խմբագրվում են յուրաքանչյուր արտադրամասի նախագծերի համար թույլատրելի ֆայլերի տեսակները։ Փոփոխությունները անմիջապես կիրառվում են PMP ֆայլերի վերբեռնման ժամանակ։
+              Այստեղ խմբագրվում են յուրաքանչյուր ֆայլերի բաժնի նախագծերի համար թույլատրելի ֆայլերի տեսակները։ Փոփոխությունները անմիջապես կիրառվում են PMP ֆայլերի վերբեռնման ժամանակ։
             </InfoTooltip>
           </div>
         </div>
 
         <label class="relative block w-full xl:w-80">
-          <span class="sr-only">Փնտրել արտադրամաս</span>
+          <span class="sr-only">Փնտրել ֆայլերի բաժին</span>
           <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.15a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" />
           </svg>
@@ -20,14 +20,14 @@
             v-model="factorySearch"
             type="search"
             class="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-4 pr-10 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
-            placeholder="Փնտրել արտադրամասի անունով կամ կոդով"
+            placeholder="Փնտրել ֆայլերի բաժնի անունով կամ կոդով"
           />
         </label>
       </section>
 
       <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <div class="metric-card">
-          <p class="metric-label">Արտադրամասեր</p>
+          <p class="metric-label">Ֆայլերի բաժիներ</p>
           <p class="metric-value">{{ factoryGroups.length }}</p>
           <p class="metric-note">բոլորը տեսանելի են այստեղ</p>
         </div>
@@ -39,17 +39,17 @@
         <div class="metric-card">
           <p class="metric-label">Ընդհանուր առաջադրանք</p>
           <p class="metric-value">{{ globalExtensions.length }}</p>
-          <p class="metric-note">արտադրամասից անկախ</p>
+          <p class="metric-note">ֆայլերի բաժնից անկախ</p>
         </div>
       </section>
 
       <section class="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 class="mt-1 text-lg font-black text-slate-950 dark:text-white">Արտադրամասերի ֆայլերի տեսակներ</h2>
+            <h2 class="mt-1 text-lg font-black text-slate-950 dark:text-white">Ֆայլերի բաժիների ֆայլերի տեսակներ</h2>
           </div>
           <p class="text-xs text-slate-500 dark:text-slate-400">
-            {{ filteredFactories.length }} արտադրամաս
+            {{ filteredFactories.length }} ֆայլերի բաժին
           </p>
         </div>
 
@@ -62,7 +62,7 @@
             <div class="mb-2 flex items-center justify-between gap-3 px-1">
               <div class="min-w-0">
                 <p class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">{{ factory.name }}</p>
-                <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ factory.value || `Արտադրամաս #${factory.id}` }}</p>
+                <p class="mt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{{ factory.value || `Ֆայլերի բաժին #${factory.id}` }}</p>
               </div>
               <span
                 class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold"
@@ -105,7 +105,7 @@
         </div>
 
         <div v-else class="mt-5 rounded-2xl border border-dashed border-slate-200 px-4 py-10 text-center text-sm text-slate-400 dark:border-slate-800">
-          Այս որոնմամբ արտադրամաս չի գտնվել։
+          Այս որոնմամբ ֆայլերի բաժին չի գտնվել։
         </div>
       </section>
 
@@ -113,14 +113,14 @@
         <div class="mb-4">
           <h2 class="mt-1 text-lg font-black text-slate-950 dark:text-white">Ընդհանուր առաջադրանքի ֆայլերի տեսակներ</h2>
           <p class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-            Այս ցուցակը պահվում է առանձին՝ այն ֆայլերի համար, որոնք կապված չեն կոնկրետ արտադրամասի PMP վերբեռնման հետ։
+            Այս ցուցակը պահվում է առանձին՝ այն ֆայլերի համար, որոնք կապված չեն կոնկրետ ֆայլերի բաժնի PMP վերբեռնման հետ։
           </p>
         </div>
 
         <div class="max-w-2xl">
           <FileExtension
             :extensions="globalExtensions"
-            paragraph="Արտադրամասից անկախ ընդհանուր թույլատրելի ֆայլերի տեսակներ"
+            paragraph="Ֆայլերի բաժինից անկախ ընդհանուր թույլատրելի ֆայլերի տեսակներ"
             @update-extension="updateGlobalExtension"
             @delete-extension="deleteGlobalExtension"
           >
@@ -138,7 +138,7 @@
       </section>
 
       <section class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-800 dark:border-amber-950/60 dark:bg-amber-950/20 dark:text-amber-200">
-        <strong>Անվտանգության նշում.</strong> Կատարողական և ակտիվ վեբ ֆայլերի վտանգավոր տեսակները սերվերը շարունակում է արգելել՝ անկախ այս կարգավորումներից։ Եթե որևէ արտադրամասի ցուցակը դատարկ է, այդ արտադրամասի PMP վերբեռնումը ֆայլ չի ընդունի մինչև ֆայլի տեսակ ավելացվի։
+        <strong>Անվտանգության նշում.</strong> Կատարողական և ակտիվ վեբ ֆայլերի վտանգավոր տեսակները սերվերը շարունակում է արգելել՝ անկախ այս կարգավորումներից։ Եթե որևէ ֆայլերի բաժնի ցուցակը դատարկ է, այդ ֆայլերի բաժնի PMP վերբեռնումը ֆայլ չի ընդունի մինչև ֆայլի տեսակ ավելացվի։
       </section>
 
       <notifications />
@@ -247,7 +247,7 @@ export default {
         })
         this.$set(this.newFactoryExtensions, factory.id, '')
         await this.fetchFactoryExtensions()
-        this.notifySuccess(`${factory.name} արտադրամասի .${extension} ֆայլի տեսակը ավելացվեց։`)
+        this.notifySuccess(`${factory.name} ֆայլերի բաժնի .${extension} ֆայլի տեսակը ավելացվեց։`)
       } catch (error) {
         this.notifyError(error, 'Ֆայլի տեսակը չհաջողվեց ավելացնել։')
       } finally {
@@ -261,7 +261,7 @@ export default {
       try {
         await this.$axios.put(`/api/admin/factory-file-extensions/${id}`, { extension })
         await this.fetchFactoryExtensions()
-        this.notifySuccess(`${factory.name} արտադրամասի ֆայլի տեսակը թարմացվեց։`)
+        this.notifySuccess(`${factory.name} ֆայլերի բաժնի ֆայլի տեսակը թարմացվեց։`)
       } catch (error) {
         this.notifyError(error, 'Ֆայլի տեսակը չհաջողվեց թարմացնել։')
       }
@@ -270,7 +270,7 @@ export default {
       try {
         await this.$axios.delete(`/api/admin/factory-file-extensions/${id}`)
         await this.fetchFactoryExtensions()
-        this.notifySuccess(`${factory.name} արտադրամասի ֆայլի տեսակը հեռացվեց։`)
+        this.notifySuccess(`${factory.name} ֆայլերի բաժնի ֆայլի տեսակը հեռացվեց։`)
       } catch (error) {
         this.notifyError(error, 'Ֆայլի տեսակը չհաջողվեց հեռացնել։')
       }

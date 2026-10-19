@@ -8,7 +8,7 @@
         <h2
           class="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100"
         >
-          {{ $t('order_create.choose_factory') }}
+          {{ sectionLabel }}
         </h2>
 
         <button
@@ -419,6 +419,7 @@
 </template>
 
 <script>
+import { catalogText } from '@/utils/workshop-catalog'
 export default {
   name: 'ShowFiles',
   props: {
@@ -433,6 +434,9 @@ export default {
     return { selectedFactory: null }
   },
   computed: {
+    sectionLabel() {
+      return catalogText(this.$i18n?.locale).sections
+    },
     remoteNumbersWithFiles() {
       if (!this.pmps?.exists || !this.selectedFactory || !this.remoteNumberId)
         return []

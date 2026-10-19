@@ -7,6 +7,7 @@ const compiler = require('vue-template-compiler')
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const taskUrl = moduleUrl(read('utils/task-workflow.js'))
+const catalogUrl = moduleUrl(read('utils/workshop-catalog.js').replace("'@/utils/task-workflow'", JSON.stringify(taskUrl)))
 const taskBoardUrl = moduleUrl(read('utils/task-board.js').replace("'@/utils/task-workflow'", JSON.stringify(taskUrl)))
 const taskRoutingUrl = moduleUrl(read('utils/task-routing.js'))
 const taskNotificationsUrl = moduleUrl(read('utils/task-notifications.js').replace("'@/utils/task-workflow'", JSON.stringify(taskUrl)))
@@ -26,6 +27,7 @@ async function component(file, render = false) {
     if (specifier === '~/utils/staff-assignments') return `import ${names} from '${staffAssignmentsUrl}'`
     if (specifier === '~/utils/membership-copy') return `import ${names} from '${membershipUrl}'`
     if (specifier === '~/static/logo.png') return `const ${names} = '/work/_nuxt/img/metalworks-test.png'`
+    if (specifier === '@/utils/workshop-catalog') return `import ${names} from '${catalogUrl}'`
     if (specifier === '@/utils/task-workflow') return `import ${names} from '${taskUrl}'`
     if (specifier === '@/utils/task-board') return `import ${names} from '${taskBoardUrl}'`
     if (specifier === '@/utils/task-routing') return `import ${names} from '${taskRoutingUrl}'`
@@ -34,6 +36,7 @@ async function component(file, render = false) {
     return `const ${names} = {}`
   })
   const options = (await import(moduleUrl(source))).default
+  if (options.components?.TaskFileRouting) options.components.TaskFileRouting = await component('components/engineer/TaskFileRouting.vue', true)
   if (options.components?.TaskCreationOptions) options.components.TaskCreationOptions = await component('components/engineer/TaskCreationOptions.vue', true)
   if (options.components?.TaskWorkshopOptions) options.components.TaskWorkshopOptions = await component('components/engineer/TaskWorkshopOptions.vue', true)
   if (options.components?.TaskOperatorPicker) options.components.TaskOperatorPicker = await component('components/engineer/TaskOperatorPicker.vue', true)
@@ -268,7 +271,7 @@ test('selected file mode requires a selection and retains both confirmation meth
   assert.equal(requests[0].confirmation_method, 'photo_text')
 })
 
-test('file picker starts with workshop choices and keeps selections when returning to that list', async () => {
+test('file picker starts with file sections and keeps selections when returning to that list', async () => {
   const options = await component('components/File/ShowFactoryFiles/ShowFiles.vue', true)
   const vm = new Vue({ ...options, propsData: {
     pmps: { exists: true, pmp: { group: '990', group_name: 'QA', remote_number: [{ id: 101, remote_number: '01' }], files: [
@@ -280,7 +283,7 @@ test('file picker starts with workshop choices and keeps selections when returni
   }, methods: { ...options.methods, $t: key => key, $formatDate: () => '' } })
   const renderer = require('vue-server-renderer').createRenderer()
   const first = await renderer.renderToString(vm)
-  assert.match(first, /order_create.choose_factory/)
+  assert.match(first, /Ընտրեք ֆայլերի բաժինը/)
   assert.match(first, /Information/); assert.match(first, /Laser/)
   assert.doesNotMatch(first, /note\.txt|part\.dxf/)
   vm.selectFactory(vm.factories[1])
@@ -288,7 +291,7 @@ test('file picker starts with workshop choices and keeps selections when returni
   assert.match(files, /part\.dxf/); assert.doesNotMatch(files, /note\.txt/)
   vm.selectedFactory = null
   const choices = await renderer.renderToString(vm)
-  assert.match(choices, /order_create.choose_factory/)
+  assert.match(choices, /Ընտրեք ֆայլերի բաժինը/)
   assert.deepEqual([...vm.selectedFiles], [2]); assert.equal(vm.fileQuantities[2], 4)
   vm.$destroy()
 })

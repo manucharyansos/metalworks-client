@@ -109,7 +109,7 @@ test('policy requests use the engineer read-only endpoint and propagate failures
   const factories = [{ id: 6, value: 'INFO', extensions: [] }]
   const result = await actions.fetchFactoryFilePolicies.call({ $axios: { get: async url => { assert.equal(url, '/api/factory-file-policies'); return { data: { data: factories } } } } }, { commit: (...args) => commits.push(args) })
   assert.equal(result, factories)
-  assert.deepEqual(commits, [['SET_FACTORY', factories]])
+  assert.deepEqual(commits, [['SET_FILE_CATEGORIES', factories]])
   await assert.rejects(actions.fetchFactoryFilePolicies.call({ $axios: { get: async () => ({ data: {} }) } }, { commit() {} }))
 })
 

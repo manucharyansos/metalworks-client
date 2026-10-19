@@ -1,6 +1,7 @@
 import { apiErrorMessage, taskActionBody } from '@/utils/task-workflow'
 export const state = () => ({
   factory: null,
+  fileCategories: [],
   orderByFactory: null,
   finishedOrder: null,
   actionError: '',
@@ -8,6 +9,7 @@ export const state = () => ({
 })
 
 export const getters = {
+  getFileCategories: (state) => state.fileCategories,
   getFactory(state) {
     return state.factory
   },
@@ -24,6 +26,21 @@ export const getters = {
 }
 
 export const actions = {
+  async fetchFileCategories({ commit }) {
+    const { data } = await this.$axios.get('/api/file-categories', {
+      params: { include_archived: 1 },
+    })
+    if (!Array.isArray(data?.categories))
+      throw new Error('Invalid file category response')
+    const sections = data.categories.map((category) => ({
+      ...category,
+      id: category.legacy_factory_id,
+      file_category_id: category.id,
+      value: category.code,
+    }))
+    commit('SET_FILE_CATEGORIES', sections)
+    return sections
+  },
   async fetchFactoryFilePolicies({ commit }) {
     let factories
     try {
@@ -51,7 +68,7 @@ export const actions = {
         }
       })
     }
-    commit('SET_FACTORY', factories)
+    commit('SET_FILE_CATEGORIES', factories)
     return factories
   },
 
@@ -156,6 +173,9 @@ export const actions = {
 }
 
 export const mutations = {
+  SET_FILE_CATEGORIES(state, categories) {
+    state.fileCategories = categories || []
+  },
   SET_ACTION_CONFLICT_ORDER(state, order) {
     state.actionConflictOrder = order
   },

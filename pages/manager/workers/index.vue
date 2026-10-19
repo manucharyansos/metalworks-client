@@ -85,7 +85,7 @@ import { membershipCopy } from '~/utils/membership-copy'
 import StaffAssignmentsModal from '~/components/users/StaffAssignmentsModal.vue'
 import { staffAccessCopy } from '~/utils/staff-assignments'
 
-const ROLE_LABELS = { manager: 'Մենեջեր', bend: 'Կռում', laser: 'Լազերային կտրում', powder_catting: 'Փոշեներկում', engineer: 'Ինժիներ', admin: 'Ադմինիստրատոր' }
+const ROLE_LABELS = { manager: 'Մենեջեր', bend: 'Կռում', laser: 'Լազերային կտրում', powder_catting: 'Փոշեներկում', engineer: 'Ինժիներ', operator: 'Օպերատոր', admin: 'Ադմինիստրատոր' }
 
 export default {
   components: { WorkerFormModal, CompanyMembershipModal, StaffAssignmentsModal },
