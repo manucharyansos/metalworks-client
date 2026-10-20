@@ -72,3 +72,11 @@ test('general file type validation retains a failed draft and retries the same c
  const retry=vm.save();await Promise.resolve();requests[0].resolve({data:[{id:3,extension:'jpg'}]});await retry
  assert.equal(vm.newExtension,'');assert.equal(vm.rows[0].extension,'jpg');assert.equal(sent[1].url,'/api/admin/file-extensions');assert.equal(sent[1].data.extension,'jpg')
 })
+test('workspace label keys stay valid across all three languages when visible customer labels change', () => {
+ const layouts = ['admin','manager','engineer','factory'].map(name => path.join(__dirname,'../layouts/'+name+'.vue')).filter(file => fs.existsSync(file))
+ const keys = new Set(layouts.flatMap(file => fs.readFileSync(file,'utf8').match(/(?:workspace_layout|admin_layout)\.[a-z_]+/g) || []))
+ for (const locale of ['hy','ru','en']) {
+  const dictionary = JSON.parse(fs.readFileSync(path.join(__dirname,'../locales/'+locale+'.json'),'utf8'))
+  for (const key of keys) assert.equal(typeof key.split('.').reduce((value,part) => value?.[part],dictionary),'string',`${locale}: ${key}`)
+ }
+})

@@ -240,7 +240,7 @@ export default {
         },
         {
           to: '/manager/clients',
-          labelKey: 'workspace_layout.customers',
+          labelKey: 'workspace_layout.clients',
           permission: 'clients.view',
           icon: 'clients',
         },
