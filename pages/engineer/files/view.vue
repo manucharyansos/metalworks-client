@@ -486,7 +486,7 @@
     <AddFileModal
       :is-open-modal="isOpenAddFileModal"
       :file="currentFile"
-      :is-dxf-file="isDxfFile"
+      :is-dxf-file="requiresDxfMetadata"
       :factory="selectedFactory"
       :extensions="allowedExtensions"
       :server-validated-formats="serverValidatedFormats"
@@ -539,7 +539,7 @@
         />
       </template>
 
-      <template v-if="isDxfFile" #quantity>
+      <template v-if="requiresDxfMetadata" #quantity>
         <InputWithLabelIcon
           v-model="fileData.quantity"
           type="number"
@@ -550,7 +550,7 @@
         />
       </template>
 
-      <template v-if="isDxfFile" #materialType>
+      <template v-if="requiresDxfMetadata" #materialType>
         <div class="relative">
           <InputWithLabelIcon
             v-model="fileData.material"
@@ -586,7 +586,7 @@
         </div>
       </template>
 
-      <template v-if="isDxfFile" #thickness>
+      <template v-if="requiresDxfMetadata" #thickness>
         <InputWithLabelIcon
           v-model="fileData.thickness"
           type="number"
@@ -621,6 +621,7 @@ import ModelViewer from '~/components/File/ModelViewer.vue'
 import { inspectFactoryPreview } from '~/utils/factory-preview'
 import {
   allowsExtension,
+  fileExtension,
   inputAccept,
   normalizeExtensions,
   previewType,
@@ -704,7 +705,9 @@ export default {
     },
     breadcrumb() {
       if (!this.projectReady) return []
-      const trail = [`${this.groupCode} — ${this.getPmp.group_name || 'Նախագիծ'}`]
+      const trail = [
+        `${this.groupCode} — ${this.getPmp.group_name || 'Նախագիծ'}`,
+      ]
       if (this.selectedRemoteNumber)
         trail.push(
           `${this.subgroupCode} — ${
@@ -720,6 +723,12 @@ export default {
         (this.getFactory || []).find(
           (factory) => this.n(factory.id) === this.selectedFactoryId
         ) || null
+      )
+    },
+    requiresDxfMetadata() {
+      return (
+        this.selectedFactory?.value === 'DXF' &&
+        fileExtension(this.fileData.file?.name) === 'dxf'
       )
     },
     isInfoFactory() {
@@ -931,7 +940,7 @@ export default {
         return
       let { file } = this.fileData
       const { quantity, material, thickness } = this.fileData
-      const isDxf = this.isDxfFile
+      const isDxf = this.requiresDxfMetadata
       this.uploadError = ''
       if (this.isInfoFactory && this.infoMode === 'text') {
         if (!this.infoText.trim()) {
@@ -1002,10 +1011,10 @@ export default {
             this.n(f.factory_id) === this.n(this.selectedFactoryId)
         )
       } catch (error) {
-        this.uploadError = uploadErrorMessage(
-          error,
-          this.$t('file_upload.save_failed')
-        )
+        this.uploadError =
+          error.response?.status === 413
+            ? this.$t('file_upload.server_limit')
+            : uploadErrorMessage(error, this.$t('file_upload.save_failed'))
       } finally {
         this.uploading = false
       }

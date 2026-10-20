@@ -8,7 +8,7 @@ The viewer supports rotation, pan, zoom, isometric/top/front/right views, fit, w
 
 ## Import and access
 
-Files are fetched through the existing authenticated secure-file endpoint. Import runs in a dedicated worker and never sends the model to a third-party service. Changing files or leaving the page terminates the worker. Import has a 45-second timeout and retains the download action on failure. Geometry is limited to 500,000 triangles, 1,000,000 vertices and 512 parts; the existing 10 MB upload/preview limit applies.
+Files are fetched through the existing authenticated secure-file endpoint. Import runs in a dedicated worker and never sends the model to a third-party service. Changing files or leaving the page terminates the worker. Import has a 45-second timeout and retains the download action on failure. Geometry is limited to 500,000 triangles, 1,000,000 vertices and 512 parts; the existing 100 MB upload/preview limit applies.
 
 OpenCascade is supplied by the pinned `occt-import-js` dependency. `build/prepare-cad-assets.cjs` copies its unmodified JavaScript, WebAssembly and licenses into `static/cad-vendor/0.0.23` before each build. These generated files are included in `dist`, not committed to git. Keep `cad-vendor/` and both CAD worker assets when installing the `/work` bundle. The host should serve `.wasm` as `application/wasm`.
 

@@ -49,7 +49,7 @@ export function detectModelFormat(bytes, filename, text = '') {
 
 // Inspect the payload as well as its name: a factory is a work stage, not a format.
 export async function inspectFactoryPreview(blob, filename, declaredType) {
-  if (!(blob instanceof Blob) || !blob.size || blob.size > 10 * 1024 * 1024) {
+  if (!(blob instanceof Blob) || !blob.size || blob.size > 100 * 1024 * 1024) {
     throw new Error('Invalid preview payload')
   }
   if (['audio', 'video'].includes(declaredType)) {

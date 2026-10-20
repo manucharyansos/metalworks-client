@@ -1,4 +1,4 @@
-export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+export const MAX_UPLOAD_BYTES = 100 * 1024 * 1024
 
 const imageExtensions = [
   'jpg',
@@ -193,5 +193,5 @@ export function uploadErrorMessage(error, fallback) {
     Object.values(data.errors)
       .flat()
       .find((message) => typeof message === 'string')
-  return validation || data?.message || fallback
+  return validation || data?.error || data?.message || fallback
 }

@@ -642,7 +642,7 @@ test('old file-version reads are ignored on company change, and invalid extensio
   assert.equal(vm.loading, false)
   for (const upload of [
     { name: 'file.pdf', size: 2 },
-    { name: 'file.txt', size: 10 * 1024 * 1024 + 1 },
+    { name: 'file.txt', size: 100 * 1024 * 1024 + 1 },
   ]) {
     vm.select(file, { target: { files: [upload], value: 'file' } })
     assert.equal(vm.uploads[60], null)

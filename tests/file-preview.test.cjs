@@ -61,7 +61,7 @@ test('SolidWorks files without a thumbnail and transport-only fixtures never inv
 
 test('empty and oversized responses fail without allocating a preview', async () => {
   const { inspectFactoryPreview } = await helpers
-  for (const blob of [new Blob([]), new Blob([new Uint8Array(10 * 1024 * 1024 + 1)])]) {
+  for (const blob of [new Blob([]), new Blob([new Uint8Array(100 * 1024 * 1024 + 1)])]) {
     await assert.rejects(inspectFactoryPreview(blob, 'cut.iqs', 'file'), /Invalid preview/)
   }
 })
