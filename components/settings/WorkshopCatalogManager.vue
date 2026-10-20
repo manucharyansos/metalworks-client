@@ -152,6 +152,17 @@
             {{ t.edit }}
           </button>
           <button
+            v-if="categories"
+            type="button"
+            :disabled="saving"
+            data-catalog-delete
+            class="rounded-lg border border-rose-200 px-3 py-2 text-rose-700 dark:border-rose-900 dark:text-rose-300"
+            @click="remove(item)"
+          >
+            {{ t.delete }}
+          </button>
+          <button
+            v-else
             type="button"
             :disabled="saving"
             data-catalog-archive
@@ -221,6 +232,22 @@ export default {
     },
     managerRole() {
       return this.$auth?.user?.role?.name === 'admin' ? 'admin' : 'manager'
+    },
+    scopeKey() {
+      return `${this.$auth?.user?.id || ''}:${
+        this.$store?.state?.workspace?.company?.id || ''
+      }`
+    },
+  },
+  watch: {
+    scopeKey() {
+      this.requestVersion++
+      this.items = []
+      this.workshops = []
+      this.saving = false
+      this.reset()
+      this.itemError = { id: null, message: '' }
+      this.load()
     },
   },
   mounted() {
@@ -305,6 +332,7 @@ export default {
     },
     async save() {
       if (this.saving || !this.draft.name) return
+      const scope = this.scopeKey
       this.saving = true
       this.error = ''
       try {
@@ -313,13 +341,35 @@ export default {
           id ? `${this.endpoint}/${id}` : this.endpoint,
           this.body(this.draft)
         )
+        if (scope !== this.scopeKey || this._isDestroyed) return
         this.reset()
         await this.load()
         this.$notify?.({ type: 'success', text: this.t.saved })
       } catch (error) {
-        this.error = apiErrorMessage(error)
+        if (scope === this.scopeKey && !this._isDestroyed)
+          this.error = apiErrorMessage(error)
       } finally {
-        this.saving = false
+        if (scope === this.scopeKey && !this._isDestroyed) this.saving = false
+      }
+    },
+    async remove(item) {
+      if (this.saving || !this.categories) return
+      const scope = this.scopeKey
+      const current = () => scope === this.scopeKey && !this._isDestroyed
+      this.saving = true
+      this.itemError = { id: null, message: '' }
+      try {
+        await this.$axios.delete(`${this.endpoint}/${item.id}`)
+        if (!current()) return
+        if (this.draft.id === item.id) this.reset()
+        this.items = this.items.filter((row) => row.id !== item.id)
+        await this.load()
+        if (current()) this.$notify?.({ type: 'success', text: this.t.deleted })
+      } catch (error) {
+        if (current())
+          this.itemError = { id: item.id, message: apiErrorMessage(error) }
+      } finally {
+        if (current()) this.saving = false
       }
     },
     async toggle(item) {

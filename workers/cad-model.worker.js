@@ -45,7 +45,7 @@ self.onmessage = async ({ data }) => {
     if (
       !(data.buffer instanceof ArrayBuffer) ||
       !data.buffer.byteLength ||
-      data.buffer.byteLength > 10 * 1024 * 1024 ||
+      data.buffer.byteLength > 100 * 1024 * 1024 ||
       !['iges', 'step', 'stl', 'obj'].includes(data.format)
     )
       throw new Error('invalid')

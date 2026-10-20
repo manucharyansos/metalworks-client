@@ -5,7 +5,7 @@ self.onmessage = ({ data }) => {
   try {
     if (
       !(data.buffer instanceof ArrayBuffer) ||
-      data.buffer.byteLength > 10 * 1024 * 1024
+      data.buffer.byteLength > 100 * 1024 * 1024
     ) {
       self.postMessage(null)
       return

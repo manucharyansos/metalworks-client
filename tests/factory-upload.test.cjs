@@ -303,3 +303,97 @@ test('shared numeric inputs put min, step, and name on the input and forward foc
   assert.equal(focused, true)
   assert.deepEqual(emitted, { name: 'input', value: '1.5' })
 })
+
+for (const code of ['SW', 'DXF', 'DLD', 'IQS', 'INFO', 'PDF', 'FILES_CUSTOM']) {
+  test(`${code} accepts PDF added in settings without requiring DXF metadata`, async () => {
+    const { vm } = await uploadPage(code, ['pdf', 'nc'])
+    const file = new File(['%PDF-1.4'], 'drawing.PDF', { type: 'application/pdf' })
+    vm.handleFileDrop(file)
+    assert.equal(vm.fileAccept, '.pdf,.nc')
+    assert.equal(vm.fileData.file, file)
+    assert.equal(vm.requiresDxfMetadata, false)
+    let submitted
+    vm.createPmpFilesByFactory = async body => { submitted = body }
+    await vm.addFile()
+    assert.equal(submitted.get('file'), file)
+    for (const key of ['quantity', 'material_type', 'thickness']) assert.equal(submitted.get(key), null)
+  })
+}
+
+test('DXF metadata follows the selected file extension when replacing PDF with DXF', async () => {
+  const { vm } = await uploadPage('DXF', ['dxf', 'pdf'])
+  vm.handleFileDrop(new File(['pdf'], 'drawing.pdf'))
+  assert.equal(vm.requiresDxfMetadata, false)
+  vm.handleFileDrop(new File(['dxf'], 'part.dxf'))
+  assert.equal(vm.requiresDxfMetadata, true)
+  vm.createPmpFilesByFactory = () => assert.fail('DXF metadata is required')
+  await vm.addFile()
+  assert.equal(vm.uploadError, 'file_upload.dxf_fields_required')
+})
+
+test('upload errors display the server reason for duplicates and other legacy error responses', async () => {
+  const { uploadErrorMessage } = await policy
+  assert.equal(uploadErrorMessage({ response: { data: { error: 'This name already exists' } } }, 'Failed'), 'This name already exists')
+  assert.equal(uploadErrorMessage({ response: { data: { errors: { file: ['Current policy blocks this format'] }, error: 'Generic' } } }), 'Current policy blocks this format')
+})
+
+test('project files accept 100 MiB and reject larger payloads before uploading', async () => {
+  const { MAX_UPLOAD_BYTES, validateFactoryFile } = await policy
+  assert.equal(MAX_UPLOAD_BYTES, 100 * 1024 * 1024)
+  assert.equal(validateFactoryFile(fakeFile('large.pdf', 11 * 1024 * 1024), ['pdf']), '')
+  assert.equal(validateFactoryFile(fakeFile('large.pdf', MAX_UPLOAD_BYTES), ['pdf']), '')
+  assert.equal(validateFactoryFile(fakeFile('large.pdf', MAX_UPLOAD_BYTES + 1), ['pdf']), 'too_large')
+})
+
+test('recording waits for asynchronous final audio chunks and validation before publishing', async () => {
+  const { VoiceRecorder } = await voice
+  const events = [], tracks = { stop() {} }
+  let recorder, approve
+  class Recorder {
+    static isTypeSupported() { return true }
+    constructor() { recorder = this; this.state = 'inactive'; this.mimeType = 'audio/webm' }
+    start() { this.state = 'recording' }
+    stop() { this.state = 'inactive' }
+  }
+  const recording = new VoiceRecorder({ Recorder, mediaDevices: { getUserMedia: async () => ({ getTracks: () => [tracks] }) }, extensions: ['webm'],
+    onState: state => events.push(state), onError: error => assert.fail(error), onFile: file => events.push(file), validateFile: () => new Promise(resolve => { approve = resolve }) })
+  await recording.start()
+  recording.finish()
+  assert.equal(recording.state, 'stopping')
+  recorder.ondataavailable({ data: new Blob(['first-'], { type: 'audio/webm' }) })
+  recorder.ondataavailable({ data: new Blob(['last'], { type: 'audio/webm' }) })
+  const finalized = recorder.onstop()
+  assert.equal(recording.state, 'processing')
+  assert.ok(!events.some(item => item instanceof File))
+  approve()
+  await finalized
+  assert.equal(recording.state, 'idle')
+  assert.equal(await events.at(-1).text(), 'first-last')
+  assert.equal(events.at(-2), 'idle')
+})
+
+test('silent or undecodable recordings never become upload files, and cancellation discards late validation', async () => {
+  const { VoiceRecorder, validateRecordedAudio } = await voice
+  let closed = 0
+  class SilentContext {
+    async decodeAudioData() { return { duration: 2, numberOfChannels: 1, getChannelData: () => new Float32Array(10) } }
+    async close() { closed++ }
+  }
+  await assert.rejects(validateRecordedAudio(new Blob(['encoded']), SilentContext), /recording_silent/)
+  assert.equal(closed, 1)
+  class BrokenContext extends SilentContext { async decodeAudioData() { throw Error('decode') } }
+  await assert.rejects(validateRecordedAudio(new Blob(['broken']), BrokenContext), /recording_failed/)
+  assert.equal(closed, 2)
+  const h = recordingHarness(VoiceRecorder)
+  h.voice.validateFile = async () => { throw Error('recording_silent') }
+  await h.voice.start(); h.voice.finish()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(h.files.length, 0)
+  assert.deepEqual(h.errors, ['recording_silent'])
+  assert.equal(h.voice.state, 'idle')
+  let approve
+  h.voice.validateFile = () => new Promise(resolve => { approve = resolve })
+  await h.voice.start(); h.voice.finish(); h.voice.cancel(); approve()
+  await new Promise(resolve => setImmediate(resolve))
+  assert.equal(h.files.length, 0)
+})

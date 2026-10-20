@@ -109,3 +109,41 @@ test('admin and manager employee forms offer a generic operator and require its 
     assert.equal(modal.methods.needsWorkshop.call({ roles, row: () => ({ role_id: 7 }) }, 1), true)
   }
 })
+
+test('deleting a category uses DELETE, waits for success, and retains a non-empty section on failure', async () => {
+  let fail = true
+  const vm = component('components/settings/WorkshopCatalogManager.vue', { propsData: { categories: true }, methods: { load: async () => {} } })
+  const item = { id: 3, name: 'Drawings', is_active: true }
+  vm.items = [item]
+  vm.edit(item)
+  vm.$axios = { delete: async url => {
+    assert.equal(url, '/api/file-categories/3')
+    if (fail) throw { response: { data: { errors: { category: ['Remove files first'] } } } }
+  } }
+  await vm.remove(item)
+  assert.equal(vm.itemError.message, 'Remove files first')
+  assert.equal(vm.items.length, 1)
+  fail = false
+  await vm.remove(item)
+  assert.equal(vm.items.length, 0)
+  assert.equal(vm.draft.id, null)
+  assert.equal(vm.saving, false)
+  vm.$destroy()
+})
+
+test('late category deletion cannot remove a new company’s section or reset its draft', async () => {
+  const vm = component('components/settings/WorkshopCatalogManager.vue', { propsData: { categories: true }, methods: { load: async () => {} } })
+  vm.$store = Vue.observable({ state: { workspace: { company: { id: 1 } } } })
+  let finish
+  vm.$axios = { delete: () => new Promise(resolve => { finish = resolve }) }
+  const pending = vm.remove({ id: 3 })
+  vm.$store.state.workspace.company.id = 2
+  await Vue.nextTick()
+  vm.items = [{ id: 4, name: 'Private' }]
+  vm.draft = { id: 4, name: 'New draft' }
+  finish({})
+  await pending
+  assert.equal(vm.items[0].id, 4)
+  assert.equal(vm.draft.name, 'New draft')
+  vm.$destroy()
+})

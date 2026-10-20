@@ -236,7 +236,7 @@ export default {
       this.$set(this.uploads, file.id, null)
       if (!upload) return
       if (
-        upload.size > 10 * 1024 * 1024 ||
+        upload.size > 100 * 1024 * 1024 ||
         !upload.name.toLowerCase().endsWith(this.extension(file))
       ) {
         this.error = this.t.versionUploadHelp
