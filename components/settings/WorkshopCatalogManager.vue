@@ -2,7 +2,7 @@
   <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6" data-workshop-catalog>
     <header class="mb-6">
       <h1 class="text-2xl font-black text-slate-900 dark:text-white">
-        {{ categories ? t.categories : t.workshops }}
+        {{ title || (categories ? t.categories : t.workshops) }}
       </h1>
       <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
         {{ categories ? t.categoryHelp : t.workshopHelp }}
@@ -195,7 +195,7 @@ const blank = () => ({
   is_active: true,
 })
 export default {
-  props: { categories: Boolean },
+  props: { categories: Boolean, title: { type: String, default: '' } },
   data: () => ({
     items: [],
     workshops: [],

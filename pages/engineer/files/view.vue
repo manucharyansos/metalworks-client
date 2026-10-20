@@ -36,7 +36,7 @@
     <section
       v-if="projectReady"
       class="work-card mb-5 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-2 sm:p-5"
-      aria-label="PMP"
+      aria-label="Նախագիծ"
     >
       <div class="min-w-0">
         <p class="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -704,7 +704,7 @@ export default {
     },
     breadcrumb() {
       if (!this.projectReady) return []
-      const trail = [`${this.groupCode} — ${this.getPmp.group_name || 'PMP'}`]
+      const trail = [`${this.groupCode} — ${this.getPmp.group_name || 'Նախագիծ'}`]
       if (this.selectedRemoteNumber)
         trail.push(
           `${this.subgroupCode} — ${

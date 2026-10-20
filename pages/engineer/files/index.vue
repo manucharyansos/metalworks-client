@@ -4,7 +4,7 @@
       <section class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div class="flex items-center gap-2">
           <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Նախագծեր և ֆայլեր</h1>
-          <InfoTooltip>Ընտրեք կամ ստեղծեք PMP խումբ և ենթախումբ, ապա անցեք համապատասխան ֆայլերին։</InfoTooltip>
+          <InfoTooltip>Ընտրեք կամ ստեղծեք նախագծերի խումբ և ենթախումբ, ապա անցեք համապատասխան ֆայլերին։</InfoTooltip>
         </div>
         <div class="flex flex-wrap gap-2 text-[10px] font-bold">
           <span class="rounded-full px-3 py-1.5" :class="$can('pmp.create') ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'">Ստեղծում՝ {{ $can('pmp.create') ? 'թույլատրված' : 'փակ' }}</span>
@@ -92,7 +92,7 @@
         <div class="work-card panel-card flex flex-col">
           <div class="panel-heading"><span class="step-badge">03</span><div><h2 class="panel-title">Գործողություններ</h2></div></div>
           <div class="flex flex-1 flex-col justify-center gap-3">
-            <button v-if="showCreateGroup && $can('pmp.create')" type="button" :disabled="saving || !canCreateGroup" class="action-button bg-emerald-600 text-white hover:bg-emerald-700" @click="addPmpGroup"><span class="action-icon">+</span><span><b>Ստեղծել խումբ</b><small>Պահպանել նոր PMP խումբ</small></span></button>
+            <button v-if="showCreateGroup && $can('pmp.create')" type="button" :disabled="saving || !canCreateGroup" class="action-button bg-emerald-600 text-white hover:bg-emerald-700" @click="addPmpGroup"><span class="action-icon">+</span><span><b>Ստեղծել խումբ</b><small>Պահպանել նախագծերի նոր խումբ</small></span></button>
             <button v-if="showCreateRemote && $can('pmp.create')" type="button" :disabled="saving || !canCreateRemote" class="action-button bg-blue-600 text-white hover:bg-blue-700" @click="addPmpGroupRemoteNumber"><span class="action-icon">+</span><span><b>Ստեղծել ենթախումբ</b><small>Ավելացնել ընտրված խմբին</small></span></button>
             <button v-if="showView && $can('pmp_files.view')" type="button" :disabled="saving" class="action-button bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200" @click="viewFiles"><span class="action-icon">→</span><span><b>Դիտել ֆայլերը</b><small>Բացել ընտրված ենթախումբը</small></span></button>
             <div v-if="showView && !$can('pmp_files.view')" class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/20 dark:text-amber-300">Ենթախումբը ընտրված է, բայց ֆայլեր դիտելու ֆունկցիան ձեզ տրված չէ։</div>

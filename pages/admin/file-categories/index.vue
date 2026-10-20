@@ -1,10 +1,11 @@
-<template><WorkshopCatalogManager categories /></template>
+<template><div /></template>
 <script>
-import WorkshopCatalogManager from '@/components/settings/WorkshopCatalogManager.vue'
 export default {
-  components: { WorkshopCatalogManager },
   layout: 'admin',
-  middleware: ['role-guard'],
+  middleware: [
+    'role-guard',
+    ({ redirect, app }) => redirect(app.localePath('/admin/file-extension')),
+  ],
   meta: { role: 'admin' },
 }
 </script>

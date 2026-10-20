@@ -1,8 +1,8 @@
-<template><WorkshopCatalogManager categories /></template>
+<template><ProjectFolderSettings /></template>
 <script>
-import WorkshopCatalogManager from '@/components/settings/WorkshopCatalogManager.vue'
+import ProjectFolderSettings from '@/components/settings/ProjectFolderSettings.vue'
 export default {
-  components: { WorkshopCatalogManager },
+  components: { ProjectFolderSettings },
   layout: 'manager',
   middleware: ['role-guard'],
   meta: { role: 'manager' },

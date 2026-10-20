@@ -6,7 +6,7 @@ const copy = {
       'Նշեք հասանելի ընկերությունները և յուրաքանչյուրի համար ընտրեք հաստիքը։',
     rights:
       'Ցուցադրվում են այն ընկերությունները, որտեղ դուք կարող եք կառավարել հասանելիությունը։',
-    current: 'Ընտրված ընկերություն․ խմբագրեք աշխատակցի կամ հաճախորդի ձևից։',
+    current: 'Ընտրված ընկերություն․ խմբագրեք աշխատակցի կամ պատվիրատուի ձևից։',
     protected: 'Այս հասանելիությունը կառավարում է գլխավոր ադմինը։',
     loading: 'Բեռնվում է…',
     failed: 'Չհաջողվեց բեռնել հասանելիությունները։',
@@ -20,7 +20,7 @@ const copy = {
     chooseRole: 'Ընտրեք հաստիքը',
     chooseWorkshop: 'Ընտրեք արտադրամասը',
     roles: {
-      authenticatedUser: 'Հաճախորդ',
+      authenticatedUser: 'Պատվիրատու',
       admin: 'Ադմինիստրատոր',
       manager: 'Մենեջեր',
       engineer: 'Ինժիներ',
@@ -36,7 +36,7 @@ const copy = {
     intro: 'Отметьте доступные предприятия и выберите должность в каждом.',
     rights: 'Показаны предприятия, в которых вы можете управлять доступом.',
     current:
-      'Выбранное предприятие: редактируйте через форму сотрудника или клиента.',
+      'Выбранное предприятие: редактируйте через форму сотрудника или заказчика.',
     protected: 'Этим доступом управляет главный администратор.',
     loading: 'Загрузка…',
     failed: 'Не удалось загрузить доступы.',
@@ -50,7 +50,7 @@ const copy = {
     chooseRole: 'Выберите должность',
     chooseWorkshop: 'Выберите цех',
     roles: {
-      authenticatedUser: 'Клиент',
+      authenticatedUser: 'Заказчик',
       admin: 'Администратор',
       manager: 'Менеджер',
       engineer: 'Инженер',
@@ -65,7 +65,7 @@ const copy = {
     button: 'Companies',
     intro: 'Select available companies and assign a role in each.',
     rights: 'Only companies where you can manage access are shown.',
-    current: 'Selected company: edit through the employee or client form.',
+    current: 'Selected company: edit through the employee or customer form.',
     protected: 'This access is managed by the platform administrator.',
     loading: 'Loading…',
     failed: 'Could not load company access.',
@@ -79,7 +79,7 @@ const copy = {
     chooseRole: 'Select a position',
     chooseWorkshop: 'Select a workshop',
     roles: {
-      authenticatedUser: 'Client',
+      authenticatedUser: 'Customer',
       admin: 'Administrator',
       manager: 'Manager',
       engineer: 'Engineer',
@@ -97,35 +97,35 @@ export function membershipCopy(locale) {
       intro:
         'Նշեք աշխատակցի հասանելի ընկերությունները, հաստիքներն ու արտադրամասերը։',
       clientIntro:
-        'Նշեք այն ընկերությունները, որոնց հասանելիությունը ցանկանում եք տրամադրել հաճախորդին։',
+        'Նշեք այն ընկերությունները, որոնց հասանելիությունը ցանկանում եք տրամադրել պատվիրատուին։',
       current: 'Ընթացիկ ընկերություն',
       chooseCompanies: 'Ընտրեք ընկերությունները',
       protectedEmployee:
         'Այս ընկերության հասանելիությունը կառավարվում է առանձին։',
       notManaged: 'Կառավարման հասանելիությունը տրված չէ',
       managementHint:
-        'Մյուս ընկերությունները կառավարելու համար գլխավոր ադմինը պետք է ձեր հաշվի «Ընկերություններ» բաժնում նշի այդ ընկերությունները և ընտրի «Մենեջեր» հաստիքը։ Դրանից հետո հասանելի կլինեն այդ ընկերությունների հաճախորդները և աշխատակիցների ու հաճախորդների բոլոր հայտերը։',
+        'Մյուս ընկերությունները կառավարելու համար գլխավոր ադմինը պետք է ձեր հաշվի «Ընկերություններ» բաժնում նշի այդ ընկերությունները և ընտրի «Մենեջեր» հաստիքը։ Դրանից հետո հասանելի կլինեն այդ ընկերությունների պատվիրատուները և աշխատակիցների ու պատվիրատուների բոլոր հայտերը։',
     },
     ru: {
       intro: 'Отметьте доступные сотруднику компании, должности и цеха.',
       clientIntro:
-        'Отметьте компании, к которым клиент должен получить доступ.',
+        'Отметьте компании, к которым заказчик должен получить доступ.',
       current: 'Текущая компания',
       chooseCompanies: 'Выберите компании',
       protectedEmployee: 'Доступ к этой компании управляется отдельно.',
       notManaged: 'Управление не назначено',
       managementHint:
-        'Чтобы управлять другими компаниями, главный админ должен отметить их в разделе «Предприятия» вашего аккаунта и выбрать должность «Менеджер». После этого будут доступны их клиенты и все заявки клиентов и сотрудников.',
+        'Чтобы управлять другими компаниями, главный админ должен отметить их в разделе «Предприятия» вашего аккаунта и выбрать должность «Менеджер». После этого будут доступны их заказчики и все заявки заказчиков и сотрудников.',
     },
     en: {
       intro: 'Select the employee’s companies, positions and workshops.',
-      clientIntro: 'Select the companies the client should have access to.',
+      clientIntro: 'Select the companies the customer should have access to.',
       current: 'Current company',
       chooseCompanies: 'Select companies',
       protectedEmployee: 'Access to this company is managed separately.',
       notManaged: 'Management access not assigned',
       managementHint:
-        'To manage other companies, the platform admin must select them under your account’s Companies and assign the Manager position. Their clients and all client and employee requests will then be available.',
+        'To manage other companies, the platform admin must select them under your account’s Companies and assign the Manager position. Their customers and all customer and employee requests will then be available.',
     },
   }
   const language = String(locale || 'hy').split('-')[0]

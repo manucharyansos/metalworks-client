@@ -7,8 +7,8 @@
 
     <div v-else-if="!rows.length" class="flex min-h-[260px] flex-col items-center justify-center px-6 text-center">
       <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">0</div>
-      <p class="mt-3 text-sm font-bold text-slate-700 dark:text-slate-200">Հաճախորդ չի գտնվել</p>
-      <p class="mt-1 text-xs text-slate-400">Փոխեք որոնումը կամ ստեղծեք նոր հաճախորդ։</p>
+      <p class="mt-3 text-sm font-bold text-slate-700 dark:text-slate-200">Պատվիրատու չի գտնվել</p>
+      <p class="mt-1 text-xs text-slate-400">Փոխեք որոնումը կամ ստեղծեք նոր պատվիրատու։</p>
     </div>
 
     <template v-else>
@@ -16,7 +16,7 @@
         <table class="w-full min-w-[850px] text-left">
           <thead class="bg-slate-50/80 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40">
             <tr>
-              <th class="px-6 py-3.5">Հաճախորդ</th>
+              <th class="px-6 py-3.5">Պատվիրատու</th>
               <th class="px-4 py-3.5">Հեռախոս</th>
               <th class="px-4 py-3.5">Հասցե</th>
               <th class="px-4 py-3.5">Տեսակ</th>

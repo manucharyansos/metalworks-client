@@ -115,7 +115,7 @@
               <input
                 v-model="filters.search"
                 class="control pr-10"
-                placeholder="Համար, անուն, նկարագրություն, հաճախորդ..."
+                placeholder="Համար, անուն, նկարագրություն, պատվիրատու..."
               />
             </div>
             <select
@@ -272,7 +272,7 @@
               >
                 <tr>
                   <th class="px-6 py-3.5">Առաջադրանք</th>
-                  <th class="px-4 py-3.5">Հաճախորդ</th>
+                  <th class="px-4 py-3.5">Պատվիրատու</th>
                   <th class="px-4 py-3.5">Արտադրամաս / աշխատակից</th>
                   <th class="px-4 py-3.5">Վերջնաժամկետ</th>
                   <th class="px-6 py-3.5">Կարգավիճակ</th>

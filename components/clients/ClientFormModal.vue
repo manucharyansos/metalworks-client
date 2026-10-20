@@ -14,7 +14,7 @@
     >
       <header class="work-modal__header">
         <h2 id="client-form-title" class="text-lg font-semibold">
-          {{ isEdit ? 'Խմբագրել հաճախորդին' : 'Նոր հաճախորդ' }}
+          {{ isEdit ? 'Խմբագրել պատվիրատուին' : 'Նոր պատվիրատու' }}
         </h2>
       </header>
       <div class="work-modal__body">
@@ -282,7 +282,7 @@ export default {
       if (!this.form.name.trim()) return 'Անունը պարտադիր է'
       if (!this.form.phone.trim()) return 'Հեռախոսը պարտադիր է'
       if (!['physPerson', 'legalEntity'].includes(this.form.type))
-        return 'Ընտրեք հաճախորդի տեսակը'
+        return 'Ընտրեք պատվիրատուի տեսակը'
       if (this.form.type === 'legalEntity') {
         if (!this.form.company_name.trim())
           return 'Ընկերության անվանումը պարտադիր է'

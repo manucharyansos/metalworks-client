@@ -253,16 +253,6 @@ export default {
           exact: false,
         },
         {
-          to: '/admin/file-categories',
-          label: {
-            hy: 'Ֆայլերի բաժիններ',
-            ru: 'Разделы файлов',
-            en: 'File sections',
-          },
-          short: '10',
-          exact: false,
-        },
-        {
           to: '/admin/file-extension',
           labelKey: 'admin_layout.file_types',
           short: '07',
