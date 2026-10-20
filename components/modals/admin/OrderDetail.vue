@@ -150,7 +150,7 @@
           <aside class="work-card panel-card">
             <div class="panel-heading">
               <div>
-                <h3 class="panel-title">Հաճախորդ</h3>
+                <h3 class="panel-title">Պատվիրատու</h3>
               </div>
             </div>
 

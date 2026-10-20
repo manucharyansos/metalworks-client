@@ -51,17 +51,17 @@
 
       <section
         v-if="dashboardLoading && !dashboardLoaded"
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5"
       >
         <div
-          v-for="n in 4"
+          v-for="n in 5"
           :key="n"
           class="h-36 animate-pulse rounded-3xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
         ></div>
       </section>
       <section
         v-else
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5"
       >
         <MetricCard
           v-for="metric in metrics"
@@ -71,77 +71,10 @@
           :description="metric.description"
           :icon="metric.icon"
           :tone="metric.tone"
+          interactive
+          :data-dashboard-metric="metric.key"
+          @click="activateMetric(metric.key)"
         />
-      </section>
-
-      <section
-        v-if="attentionOrders.length"
-        class="rounded-[28px] border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-white p-5 shadow-sm dark:border-rose-950/60 dark:from-rose-950/20 dark:via-slate-900 dark:to-slate-900 sm:p-6"
-      >
-        <div
-          class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div>
-            <div class="flex items-center gap-2">
-              <span
-                class="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-sm font-black text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
-                >!</span
-              >
-              <h2 class="text-lg font-bold text-slate-950 dark:text-white">
-                Ուշադրություն պահանջող առաջադրանքներ
-              </h2>
-            </div>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {{ $t('operations_dashboard.attention_caption') }}
-            </p>
-          </div>
-          <button
-            class="text-xs font-semibold text-rose-700 hover:underline dark:text-rose-300"
-            @click="applyAttentionFilter"
-          >
-            Ցույց տալ ուշացածները ֆիլտրում
-          </button>
-        </div>
-        <div class="grid gap-3 lg:grid-cols-2 2xl:grid-cols-3">
-          <button
-            v-for="order in attentionOrders"
-            :key="order.id"
-            type="button"
-            class="group rounded-2xl border border-rose-100 bg-white/90 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-md dark:border-rose-950/60 dark:bg-slate-950/50 dark:hover:border-rose-900"
-            @click="openOrder(order)"
-          >
-            <div class="flex items-start justify-between gap-3">
-              <div class="min-w-0">
-                <p
-                  class="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400"
-                >
-                  {{ orderNumber(order) }}
-                </p>
-                <p
-                  class="mt-1 truncate text-sm font-bold text-slate-900 dark:text-white"
-                >
-                  {{ order.name || 'Առանց անվանման' }}
-                </p>
-              </div>
-              <span
-                class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold"
-                :class="deadlineClass(order)"
-              >
-                {{ deadlineLabel(order) }}
-              </span>
-            </div>
-            <div class="mt-3 flex flex-wrap gap-1.5">
-              <span
-                v-for="fo in workshopSteps(order)"
-                :key="fo.id"
-                class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-              >
-                {{ fo.factory?.name || 'Արտադրամաս' }} ·
-                {{ fo.operator?.name || 'չնշանակված' }}
-              </span>
-            </div>
-          </button>
-        </div>
       </section>
 
       <section class="grid min-w-0 grid-cols-1 gap-6 2xl:grid-cols-[1.2fr_1fr]">
@@ -313,6 +246,7 @@
               :key="operator.id"
               type="button"
               class="flex w-full items-center gap-3 rounded-2xl border border-slate-100 p-3 text-left transition hover:border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:border-slate-700 dark:hover:bg-slate-950/50"
+              :data-workload-operator="operator.id"
               @click="filterByOperator(operator)"
             >
               <div
@@ -384,7 +318,11 @@
             class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between"
           >
             <div>
-              <h2 class="mt-1 text-xl font-bold text-slate-950 dark:text-white">
+              <h2
+                ref="ordersTitle"
+                tabindex="-1"
+                class="mt-1 text-xl font-bold text-slate-950 dark:text-white"
+              >
                 Առաջադրանքների ամբողջական որոնում
               </h2>
               <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -429,7 +367,7 @@
               <input
                 v-model="filters.search"
                 class="control pr-10"
-                placeholder="Համար, անվանում, նկարագրություն, հաճախորդ, ստեղծող..."
+                placeholder="Համար, անվանում, նկարագրություն, պատվիրատու, ստեղծող..."
               />
             </div>
             <select
@@ -609,7 +547,7 @@
               >
                 <tr>
                   <th class="px-6 py-3.5">Առաջադրանք</th>
-                  <th class="px-4 py-3.5">Հաճախորդ</th>
+                  <th class="px-4 py-3.5">Պատվիրատու</th>
                   <th class="px-4 py-3.5">Արտադրամաս / աշխատակից</th>
                   <th class="px-4 py-3.5">Վերջնաժամկետ</th>
                   <th class="px-4 py-3.5">Ստատուս</th>
@@ -772,6 +710,15 @@
       </section>
     </div>
 
+    <DashboardTasksModal
+      v-if="taskList"
+      ref="taskList"
+      :title="taskList.title"
+      :filters="taskList.filters"
+      @close="taskList = null"
+      @open="openOrder"
+    />
+
     <transition name="fade">
       <div
         v-if="selectedOrder"
@@ -798,6 +745,8 @@
 
 <script>
 import { workshopSteps } from '@/utils/task-board'
+import { metricTaskFilters, operatorTaskFilters } from '@/utils/dashboard-tasks'
+import DashboardTasksModal from '@/components/admin/dashboard/TasksModal.vue'
 import AdminOrderCard from '@/components/admin/orders/OrderCard.vue'
 import MetricCard from '~/components/admin/dashboard/MetricCard.vue'
 import OrderDetail from '~/components/modals/admin/OrderDetail.vue'
@@ -822,7 +771,7 @@ const emptyFilters = () => ({
 
 export default {
   name: 'AdminOperationsDashboard',
-  components: { MetricCard, OrderDetail, AdminOrderCard },
+  components: { MetricCard, OrderDetail, AdminOrderCard, DashboardTasksModal },
   layout: 'admin',
   middleware: ['role-guard'],
   meta: { role: 'admin' },
@@ -836,7 +785,10 @@ export default {
       summary: {},
       factories: [],
       operators: [],
-      attentionOrders: [],
+      taskList: null,
+      dashboardRequestVersion: 0,
+      ordersRequestVersion: 0,
+      detailsRequestVersion: 0,
       filterOptions: {
         factories: [],
         operators: [],
@@ -863,6 +815,11 @@ export default {
     }
   },
   computed: {
+    scope() {
+      return `${this.$store.state.auth?.user?.id || ''}:${
+        this.$store.state.workspace?.company?.id || ''
+      }`
+    },
     metrics() {
       return [
         {
@@ -895,14 +852,20 @@ export default {
           tone: 'amber',
         },
         {
-          key: 'complete',
+          key: 'completed',
           label: this.$t('operations_dashboard.completed'),
           value: this.summary.completed_orders || 0,
-          description: this.$t('operations_dashboard.canceled_count', {
-            count: this.summary.canceled_orders || 0,
-          }),
+          description: this.$t('operations_dashboard.completed_description'),
           icon: '✓',
           tone: 'green',
+        },
+        {
+          key: 'canceled',
+          label: this.$t('operations_dashboard.canceled'),
+          value: this.summary.canceled_orders || 0,
+          description: this.$t('operations_dashboard.canceled_description'),
+          icon: '×',
+          tone: 'neutral',
         },
       ]
     },
@@ -956,6 +919,37 @@ export default {
     },
   },
   watch: {
+    scope() {
+      clearTimeout(this.searchTimer)
+      this.taskList = null
+      this.closeOrder()
+      this.summary = {}
+      this.factories = []
+      this.operators = []
+      this.orders = []
+      this.pagination = {
+        current_page: 1,
+        last_page: 1,
+        total: 0,
+        per_page: 30,
+        from: 0,
+        to: 0,
+      }
+      this.filterOptions = {
+        factories: [],
+        operators: [],
+        factory_statuses: [],
+        creators: [],
+        order_statuses: [],
+      }
+      this.dashboardLoaded = false
+      this.filters = emptyFilters()
+      if (
+        this.$store.state.auth?.user &&
+        this.$store.state.workspace?.company?.id
+      )
+        this.refreshAll()
+    },
     'filters.search'() {
       clearTimeout(this.searchTimer)
       this.searchTimer = setTimeout(() => this.loadOrders(1), 350)
@@ -974,21 +968,29 @@ export default {
   },
   beforeDestroy() {
     clearTimeout(this.searchTimer)
+    this.dashboardRequestVersion++
+    this.ordersRequestVersion++
+    this.detailsRequestVersion++
   },
   methods: {
     workshopSteps,
     async loadDashboard() {
+      const version = ++this.dashboardRequestVersion
+      const scope = this.scope
       this.dashboardLoading = true
       try {
         const { data } = await this.$axios.get('/api/admin/dashboard')
+        if (version !== this.dashboardRequestVersion || scope !== this.scope)
+          return
         this.summary = data.summary || {}
         this.factories = data.factories || []
         this.operators = data.operators || []
-        this.attentionOrders = data.attention_orders || []
         this.filterOptions = data.filters || this.filterOptions
         this.generatedAt = data.generated_at || ''
         this.dashboardLoaded = true
       } catch (error) {
+        if (version !== this.dashboardRequestVersion || scope !== this.scope)
+          return
         this.$notify?.({
           type: 'error',
           text:
@@ -996,10 +998,13 @@ export default {
             'Չհաջողվեց բեռնել կառավարման վահանակը',
         })
       } finally {
-        this.dashboardLoading = false
+        if (version === this.dashboardRequestVersion && scope === this.scope)
+          this.dashboardLoading = false
       }
     },
     async loadOrders(page = 1) {
+      const version = ++this.ordersRequestVersion
+      const scope = this.scope
       this.ordersLoading = true
       try {
         const params = { page, ...this.filters }
@@ -1014,9 +1019,13 @@ export default {
         const { data } = await this.$axios.get('/api/admin/dashboard/orders', {
           params,
         })
+        if (version !== this.ordersRequestVersion || scope !== this.scope)
+          return
         this.orders = data.orders || []
         this.pagination = data.pagination || this.pagination
       } catch (error) {
+        if (version !== this.ordersRequestVersion || scope !== this.scope)
+          return
         this.orders = []
         this.$notify?.({
           type: 'error',
@@ -1024,11 +1033,13 @@ export default {
             error?.response?.data?.message || 'Չհաջողվեց բեռնել առաջադրանքները',
         })
       } finally {
-        this.ordersLoading = false
+        if (version === this.ordersRequestVersion && scope === this.scope)
+          this.ordersLoading = false
       }
     },
     async refreshAll() {
       await Promise.all([
+        this.$refs.taskList?.refresh(),
         this.loadDashboard(),
         this.loadOrders(this.pagination.current_page || 1),
       ])
@@ -1040,14 +1051,23 @@ export default {
       this.filters = emptyFilters()
       this.loadOrders(1)
     },
-    applyAttentionFilter() {
-      this.filters.time_range = 'overdue'
+    activateMetric(key) {
+      if (key === 'overdue') {
+        this.taskList = {
+          title: this.$t('operations_dashboard.overdue'),
+          filters: metricTaskFilters(key),
+        }
+        return
+      }
+      clearTimeout(this.searchTimer)
+      this.filters = { ...emptyFilters(), ...metricTaskFilters(key) }
       this.loadOrders(1)
-      this.$nextTick(() =>
+      this.$nextTick(() => {
+        this.$refs.ordersTitle?.focus({ preventScroll: true })
         document
           .getElementById('orders-explorer')
           ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      )
+      })
     },
     filterByFactory(factoryId) {
       this.filters.factory_id = String(factoryId)
@@ -1060,24 +1080,30 @@ export default {
       )
     },
     filterByOperator(operator) {
-      this.filters.factory_id = String(operator.factory?.id || '')
-      this.filters.operator_id = String(operator.id)
-      this.loadOrders(1)
-      this.$nextTick(() =>
-        document
-          .getElementById('orders-explorer')
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      )
+      this.taskList = {
+        title: this.$t('operations_dashboard.operator_tasks', {
+          name: operator.name,
+        }),
+        filters: operatorTaskFilters(operator),
+      }
     },
     async openOrder(order) {
+      const version = ++this.detailsRequestVersion
+      const scope = this.scope
       try {
         const { data } = await this.$axios.get(`/api/admin/order/${order.id}`)
-        this.selectedOrder = data
+        if (version === this.detailsRequestVersion && scope === this.scope)
+          this.selectedOrder = data
       } catch (error) {
-        this.selectedOrder = order
+        if (version === this.detailsRequestVersion && scope === this.scope)
+          this.$notify?.({
+            type: 'error',
+            text: this.$t('operations_dashboard.load_failed'),
+          })
       }
     },
     closeOrder() {
+      this.detailsRequestVersion++
       this.selectedOrder = null
     },
     async handleOrderSaved() {

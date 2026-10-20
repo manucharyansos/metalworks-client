@@ -104,7 +104,7 @@ export function assignmentCopy(locale) {
       chooseWorkshop: 'Ընտրեք արտադրամասը',
       duplicate: 'Այս հաստիքն ու արտադրամասն արդեն ընտրված են։',
       clientOnly:
-        'Հաճախորդի հասանելիությունը չի համատեղվում աշխատակցի հաստիքների հետ նույն ընկերությունում։',
+        'Պատվիրատուի հասանելիությունը չի համատեղվում աշխատակցի հաստիքների հետ նույն ընկերությունում։',
       hint: 'Ավելացրեք անհրաժեշտ հաստիքներն ու արտադրամասերը։ Հիմնական հաստիքը բացվում է մուտքից հետո, մյուսները կարելի է ընտրել կողային ընտրացանկից։',
       select: 'Աշխատանքային հաստիք և արտադրամաս',
     },
@@ -120,7 +120,7 @@ export function assignmentCopy(locale) {
       chooseWorkshop: 'Выберите цех',
       duplicate: 'Эта должность и цех уже выбраны.',
       clientOnly:
-        'Доступ клиента нельзя совмещать с должностями сотрудника в одной компании.',
+        'Доступ заказчика нельзя совмещать с должностями сотрудника в одной компании.',
       hint: 'Добавьте нужные должности и цеха. Основная должность открывается после входа; другие доступны в боковом меню.',
       select: 'Рабочая должность и цех',
     },
@@ -136,7 +136,7 @@ export function assignmentCopy(locale) {
       chooseWorkshop: 'Select a workshop',
       duplicate: 'This position and workshop are already selected.',
       clientOnly:
-        'Client access cannot be combined with employee positions in one company.',
+        'Customer access cannot be combined with employee positions in one company.',
       hint: 'Add the required positions and workshops. The primary position opens after sign-in; others are available in the sidebar.',
       select: 'Working position and workshop',
     },

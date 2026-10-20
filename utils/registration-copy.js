@@ -3,7 +3,7 @@ const copy = {
     title: 'Գրանցման հարցում',
     intro: 'Ուղարկեք հարցում․ մենեջերի հաստատումից հետո կստեղծվի ձեր հաշիվը։',
     employee: 'Գրանցվել որպես ընկերության աշխատակից',
-    client: 'Հաճախորդ',
+    client: 'Պատվիրատու',
     staff: 'Աշխատակից',
     name: 'Անուն',
     lastName: 'Ազգանուն',
@@ -37,7 +37,7 @@ const copy = {
     failed: 'Չհաջողվեց ուղարկել հարցումը։',
     requests: 'Գրանցման հարցումներ',
     reviewIntro:
-      'Ընտրված ընկերության աշխատակիցների և հաճախորդների հարցումները։',
+      'Ընտրված ընկերության աշխատակիցների և պատվիրատուների հարցումները։',
     pending: 'Սպասում է հաստատման',
     approved: 'Հաստատված',
     rejected: 'Մերժված',
@@ -52,7 +52,7 @@ const copy = {
     applicantJob: 'Նշված պաշտոնը',
     employeeReview:
       'Ընտրեք իրական հաստիքը և անհրաժեշտության դեպքում արտադրամասը։',
-    clientReview: 'Հաստատումից հետո կստեղծվի հաճախորդի հաշիվ։',
+    clientReview: 'Հաստատումից հետո կստեղծվի պատվիրատուի հաշիվ։',
     permissionsHint:
       'Աշխատակցի անհատական իրավունքները կառավարեք «Աշխատակիցների իրավունքներ» բաժնում։',
     rejectHint: 'Մերժված հարցումը հաշիվ չի ստեղծում։',
@@ -86,7 +86,7 @@ const copy = {
     title: 'Заявка на регистрацию',
     intro: 'Отправьте заявку. Менеджер подтвердит её и создаст ваш аккаунт.',
     employee: 'Зарегистрироваться как сотрудник компании',
-    client: 'Клиент',
+    client: 'Заказчик',
     staff: 'Сотрудник',
     name: 'Имя',
     lastName: 'Фамилия',
@@ -119,7 +119,7 @@ const copy = {
     retry: 'Повторить',
     failed: 'Не удалось отправить заявку.',
     requests: 'Заявки на регистрацию',
-    reviewIntro: 'Заявки сотрудников и клиентов выбранного предприятия.',
+    reviewIntro: 'Заявки сотрудников и заказчиков выбранного предприятия.',
     pending: 'Ожидают подтверждения',
     approved: 'Подтверждены',
     rejected: 'Отклонены',
@@ -133,7 +133,7 @@ const copy = {
     workshop: 'Цех',
     applicantJob: 'Указанная должность',
     employeeReview: 'Назначьте рабочую должность и, если требуется, цех.',
-    clientReview: 'После подтверждения появится аккаунт клиента.',
+    clientReview: 'После подтверждения появится аккаунт заказчика.',
     permissionsHint:
       'Индивидуальные права сотрудника назначаются в разделе «Права сотрудников».',
     rejectHint: 'Отклонение заявки не создаёт аккаунт.',
@@ -168,7 +168,7 @@ const copy = {
     intro:
       'Send a request. Your account will be created after the manager approves it.',
     employee: 'Register as a company employee',
-    client: 'Client',
+    client: 'Customer',
     staff: 'Employee',
     name: 'First name',
     lastName: 'Last name',
@@ -201,7 +201,7 @@ const copy = {
     retry: 'Retry',
     failed: 'Could not send your request.',
     requests: 'Registration requests',
-    reviewIntro: 'Employee and client requests for the selected company.',
+    reviewIntro: 'Employee and customer requests for the selected company.',
     pending: 'Awaiting approval',
     approved: 'Approved',
     rejected: 'Rejected',
@@ -215,7 +215,7 @@ const copy = {
     workshop: 'Workshop',
     applicantJob: 'Stated job title',
     employeeReview: 'Assign a position and a workshop if required.',
-    clientReview: 'Approval will create a client account.',
+    clientReview: 'Approval will create a customer account.',
     permissionsHint:
       'Assign individual employee permissions in Employee permissions.',
     rejectHint: 'Rejecting this request will not create an account.',
@@ -257,26 +257,26 @@ export function registrationCopy(locale) {
     hy: {
       allStatuses: 'Բոլոր կարգավիճակները',
       allCompanies: 'Բոլոր հասանելի ընկերությունները',
-      clientRequests: 'Հաճախորդների հայտեր',
+      clientRequests: 'Պատվիրատուների հայտեր',
       employeeRequests: 'Աշխատակիցների հայտեր',
       reviewIntro:
-        'Աշխատակիցների և հաճախորդների բոլոր հայտերը՝ սպասող, հաստատված և մերժված, այն ընկերություններից, որոնք կարող եք կառավարել։',
+        'Աշխատակիցների և պատվիրատուների բոլոր հայտերը՝ սպասող, հաստատված և մերժված, այն ընկերություններից, որոնք կարող եք կառավարել։',
     },
     ru: {
       allStatuses: 'Все статусы',
       allCompanies: 'Все доступные компании',
-      clientRequests: 'Заявки клиентов',
+      clientRequests: 'Заявки заказчиков',
       employeeRequests: 'Заявки сотрудников',
       reviewIntro:
-        'Все заявки сотрудников и клиентов: ожидающие, подтверждённые и отклонённые — из компаний, которыми вы можете управлять.',
+        'Все заявки сотрудников и заказчиков: ожидающие, подтверждённые и отклонённые — из компаний, которыми вы можете управлять.',
     },
     en: {
       allStatuses: 'All statuses',
       allCompanies: 'All accessible companies',
-      clientRequests: 'Client requests',
+      clientRequests: 'Customer requests',
       employeeRequests: 'Employee requests',
       reviewIntro:
-        'All employee and client requests, including pending, approved and rejected, from companies you can manage.',
+        'All employee and customer requests, including pending, approved and rejected, from companies you can manage.',
     },
   }
   const language = String(locale || 'hy').split('-')[0]

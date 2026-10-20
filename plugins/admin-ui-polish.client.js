@@ -44,7 +44,7 @@ export default ({ app }) => {
       allowed: 'Թույլատրված',
       helpLabel: 'Տեղեկություն',
       employeeHelp:
-        'Admin և Manager հաստիքները ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Հաճախորդները այստեղ չեն ցուցադրվում։',
+        'Admin և Manager հաստիքները ունեն լիարժեք հասանելիություն։ Մնացած աշխատակիցների ֆունկցիաների հասանելիությունը տրվում է առանձին։ Պատվիրատուները այստեղ չեն ցուցադրվում։',
       noPhone: 'Հեռախոս նշված չէ',
       positionPermissions: 'Հաստիքի թույլտվությունները այստեղ չեն օգտագործվում։',
       positionsView: 'Հաստիքների դիտում',
@@ -61,7 +61,7 @@ export default ({ app }) => {
       allowed: 'Разрешено',
       helpLabel: 'Информация',
       employeeHelp:
-        'Должности Admin и Manager имеют полный доступ. Для остальных сотрудников доступ к функциям назначается отдельно. Клиенты здесь не отображаются.',
+        'Должности Admin и Manager имеют полный доступ. Для остальных сотрудников доступ к функциям назначается отдельно. Заказчики здесь не отображаются.',
       noPhone: 'Телефон не указан',
       positionPermissions: 'Разрешения должности здесь не используются.',
       positionsView: 'Просмотр должностей',
@@ -78,7 +78,7 @@ export default ({ app }) => {
       allowed: 'Allowed',
       helpLabel: 'Information',
       employeeHelp:
-        'Admin and Manager positions have full access. Access to functions is assigned individually for all other employees. Clients are not shown here.',
+        'Admin and Manager positions have full access. Access to functions is assigned individually for all other employees. Customers are not shown here.',
       noPhone: 'Phone not provided',
       positionPermissions: 'Position permissions are not used here.',
       positionsView: 'View positions',

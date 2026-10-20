@@ -240,7 +240,7 @@ export default {
         },
         {
           to: '/manager/clients',
-          labelKey: 'workspace_layout.clients',
+          labelKey: 'workspace_layout.customers',
           permission: 'clients.view',
           icon: 'clients',
         },
@@ -259,9 +259,9 @@ export default {
         {
           to: '/manager/registration-requests',
           label: {
-            hy: 'Հաճախորդների և աշխատակիցների հայտեր',
-            ru: 'Заявки клиентов и сотрудников',
-            en: 'Client and employee requests',
+            hy: 'Պատվիրատուների և աշխատակիցների հայտեր',
+            ru: 'Заявки заказчиков и сотрудников',
+            en: 'Customer and employee requests',
           },
           permission: null,
           icon: 'workers',
@@ -280,9 +280,9 @@ export default {
         {
           to: '/manager/file-categories',
           label: {
-            hy: 'Ֆայլերի բաժիններ',
-            ru: 'Разделы файлов',
-            en: 'File sections',
+            hy: 'Նախագծերի թղթապանակ',
+            ru: 'Папки проектов',
+            en: 'Project folders',
           },
           permission: null,
           icon: 'orders',

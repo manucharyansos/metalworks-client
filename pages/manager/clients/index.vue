@@ -8,8 +8,8 @@
     <div v-else class="mx-auto max-w-3xl">
       <div class="work-card rounded-[28px] border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-950/35 dark:text-blue-300">+</div>
-        <h1 class="mt-4 text-xl font-black text-slate-950 dark:text-white">Նոր հաճախորդ</h1>
-        <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Ձեզ տրված է հաճախորդ ստեղծելու ֆունկցիան, բայց հաճախորդների ամբողջ ցուցակը դիտելու իրավունքը տրված չէ։</p>
+        <h1 class="mt-4 text-xl font-black text-slate-950 dark:text-white">Նոր պատվիրատու</h1>
+        <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Ձեզ տրված է պատվիրատու ստեղծելու ֆունկցիան, բայց պատվիրատուների ամբողջ ցուցակը դիտելու իրավունքը տրված չէ։</p>
         <button v-if="$can('clients.create') && !isFormOpen" type="button" class="mt-5 rounded-xl bg-slate-950 px-5 py-2.5 text-xs font-bold text-white dark:bg-white dark:text-slate-950" @click="openCreate">Բացել ստեղծման ձևը</button>
       </div>
     </div>
@@ -84,7 +84,7 @@ export default {
       try {
         await this.fetchClients()
       } catch (e) {
-        this.$notify?.({ type: 'error', text: e.response?.data?.message || 'Չհաջողվեց բեռնել հաճախորդներին' })
+        this.$notify?.({ type: 'error', text: e.response?.data?.message || 'Չհաջողվեց բեռնել պատվիրատուներին' })
       } finally { this.loading = false }
     },
     // eslint-disable-next-line require-await -- Preserve the existing asynchronous caller contract.
@@ -132,9 +132,9 @@ export default {
       try {
         await this.$axios.delete(`/api/clients/client/${this.deleteTarget.user_id || this.deleteTarget.user?.id}`)
         if (this.$can('clients.view')) await this.loadClients()
-        this.$notify?.({ type: 'success', text: 'Հաճախորդը ջնջվեց' })
+        this.$notify?.({ type: 'success', text: 'Պատվիրատուն ջնջվեց' })
       } catch (e) {
-        this.$notify?.({ text: e.response?.data?.message || 'Չհաջողվեց ջնջել հաճախորդին', type: 'error' })
+        this.$notify?.({ text: e.response?.data?.message || 'Չհաջողվեց ջնջել պատվիրատուին', type: 'error' })
       } finally {
         this.submitting = false
         this.deleteTarget = null
@@ -150,7 +150,7 @@ export default {
         if (payload.isEdit) await this.$axios.put(`/api/clients/client/${payload.id}`, payload.data)
         else await this.$axios.post('/api/clients/client', payload.data)
         if (this.$can('clients.view')) await this.loadClients()
-        this.$notify?.({ type: 'success', text: payload.isEdit ? 'Հաճախորդը թարմացվեց' : 'Հաճախորդը ստեղծվեց' })
+        this.$notify?.({ type: 'success', text: payload.isEdit ? 'Պատվիրատուն թարմացվեց' : 'Պատվիրատուն ստեղծվեց' })
         this.closeForm()
       } catch (e) {
         if (e.response?.status === 422) {
