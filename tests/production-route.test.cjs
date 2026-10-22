@@ -16,6 +16,19 @@ function load(name) {
   return module.exports
 }
 const route = load('utils/production-route.js')
+
+test('file defaults preserve independent production paths and explicit task overrides', () => {
+  const workshops = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]
+  const files = [{ id: 10, production_factory_ids: [1, 2, 4] }, { id: 11, production_factory_ids: [3, 4] }]
+  const routing = [{ file_id: 10, factory_ids: [1, 2, 4] }, { file_id: 11, factory_ids: [3, 4] }]
+  const plan = route.routeFromFilePlans(files, workshops, routing)
+  assert.equal(route.routeHasCycle(plan), false)
+  assert.deepEqual(plan.stages.find(row => row.factory_id === 2).predecessor_factory_ids, [1])
+  assert.deepEqual(plan.stages.find(row => row.factory_id === 4).predecessor_factory_ids, [2, 3])
+  const changed = route.routeFromFilePlans(files, workshops, [{ file_id: 10, factory_ids: [4] }, { file_id: 11, factory_ids: [3, 4] }])
+  assert.deepEqual(changed.stages.find(row => row.factory_id === 4).predecessor_factory_ids, [3])
+  assert.equal(route.routeFromFilePlans([{ id: 9 }], workshops, []).mode, 'parallel', 'legacy defaults retain their previous behavior')
+})
 const factories = [{ id: 1, name: 'Laser' }, { id: 2, name: 'Bend' }, { id: 3, name: 'Powder' }]
 const steps = () => factories.map((factory, index) => ({ id: index + 10, factory_id: factory.id, factory, status: 'pending', route_position: index, predecessor_ids: index ? [index + 9] : [], deadline: null }))
 const order = () => ({ id: 55, company_id: 7, factory_orders: steps(), dates: { finish_date: '2026-11-20' } })

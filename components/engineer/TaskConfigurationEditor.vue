@@ -110,7 +110,7 @@
               v-if="workingFileCount || referenceFileCount"
               type="button"
               class="font-semibold text-blue-700 underline dark:text-blue-300"
-              @click="toggleSection('routing')"
+              @click="$emit('choose-destinations')"
             >
               {{ $t('order_configuration.choose_destinations') }}
             </button>
@@ -166,14 +166,7 @@ export default {
   data() {
     return {
       activeSection: 'files',
-      sections: [
-        'files',
-        'routing',
-        'route',
-        'confirmation',
-        'workshops',
-        'operators',
-      ],
+      sections: ['files', 'route', 'confirmation', 'workshops', 'operators'],
     }
   },
   methods: {

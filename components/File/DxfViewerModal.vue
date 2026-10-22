@@ -48,6 +48,11 @@
     >
       {{ t.dxfError }} — {{ error }}
     </div>
+    <FileProductionAttributes
+      v-if="showProductionAttributes && fileMeta"
+      :file="fileMeta"
+      class="absolute bottom-2 left-2 max-w-[85%] rounded-lg bg-white/90 p-2 dark:bg-slate-900/90"
+    />
     <notifications />
   </div>
 </template>
@@ -56,6 +61,7 @@
 import * as THREE from 'three'
 import DxfParser from 'dxf-parser'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 
 const COPY = {
   hy: {
@@ -92,6 +98,7 @@ const COPY = {
 
 export default {
   name: 'DxfCanvasViewer',
+  components: { FileProductionAttributes },
   props: {
     dxfUrl: { type: String, required: true },
     fileMeta: {
@@ -99,6 +106,10 @@ export default {
       default: null,
     },
     showLaserInfo: {
+      type: Boolean,
+      default: true,
+    },
+    showProductionAttributes: {
       type: Boolean,
       default: true,
     },

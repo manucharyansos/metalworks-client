@@ -6,6 +6,7 @@ const { test } = require('node:test')
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const taskUrl = moduleUrl(read('utils/task-workflow.js'))
+const catalogUrl = moduleUrl(read('utils/workshop-catalog.js').replace("'@/utils/task-workflow'", JSON.stringify(taskUrl)))
 const policyUrl = moduleUrl(read('utils/factory-file-policy.js'))
 const previewUrl = moduleUrl(read('utils/factory-preview.js'))
 const policy = import(policyUrl)
@@ -14,6 +15,7 @@ const voice = import(moduleUrl(read('utils/voice-recorder.js').replace("'./facto
 async function component(file) {
   let source = read(file).match(/<script>([\s\S]*?)<\/script>/)[1]
   source = source.replace(/import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g, (_, names, specifier) => {
+    if (specifier === '@/utils/workshop-catalog') return `import ${names} from '${catalogUrl}'`
     if (specifier === '~/utils/factory-file-policy') return `import ${names} from '${policyUrl}'`
     if (specifier === '~/utils/factory-preview') return `import ${names} from '${previewUrl}'`
     if (specifier === '@/utils/task-workflow') return `import ${names} from '${taskUrl}'`
@@ -47,6 +49,70 @@ async function uploadPage(code = 'INFO', extensions = ['*']) {
 }
 
 const fakeFile = (name, size = 10, type = '') => ({ name, size, type })
+
+test('ordinary files upload together with independent routes and retain the selection on failure', async () => {
+  const { vm } = await uploadPage('IQS', ['igs', 'step'])
+  vm.handleFileDrop([new File(['IGES'], 'part.igs'), new File(['STEP'], 'other.step')])
+  assert.equal(vm.canPickMultiple, true)
+  assert.equal(vm.pendingFiles.length, 2)
+  vm.pendingFiles[0].plan = { production_factory_ids: [1, 2], inspection_required: true }
+  vm.pendingFiles[1].plan = { production_factory_ids: [3], inspection_required: false }
+  vm.createPmpFilesByFactory = async () => { throw failure(503) }
+  await vm.addFile()
+  assert.equal(vm.pendingFiles.length, 2)
+  assert.equal(vm.isOpenAddFileModal, true)
+  let body
+  vm.createPmpFilesByFactory = async form => { body = form; return { files: [{ id: 1 }, { id: 2 }] } }
+  await vm.addFile()
+  assert.deepEqual(body.getAll('files[]').map(file => file.name), ['part.igs', 'other.step'])
+  assert.deepEqual(JSON.parse(body.get('file_plans')), [
+    { production_factory_ids: [1, 2], inspection_required: true },
+    { production_factory_ids: [3], inspection_required: false },
+  ])
+  assert.equal(vm.pendingFiles.length, 0)
+  assert.equal(vm.isOpenAddFileModal, false)
+})
+
+test('attribute-bearing files stay individual and their dimensions and route reach the upload', async () => {
+  const { vm } = await uploadPage('DXF', ['dxf', 'pdf', 'ic'])
+  assert.equal(vm.requiresDxfMetadata, true, 'DXF fields are visible before choosing a file')
+  assert.equal(vm.canPickMultiple, true, 'configured PDF files may still be selected together')
+  vm.handleFileDrop([new File(['DXF'], 'part.dxf'), new File(['PDF'], 'notes.pdf')])
+  assert.equal(vm.uploadError, 'file_plan.individual_only')
+  assert.equal(vm.pendingFiles.length, 0)
+  vm.handleFileDrop(new File(['IC'], 'part.ic'))
+  vm.fileData.quantity = 2
+  vm.fileData.material = 'Steel'
+  vm.fileData.thickness = '0'
+  vm.fileData.dimensions = '1000 × 2000 mm'
+  vm.filePlan = { production_factory_ids: [1, 2], inspection_required: true }
+  let body
+  vm.createPmpFilesByFactory = async form => { body = form; return { file: { id: 1 } } }
+  await vm.addFile()
+  assert.equal(body.get('dimensions'), '1000 × 2000 mm')
+  assert.equal(body.get('inspection_required'), '1')
+  assert.deepEqual(JSON.parse(body.get('production_factory_ids')), [1, 2])
+  assert.equal(body.get('quantity'), '2')
+})
+
+test('a DXF section accepts a batch of ordinary files without individual DXF attributes', async () => {
+  const { vm } = await uploadPage('DXF', ['dxf', 'pdf'])
+  vm.handleFileDrop([new File(['PDF A'], 'a.pdf'), new File(['PDF B'], 'b.pdf')])
+  assert.equal(vm.requiresDxfMetadata, false)
+  assert.equal(vm.canSubmitFile, true)
+  let body
+  vm.createPmpFilesByFactory = async form => { body = form }
+  await vm.addFile()
+  assert.deepEqual(body.getAll('files[]').map(file => file.name), ['a.pdf', 'b.pdf'])
+  for (const key of ['quantity', 'material_type', 'thickness']) assert.equal(body.get(key), null)
+})
+
+test('the upload store retains every file from a successful batch if refreshing the project fails', async () => {
+  const { actions } = await import(moduleUrl(read('store/pmp/index.js')))
+  const commits = []
+  await actions.createPmpFilesByFactory.call({ $axios: { post: async () => ({ data: { files: [{ id: 1 }, { id: 2 }] } }) } }, { commit: (...args) => commits.push(args) }, {})
+  assert.deepEqual(commits, [['ADD_FILE', { id: 1 }], ['ADD_FILE', { id: 2 }], ['SET_ERROR', null]])
+})
 const failure = status => ({ response: { status, data: { message: 'Rejected', errors: { file: ['Configured format rejected'] } } } })
 
 for (const [code, extensions, accepted, rejected] of [

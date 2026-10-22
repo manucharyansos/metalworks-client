@@ -318,6 +318,7 @@
                         >Հաստ՝ {{ file.thickness }}</span
                       >
                     </div>
+                    <FileProductionAttributes :file="file" />
                   </div>
                   <div class="flex shrink-0 gap-2">
                     <button
@@ -374,10 +375,12 @@ import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
 import TaskChangeRequestPanel from '@/components/order/TaskChangeRequestPanel.vue'
 import TaskFileVersions from '@/components/order/TaskFileVersions.vue'
 import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
+import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 
 export default {
   name: 'ProductionOrderDetailsPanel',
   components: {
+    FileProductionAttributes,
     DxfViewerModal,
     TaskCompletionProof,
     TaskChangeRequestPanel,

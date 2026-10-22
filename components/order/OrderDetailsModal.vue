@@ -117,6 +117,7 @@
                       {{ file.thickness || 'N/A' }}
                     </p>
                   </div>
+                  <FileProductionAttributes :file="file" />
                 </div>
               </div>
             </li>
@@ -129,8 +130,10 @@
 
 <script>
 import { workshopSteps } from '@/utils/task-board'
+import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 export default {
   name: 'OrderDetailsModal',
+  components: { FileProductionAttributes },
   props: {
     details: {
       type: Object,

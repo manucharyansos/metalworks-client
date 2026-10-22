@@ -359,56 +359,67 @@
               </div>
             </template>
             <template #requirements>
-              <TaskCreationOptions
-                v-if="pmpFilesReady && !isFiles && referenceFiles.length"
-                references-only
-                :reference-visibility.sync="referenceVisibility"
-                :files="effectiveFiles"
-                :selected-workshops="subgroupFactories"
-                :factories="taskFactories"
-                :disabled="isLoading || !factoryCatalogReady"
-              />
-              <div
-                v-if="showQuickWorkshopChoice"
-                class="mt-5 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/40"
-                data-quick-task-workshop
+              <section
+                v-if="pmpFilesReady"
+                ref="fileDestinations"
+                class="mt-5 scroll-mt-24 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
+                data-task-file-destinations
               >
-                <label for="task-workshop" class="order-label">
-                  {{ $t('order_configuration.workshop') }}
-                  <span class="text-red-500">*</span>
-                </label>
-                <p
-                  id="task-workshop-help"
-                  class="mb-3 text-sm text-slate-600 dark:text-slate-300"
+                <button
+                  type="button"
+                  :aria-expanded="destinationsOpen"
+                  aria-controls="task-file-destinations-panel"
+                  class="flex w-full items-start justify-between gap-3 p-4 text-left"
+                  data-toggle-task-destinations
+                  @click="destinationsOpen = !destinationsOpen"
                 >
-                  {{ $t('order_configuration.quick_workshop_help') }}
-                </p>
-                <select
-                  id="task-workshop"
-                  :value="quickWorkshopId"
-                  :disabled="isLoading"
-                  aria-describedby="task-workshop-help"
-                  class="order-input"
-                  @change="chooseQuickWorkshop($event.target.value)"
-                >
-                  <option value="">
-                    {{
-                      $t(
-                        selectedFactories.length
-                          ? 'order_configuration.workshops_per_file'
-                          : 'order_configuration.choose_workshop'
-                      )
-                    }}
-                  </option>
-                  <option
-                    v-for="factory in subgroupFactories"
-                    :key="factory.id"
-                    :value="String(factory.id)"
+                  <span class="min-w-0"
+                    ><span class="block text-sm font-semibold">{{
+                      $t('order_configuration.routing')
+                    }}</span
+                    ><span class="mt-1 block text-xs text-slate-500">{{
+                      $t('order_configuration.summary', {
+                        files: effectiveFiles.length,
+                        workshops: selectedFactories.length,
+                      })
+                    }}</span></span
                   >
-                    {{ factory.name }}
-                  </option>
-                </select>
-              </div>
+                  <span class="shrink-0" aria-hidden="true">{{
+                    destinationsOpen ? '−' : '+'
+                  }}</span>
+                </button>
+                <div
+                  v-show="destinationsOpen"
+                  id="task-file-destinations-panel"
+                  class="space-y-4 border-t border-slate-200 p-4 dark:border-slate-700"
+                  data-task-destinations-panel
+                >
+                  <TaskFileRouting
+                    v-model="fileRouting"
+                    embedded
+                    class="!mt-0 !border-0 !p-0"
+                    :files="effectiveFiles"
+                    :factories="taskFactories"
+                    :disabled="isLoading || !factoryCatalogReady"
+                  />
+                  <TaskCreationOptions
+                    v-if="referenceFiles.length"
+                    references-only
+                    :reference-visibility.sync="referenceVisibility"
+                    :files="effectiveFiles"
+                    :selected-workshops="subgroupFactories"
+                    :factories="taskFactories"
+                    :disabled="isLoading || !factoryCatalogReady"
+                    class="!mt-0 !border-0 !p-0"
+                  />
+                  <p
+                    v-if="!effectiveFiles.length"
+                    class="text-sm text-slate-500"
+                  >
+                    {{ $t('order_files.select_files') }}
+                  </p>
+                </div>
+              </section>
               <div
                 v-if="submissionIssue"
                 id="task-create-issue"
@@ -417,6 +428,19 @@
                 class="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
               >
                 <p>{{ $t(submissionIssue) }}</p>
+                <button
+                  v-if="
+                    factoryCatalogReady &&
+                    !selectedFactories.length &&
+                    effectiveFiles.length
+                  "
+                  type="button"
+                  class="mt-2 font-semibold underline"
+                  data-resolve-task-destinations
+                  @click="openFileDestinations"
+                >
+                  {{ $t('order_configuration.choose_destinations') }}
+                </button>
                 <button
                   v-if="factoriesLoadError"
                   type="button"
@@ -479,6 +503,7 @@
         @close="backToDetails"
         @submit="pmpFiles"
         @all-files="useWholeSubgroup"
+        @choose-destinations="openFileDestinations"
       >
         <template #files>
           <div
@@ -559,27 +584,9 @@
             @update:selectedFiles="updateSelectedFiles"
           />
         </template>
-        <template #routing>
-          <TaskFileRouting
-            v-model="fileRouting"
-            class="!mt-0 !border-0 !bg-transparent !p-0"
-            :files="effectiveFiles"
-            :factories="taskFactories"
-            :disabled="isLoading"
-          />
-          <TaskCreationOptions
-            v-if="referenceFiles.length"
-            references-only
-            :reference-visibility.sync="referenceVisibility"
-            :selected-workshops="subgroupFactories"
-            :files="effectiveFiles"
-            :factories="taskFactories"
-            :disabled="isLoading || !factoryCatalogReady"
-          />
-        </template>
         <template #route>
           <ProductionRouteEditor
-            v-model="productionRoute"
+            v-model="productionRouteModel"
             class="!mt-0 !border-0 !bg-transparent !p-0"
             :factories="selectedFactories"
             :overall-deadline="finishDate"
@@ -656,7 +663,11 @@ import {
 import TaskCreationOptions from '@/components/engineer/TaskCreationOptions.vue'
 import TaskWorkshopOptions from '@/components/engineer/TaskWorkshopOptions.vue'
 import ProductionRouteEditor from '@/components/engineer/ProductionRouteEditor.vue'
-import { normalizeRoute, routeHasCycle } from '@/utils/production-route'
+import {
+  normalizeRoute,
+  routeHasCycle,
+  routeFromFilePlans,
+} from '@/utils/production-route'
 import TaskOperatorPicker from '@/components/engineer/TaskOperatorPicker.vue'
 import {
   confirmationMethods,
@@ -703,6 +714,7 @@ export default {
       finishDate: '',
       formSubmitted: false,
       isFiles: false,
+      destinationsOpen: false,
       selectedFiles: [],
       fileQuantities: {},
       isLoading: false,
@@ -725,7 +737,7 @@ export default {
       referenceVisibility: {},
       fileRouting: {},
       workshopSettings: {},
-      productionRoute: { mode: 'parallel', stages: [] },
+      productionRoute: null,
     }
   },
   computed: {
@@ -825,37 +837,6 @@ export default {
         Array.isArray(this.getFactory)
       )
     },
-    showQuickWorkshopChoice() {
-      if (
-        !this.canProceedToFiles ||
-        !this.factoryCatalogReady ||
-        !this.workingFiles.length ||
-        !this.subgroupFactories.length
-      )
-        return false
-      // Keep this basic choice visible after choosing a workshop when the
-      // subgroup has no defaults. Per-file overrides remain an optional edit.
-      return (
-        !this.selectedFactories.length ||
-        !fileRoutingPayload(this.workingFiles, this.taskFactories).some(
-          (row) => row.factory_ids.length
-        )
-      )
-    },
-    quickWorkshopId() {
-      const routing = fileRoutingPayload(
-        this.workingFiles,
-        this.taskFactories,
-        this.fileRouting
-      )
-      const id = routing[0]?.factory_ids[0]
-      return id &&
-        routing.every(
-          (row) => row.factory_ids.length === 1 && row.factory_ids[0] === id
-        )
-        ? String(id)
-        : ''
-    },
     users() {
       return this.allClients
     },
@@ -872,13 +853,33 @@ export default {
         for (const id of this.referenceVisibility[file.id] || [])
           ids.add(Number(id))
       })
-      return (this.taskFactories)
+      return this.taskFactories
         .filter((factory) => ids.has(Number(factory.id)) && isWorkshop(factory))
         .map((factory) => ({ ...factory, operators: factory.operators || [] }))
     },
 
+    productionRouteModel: {
+      get() {
+        return (
+          this.productionRoute ||
+          routeFromFilePlans(
+            this.effectiveFiles,
+            this.selectedFactories,
+            fileRoutingPayload(
+              this.effectiveFiles,
+              this.taskFactories,
+              this.fileRouting
+            )
+          )
+        )
+      },
+      set(value) {
+        this.productionRoute = value
+        this.$workspace?.setDirty(true)
+      },
+    },
     productionRoutePayload() {
-      return normalizeRoute(this.productionRoute, this.selectedFactories)
+      return normalizeRoute(this.productionRouteModel, this.selectedFactories)
     },
 
     canProceedToFiles() {
@@ -1019,19 +1020,14 @@ export default {
       }
     },
 
-    chooseQuickWorkshop(value) {
-      const id = Number(value)
-      if (
-        this.isLoading ||
-        !this.factoryCatalogReady ||
-        !this.subgroupFactories.some((factory) => Number(factory.id) === id)
+    openFileDestinations() {
+      this.destinationsOpen = true
+      this.$nextTick(() =>
+        this.$refs.fileDestinations?.scrollIntoView?.({
+          block: 'start',
+          behavior: 'smooth',
+        })
       )
-        return
-      this.fileRouting = {
-        ...this.fileRouting,
-        ...Object.fromEntries(this.workingFiles.map((file) => [file.id, [id]])),
-      }
-      this.$workspace?.setDirty(true)
     },
 
     selectPmpGroup(pmp) {
@@ -1085,7 +1081,8 @@ export default {
     },
 
     resetPmpFileSelection() {
-      this.productionRoute = { mode: 'parallel', stages: [] }
+      this.productionRoute = null
+      this.destinationsOpen = false
       this.selectedFiles = []
       this.fileQuantities = {}
       this.factoryOperators = {}

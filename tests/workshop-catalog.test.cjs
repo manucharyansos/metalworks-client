@@ -45,6 +45,8 @@ test('a file format is independent of its workshop, explicit empty choices stay 
   assert.deepEqual(fileRoutingPayload([drawing, info], factories, { 10: [2, 3] }), [{ file_id: 10, factory_ids: [2, 3] }])
   assert.equal(isReferenceFile({ ...info, is_reference_file: false }), false)
   assert.deepEqual(fileDestinations({ id: 12, routing_factory_id: null, factory_id: 1 }, factories), [])
+  assert.deepEqual(fileDestinations({ id: 12, routing_factory_ids: [2, 3], routing_factory_id: 1 }, factories), [2, 3])
+  assert.deepEqual(fileDestinations({ id: 12, routing_factory_ids: [], routing_factory_id: 1 }, factories), [], 'an explicitly empty saved route does not fall back to a different workshop')
 })
 
 test('file routing checkboxes preserve other files, permit several workshops and never mutate the parent', () => {
