@@ -79,7 +79,7 @@ test('route save sends its original snapshot and a late response cannot replace 
   const updates = []; vm.$on('updated', value => updates.push(value))
   const pending = vm.save()
   assert.equal(sent.url, '/api/tasks/55/production-route')
-  assert.deepEqual(sent.data.previous_route, route.routeSnapshot(steps()))
+  assert.deepEqual(JSON.parse(JSON.stringify(sent.data.previous_route)), route.routeSnapshot(steps()))
   assert.deepEqual(sent.data.production_route.stages.map(row => row.predecessor_factory_ids), [[], [], []])
   vm.order = { ...order(), id: 56, company_id: 8 }
   await Vue.nextTick()
