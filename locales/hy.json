@@ -1,4 +1,7 @@
 {
+  "employee_permissions": {
+    "dependents_disabled": "Անջատվեցին նաև այս հասանելիությունից կախված {count} ֆունկցիաները։"
+  },
   "dashboard": "Վահանակ",
   "see_all": "Տեսնել բոլորը",
   "logout": "Ելք",

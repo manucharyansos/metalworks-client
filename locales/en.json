@@ -1,4 +1,7 @@
 {
+  "employee_permissions": {
+    "dependents_disabled": "Also disabled {count} functions that depend on this access."
+  },
   "dashboard": "Dashboard",
   "services": "Services",
   "see_all": "See all",

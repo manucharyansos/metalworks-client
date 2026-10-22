@@ -59,16 +59,17 @@
             :key="item.to"
             :to="localePath(item.to)"
             :exact="item.exact"
+            :title="navigationLabel(item)"
             class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-white"
             active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950"
             @click.native="closeSidebar"
           >
             <span
-              class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-500 transition group-hover:bg-white dark:bg-slate-900 dark:text-slate-300 dark:group-hover:bg-slate-800"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-500 transition group-hover:bg-white dark:bg-slate-900 dark:text-slate-300 dark:group-hover:bg-slate-800"
             >
               {{ item.short }}
             </span>
-            <span class="min-w-0 flex-1 truncate">{{
+            <span class="min-w-0 flex-1 whitespace-normal break-words leading-5">{{
               navigationLabel(item)
             }}</span>
           </nuxt-link>

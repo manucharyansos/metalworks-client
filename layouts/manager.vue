@@ -45,6 +45,7 @@
             v-for="item in visibleNavItems"
             :key="item.to"
             :to="localePath(item.to)"
+            :title="navigationLabel(item)"
             class="nav-item group"
             active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950"
             :exact="item.exact"
@@ -64,8 +65,7 @@
                   :d="iconPath(item.icon)"
                 /></svg></span
             ><span
-              class="min-w-0 flex-1"
-              :class="item.wrap ? 'whitespace-normal leading-5' : 'truncate'"
+              class="min-w-0 flex-1 whitespace-normal break-words leading-5"
               >{{ navigationLabel(item) }}</span
             >
           </nuxt-link>
@@ -84,6 +84,7 @@
                 typeof item.to === 'string' ? item.to : item.to.query.factory_id
               "
               :to="localePath(item.to)"
+              :title="item.label"
               class="nav-item group"
               active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950"
               @click.native="closeSidebar"
@@ -101,7 +102,7 @@
                     stroke-width="1.8"
                     d="M4 20V9l5-3v4l5-3v4l6-3v12H4Zm4 0v-4h3v4m3 0v-5h3v5"
                   /></svg></span
-              ><span class="min-w-0 flex-1 truncate">{{ item.label }}</span>
+              ><span class="min-w-0 flex-1 whitespace-normal break-words leading-5">{{ item.label }}</span>
             </nuxt-link>
           </nav>
         </div>
