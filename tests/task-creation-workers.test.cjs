@@ -6,6 +6,7 @@ const Vue = require('vue')
 const compiler = require('vue-template-compiler')
 
 const read = (file) => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
+const plainData = (value) => JSON.parse(JSON.stringify(value))
 const moduleUrl = (source) =>
   `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const workflowUrl = moduleUrl(read('utils/task-workflow.js'))
@@ -398,7 +399,7 @@ test('missing default routing has a basic workshop choice and creates without op
   assert.equal(vm.showQuickWorkshopChoice, true, 'the chosen input stays visible')
   assert.equal(vm.quickWorkshopId, '2')
   assert.equal(vm.canSubmit, true)
-  assert.deepEqual(vm.fileRouting, { 1: [2] }, 'reference files keep their separate visibility')
+  assert.deepEqual(plainData(vm.fileRouting), { 1: [2] }, 'reference files keep their separate visibility')
   await vm.pmpFiles()
   assert.deepEqual(requests[0].file_routing, [{ file_id: 1, factory_ids: [2] }])
   assert.equal(requests[0].link_existing_files, false)
@@ -448,8 +449,8 @@ test('editing starts from all files and mode changes keep reference access and p
   assert.equal(vm.submissionIssue, 'order_files.select_files')
   vm.selectAllTaskFiles()
   vm.useWholeSubgroup()
-  assert.deepEqual(vm.fileRouting, { 1: [2] })
-  assert.deepEqual(vm.referenceVisibility, { 9: [1] })
+  assert.deepEqual(plainData(vm.fileRouting), { 1: [2] })
+  assert.deepEqual(plainData(vm.referenceVisibility), { 9: [1] })
   assert.equal(vm.canSubmit, true)
 })
 
