@@ -424,12 +424,18 @@ export default {
       return 'file'
     },
     formattedDeadline() {
-      const value = this.details?.dates?.finish_date
+      const value =
+        (this.mode === 'factory' && this.factoryOrders.length === 1
+          ? this.factoryOrders[0].deadline
+          : null) || this.details?.dates?.finish_date
       if (!value) return 'Չի նշված'
       return this.$formatDate ? this.$formatDate(value) : value
     },
     deadlineState() {
-      const value = this.details?.dates?.finish_date
+      const value =
+        (this.mode === 'factory' && this.factoryOrders.length === 1
+          ? this.factoryOrders[0].deadline
+          : null) || this.details?.dates?.finish_date
       if (!value) return 'none'
       const end = new Date(value)
       if (Number.isNaN(end.getTime())) return 'none'

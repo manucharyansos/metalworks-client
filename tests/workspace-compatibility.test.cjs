@@ -28,7 +28,8 @@ async function component(file, render = false) {
     if (specifier === '~/utils/membership-copy') return `import ${names} from '${membershipUrl}'`
     if (specifier === '~/static/logo.png') return `const ${names} = '/work/_nuxt/img/metalworks-test.png'`
     if (specifier === '@/utils/workshop-catalog') return `import ${names} from '${catalogUrl}'`
-    if (specifier === '@/utils/task-workflow') return `import ${names} from '${taskUrl}'`
+    if (specifier === '@/utils/production-route') return `import ${names} from '${moduleUrl(read('utils/production-route.js'))}'`
+      if (specifier === '@/utils/task-workflow') return `import ${names} from '${taskUrl}'`
     if (specifier === '@/utils/task-board') return `import ${names} from '${taskBoardUrl}'`
     if (specifier === '@/utils/task-routing') return `import ${names} from '${taskRoutingUrl}'`
     if (specifier === '@/utils/task-notifications') return `import ${names} from '${taskNotificationsUrl}'`
@@ -41,6 +42,7 @@ async function component(file, render = false) {
   if (options.components?.TaskWorkshopOptions) options.components.TaskWorkshopOptions = await component('components/engineer/TaskWorkshopOptions.vue', true)
   if (options.components?.TaskOperatorPicker) options.components.TaskOperatorPicker = await component('components/engineer/TaskOperatorPicker.vue', true)
   if (options.components?.WorkspaceLogo) options.components.WorkspaceLogo = await component('components/auth/WorkspaceLogo.vue', true)
+  if (options.components?.ProductionRouteEditor) options.components.ProductionRouteEditor = await component('components/engineer/ProductionRouteEditor.vue', true)
   return render ? { ...options, ...compiler.compileToFunctions(parsed.template.content) } : options
 }
 

@@ -91,7 +91,21 @@
       Առաջադրանքը վերցված է այլ օպերատորի կողմից
     </p>
     <p v-else-if="factoryOrder?.is_blocked" class="work-alert">
-      {{ routingText.blocked }}
+      {{ routingText.blocked
+      }}<span v-if="factoryOrder.waiting_for?.length">
+        · {{ factoryOrder.waiting_for.join(', ') }}</span
+      >
+    </p>
+    <p
+      v-else-if="
+        factoryOrder?.ready_at &&
+        (factoryOrder.predecessor_ids?.length || factoryOrder.depends_on_id) &&
+        ['pending', 'waiting', null, ''].includes(factoryOrder.status)
+      "
+      class="work-alert work-alert--success"
+      data-work-ready
+    >
+      {{ routeText.ready }}
     </p>
     <p v-else-if="awaitingEngineer" data-awaiting-engineer class="work-alert">
       {{ taskText.waiting }}
@@ -157,6 +171,7 @@
 </template>
 
 <script>
+import { routeCopy } from '@/utils/production-route'
 import PersonAvatar from '@/components/ui/PersonAvatar.vue'
 import TaskDeadline from '@/components/ui/TaskDeadline.vue'
 import { boardCopy, stepStatusText } from '@/utils/task-board'
@@ -222,6 +237,9 @@ export default {
       return confirmationMethods(this.factoryOrder?.confirmation_method)
         .map((method) => this.taskText[method])
         .join(' + ')
+    },
+    routeText() {
+      return routeCopy[this.$i18n?.locale] || routeCopy.hy
     },
     routingText() {
       return routingCopy[this.$i18n?.locale] || routingCopy.hy

@@ -19,6 +19,7 @@ async function component(file, { render = false } = {}) {
     /import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g,
     (_, names, specifier) => {
       if (specifier === '@/utils/workshop-catalog') return `import ${names} from '${catalogUrl}'`
+      if (specifier === '@/utils/production-route') return `import ${names} from '${moduleUrl(read('utils/production-route.js'))}'`
       if (specifier === '@/utils/task-workflow') return `import ${names} from '${workflowUrl}'`
       if (specifier === '@/utils/task-routing') return `import ${names} from '${routingUrl}'`
       if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
@@ -27,6 +28,7 @@ async function component(file, { render = false } = {}) {
   )
   const options = (await import(moduleUrl(source))).default
   if (options.components?.TaskFileRouting) options.components.TaskFileRouting = await component('components/engineer/TaskFileRouting.vue', { render: true })
+  if (options.components?.ProductionRouteEditor) options.components.ProductionRouteEditor = await component('components/engineer/ProductionRouteEditor.vue', { render: true })
   return render ? { ...options, ...compiler.compileToFunctions(parsed.template.content) } : options
 }
 

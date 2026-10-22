@@ -262,3 +262,10 @@ test('relative business URLs preserve the selected company and secondary worksho
     assert.equal(publicRequest.headers['X-Assignment-ID'], undefined)
   }, null, { user: assignmentUser })
 })
+
+test('a notification can focus a permitted assignment without copying a foreign URL into navigation', async () => {
+  await harness(async ({ service, replacements }) => {
+    await service.switchAssignment(22, { order: 55, step: 12, path: 'https://other.example.invalid' })
+    assert.deepEqual(replacements, ['/work/factory/laser?order=55&step=12'])
+  }, null, { user: assignmentUser })
+})

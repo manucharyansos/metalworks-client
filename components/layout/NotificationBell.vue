@@ -305,10 +305,31 @@ export default {
     markAll() {
       return this.markRead(null)
     },
-    go(item) {
+    async go(item) {
+      const scope = this.scopeKey
       this.open = false
       if (!item.read_at) {
-        this.markRead([item.id])
+        await this.markRead([item.id])
+      }
+      if (scope !== this.scopeKey || this._isDestroyed) return
+      if (
+        ['step.ready', 'step.route_changed'].includes(item.type) &&
+        Number(item.data?.factory_id) !== Number(this.$auth?.user?.factory_id)
+      ) {
+        const assignment = this.$store.state.workspace?.assignments?.find(
+          (row) =>
+            Number(row.factory_id) === Number(item.data?.factory_id) &&
+            ['laser', 'bend', 'powder_catting', 'operator'].includes(
+              row.role?.name
+            )
+        )
+        if (assignment && this.$workspace?.switchAssignment) {
+          await this.$workspace.switchAssignment(assignment.id, {
+            order: item.order_id,
+            step: item.factory_order_id,
+          })
+          return
+        }
       }
       const target = notificationTarget(item, this.role)
       const result = this.$router.push({

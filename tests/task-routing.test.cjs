@@ -209,7 +209,7 @@ test('new workshop reuses existing files, defaults to the preceding job, and sen
       data: {
         factory_id: 2,
         operator_id: null,
-        depends_on_id: 30,
+        predecessor_ids: [30],
         confirmation_required: false,
         confirmation_method: null,
         deadline: null,

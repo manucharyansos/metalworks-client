@@ -127,7 +127,9 @@
         class="work-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
       >
         <div
-data-work-modal role="dialog" aria-modal="true"
+          data-work-modal
+          role="dialog"
+          aria-modal="true"
           class="work-modal relative max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
         >
           <button
@@ -358,6 +360,11 @@ export default {
       return localFactoryDate(d)
     },
   },
+  watch: {
+    '$route.query.order'() {
+      this.openNotificationTask()
+    },
+  },
   async mounted() {
     try {
       const [actionsRes, filtersRes] = await Promise.all([
@@ -381,6 +388,7 @@ export default {
 
     if (this.currentFactoryId) {
       await this.fetchOrdersByFactory(this.currentFactoryId)
+      await this.openNotificationTask()
       // The engineer answers requests and returns work at any moment.
       this.refreshTimer = setInterval(this.refreshQuietly, 30000)
     }
@@ -389,6 +397,37 @@ export default {
     clearInterval(this.refreshTimer)
   },
   methods: {
+    async openNotificationTask() {
+      const id = Number(this.$route?.query?.order)
+      if (!Number.isSafeInteger(id) || id <= 0 || !this.currentFactoryId) return
+      const scope = `${this.$auth.user?.id}:${this.$auth.user?.company?.id}:${this.currentFactoryId}`
+      const rows = this.getOrderByFactories?.orders || []
+      let order = rows.find((row) => Number(row.id) === id)
+      try {
+        if (!order) {
+          const { data } = await this.$axios.get(`/api/orders/${id}`)
+          order = data.order || data
+        }
+        if (
+          scope !==
+            `${this.$auth.user?.id}:${this.$auth.user?.company?.id}:${this.currentFactoryId}` ||
+          id !== Number(this.$route?.query?.order) ||
+          this._isDestroyed
+        )
+          return
+        if (
+          order?.factory_orders?.some(
+            (step) => Number(step.factory_id) === Number(this.currentFactoryId)
+          )
+        )
+          this.toggleDetails(order)
+      } catch (error) {
+        this.$notify?.({
+          type: 'error',
+          text: this.getActionError || 'Առաջադրանքը հասանելի չէ։',
+        })
+      }
+    },
     async refreshQuietly() {
       if (
         document.hidden ||

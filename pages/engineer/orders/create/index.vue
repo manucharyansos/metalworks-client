@@ -376,8 +376,15 @@
             :factories="getFactory || []"
             :disabled="isLoading"
           />
+          <ProductionRouteEditor
+            v-model="productionRoute"
+            :factories="selectedFactories"
+            :overall-deadline="finishDate"
+            :disabled="isLoading"
+          />
           <TaskWorkshopOptions
             v-model="workshopSettings"
+            hide-deadline
             :factories="selectedFactories"
             :disabled="isLoading"
           />
@@ -453,8 +460,15 @@
           :factories="getFactory || []"
           :disabled="isLoading"
         />
+        <ProductionRouteEditor
+          v-model="productionRoute"
+          :factories="selectedFactories"
+          :overall-deadline="finishDate"
+          :disabled="isLoading"
+        />
         <TaskWorkshopOptions
           v-model="workshopSettings"
+          hide-deadline
           :factories="selectedFactories"
           :disabled="isLoading"
         />
@@ -519,6 +533,8 @@ import {
 } from '@/utils/workshop-catalog'
 import TaskCreationOptions from '@/components/engineer/TaskCreationOptions.vue'
 import TaskWorkshopOptions from '@/components/engineer/TaskWorkshopOptions.vue'
+import ProductionRouteEditor from '@/components/engineer/ProductionRouteEditor.vue'
+import { normalizeRoute, routeHasCycle } from '@/utils/production-route'
 import TaskOperatorPicker from '@/components/engineer/TaskOperatorPicker.vue'
 import {
   confirmationMethods,
@@ -538,6 +554,7 @@ export default {
     TaskFileRouting,
     TaskCreationOptions,
     TaskWorkshopOptions,
+    ProductionRouteEditor,
     TaskOperatorPicker,
     PermissionDenied,
     InputWithLabels,
@@ -583,6 +600,7 @@ export default {
       referenceVisibility: {},
       fileRouting: {},
       workshopSettings: {},
+      productionRoute: { mode: 'parallel', stages: [] },
     }
   },
   computed: {
@@ -678,6 +696,10 @@ export default {
         .map((factory) => ({ ...factory, operators: factory.operators || [] }))
     },
 
+    productionRoutePayload() {
+      return normalizeRoute(this.productionRoute, this.selectedFactories)
+    },
+
     canProceedToFiles() {
       return !!(
         this.selectedClient &&
@@ -697,6 +719,7 @@ export default {
         (!this.confirmationRequired ||
           ['photo', 'text', 'photo_text'].includes(this.confirmationMethod)) &&
         this.selectedFactories.length > 0 &&
+        !routeHasCycle(this.productionRoutePayload) &&
         !this.isEditingMode &&
         (!this.files_existing || this.validSelectedFiles)
       )
@@ -832,6 +855,7 @@ export default {
     },
 
     resetPmpFileSelection() {
+      this.productionRoute = { mode: 'parallel', stages: [] }
       this.selectedFiles = []
       this.fileQuantities = {}
       this.factoryOperators = {}
@@ -1032,7 +1056,14 @@ export default {
           this.getFactory || [],
           this.fileRouting
         ),
-        workshop_settings: workshopSettings,
+        production_route: this.productionRoutePayload,
+        workshop_settings: workshopSettings.map((row) => ({
+          ...row,
+          deadline:
+            this.productionRoutePayload.stages.find(
+              (stage) => stage.factory_id === row.factory_id
+            )?.deadline || null,
+        })),
         confirmation_required: this.confirmationRequired,
         confirmation_method: this.confirmationRequired
           ? this.confirmationMethod
