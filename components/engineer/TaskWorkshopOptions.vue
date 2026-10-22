@@ -9,7 +9,7 @@
     >
       <summary class="cursor-pointer font-semibold">{{ factory.name }}</summary>
       <div class="mt-4 grid gap-3 sm:grid-cols-2">
-        <label class="text-sm font-semibold"
+        <label v-if="!hideDeadline" class="text-sm font-semibold"
           >{{ t.deadline }}
           <input
             :value="row(factory.id).deadline"
@@ -73,6 +73,7 @@ import { taskCopy } from '@/utils/task-workflow'
 export default {
   components: { TaskCreationOptions },
   props: {
+    hideDeadline: { type: Boolean, default: false },
     factories: { type: Array, default: () => [] },
     value: { type: Object, default: () => ({}) },
     disabled: Boolean,

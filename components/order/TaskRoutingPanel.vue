@@ -21,6 +21,23 @@
     <p v-if="error" role="alert" class="mt-3 break-words text-sm text-red-600">
       {{ error }}
     </p>
+    <details class="mt-4" data-edit-production-route>
+      <summary class="cursor-pointer font-semibold">
+        {{ routeText.title }}
+      </summary>
+      <ProductionRoutePanel
+        :order="order"
+        :disabled="
+          loading ||
+          savingStepId != null ||
+          savingWork ||
+          savingEvidence ||
+          savingFiles
+        "
+        @busy="savingRoute = $event"
+        @updated="handleSettingsUpdated"
+      />
+    </details>
     <details class="mt-4" data-all-evidence-settings>
       <summary class="cursor-pointer font-semibold">
         {{ workflowText.editEvidence }}
@@ -158,24 +175,30 @@
               </option>
             </select>
           </label>
-          <label class="block text-sm font-semibold"
-            >{{ t.after }}
-            <select
-              v-model="dependsOnId"
-              :disabled="saving"
-              class="mt-2 block w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-              data-work-predecessor
+          <fieldset
+            class="space-y-2 rounded-xl border border-slate-200 p-3"
+            data-work-predecessors
+          >
+            <legend class="text-sm font-semibold">{{ t.after }}</legend>
+            <label
+              v-for="step in predecessors"
+              :key="step.id"
+              class="flex items-center gap-2 text-sm"
             >
-              <option value="">{{ t.independent }}</option>
-              <option
-                v-for="step in predecessors"
-                :key="step.id"
-                :value="String(step.id)"
-              >
-                {{ step.factory?.name }} · {{ t.afterSuffix }}
-              </option>
-            </select>
-          </label>
+              <input
+                v-model="predecessorIds"
+                type="checkbox"
+                :value="step.id"
+                :disabled="saving"
+                :data-work-predecessor="step.id"
+                class="h-4 w-4"
+              />
+              <span>{{ step.factory?.name }}</span>
+            </label>
+            <p class="text-xs text-slate-500">
+              {{ predecessorIds.length ? routeText.all : t.independent }}
+            </p>
+          </fieldset>
           <fieldset class="space-y-2">
             <legend class="font-semibold">{{ t.files }}</legend>
             <p class="my-2 text-sm text-slate-500">{{ t.filesHelp }}</p>
@@ -239,6 +262,8 @@ import { workshopSteps } from '@/utils/task-board'
 import TaskEvidenceSettings from '@/components/order/TaskEvidenceSettings.vue'
 import TaskFileVersions from '@/components/order/TaskFileVersions.vue'
 import TaskWorkshopOptions from '@/components/engineer/TaskWorkshopOptions.vue'
+import ProductionRoutePanel from '@/components/order/ProductionRoutePanel.vue'
+import { dependencyIds, routeCopy } from '@/utils/production-route'
 import {
   confirmationMethods,
   taskCopy,
@@ -252,7 +277,12 @@ import {
   taskFiles,
 } from '@/utils/task-routing'
 export default {
-  components: { TaskEvidenceSettings, TaskFileVersions, TaskWorkshopOptions },
+  components: {
+    TaskEvidenceSettings,
+    TaskFileVersions,
+    TaskWorkshopOptions,
+    ProductionRoutePanel,
+  },
   props: { order: { type: Object, required: true } },
   data: () => ({
     workload: null,
@@ -267,11 +297,16 @@ export default {
     factoryId: '',
     newOperatorId: '',
     dependsOnId: '',
+    predecessorIds: [],
+    savingRoute: false,
     selectedFileIds: [],
     quantities: {},
     newWorkSettings: {},
   }),
   computed: {
+    routeText() {
+      return routeCopy[this.$i18n?.locale] || routeCopy.hy
+    },
     workflowText() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
@@ -290,7 +325,8 @@ export default {
         this.savingStepId != null ||
         this.savingWork ||
         this.savingEvidence ||
-        this.savingFiles
+        this.savingFiles ||
+        this.savingRoute
       )
     },
     isCanceled() {
@@ -376,6 +412,11 @@ export default {
         : this.predecessors.length === 1
         ? String(this.predecessors[0].id)
         : ''
+      this.predecessorIds = step
+        ? dependencyIds(step)
+        : this.dependsOnId
+        ? [Number(this.dependsOnId)]
+        : []
       this.selectedFileIds = []
       for (const file of this.availableFiles)
         this.$set(this.quantities, file.id, Number(file.quantity) || 1)
@@ -413,8 +454,15 @@ export default {
     },
     predecessorName(step) {
       return (
-        workshopSteps(this.order).find((row) => row.id === step.depends_on_id)
-          ?.factory?.name || ''
+        step.waiting_for?.join(', ') ||
+        dependencyIds(step)
+          .map(
+            (id) =>
+              workshopSteps(this.order).find((row) => row.id === id)?.factory
+                ?.name || ''
+          )
+          .filter(Boolean)
+          .join(', ')
       )
     },
     syncDrafts() {
@@ -481,7 +529,7 @@ export default {
             ...this.newSettings[0],
             factory_id: Number(this.factoryId),
             operator_id: this.newOperatorId ? Number(this.newOperatorId) : null,
-            depends_on_id: this.dependsOnId ? Number(this.dependsOnId) : null,
+            predecessor_ids: this.predecessorIds.map(Number),
             files: this.selectedFileIds.map((id) => ({
               id,
               quantity: this.quantities[id],

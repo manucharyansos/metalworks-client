@@ -31,6 +31,10 @@ export const notificationCopy = {
       other: 'Այլ պատճառ',
     },
     types: {
+      'step.ready':
+        '«{factory}» արտադրամաս · նախորդ փուլերն ավարտված են․ ձեր հերթն է։ Ժամկետ՝ {deadline}',
+      'step.route_changed':
+        '«{factory}» արտադրամաս · երթուղին կամ ժամկետը փոխվել է։ Ժամկետ՝ {deadline}',
       'step.evidence_requirements_changed':
         '«{factory}» արտադրամաս · հավաստման պահանջները փոխվել են՝ {evidence}։{supplement}',
       'step.settings_changed':
@@ -85,6 +89,10 @@ export const notificationCopy = {
       other: 'Другая причина',
     },
     types: {
+      'step.ready':
+        'Цех «{factory}» · предыдущие этапы завершены. Ваша очередь. Срок: {deadline}',
+      'step.route_changed':
+        'Цех «{factory}» · маршрут или срок изменён. Срок: {deadline}',
       'step.evidence_requirements_changed':
         'Цех «{factory}» · требования к подтверждению изменены: {evidence}.{supplement}',
       'step.settings_changed':
@@ -137,6 +145,10 @@ export const notificationCopy = {
       other: 'Other reason',
     },
     types: {
+      'step.ready':
+        '“{factory}” · previous stages finished. It is your turn. Deadline: {deadline}',
+      'step.route_changed':
+        '“{factory}” · route or deadline changed. Deadline: {deadline}',
       'step.evidence_requirements_changed':
         '“{factory}” · evidence requirements changed: {evidence}.{supplement}',
       'step.settings_changed':
@@ -246,7 +258,18 @@ export function notificationTarget(notification, role) {
       query,
     }
   }
-  if (FACTORY_HOME[role]) return { path: FACTORY_HOME[role], query: {} }
+  if (FACTORY_HOME[role]) {
+    const query = {}
+    if (
+      ['step.ready', 'step.route_changed'].includes(notification?.type) &&
+      Number(notification?.order_id) > 0
+    ) {
+      query.order = String(notification.order_id)
+      if (Number(notification.factory_order_id) > 0)
+        query.step = String(notification.factory_order_id)
+    }
+    return { path: FACTORY_HOME[role], query }
+  }
   if (role === 'manager') return { path: '/manager', query: {} }
   if (role === 'admin') return { path: '/admin', query: {} }
   return { path: '/', query: {} }
