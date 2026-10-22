@@ -1,4 +1,7 @@
 {
+  "employee_permissions": {
+    "dependents_disabled": "Также отключены зависящие от этого доступа функции: {count}."
+  },
   "dashboard": "Панель",
   "see_all": "Смотреть все",
   "logout": "Выйти",

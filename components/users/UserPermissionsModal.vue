@@ -171,7 +171,7 @@
                         type="checkbox"
                         class="h-5 w-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
                         :checked="isSelected(perm.id)"
-                        :disabled="isRequired(perm.id)"
+                        :disabled="saving"
                         @change="$emit('toggle-permission', perm.id)"
                       />
                     </span>
@@ -185,7 +185,7 @@
                           v-if="isRequired(perm.id)"
                           class="rounded-full bg-blue-50 px-2 py-0.5 text-[9px] font-black text-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
                         >
-                          {{ ui.required }}
+                          {{ ui.linked }}
                         </span>
                       </span>
                       <span class="mt-1 block text-[11px] leading-5 text-slate-500 dark:text-slate-400">
@@ -209,9 +209,17 @@
         </div>
 
         <footer class="work-modal__footer flex flex-col-reverse gap-3 border-t border-slate-100 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-          <p class="max-w-2xl text-[10px] leading-4 text-slate-400">
-            {{ ui.footer }}
-          </p>
+          <div class="min-w-0 max-w-2xl">
+            <p
+              v-if="feedback"
+              :role="feedback.type === 'error' ? 'alert' : 'status'"
+              class="mb-2 break-words rounded-xl px-3 py-2 text-xs leading-5"
+              :class="feedback.type === 'error'
+                ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300'
+                : 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300'"
+            >{{ feedback.text }}</p>
+            <p class="text-[10px] leading-4 text-slate-400">{{ ui.footer }}</p>
+          </div>
           <div class="flex items-center justify-end gap-2">
             <button
               type="button"
@@ -251,12 +259,12 @@ const UI = {
     grantedHint: 'այս աշխատակցին',
     logic: 'Աշխատանքի սկզբունք',
     logicTitle: 'Ցուցադրվում են միայն կիրառելի ֆունկցիաները',
-    logicHint: 'Կապակցված պարտադիր թույլտվությունները միանում են ավտոմատ։',
+    logicHint: 'Կարող եք միացնել կամ անջատել ցանկացած ֆունկցիա՝ դրա կապակցված հասանելիությունների հետ միասին։',
     emptyTitle: 'Այս հաստիքի համար կառավարվող թույլտվություն չկա։',
     emptyText: 'Ստուգեք աշխատակցի հաստիքը կամ server-ի permission scope-ը։',
     open: 'Բաց',
-    required: 'Պարտադիր',
-    footer: 'Չնշված ֆունկցիաները փակ են։ Եթե որևէ ֆունկցիա պահանջում է լրացուցիչ հասանելիություն, համակարգը այն միացնում է ավտոմատ, որպեսզի էջը և API endpoint-ները աշխատեն ամբողջությամբ։',
+    linked: 'Կապակցված',
+    footer: 'Միացնելիս ավելանում են անհրաժեշտ հասանելիությունները։ Անջատելիս անջատվում են նաև այդ հասանելիությունից կախված ֆունկցիաները։ Փոփոխությունները գործում են պահպանելուց հետո։',
     save: 'Պահպանել',
     saving: 'Պահպանվում է…',
   },
@@ -273,12 +281,12 @@ const UI = {
     grantedHint: 'этому сотруднику',
     logic: 'Принцип работы',
     logicTitle: 'Показаны только применимые функции',
-    logicHint: 'Обязательные связанные разрешения включаются автоматически.',
+    logicHint: 'Любую функцию можно включить или отключить вместе со связанными разрешениями.',
     emptyTitle: 'Для этой должности нет управляемых разрешений.',
     emptyText: 'Проверьте должность сотрудника или permission scope на сервере.',
     open: 'Открыто',
-    required: 'Обязательно',
-    footer: 'Неотмеченные функции закрыты. Если функции нужен дополнительный доступ, система включает его автоматически, чтобы интерфейс и API работали полностью.',
+    linked: 'Связано',
+    footer: 'При включении добавляются необходимые разрешения. При отключении также отключаются зависящие от этого доступа функции. Изменения действуют после сохранения.',
     save: 'Сохранить',
     saving: 'Сохранение…',
   },
@@ -295,12 +303,12 @@ const UI = {
     grantedHint: 'for this employee',
     logic: 'Access logic',
     logicTitle: 'Only relevant functions are shown',
-    logicHint: 'Required dependent permissions are enabled automatically.',
+    logicHint: 'Any function can be enabled or disabled together with its related permissions.',
     emptyTitle: 'There are no configurable permissions for this position.',
     emptyText: 'Check the employee position or the server permission scope.',
     open: 'Open',
-    required: 'Required',
-    footer: 'Unchecked functions are blocked. When a function depends on additional access, the system enables it automatically so the UI and API endpoints keep working.',
+    linked: 'Linked',
+    footer: 'Enabling a function adds its necessary access. Disabling access also disables functions that depend on it. Changes take effect after saving.',
     save: 'Save',
     saving: 'Saving…',
   },
@@ -478,6 +486,7 @@ export default {
     user: { type: Object, default: null },
     loading: { type: Boolean, default: false },
     saving: { type: Boolean, default: false },
+    feedback: { type: Object, default: null },
     permissionGroups: { type: Object, default: () => ({}) },
     permissionGroupsKeys: { type: Array, default: () => [] },
     permissionScope: { type: Object, default: null },
@@ -578,7 +587,7 @@ export default {
     permissionCardClass(permission) {
       if (this.isSelected(permission.id)) {
         return this.isRequired(permission.id)
-          ? 'cursor-not-allowed border-blue-200 bg-blue-50/60 dark:border-blue-900/60 dark:bg-blue-950/20'
+          ? 'cursor-pointer border-blue-200 bg-blue-50/60 hover:border-blue-300 dark:border-blue-900/60 dark:bg-blue-950/20'
           : 'cursor-pointer border-emerald-200 bg-emerald-50/70 shadow-sm hover:border-emerald-300 dark:border-emerald-900/70 dark:bg-emerald-950/20'
       }
       return 'cursor-pointer border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-950/40'

@@ -24,6 +24,7 @@
             v-for="item in visibleNavItems"
             :key="item.to"
             :to="localePath(item.to)"
+            :title="$t(item.labelKey)"
             class="group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
             active-class="!bg-slate-950 !text-white shadow-sm dark:!bg-white dark:!text-slate-950"
             :exact="item.exact"
@@ -35,7 +36,7 @@
               <svg v-else-if="item.icon === 'plus'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 5v14M5 12h14" /></svg>
               <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 21a8 8 0 10-16 0m8-10a4 4 0 100-8 4 4 0 000 8Z" /></svg>
             </span>
-            <span class="min-w-0 flex-1 truncate">{{ $t(item.labelKey) }}</span>
+            <span class="min-w-0 flex-1 whitespace-normal break-words leading-5">{{ $t(item.labelKey) }}</span>
           </nuxt-link>
         </nav>
       </div>

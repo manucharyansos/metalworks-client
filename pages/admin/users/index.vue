@@ -144,6 +144,7 @@
       :user="selectedUser"
       :loading="permissionLoading"
       :saving="permissionSaving"
+      :feedback="permissionFeedback"
       :permission-groups="permissionGroups"
       :permission-groups-keys="permissionGroupsKeys"
       :permission-scope="permissionScope"
@@ -165,6 +166,7 @@ import StaffAssignmentsModal from '~/components/users/StaffAssignmentsModal.vue'
 import CompanyMembershipModal from '~/components/users/CompanyMembershipModal.vue'
 import { staffAccessCopy } from '~/utils/staff-assignments'
 import { membershipCopy } from '~/utils/membership-copy'
+import { togglePermissionSelection } from '~/utils/permission-selection'
 
 export default {
   components: { UserPermissionsModal, StaffAssignmentsModal, CompanyMembershipModal },
@@ -186,6 +188,7 @@ export default {
       selectedUser: null,
       permissionLoading: false,
       permissionSaving: false,
+      permissionFeedback: null,
       permissionsRaw: [],
       permissionScope: null,
       userPermissionIds: [],
@@ -319,6 +322,7 @@ export default {
     },
     async loadSelectedPermissions() {
       if (!this.selectedUser) return
+      this.permissionFeedback = null
       this.permissionLoading = true
       this.permissionsRaw = []
       this.permissionScope = null
@@ -353,6 +357,7 @@ export default {
     },
     closePermissionModal() {
       this.showPermissionModal = false
+      this.permissionFeedback = null
       this.selectedUser = null
       this.permissionsRaw = []
       this.permissionScope = null
@@ -365,47 +370,29 @@ export default {
         : [groupKey]
     },
     togglePermission(permissionId) {
-      const id = Number(permissionId)
-      const permission = this.permissionsRaw.find(
-        (item) => Number(item.id) === id
+      if (this.permissionSaving) return
+      this.permissionFeedback = null
+      const previous = this.userPermissionIds.map(Number)
+      const selected = togglePermissionSelection(
+        this.permissionsRaw,
+        previous,
+        this.permissionScope?.dependencies || {},
+        permissionId
       )
-      if (!permission) return
-
-      const selected = new Set(this.userPermissionIds.map(Number))
-      const dependencies = this.permissionScope?.dependencies || {}
-      const bySlug = new Map(
-        this.permissionsRaw.map((item) => [item.slug, Number(item.id)])
-      )
-
-      if (selected.has(id)) {
-        const selectedSlugs = this.permissionsRaw
-          .filter((item) => selected.has(Number(item.id)))
-          .map((item) => item.slug)
-
-        const requiredBy = selectedSlugs.filter(
-          (slug) =>
-            slug !== permission.slug &&
-            (dependencies[slug] || []).includes(permission.slug)
-        )
-
-        if (requiredBy.length) {
-          this.$notify?.({
-            type: 'warning',
-            text: 'Այս թույլտվությունը անհրաժեշտ է արդեն միացված այլ ֆունկցիայի աշխատանքի համար։',
-          })
-          return
+      this.userPermissionIds = selected
+      const removed = previous.filter((id) => !selected.includes(id))
+      if (removed.length > 1) {
+        this.permissionFeedback = {
+          type: 'info',
+          text: this.$t('employee_permissions.dependents_disabled', {
+            count: removed.length - 1,
+          }),
         }
-
-        selected.delete(id)
-      } else {
-        selected.add(id)
-        ;(dependencies[permission.slug] || []).forEach((dependencySlug) => {
-          const dependencyId = bySlug.get(dependencySlug)
-          if (dependencyId) selected.add(dependencyId)
+        this.$notify?.({
+          type: 'info',
+          text: this.permissionFeedback.text,
         })
       }
-
-      this.userPermissionIds = Array.from(selected)
     },
     async savePermissions() {
       if (!this.selectedUser) return
@@ -423,6 +410,7 @@ export default {
         const message =
           error?.response?.data?.message ||
           'Չհաջողվեց պահպանել թույլտվությունները'
+        this.permissionFeedback = { type: 'error', text: message }
         this.$notify?.({ type: 'error', text: message })
       } finally {
         this.permissionSaving = false
