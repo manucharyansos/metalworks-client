@@ -1,4 +1,30 @@
 {
+  "order_configuration": {
+    "edit": "Edit",
+    "optional": "optional",
+    "short_title": "Settings",
+    "title": "Task settings",
+    "entry_hint": "Choose Edit to configure files, workshops, the production route and operators.",
+    "help": "Open a section. Your choices stay when switching sections and are applied when you create the task.",
+    "summary": "Files: {files} · Workshops: {workshops}",
+    "files": "Files and quantities",
+    "files_hint": "The whole subgroup or individual files",
+    "routing": "File destinations",
+    "routing_hint": "Choose which workshops receive each file",
+    "route": "Production route and deadlines",
+    "route_hint": "Production stages and separate deadlines",
+    "confirmation": "Completion approval",
+    "confirmation_hint": "Photo, text and reference file access",
+    "workshops": "Workshop settings",
+    "workshops_hint": "Priority and individual approval requirements",
+    "operators": "Operators",
+    "operators_hint": "Assign employees using current workload",
+    "file_mode": "Task files",
+    "all_files": "Whole subgroup",
+    "selected_files": "Choose individual files",
+    "no_workshops": "Choose working files and workshops first.",
+    "done": "Done"
+  },
   "employee_permissions": {
     "dependents_disabled": "Also disabled {count} functions that depend on this access."
   },

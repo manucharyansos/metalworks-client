@@ -225,10 +225,10 @@ test('workers can be chosen before creating from the whole subgroup and are sent
   assert.deepEqual(requests[0].factory_operators, [{ factory_id: 1, user_id: 8 }])
 })
 
-test('the same picker is rendered in both steps and fed by the same choices', async () => {
+test('the configuration editor has one operator picker backed by the existing choices', async () => {
   const source = compiler.compile(compiler.parseComponent(read('pages/engineer/orders/create/index.vue')).template.content)
   const uses = source.render.match(/_c\('TaskOperatorPicker'/g) || []
-  assert.equal(uses.length, 2, 'details step and files step both offer the picker')
+  assert.equal(uses.length, 1, 'configuration editor owns the single operator picker')
   assert.doesNotMatch(source.render, /factoryOperators\[factory\.id\]/, 'no second hand-written operator list is left')
 })
 
@@ -236,8 +236,8 @@ test('Back from the file picker with nothing chosen returns to whole-subgroup cr
   const { vm, requests } = await orderPage()
   vm.selectFromOtherFactory()
   assert.equal(vm.isFiles, true)
-  assert.equal(vm.files_existing, true)
-  assert.equal(vm.canSubmit, false, 'choose-files mode without files cannot create')
+  assert.equal(vm.files_existing, false, 'opening settings does not change the file mode')
+  assert.equal(vm.canSubmit, true, 'whole-subgroup creation remains available')
   vm.backToDetails()
   assert.equal(vm.isFiles, false)
   assert.equal(vm.files_existing, false)
@@ -352,4 +352,39 @@ test('typing a task project search before the catalog response arrives stays usa
   const groups = [{ id: 1, group: 987, group_name: null }, { id: 2, group: '988', group_name: 'Powder parts' }]
   assert.deepEqual(filter.call({ getPmpes: { pmp: groups }, pmpGroupSearch: '987' }), [groups[0]])
   assert.deepEqual(filter.call({ getPmpes: { pmp: groups }, pmpGroupSearch: 'powder' }), [groups[1]])
+})
+
+
+test('an empty description can open settings and create a whole-subgroup task', async () => {
+  const { vm, requests } = await orderPage()
+  vm.description = ''
+  assert.equal(vm.canProceedToFiles, true)
+  assert.equal(vm.canSubmit, true)
+  vm.selectFromOtherFactory()
+  assert.equal(vm.isFiles, true)
+  assert.equal(vm.files_existing, false)
+  vm.backToDetails()
+  await vm.pmpFiles()
+  assert.equal(requests[0].description, '')
+  assert.equal(requests[0].link_existing_files, false)
+})
+
+test('the settings accordion opens one section at a time without losing its slots', async () => {
+  const options = await component('components/engineer/TaskConfigurationEditor.vue', { render: true })
+  const vm = new Vue({ ...options, propsData: { fileCount: 2, workshopCount: 4 }, methods: { ...options.methods, $t: key => key } })
+  const render = () => require('vue-server-renderer').createRenderer().renderToString(vm)
+  let html = await render()
+  assert.equal((html.match(/aria-expanded="true"/g) || []).length, 1)
+  vm.toggleSection('route')
+  assert.equal(vm.activeSection, 'route')
+  html = await render()
+  assert.equal((html.match(/aria-expanded="true"/g) || []).length, 1)
+  assert.equal((html.match(/data-task-config-panel=/g) || []).length, 6, 'closed sections stay mounted to preserve inputs')
+  vm.toggleSection('operators')
+  assert.equal(vm.activeSection, 'operators')
+  vm.toggleSection('operators')
+  assert.equal(vm.activeSection, null)
+  vm.disabled = true
+  vm.toggleSection('files')
+  assert.equal(vm.activeSection, null)
 })

@@ -52,6 +52,10 @@
         <div class="flex flex-row flex-wrap gap-3">
           <!-- Ընտրել այլ գործարանից – միշտ ակտիվ -->
           <button
+            type="button"
+            data-edit-task-configuration
+            :aria-expanded="configurationOpen"
+            aria-controls="task-configuration"
             :disabled="!canProceedToFiles"
             :class="[
               'flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition',
@@ -71,39 +75,11 @@
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
-                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                d="m16 4 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6 5-2"
               />
             </svg>
-            {{ $t('order_create.choose_files') }}
+            {{ $t('order_configuration.edit') }}
           </button>
-
-          <!--          &lt;!&ndash; Ընտրել ֆայլերը – ակտիվ միայն եթե պարտադիր դաշտերը լրացված են &ndash;&gt;-->
-          <!--          <button-->
-          <!--            :disabled="!canProceedToFiles"-->
-          <!--            :class="[-->
-          <!--              'flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition',-->
-          <!--              canProceedToFiles-->
-          <!--                ? 'border border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'-->
-          <!--                : 'bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800 dark:text-slate-500',-->
-          <!--            ]"-->
-          <!--            type="button"-->
-          <!--            @click="$emit('openFiles')"-->
-          <!--          >-->
-          <!--            <svg-->
-          <!--              class="w-5 h-5 mr-2"-->
-          <!--              fill="none"-->
-          <!--              stroke="currentColor"-->
-          <!--              viewBox="0 0 24 24"-->
-          <!--            >-->
-          <!--              <path-->
-          <!--                stroke-linecap="round"-->
-          <!--                stroke-linejoin="round"-->
-          <!--                stroke-width="2"-->
-          <!--                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"-->
-          <!--              />-->
-          <!--            </svg>-->
-          <!--            {{ $t('order_create.choose_files') }}ը-->
-          <!--          </button>-->
 
           <!-- Հաստատել – ակտիվ միայն եթե բոլորը լրացված են (non-editing) -->
           <button
@@ -146,6 +122,7 @@ export default {
     isEditingMode: { type: Boolean, default: false },
     successButton: { type: String, default: 'Հաստատել' },
     cancelButton: { type: String, default: 'Չեղարկել' },
+    configurationOpen: { type: Boolean, default: false },
     canProceedToFiles: { type: Boolean, default: false },
     canSubmit: { type: Boolean, default: false },
   },
