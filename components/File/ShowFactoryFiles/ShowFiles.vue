@@ -12,6 +12,7 @@
         </h2>
 
         <button
+          v-if="!embedded"
           type="button"
           class="p-2 hover:bg-gray-100 rounded-xl transition"
           :title="$t('order_create.back')"
@@ -363,7 +364,7 @@
       <!-- Sticky Action Bar -->
       <transition name="slide-up">
         <div
-          v-if="selectedFiles.length > 0"
+          v-if="selectedFiles.length > 0 && !embedded"
           class="mt-8 sticky bottom-4 left-0 right-0 mx-4 md:mx-0"
         >
           <div
@@ -423,6 +424,7 @@ import { catalogText } from '@/utils/workshop-catalog'
 export default {
   name: 'ShowFiles',
   props: {
+    embedded: { type: Boolean, default: false },
     pmps: { type: Object, default: () => ({ exists: false }) },
     factories: { type: Array, default: () => [] },
     selectedFiles: { type: Array, default: () => [] },

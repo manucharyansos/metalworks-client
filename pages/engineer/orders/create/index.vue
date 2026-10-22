@@ -39,7 +39,7 @@
                 ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
                 : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
             "
-            >02 · {{ $t('order_create.files') }}</span
+            >02 · {{ $t('order_configuration.short_title') }}</span
           >
         </div>
       </div>
@@ -60,10 +60,7 @@
         </button>
       </div>
 
-      <div
-        v-if="!isFiles"
-        class="grid items-start gap-5 lg:grid-cols-[minmax(260px,_1fr)_2fr]"
-      >
+      <div class="grid items-start gap-5 lg:grid-cols-[minmax(260px,_1fr)_2fr]">
         <section
           class="work-card min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
         >
@@ -174,6 +171,7 @@
             class="order-form"
             :can-proceed-to-files="canProceedToFiles"
             :can-submit="canSubmit"
+            :configuration-open="isFiles"
             @addButton="pmpFiles"
             @cancelButton="cancelBack"
             @selectFromOtherFactory="selectFromOtherFactory"
@@ -345,68 +343,146 @@
               <div>
                 <label for="description" class="order-label"
                   >{{ $t('order_create.description') }}
-                  <span class="text-red-500">*</span></label
+                  <span class="ml-1 text-xs font-normal text-slate-400">{{
+                    $t('order_configuration.optional')
+                  }}</span></label
                 >
                 <textarea-with-label
                   v-model="description"
                   textarea_id="description"
                   class="description-field"
-                  :class="{
-                    'rounded-xl ring-2 ring-red-400':
-                      formSubmitted && !description,
-                  }"
                   :rows="4"
                   :placeholder="$t('order_create.description_placeholder')"
                 />
               </div>
             </template>
           </create-order-form>
-          <TaskFileRouting
-            v-model="fileRouting"
-            :files="effectiveFiles"
-            :factories="getFactory || []"
+          <p class="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            {{ $t('order_configuration.entry_hint') }}
+          </p>
+          <TaskConfigurationEditor
+            v-if="isFiles"
+            ref="configurationEditor"
             :disabled="isLoading"
-          />
-          <TaskCreationOptions
-            :confirmation-required.sync="confirmationRequired"
-            :confirmation-method.sync="confirmationMethod"
-            :reference-visibility.sync="referenceVisibility"
-            :selected-workshops="selectedFactories"
-            :files="effectiveFiles"
-            :factories="getFactory || []"
-            :disabled="isLoading"
-          />
-          <ProductionRouteEditor
-            v-model="productionRoute"
-            :factories="selectedFactories"
-            :overall-deadline="finishDate"
-            :disabled="isLoading"
-          />
-          <TaskWorkshopOptions
-            v-model="workshopSettings"
-            hide-deadline
-            :factories="selectedFactories"
-            :disabled="isLoading"
-          />
-          <TaskOperatorPicker
-            v-model="factoryOperators"
-            :factories="selectedFactories"
-            :workload="workload"
-            :error="workloadError"
-            :loading="workloadLoading"
-            :disabled="isLoading"
-            @refresh="loadWorkload"
-          />
+            :file-count="effectiveFiles.length"
+            :workshop-count="selectedFactories.length"
+            @close="backToDetails"
+          >
+            <template #files>
+              <div
+                class="mb-4 flex flex-wrap gap-2"
+                role="group"
+                :aria-label="$t('order_configuration.file_mode')"
+              >
+                <button
+                  type="button"
+                  data-all-files
+                  :aria-pressed="!files_existing"
+                  class="order-mode-button"
+                  :class="{ 'order-mode-button--active': !files_existing }"
+                  @click="useWholeSubgroup"
+                >
+                  {{ $t('order_configuration.all_files') }}
+                </button>
+                <button
+                  type="button"
+                  data-individual-files
+                  :aria-pressed="files_existing"
+                  class="order-mode-button"
+                  :class="{ 'order-mode-button--active': files_existing }"
+                  @click="selectIndividualFiles"
+                >
+                  {{ $t('order_configuration.selected_files') }}
+                </button>
+              </div>
+              <p
+                v-if="!files_existing"
+                class="rounded-xl bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-950/40 dark:text-blue-200"
+              >
+                {{
+                  $t('order_create.files_mode_whole', {
+                    count: subgroupFiles.length,
+                  })
+                }}
+              </p>
+              <show-files
+                v-else
+                embedded
+                :pmps="pmpsData"
+                :factories="
+                  getFileCategories?.length ? getFileCategories : getFactory
+                "
+                :selected-files="selectedFiles"
+                :file-quantities.sync="fileQuantities"
+                :remote-number-id="remote_number_id"
+                class="order-files !border-0 !p-0 !shadow-none"
+                @update:selectedFiles="updateSelectedFiles"
+              />
+            </template>
+            <template #routing>
+              <TaskFileRouting
+                v-model="fileRouting"
+                class="!mt-0 !border-0 !bg-transparent !p-0"
+                :files="effectiveFiles"
+                :factories="getFactory || []"
+                :disabled="isLoading"
+              />
+            </template>
+            <template #route>
+              <ProductionRouteEditor
+                v-model="productionRoute"
+                class="!mt-0 !border-0 !bg-transparent !p-0"
+                :factories="selectedFactories"
+                :overall-deadline="finishDate"
+                :disabled="isLoading"
+              />
+            </template>
+            <template #confirmation>
+              <TaskCreationOptions
+                class="!mt-0 !border-0 !bg-transparent !p-0"
+                :confirmation-required.sync="confirmationRequired"
+                :confirmation-method.sync="confirmationMethod"
+                :reference-visibility.sync="referenceVisibility"
+                :selected-workshops="selectedFactories"
+                :files="effectiveFiles"
+                :factories="getFactory || []"
+                :disabled="isLoading"
+              />
+            </template>
+            <template #workshops>
+              <TaskWorkshopOptions
+                v-model="workshopSettings"
+                class="!mt-0 !border-0 !bg-transparent !p-0"
+                hide-deadline
+                :factories="selectedFactories"
+                :disabled="isLoading"
+              />
+            </template>
+            <template #operators>
+              <TaskOperatorPicker
+                v-model="factoryOperators"
+                class="!mt-0 !border-0 !bg-transparent !p-0"
+                :factories="selectedFactories"
+                :workload="workload"
+                :error="workloadError"
+                :loading="workloadLoading"
+                :disabled="isLoading"
+                @refresh="loadWorkload"
+              />
+            </template>
+          </TaskConfigurationEditor>
           <div
             v-if="pmpFilesReady"
             class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-800/50"
             data-files-mode
           >
-            <template v-if="usesSelectedFiles">
+            <template v-if="files_existing">
               <span>{{
-                $t('order_create.files_mode_selected', {
-                  count: selectedFiles.length,
-                })
+                selectedFiles.length
+                  ? $t('order_create.files_mode_selected', {
+                      count: selectedFiles.length,
+                    })
+                  : $t('order_files.select_files')
               }}</span>
               <button
                 type="button"
@@ -429,78 +505,6 @@
         </section>
       </div>
 
-      <section
-        v-else
-        class="work-card min-w-0 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
-      >
-        <show-files
-          :pmps="pmpsData"
-          :factories="
-            getFileCategories?.length ? getFileCategories : getFactory
-          "
-          :selected-files.sync="selectedFiles"
-          :file-quantities.sync="fileQuantities"
-          :remote-number-id="remote_number_id"
-          class="order-files"
-          @files-selected="handleFilesSelected"
-          @back="backToDetails"
-        />
-        <TaskFileRouting
-          v-model="fileRouting"
-          :files="effectiveFiles"
-          :factories="getFactory || []"
-          :disabled="isLoading"
-        />
-        <TaskCreationOptions
-          :confirmation-required.sync="confirmationRequired"
-          :confirmation-method.sync="confirmationMethod"
-          :reference-visibility.sync="referenceVisibility"
-          :selected-workshops="selectedFactories"
-          :files="effectiveFiles"
-          :factories="getFactory || []"
-          :disabled="isLoading"
-        />
-        <ProductionRouteEditor
-          v-model="productionRoute"
-          :factories="selectedFactories"
-          :overall-deadline="finishDate"
-          :disabled="isLoading"
-        />
-        <TaskWorkshopOptions
-          v-model="workshopSettings"
-          hide-deadline
-          :factories="selectedFactories"
-          :disabled="isLoading"
-        />
-        <TaskOperatorPicker
-          v-model="factoryOperators"
-          :factories="selectedFactories"
-          :workload="workload"
-          :error="workloadError"
-          :loading="workloadLoading"
-          :disabled="isLoading"
-          @refresh="loadWorkload"
-        />
-        <div
-          class="mt-6 flex flex-wrap justify-end gap-3 border-t border-slate-200 pt-5 dark:border-slate-800"
-        >
-          <button
-            type="button"
-            class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-            @click="backToDetails"
-          >
-            {{ $t('order_create.back') }}
-          </button>
-          <button
-            type="button"
-            :disabled="!canSubmit || isLoading"
-            class="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
-            @click="pmpFiles"
-          >
-            {{ $t('order_create.save') }}
-          </button>
-        </div>
-      </section>
       <div
         v-if="isLoading"
         class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-sm"
@@ -526,6 +530,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import TaskFileRouting from '@/components/engineer/TaskFileRouting.vue'
+import TaskConfigurationEditor from '@/components/engineer/TaskConfigurationEditor.vue'
 import {
   fileRoutingPayload,
   isReferenceFile,
@@ -552,6 +557,7 @@ import PermissionDenied from '@/components/modals/permission/PermissionDenied.vu
 export default {
   components: {
     TaskFileRouting,
+    TaskConfigurationEditor,
     TaskCreationOptions,
     TaskWorkshopOptions,
     ProductionRouteEditor,
@@ -706,7 +712,6 @@ export default {
         this.selectedPmp &&
         this.selectedPmpRemoteNumber &&
         this.finishDate &&
-        this.description &&
         this.pmpFilesReady &&
         this.subgroupFiles.length > 0
       )
@@ -878,6 +883,7 @@ export default {
     },
 
     handleFilesSelected(files) {
+      this.files_existing = true
       this.$workspace?.setDirty(true)
       this.selectedFiles = files.map((file) => file.id)
       this.fileQuantities = files.reduce((acc, file) => {
@@ -965,7 +971,6 @@ export default {
         !this.selectedPmpRemoteNumber ||
         !this.remote_number_id ||
         !this.finishDate ||
-        !this.description ||
         (this.isEditingMode &&
           (!this.quantity ||
             this.quantity <= 0 ||
@@ -1138,7 +1143,19 @@ export default {
       }
     },
 
+    selectIndividualFiles() {
+      this.files_existing = true
+      this.$workspace?.setDirty(true)
+    },
+    updateSelectedFiles(files) {
+      this.selectIndividualFiles()
+      this.selectedFiles = files
+    },
     selectFromOtherFactory() {
+      if (this.isFiles) {
+        this.backToDetails()
+        return
+      }
       this.formSubmitted = true
 
       if (
@@ -1146,7 +1163,6 @@ export default {
         !this.selectedPmp ||
         !this.selectedPmpRemoteNumber ||
         !this.finishDate ||
-        !this.description ||
         (this.isEditingMode && (!this.quantity || this.quantity <= 0))
       ) {
         this.$notify({
@@ -1160,9 +1176,14 @@ export default {
       }
 
       if (!this.validateOrderFiles(false)) return
-      this.files_existing = true
       this.isFiles = true
       this.loadWorkload()
+      this.$nextTick(() => {
+        this.$refs.configurationEditor?.$el?.scrollIntoView?.({
+          block: 'start',
+          behavior: 'smooth',
+        })
+      })
     },
 
     validateOrderFiles(requireSelection = this.files_existing) {
@@ -1211,6 +1232,13 @@ export default {
 </script>
 
 <style scoped>
+.order-mode-button {
+  @apply rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold transition hover:border-blue-400 dark:border-slate-700;
+}
+.order-mode-button--active {
+  @apply border-blue-600 bg-blue-600 text-white dark:border-blue-500;
+}
+
 .pmp-selector {
   position: relative;
   min-width: 0;

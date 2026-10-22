@@ -258,6 +258,7 @@ test('selected file mode requires a selection and retains both confirmation meth
   const { vm, requests } = await orderPage()
   assert.equal(vm.canSubmit, true)
   vm.selectFromOtherFactory()
+  vm.selectIndividualFiles()
   assert.equal(vm.isFiles, true)
   assert.equal(vm.canSubmit, false)
   await vm.pmpFiles()
@@ -362,19 +363,22 @@ test('a Laravel 422 file validation message is displayed without clearing the or
   assert.equal(vm.isLoading, false)
 })
 
-test('empty selected-file view renders a disabled Save button and a visible explanation', async () => {
+test('empty individual-file selection keeps the Create button disabled and explains why', async () => {
   const { vm } = await orderPage()
   const rendered = await component('pages/engineer/orders/create/index.vue', true)
   vm.$options.render = rendered.render
   vm.$options.staticRenderFns = rendered.staticRenderFns
-  vm.$options.components.ShowFiles = { render: h => h('div', 'File picker') }
-  vm.$options.components.notifications = { render: h => h('div') }
+  vm.$options.components.CreateOrderForm = { ...await component('components/modals/create/CreateOrderForm.vue', true), methods: { $t: key => key } }
+  for (const name of ['SelectWithLabel', 'InputWithLabels', 'TextareaWithLabel', 'TaskConfigurationEditor', 'notifications']) {
+    vm.$options.components[name] = { render: h => h('div') }
+  }
   vm.$can = () => true
   vm.files_existing = true
   vm.isFiles = true
   const html = await require('vue-server-renderer').createRenderer().renderToString(vm)
   assert.match(html, /order_files.select_files/)
-  assert.match(html, /<button[^>]*disabled="disabled"[^>]*>\s*order_create.save/)
+  const disabledButtons = html.match(/<button[^>]*disabled="disabled"[^>]*>[\s\S]*?<\/button>/g) || []
+  assert.ok(disabledButtons.some(button => button.includes('order_create.create')))
 })
 
 test('order file warnings and recovery text exist in all three languages', () => {
