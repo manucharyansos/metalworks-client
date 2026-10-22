@@ -333,6 +333,7 @@
 
                 <!-- File Metadata -->
                 <div class="text-right space-y-1 text-xs md:text-sm">
+                  <FileProductionAttributes :file="file" />
                   <p
                     v-if="file.quantity"
                     class="text-emerald-700 dark:text-emerald-300 font-medium"
@@ -439,8 +440,10 @@
 
 <script>
 import { catalogText } from '@/utils/workshop-catalog'
+import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 export default {
   name: 'ShowFiles',
+  components: { FileProductionAttributes },
   props: {
     embedded: { type: Boolean, default: false },
     pmps: { type: Object, default: () => ({ exists: false }) },

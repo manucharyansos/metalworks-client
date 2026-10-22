@@ -28,6 +28,7 @@ async function component(file, { render = false } = {}) {
     }
   )
   const options = (await import(moduleUrl(source))).default
+  if (options.components?.FileProductionAttributes) options.components.FileProductionAttributes = await component('components/File/FileProductionAttributes.vue', { render: true })
   if (options.components?.TaskFileRouting) options.components.TaskFileRouting = await component('components/engineer/TaskFileRouting.vue', { render: true })
   if (options.components?.ProductionRouteEditor) options.components.ProductionRouteEditor = await component('components/engineer/ProductionRouteEditor.vue', { render: true })
   return render ? { ...options, ...compiler.compileToFunctions(parsed.template.content) } : options
@@ -374,7 +375,7 @@ test('a fresh task uses subgroup defaults without opening the editor', async () 
   const { vm, requests } = await orderPage()
   vm.description = ''
   assert.equal(vm.isFiles, false)
-  assert.equal(vm.showQuickWorkshopChoice, false)
+  assert.equal(vm.destinationsOpen, false)
   assert.equal(vm.submissionIssue, null)
   assert.equal(vm.canSubmit, true)
   await vm.pmpFiles()
@@ -391,13 +392,12 @@ test('missing default routing has a basic workshop choice and creates without op
   ] })
   assert.equal(vm.canSubmit, false)
   assert.equal(vm.submissionIssue, 'order_configuration.workshop_required')
-  assert.equal(vm.showQuickWorkshopChoice, true)
-  vm.chooseQuickWorkshop('999')
-  assert.deepEqual(vm.fileRouting, {}, 'an unavailable workshop cannot be chosen')
-  vm.chooseQuickWorkshop('2')
+  vm.openFileDestinations()
+  vm.fileRouting = { 1: [999] }
+  assert.equal(vm.canSubmit, false, 'an unavailable workshop cannot enable creation')
+  vm.fileRouting = { 1: [2] }
   assert.equal(vm.isFiles, false)
-  assert.equal(vm.showQuickWorkshopChoice, true, 'the chosen input stays visible')
-  assert.equal(vm.quickWorkshopId, '2')
+  assert.equal(vm.destinationsOpen, true, 'the single destination section is open')
   assert.equal(vm.canSubmit, true)
   assert.deepEqual(plainData(vm.fileRouting), { 1: [2] }, 'reference files keep their separate visibility')
   await vm.pmpFiles()
@@ -487,7 +487,7 @@ test('the settings accordion opens one section at a time without losing its slot
   assert.equal(vm.activeSection, 'route')
   html = await render()
   assert.equal((html.match(/aria-expanded="true"/g) || []).length, 1)
-  assert.equal((html.match(/data-task-config-panel=/g) || []).length, 6, 'closed sections stay mounted to preserve inputs')
+  assert.equal((html.match(/data-task-config-panel=/g) || []).length, 5, 'closed sections stay mounted to preserve inputs')
   vm.toggleSection('operators')
   assert.equal(vm.activeSection, 'operators')
   vm.toggleSection('operators')

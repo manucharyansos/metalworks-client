@@ -105,6 +105,39 @@ export function routeHasCycle(plan) {
   return plan.stages.some((stage) => visit(stage.factory_id))
 }
 
+export function routeFromFilePlans(files = [], factories = [], routing = []) {
+  const graph = new Map(factories.map((factory) => [Number(factory.id), []]))
+  const ordered = []
+  let hasPlan = false
+  for (const file of files) {
+    if (!Array.isArray(file.production_factory_ids) || file.is_reference_file)
+      continue
+    hasPlan = true
+    const targets =
+      routing.find((row) => Number(row.file_id) === Number(file.id))
+        ?.factory_ids || []
+    const path = [
+      ...new Set([...file.production_factory_ids, ...targets].map(Number)),
+    ].filter((id) => targets.includes(id) && graph.has(id))
+    path.forEach((id, index) => {
+      if (!ordered.includes(id)) ordered.push(id)
+      if (index) graph.get(id).push(path[index - 1])
+    })
+  }
+  if (!hasPlan) return { mode: 'parallel', stages: [] }
+  for (const id of graph.keys()) if (!ordered.includes(id)) ordered.push(id)
+  return {
+    mode: 'custom',
+    stages: ordered.map((id) => ({
+      factory_id: id,
+      predecessor_factory_ids: [...new Set(graph.get(id))].sort(
+        (a, b) => a - b
+      ),
+      deadline: null,
+    })),
+  }
+}
+
 export function routeWarnings(plan, overallDeadline) {
   const end = overallDeadline?.slice(0, 10)
   return plan.stages

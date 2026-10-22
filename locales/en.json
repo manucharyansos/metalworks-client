@@ -4,7 +4,7 @@
     "optional": "optional",
     "short_title": "Settings",
     "title": "Task settings",
-    "entry_hint": "Create a task directly with all subgroup files. Choose Edit to change files, quantities, workshops, the route or operators.",
+    "entry_hint": "Create directly with all files. Choose recipients in File destinations. Use Edit to change individual files, quantities and the remaining task settings.",
     "help": "Open a section. Your choices stay when switching sections and are applied when you create the task.",
     "summary": "Files: {files} · Workshops: {workshops}",
     "files": "Files and quantities",
@@ -401,5 +401,23 @@
     "previous": "Previous page",
     "next": "Next page",
     "operator_tasks": "{name} · current tasks"
+  },
+  "file_plan": {
+    "title": "File production route",
+    "help": "Choose workshops for this file. This route will be suggested when creating a task.",
+    "cutting": "Cutting",
+    "bending": "Bending",
+    "welding": "Welding",
+    "powder": "Powder coating",
+    "inspection": "Inspection",
+    "inspection_help": "This file needs inspection. The requirement will also be visible in workshop tasks.",
+    "inspection_required": "Inspection required",
+    "dimensions": "Dimensions",
+    "dimensions_example": "For example: 1000 × 2000 mm",
+    "remove_file": "Remove file {name}",
+    "batch_limit": "Choose up to 50 files with a combined size of at most 100 MB.",
+    "individual_only": "Add DXF and IC files individually and complete their attributes.",
+    "duplicate_names": "The selection contains duplicate file names.",
+    "selected_files": "Selected files: {count}"
   }
 }

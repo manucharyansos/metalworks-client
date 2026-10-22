@@ -141,7 +141,9 @@ export const actions = {
         '/api/engineers/uploadPmpFile',
         formData
       )
-      commit('ADD_FILE', data?.file)
+      if (Array.isArray(data?.files))
+        data.files.forEach((file) => commit('ADD_FILE', file))
+      else commit('ADD_FILE', data?.file)
       commit('SET_ERROR', null)
       return data
     } catch (error) {

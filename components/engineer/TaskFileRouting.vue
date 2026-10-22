@@ -4,7 +4,7 @@
     class="mt-5 space-y-3 rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
     data-file-routing
   >
-    <h3 class="font-bold">{{ t.routing }}</h3>
+    <h3 v-if="!embedded" class="font-bold">{{ t.routing }}</h3>
     <p class="text-sm text-slate-500">{{ t.routingHelp }}</p>
     <details
       v-for="file in workingFiles"
@@ -32,7 +32,13 @@
             class="mt-0.5 h-5 w-5 shrink-0"
             @change="select(file, factory.id, $event.target.checked)"
           />
-          <span class="break-words">{{ factory.name }}</span>
+          <span class="break-words"
+            ><span
+              v-if="factory.operation !== 'other'"
+              class="block text-xs font-semibold"
+              >{{ $t('file_plan.' + factory.operation) }}</span
+            >{{ factory.name }}</span
+          >
         </label>
       </div>
     </details>
@@ -48,7 +54,7 @@
 <script>
 import {
   catalogText,
-  isWorkshop,
+  productionWorkshopOptions,
   isReferenceFile,
   fileDestinations,
 } from '@/utils/workshop-catalog'
@@ -58,13 +64,14 @@ export default {
     factories: { type: Array, default: () => [] },
     value: { type: Object, default: () => ({}) },
     disabled: Boolean,
+    embedded: Boolean,
   },
   computed: {
     t() {
       return catalogText(this.$i18n?.locale)
     },
     workshops() {
-      return this.factories.filter(isWorkshop)
+      return productionWorkshopOptions(this.factories)
     },
     workingFiles() {
       return this.files.filter((file) => !isReferenceFile(file, this.factories))

@@ -147,6 +147,8 @@ export function isReferenceFile(file, factories = []) {
 export function fileDestinations(file, factories, overrides = {}) {
   const chosen = Object.prototype.hasOwnProperty.call(overrides, file.id)
     ? overrides[file.id]
+    : Array.isArray(file.routing_factory_ids)
+    ? file.routing_factory_ids
     : [
         file.routing_factory_id === undefined
           ? file.factory_id
@@ -173,4 +175,33 @@ export function categorySections(categories) {
     file_category_id: category.id,
     value: category.code,
   }))
+}
+
+export function needsIndividualFileAttributes(name) {
+  return /\.(dxf|ic)$/i.test(String(name || ''))
+}
+
+export function productionWorkshopOptions(factories = []) {
+  const rank = (factory) => {
+    const value = String(factory.value || '').toUpperCase()
+    const name = String(factory.name || '').toLowerCase()
+    if (
+      ['DXF', 'IQS', 'LASER', 'CUTTING'].includes(value) ||
+      /laser|լազեր|лазер|cutting/.test(name)
+    )
+      return 0
+    if (value === 'DLD' || /bend|ճկ|կռ|гиб/.test(name)) return 1
+    if (/weld|զոդ|свар/.test(name) || /WELD/.test(value)) return 2
+    if (/POWDER/.test(value) || /powder|փոշե|порош/.test(name)) return 3
+    return 4
+  }
+  return (Array.isArray(factories) ? factories : [])
+    .filter(isWorkshop)
+    .map((factory) => ({
+      ...factory,
+      operation: ['cutting', 'bending', 'welding', 'powder', 'other'][
+        rank(factory)
+      ],
+    }))
+    .sort((a, b) => rank(a) - rank(b) || Number(a.id) - Number(b.id))
 }

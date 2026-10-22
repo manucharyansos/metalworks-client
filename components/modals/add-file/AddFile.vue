@@ -91,7 +91,7 @@
             >
               <div
                 v-if="isDxfFile"
-                class="grid grid-cols-1 md:grid-cols-3 gap-4"
+                class="grid grid-cols-1 sm:grid-cols-2 gap-4"
               >
                 <div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-3">
                   <slot name="quantity" />
@@ -101,6 +101,9 @@
                 </div>
                 <div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-3">
                   <slot name="thickness" />
+                </div>
+                <div class="rounded-lg bg-gray-50 dark:bg-gray-800 p-3">
+                  <slot name="dimensions" />
                 </div>
               </div>
               <slot name="info-content" />
@@ -138,6 +141,7 @@
                   <slot name="file-input" />
                 </div>
               </label>
+              <slot name="file-plans" />
             </fieldset>
             <p
               v-if="uploadError"
@@ -247,8 +251,9 @@ export default {
     },
     onDrop(event) {
       if (this.busy || this.policyLoading || this.policyError) return
-      const file = event.dataTransfer?.files?.[0]
-      if (file) this.$emit('dropped', file)
+      const files = Array.from(event.dataTransfer?.files || [])
+      if (files.length)
+        this.$emit('dropped', files.length === 1 ? files[0] : files)
     },
   },
 }

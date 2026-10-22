@@ -302,7 +302,13 @@
               class="flex-1 flex flex-col"
             >
               <div
-                v-if="isDxfFile && selectedFile"
+                v-if="
+                  selectedFile &&
+                  (selectedFile.quantity ||
+                    selectedFile.material_type ||
+                    (selectedFile.thickness !== null &&
+                      selectedFile.thickness !== undefined))
+                "
                 class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
               >
                 <div
@@ -339,6 +345,7 @@
                 </div>
               </div>
 
+              <FileProductionAttributes :file="selectedFile" />
               <h3
                 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center break-all"
               >
@@ -360,6 +367,7 @@
                   :dxf-url="dxfUrl"
                   :file-meta="selectedFile"
                   :show-laser-info="true"
+                  :show-production-attributes="false"
                   class="w-full h-full rounded-lg border border-gray-200 dark:border-gray-700"
                   @close="dxfUrl = ''"
                 />
@@ -526,6 +534,7 @@
         <input
           :key="`${selectedFactoryId}-${infoMode}-${fileInputKey}`"
           type="file"
+          :multiple="canPickMultiple"
           class="hidden"
           :accept="fileAccept"
           :disabled="
@@ -544,6 +553,7 @@
           v-model="fileData.quantity"
           type="number"
           name="quantity"
+          autocomplete="off"
           label="Քանակ լրակազմում"
           :disabled="uploading"
           min="1"
@@ -556,20 +566,24 @@
             v-model="fileData.material"
             type="text"
             name="materialType"
+            autocomplete="off"
             label="Նյութ"
             :disabled="uploading"
-            @focus="openMaterials"
           />
           <button
             type="button"
             class="absolute inset-y-0 right-0 px-3 text-gray-500"
-            :disabled="uploading"
+            :disabled="
+              uploading || materialsLoading || productionWorkshopsLoading
+            "
+            data-project-material-picker
             @click="openMaterials"
           >
             ▼
           </button>
           <div
             v-if="isSelectedMaterials"
+            data-project-material-options
             class="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-auto"
           >
             <ul class="py-1">
@@ -591,10 +605,69 @@
           v-model="fileData.thickness"
           type="number"
           name="thickness"
+          autocomplete="off"
           label="Հաստություն"
           :disabled="uploading"
           min="0"
           step="any"
+        />
+      </template>
+      <template v-if="requiresDxfMetadata" #dimensions>
+        <InputWithLabelIcon
+          v-model="fileData.dimensions"
+          type="text"
+          name="dimensions"
+          autocomplete="off"
+          :label="$t('file_plan.dimensions')"
+          :placeholder="$t('file_plan.dimensions_example')"
+          :disabled="uploading"
+        />
+      </template>
+      <template #file-plans>
+        <div v-if="pendingFiles.length" class="space-y-3" data-pending-files>
+          <article
+            v-for="(entry, index) in pendingFiles"
+            :key="entry.file.name"
+            class="rounded-xl border border-slate-200 p-3 dark:border-slate-700"
+            :data-pending-file="entry.file.name"
+          >
+            <div class="mb-2 flex items-start justify-between gap-3">
+              <span class="min-w-0 break-words text-sm font-semibold">{{
+                entry.file.name
+              }}</span>
+              <button
+                type="button"
+                :disabled="uploading"
+                class="shrink-0 text-sm font-semibold text-red-600"
+                :aria-label="
+                  $t('file_plan.remove_file', { name: entry.file.name })
+                "
+                @click="removePendingFile(index)"
+              >
+                ×
+              </button>
+            </div>
+            <FileProductionPlan
+              v-if="!selectedFactory?.is_reference"
+              v-model="entry.plan"
+              :factories="getProductionWorkshops || []"
+              :default-factory-id="selectedFactory?.default_factory_id"
+              :disabled="uploading"
+              :loading="productionWorkshopsLoading"
+              :error="productionWorkshopsError"
+              @retry="loadProductionWorkshops"
+            />
+          </article>
+        </div>
+        <FileProductionPlan
+          v-else-if="fileData.file && !selectedFactory?.is_reference"
+          v-model="filePlan"
+          :factories="getProductionWorkshops || []"
+          :default-factory-id="selectedFactory?.default_factory_id"
+          :disabled="uploading"
+          :loading="productionWorkshopsLoading"
+          :error="productionWorkshopsError"
+          @retry="loadProductionWorkshops"
         />
       </template>
     </AddFileModal>
@@ -615,13 +688,15 @@ import PopupModal from '~/components/modals/popup-modal/PopupModal.vue'
 import AddFileModal from '~/components/modals/add-file/AddFile.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import InfoContentInput from '~/components/modals/add-file/InfoContentInput.vue'
+import FileProductionPlan from '@/components/engineer/FileProductionPlan.vue'
+import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
+import { needsIndividualFileAttributes } from '@/utils/workshop-catalog'
 import CadPreviewWorker from '~/workers/cad-preview.worker.js'
 import CadModelWorker from '~/workers/cad-model.worker.js'
 import ModelViewer from '~/components/File/ModelViewer.vue'
 import { inspectFactoryPreview } from '~/utils/factory-preview'
 import {
   allowsExtension,
-  fileExtension,
   inputAccept,
   normalizeExtensions,
   previewType,
@@ -633,6 +708,8 @@ import {
 export default {
   name: 'EngineerFilesView',
   components: {
+    FileProductionPlan,
+    FileProductionAttributes,
     InputWithLabelIcon,
     AddFileModal,
     PopupModal,
@@ -686,6 +763,15 @@ export default {
       isDxfFile: false,
       isSelectedMaterials: false,
       fileData: { quantity: null, material: '', thickness: '', file: null },
+      pendingFiles: [],
+      filePlan: { production_factory_ids: null, inspection_required: false },
+      productionWorkshopsLoading: false,
+      productionWorkshopsError: '',
+      productionWorkshops: [],
+      productionOptionsLoaded: false,
+      productionOptionsRequest: 0,
+      uploadMaterials: [],
+      materialsLoading: false,
       currentFile: { name: '', size: 0 },
       toDeleteId: null,
     }
@@ -694,7 +780,9 @@ export default {
   computed: {
     ...mapGetters('pmp', ['getPmp', 'errorMessage']),
     ...mapGetters('factory', { getFactory: 'getFileCategories' }),
-    ...mapGetters('materials', ['getMaterials']),
+    getProductionWorkshops() {
+      return this.productionWorkshops
+    },
     groupCode() {
       const code = String(this.getPmp?.group ?? '').trim()
       return /^\d+$/.test(code) ? code.padStart(3, '0') : code || '—'
@@ -727,8 +815,11 @@ export default {
     },
     requiresDxfMetadata() {
       return (
-        this.selectedFactory?.value === 'DXF' &&
-        fileExtension(this.fileData.file?.name) === 'dxf'
+        !this.selectedFactory?.is_reference &&
+        !this.pendingFiles.length &&
+        (this.fileData.file
+          ? needsIndividualFileAttributes(this.fileData.file.name)
+          : ['DXF', 'IC'].includes(this.selectedFactory?.value))
       )
     },
     isInfoFactory() {
@@ -751,6 +842,14 @@ export default {
         this.isInfoFactory ? this.infoMode : 'file'
       )
     },
+    canPickMultiple() {
+      return (
+        (!this.isInfoFactory || this.infoMode === 'file') &&
+        this.allowedExtensions.some(
+          (extension) => !['dxf', 'ic'].includes(extension)
+        )
+      )
+    },
     canSubmitFile() {
       return (
         this.selectedFactory?.is_active !== false &&
@@ -759,11 +858,11 @@ export default {
         (this.isInfoFactory && this.infoMode === 'text'
           ? allowsExtension(this.allowedExtensions, 'txt') &&
             !!this.infoText.trim()
-          : !!this.fileData.file)
+          : !!this.fileData.file || this.pendingFiles.length > 0)
       )
     },
     materials() {
-      return this.getMaterials || []
+      return this.uploadMaterials
     },
     filteredMaterials() {
       if (!this.fileData.material) return this.materials
@@ -785,6 +884,7 @@ export default {
 
   beforeDestroy() {
     ++this.policyRequest
+    ++this.productionOptionsRequest
     this.clearPreview()
   },
 
@@ -795,7 +895,6 @@ export default {
       'fetchFileCategories',
       'downloadUploadedFile',
     ]),
-    ...mapActions('materials', ['fetchMaterials']),
 
     async loadPage() {
       if (this.loading) return
@@ -836,17 +935,37 @@ export default {
     n(v) {
       return Number(v)
     },
-    openMaterials() {
-      this.loading = true
-      this.fetchMaterials()
-        .then(() => (this.isSelectedMaterials = !this.isSelectedMaterials))
-        .catch((error) => this.$notify({ text: String(error), type: 'error' }))
-        .finally(() => (this.loading = false))
+    async openMaterials() {
+      if (this.materialsLoading || this.productionWorkshopsLoading) return
+      if (this.isSelectedMaterials) {
+        this.isSelectedMaterials = false
+        return
+      }
+      this.materialsLoading = true
+      try {
+        if (
+          !this.productionOptionsLoaded &&
+          !(await this.loadProductionWorkshops())
+        )
+          return
+        if (this.isOpenAddFileModal) this.isSelectedMaterials = true
+      } finally {
+        this.materialsLoading = false
+      }
     },
 
     selectMaterial(material) {
       this.fileData.material = material.description
       this.fileData.thickness = material.thickness
+      this.fileData.dimensions = [
+        material.width,
+        material.length,
+        material.height,
+      ]
+        .filter(
+          (value) => value !== null && value !== undefined && value !== ''
+        )
+        .join(' × ')
       this.isSelectedMaterials = false
     },
 
@@ -900,8 +1019,9 @@ export default {
     },
 
     handleFileChange(e) {
-      const file = e.target.files?.[0]
-      if (file) this.handleFileDrop(file)
+      const files = Array.from(e.target.files || [])
+      if (files.length)
+        this.handleFileDrop(files.length === 1 ? files[0] : files)
       // Selecting the same file again must trigger validation after a rejection.
       e.target.value = ''
     },
@@ -914,6 +1034,49 @@ export default {
         this.policyError
       )
         return
+      if (Array.isArray(file)) {
+        if (file.length === 1) return this.handleFileDrop(file[0])
+        if (
+          file.length > 50 ||
+          file.reduce((sum, item) => sum + item.size, 0) > 100 * 1024 * 1024
+        ) {
+          this.uploadError = this.$t('file_plan.batch_limit')
+          return
+        }
+        if (file.some((item) => needsIndividualFileAttributes(item.name))) {
+          this.uploadError = this.$t('file_plan.individual_only')
+          return
+        }
+        const issue = file
+          .map((item) =>
+            validateFactoryFile(
+              item,
+              this.allowedExtensions,
+              this.isInfoFactory ? this.infoMode : 'file'
+            )
+          )
+          .find(Boolean)
+        if (
+          issue ||
+          new Set(file.map((item) => item.name)).size !== file.length
+        ) {
+          this.uploadError = issue
+            ? this.$t('file_upload.' + issue)
+            : this.$t('file_plan.duplicate_names')
+          return
+        }
+        this.pendingFiles = file.map((item) => ({
+          file: item,
+          plan: { production_factory_ids: null, inspection_required: false },
+        }))
+        this.fileData.file = null
+        this.currentFile = {
+          name: this.$t('file_plan.selected_files', { count: file.length }),
+          size: file.reduce((sum, item) => sum + item.size, 0),
+        }
+        this.uploadError = ''
+        return
+      }
       const error = validateFactoryFile(
         file,
         this.allowedExtensions,
@@ -928,6 +1091,52 @@ export default {
       this.uploadError = ''
       this.currentFile = { name: file.name, size: file.size }
       this.fileData.file = file
+      this.pendingFiles = []
+      this.filePlan = {
+        production_factory_ids: null,
+        inspection_required: false,
+      }
+    },
+
+    removePendingFile(index) {
+      this.pendingFiles.splice(index, 1)
+      this.currentFile = {
+        name: this.pendingFiles.length
+          ? this.$t('file_plan.selected_files', {
+              count: this.pendingFiles.length,
+            })
+          : '',
+        size: this.pendingFiles.reduce(
+          (sum, entry) => sum + entry.file.size,
+          0
+        ),
+      }
+    },
+
+    async loadProductionWorkshops() {
+      if (this.productionWorkshopsLoading) return false
+      const request = ++this.productionOptionsRequest
+      this.productionWorkshopsLoading = true
+      this.productionWorkshopsError = ''
+      try {
+        const data = await this.$axios.$get('/api/engineers/pmp-file-options')
+        if (request !== this.productionOptionsRequest) return false
+        if (!Array.isArray(data?.workshops) || !Array.isArray(data?.materials))
+          throw new Error('Invalid file options')
+        this.productionWorkshops = data.workshops
+        this.uploadMaterials = data.materials
+        this.productionOptionsLoaded = true
+        return true
+      } catch (error) {
+        if (request === this.productionOptionsRequest)
+          this.productionWorkshopsError = this.$t(
+            'order_configuration.workshops_load_failed'
+          )
+        return false
+      } finally {
+        if (request === this.productionOptionsRequest)
+          this.productionWorkshopsLoading = false
+      }
     },
 
     async addFile() {
@@ -939,6 +1148,7 @@ export default {
       )
         return
       let { file } = this.fileData
+      const batch = this.pendingFiles.length > 0
       const { quantity, material, thickness } = this.fileData
       const isDxf = this.requiresDxfMetadata
       this.uploadError = ''
@@ -952,11 +1162,17 @@ export default {
           this.infoText
         )
       }
-      const error = validateFactoryFile(
-        file,
-        this.allowedExtensions,
-        this.isInfoFactory ? this.infoMode : 'file'
+      const error = (
+        batch ? this.pendingFiles.map((entry) => entry.file) : [file]
       )
+        .map((file) =>
+          validateFactoryFile(
+            file,
+            this.allowedExtensions,
+            this.isInfoFactory ? this.infoMode : 'file'
+          )
+        )
+        .find(Boolean)
       if (error) {
         this.uploadError = this.$t(`file_upload.${error}`)
         return
@@ -976,7 +1192,33 @@ export default {
 
       this.uploading = true
       const formData = new FormData()
-      formData.append('file', file)
+      if (batch) {
+        formData.append('expected_file_count', this.pendingFiles.length)
+        this.pendingFiles.forEach((entry) =>
+          formData.append('files[]', entry.file)
+        )
+        formData.append(
+          'file_plans',
+          JSON.stringify(
+            this.pendingFiles.map((entry) =>
+              this.selectedFactory?.is_reference ? {} : entry.plan
+            )
+          )
+        )
+      } else {
+        formData.append('file', file)
+        if (!this.selectedFactory?.is_reference) {
+          if (this.filePlan.production_factory_ids !== null)
+            formData.append(
+              'production_factory_ids',
+              JSON.stringify(this.filePlan.production_factory_ids)
+            )
+          formData.append(
+            'inspection_required',
+            this.filePlan.inspection_required ? '1' : '0'
+          )
+        }
+      }
       formData.append('pmp_id', this.getPmp.id)
       formData.append('remote_number_id', this.selectedRemoteNumberId)
       formData.append('factory_id', this.selectedFactoryId)
@@ -989,6 +1231,8 @@ export default {
         formData.append('quantity', quantity)
         formData.append('material_type', material.trim())
         formData.append('thickness', thickness)
+        if (this.fileData.dimensions?.trim())
+          formData.append('dimensions', this.fileData.dimensions.trim())
       }
 
       try {
@@ -1210,8 +1454,10 @@ export default {
       )
         return
       this.isOpenAddFileModal = !this.isOpenAddFileModal
-      if (this.isOpenAddFileModal) this.loadFactoryPolicy()
-      else {
+      if (this.isOpenAddFileModal) {
+        this.loadFactoryPolicy()
+        this.loadProductionWorkshops()
+      } else {
         ++this.policyRequest
         this.policyLoading = false
         this.resetFileFields()
@@ -1245,19 +1491,30 @@ export default {
       if (this.uploading || this.recording) return
       this.infoMode = mode
       this.fileData.file = null
+      this.pendingFiles = []
       this.currentFile = { name: '', size: 0 }
       this.uploadError = ''
       ++this.fileInputKey
     },
 
     resetFileFields() {
+      ++this.productionOptionsRequest
+      this.productionWorkshopsLoading = this.materialsLoading = false
+      this.productionOptionsLoaded = false
+      this.productionWorkshops = this.uploadMaterials = []
       this.fileData = {
         quantity: null,
         material: '',
         thickness: '',
+        dimensions: '',
         file: null,
       }
       this.currentFile = { name: '', size: 0 }
+      this.pendingFiles = []
+      this.filePlan = {
+        production_factory_ids: null,
+        inspection_required: false,
+      }
       this.isSelectedMaterials = false
       this.infoMode = 'file'
       this.infoText = this.infoTitle = this.uploadError = ''

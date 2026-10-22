@@ -37,6 +37,7 @@ async function component(file, render = false) {
     return `const ${names} = {}`
   })
   const options = (await import(moduleUrl(source))).default
+  if (options.components?.FileProductionAttributes) options.components.FileProductionAttributes = await component('components/File/FileProductionAttributes.vue', true)
   if (options.components?.TaskFileRouting) options.components.TaskFileRouting = await component('components/engineer/TaskFileRouting.vue', true)
   if (options.components?.TaskCreationOptions) options.components.TaskCreationOptions = await component('components/engineer/TaskCreationOptions.vue', true)
   if (options.components?.TaskWorkshopOptions) options.components.TaskWorkshopOptions = await component('components/engineer/TaskWorkshopOptions.vue', true)

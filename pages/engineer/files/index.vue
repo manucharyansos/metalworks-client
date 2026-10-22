@@ -23,7 +23,7 @@
             <div class="relative">
               <label for="pmp-group-code" class="field-label">Ծածկագիր</label>
               <div class="relative">
-                <input id="pmp-group-code" v-model.trim="pmpGroup" :disabled="saving" type="text" maxlength="3" class="control pr-10 font-mono" placeholder="000" autocomplete="off" @focus="openDropdown('groupCode')" @input="onGroupCodeInput" />
+                <input id="pmp-group-code" v-model.trim="pmpGroup" :disabled="saving" type="text" maxlength="3" class="control pr-10 font-mono" placeholder="000" autocomplete="off" autocorrect="off" :spellcheck="false" @input="onGroupCodeInput" />
                 <button type="button" class="picker-button" :disabled="saving" @click="toggleDropdown('groupCode')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
@@ -36,7 +36,7 @@
             <div class="relative">
               <label for="pmp-group-name" class="field-label">Անվանում</label>
               <div class="relative">
-                <input id="pmp-group-name" v-model.trim="pmpGroupName" :disabled="saving" type="text" class="control pr-10" placeholder="Մուտքագրեք անվանում" autocomplete="off" @focus="openDropdown('groupName')" @input="onGroupNameInput" />
+                <input id="pmp-group-name" v-model.trim="pmpGroupName" :disabled="saving" type="text" class="control pr-10" placeholder="Մուտքագրեք անվանում" autocomplete="off" autocorrect="off" :spellcheck="false" @input="onGroupNameInput" />
                 <button type="button" class="picker-button" :disabled="saving" @click="toggleDropdown('groupName')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
@@ -62,7 +62,7 @@
             <div class="relative">
               <label for="pmp-remote-code" class="field-label">Համար</label>
               <div class="relative">
-                <input id="pmp-remote-code" v-model.trim="pmpRemoteNumber" type="text" maxlength="2" :disabled="saving || !isExistingGroup" class="control pr-10 font-mono" placeholder="00" autocomplete="off" @focus="openDropdown('remoteCode')" @input="onRemoteCodeInput" />
+                <input id="pmp-remote-code" v-model.trim="pmpRemoteNumber" type="text" maxlength="2" :disabled="saving || !isExistingGroup" class="control pr-10 font-mono" placeholder="00" autocomplete="off" autocorrect="off" :spellcheck="false" @input="onRemoteCodeInput" />
                 <button type="button" class="picker-button" :disabled="saving || !isExistingGroup" @click="toggleDropdown('remoteCode')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
@@ -75,7 +75,7 @@
             <div class="relative">
               <label for="pmp-remote-name" class="field-label">Նկարագրություն</label>
               <div class="relative">
-                <input id="pmp-remote-name" v-model.trim="pmpRemoteNumberName" type="text" :disabled="saving || !isExistingGroup" class="control pr-10" placeholder="Մուտքագրեք նկարագրություն" autocomplete="off" @focus="openDropdown('remoteName')" @input="onRemoteNameInput" />
+                <input id="pmp-remote-name" v-model.trim="pmpRemoteNumberName" type="text" :disabled="saving || !isExistingGroup" class="control pr-10" placeholder="Մուտքագրեք նկարագրություն" autocomplete="off" autocorrect="off" :spellcheck="false" @input="onRemoteNameInput" />
                 <button type="button" class="picker-button" :disabled="saving || !isExistingGroup" @click="toggleDropdown('remoteName')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">

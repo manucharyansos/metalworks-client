@@ -293,6 +293,7 @@
 
                 <!-- File Metadata -->
                 <div class="text-right space-y-1 text-xs md:text-sm">
+                  <FileProductionAttributes :file="file" />
                   <p v-if="file.quantity" class="text-emerald-700 font-medium">
                     Քանակ: {{ file.quantity }}
                   </p>
@@ -387,8 +388,10 @@
 </template>
 
 <script>
+import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 export default {
   name: 'ShowFiles',
+  components: { FileProductionAttributes },
   props: {
     pmps: { type: Object, default: () => ({ exists: false }) },
     factories: { type: Array, default: () => [] },
