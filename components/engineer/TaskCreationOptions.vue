@@ -3,7 +3,7 @@
     class="mt-5 space-y-5 rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
     data-task-options
   >
-    <div>
+    <div v-if="!referencesOnly">
       <label class="flex items-start gap-3 font-semibold">
         <input
           type="checkbox"
@@ -43,28 +43,32 @@
         </p>
       </fieldset>
     </div>
-    <div v-if="referenceFiles.length && workshops.length" class="space-y-3">
+    <div
+      v-if="!hideReferences && referenceFiles.length && workshops.length"
+      class="space-y-3"
+      data-reference-visibility
+    >
       <h3 class="font-semibold">{{ t.references }}</h3>
       <p class="text-sm text-slate-500">{{ t.referencesHelp }}</p>
-      <details
+      <div
         v-for="file in referenceFiles"
         :key="file.id"
         class="rounded-xl border border-slate-200 p-3 dark:border-slate-700"
         :data-reference-file="file.id"
       >
-        <summary class="cursor-pointer break-words text-sm font-semibold">
+        <h4 class="break-words text-sm font-semibold">
           {{ file.original_name }}
-        </summary>
-        <div class="mt-3 space-y-2">
+        </h4>
+        <div class="mt-3 grid gap-2 sm:grid-cols-2">
           <label
             v-for="factory in workshops"
             :key="factory.id"
-            class="flex items-center gap-3 rounded-lg p-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
+            class="flex min-w-0 items-start gap-3 rounded-lg border border-slate-200 p-2.5 text-sm hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
           >
             <input
               type="checkbox"
               :disabled="disabled"
-              class="h-5 w-5"
+              class="h-5 w-5 shrink-0"
               :checked="
                 (referenceVisibility[file.id] || []).includes(
                   Number(factory.id)
@@ -75,10 +79,10 @@
                 selectWorkshop(file.id, factory.id, $event.target.checked)
               "
             />
-            {{ factory.name }}
+            <span class="break-words">{{ factory.name }}</span>
           </label>
         </div>
-      </details>
+      </div>
     </div>
   </section>
 </template>
@@ -88,6 +92,8 @@ import { isReferenceFile, isWorkshop } from '@/utils/workshop-catalog'
 export default {
   props: {
     confirmationRequired: Boolean,
+    referencesOnly: Boolean,
+    hideReferences: Boolean,
     disabled: Boolean,
     confirmationMethod: { type: String, default: '' },
     referenceVisibility: { type: Object, default: () => ({}) },

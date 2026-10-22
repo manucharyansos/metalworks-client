@@ -76,30 +76,77 @@
           :aria-labelledby="`task-config-toggle-${section}`"
           class="min-w-0 border-t border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900 sm:p-4"
         >
-          <p
-            v-if="
-              !workshopCount && !['files', 'confirmation'].includes(section)
-            "
-            class="text-sm text-slate-500"
+          <div
+            v-if="!fileCount && !['files', 'confirmation'].includes(section)"
+            class="space-y-3 rounded-xl bg-slate-50 p-4 text-sm dark:bg-slate-800"
+            data-configuration-empty-files
           >
-            {{ $t('order_configuration.no_workshops') }}
-          </p>
+            <p>{{ $t('order_files.select_files') }}</p>
+            <button
+              type="button"
+              class="font-semibold text-blue-700 underline dark:text-blue-300"
+              @click="$emit('all-files')"
+            >
+              {{ $t('order_create.use_whole_subgroup') }}
+            </button>
+            <button
+              type="button"
+              class="ml-3 font-semibold underline"
+              @click="toggleSection('files')"
+            >
+              {{ $t('order_configuration.selected_files') }}
+            </button>
+          </div>
+          <div
+            v-else-if="
+              !workshopCount &&
+              ['route', 'workshops', 'operators'].includes(section)
+            "
+            class="space-y-3 rounded-xl bg-slate-50 p-4 text-sm dark:bg-slate-800"
+            data-configuration-needs-workshop
+          >
+            <p>{{ $t('order_configuration.no_workshops') }}</p>
+            <button
+              v-if="workingFileCount || referenceFileCount"
+              type="button"
+              class="font-semibold text-blue-700 underline dark:text-blue-300"
+              @click="toggleSection('routing')"
+            >
+              {{ $t('order_configuration.choose_destinations') }}
+            </button>
+          </div>
           <slot :name="section" />
         </section>
       </div>
     </div>
 
     <footer
-      class="flex justify-end border-t border-slate-200 p-3 dark:border-slate-800 sm:p-4"
+      class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 p-3 dark:border-slate-800 sm:p-4"
     >
+      <p
+        v-if="submitIssue"
+        role="status"
+        class="w-full text-sm text-amber-800 dark:text-amber-200"
+      >
+        {{ submitIssue }}
+      </p>
       <button
         type="button"
         data-finish-task-configuration
         :disabled="disabled"
-        class="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50 dark:bg-white dark:text-slate-900"
+        class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold disabled:opacity-50 dark:border-slate-700"
         @click="$emit('close')"
       >
         {{ $t('order_configuration.done') }}
+      </button>
+      <button
+        type="button"
+        data-create-configured-task
+        :disabled="disabled || !canSubmit"
+        class="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40 dark:bg-white dark:text-slate-900"
+        @click="$emit('submit')"
+      >
+        {{ $t('order_create.create') }}
       </button>
     </footer>
   </section>
@@ -111,6 +158,10 @@ export default {
     disabled: Boolean,
     fileCount: { type: Number, default: 0 },
     workshopCount: { type: Number, default: 0 },
+    workingFileCount: { type: Number, default: 0 },
+    referenceFileCount: { type: Number, default: 0 },
+    canSubmit: Boolean,
+    submitIssue: { type: String, default: '' },
   },
   data() {
     return {

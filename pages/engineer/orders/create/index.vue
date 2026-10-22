@@ -30,7 +30,7 @@
                 ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
                 : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
             "
-            >01 · {{ $t('order_create.details') }}</span
+            >{{ $t('order_create.details') }}</span
           >
           <span
             class="rounded-lg px-3 py-2"
@@ -39,7 +39,8 @@
                 ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
                 : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
             "
-            >02 · {{ $t('order_configuration.short_title') }}</span
+            >{{ $t('order_configuration.short_title') }} ·
+            {{ $t('order_configuration.optional') }}</span
           >
         </div>
       </div>
@@ -171,6 +172,7 @@
             class="order-form"
             :can-proceed-to-files="canProceedToFiles"
             :can-submit="canSubmit"
+            :submit-issue="submissionIssue ? $t(submissionIssue) : ''"
             :configuration-open="isFiles"
             @addButton="pmpFiles"
             @cancelButton="cancelBack"
@@ -356,121 +358,80 @@
                 />
               </div>
             </template>
+            <template #requirements>
+              <TaskCreationOptions
+                v-if="pmpFilesReady && !isFiles && referenceFiles.length"
+                references-only
+                :reference-visibility.sync="referenceVisibility"
+                :files="effectiveFiles"
+                :selected-workshops="subgroupFactories"
+                :factories="taskFactories"
+                :disabled="isLoading || !factoryCatalogReady"
+              />
+              <div
+                v-if="showQuickWorkshopChoice"
+                class="mt-5 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/40"
+                data-quick-task-workshop
+              >
+                <label for="task-workshop" class="order-label">
+                  {{ $t('order_configuration.workshop') }}
+                  <span class="text-red-500">*</span>
+                </label>
+                <p
+                  id="task-workshop-help"
+                  class="mb-3 text-sm text-slate-600 dark:text-slate-300"
+                >
+                  {{ $t('order_configuration.quick_workshop_help') }}
+                </p>
+                <select
+                  id="task-workshop"
+                  :value="quickWorkshopId"
+                  :disabled="isLoading"
+                  aria-describedby="task-workshop-help"
+                  class="order-input"
+                  @change="chooseQuickWorkshop($event.target.value)"
+                >
+                  <option value="">
+                    {{
+                      $t(
+                        selectedFactories.length
+                          ? 'order_configuration.workshops_per_file'
+                          : 'order_configuration.choose_workshop'
+                      )
+                    }}
+                  </option>
+                  <option
+                    v-for="factory in subgroupFactories"
+                    :key="factory.id"
+                    :value="String(factory.id)"
+                  >
+                    {{ factory.name }}
+                  </option>
+                </select>
+              </div>
+              <div
+                v-if="submissionIssue"
+                id="task-create-issue"
+                role="status"
+                data-task-create-issue
+                class="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+              >
+                <p>{{ $t(submissionIssue) }}</p>
+                <button
+                  v-if="factoriesLoadError"
+                  type="button"
+                  class="mt-2 font-semibold underline"
+                  @click="loadTaskFactories"
+                >
+                  {{ $t('order_files.retry') }}
+                </button>
+              </div>
+            </template>
           </create-order-form>
           <p class="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
             {{ $t('order_configuration.entry_hint') }}
           </p>
-          <TaskConfigurationEditor
-            v-if="isFiles"
-            ref="configurationEditor"
-            :disabled="isLoading"
-            :file-count="effectiveFiles.length"
-            :workshop-count="selectedFactories.length"
-            @close="backToDetails"
-          >
-            <template #files>
-              <div
-                class="mb-4 flex flex-wrap gap-2"
-                role="group"
-                :aria-label="$t('order_configuration.file_mode')"
-              >
-                <button
-                  type="button"
-                  data-all-files
-                  :aria-pressed="!files_existing"
-                  class="order-mode-button"
-                  :class="{ 'order-mode-button--active': !files_existing }"
-                  @click="useWholeSubgroup"
-                >
-                  {{ $t('order_configuration.all_files') }}
-                </button>
-                <button
-                  type="button"
-                  data-individual-files
-                  :aria-pressed="files_existing"
-                  class="order-mode-button"
-                  :class="{ 'order-mode-button--active': files_existing }"
-                  @click="selectIndividualFiles"
-                >
-                  {{ $t('order_configuration.selected_files') }}
-                </button>
-              </div>
-              <p
-                v-if="!files_existing"
-                class="rounded-xl bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-950/40 dark:text-blue-200"
-              >
-                {{
-                  $t('order_create.files_mode_whole', {
-                    count: subgroupFiles.length,
-                  })
-                }}
-              </p>
-              <show-files
-                v-else
-                embedded
-                :pmps="pmpsData"
-                :factories="
-                  getFileCategories?.length ? getFileCategories : getFactory
-                "
-                :selected-files="selectedFiles"
-                :file-quantities.sync="fileQuantities"
-                :remote-number-id="remote_number_id"
-                class="order-files !border-0 !p-0 !shadow-none"
-                @update:selectedFiles="updateSelectedFiles"
-              />
-            </template>
-            <template #routing>
-              <TaskFileRouting
-                v-model="fileRouting"
-                class="!mt-0 !border-0 !bg-transparent !p-0"
-                :files="effectiveFiles"
-                :factories="getFactory || []"
-                :disabled="isLoading"
-              />
-            </template>
-            <template #route>
-              <ProductionRouteEditor
-                v-model="productionRoute"
-                class="!mt-0 !border-0 !bg-transparent !p-0"
-                :factories="selectedFactories"
-                :overall-deadline="finishDate"
-                :disabled="isLoading"
-              />
-            </template>
-            <template #confirmation>
-              <TaskCreationOptions
-                class="!mt-0 !border-0 !bg-transparent !p-0"
-                :confirmation-required.sync="confirmationRequired"
-                :confirmation-method.sync="confirmationMethod"
-                :reference-visibility.sync="referenceVisibility"
-                :selected-workshops="selectedFactories"
-                :files="effectiveFiles"
-                :factories="getFactory || []"
-                :disabled="isLoading"
-              />
-            </template>
-            <template #workshops>
-              <TaskWorkshopOptions
-                v-model="workshopSettings"
-                class="!mt-0 !border-0 !bg-transparent !p-0"
-                hide-deadline
-                :factories="selectedFactories"
-                :disabled="isLoading"
-              />
-            </template>
-            <template #operators>
-              <TaskOperatorPicker
-                v-model="factoryOperators"
-                class="!mt-0 !border-0 !bg-transparent !p-0"
-                :factories="selectedFactories"
-                :workload="workload"
-                :error="workloadError"
-                :loading="workloadLoading"
-                :disabled="isLoading"
-                @refresh="loadWorkload"
-              />
-            </template>
-          </TaskConfigurationEditor>
+
           <div
             v-if="pmpFilesReady"
             class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-800/50"
@@ -504,6 +465,162 @@
           </p>
         </section>
       </div>
+
+      <TaskConfigurationEditor
+        v-if="isFiles"
+        ref="configurationEditor"
+        :disabled="isLoading"
+        :file-count="effectiveFiles.length"
+        :workshop-count="selectedFactories.length"
+        :can-submit="canSubmit"
+        :submit-issue="submissionIssue ? $t(submissionIssue) : ''"
+        :working-file-count="workingFiles.length"
+        :reference-file-count="referenceFiles.length"
+        @close="backToDetails"
+        @submit="pmpFiles"
+        @all-files="useWholeSubgroup"
+      >
+        <template #files>
+          <div
+            class="mb-4 flex flex-wrap gap-2"
+            role="group"
+            :aria-label="$t('order_configuration.file_mode')"
+          >
+            <button
+              type="button"
+              data-all-files
+              :aria-pressed="!files_existing"
+              class="order-mode-button"
+              :class="{ 'order-mode-button--active': !files_existing }"
+              @click="useWholeSubgroup"
+            >
+              {{ $t('order_configuration.all_files') }}
+            </button>
+            <button
+              type="button"
+              data-individual-files
+              :aria-pressed="files_existing"
+              class="order-mode-button"
+              :class="{ 'order-mode-button--active': files_existing }"
+              @click="selectIndividualFiles"
+            >
+              {{ $t('order_configuration.selected_files') }}
+            </button>
+          </div>
+          <p
+            v-if="!files_existing"
+            class="rounded-xl bg-blue-50 p-4 text-sm text-blue-800 dark:bg-blue-950/40 dark:text-blue-200"
+          >
+            {{
+              $t('order_create.files_mode_whole', {
+                count: subgroupFiles.length,
+              })
+            }}
+          </p>
+          <div
+            v-else
+            class="mb-3 flex flex-wrap items-center justify-between gap-2 text-sm"
+          >
+            <span>{{
+              $t('order_configuration.selected_count', {
+                count: selectedFiles.length,
+              })
+            }}</span>
+            <div class="flex gap-3">
+              <button
+                type="button"
+                data-select-all-task-files
+                class="font-semibold underline"
+                @click="selectAllTaskFiles"
+              >
+                {{ $t('order_create.select_all') }}
+              </button>
+              <button
+                type="button"
+                data-clear-task-files
+                class="font-semibold underline"
+                @click="clearTaskFiles"
+              >
+                {{ $t('order_create.clear_all') }}
+              </button>
+            </div>
+          </div>
+          <show-files
+            v-if="files_existing"
+            embedded
+            :pmps="pmpsData"
+            :factories="
+              getFileCategories?.length ? getFileCategories : taskFactories
+            "
+            :selected-files="selectedFiles"
+            :file-quantities.sync="fileQuantities"
+            :remote-number-id="remote_number_id"
+            class="order-files !border-0 !p-0 !shadow-none"
+            @update:selectedFiles="updateSelectedFiles"
+          />
+        </template>
+        <template #routing>
+          <TaskFileRouting
+            v-model="fileRouting"
+            class="!mt-0 !border-0 !bg-transparent !p-0"
+            :files="effectiveFiles"
+            :factories="taskFactories"
+            :disabled="isLoading"
+          />
+          <TaskCreationOptions
+            v-if="referenceFiles.length"
+            references-only
+            :reference-visibility.sync="referenceVisibility"
+            :selected-workshops="subgroupFactories"
+            :files="effectiveFiles"
+            :factories="taskFactories"
+            :disabled="isLoading || !factoryCatalogReady"
+          />
+        </template>
+        <template #route>
+          <ProductionRouteEditor
+            v-model="productionRoute"
+            class="!mt-0 !border-0 !bg-transparent !p-0"
+            :factories="selectedFactories"
+            :overall-deadline="finishDate"
+            :disabled="isLoading"
+          />
+        </template>
+        <template #confirmation>
+          <TaskCreationOptions
+            hide-references
+            class="!mt-0 !border-0 !bg-transparent !p-0"
+            :confirmation-required.sync="confirmationRequired"
+            :confirmation-method.sync="confirmationMethod"
+            :reference-visibility.sync="referenceVisibility"
+            :selected-workshops="selectedFactories"
+            :files="effectiveFiles"
+            :factories="taskFactories"
+            :disabled="isLoading"
+          />
+        </template>
+        <template #workshops>
+          <TaskWorkshopOptions
+            v-model="workshopSettings"
+            class="!mt-0 !border-0 !bg-transparent !p-0"
+            hide-deadline
+            :factories="selectedFactories"
+            :disabled="isLoading"
+          />
+        </template>
+        <template #operators>
+          <TaskOperatorPicker
+            v-model="factoryOperators"
+            class="!mt-0 !border-0 !bg-transparent !p-0"
+            :factories="selectedFactories"
+            :workload="workload"
+            :error="workloadError"
+            :loading="workloadLoading"
+            :disabled="isLoading"
+            @refresh="loadWorkload"
+          />
+        </template>
+      </TaskConfigurationEditor>
 
       <div
         v-if="isLoading"
@@ -595,6 +712,8 @@ export default {
       pmpFilesLoading: false,
       pmpFilesLoadError: false,
       pmpFileRequestId: 0,
+      factoriesLoading: false,
+      factoriesLoadError: false,
 
       factoryOperators: {},
       workload: null,
@@ -613,6 +732,10 @@ export default {
     ...mapGetters('factory', ['getFactory', 'getFileCategories']),
     ...mapGetters('clients', ['allClients']),
     ...mapGetters('pmp', ['getPmpes', 'getPmp']),
+
+    taskFactories() {
+      return Array.isArray(this.getFactory) ? this.getFactory : []
+    },
 
     pmpsData() {
       const p = this.orderPmp
@@ -668,7 +791,7 @@ export default {
 
     // Every workshop this subgroup could send work to, whatever files are chosen.
     subgroupFactories() {
-      return (Array.isArray(this.getFactory) ? this.getFactory : [])
+      return this.taskFactories
         .filter(isWorkshop)
         .map((factory) => ({ ...factory, operators: factory.operators || [] }))
     },
@@ -685,6 +808,54 @@ export default {
           )
         : this.subgroupFiles
     },
+    workingFiles() {
+      return this.effectiveFiles.filter(
+        (file) => !isReferenceFile(file, this.taskFactories)
+      )
+    },
+    referenceFiles() {
+      return this.effectiveFiles.filter((file) =>
+        isReferenceFile(file, this.taskFactories)
+      )
+    },
+    factoryCatalogReady() {
+      return (
+        !this.factoriesLoading &&
+        !this.factoriesLoadError &&
+        Array.isArray(this.getFactory)
+      )
+    },
+    showQuickWorkshopChoice() {
+      if (
+        !this.canProceedToFiles ||
+        !this.factoryCatalogReady ||
+        !this.workingFiles.length ||
+        !this.subgroupFactories.length
+      )
+        return false
+      // Keep this basic choice visible after choosing a workshop when the
+      // subgroup has no defaults. Per-file overrides remain an optional edit.
+      return (
+        !this.selectedFactories.length ||
+        !fileRoutingPayload(this.workingFiles, this.taskFactories).some(
+          (row) => row.factory_ids.length
+        )
+      )
+    },
+    quickWorkshopId() {
+      const routing = fileRoutingPayload(
+        this.workingFiles,
+        this.taskFactories,
+        this.fileRouting
+      )
+      const id = routing[0]?.factory_ids[0]
+      return id &&
+        routing.every(
+          (row) => row.factory_ids.length === 1 && row.factory_ids[0] === id
+        )
+        ? String(id)
+        : ''
+    },
     users() {
       return this.allClients
     },
@@ -693,11 +864,15 @@ export default {
       const ids = new Set(
         fileRoutingPayload(
           this.effectiveFiles,
-          this.getFactory || [],
+          this.taskFactories,
           this.fileRouting
         ).flatMap((row) => row.factory_ids)
       )
-      return (this.getFactory || [])
+      this.referenceFiles.forEach((file) => {
+        for (const id of this.referenceVisibility[file.id] || [])
+          ids.add(Number(id))
+      })
+      return (this.taskFactories)
         .filter((factory) => ids.has(Number(factory.id)) && isWorkshop(factory))
         .map((factory) => ({ ...factory, operators: factory.operators || [] }))
     },
@@ -717,16 +892,37 @@ export default {
       )
     },
 
+    submissionIssue() {
+      if (!this.canProceedToFiles) return null
+      if (this.factoriesLoadError)
+        return 'order_configuration.workshops_load_failed'
+      if (!this.factoryCatalogReady)
+        return 'order_configuration.workshops_loading'
+      if (!this.effectiveFiles.length) return 'order_files.select_files'
+      if (!this.subgroupFactories.length)
+        return 'order_configuration.no_active_workshops'
+      if (!this.selectedFactories.length)
+        return this.workingFiles.length
+          ? 'order_configuration.workshop_required'
+          : 'order_configuration.reference_workshop_required'
+      if (this.files_existing && !this.validSelectedFiles)
+        return 'order_configuration.invalid_file_quantities'
+      if (
+        this.confirmationRequired &&
+        !['photo', 'text', 'photo_text'].includes(this.confirmationMethod)
+      )
+        return 'order_configuration.confirmation_method_required'
+      if (routeHasCycle(this.productionRoutePayload))
+        return 'order_configuration.route_cycle'
+      return null
+    },
     canSubmit() {
-      // The existing API uses false for all subgroup files, true for a selection.
+      // All-subgroup creation uses the defaults without mounting the editor.
       return (
         this.canProceedToFiles &&
-        (!this.confirmationRequired ||
-          ['photo', 'text', 'photo_text'].includes(this.confirmationMethod)) &&
-        this.selectedFactories.length > 0 &&
-        !routeHasCycle(this.productionRoutePayload) &&
+        !this.submissionIssue &&
         !this.isEditingMode &&
-        (!this.files_existing || this.validSelectedFiles)
+        !this.isLoading
       )
     },
 
@@ -779,7 +975,7 @@ export default {
       })
     },
     // Choices follow the subgroup, not the momentary file selection: opening the
-    // file picker (nothing selected yet) or deselecting a file must not erase
+    // file picker or deselecting a file must not erase
     // them. Only the workshops the task really uses are sent on creation.
     subgroupFactories(allFactories) {
       const allowedIds = new Set(
@@ -794,7 +990,7 @@ export default {
   },
   mounted() {
     this.fetchClients()
-    this.fetchFactory()
+    this.loadTaskFactories()
     this.fetchFileCategories().catch(() => {})
     this.fetchPmps()
     this.loadWorkload()
@@ -808,6 +1004,35 @@ export default {
       'checkPmpByRemoteNumber',
       'checkIfGroupExists',
     ]),
+
+    async loadTaskFactories() {
+      if (this.factoriesLoading) return
+      this.factoriesLoading = true
+      this.factoriesLoadError = false
+      try {
+        const loaded = await this.fetchFactory()
+        this.factoriesLoadError = !loaded || !Array.isArray(this.getFactory)
+      } catch (error) {
+        this.factoriesLoadError = true
+      } finally {
+        this.factoriesLoading = false
+      }
+    },
+
+    chooseQuickWorkshop(value) {
+      const id = Number(value)
+      if (
+        this.isLoading ||
+        !this.factoryCatalogReady ||
+        !this.subgroupFactories.some((factory) => Number(factory.id) === id)
+      )
+        return
+      this.fileRouting = {
+        ...this.fileRouting,
+        ...Object.fromEntries(this.workingFiles.map((file) => [file.id, [id]])),
+      }
+      this.$workspace?.setDirty(true)
+    },
 
     selectPmpGroup(pmp) {
       this.$workspace?.setDirty(true)
@@ -956,8 +1181,7 @@ export default {
       this.files_existing = false
       this.selectedFiles = []
       this.fileQuantities = {}
-      this.referenceVisibility = {}
-      this.fileRouting = {}
+      // File mode changes do not discard routing or reference visibility.
     },
 
     async pmpFiles() {
@@ -991,6 +1215,16 @@ export default {
       }
 
       if (!this.validateOrderFiles()) {
+        this.isLoading = false
+        return
+      }
+
+      if (this.submissionIssue) {
+        this.$notify({
+          text: this.$t(this.submissionIssue),
+          type: 'error',
+          duration: 4000,
+        })
         this.isLoading = false
         return
       }
@@ -1058,7 +1292,7 @@ export default {
       const data = {
         file_routing: fileRoutingPayload(
           this.effectiveFiles,
-          this.getFactory || [],
+          this.taskFactories,
           this.fileRouting
         ),
         production_route: this.productionRoutePayload,
@@ -1079,7 +1313,7 @@ export default {
               file,
               this.getFileCategories?.length
                 ? this.getFileCategories
-                : this.getFactory || []
+                : this.taskFactories
             )
           )
           .map((file) => ({
@@ -1144,7 +1378,27 @@ export default {
     },
 
     selectIndividualFiles() {
+      if (!this.files_existing) this.selectAllTaskFiles()
       this.files_existing = true
+      this.$workspace?.setDirty(true)
+    },
+    selectAllTaskFiles() {
+      this.selectedFiles = this.subgroupFiles.map((file) => file.id)
+      this.fileQuantities = Object.fromEntries(
+        this.subgroupFiles.map((file) => [
+          file.id,
+          this.fileQuantities[file.id] ||
+            (Number.isInteger(Number(file.quantity)) &&
+            Number(file.quantity) > 0
+              ? Number(file.quantity)
+              : 1),
+        ])
+      )
+      this.$workspace?.setDirty(true)
+    },
+    clearTaskFiles() {
+      this.selectedFiles = []
+      this.fileQuantities = {}
       this.$workspace?.setDirty(true)
     },
     updateSelectedFiles(files) {

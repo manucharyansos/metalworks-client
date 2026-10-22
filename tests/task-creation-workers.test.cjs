@@ -369,6 +369,113 @@ test('an empty description can open settings and create a whole-subgroup task', 
   assert.equal(requests[0].link_existing_files, false)
 })
 
+test('a fresh task uses subgroup defaults without opening the editor', async () => {
+  const { vm, requests } = await orderPage()
+  vm.description = ''
+  assert.equal(vm.isFiles, false)
+  assert.equal(vm.showQuickWorkshopChoice, false)
+  assert.equal(vm.submissionIssue, null)
+  assert.equal(vm.canSubmit, true)
+  await vm.pmpFiles()
+  assert.equal(requests.length, 1)
+  assert.equal(requests[0].link_existing_files, false)
+  assert.equal(requests[0].production_route.stages.length, 2)
+  assert.equal(requests[0].description, '')
+})
+
+test('missing default routing has a basic workshop choice and creates without opening Edit', async () => {
+  const { vm, requests } = await orderPage({ files: [
+    { id: 1, remote_number_id: 101, factory_id: 1, routing_factory_id: null, is_reference_file: false },
+    { id: 2, remote_number_id: 101, factory_id: 9, is_reference_file: true },
+  ] })
+  assert.equal(vm.canSubmit, false)
+  assert.equal(vm.submissionIssue, 'order_configuration.workshop_required')
+  assert.equal(vm.showQuickWorkshopChoice, true)
+  vm.chooseQuickWorkshop('999')
+  assert.deepEqual(vm.fileRouting, {}, 'an unavailable workshop cannot be chosen')
+  vm.chooseQuickWorkshop('2')
+  assert.equal(vm.isFiles, false)
+  assert.equal(vm.showQuickWorkshopChoice, true, 'the chosen input stays visible')
+  assert.equal(vm.quickWorkshopId, '2')
+  assert.equal(vm.canSubmit, true)
+  assert.deepEqual(vm.fileRouting, { 1: [2] }, 'reference files keep their separate visibility')
+  await vm.pmpFiles()
+  assert.deepEqual(requests[0].file_routing, [{ file_id: 1, factory_ids: [2] }])
+  assert.equal(requests[0].link_existing_files, false)
+})
+
+test('INFO-only tasks use checked recipients with or without individual file selection', async () => {
+  for (const individual of [false, true]) {
+    const { vm, requests } = await orderPage({ files: [
+      { id: 10, remote_number_id: 101, factory_id: 9, original_name: 'info.pdf', is_reference_file: true },
+      { id: 11, remote_number_id: 101, factory_id: 9, original_name: 'other.pdf', is_reference_file: true },
+    ] })
+    assert.equal(vm.submissionIssue, 'order_configuration.reference_workshop_required')
+    if (individual) {
+      vm.selectFromOtherFactory()
+      vm.selectIndividualFiles()
+      assert.deepEqual([...vm.selectedFiles], [10, 11])
+      vm.updateSelectedFiles([10])
+      vm.fileQuantities[10] = 3
+    }
+    vm.referenceVisibility = { 10: [2], 11: [1] }
+    vm.factoryOperators = { 1: 8, 2: 20 }
+    assert.equal(vm.canSubmit, true)
+    assert.deepEqual(vm.selectedFactories.map(row => row.id), individual ? [2] : [1, 2])
+    await vm.pmpFiles()
+    assert.equal(requests[0].link_existing_files, individual)
+    assert.deepEqual(requests[0].file_routing, [])
+    assert.deepEqual(requests[0].reference_file_visibility, individual
+      ? [{ file_id: 10, factory_ids: [2] }]
+      : [{ file_id: 10, factory_ids: [2] }, { file_id: 11, factory_ids: [1] }])
+    assert.equal(requests[0].production_route.stages.length, individual ? 1 : 2)
+    assert.deepEqual(requests[0].factory_operators.map(row => row.factory_id), individual ? [2] : [1, 2])
+  }
+})
+
+test('editing starts from all files and mode changes keep reference access and per-file routes', async () => {
+  const { vm } = await orderPage()
+  vm.fileRouting = { 1: [2] }
+  vm.referenceVisibility = { 9: [1] }
+  vm.selectFromOtherFactory()
+  vm.selectIndividualFiles()
+  assert.deepEqual([...vm.selectedFiles], [1, 2])
+  assert.deepEqual(vm.fileQuantities, { 1: 1, 2: 1 })
+  assert.equal(vm.canSubmit, true)
+  vm.fileQuantities[1] = 4
+  vm.clearTaskFiles()
+  assert.equal(vm.canSubmit, false)
+  assert.equal(vm.submissionIssue, 'order_files.select_files')
+  vm.selectAllTaskFiles()
+  vm.useWholeSubgroup()
+  assert.deepEqual(vm.fileRouting, { 1: [2] })
+  assert.deepEqual(vm.referenceVisibility, { 9: [1] })
+  assert.equal(vm.canSubmit, true)
+})
+
+test('a failed workshop load is explained and can retry without losing task details', async () => {
+  const { vm } = await orderPage()
+  const description = vm.description
+  vm.fetchFactory = async () => false
+  await vm.loadTaskFactories()
+  assert.equal(vm.canSubmit, false)
+  assert.equal(vm.submissionIssue, 'order_configuration.workshops_load_failed')
+  const factories = vm.getFactory
+  vm.fetchFactory = async () => true
+  vm.getFactory = { data: [] }
+  await vm.loadTaskFactories()
+  assert.equal(vm.canSubmit, false)
+  assert.equal(vm.submissionIssue, 'order_configuration.workshops_load_failed')
+  assert.deepEqual(vm.selectedFactories, [], 'a malformed response cannot crash the form or select a stale workshop')
+  vm.getFactory = factories
+  await vm.loadTaskFactories()
+  assert.equal(vm.canSubmit, true)
+  assert.equal(vm.submissionIssue, null)
+  assert.equal(vm.description, description)
+  vm.isLoading = true
+  assert.equal(vm.canSubmit, false, 'pending creation cannot be submitted again')
+})
+
 test('the settings accordion opens one section at a time without losing its slots', async () => {
   const options = await component('components/engineer/TaskConfigurationEditor.vue', { render: true })
   const vm = new Vue({ ...options, propsData: { fileCount: 2, workshopCount: 4 }, methods: { ...options.methods, $t: key => key } })

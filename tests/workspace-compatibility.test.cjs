@@ -260,6 +260,8 @@ test('selected file mode requires a selection and retains both confirmation meth
   vm.selectFromOtherFactory()
   vm.selectIndividualFiles()
   assert.equal(vm.isFiles, true)
+  assert.equal(vm.canSubmit, true, 'opening individual selection retains the existing files')
+  vm.clearTaskFiles()
   assert.equal(vm.canSubmit, false)
   await vm.pmpFiles()
   assert.equal(requests.length, 0)
