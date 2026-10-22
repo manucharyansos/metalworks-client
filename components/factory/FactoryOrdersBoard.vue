@@ -405,8 +405,10 @@ export default {
       let order = rows.find((row) => Number(row.id) === id)
       try {
         if (!order) {
-          const { data } = await this.$axios.get(`/api/orders/${id}`)
-          order = data.order || data
+          const { data } = await this.$axios.get(
+            `/api/factories/factory/${this.currentFactoryId}`
+          )
+          order = data.orders?.find((row) => Number(row.id) === id)
         }
         if (
           scope !==

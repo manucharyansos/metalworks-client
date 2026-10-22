@@ -128,3 +128,14 @@ test('refresh reads the latest saved route after a conflict and never overwrites
   assert.equal(updates.length, 1); assert.equal(vm.order.id, 999)
   vm.$destroy()
 })
+
+
+test('a ready notification arriving before the next poll loads the task through the operator workshop API', async () => {
+  const options = load('components/factory/FactoryOrdersBoard.vue').default
+  const task = { id: 55, factory_orders: [{ factory_id: 2 }] }
+  let opened
+  const vm = { $route: { query: { order: '55' } }, $auth: { user: { id: 9, company: { id: 7 } } }, currentFactoryId: 2, getOrderByFactories: { orders: [] },
+    $axios: { get: async url => { assert.equal(url, '/api/factories/factory/2'); return { data: { orders: [task] } } } }, toggleDetails: value => { opened = value } }
+  await options.methods.openNotificationTask.call(vm)
+  assert.equal(opened, task)
+})
