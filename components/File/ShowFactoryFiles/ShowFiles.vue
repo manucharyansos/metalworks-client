@@ -34,11 +34,13 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <button
           v-for="factory in factoriesWithCount"
           :key="factory.id"
-          class="text-left p-4 border rounded-xl transition-colors flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          type="button"
+          :data-file-category="factory.id"
+          class="min-w-0 text-left p-3 border rounded-xl transition-colors flex items-start justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           :class="{
             'border-slate-200 bg-white hover:border-blue-400 dark:border-slate-700 dark:bg-slate-900':
               factory.fileCount > 0,
@@ -48,18 +50,18 @@
           :disabled="factory.fileCount === 0"
           @click="factory.fileCount > 0 && selectFactory(factory)"
         >
-          <div class="flex items-center">
+          <div class="flex min-w-0 items-start gap-2">
             <div
               :class="{
                 'bg-green-100 text-green-600': factory.fileCount > 0,
                 'bg-gray-100 text-gray-400': factory.fileCount === 0,
               }"
-              class="p-2 rounded-full mr-3"
+              class="shrink-0 p-2 rounded-lg"
               aria-hidden="true"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6"
+                class="h-4 w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -72,10 +74,25 @@
                 />
               </svg>
             </div>
-            <div>
-              <h3 class="font-semibold text-lg">{{ factory.name }}</h3>
-              <p class="text-slate-600 dark:text-slate-400 text-sm">
+            <div class="min-w-0">
+              <h3 class="break-words font-semibold text-sm">
+                {{ factory.name }}
+              </h3>
+              <p
+                v-if="!String(factory.value || '').startsWith('FILES_')"
+                class="break-words text-slate-500 dark:text-slate-400 text-xs"
+              >
                 {{ factory.value }}
+              </p>
+              <p
+                v-if="factory.selectedCount"
+                class="mt-1 text-xs text-blue-700 dark:text-blue-300"
+              >
+                {{
+                  $t('order_configuration.selected_count', {
+                    count: factory.selectedCount,
+                  })
+                }}
               </p>
             </div>
           </div>
@@ -84,9 +101,10 @@
               'bg-green-100 text-green-800': factory.fileCount > 0,
               'bg-gray-100 text-gray-400': factory.fileCount === 0,
             }"
-            class="px-2 py-1 rounded-full text-sm font-medium"
+            :title="$t('order_create.file_count', { count: factory.fileCount })"
+            class="shrink-0 px-2 py-1 rounded-full text-xs font-semibold"
           >
-            {{ $t('order_create.file_count', { count: factory.fileCount }) }}
+            {{ factory.fileCount }}
           </span>
         </button>
       </div>
@@ -97,7 +115,7 @@
       <!-- Header with Back Button -->
       <div class="flex items-center justify-between mb-4">
         <h2
-          class="text-xl md:text-2xl font-bold text-slate-900 dark:text-slate-100 truncate"
+          class="min-w-0 break-words text-lg font-bold text-slate-900 dark:text-slate-100"
         >
           {{ selectedFactory.name }}
         </h2>
@@ -465,13 +483,16 @@ export default {
       )
         return []
       return this.factories.map((factory) => {
-        const fileCount = (this.pmps.pmp.files || []).filter(
+        const files = (this.pmps.pmp.files || []).filter(
           (file) =>
             Number(file.factory_id) === Number(factory.id) &&
             (!this.remoteNumberId ||
               Number(file.remote_number_id) === Number(this.remoteNumberId))
+        )
+        const selectedCount = files.filter((file) =>
+          this.selectedFiles.includes(file.id)
         ).length
-        return { ...factory, fileCount }
+        return { ...factory, fileCount: files.length, selectedCount }
       })
     },
     allSelected() {

@@ -22,6 +22,8 @@
       <slot name="description"></slot>
     </div>
 
+    <slot name="requirements"></slot>
+
     <!-- Action buttons (with back) -->
     <div
       class="mt-6 w-full border-t border-slate-200 pt-5 dark:border-slate-800"
@@ -85,6 +87,7 @@
           <button
             v-if="!isEditingMode"
             :disabled="!canSubmit"
+            :aria-describedby="submitIssue ? 'task-create-issue' : null"
             :class="[
               'flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition',
               canSubmit
@@ -125,6 +128,7 @@ export default {
     configurationOpen: { type: Boolean, default: false },
     canProceedToFiles: { type: Boolean, default: false },
     canSubmit: { type: Boolean, default: false },
+    submitIssue: { type: String, default: '' },
   },
   emits: [
     'addButton',
