@@ -137,7 +137,7 @@
                   :creator-id="order.creator_id"
                   @updated="$emit('updated', $event)"
                 />
-                <FileGallery :items="fo.files || []" />
+                <FileGallery :items="fo.files || []" :order-id="order.id" />
               </article>
             </section>
             <section
@@ -146,7 +146,7 @@
               data-task-attachments
             >
               <h4 class="work-section__title">Կցված ֆայլեր</h4>
-              <FileGallery :items="unroutedFiles" />
+              <FileGallery :items="unroutedFiles" :order-id="order.id" />
             </section>
             <TaskRoutingPanel
               :order="order"

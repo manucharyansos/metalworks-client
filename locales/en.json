@@ -408,6 +408,7 @@
     "cutting": "Cutting",
     "bending": "Bending",
     "welding": "Welding",
+    "rolling": "Rolling",
     "powder": "Powder coating",
     "inspection": "Inspection",
     "inspection_help": "This file needs inspection. The requirement will also be visible in workshop tasks.",
@@ -419,5 +420,28 @@
     "individual_only": "Add DXF and IC files individually and complete their attributes.",
     "duplicate_names": "The selection contains duplicate file names.",
     "selected_files": "Selected files: {count}"
+  },
+  "file_details": {
+    "title": "File details",
+    "task_snapshot": "In this task",
+    "project_values": "Project file",
+    "loading": "Loading file details…",
+    "quantity": "Quantity",
+    "material": "Material",
+    "thickness": "Thickness",
+    "not_set": "Not specified",
+    "reference_workshops": "Workshops with file access",
+    "inspection_not_required": "Inspection not required",
+    "current_workshop": "This workshop",
+    "archived": "Archived",
+    "no_workshops": "No workshop is assigned to this file.",
+    "choose_on_task": "Workshops can be selected when creating a task.",
+    "unavailable": "File details are unavailable in your current role.",
+    "failed": "Could not load file details. Please try again.",
+    "preview": "File preview",
+    "view": "View",
+    "download": "Download",
+    "download_failed": "Could not download the file.",
+    "no_preview": "A preview is not available for this format. File details are shown above."
   }
 }

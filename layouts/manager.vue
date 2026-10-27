@@ -102,7 +102,10 @@
                     stroke-width="1.8"
                     d="M4 20V9l5-3v4l5-3v4l6-3v12H4Zm4 0v-4h3v4m3 0v-5h3v5"
                   /></svg></span
-              ><span class="min-w-0 flex-1 whitespace-normal break-words leading-5">{{ item.label }}</span>
+              ><span
+                class="min-w-0 flex-1 whitespace-normal break-words leading-5"
+                >{{ item.label }}</span
+              >
             </nuxt-link>
           </nav>
         </div>
@@ -197,6 +200,7 @@ import WorkspaceTransition from '@/components/layout/WorkspaceTransition.vue'
 import NotificationBell from '@/components/layout/NotificationBell.vue'
 import WorkspaceSettingsIcon from '@/components/layout/WorkspaceSettingsIcon.vue'
 import { isWorkspaceRouteActive } from '@/utils/workspace-route'
+import { isWorkshop, workshopPage } from '@/utils/workshop-catalog'
 
 const PRODUCTION_COPY = {
   hy: {
@@ -338,12 +342,9 @@ export default {
           },
         ]
       return this.$store.state.workshops.items
-        .filter((row) => row.is_active && row.is_workshop !== false)
+        .filter(isWorkshop)
         .map((row) => ({
-          to: {
-            path: '/manager/factories/workspace',
-            query: { factory_id: String(row.id) },
-          },
+          to: workshopPage(row, 'manager'),
           label: row.name,
         }))
     },
@@ -360,7 +361,7 @@ export default {
         typeof item.to === 'string'
           ? isWorkspaceRouteActive(this.$route.path, item)
           : String(this.$route.query.factory_id) === item.to.query.factory_id &&
-            this.$route.path.includes('/factories/workspace')
+            isWorkspaceRouteActive(this.$route.path, { to: item.to.path })
       )
       if (production) return production.label
       const found = this.navItems.find((item) =>

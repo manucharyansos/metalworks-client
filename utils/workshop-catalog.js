@@ -182,26 +182,80 @@ export function needsIndividualFileAttributes(name) {
 }
 
 export function productionWorkshopOptions(factories = []) {
-  const rank = (factory) => {
-    const value = String(factory.value || '').toUpperCase()
-    const name = String(factory.name || '').toLowerCase()
-    if (
-      ['DXF', 'IQS', 'LASER', 'CUTTING'].includes(value) ||
-      /laser|լազեր|лазер|cutting/.test(name)
-    )
-      return 0
-    if (value === 'DLD' || /bend|ճկ|կռ|гиб/.test(name)) return 1
-    if (/weld|զոդ|свар/.test(name) || /WELD/.test(value)) return 2
-    if (/POWDER/.test(value) || /powder|փոշե|порош/.test(name)) return 3
-    return 4
+  const operations = {
+    'laser-sheets': 'cutting',
+    'laser-tubes': 'cutting',
+    laser: 'cutting',
+    bend: 'bending',
+    welding: 'welding',
+    rolling: 'rolling',
+    powder: 'powder',
   }
+  const rank = (factory) =>
+    ['cutting', 'bending', 'welding', 'rolling', 'powder', 'other'].indexOf(
+      operations[workshopKind(factory)] || 'other'
+    )
   return (Array.isArray(factories) ? factories : [])
     .filter(isWorkshop)
     .map((factory) => ({
       ...factory,
-      operation: ['cutting', 'bending', 'welding', 'powder', 'other'][
-        rank(factory)
-      ],
+      operation: operations[workshopKind(factory)] || 'other',
     }))
     .sort((a, b) => rank(a) - rank(b) || Number(a.id) - Number(b.id))
 }
+
+// Stable production identities are independent of file categories (DXF/IGS).
+export function workshopKind(factory) {
+  if (!isProductionWorkshop(factory)) return null
+  const value = String(factory.value || '')
+    .trim()
+    .toUpperCase()
+  const byCode = {
+    DXF: 'laser-sheets',
+    IQS: 'laser-tubes',
+    DLD: 'bend',
+    BEND: 'bend',
+    WELD: 'welding',
+    WELDING: 'welding',
+    ROLL: 'rolling',
+    ROLLING: 'rolling',
+    POWDER: 'powder',
+    POWDER_CATTING: 'powder',
+    PAINT: 'powder',
+    LASER_SHEETS: 'laser-sheets',
+    LASER_TUBES: 'laser-tubes',
+  }
+  if (byCode[value]) return byCode[value]
+  const name = String(factory.name || '').toLowerCase()
+  if (/laser|լազեր|лазер|cutting/.test(name)) {
+    if (/tube|pipe|խողովակ|труб/.test(name)) return 'laser-tubes'
+    if (/sheet|լիստ|թիթեղ|лист/.test(name)) return 'laser-sheets'
+    return 'laser'
+  }
+  if (/bend|ճկ|կռ|гиб/.test(name)) return 'bend'
+  if (/weld|զոդ|свар/.test(name)) return 'welding'
+  if (/roll|վալց|вальц/.test(name)) return 'rolling'
+  if (/powder|փոշե|порош/.test(name)) return 'powder'
+  return value === 'LASER' ? 'laser' : null
+}
+
+export function workshopPage(factory, scope = 'manager') {
+  const detected = workshopKind(factory)
+  const kind = scope === 'admin' && detected === 'laser' ? null : detected
+  const prefix = scope === 'factory' ? '/factory' : `/${scope}/factories`
+  return {
+    path: `${prefix}/${kind || 'workspace'}`,
+    ...(scope === 'factory'
+      ? {}
+      : { query: { factory_id: String(factory.id) } }),
+  }
+}
+
+export const workshopPageKinds = [
+  'laser-sheets',
+  'laser-tubes',
+  'bend',
+  'welding',
+  'rolling',
+  'powder',
+]

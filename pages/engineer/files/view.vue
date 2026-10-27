@@ -301,51 +301,7 @@
               v-if="selectedFile && $can('pmp_files.view')"
               class="flex-1 flex flex-col"
             >
-              <div
-                v-if="
-                  selectedFile &&
-                  (selectedFile.quantity ||
-                    selectedFile.material_type ||
-                    (selectedFile.thickness !== null &&
-                      selectedFile.thickness !== undefined))
-                "
-                class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
-              >
-                <div
-                  class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg text-center"
-                >
-                  <div class="text-xs text-gray-600 dark:text-gray-400">
-                    Քանակ
-                  </div>
-                  <div class="font-bold text-blue-700 dark:text-blue-300">
-                    {{ selectedFile.quantity }}
-                  </div>
-                </div>
-                <div
-                  class="bg-green-50 dark:bg-green-900/30 p-3 rounded-lg text-center"
-                >
-                  <div class="text-xs text-gray-600 dark:text-gray-400">
-                    Նյութ
-                  </div>
-                  <div
-                    class="font-bold text-green-700 dark:text-green-300 truncate"
-                  >
-                    {{ selectedFile.material_type }}
-                  </div>
-                </div>
-                <div
-                  class="bg-purple-50 dark:bg-purple-900/30 p-3 rounded-lg text-center"
-                >
-                  <div class="text-xs text-gray-600 dark:text-gray-400">
-                    Հաստություն
-                  </div>
-                  <div class="font-bold text-purple-700 dark:text-purple-300">
-                    {{ selectedFile.thickness }}
-                  </div>
-                </div>
-              </div>
-
-              <FileProductionAttributes :file="selectedFile" />
+              <FileMetadataPanel :file="selectedFile" class="mb-4" />
               <h3
                 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center break-all"
               >
@@ -689,7 +645,7 @@ import AddFileModal from '~/components/modals/add-file/AddFile.vue'
 import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import InfoContentInput from '~/components/modals/add-file/InfoContentInput.vue'
 import FileProductionPlan from '@/components/engineer/FileProductionPlan.vue'
-import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
+import FileMetadataPanel from '@/components/File/FileMetadataPanel.vue'
 import { needsIndividualFileAttributes } from '@/utils/workshop-catalog'
 import CadPreviewWorker from '~/workers/cad-preview.worker.js'
 import CadModelWorker from '~/workers/cad-model.worker.js'
@@ -709,7 +665,7 @@ export default {
   name: 'EngineerFilesView',
   components: {
     FileProductionPlan,
-    FileProductionAttributes,
+    FileMetadataPanel,
     InputWithLabelIcon,
     AddFileModal,
     PopupModal,

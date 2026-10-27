@@ -293,6 +293,15 @@
 
                 <!-- File Metadata -->
                 <div class="text-right space-y-1 text-xs md:text-sm">
+                  <button
+                    v-if="$can('pmp_files.view')"
+                    type="button"
+                    class="mb-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-200"
+                    data-preview-project-file
+                    @click.stop="previewFile = file"
+                  >
+                    {{ $t('file_details.view') }}
+                  </button>
                   <FileProductionAttributes :file="file" />
                   <p v-if="file.quantity" class="text-emerald-700 font-medium">
                     Քանակ: {{ file.quantity }}
@@ -384,14 +393,20 @@
         </div>
       </transition>
     </div>
+    <FilePreviewModal
+      v-if="previewFile"
+      :file="previewFile"
+      @close="previewFile = null"
+    />
   </div>
 </template>
 
 <script>
 import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
+import FilePreviewModal from '@/components/File/FilePreviewModal.vue'
 export default {
   name: 'ShowFiles',
-  components: { FileProductionAttributes },
+  components: { FileProductionAttributes, FilePreviewModal },
   props: {
     pmps: { type: Object, default: () => ({ exists: false }) },
     factories: { type: Array, default: () => [] },
@@ -402,7 +417,7 @@ export default {
     remoteNumberId: { type: [Number, String], default: null },
   },
   data() {
-    return { selectedFactory: null }
+    return { selectedFactory: null, previewFile: null }
   },
   computed: {
     remoteNumbersWithFiles() {

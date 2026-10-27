@@ -3,26 +3,24 @@
     class="work-production-detail grid items-start gap-5 xl:grid-cols-[0.9fr_1.1fr]"
   >
     <section
+      ref="filePreviewRegion"
+      tabindex="-1"
+      data-file-preview-region
       class="work-card overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
     >
       <div
         class="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800"
       >
         <div>
-          <p
-            class="text-sm font-bold uppercase tracking-[0.16em] text-slate-400"
-          >
-            File preview
-          </p>
           <h3 class="mt-1 text-sm font-black text-slate-900 dark:text-white">
-            Ֆայլի դիտում
+            {{ $t('file_details.preview') }}
           </h3>
         </div>
         <button
-          v-if="previewUrl && canDownload"
+          v-if="(previewFile || previewUrl) && canDownload"
           type="button"
           class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-500 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-          @click="$emit('close-preview')"
+          @click="closePreview"
         >
           Փակել
         </button>
@@ -58,6 +56,14 @@
           </p>
         </div>
 
+        <FilePreview
+          v-else-if="previewFile"
+          :file="previewFile"
+          :order-id="details.id"
+          show-download
+          @download="$emit('download-file', $event)"
+          @close="closePreview"
+        />
         <div
           v-else-if="previewUrl"
           class="min-h-[320px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/40"
@@ -312,10 +318,14 @@
                       class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400"
                     >
                       <span>Քանակ՝ {{ selectedQuantity(file) }}</span
-                      ><span v-if="file.material_type"
-                        >Նյութ՝ {{ file.material_type }}</span
-                      ><span v-if="file.thickness"
-                        >Հաստ՝ {{ file.thickness }}</span
+                      ><span v-if="fileAttribute(file, 'material_type')"
+                        >Նյութ՝ {{ fileAttribute(file, 'material_type') }}</span
+                      ><span
+                        v-if="
+                          fileAttribute(file, 'thickness') !== null &&
+                          fileAttribute(file, 'thickness') !== undefined
+                        "
+                        >Հաստ՝ {{ fileAttribute(file, 'thickness') }}</span
                       >
                     </div>
                     <FileProductionAttributes :file="file" />
@@ -324,7 +334,7 @@
                     <button
                       type="button"
                       class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                      @click="$emit('view-file', file)"
+                      @click="openFile(file)"
                     >
                       Դիտել
                     </button>
@@ -376,10 +386,13 @@ import TaskChangeRequestPanel from '@/components/order/TaskChangeRequestPanel.vu
 import TaskFileVersions from '@/components/order/TaskFileVersions.vue'
 import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
+import FilePreview from '@/components/File/FilePreview.vue'
+import { fileAttribute } from '@/utils/file-production-details'
 
 export default {
   name: 'ProductionOrderDetailsPanel',
   components: {
+    FilePreview,
     FileProductionAttributes,
     DxfViewerModal,
     TaskCompletionProof,
@@ -391,7 +404,27 @@ export default {
     previewUrl: { type: String, default: '' },
     mode: { type: String, default: 'factory' },
   },
+  data: () => ({ activePreviewFile: null }),
   computed: {
+    previewFile() {
+      if (this.activePreviewFile) return this.activePreviewFile
+      if (!this.previewUrl) return null
+      const files = this.factoryOrders.flatMap((step) => step.files || [])
+      const raw = decodeURIComponent(String(this.previewUrl).split('?')[0])
+      const id = raw.match(/\/pmp\/(\d+)$/)?.[1]
+      const revision = raw.match(/\/task-revisions\/(\d+)$/)?.[1]
+      return (
+        files.find((file) =>
+          id
+            ? Number(file.id) === Number(id)
+            : revision
+            ? Number(
+                file.task_file_revision_id || file.pivot?.task_file_revision_id
+              ) === Number(revision)
+            : file.path && (raw === file.path || raw.endsWith('/' + file.path))
+        ) || null
+      )
+    },
     canDownload() {
       return this.$can('factory.download')
     },
@@ -463,11 +496,31 @@ export default {
       return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300'
     },
   },
+  watch: {
+    'details.id'() {
+      this.activePreviewFile = null
+    },
+    previewUrl(value, previous) {
+      if (!value && previous) this.activePreviewFile = null
+    },
+  },
   methods: {
+    fileAttribute,
+    openFile(file) {
+      this.activePreviewFile = file
+      this.$emit('view-file', file)
+      this.$nextTick(() => {
+        const region = this.$refs.filePreviewRegion
+        region?.scrollIntoView?.({ block: 'start', behavior: 'auto' })
+        region?.focus?.({ preventScroll: true })
+      })
+    },
+    closePreview() {
+      this.activePreviewFile = null
+      this.$emit('close-preview')
+    },
     selectedQuantity(file) {
-      if (this.details?.link_existing_files)
-        return file?.pivot?.quantity ?? file?.quantity ?? '—'
-      return file?.quantity ?? '—'
+      return fileAttribute(file, 'quantity') ?? '—'
     },
     statusLabel(status) {
       const value = String(status || '').toLowerCase()

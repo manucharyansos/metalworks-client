@@ -107,6 +107,7 @@ import CompanySelector from '@/components/layout/CompanySelector.vue'
 import WorkspaceTransition from '@/components/layout/WorkspaceTransition.vue'
 import NotificationBell from '@/components/layout/NotificationBell.vue'
 import WorkspaceSettingsIcon from '@/components/layout/WorkspaceSettingsIcon.vue'
+import { workshopKind, workshopPage } from '@/utils/workshop-catalog'
 
 export default {
   name: 'FactoryLayout',
@@ -119,6 +120,7 @@ export default {
     roleName() { return this.currentUser?.role?.name || this.currentUser?.role || '' },
     dashboardPath() {
       if (!this.$can('factory.view')) return '/profile'
+      if (workshopKind(this.currentUser.factory)) return workshopPage(this.currentUser.factory, 'factory').path
       if (this.roleName === 'bend') return '/factory/bend'
       if (this.roleName === 'laser') return '/factory/laser'
       if (this.currentUser.factory_id) return '/factory/workspace'

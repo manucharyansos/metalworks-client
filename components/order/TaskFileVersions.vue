@@ -30,13 +30,14 @@
       </p>
       <div v-if="!file.versions.length" class="flex flex-wrap gap-3 text-sm">
         <span>{{ t.originalVersion }} · v1</span>
-        <a
-          :href="$getPmpFileUrl(file)"
-          target="_blank"
-          rel="noopener"
+        <button
+          type="button"
           class="text-blue-600 underline"
-          >{{ t.view }}</a
+          data-preview-file-version
+          @click="preview(file)"
         >
+          {{ t.view }}
+        </button>
         <a :href="$getPmpFileUrl(file, true)" class="text-blue-600 underline">{{
           t.download
         }}</a>
@@ -66,13 +67,14 @@
             {{ version.note }}
           </p>
           <div class="mt-2 flex flex-wrap items-center gap-3">
-            <a
-              :href="$getTaskRevisionUrl(version.id)"
-              target="_blank"
-              rel="noopener"
+            <button
+              type="button"
               class="text-blue-600 underline"
-              >{{ t.view }}</a
+              data-preview-file-version
+              @click="preview(file, version)"
             >
+              {{ t.view }}
+            </button>
             <a
               :href="$getTaskRevisionUrl(version.id, true)"
               class="text-blue-600 underline"
@@ -133,15 +135,26 @@
         </button>
       </div>
     </article>
+    <FilePreviewModal
+      v-if="previewFile"
+      :file="previewFile"
+      :order-id="order.id"
+      show-download
+      @close="previewFile = null"
+      @download="downloadPreview"
+    />
   </details>
 </template>
 
 <script>
+import FilePreviewModal from '@/components/File/FilePreviewModal.vue'
 import { canManageTask } from '@/utils/task-routing'
 import { apiErrorMessage, taskCopy } from '@/utils/task-workflow'
 export default {
+  components: { FilePreviewModal },
   props: { order: { type: Object, required: true }, disabled: Boolean },
   data: () => ({
+    previewFile: null,
     files: [],
     uploads: {},
     notes: {},
@@ -176,6 +189,7 @@ export default {
   watch: {
     scopeKey() {
       this.requestVersion++
+      this.previewFile = null
       this.files = []
       this.uploads = {}
       this.notes = {}
@@ -190,6 +204,24 @@ export default {
     this.requestVersion++
   },
   methods: {
+    preview(file, version) {
+      this.previewFile = {
+        ...file,
+        original_name: version?.original_name || file.original_name,
+        task_file_revision_id:
+          version?.id || file.task_file_revision_id || null,
+      }
+    },
+    async downloadPreview(file) {
+      try {
+        await this.$store.dispatch('factory/downloadUploadedFile', file)
+      } catch (_) {
+        this.$notify?.({
+          text: this.$t('file_details.download_failed'),
+          type: 'error',
+        })
+      }
+    },
     extension(file) {
       const name = file.original_name || ''
       return name.includes('.') ? `.${name.split('.').pop().toLowerCase()}` : ''

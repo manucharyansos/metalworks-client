@@ -149,3 +149,61 @@ test('late category deletion cannot remove a new company’s section or reset it
   assert.equal(vm.draft.name, 'New draft')
   vm.$destroy()
 })
+
+test('six production identities distinguish tube and sheet cutting and preserve custom workshops', () => {
+  const { workshopKind, workshopPage, productionWorkshopOptions } = load('utils/workshop-catalog.js')
+  const rows = [
+    { id: 1, value: 'DXF', name: 'Custom sheet name' },
+    { id: 2, value: 'IQS', name: 'Custom tube name' },
+    { id: 3, value: 'DLD' }, { id: 4, value: 'WELD' },
+    { id: 5, value: 'ROLL' }, { id: 6, value: 'POWDER' },
+  ]
+  assert.deepEqual(rows.map(workshopKind), ['laser-sheets', 'laser-tubes', 'bend', 'welding', 'rolling', 'powder'])
+  assert.deepEqual(productionWorkshopOptions(rows).map(row => row.operation), ['cutting', 'cutting', 'bending', 'welding', 'rolling', 'powder'])
+  assert.deepEqual(workshopPage(rows[1]), { path: '/manager/factories/laser-tubes', query: { factory_id: '2' } })
+  assert.deepEqual(workshopPage(rows[4], 'admin'), { path: '/admin/factories/rolling', query: { factory_id: '5' } })
+  assert.deepEqual(workshopPage(rows[3], 'factory'), { path: '/factory/welding' })
+  assert.deepEqual(workshopPage({ id: 40, value: 'WORK_CUSTOM', name: 'Assembly' }), { path: '/manager/factories/workspace', query: { factory_id: '40' } })
+  assert.equal(workshopKind({ id: 4, value: 'WORK_EXISTING', name: 'Զոդում' }), 'welding')
+  assert.equal(workshopKind({ id: 5, value: 'WORK_EXISTING', name: 'Вальцовка' }), 'rolling')
+  assert.equal(workshopKind({ id: 6, value: 'INFO', name: 'Laser cutting' }), null)
+})
+
+test('each management page selects only its real active production workshop', () => {
+  const rows = ['DXF', 'IQS', 'DLD', 'WELD', 'ROLL', 'POWDER'].map((value, index) => ({ id: index+1, value, is_workshop: true, is_active: true }))
+  const kinds = ['laser-sheets', 'laser-tubes', 'bend', 'welding', 'rolling', 'powder']
+  for (const [index, kind] of kinds.entries()) {
+    const vm = component('components/manager/FactoryOrdersManager.vue', { propsData: { kind }, state: { factories: rows } })
+    assert.deepEqual(vm.matchingFactories.map(row => row.id), [index+1], kind)
+    assert.ok(vm.title && vm.helpText)
+    assert.equal(vm.matchesKind({ ...rows[index], is_active: false }), false)
+    assert.equal(vm.matchesKind({ ...rows[index], is_workshop: false }), false)
+    vm.$destroy()
+  }
+  const vm = component('components/manager/FactoryOrdersManager.vue', { propsData: { kind: 'laser' }, state: { factories: rows } })
+  assert.deepEqual(vm.matchingFactories.map(row => row.id), [1, 2], 'legacy combined laser page remains compatible')
+  vm.$destroy()
+})
+
+test('all named production pages exist for admin manager and operator and reject unknown page names', () => {
+  const kinds = ['laser-sheets', 'laser-tubes', 'bend', 'welding', 'rolling', 'powder']
+  for (const file of ['pages/admin/factories/_kind.vue', 'pages/manager/factories/_kind.vue', 'pages/factory/_kind.vue']) {
+    const page = load(file).default
+    for (const kind of kinds) assert.equal(page.validate({ params: { kind } }), true, file+': '+kind)
+    assert.equal(page.validate({ params: { kind: 'not-a-workshop' } }), false)
+  }
+})
+
+test('an operator visiting another named workshop is redirected to their own production page', () => {
+  const guard = load('middleware/workshop-workspace.js').default
+  const user = { id: 7, factory_id: 4, factory: { id: 4, value: 'WELD', name: 'Զոդում' } }
+  const redirects = []
+  const app = { $auth: { user }, localePath: value => ({ ...value, path: '/ru'+value.path }) }
+  guard({ app, route: { params: { kind: 'welding' } }, redirect: value => redirects.push(value) })
+  assert.equal(redirects.length, 0)
+  guard({ app, route: { params: { kind: 'rolling' } }, redirect: value => redirects.push(value) })
+  assert.deepEqual(redirects, [{ path: '/ru/factory/welding' }])
+  user.factory = null
+  guard({ app, route: { params: { kind: 'rolling' } }, redirect: value => redirects.push(value) })
+  assert.deepEqual(redirects[1], { path: '/ru/factory/workspace' })
+})
