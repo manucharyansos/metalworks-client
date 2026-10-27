@@ -3,6 +3,9 @@
     class="work-production-detail grid items-start gap-5 xl:grid-cols-[0.9fr_1.1fr]"
   >
     <section
+      ref="filePreviewRegion"
+      tabindex="-1"
+      data-file-preview-region
       class="work-card overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
     >
       <div
@@ -506,6 +509,11 @@ export default {
     openFile(file) {
       this.activePreviewFile = file
       this.$emit('view-file', file)
+      this.$nextTick(() => {
+        const region = this.$refs.filePreviewRegion
+        region?.scrollIntoView?.({ block: 'start', behavior: 'auto' })
+        region?.focus?.({ preventScroll: true })
+      })
     },
     closePreview() {
       this.activePreviewFile = null

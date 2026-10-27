@@ -194,3 +194,20 @@ test('closing a 3D viewport releases its resources without forcing native contex
   assert.equal(vm.viewport, null)
   assert.deepEqual(calls, ['controls', 'geometry', 'material', 'renderer'])
 })
+
+test('bending and generic workshop task links open assigned work and discard old company responses', async () => {
+  for (const name of ['pages/factory/bend/index.vue', 'components/factory/FactoryOrdersBoard.vue']) {
+    const open = load(name).default.methods.openNotificationTask
+    const shown = [], task = { id: 20, factory_orders: [{ id: 9, factory_id: 4 }] }
+    const vm = { $route: { query: { order: '20' } }, currentFactoryId: 4, $auth: { user: { id: 7, company: { id: 1 } } }, getOrderByFactories: { orders: [task] }, toggleDetails: value => shown.push(value) }
+    await open.call(vm)
+    assert.deepEqual(shown, [task], name)
+    vm.getOrderByFactories.orders = []
+    let finish
+    vm.$axios = { get: () => new Promise(resolve => { finish = resolve }) }
+    const pending = open.call(vm)
+    vm.$auth.user.company.id = 2
+    finish({ data: { orders: [task] } }); await pending
+    assert.equal(shown.length, 1, 'a previous company task cannot open after changing company')
+  }
+})
