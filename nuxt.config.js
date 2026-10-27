@@ -186,6 +186,18 @@ export default {
 
   generate: {
     fallback: true,
+    routes: ['', '/ru', '/en'].flatMap((locale) =>
+      ['admin/factories', 'manager/factories', 'factory'].flatMap((section) =>
+        [
+          'laser-sheets',
+          'laser-tubes',
+          'bend',
+          'welding',
+          'rolling',
+          'powder',
+        ].map((kind) => `${locale}/${section}/${kind}`)
+      )
+    ),
   },
 
   hooks: {

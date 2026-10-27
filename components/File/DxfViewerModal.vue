@@ -124,11 +124,14 @@ export default {
       error: null,
       raf: null,
       laserLengthMm: 0,
+      loadRequest: 0,
     }
   },
   computed: {
     locale() {
-      const code = String(this.$i18n?.locale || 'hy').toLowerCase().split('-')[0]
+      const code = String(this.$i18n?.locale || 'hy')
+        .toLowerCase()
+        .split('-')[0]
       return ['hy', 'ru', 'en'].includes(code) ? code : 'hy'
     },
     t() {
@@ -159,11 +162,11 @@ export default {
     },
   },
   mounted() {
-    this.initThree()
     this.loadDxfFile()
     window.addEventListener('resize', this.onResize)
   },
   beforeDestroy() {
+    ++this.loadRequest
     window.removeEventListener('resize', this.onResize)
     this.cleanupThree()
   },
@@ -237,7 +240,8 @@ export default {
       this.scene.add(new THREE.AmbientLight(0xffffff, 1))
 
       const animate = () => {
-        if (!this.renderer || !this.scene || !this.camera || !this.controls) return
+        if (!this.renderer || !this.scene || !this.camera || !this.controls)
+          return
         this.raf = requestAnimationFrame(animate)
         this.controls.update()
         this.renderer.render(this.scene, this.camera)
@@ -283,19 +287,27 @@ export default {
     },
 
     async loadDxfFile() {
+      const request = ++this.loadRequest
+      const current = () =>
+        request === this.loadRequest &&
+        !this._isDestroyed &&
+        !this._isBeingDestroyed
       const secureUrl = this.resolveSecureUrl()
       if (!secureUrl) return
 
       try {
         this.error = null
         this.cleanupThree()
-        this.$nextTick(() => this.initThree())
+        await this.$nextTick()
+        if (!current()) return
+        this.initThree()
         this.laserLengthMm = 0
 
         const response = await this.$axios.get(secureUrl, {
           responseType: 'text',
           transformResponse: [(data) => data],
         })
+        if (!current()) return
 
         if (response.status !== 200) throw new Error(`HTTP ${response.status}`)
 
@@ -303,9 +315,11 @@ export default {
         if (!dxfText.trim()) throw new Error(this.t.emptyFile)
 
         await this.$nextTick()
+        if (!current()) return
         if (!this.scene || !this.camera || !this.renderer) this.initThree()
         this.parseDxf(dxfText)
       } catch (e) {
+        if (!current()) return
         console.error(e)
         this.error = e?.response?.data?.message || e.message || this.t.loadError
         this.$notify?.({ text: this.error, type: 'error', duration: 4000 })

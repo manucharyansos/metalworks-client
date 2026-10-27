@@ -21,6 +21,7 @@ async function component(file, render = false) {
   const parsed = compiler.parseComponent(read(file))
   const source = parsed.script.content.replace(/import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g, (_, names, specifier) => {
     if (specifier === '@/utils/workspace-route') return `import ${names} from '${routeUrl}'`
+    if (specifier === '@/utils/workshop-catalog') return `import ${names} from '${catalogUrl}'`
     if (specifier === '~/config/workspace-brands') return `import ${names} from '${brandsUrl}'`
     if (specifier === '~/utils/company-copy') return `import ${names} from '${companyCopyUrl}'`
     if (specifier === '~/utils/brand-logo') return `import ${names} from '${brandLogoUrl}'`
@@ -286,7 +287,7 @@ test('file picker starts with file sections and keeps selections when returning 
     ] } },
     factories: [{ id: 6, value: 'INFO', name: 'Information' }, { id: 3, value: 'DXF', name: 'Laser' }],
     remoteNumberId: 101, selectedFiles: [2], fileQuantities: { 2: 4 },
-  }, methods: { ...options.methods, $t: key => key, $formatDate: () => '' } })
+  }, methods: { ...options.methods, $t: key => key, $formatDate: () => '', $can: () => true } })
   const renderer = require('vue-server-renderer').createRenderer()
   const first = await renderer.renderToString(vm)
   assert.match(first, /Ընտրեք ֆայլերի բաժինը/)

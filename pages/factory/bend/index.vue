@@ -205,8 +205,8 @@ export default {
     Pagination,
   },
   layout: 'factory',
-  middleware: ['role-guard'],
-  meta: { role: 'bend' },
+  middleware: ['workshop-workspace'],
+  meta: { workshopKind: 'bend' },
   data() {
     return {
       searchable: '',

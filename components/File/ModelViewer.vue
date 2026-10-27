@@ -409,6 +409,8 @@ export default {
     disposeViewport() {
       const view = this.viewport
       if (!view) return
+      // Detach first: cleanup events must not render a disposed viewport.
+      this.viewport = null
       view.controls?.dispose()
       view.scene.traverse((object) => {
         object.geometry?.dispose()
@@ -418,8 +420,8 @@ export default {
         materials.forEach((material) => material?.dispose())
       })
       view.renderer.dispose()
-      view.renderer.forceContextLoss()
-      this.viewport = null
+      // Removing the canvas releases its context. Forcing context loss during
+      // a modal's click handler can block input in some graphics drivers.
     },
     createControls() {
       const view = this.viewport

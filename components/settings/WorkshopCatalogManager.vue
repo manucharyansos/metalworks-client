@@ -173,12 +173,7 @@
           </button>
           <nuxt-link
             v-if="!categories"
-            :to="
-              localePath({
-                path: `/${managerRole}/factories/workspace`,
-                query: { factory_id: String(item.id) },
-              })
-            "
+            :to="localePath(workshopPage(item, managerRole))"
             class="block rounded-lg px-2 py-2 text-indigo-700 dark:text-indigo-300"
             >{{ t.open }} →</nuxt-link
           >
@@ -195,7 +190,7 @@
   </main>
 </template>
 <script>
-import { catalogText } from '@/utils/workshop-catalog'
+import { catalogText, workshopPage } from '@/utils/workshop-catalog'
 import { apiErrorMessage } from '@/utils/task-workflow'
 const blank = () => ({
   id: null,
@@ -257,6 +252,7 @@ export default {
     this.requestVersion++
   },
   methods: {
+    workshopPage,
     reset() {
       this.draft = blank()
       this.error = ''

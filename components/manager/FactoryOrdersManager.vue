@@ -252,7 +252,9 @@
       @click.self="isDetailsOpen = false"
     >
       <div
-data-work-modal role="dialog" aria-modal="true"
+        data-work-modal
+        role="dialog"
+        aria-modal="true"
         class="work-modal relative max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-[28px] bg-white p-5 shadow-2xl dark:bg-slate-900 sm:p-7"
       >
         <button
@@ -288,6 +290,7 @@ import OrderActionModal from '@/components/factory/OrderActionModal.vue'
 import { localFactoryDate } from '@/utils/factory-order-status'
 import LaserOrderDetailsPanel from '@/components/factory/laser/LaserOrderDetailsPanel.vue'
 import BendOrderDetailsPanel from '@/components/factory/bend/BendOrderDetailsPanel.vue'
+import { isWorkshop, workshopKind } from '@/utils/workshop-catalog'
 import FactoryOrderDetailsPanel from '@/components/factory/FactoryOrderDetailsPanel.vue'
 import TaskRoutingPanel from '@/components/order/TaskRoutingPanel.vue'
 
@@ -320,11 +323,21 @@ const COPY = {
       laser: 'Լազերային կտրման կառավարում',
       bend: 'Կռման կառավարում',
       powder: 'Փոշեներկման կառավարում',
+      'laser-sheets': 'Լազերային կտրում՝ լիստեր',
+      'laser-tubes': 'Լազերային կտրում՝ խողովակներ',
+      welding: 'Զոդում',
+      rolling: 'Վալց',
     },
     help: {
       laser: 'Դիտեք և կառավարեք լազերային կտրման բոլոր բաց առաջադրանքները։',
       bend: 'Դիտեք և կառավարեք կռման բոլոր բաց առաջադրանքները։',
       powder: 'Դիտեք և կառավարեք փոշեներկման բոլոր բաց առաջադրանքները։',
+      'laser-sheets':
+        'Լիստերի կտրման առաջադրանքները, ֆայլերն ու արտադրական տվյալները։',
+      'laser-tubes':
+        'Խողովակների կտրման առաջադրանքները, ֆայլերն ու արտադրական տվյալները։',
+      welding: 'Զոդման առաջադրանքները, պատասխանատուներն ու ընթացքը։',
+      rolling: 'Վալցի առաջադրանքները, պատասխանատուներն ու ընթացքը։',
     },
     statuses: {
       confirmed: 'Կատարվում է',
@@ -364,6 +377,10 @@ const COPY = {
       laser: 'Управление лазерной резкой',
       bend: 'Управление гибкой',
       powder: 'Управление порошковой покраской',
+      'laser-sheets': 'Лазерная резка листов',
+      'laser-tubes': 'Лазерная резка труб',
+      welding: 'Сварка',
+      rolling: 'Вальцовка',
     },
     help: {
       laser:
@@ -371,6 +388,11 @@ const COPY = {
       bend: 'Просматривайте и управляйте всеми открытыми заказами на гибку.',
       powder:
         'Просматривайте и управляйте всеми открытыми заказами порошковой покраски.',
+      'laser-sheets':
+        'Задания на резку листов, файлы и производственные данные.',
+      'laser-tubes': 'Задания на резку труб, файлы и производственные данные.',
+      welding: 'Задания на сварку, ответственные и ход работ.',
+      rolling: 'Задания на вальцовку, ответственные и ход работ.',
     },
     statuses: {
       confirmed: 'В работе',
@@ -410,11 +432,19 @@ const COPY = {
       laser: 'Laser cutting management',
       bend: 'Bending management',
       powder: 'Powder coating management',
+      'laser-sheets': 'Laser cutting: sheets',
+      'laser-tubes': 'Laser cutting: tubes',
+      welding: 'Welding',
+      rolling: 'Rolling',
     },
     help: {
       laser: 'Review and manage all open laser cutting orders.',
       bend: 'Review and manage all open bending orders.',
       powder: 'Review and manage all open powder coating orders.',
+      'laser-sheets': 'Sheet cutting tasks, files and production details.',
+      'laser-tubes': 'Tube cutting tasks, files and production details.',
+      welding: 'Welding tasks, assigned operators and progress.',
+      rolling: 'Rolling tasks, assigned operators and progress.',
     },
     statuses: {
       confirmed: 'In progress',
@@ -480,7 +510,7 @@ export default {
       return this.t.help[this.kind] || ''
     },
     detailsComponent() {
-      return this.kind === 'laser'
+      return this.kind.startsWith('laser')
         ? 'LaserOrderDetailsPanel'
         : this.kind === 'bend'
         ? 'BendOrderDetailsPanel'
@@ -542,30 +572,12 @@ export default {
     },
     ...mapActions('factory', ['downloadUploadedFile']),
     matchesKind(factory) {
-      if (this.kind === 'all')
-        return factory.is_workshop !== false && factory.is_active !== false
-      const value = String(factory?.value || '').toUpperCase()
-      const name = String(factory?.name || '').toLowerCase()
-      if (this.kind === 'laser')
-        return (
-          ['DXF', 'IQS', 'LASER'].includes(value) ||
-          name.includes('laser') ||
-          name.includes('լազեր')
-        )
-      if (this.kind === 'bend')
-        return (
-          ['DLD', 'BEND'].includes(value) ||
-          name.includes('bend') ||
-          name.includes('կռ')
-        )
-      if (this.kind === 'powder')
-        return (
-          ['POWDER', 'PAINT'].includes(value) ||
-          name.includes('powder') ||
-          name.includes('paint') ||
-          name.includes('փոշ')
-        )
-      return false
+      if (!isWorkshop(factory)) return false
+      if (this.kind === 'all') return true
+      const kind = workshopKind(factory)
+      return this.kind === 'laser'
+        ? ['laser', 'laser-sheets', 'laser-tubes'].includes(kind)
+        : kind === this.kind
     },
     async loadFactories() {
       try {
