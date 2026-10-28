@@ -38,6 +38,9 @@ export const boardCopy = {
     nextPage: 'Հաջորդ էջ',
     perColumn: 'Յուրաքանչյուր սյունակում',
     shortCreated: 'Ստեղծված',
+    shortAccepted: 'Ընդունված',
+    shortCompleted: 'Ավարտված',
+    shortRejected: 'Մերժված',
     created: 'Ստեղծված առաջադրանքներ',
     accepted: 'Ընդունված',
     in_progress: 'Կատարվում է',
@@ -71,6 +74,9 @@ export const boardCopy = {
     nextPage: 'Следующая страница',
     perColumn: 'В каждой колонке',
     shortCreated: 'Создано',
+    shortAccepted: 'Принято',
+    shortCompleted: 'Завершено',
+    shortRejected: 'Отклонено',
     created: 'Созданные задания',
     accepted: 'Принятые',
     in_progress: 'В работе',
@@ -104,6 +110,9 @@ export const boardCopy = {
     nextPage: 'Next page',
     perColumn: 'Per column',
     shortCreated: 'Created',
+    shortAccepted: 'Accepted',
+    shortCompleted: 'Completed',
+    shortRejected: 'Rejected',
     created: 'Created tasks',
     accepted: 'Accepted',
     in_progress: 'In progress',
@@ -233,18 +242,47 @@ export function factoryBoardColumns(
   }))
 }
 
+// Badge text for one task or job. The board copy without the "short" prefix
+// holds the plural column headings ("Created tasks", "Принятые").
+export function taskStageText(stage, locale = 'hy') {
+  const t = boardCopy[locale] || boardCopy.hy
+  return (
+    {
+      created: t.shortCreated,
+      accepted: t.shortAccepted,
+      in_progress: t.in_progress,
+      completed: t.shortCompleted,
+      rejected: t.shortRejected,
+    }[stage] || stage
+  )
+}
+
+// Raw task status from the API (pending, confirmed, completed …) as a label.
+export function taskStatusText(status, locale = 'hy') {
+  const key = String(status || 'pending').toLowerCase()
+  if (['pending', 'waiting', 'created', 'null'].includes(key))
+    return taskStageText('created', locale)
+  if (key === 'accepted') return taskStageText('accepted', locale)
+  if (['confirmed', 'in_progress', 'date_changed'].includes(key))
+    return taskStageText('in_progress', locale)
+  if (['completed', 'finished', 'done'].includes(key))
+    return taskStageText('completed', locale)
+  if (['canceled', 'cancelled', 'rejected'].includes(key))
+    return taskStageText('rejected', locale)
+  return status
+}
+
 export function stepStatusText(step, locale = 'hy') {
   const t = boardCopy[locale] || boardCopy.hy
   if (step?.awaiting_engineer_confirmation) return t.review
   if (isStepCompleted(step)) return t.finished
-  if (isStepRejected(step)) return t.rejected
+  if (isStepRejected(step)) return taskStageText('rejected', locale)
   const column = boardColumnForStep(step)
-  // A single job is "Created"; t.created is the plural column heading.
   return column === 'null'
-    ? t.shortCreated
+    ? taskStageText('created', locale)
     : column === 'confirmed'
-    ? t.in_progress
+    ? taskStageText('in_progress', locale)
     : column === 'accepted'
-    ? t.accepted
+    ? taskStageText('accepted', locale)
     : column
 }

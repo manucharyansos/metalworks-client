@@ -2,8 +2,9 @@ import part1 from '~/utils/ui-i18n-extended-data-1'
 import part2 from '~/utils/ui-i18n-extended-data-2'
 import part3 from '~/utils/ui-i18n-extended-data-3'
 import part4 from '~/utils/ui-i18n-extended-data-4'
+import part5 from '~/utils/ui-i18n-extended-data-5'
 
-const entries = [...part1, ...part2, ...part3, ...part4]
+const entries = [...part1, ...part2, ...part3, ...part4, ...part5]
 const LOCALE_INDEX = { hy: 0, ru: 1, en: 2 }
 // Armenian letters only; Armenian punctuation (՝ ։) is handled separately.
 const ARMENIAN_LETTER = /[Ա-Ֆա-և]/
@@ -103,6 +104,40 @@ function translateDynamic(trimmed, locale) {
   match = trimmed.match(/^Ձեր առաջադրանքը \(#(.+)\) հաջողությամբ տեղադրվել է[:։]$/)
   if (match) return pick(trimmed, `Ваше задание (#${match[1]}) успешно размещено.`, `Your task (#${match[1]}) was placed successfully.`)
 
+  // Messages composed by the API (task history and validation details).
+  if (idx === 0) return null
+  const tr = (value) => translateTrimmed(String(value).trim(), locale)
+
+  match = trimmed.match(/^Առաջադրանքը թարմացվել է \((.+)\)$/)
+  if (match) return pick(trimmed, `Задание обновлено (${match[1]})`, `Task updated (${match[1]})`)
+
+  match = trimmed.match(/^Ֆայլի տեսակը թույլատրված չէ։ Թույլատրելի են՝\s*(.*)$/)
+  if (match) return pick(trimmed, `Тип файла не разрешён. Разрешены: ${match[1]}`, `This file type is not allowed. Allowed: ${match[1]}`)
+
+  match = trimmed.match(/^Ինժեները վերադարձրել է աշխատանքը վերանայման՝\s*(.*)$/)
+  if (match) return pick(trimmed, `Инженер вернул работу на доработку: ${match[1]}`, `The engineer returned the work for revision: ${match[1]}`)
+
+  match = trimmed.match(/^Արտադրամաս «(.+?)»․ ավելացվել է (\d+) ֆայլով աշխատանք։$/)
+  if (match) return pick(trimmed, `Цех «${tr(match[1])}»: добавлена работа (${match[2]} ${ruPlural(match[2], 'файл', 'файла', 'файлов')}).`, `Workshop “${tr(match[1])}”: added a job with ${match[2]} ${enPlural(match[2], 'file', 'files')}.`)
+
+  match = trimmed.match(/^Արտադրամաս «(.+?)»․ կատարող «(.+?)» → «(.+?)»$/)
+  if (match) return pick(trimmed, `Цех «${tr(match[1])}»: исполнитель «${tr(match[2])}» → «${tr(match[3])}»`, `Workshop “${tr(match[1])}”: operator “${tr(match[2])}” → “${tr(match[3])}”`)
+
+  match = trimmed.match(/^Արտադրամաս «(.+?)»․ (.+?)՝ սպասում է ինժեների համաձայնությանը։$/)
+  if (match) return pick(trimmed, `Цех «${tr(match[1])}»: ${tr(match[2])} — ожидает согласия инженера.`, `Workshop “${tr(match[1])}”: ${tr(match[2])} — waiting for the engineer’s consent.`)
+
+  match = trimmed.match(/^Արտադրամաս «(.+?)»․ (.+?)՝ հարցումը հետ է վերցվել։$/)
+  if (match) return pick(trimmed, `Цех «${tr(match[1])}»: ${tr(match[2])} — запрос отозван.`, `Workshop “${tr(match[1])}”: ${tr(match[2])} — request withdrawn.`)
+
+  match = trimmed.match(/^Արտադրամաս «(.+?)»․ (.+?)՝ (ինժեները համաձայնել է|ինժեները մերժել է)։$/)
+  if (match) return pick(trimmed, `Цех «${tr(match[1])}»: ${tr(match[2])} — ${tr(match[3])}.`, `Workshop “${tr(match[1])}”: ${tr(match[2])} — ${tr(match[3])}.`)
+
+  match = trimmed.match(/^Արտադրամաս «(.+?)»․ (.+?) → (.+)$/)
+  if (match) return pick(trimmed, `Цех «${tr(match[1])}»: ${tr(match[2])} → ${tr(match[3])}`, `Workshop “${tr(match[1])}”: ${tr(match[2])} → ${tr(match[3])}`)
+
+  match = trimmed.match(/^Ֆայլ «(.+?)»․ գործող տարբերակը՝ (\d+)։$/)
+  if (match) return pick(trimmed, `Файл «${match[1]}»: текущая версия — ${match[2]}.`, `File “${match[1]}”: current version is ${match[2]}.`)
+
   match = trimmed.match(/^(\d+)\s+ակտիվ ֆիլտր(?:եր)?$/)
   if (match) return pick(trimmed, `${match[1]} активных фильтров`, `${match[1]} active filters`)
 
@@ -172,9 +207,9 @@ function translateSegments(trimmed, locale) {
   return null
 }
 
-// "· Էջ 2 / 5" or "| Ցուցադրվում է՝" – a separator left from a split template.
+// "· Էջ 2 / 5", "| Ցուցադրվում է՝" or a numbered stage such as "1. Կռում".
 function translateLeadingSeparator(trimmed, locale) {
-  const match = trimmed.match(/^([|·•])\s+(\S[\s\S]*)$/)
+  const match = trimmed.match(/^([|·•]|\d{1,3}\.)\s+(\S[\s\S]*)$/)
   if (!match) return null
   const rest = translateTrimmed(match[2], locale)
   return rest === match[2] ? null : `${match[1]} ${rest}`
@@ -219,15 +254,11 @@ function translateTrimmed(trimmed, locale) {
 
 export function translateValue(source, locale = currentLocale) {
   if (typeof source !== 'string' || !source.trim()) return source
-  const normalizedLocale = normalizeLocale(locale)
-  const trimmed = source.trim()
-  const translated = translateTrimmed(trimmed, normalizedLocale)
-  if (translated !== trimmed) return preserveWhitespace(source, translated)
-  // Multi-line template text keeps its indentation; look it up as one line.
-  const collapsed = trimmed.replace(/\s+/g, ' ')
-  if (collapsed === trimmed) return source
-  const fromCollapsed = translateTrimmed(collapsed, normalizedLocale)
-  return fromCollapsed === collapsed ? source : preserveWhitespace(source, fromCollapsed)
+  // Template text often spans lines ("name ·\n  role"). Match it as the
+  // browser shows it, on one line; untranslated text keeps its formatting.
+  const collapsed = source.trim().replace(/\s+/g, ' ')
+  const translated = translateTrimmed(collapsed, normalizeLocale(locale))
+  return translated === collapsed ? source : preserveWhitespace(source, translated)
 }
 
 function shouldSkip(element) {

@@ -149,6 +149,7 @@ import {
   boardCopy,
   stepStatusText,
   taskStage,
+  taskStageText,
   workshopSteps,
 } from '@/utils/task-board'
 import { routingCopy } from '@/utils/task-routing'
@@ -239,9 +240,10 @@ export default {
         return this.t.requestAnswerNeeded
       if (this.steps.some((step) => step.awaiting_engineer_confirmation))
         return this.boardText.review
-      if (this.allRejected) return this.boardText.rejected
-      if (this.stage === 'created') return this.boardText.shortCreated
-      return this.boardText[this.stage]
+      return taskStageText(
+        this.allRejected ? 'rejected' : this.stage,
+        this.$i18n?.locale
+      )
     },
     overallStatusClass() {
       if (this.needsAnswer) return 'bg-amber-600'

@@ -67,6 +67,8 @@ test('Armenian punctuation, leading separators and multi-line template text', ()
   assert.equal(translateValue('Առաջադրանքը հասանելի չէ։', 'en'), 'The task is not available.')
   assert.equal(translateValue('Առաջադրանքը հասանելի չէ։', 'ru'), 'Задание недоступно.')
   assert.equal(translateValue('· Էջ 2 / 5', 'en'), '· Page 2 of 5')
+  assert.equal(translateValue('1. Լազերային կտրում՝ լիստեր', 'ru'), '1. Лазерная резка: листы')
+  assert.equal(translateValue('1. Լազերային կտրում՝ լիստեր', 'hy'), '1. Լազերային կտրում՝ լիստեր')
   assert.equal(translateValue('| Ցուցադրվում է՝', 'en'), '| Showing:')
   assert.equal(translateValue('Ընդհանուր՝', 'en'), 'Total:')
   const multiline =
@@ -75,6 +77,9 @@ test('Armenian punctuation, leading separators and multi-line template text', ()
     '        ֆայլը պահվում է UTF‑8 BOM ձևաչափով։\n      '
   assert.match(translateValue(multiline, 'en'), /^\n\s+The CSV export includes the entire filtered result/)
   assert.equal(translateValue(multiline, 'hy'), multiline)
+  const workshopAndRole = '\n                Լազերային կտրում՝ լիստեր ·\n                Լազերաին կտրում\n              '
+  assert.equal(translateValue(workshopAndRole, 'en').trim(), 'Laser cutting: sheets · Laser cutting')
+  assert.equal(translateValue(workshopAndRole, 'hy'), workshopAndRole)
 })
 
 test('task terminology is consistent in Russian and English', () => {
@@ -100,4 +105,15 @@ test('every dictionary row has three non-empty translations', () => {
       )
     }
   }
+})
+
+test('task history and validation messages written by the API are translated', () => {
+  assert.equal(translateValue('Արտադրամաս «Կռում»․ ավելացվել է 1 ֆայլով աշխատանք։', 'ru'), 'Цех «Гибка»: добавлена работа (1 файл).')
+  assert.equal(translateValue('Արտադրամաս «Կռում»․ ավելացվել է 3 ֆայլով աշխատանք։', 'en'), 'Workshop “Bending”: added a job with 3 files.')
+  assert.equal(translateValue('Արտադրամաս «Կռում»․ կատարող «Չնշանակված» → «Hamlet»', 'en'), 'Workshop “Bending”: operator “Unassigned” → “Hamlet”')
+  assert.equal(translateValue('Արտադրամաս «Կռում»․ ժամկետի փոփոխության հարցում՝ ինժեները համաձայնել է։', 'en'), 'Workshop “Bending”: deadline change request — the engineer agreed.')
+  assert.equal(translateValue('Ինժեները վերադարձրել է աշխատանքը վերանայման՝ Փոխել անցքը', 'ru'), 'Инженер вернул работу на доработку: Փոխել անցքը')
+  assert.equal(translateValue('Ֆայլի տեսակը թույլատրված չէ։ Թույլատրելի են՝ dxf, pdf', 'en'), 'This file type is not allowed. Allowed: dxf, pdf')
+  assert.equal(translateValue('Հաստատման կոդը սխալ է։', 'ru'), 'Неверный код подтверждения.')
+  assert.equal(translateValue('Արտադրամաս «Կռում»․ ավելացվել է 1 ֆայլով աշխատանք։', 'hy'), 'Արտադրամաս «Կռում»․ ավելացվել է 1 ֆայլով աշխատանք։')
 })

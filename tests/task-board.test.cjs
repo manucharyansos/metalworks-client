@@ -133,3 +133,19 @@ test('reopening and accepting notifications are readable in all three interface 
     assert.doesNotMatch(result.text, /\{\w+\}/)
   }
 })
+
+test('single task and job badges use singular status labels, while columns keep plural headings', () => {
+  const { taskStageText, taskStatusText } = load('utils/task-board.js')
+  assert.equal(taskStageText('created', 'ru'), 'Создано')
+  assert.equal(taskStageText('accepted', 'ru'), 'Принято')
+  assert.equal(taskStageText('completed', 'ru'), 'Завершено')
+  assert.equal(taskStageText('rejected', 'ru'), 'Отклонено')
+  assert.equal(taskStageText('in_progress', 'en'), 'In progress')
+  assert.equal(stepStatusText(step(null)), boardCopy.hy.shortCreated)
+  assert.equal(stepStatusText(step('accepted'), 'ru'), 'Принято')
+  assert.equal(stepStatusText(step('canceled'), 'en'), 'Rejected')
+  for (const [raw, expected] of [['pending', 'Created'], [null, 'Created'], ['confirmed', 'In progress'], ['completed', 'Completed'], ['canceled', 'Rejected'], ['custom_status', 'custom_status']]) {
+    assert.equal(taskStatusText(raw, 'en'), expected)
+  }
+  assert.equal(factoryBoardColumns([], 1, [], 'ru')[0].label, boardCopy.ru.created)
+})

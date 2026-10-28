@@ -68,6 +68,17 @@ export default [
 ['Հաստ', 'Толщина', 'Thickness'],
 ['Կատարող', 'Исполнитель', 'Operator'],
 ['DXF ֆայլը բեռնելիս սխալ', 'Ошибка при загрузке DXF-файла', 'Error loading the DXF file'],
+['Ժամկետը փոխված է', 'Срок изменён', 'Deadline changed'],
+// Operator actions seeded in factory_order_statuses.
+['Ընդունել', 'Принять', 'Accept'],
+['Սկսել', 'Начать', 'Start'],
+['Մերժել', 'Отклонить', 'Reject'],
+['Կատարման ժամկետի փոխարինում', 'Изменить срок выполнения', 'Change the deadline'],
+// Request names used inside the task history written by the API.
+['մերժման հարցում', 'запрос на отказ', 'rejection request'],
+['աշխատանքը վերաբացելու հարցում', 'запрос на возобновление работы', 'request to reopen the work'],
+['ժամկետի փոփոխության հարցում', 'запрос на перенос срока', 'deadline change request'],
+['Սպասում', 'Ожидание', 'Waiting'],
 // Store fallbacks that are written in English when the server sends no message.
 ['Մուտք գործել չհաջողվեց', 'Не удалось войти', 'Login failed'],
 ['Գրանցումը չհաջողվեց', 'Регистрация не удалась', 'Registration failed'],
@@ -82,5 +93,7 @@ export default [
 ['Լազերային կտրում՝ լիստեր', 'Лазерная резка: листы', 'Laser cutting: sheets'],
 ['Լազերային կտրում՝ խողովակներ', 'Лазерная резка: трубы', 'Laser cutting: tubes'],
 ['Զոդում', 'Сварка', 'Welding'],
+// The seeded "laser" position is stored with this spelling.
+['Լազերաին կտրում', 'Лазерная резка', 'Laser cutting'],
 ['Վալց', 'Вальцовка', 'Rolling'],
 ]

@@ -193,6 +193,7 @@ import {
   boardCopy,
   stepStatusText,
   taskStage,
+  taskStageText,
   workshopSteps,
   taskActionTarget,
 } from '@/utils/task-board'
@@ -270,9 +271,10 @@ export default {
       if (this.steps.some((step) => step.pending_request))
         return this.t.requestAnswerNeeded
       if (this.needsAnswer) return this.boardText.review
-      if (this.allRejected) return this.boardText.rejected
-      if (this.workflowStage === 'created') return this.boardText.shortCreated
-      return this.boardText[this.workflowStage]
+      return taskStageText(
+        this.allRejected ? 'rejected' : this.workflowStage,
+        this.$i18n?.locale
+      )
     },
     t() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy

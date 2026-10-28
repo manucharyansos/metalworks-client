@@ -428,7 +428,7 @@
                 :key="status"
                 :value="status"
               >
-                {{ status }}
+                {{ statusText(status) }}
               </option>
             </select>
             <select
@@ -611,7 +611,7 @@
                   <td class="px-4 py-4">
                     <span
                       class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                      >{{ order.status || 'pending' }}</span
+                      >{{ statusText(order.status) }}</span
                     >
                   </td>
                   <td class="px-6 py-4 text-right">
@@ -744,7 +744,7 @@
 </template>
 
 <script>
-import { workshopSteps } from '@/utils/task-board'
+import { taskStatusText, workshopSteps } from '@/utils/task-board'
 import { metricTaskFilters, operatorTaskFilters } from '@/utils/dashboard-tasks'
 import DashboardTasksModal from '@/components/admin/dashboard/TasksModal.vue'
 import AdminOrderCard from '@/components/admin/orders/OrderCard.vue'
@@ -1146,6 +1146,9 @@ export default {
       if (diff === 1) return 'Վաղը'
       if (diff > 1) return `${diff} օր մնաց`
       return 'Ավարտված ժամկետ'
+    },
+    statusText(status) {
+      return taskStatusText(status, this.$i18n?.locale)
     },
     deadlineClass(order) {
       const label = this.deadlineLabel(order)

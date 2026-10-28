@@ -11,7 +11,7 @@
         <table class="min-w-full text-left">
           <thead class="bg-slate-50/80 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40">
             <tr>
-              <th class="px-6 py-3.5">Նկարագրություն</th><th class="px-4 py-3.5">Լայն</th><th class="px-4 py-3.5">Երկար</th><th class="px-4 py-3.5">Բարձր</th><th class="px-4 py-3.5">Հաստ</th><th v-if="$canAny(['materials.update', 'materials.delete'])" class="px-6 py-3.5 text-right">Գործողություններ</th>
+              <th class="px-6 py-3.5">Նկարագրություն</th><th class="px-4 py-3.5">Լայն</th><th class="px-4 py-3.5">Երկար</th><th class="px-4 py-3.5" translate="no">{{ heightLabel }}</th><th class="px-4 py-3.5">Հաստ</th><th v-if="$canAny(['materials.update', 'materials.delete'])" class="px-6 py-3.5 text-right">Գործողություններ</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -47,5 +47,14 @@
 </template>
 
 <script>
-export default { props: { items: { type: Array, default: () => [] } } }
+export default {
+  props: { items: { type: Array, default: () => [] } },
+  computed: {
+    // "Բարձր" also means "high" (workload, priority), so this column is
+    // localized here instead of by the page-wide dictionary.
+    heightLabel() {
+      return { hy: 'Բարձր', ru: 'Высота', en: 'Height' }[this.$i18n?.locale] || 'Բարձր'
+    },
+  },
+}
 </script>
