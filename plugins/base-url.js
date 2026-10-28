@@ -1,6 +1,6 @@
 const PRODUCTION_API_BASE_URL = 'https://api.metalworks.am'
 
-function isLocalBrowserHost(hostname) {
+export function isLocalBrowserHost(hostname) {
   if (!hostname) return false
   if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
     return true
@@ -9,8 +9,18 @@ function isLocalBrowserHost(hostname) {
   return /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(hostname)
 }
 
-function localApiFor(hostname) {
+export function localApiFor(hostname, configured = '') {
   const safeHost = hostname === '::1' ? '[::1]' : hostname
+  // A local API configured at build time (API_BASE_URL=http://localhost:8010)
+  // keeps its port and path; only the host follows the browser, so the app
+  // still works when opened from another device on the LAN.
+  try {
+    const url = new URL(configured)
+    if (isLocalBrowserHost(url.hostname.replace(/^\[|\]$/g, ''))) {
+      url.hostname = safeHost
+      return url.toString().replace(/\/+$/, '')
+    }
+  } catch (e) {}
   return `http://${safeHost}:8000`
 }
 
@@ -29,7 +39,7 @@ export default ({ $axios, $config }, inject) => {
   if (process.client) {
     const hostname = window.location.hostname
     baseUrl = isLocalBrowserHost(hostname)
-      ? localApiFor(hostname)
+      ? localApiFor(hostname, configured)
       : PRODUCTION_API_BASE_URL
   }
 

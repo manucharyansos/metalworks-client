@@ -249,7 +249,7 @@
   },
   "order_files": {
     "loading": "Loading files for the selected subgroup…",
-    "load_failed": "Could not load subgroup files. An task can be created after the files load successfully.",
+    "load_failed": "Could not load subgroup files. A task can be created after the files load successfully.",
     "empty_subgroup": "The selected project subgroup has no files. Add files before creating a task.",
     "select_files": "Select at least one file to save the task.",
     "wrong_subgroup": "One of the selected files belongs to a different subgroup. Select the files again.",

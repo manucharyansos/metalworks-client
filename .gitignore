@@ -68,6 +68,9 @@ typings/
 # nuxt.js build output
 .nuxt
 
+# nuxt generate output (deploy archive is built from it, never committed)
+/dist
+
 # CAD runtime is copied from the pinned dependency before every build.
 /static/cad-vendor/
 

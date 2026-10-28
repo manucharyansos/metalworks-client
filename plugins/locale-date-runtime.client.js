@@ -33,6 +33,9 @@ export default ({ app }) => {
   const nativeTime = Date.prototype.toLocaleTimeString
   const nativeString = Date.prototype.toLocaleString
 
+  // Intentional runtime shim: older components format dates with a hard-coded
+  // 'hy-AM' locale, so these wrappers map it to the selected UI language.
+  /* eslint-disable no-extend-native */
   Date.prototype.toLocaleDateString = function (locales, options) {
     return nativeDate.call(this, resolveLegacyLocale(locales), options)
   }
@@ -42,4 +45,5 @@ export default ({ app }) => {
   Date.prototype.toLocaleString = function (locales, options) {
     return nativeString.call(this, resolveLegacyLocale(locales), options)
   }
+  /* eslint-enable no-extend-native */
 }

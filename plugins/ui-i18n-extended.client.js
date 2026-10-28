@@ -1,9 +1,12 @@
 import part1 from '~/utils/ui-i18n-extended-data-1'
 import part2 from '~/utils/ui-i18n-extended-data-2'
 import part3 from '~/utils/ui-i18n-extended-data-3'
+import part4 from '~/utils/ui-i18n-extended-data-4'
 
-const entries = [...part1, ...part2, ...part3]
+const entries = [...part1, ...part2, ...part3, ...part4]
 const LOCALE_INDEX = { hy: 0, ru: 1, en: 2 }
+// Armenian letters only; Armenian punctuation (՝ ։) is handled separately.
+const ARMENIAN_LETTER = /[Ա-Ֆա-և]/
 const sourceIndex = new Map()
 
 for (const entry of entries) {
@@ -32,19 +35,73 @@ function exactTranslate(trimmed, locale) {
   return entry ? entry[LOCALE_INDEX[locale]] : null
 }
 
+// Armenian full stop, comma-colon and abbreviation dot become . : . outside Armenian.
+function localizeMarks(text, locale) {
+  if (locale === 'hy') return text
+  return text.replace(/։/g, '.').replace(/՝/g, ':').replace(/․/g, '.')
+}
+
 function translatePunctuation(trimmed, locale) {
-  const match = trimmed.match(/^(.*?)([:։․.!?…]+)$/)
+  const match = trimmed.match(/^(.*?)([:։․.!?…՝]+)$/)
   if (!match) return null
   const translated = exactTranslate(match[1].trim(), locale)
   if (!translated) return null
-  const punctuation = locale === 'en' && match[2] === '։' ? '.' : match[2]
-  return `${translated}${punctuation}`
+  return `${translated}${localizeMarks(match[2], locale)}`
+}
+
+function ruPlural(value, one, few, many) {
+  const n = Math.abs(Number(value)) % 100
+  const last = n % 10
+  if (n > 10 && n < 20) return many
+  if (last > 1 && last < 5) return few
+  if (last === 1) return one
+  return many
+}
+
+function enPlural(value, one, other) {
+  return Number(value) === 1 ? one : other
 }
 
 function translateDynamic(trimmed, locale) {
   const idx = LOCALE_INDEX[locale]
   const pick = (hy, ru, en) => [hy, ru, en][idx]
   let match
+
+  match = trimmed.match(/^(\d+)\s+ֆայլ$/)
+  if (match) return pick(trimmed, `${match[1]} ${ruPlural(match[1], 'файл', 'файла', 'файлов')}`, `${match[1]} ${enPlural(match[1], 'file', 'files')}`)
+
+  match = trimmed.match(/^(\d+)\s+քայլ այս ցանկում$/)
+  if (match) return pick(trimmed, `${match[1]} ${ruPlural(match[1], 'этап', 'этапа', 'этапов')} в этом списке`, `${match[1]} ${enPlural(match[1], 'step', 'steps')} in this list`)
+
+  match = trimmed.match(/^(\d+)\s+քայլ$/)
+  if (match) return pick(trimmed, `${match[1]} ${ruPlural(match[1], 'этап', 'этапа', 'этапов')}`, `${match[1]} ${enPlural(match[1], 'step', 'steps')}`)
+
+  match = trimmed.match(/^(\d+)\s+արդյունք$/)
+  if (match) return pick(trimmed, `${match[1]} ${ruPlural(match[1], 'результат', 'результата', 'результатов')}`, `${match[1]} ${enPlural(match[1], 'result', 'results')}`)
+
+  match = trimmed.match(/^(\d+)\s+ակտիվ$/)
+  if (match) return pick(trimmed, `активных: ${match[1]}`, `${match[1]} active`)
+
+  match = trimmed.match(/^Առաջադրանք #(.+)$/)
+  if (match) return pick(trimmed, `Задание #${match[1]}`, `Task #${match[1]}`)
+
+  match = trimmed.match(/^Հաստատել \((.+)\)$/)
+  if (match) return pick(trimmed, `Подтвердить (${match[1]})`, `Confirm (${match[1]})`)
+
+  match = trimmed.match(/^Ցուցադրվում է (\d+) \/ (\d+) աշխատակից$/)
+  if (match) return pick(trimmed, `Показано ${match[1]} из ${match[2]} ${ruPlural(match[2], 'сотрудника', 'сотрудников', 'сотрудников')}`, `Showing ${match[1]} of ${match[2]} ${enPlural(match[2], 'employee', 'employees')}`)
+
+  match = trimmed.match(/^Էջ (\d+) \/ (\d+)$/)
+  if (match) return pick(trimmed, `Стр. ${match[1]} из ${match[2]}`, `Page ${match[1]} of ${match[2]}`)
+
+  match = trimmed.match(/^«(.+)» հաշիվը կհեռացվի։$/)
+  if (match) return pick(trimmed, `Учётная запись «${match[1]}» будет удалена.`, `The “${match[1]}” account will be removed.`)
+
+  match = trimmed.match(/^HTTP սխալ (.+)$/)
+  if (match) return pick(trimmed, `Ошибка HTTP ${match[1]}`, `HTTP error ${match[1]}`)
+
+  match = trimmed.match(/^Ձեր առաջադրանքը \(#(.+)\) հաջողությամբ տեղադրվել է[:։]$/)
+  if (match) return pick(trimmed, `Ваше задание (#${match[1]}) успешно размещено.`, `Your task (#${match[1]}) was placed successfully.`)
 
   match = trimmed.match(/^(\d+)\s+ակտիվ ֆիլտր(?:եր)?$/)
   if (match) return pick(trimmed, `${match[1]} активных фильтров`, `${match[1]} active filters`)
@@ -115,19 +172,62 @@ function translateSegments(trimmed, locale) {
   return null
 }
 
+// "· Էջ 2 / 5" or "| Ցուցադրվում է՝" – a separator left from a split template.
+function translateLeadingSeparator(trimmed, locale) {
+  const match = trimmed.match(/^([|·•])\s+(\S[\s\S]*)$/)
+  if (!match) return null
+  const rest = translateTrimmed(match[2], locale)
+  return rest === match[2] ? null : `${match[1]} ${rest}`
+}
+
+// Template text such as "Օպերատոր՝ {{ name }}" or "Քանակ: {{ qty }}" renders as
+// one text node. Translate the known label and keep (or translate) the value.
+function translateLabelValue(trimmed, locale) {
+  const match = trimmed.match(/^([^՝:]{1,60}?)\s*([՝:])\s+(\S[\s\S]*)$/)
+  if (!match) return null
+  const labelSource = match[1].trim()
+  const label =
+    exactTranslate(labelSource, locale) ||
+    (ARMENIAN_LETTER.test(labelSource) ? null : labelSource)
+  if (!label) return null
+  const valueSource = match[3].trim()
+  const value = translateTrimmed(valueSource, locale)
+  const separator = locale === 'hy' ? match[2] : ':'
+  const result = `${label}${separator} ${value}`
+  return result === trimmed ? null : result
+}
+
+// Already translated text that still carries Armenian punctuation, e.g. a
+// localized label followed by "՝ {{ count }}" in the template.
+function localizePunctuation(trimmed, locale) {
+  if (locale === 'hy' || ARMENIAN_LETTER.test(trimmed) || !/[՝։]/.test(trimmed)) return null
+  return trimmed.replace(/\s*՝\s*/g, ': ').replace(/։/g, '.').trim()
+}
+
 function translateTrimmed(trimmed, locale) {
   return (
     exactTranslate(trimmed, locale) ||
     translatePunctuation(trimmed, locale) ||
     translateDynamic(trimmed, locale) ||
     translateSegments(trimmed, locale) ||
+    translateLeadingSeparator(trimmed, locale) ||
+    translateLabelValue(trimmed, locale) ||
+    localizePunctuation(trimmed, locale) ||
     trimmed
   )
 }
 
-function translateValue(source, locale = currentLocale) {
+export function translateValue(source, locale = currentLocale) {
   if (typeof source !== 'string' || !source.trim()) return source
-  return preserveWhitespace(source, translateTrimmed(source.trim(), normalizeLocale(locale)))
+  const normalizedLocale = normalizeLocale(locale)
+  const trimmed = source.trim()
+  const translated = translateTrimmed(trimmed, normalizedLocale)
+  if (translated !== trimmed) return preserveWhitespace(source, translated)
+  // Multi-line template text keeps its indentation; look it up as one line.
+  const collapsed = trimmed.replace(/\s+/g, ' ')
+  if (collapsed === trimmed) return source
+  const fromCollapsed = translateTrimmed(collapsed, normalizedLocale)
+  return fromCollapsed === collapsed ? source : preserveWhitespace(source, fromCollapsed)
 }
 
 function shouldSkip(element) {

@@ -271,6 +271,7 @@ export default {
         return this.t.requestAnswerNeeded
       if (this.needsAnswer) return this.boardText.review
       if (this.allRejected) return this.boardText.rejected
+      if (this.workflowStage === 'created') return this.boardText.shortCreated
       return this.boardText[this.workflowStage]
     },
     t() {

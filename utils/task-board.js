@@ -60,6 +60,7 @@ export const boardCopy = {
     deadline: 'Ժամկետ',
     noOperator: 'Չնշանակված',
     stage: 'Առաջադրանքների փուլերը',
+    engineer: 'Ինժեներ',
   },
   ru: {
     loading: 'Загрузка…',
@@ -69,7 +70,7 @@ export const boardCopy = {
     previousPage: 'Предыдущая страница',
     nextPage: 'Следующая страница',
     perColumn: 'В каждой колонке',
-    shortCreated: 'Созданные',
+    shortCreated: 'Создано',
     created: 'Созданные задания',
     accepted: 'Принятые',
     in_progress: 'В работе',
@@ -92,6 +93,7 @@ export const boardCopy = {
     deadline: 'Срок',
     noOperator: 'Не назначен',
     stage: 'Этапы заданий',
+    engineer: 'Инженер',
   },
   en: {
     loading: 'Loading…',
@@ -124,6 +126,7 @@ export const boardCopy = {
     deadline: 'Deadline',
     noOperator: 'Unassigned',
     stage: 'Task stages',
+    engineer: 'Engineer',
   },
 }
 
@@ -236,8 +239,9 @@ export function stepStatusText(step, locale = 'hy') {
   if (isStepCompleted(step)) return t.finished
   if (isStepRejected(step)) return t.rejected
   const column = boardColumnForStep(step)
+  // A single job is "Created"; t.created is the plural column heading.
   return column === 'null'
-    ? t.created
+    ? t.shortCreated
     : column === 'confirmed'
     ? t.in_progress
     : column === 'accepted'

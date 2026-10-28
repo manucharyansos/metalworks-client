@@ -240,6 +240,7 @@ export default {
       if (this.steps.some((step) => step.awaiting_engineer_confirmation))
         return this.boardText.review
       if (this.allRejected) return this.boardText.rejected
+      if (this.stage === 'created') return this.boardText.shortCreated
       return this.boardText[this.stage]
     },
     overallStatusClass() {

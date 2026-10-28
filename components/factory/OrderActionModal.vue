@@ -317,7 +317,7 @@ export default {
     availableActions() {
       if (!this.reopenMode) return this.actionOptions
       return [
-        { value: 'pending', label: this.boardText.created },
+        { value: 'pending', label: this.boardText.shortCreated },
         { value: 'accepted', label: this.boardText.accepted },
         { value: 'confirmed', label: this.boardText.in_progress },
       ]
