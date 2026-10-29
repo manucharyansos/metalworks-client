@@ -93,11 +93,10 @@
           {{ $t('file_details.no_preview') }}
         </p>
       </object>
-      <img
+      <ImageZoomViewer
         v-else-if="kind === 'image' && blobUrl"
         :src="blobUrl"
         :alt="effectiveFile.original_name"
-        class="max-h-[520px] min-h-[240px] w-full object-contain p-3"
       />
       <audio
         v-else-if="kind === 'audio' && blobUrl"
@@ -136,6 +135,7 @@
 import FileMetadataPanel from '@/components/File/FileMetadataPanel.vue'
 import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 import ModelViewer from '@/components/File/ModelViewer.vue'
+import ImageZoomViewer from '@/components/File/ImageZoomViewer.vue'
 import { inspectFactoryPreview } from '@/utils/factory-preview'
 import { previewType } from '@/utils/factory-file-policy'
 import { fileDetailsIdentity } from '@/utils/file-production-details'
@@ -143,7 +143,7 @@ import CadModelWorker from '~/workers/cad-model.worker.js'
 import CadPreviewWorker from '~/workers/cad-preview.worker.js'
 
 export default {
-  components: { FileMetadataPanel, DxfViewerModal, ModelViewer },
+  components: { FileMetadataPanel, DxfViewerModal, ModelViewer, ImageZoomViewer },
   props: {
     file: { type: Object, required: true },
     orderId: { type: [Number, String], default: null },

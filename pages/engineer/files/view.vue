@@ -252,13 +252,46 @@
           </button>
         </template>
 
-        <p v-if="productionSections.length" class="explorer-caption">
-          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
-          </svg>
-          Նախագծի բաժիններ
-        </p>
-        <div class="explorer-folders">
+        <div v-if="productionSections.length" class="explorer-caption-row">
+          <p class="explorer-caption">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+            </svg>
+            Նախագծի բաժիններ
+          </p>
+          <div class="explorer-view-toggle" role="group" data-section-view>
+            <button
+              type="button"
+              class="explorer-icon-button"
+              :class="{ 'explorer-icon-button--on': sectionView === 'grid' }"
+              :aria-label="$t('file_explorer.sections_tiles')"
+              :title="$t('file_explorer.sections_tiles')"
+              :aria-pressed="sectionView === 'grid'"
+              @click="sectionView = 'grid'"
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="5" width="5" height="14" rx="1" /><rect x="10" y="5" width="5" height="14" rx="1" /><rect x="17" y="5" width="4" height="14" rx="1" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="explorer-icon-button"
+              :class="{ 'explorer-icon-button--on': sectionView === 'list' }"
+              :aria-label="$t('file_explorer.sections_list')"
+              :title="$t('file_explorer.sections_list')"
+              :aria-pressed="sectionView === 'list'"
+              @click="sectionView = 'list'"
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="4" y="4" width="16" height="4" rx="1" /><rect x="4" y="10" width="16" height="4" rx="1" /><rect x="4" y="16" width="16" height="4" rx="1" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div
+          class="explorer-folders"
+          :class="{ 'explorer-folders--list': sectionView === 'list' }"
+        >
           <button
             v-for="factory in productionSections"
             :key="factory.id"
@@ -326,7 +359,7 @@
                       <svg v-else-if="fileKind(file) === 'drawing'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M7 16 12 7l5 9M9 13h6" /></svg>
                       <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></svg>
                     </span>
-                    <span class="explorer-file__ext">{{ fileExt(file) || '—' }}</span>
+                    <span class="explorer-file__ext">{{ fileExt(file) || '—' }}<template v-if="hasCompanionModel(file)"> · 3D</template></span>
                     <span class="explorer-file__name">{{ file.original_name }}</span>
                   </button>
                   <div class="explorer-file__actions">
@@ -379,6 +412,35 @@
               >
                 {{ selectedFile.original_name }}
               </h3>
+              <div
+                v-if="isNativeSolidWorks(selectedFile)"
+                class="mb-4 flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3 text-sm"
+                :class="
+                  companionModel
+                    ? 'border-violet-200 bg-violet-50 text-violet-900 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-100'
+                    : 'border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'
+                "
+                data-cad-companion
+              >
+                <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4 7.5 8 4.5 8-4.5M12 12v9" />
+                </svg>
+                <span class="min-w-0 flex-1 leading-5">
+                  {{
+                    companionModel
+                      ? $t('cad_companion.found', { name: companionModel.original_name })
+                      : $t('cad_companion.missing')
+                  }}
+                </span>
+                <button
+                  v-if="companionModel"
+                  type="button"
+                  class="rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-700"
+                  @click="openCompanionModel"
+                >
+                  {{ $t('cad_companion.open') }}
+                </button>
+              </div>
 
               <p
                 v-if="previewNote && !previewLoading"
@@ -444,19 +506,12 @@
                 </a>
               </div>
 
-              <div
+              <ImageZoomViewer
                 v-else-if="fileType === 'image' && previewUrl"
-                class="flex justify-center items-center flex-1"
-              >
-                <a :href="previewUrl" target="_blank" rel="noopener">
-                  <img
-                    :src="previewUrl"
-                    class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-md"
-                    :alt="selectedFile.original_name"
-                    @error="previewError = $t('file_upload.preview_failed')"
-                  />
-                </a>
-              </div>
+                :src="previewUrl"
+                :alt="selectedFile.original_name"
+                @error="previewError = $t('file_upload.preview_failed')"
+              />
 
               <audio
                 v-else-if="fileType === 'audio' && previewUrl"
@@ -732,6 +787,7 @@ import { needsIndividualFileAttributes } from '@/utils/workshop-catalog'
 import CadPreviewWorker from '~/workers/cad-preview.worker.js'
 import CadModelWorker from '~/workers/cad-model.worker.js'
 import ModelViewer from '~/components/File/ModelViewer.vue'
+import ImageZoomViewer from '~/components/File/ImageZoomViewer.vue'
 import { inspectFactoryPreview } from '~/utils/factory-preview'
 import {
   allowsExtension,
@@ -754,6 +810,7 @@ export default {
     DxfViewerModal,
     InfoContentInput,
     ModelViewer,
+    ImageZoomViewer,
   },
   layout: 'engineer',
   middleware: ['role-guard'],
@@ -815,6 +872,7 @@ export default {
       // Explorer view state (display only).
       fileQuery: '',
       fileView: 'grid',
+      sectionView: 'grid',
     }
   },
 
@@ -884,6 +942,32 @@ export default {
         !!this.selectedFactory && this.isOpenFiles === this.selectedFactoryId
       )
     },
+    // Base names of 3D exports (STEP/IGES/STL/OBJ) in the open subgroup.
+    modelBaseNames() {
+      return new Set(
+        (this.getPmp?.files || [])
+          .filter(
+            (file) =>
+              this.n(file.remote_number_id) === this.selectedRemoteNumberId &&
+              /\.(step|stp|igs|iges|stl|obj)$/i.test(file.original_name || '')
+          )
+          .map((file) => this.baseName(file.original_name))
+      )
+    },
+    companionModel() {
+      const file = this.selectedFile
+      if (!this.isNativeSolidWorks(file)) return null
+      const base = this.baseName(file.original_name)
+      return (
+        (this.getPmp?.files || []).find(
+          (other) =>
+            other.id !== file.id &&
+            this.n(other.remote_number_id) === this.n(file.remote_number_id) &&
+            /\.(step|stp|igs|iges|stl|obj)$/i.test(other.original_name || '') &&
+            this.baseName(other.original_name) === base
+        ) || null
+      )
+    },
     visibleFiles() {
       const query = this.fileQuery.trim().toLowerCase()
       if (!query) return this.selectedFiles
@@ -941,6 +1025,11 @@ export default {
     },
   },
 
+  watch: {
+    sectionView: 'saveExplorerViews',
+    fileView: 'saveExplorerViews',
+  },
+
   created() {
     this.id = this.$route.query.id
     if (this.id) {
@@ -948,6 +1037,18 @@ export default {
     } else {
       this.$notify({ text: 'ID-ն բացակայում է', type: 'error' })
     }
+  },
+
+  mounted() {
+    // Tile/list choices are a per-browser convenience.
+    try {
+      const saved = JSON.parse(
+        window.localStorage.getItem('metalworks.files.views') || '{}'
+      )
+      if (['grid', 'list'].includes(saved.sections))
+        this.sectionView = saved.sections
+      if (['grid', 'list'].includes(saved.files)) this.fileView = saved.files
+    } catch (_) {}
   },
 
   beforeDestroy() {
@@ -1660,6 +1761,45 @@ export default {
       this.selectBreadcrumb(this.breadcrumb.length - 2)
     },
 
+    saveExplorerViews() {
+      try {
+        window.localStorage.setItem(
+          'metalworks.files.views',
+          JSON.stringify({ sections: this.sectionView, files: this.fileView })
+        )
+      } catch (_) {}
+    },
+
+    baseName(name) {
+      return String(name || '')
+        .replace(/\.[^.]+$/, '')
+        .trim()
+        .toLowerCase()
+    },
+
+    // SolidWorks part/assembly files cannot be read in the browser; their 3D
+    // view comes from a STEP/IGES/STL/OBJ export with the same name.
+    isNativeSolidWorks(file) {
+      return /\.(sldprt|sldasm)$/i.test(file?.original_name || '')
+    },
+
+    hasCompanionModel(file) {
+      return (
+        this.isNativeSolidWorks(file) &&
+        this.modelBaseNames.has(this.baseName(file.original_name))
+      )
+    },
+
+    openCompanionModel() {
+      const file = this.companionModel
+      if (!file) return
+      const section = (this.getFactory || []).find(
+        (factory) => this.n(factory.id) === this.n(file.factory_id)
+      )
+      if (section && !this.isSectionOpen(section)) this.openSection(section)
+      this.viewFile(file.path, file)
+    },
+
     fileExt(file) {
       const name = String(file?.original_name || file?.path || '')
       return (name.match(/\.([a-z0-9_]{1,8})$/i)?.[1] || '').toUpperCase()
@@ -1866,5 +2006,27 @@ export default {
 }
 .explorer-status {
   @apply flex items-center gap-3 border-t border-slate-200 bg-slate-50 px-4 py-1.5 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400;
+}
+.explorer-caption-row {
+  @apply mb-1 mt-3 flex items-center justify-between gap-2 pr-3;
+}
+.explorer-caption-row .explorer-caption {
+  @apply my-0;
+}
+/* "One under another": folders as full-width rows. */
+.explorer-folders--list {
+  @apply flex flex-col gap-1;
+}
+.explorer-folders--list .explorer-folder {
+  @apply flex-row gap-3 px-3 py-2 text-left;
+}
+.explorer-folders--list .explorer-folder__icon {
+  @apply h-8 w-10 shrink-0;
+}
+.explorer-folders--list .explorer-folder__name {
+  @apply min-w-0 flex-1;
+}
+.explorer-folders--list .explorer-folder__meta {
+  @apply shrink-0;
 }
 </style>

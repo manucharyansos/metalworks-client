@@ -1,5 +1,6 @@
 <template>
   <section
+    v-if="error || hasContent"
     class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
     data-file-metadata
     :aria-busy="loading"
@@ -44,10 +45,12 @@
     </div>
     <template v-else>
       <dl
-        class="grid grid-cols-2 gap-px bg-slate-100 dark:bg-slate-800 sm:grid-cols-4"
+        v-if="visibleFields.length"
+        class="grid grid-cols-2 gap-px bg-slate-100 dark:bg-slate-800"
+        :class="gridColumns"
       >
         <div
-          v-for="field in fields"
+          v-for="field in visibleFields"
           :key="field.key"
           class="min-w-0 bg-white px-4 py-3 dark:bg-slate-900"
           :data-file-attribute="field.key"
@@ -63,7 +66,9 @@
         </div>
       </dl>
       <div
-        class="space-y-3 border-t border-slate-100 px-4 py-4 dark:border-slate-800"
+        v-if="showRoute"
+        class="space-y-3 px-4 py-4"
+        :class="visibleFields.length ? 'border-t border-slate-100 dark:border-slate-800' : ''"
       >
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h5 class="text-xs font-semibold text-slate-600 dark:text-slate-300">
@@ -76,7 +81,7 @@
             }}
           </h5>
           <span
-            v-if="!model.is_reference_file"
+            v-if="!model.is_reference_file && model.inspection_required"
             class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold"
             :class="
               model.inspection_required
@@ -127,15 +132,6 @@
             >
           </li>
         </ul>
-        <p v-else class="text-xs leading-5 text-slate-500 dark:text-slate-400">
-          {{
-            $t(
-              model.source === 'task'
-                ? 'file_details.no_workshops'
-                : 'file_details.choose_on_task'
-            )
-          }}
-        </p>
       </div>
     </template>
   </section>
@@ -174,16 +170,39 @@ export default {
         { key: 'dimensions', label: 'file_plan.dimensions' },
       ]
     },
+    // Only saved values are shown; 0 is a real value (e.g. thickness 0).
+    visibleFields() {
+      return this.fields.filter((field) => this.isSet(this.model[field.key]))
+    },
+    gridColumns() {
+      return (
+        {
+          1: 'sm:grid-cols-1',
+          2: 'sm:grid-cols-2',
+          3: 'sm:grid-cols-3',
+        }[this.visibleFields.length] || 'sm:grid-cols-4'
+      )
+    },
+    showRoute() {
+      return (
+        (this.model.workshops || []).length > 0 ||
+        (!this.model.is_reference_file && !!this.model.inspection_required)
+      )
+    },
+    hasContent() {
+      return this.visibleFields.length > 0 || this.showRoute
+    },
   },
   watch: { scopeKey: { immediate: true, handler: 'load' } },
   beforeDestroy() {
     ++this.request
   },
   methods: {
+    isSet(value) {
+      return !(value === null || value === undefined || value === '')
+    },
     present(value) {
-      return value === null || value === undefined || value === ''
-        ? this.$t('file_details.not_set')
-        : value
+      return this.isSet(value) ? value : this.$t('file_details.not_set')
     },
     async load() {
       const request = ++this.request

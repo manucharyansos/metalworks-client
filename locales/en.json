@@ -443,5 +443,24 @@
     "download": "Download",
     "download_failed": "Could not download the file.",
     "no_preview": "A preview is not available for this format. File details are shown above."
+  },
+  "image_preview": {
+    "zoom_in": "Zoom in",
+    "zoom_out": "Zoom out",
+    "rotate": "Rotate 90°",
+    "reset": "Reset view",
+    "fullscreen": "Full screen",
+    "exit_fullscreen": "Exit full screen",
+    "open": "Open in a new tab",
+    "hint": "Scroll to zoom, drag to move, double-click to reset"
+  },
+  "cad_companion": {
+    "found": "A 3D model of this part is available: {name}",
+    "open": "Open in 3D",
+    "missing": "SolidWorks files are shown with their saved image. For a rotatable 3D view, save a STEP or IGES copy with the same name from SolidWorks and upload it to this subgroup."
+  },
+  "file_explorer": {
+    "sections_tiles": "Side by side",
+    "sections_list": "One under another"
   }
 }

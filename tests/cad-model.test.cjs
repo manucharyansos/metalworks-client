@@ -87,6 +87,16 @@ test('nonfinite positions, invalid indices and invalid colored faces never reach
   }
 })
 
+test('zero normals stored in a file are dropped so the viewer computes lighting', async () => {
+  const { normalizeCadModel } = await helpers
+  const zero = sample()
+  zero.meshes[0].attributes.normal = { array: [0, 0, 0, 0, 0, 0, 0, 0, 0] }
+  assert.equal(normalizeCadModel(zero, 'stl', null).meshes[0].normal, null)
+  const real = sample()
+  real.meshes[0].attributes.normal = { array: [0, 0, 1, 0, 0, 1, 0, 0, 1] }
+  assert.deepEqual(Array.from(normalizeCadModel(real, 'stl', null).meshes[0].normal), [0, 0, 1, 0, 0, 1, 0, 0, 1])
+})
+
 test('geometry complexity is bounded before output allocation', async () => {
   const { normalizeCadModel, MAX_MODEL_PARTS, MAX_MODEL_TRIANGLES, MAX_MODEL_VERTICES } = await helpers
   const source = sample()

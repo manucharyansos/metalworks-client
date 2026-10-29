@@ -26,6 +26,14 @@ function numericArray(value) {
 }
 
 // Normalize both OpenCascade and mesh-loader output before it reaches WebGL.
+function hasZeroNormal(normal) {
+  for (let i = 0; i < normal.length; i += 3) {
+    if (Math.abs(normal[i]) + Math.abs(normal[i + 1]) + Math.abs(normal[i + 2]) < 1e-6)
+      return true
+  }
+  return false
+}
+
 export function normalizeCadModel(source, format, unit) {
   if (
     !source?.success ||
@@ -67,11 +75,14 @@ export function normalizeCadModel(source, format, unit) {
     }
     const normalValues = mesh.attributes?.normal?.array
     if (normalValues != null && !numericArray(normalValues)) invalid()
-    const normal =
+    let normal =
       normalValues?.length === position.length
         ? new Float32Array(normalValues)
         : null
     if (normal && !normal.every(Number.isFinite)) invalid()
+    // STL files may store zero normals; the viewer then computes real ones,
+    // otherwise the model is lit as a flat black shape.
+    if (normal && hasZeroNormal(normal)) normal = null
     const faces = Array.isArray(mesh.brep_faces) ? mesh.brep_faces : []
     if (faces.length > MAX_MODEL_TRIANGLES) invalid('too_complex')
     let coloredIndices = 0

@@ -115,6 +115,27 @@ test('the complete metadata panel renders saved attributes and safe workshop nam
   vm.$destroy()
 })
 
+test('files without saved attributes, route or inspection show no details panel', async () => {
+  const empty = { id: 1, original_name: 'bracket.sldprt', source: 'project', quantity: null, material_type: '', thickness: null, dimensions: null, inspection_required: false, workshops: [] }
+  const vm = component('components/File/FileMetadataPanel.vue', { file: { id: 1, original_name: 'bracket.sldprt' } }, { $get: async () => ({ details: empty }) })
+  await flush()
+  const html = await require('vue-server-renderer').createRenderer().renderToString(vm)
+  assert.doesNotMatch(html, /data-file-metadata|file_details.not_set|file_details.choose_on_task/)
+  vm.$destroy()
+})
+
+test('only saved attributes are listed and a zero thickness still counts as saved', async () => {
+  const partial = { id: 1, original_name: 'plate.dxf', source: 'project', quantity: 4, material_type: null, thickness: 0, dimensions: '', inspection_required: false, workshops: [] }
+  const vm = component('components/File/FileMetadataPanel.vue', { file: { id: 1, original_name: 'plate.dxf' } }, { $get: async () => ({ details: partial }) })
+  await flush()
+  const html = await require('vue-server-renderer').createRenderer().renderToString(vm)
+  assert.match(html, /data-file-attribute="quantity"/)
+  assert.match(html, /data-file-attribute="thickness"/)
+  assert.doesNotMatch(html, /data-file-attribute="material_type"|data-file-attribute="dimensions"|file_details.not_set/)
+  assert.doesNotMatch(html, /data-file-inspection|file_details.choose_on_task/)
+  vm.$destroy()
+})
+
 test('switching a preview discards late file bytes and cancels pending work', async () => {
   let release
   const old = new Blob(['old text'], { type: 'text/plain' })
