@@ -59,6 +59,9 @@ test('counted labels use plural forms', () => {
   assert.equal(translateValue('21 ֆայլ', 'ru'), '21 файл')
   assert.equal(translateValue('12 քայլ', 'ru'), '12 этапов')
   assert.equal(translateValue('4 քայլ այս ցանկում', 'en'), '4 steps in this list')
+  assert.equal(translateValue('6 տարր', 'ru'), '6 элементов')
+  assert.equal(translateValue('1 տարր', 'en'), '1 item')
+  assert.equal(translateValue('1 ընտրված', 'en'), '1 selected')
   assert.equal(translateValue('Ցուցադրվում է 3 / 21 աշխատակից', 'ru'), 'Показано 3 из 21 сотрудника')
   assert.equal(translateValue('Ցուցադրվում է 1 / 1 աշխատակից', 'en'), 'Showing 1 of 1 employee')
 })
@@ -115,5 +118,10 @@ test('task history and validation messages written by the API are translated', (
   assert.equal(translateValue('Ինժեները վերադարձրել է աշխատանքը վերանայման՝ Փոխել անցքը', 'ru'), 'Инженер вернул работу на доработку: Փոխել անցքը')
   assert.equal(translateValue('Ֆայլի տեսակը թույլատրված չէ։ Թույլատրելի են՝ dxf, pdf', 'en'), 'This file type is not allowed. Allowed: dxf, pdf')
   assert.equal(translateValue('Հաստատման կոդը սխալ է։', 'ru'), 'Неверный код подтверждения.')
+  assert.equal(
+    translateValue('“Լազերային կտրում՝ լիստեր” · QA changed the status: In progress → Finished', 'en'),
+    '“Laser cutting: sheets” · QA changed the status: In progress → Finished'
+  )
+  assert.equal(translateValue('Цех «Կռում» · маршрут изменён', 'ru'), 'Цех «Гибка» · маршрут изменён')
   assert.equal(translateValue('Արտադրամաս «Կռում»․ ավելացվել է 1 ֆայլով աշխատանք։', 'hy'), 'Արտադրամաս «Կռում»․ ավելացվել է 1 ֆայլով աշխատանք։')
 })

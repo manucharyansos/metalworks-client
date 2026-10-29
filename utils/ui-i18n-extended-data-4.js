@@ -79,9 +79,23 @@ export default [
 ['աշխատանքը վերաբացելու հարցում', 'запрос на возобновление работы', 'request to reopen the work'],
 ['ժամկետի փոփոխության հարցում', 'запрос на перенос срока', 'deadline change request'],
 ['Սպասում', 'Ожидание', 'Waiting'],
+// Project files explorer.
+['Մեկ մակարդակ վեր', 'На уровень выше', 'Up one level'],
+['Որոնել ֆայլ', 'Поиск файла', 'Search files'],
+['Սալիկներ', 'Значки', 'Tiles'],
+['Ցանկ', 'Список', 'List'],
+['Տեղեկատու', 'Справочные', 'Reference'],
+['Տեքստ, նկար, ձայն և փաստաթղթեր', 'Текст, фото, аудио и документы', 'Text, photos, audio and documents'],
+['Նախագծի բաժիններ', 'Разделы проекта', 'Project sections'],
+['Թղթապանակը դատարկ է', 'Папка пуста', 'This folder is empty'],
+['Ընտրեք թղթապանակ', 'Выберите папку', 'Choose a folder'],
 // Store fallbacks that are written in English when the server sends no message.
 ['Մուտք գործել չհաջողվեց', 'Не удалось войти', 'Login failed'],
 ['Գրանցումը չհաջողվեց', 'Регистрация не удалась', 'Registration failed'],
+// Sign-in errors the API returns in English.
+['Սխալ էլ․ փոստ կամ գաղտնաբառ', 'Неверная эл. почта или пароль', 'Invalid credentials'],
+['Չափազանց շատ փորձեր։ Խնդրում ենք կրկին փորձել մի փոքր ուշ։', 'Слишком много попыток входа. Попробуйте позже.', 'Too many login attempts. Please try again later.'],
+['Մուտք գործել չհաջողվեց։ Խնդրում ենք կրկին փորձել մի փոքր ուշ։', 'Не удалось войти. Попробуйте позже.', 'Login failed. Please try again later.'],
 // Default file sections and the Metalworks production catalog. Custom names
 // typed by a company stay as entered.
 ['CAD նախագծեր', 'CAD-проекты', 'CAD projects'],

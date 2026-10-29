@@ -77,6 +77,12 @@ function translateDynamic(trimmed, locale) {
   match = trimmed.match(/^(\d+)\s+քայլ$/)
   if (match) return pick(trimmed, `${match[1]} ${ruPlural(match[1], 'этап', 'этапа', 'этапов')}`, `${match[1]} ${enPlural(match[1], 'step', 'steps')}`)
 
+  match = trimmed.match(/^(\d+)\s+տարր$/)
+  if (match) return pick(trimmed, `${match[1]} ${ruPlural(match[1], 'элемент', 'элемента', 'элементов')}`, `${match[1]} ${enPlural(match[1], 'item', 'items')}`)
+
+  match = trimmed.match(/^(\d+)\s+ընտրված$/)
+  if (match) return pick(trimmed, `выбрано: ${match[1]}`, `${match[1]} selected`)
+
   match = trimmed.match(/^(\d+)\s+արդյունք$/)
   if (match) return pick(trimmed, `${match[1]} ${ruPlural(match[1], 'результат', 'результата', 'результатов')}`, `${match[1]} ${enPlural(match[1], 'result', 'results')}`)
 
@@ -232,6 +238,20 @@ function translateLabelValue(trimmed, locale) {
   return result === trimmed ? null : result
 }
 
+// Known names quoted inside a message ("“Կռում” · …", "Цех «Կռում»").
+function translateQuoted(trimmed, locale) {
+  if (locale === 'hy') return null
+  let changed = false
+  const result = trimmed.replace(/([“«])([^“”«»]{1,80})([”»])/g, (whole, open, inner, close) => {
+    if (!ARMENIAN_LETTER.test(inner)) return whole
+    const translated = exactTranslate(inner.trim(), locale)
+    if (!translated || translated === inner) return whole
+    changed = true
+    return `${open}${translated}${close}`
+  })
+  return changed ? result : null
+}
+
 // Already translated text that still carries Armenian punctuation, e.g. a
 // localized label followed by "՝ {{ count }}" in the template.
 function localizePunctuation(trimmed, locale) {
@@ -247,6 +267,7 @@ function translateTrimmed(trimmed, locale) {
     translateSegments(trimmed, locale) ||
     translateLeadingSeparator(trimmed, locale) ||
     translateLabelValue(trimmed, locale) ||
+    translateQuoted(trimmed, locale) ||
     localizePunctuation(trimmed, locale) ||
     trimmed
   )

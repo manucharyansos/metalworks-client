@@ -6,15 +6,34 @@
       >
         <WorkspaceBranding class="order-first lg:order-last" />
         <div class="order-last flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-12 lg:order-first lg:px-14 lg:py-16">
-          <div class="max-w-md">
+          <!-- Errors never change the card height: the general error covers the
+               intro text and field messages use space that is always reserved. -->
+          <div class="relative max-w-md">
             <p class="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Անվտանգ մուտք</p>
             <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">Բարի վերադարձ</h1>
             <p class="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
               Մուտք գործեք ձեր աշխատանքային հաշիվ՝ առաջադրանքների, ֆայլերի և արտադրական գործընթացների հետ աշխատելու համար։
             </p>
+            <transition
+              enter-active-class="transition-opacity duration-150"
+              enter-class="opacity-0"
+              leave-active-class="transition-opacity duration-150"
+              leave-to-class="opacity-0"
+            >
+              <div
+                v-if="errors || errorMessage.general"
+                role="alert"
+                class="absolute inset-x-0 bottom-0 flex gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950 dark:text-rose-200"
+              >
+                <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v4m0 4h.01M10.3 3.8 2.9 17a2 2 0 0 0 1.75 3h14.7A2 2 0 0 0 21.1 17L13.7 3.8a2 2 0 0 0-3.4 0Z" />
+                </svg>
+                <span>{{ errorMessage.general || errors }}</span>
+              </div>
+            </transition>
           </div>
 
-          <form class="mt-9 max-w-md space-y-5" @submit.prevent="login">
+          <form class="mt-9 max-w-md space-y-4" novalidate @submit.prevent="login">
             <div>
               <input-with-label-icon
                 v-model="email"
@@ -26,12 +45,12 @@
                 label_-id="email"
                 for_-l-abel="email"
               />
-              <p v-if="fieldEmail" class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-300">
-                Խնդրում ենք մուտքագրեք էլ․ փոստի հասցեն։
+              <p class="field-message" :role="fieldEmail ? 'alert' : null">
+                <template v-if="fieldEmail">Խնդրում ենք մուտքագրեք էլ․ փոստի հասցեն։</template>
               </p>
             </div>
 
-            <div>
+            <div class="!mt-1">
               <input-with-label-icon
                 v-model="password"
                 type="password"
@@ -42,19 +61,9 @@
                 label_-id="password"
                 for_-l-abel="password"
               />
-              <p v-if="fieldPassword" class="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-300">
-                Խնդրում ենք մուտքագրեք գաղտնաբառը։
+              <p class="field-message" :role="fieldPassword ? 'alert' : null">
+                <template v-if="fieldPassword">Խնդրում ենք մուտքագրեք գաղտնաբառը։</template>
               </p>
-            </div>
-
-            <div
-              v-if="errors || errorMessage.general"
-              class="flex gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200"
-            >
-              <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v4m0 4h.01M10.3 3.8 2.9 17a2 2 0 0 0 1.75 3h14.7A2 2 0 0 0 21.1 17L13.7 3.8a2 2 0 0 0-3.4 0Z" />
-              </svg>
-              <span>{{ errorMessage.general || errors }}</span>
             </div>
 
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -128,6 +137,8 @@ export default {
         general: '',
       },
       loading: false,
+      // Fields are validated live only after the first sign-in attempt.
+      submitted: false,
     }
   },
   computed: {
@@ -138,21 +149,26 @@ export default {
   },
   watch: {
     email(val) {
-      this.fieldEmail = !val
+      if (this.submitted) this.fieldEmail = !val
       this.errorMessage.email = val ? '' : 'Էլ․ հասցեն պարտադիր է։'
-      if (val) this.errorMessage.general = ''
+      if (val) this.clearGeneralError()
     },
     password(val) {
-      this.fieldPassword = val.length < 6
+      if (this.submitted) this.fieldPassword = val.length < 6
       this.errorMessage.password =
         val.length >= 6 ? '' : 'Գաղտնաբառը պետք է լինի առնվազն 6 նիշ։'
-      if (val) this.errorMessage.general = ''
+      if (val) this.clearGeneralError()
     },
   },
   methods: {
     ...mapActions('authCustom', ['loginUser']),
+    clearGeneralError() {
+      this.errorMessage.general = ''
+      if (this.getErrorMessage) this.$store.commit('authCustom/setErrorMessage', null)
+    },
     async login() {
       if (this.loading) return
+      this.submitted = true
       this.loading = true
       this.errorMessage.general = ''
       try {
@@ -200,3 +216,10 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+/* Always occupies one line so a message never moves the form. */
+.field-message {
+  @apply mt-1.5 min-h-[1.125rem] text-xs font-semibold leading-[1.125rem] text-rose-600 dark:text-rose-300;
+}
+</style>

@@ -72,229 +72,301 @@
       </div>
     </section>
 
-    <transition name="slide-up">
-      <nav v-if="breadcrumb.length" class="mb-6">
-        <ol
-          class="flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+    <!-- Windows Explorer style: address bar, toolbar, pinned INFO folder,
+         production folders, then the opened folder's files and the preview.
+         All actions call the same methods as before. -->
+    <section
+      v-if="projectReady"
+      class="explorer"
+      data-files-explorer
+    >
+      <div class="explorer-bar">
+        <button
+          type="button"
+          class="explorer-icon-button"
+          :disabled="breadcrumb.length < 2"
+          aria-label="Մեկ մակարդակ վեր"
+          title="Մեկ մակարդակ վեր"
+          @click="goUp"
         >
-          <li
-            v-for="(item, index) in breadcrumb"
-            :key="index"
-            class="flex items-center"
-          >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0-6 6m6-6 6 6" />
+          </svg>
+        </button>
+        <nav class="explorer-path" aria-label="Նախագիծ">
+          <svg class="h-4 w-4 shrink-0 text-amber-500" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.38a1.5 1.5 0 0 1 1.06.44L11.5 7h8A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11Z" />
+          </svg>
+          <template v-for="(item, index) in breadcrumb">
+            <svg
+              v-if="index > 0"
+              :key="'sep-' + index"
+              class="h-3 w-3 shrink-0 text-slate-400"
+              viewBox="0 0 6 10"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path d="M1 9l4-4-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
             <button
-              class="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-white hover:shadow-sm dark:hover:bg-gray-800 transition-all duration-200"
-              :class="{
-                'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300':
-                  index === breadcrumb.length - 1,
-              }"
+              :key="'crumb-' + index"
+              type="button"
+              class="explorer-crumb"
+              :class="{ 'explorer-crumb--current': index === breadcrumb.length - 1 }"
+              :title="item"
               @click="selectBreadcrumb(index)"
             >
-              <svg
-                v-if="index > 0"
-                class="w-3 h-3 text-gray-400"
-                viewBox="0 0 6 10"
-                fill="none"
-              >
-                <path
-                  d="M1 9l4-4-4-4"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              <span
-                :title="item"
-                class="truncate max-w-[200px] sm:max-w-[280px]"
-                >{{ item }}</span
-              >
+              {{ item }}
             </button>
-          </li>
-        </ol>
-      </nav>
-    </transition>
-
-    <div
-      v-if="projectReady"
-      class="grid grid-cols-1 lg:grid-cols-[minmax(300px,_1fr)_3fr] gap-6 xl:gap-8"
-    >
-      <aside class="space-y-6">
-        <transition v-if="isOpen === 'remote_number'" name="fade-scale">
-          <section class="grid gap-3">
-            <button
-              v-for="number in getPmp.remote_number"
-              :key="number.id"
-              class="group flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-200 dark:border-gray-700"
-              @click="showFiles(number)"
-            >
-              <div
-                class="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-lg flex items-center justify-center"
-              >
-                <img src="/dxf.png" alt="DXF" class="w-9 h-9 object-contain" />
-              </div>
-              <div class="text-left flex-1">
-                <div class="font-semibold text-gray-900 dark:text-white">
-                  {{ number.remote_number }}
-                </div>
-                <div class="text-sm text-gray-500 dark:text-gray-400 truncate">
-                  {{ number.remote_number_name }}
-                </div>
-              </div>
-              <svg
-                class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path
-                  d="M9 18l6-6-6-6"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </button>
-          </section>
-        </transition>
-
-        <transition
-          v-else-if="isOpen === 'factories'"
-          class="space-y-4"
-          name="fade-scale"
+          </template>
+        </nav>
+        <label
+          v-if="sectionOpen && $can('pmp_files.view')"
+          class="explorer-search"
         >
-          <section>
-            <div v-for="factory in getFactory" :key="factory.id">
-              <button
-                :disabled="loadingFactoryId === factory.id"
-                class="w-full p-4 rounded-xl text-left transition-all duration-300 flex items-center justify-between"
-                :class="{
-                  'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg':
-                    selectedFactoryId === factory.id,
-                  'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700':
-                    selectedFactoryId !== factory.id,
-                  'opacity-70 cursor-not-allowed':
-                    loadingFactoryId === factory.id,
-                }"
-                @click="selectFactory(factory)"
-              >
-                <span class="font-medium"
-                  >{{ factory.name || factory.value }}
-                  <span
-                    v-if="factory.is_active === false"
-                    class="ml-2 text-xs opacity-70"
-                    >{{ $t('file_upload.archived_section_short') }}</span
-                  ></span
-                >
-                <span
-                  v-if="loadingFactoryId === factory.id"
-                  class="animate-spin"
-                >
-                  <svg
-                    class="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                  >
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke-width="3"
-                      class="opacity-25"
-                    />
-                    <path
-                      d="M4 12a8 8 0 018-8"
-                      stroke-width="3"
-                      class="opacity-75"
-                    />
-                  </svg>
-                </span>
-                <span
-                  v-else-if="hasFiles(factory.id)"
-                  class="text-green-400 text-xl"
-                  >✔</span
-                >
-              </button>
+          <svg class="h-4 w-4 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path stroke-linecap="round" d="m20 20-3.5-3.5" />
+          </svg>
+          <input
+            v-model="fileQuery"
+            type="search"
+            class="min-w-0 flex-1 bg-transparent text-sm outline-none"
+            placeholder="Որոնել ֆայլ"
+            aria-label="Որոնել ֆայլ"
+          />
+        </label>
+      </div>
 
-              <transition
-                v-if="isOpenFiles === factory.id"
-                class="mt-3 space-y-2 pl-4 border-l-2 border-blue-500"
-                name="slide-down"
-              >
-                <div v-if="$can('pmp_files.view')">
-                  <div
-                    v-for="file in selectedFiles"
-                    :key="file.id"
-                    class="group bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm hover:shadow transition-all duration-200 border border-gray-200 dark:border-gray-700"
-                    @mouseenter="hoveredFileId = file.id"
-                    @mouseleave="hoveredFileId = null"
-                  >
-                    <div class="flex items-center justify-between">
-                      <button
-                        class="text-left flex-1 min-w-0 truncate text-sm font-medium text-gray-800 dark:text-gray-200"
-                        @click="viewFile(file.path, file)"
-                      >
-                        {{ file.original_name }}
-                      </button>
-                      <div
-                        class="flex shrink-0 items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity"
-                      >
-                        <button
-                          v-if="$can('pmp_files.view')"
-                          class="text-xs text-blue-600 hover:underline"
-                          @click.stop="downloadFile(file)"
-                        >
-                          Ներբեռնել
-                        </button>
-                        <button
-                          v-if="$can('pmp_files.delete')"
-                          class="text-xs text-red-600 hover:underline"
-                          @click.stop="openDelete(file.id)"
-                        >
-                          Ջնջել
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+      <div v-if="isOpen === 'factories' && sectionOpen" class="explorer-toolbar">
+        <button
+          v-if="sectionOpen && $can('pmp_files.view') && $can('pmp_files.upload')"
+          type="button"
+          class="explorer-button explorer-button--primary"
+          :disabled="loading || selectedFactory?.is_active === false"
+          @click="openAddFileModal"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0-4 4m4-4 4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+          </svg>
+          Ավելացնել ֆայլ
+        </button>
+        <button
+          v-if="selectedFile && $can('pmp_files.view')"
+          type="button"
+          class="explorer-button"
+          @click="downloadFile(selectedFile)"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0 4-4m-4 4-4-4M4 18v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1" />
+          </svg>
+          Ներբեռնել
+        </button>
+        <button
+          v-if="selectedFile && $can('pmp_files.delete')"
+          type="button"
+          class="explorer-button explorer-button--danger"
+          @click="openDelete(selectedFile.id)"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+          </svg>
+          Ջնջել
+        </button>
+        <span class="flex-1"></span>
+        <div v-if="sectionOpen" class="explorer-view-toggle" role="group">
+          <button
+            type="button"
+            class="explorer-icon-button"
+            :class="{ 'explorer-icon-button--on': fileView === 'grid' }"
+            aria-label="Սալիկներ"
+            title="Սալիկներ"
+            :aria-pressed="fileView === 'grid'"
+            @click="fileView = 'grid'"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="explorer-icon-button"
+            :class="{ 'explorer-icon-button--on': fileView === 'list' }"
+            aria-label="Ցանկ"
+            title="Ցանկ"
+            :aria-pressed="fileView === 'list'"
+            @click="fileView = 'list'"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
-                  <p
-                    v-if="selectedFactory?.is_active === false"
-                    class="mt-4 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200"
-                  >
-                    {{ $t('file_upload.archived_section') }}
-                  </p>
+      <transition name="fade-scale">
+        <div v-if="isOpen === 'remote_number'" class="explorer-folders">
+          <button
+            v-for="number in getPmp.remote_number"
+            :key="number.id"
+            type="button"
+            class="explorer-folder"
+            @click="showFiles(number)"
+          >
+            <svg class="explorer-folder__icon" viewBox="0 0 48 40" aria-hidden="true">
+              <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#E9B949" />
+              <path d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#F8D775" />
+            </svg>
+            <span class="explorer-folder__name">{{ number.remote_number }}</span>
+            <span class="explorer-folder__meta" :title="number.remote_number_name">{{ number.remote_number_name }}</span>
+          </button>
+        </div>
+      </transition>
+
+      <template v-if="isOpen === 'factories'">
+        <template v-if="infoSection">
+          <p class="explorer-caption">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 4.5 19.5 9l-3 3-.5 4.5-4.5-4.5L7 16.5M15 4.5l-3 3-4.5-.5-1 1L16 17.5l1-1-.5-4.5" />
+            </svg>
+            Տեղեկատու
+          </p>
+          <button
+            type="button"
+            class="explorer-pinned"
+            :class="{ 'explorer-pinned--open': isSectionOpen(infoSection) }"
+            :disabled="loadingFactoryId === infoSection.id"
+            data-section="INFO"
+            @click="openSection(infoSection)"
+          >
+            <svg class="h-10 w-12 shrink-0" viewBox="0 0 48 40" aria-hidden="true">
+              <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#60A5FA" />
+              <path d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#93C5FD" />
+              <path d="M18 24h12M18 29h8" stroke="#1D4ED8" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+            <span class="min-w-0 flex-1 text-left">
+              <span class="explorer-folder__name">{{ infoSection.name || infoSection.value }}</span>
+              <span class="explorer-folder__meta">Տեքստ, նկար, ձայն և փաստաթղթեր</span>
+            </span>
+            <span class="explorer-count">{{ sectionFileCount(infoSection.id) }} ֆայլ</span>
+          </button>
+        </template>
+
+        <p v-if="productionSections.length" class="explorer-caption">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+          </svg>
+          Նախագծի բաժիններ
+        </p>
+        <div class="explorer-folders">
+          <button
+            v-for="factory in productionSections"
+            :key="factory.id"
+            type="button"
+            class="explorer-folder"
+            :class="{ 'explorer-folder--open': isSectionOpen(factory) }"
+            :disabled="loadingFactoryId === factory.id"
+            :data-section="factory.value"
+            @click="openSection(factory)"
+          >
+            <svg class="explorer-folder__icon" viewBox="0 0 48 40" aria-hidden="true">
+              <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#E9B949" />
+              <path
+                v-if="isSectionOpen(factory)"
+                d="M2 14h44l-4 20a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V14Z"
+                fill="#FBE29B"
+              />
+              <path v-else d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#F8D775" />
+            </svg>
+            <span class="explorer-folder__name">{{ factory.name || factory.value }}</span>
+            <span class="explorer-folder__meta">
+              <template v-if="factory.is_active === false">{{ $t('file_upload.archived_section_short') }}</template>
+              <template v-else>{{ sectionFileCount(factory.id) }} ֆայլ</template>
+            </span>
+          </button>
+        </div>
+
+        <div class="explorer-split">
+          <div class="explorer-files" data-files-pane>
+            <template v-if="sectionOpen && $can('pmp_files.view')">
+              <p
+                v-if="selectedFactory?.is_active === false"
+                class="mb-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200"
+              >
+                {{ $t('file_upload.archived_section') }}
+              </p>
+              <div v-if="!visibleFiles.length" class="explorer-empty">
+                <svg class="h-10 w-12" viewBox="0 0 48 40" aria-hidden="true">
+                  <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#E2E8F0" />
+                  <path d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#F1F5F9" />
+                </svg>
+                <span>{{ fileQuery ? 'Ֆայլեր չեն գտնվել' : 'Թղթապանակը դատարկ է' }}</span>
+              </div>
+              <div
+                v-else
+                :class="fileView === 'grid' ? 'explorer-file-grid' : 'explorer-file-list'"
+              >
+                <div
+                  v-for="file in visibleFiles"
+                  :key="file.id"
+                  class="explorer-file group"
+                  :class="{ 'explorer-file--selected': selectedFile?.id === file.id }"
+                >
                   <button
-                    v-if="$can('pmp_files.upload')"
-                    :disabled="loading || selectedFactory?.is_active === false"
-                    class="w-full mt-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
-                    @click="openAddFileModal"
+                    type="button"
+                    class="explorer-file__open"
+                    :title="file.original_name"
+                    @click="viewFile(file.path, file)"
                   >
-                    <svg
-                      class="w-5 h-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <path
-                        d="M12 4v16m8-8H4"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                    Ավելացնել ֆայլ
+                    <span class="explorer-file__icon" :data-kind="fileKind(file)" aria-hidden="true">
+                      <svg v-if="fileKind(file) === 'image'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="2" /><path d="m21 17-5-5-8 8" /></svg>
+                      <svg v-else-if="fileKind(file) === 'audio'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V6l11-2v12" /><circle cx="6" cy="18" r="3" /><circle cx="17" cy="16" r="3" /></svg>
+                      <svg v-else-if="fileKind(file) === 'video'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="m16 10 5-3v10l-5-3" /></svg>
+                      <svg v-else-if="fileKind(file) === 'model'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4 7.5 8 4.5 8-4.5M12 12v9" /></svg>
+                      <svg v-else-if="fileKind(file) === 'drawing'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M7 16 12 7l5 9M9 13h6" /></svg>
+                      <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></svg>
+                    </span>
+                    <span class="explorer-file__ext">{{ fileExt(file) || '—' }}</span>
+                    <span class="explorer-file__name">{{ file.original_name }}</span>
                   </button>
+                  <div class="explorer-file__actions">
+                    <button
+                      type="button"
+                      class="explorer-icon-button"
+                      aria-label="Ներբեռնել"
+                      title="Ներբեռնել"
+                      @click.stop="downloadFile(file)"
+                    >
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0 4-4m-4 4-4-4M4 18v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1" />
+                      </svg>
+                    </button>
+                    <button
+                      v-if="$can('pmp_files.delete')"
+                      type="button"
+                      class="explorer-icon-button text-rose-600"
+                      aria-label="Ջնջել"
+                      title="Ջնջել"
+                      @click.stop="openDelete(file.id)"
+                    >
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              </transition>
+              </div>
+            </template>
+            <div v-else class="explorer-empty">
+              <svg class="h-10 w-12" viewBox="0 0 48 40" aria-hidden="true">
+                <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#E9B949" />
+                <path d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#F8D775" />
+              </svg>
+              <span>Ընտրեք թղթապանակ</span>
             </div>
-          </section>
-        </transition>
-      </aside>
+          </div>
 
-      <section
-        class="min-w-0 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 min-h-[70vh] flex flex-col"
-      >
+          <section class="explorer-preview" data-preview-pane>
         <transition name="fade">
           <div class="flex-1 flex flex-col">
             <div
@@ -444,8 +516,18 @@
             </div>
           </div>
         </transition>
-      </section>
-    </div>
+          </section>
+        </div>
+      </template>
+
+      <div class="explorer-status">
+        <span v-if="sectionOpen">{{ visibleFiles.length }} տարր</span>
+        <span v-else-if="isOpen === 'factories'">{{ (getFactory || []).length }} տարր</span>
+        <span v-else>{{ (getPmp.remote_number || []).length }} տարր</span>
+        <span v-if="selectedFile" class="truncate">1 ընտրված</span>
+        <span class="ml-auto font-mono">{{ groupCode }}<template v-if="selectedRemoteNumber"> / {{ subgroupCode }}</template></span>
+      </div>
+    </section>
 
     <AddFileModal
       :is-open-modal="isOpenAddFileModal"
@@ -730,6 +812,9 @@ export default {
       materialsLoading: false,
       currentFile: { name: '', size: 0 },
       toDeleteId: null,
+      // Explorer view state (display only).
+      fileQuery: '',
+      fileView: 'grid',
     }
   },
 
@@ -780,6 +865,33 @@ export default {
     },
     isInfoFactory() {
       return this.selectedFactory?.value === 'INFO'
+    },
+    // The INFO reference section is pinned above the other folders.
+    infoSection() {
+      return (
+        (this.getFactory || []).find(
+          (factory) => String(factory.value || '').toUpperCase() === 'INFO'
+        ) || null
+      )
+    },
+    productionSections() {
+      return (this.getFactory || []).filter(
+        (factory) => factory !== this.infoSection
+      )
+    },
+    sectionOpen() {
+      return (
+        !!this.selectedFactory && this.isOpenFiles === this.selectedFactoryId
+      )
+    },
+    visibleFiles() {
+      const query = this.fileQuery.trim().toLowerCase()
+      if (!query) return this.selectedFiles
+      return this.selectedFiles.filter((file) =>
+        String(file.original_name || '')
+          .toLowerCase()
+          .includes(query)
+      )
     },
     allowedExtensions() {
       const policy = this.factoryPolicies.find(
@@ -1520,6 +1632,53 @@ export default {
           this.n(f.remote_number_id) === this.selectedRemoteNumberId
       )
     },
+
+    sectionFileCount(factoryId) {
+      return (this.getPmp.files || []).filter(
+        (f) =>
+          this.n(f.factory_id) === this.n(factoryId) &&
+          this.n(f.remote_number_id) === this.selectedRemoteNumberId
+      ).length
+    },
+
+    isSectionOpen(factory) {
+      const id = this.n(factory?.id)
+      return this.selectedFactoryId === id && this.isOpenFiles === id
+    },
+
+    // Opening a folder never closes it again; "Up" leaves it.
+    openSection(factory) {
+      if (this.isSectionOpen(factory)) return
+      this.fileQuery = ''
+      if (this.isOpenFiles === this.n(factory.id)) this.isOpenFiles = null
+      this.selectFactory(factory)
+    },
+
+    goUp() {
+      if (this.breadcrumb.length < 2) return
+      this.fileQuery = ''
+      this.selectBreadcrumb(this.breadcrumb.length - 2)
+    },
+
+    fileExt(file) {
+      const name = String(file?.original_name || file?.path || '')
+      return (name.match(/\.([a-z0-9_]{1,8})$/i)?.[1] || '').toUpperCase()
+    },
+
+    fileKind(file) {
+      const ext = this.fileExt(file).toLowerCase()
+      if (['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'].includes(ext))
+        return 'image'
+      if (['mp3', 'wav', 'ogg', 'oga', 'm4a', 'aac', 'webm'].includes(ext))
+        return 'audio'
+      if (['mp4', 'mov', 'avi', 'mkv'].includes(ext)) return 'video'
+      if (
+        ['step', 'stp', 'igs', 'iges', 'sldprt', 'sldasm', 'stl', 'obj', 'x_t', '3mf'].includes(ext)
+      )
+        return 'model'
+      if (['dxf', 'dwg', 'dld', 'ic'].includes(ext)) return 'drawing'
+      return 'document'
+    },
   },
 }
 </script>
@@ -1570,5 +1729,142 @@ export default {
     opacity: 1;
     transform: scale(1);
   }
+}
+/* Explorer layout (Windows folders style) */
+.explorer {
+  @apply overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+}
+.explorer-bar {
+  @apply flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-950/40;
+}
+.explorer-path {
+  @apply flex min-w-0 flex-1 items-center gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white px-3 py-1.5 dark:border-slate-700 dark:bg-slate-900;
+}
+.explorer-crumb {
+  @apply max-w-[16rem] shrink-0 truncate rounded-md px-1.5 py-0.5 text-sm text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800;
+}
+.explorer-crumb--current {
+  @apply font-semibold text-slate-900 dark:text-white;
+}
+.explorer-search {
+  @apply flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:w-56;
+}
+.explorer-toolbar {
+  @apply flex flex-wrap items-center gap-2 border-b border-slate-200 px-3 py-2 dark:border-slate-800;
+}
+.explorer-button {
+  @apply inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800;
+}
+.explorer-button--primary {
+  @apply border-slate-900 bg-slate-900 text-white hover:bg-slate-800 dark:border-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200;
+}
+.explorer-button--danger {
+  @apply text-rose-600 dark:text-rose-300;
+}
+.explorer-icon-button {
+  @apply inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white;
+}
+.explorer-icon-button--on {
+  @apply bg-slate-200 text-slate-900 dark:bg-slate-700 dark:text-white;
+}
+.explorer-view-toggle {
+  @apply flex items-center gap-1;
+}
+.explorer-caption {
+  @apply mx-4 mb-2 mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400;
+}
+.explorer-pinned {
+  @apply mx-3 flex w-[calc(100%-1.5rem)] items-center gap-4 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3 transition hover:border-blue-200 hover:bg-blue-50 disabled:cursor-wait disabled:opacity-60 dark:border-blue-900/50 dark:bg-blue-950/20 dark:hover:bg-blue-950/40;
+}
+.explorer-pinned--open {
+  @apply border-blue-400 bg-blue-100/70 ring-2 ring-blue-200 dark:border-blue-500 dark:bg-blue-950/50 dark:ring-blue-900;
+}
+.explorer-folders {
+  @apply grid grid-cols-3 gap-2 px-3 pb-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8;
+}
+.explorer-folder {
+  @apply flex min-w-0 flex-col items-center gap-1 rounded-xl border border-transparent px-2 py-3 text-center transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60 dark:hover:bg-slate-800/60;
+}
+.explorer-folder--open {
+  @apply border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-950/40;
+}
+.explorer-folder__icon {
+  @apply h-12 w-14;
+}
+.explorer-folder__name {
+  @apply block max-w-full truncate text-sm font-semibold text-slate-900 dark:text-white;
+}
+.explorer-folder__meta {
+  @apply block max-w-full truncate text-xs text-slate-500 dark:text-slate-400;
+}
+.explorer-count {
+  @apply shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-slate-900 dark:text-blue-300;
+}
+.explorer-split {
+  @apply grid border-t border-slate-200 dark:border-slate-800 xl:grid-cols-[minmax(18rem,1fr)_minmax(0,1.6fr)];
+}
+.explorer-files {
+  @apply min-w-0 p-3;
+}
+.explorer-preview {
+  @apply flex min-h-[60vh] min-w-0 flex-col border-t border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-950/30 sm:p-6 xl:border-l xl:border-t-0;
+}
+.explorer-empty {
+  @apply flex min-h-[10rem] flex-col items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400;
+}
+.explorer-file-grid {
+  @apply grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-3 2xl:grid-cols-4;
+}
+.explorer-file-list {
+  @apply flex flex-col gap-1;
+}
+.explorer-file {
+  @apply relative min-w-0 rounded-xl border border-transparent transition hover:bg-slate-50 dark:hover:bg-slate-800/60;
+}
+.explorer-file--selected {
+  @apply border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-950/40;
+}
+.explorer-file__open {
+  @apply flex w-full min-w-0 flex-col items-center gap-1 px-2 pb-2 pt-3 text-center;
+}
+.explorer-file-list .explorer-file__open {
+  @apply flex-row gap-3 py-2 pl-3 pr-20 text-left;
+}
+.explorer-file__icon {
+  @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300;
+}
+.explorer-file__icon svg {
+  @apply h-6 w-6;
+}
+.explorer-file__icon[data-kind='drawing'] {
+  @apply bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300;
+}
+.explorer-file__icon[data-kind='model'] {
+  @apply bg-violet-50 text-violet-600 dark:bg-violet-950/50 dark:text-violet-300;
+}
+.explorer-file__icon[data-kind='image'] {
+  @apply bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-300;
+}
+.explorer-file__icon[data-kind='audio'],
+.explorer-file__icon[data-kind='video'] {
+  @apply bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-300;
+}
+.explorer-file__ext {
+  @apply shrink-0 rounded bg-slate-100 px-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300;
+}
+.explorer-file__name {
+  @apply line-clamp-2 break-all text-xs font-medium text-slate-800 dark:text-slate-100;
+}
+.explorer-file-list .explorer-file__name {
+  @apply line-clamp-1 text-sm;
+}
+.explorer-file__actions {
+  @apply absolute right-1 top-1 flex gap-0.5 transition sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100;
+}
+.explorer-file-list .explorer-file__actions {
+  @apply top-1/2 -translate-y-1/2;
+}
+.explorer-status {
+  @apply flex items-center gap-3 border-t border-slate-200 bg-slate-50 px-4 py-1.5 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400;
 }
 </style>

@@ -18,7 +18,12 @@
                 <input v-model="isEmployee" name="is_employee" type="checkbox" class="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300" :disabled="loading" />
                 <span class="min-w-0 text-sm font-bold text-slate-700 dark:text-slate-200">{{ copy.employee }}</span>
               </label>
-              <div v-if="companiesLoading" class="text-sm text-slate-500" role="status">{{ copy.loading }}</div>
+              <!-- Same height as the company select below, so loading does not move the form. -->
+              <div v-if="companiesLoading" role="status">
+                <span class="field-label">{{ copy.company }}</span>
+                <div class="field-control text-slate-400">{{ copy.loading }}</div>
+                <p class="field-error"></p>
+              </div>
               <div v-else-if="companiesError" class="rounded-xl bg-rose-50 p-4 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-200" role="alert">
                 <p>{{ companiesError }}</p><button type="button" class="mt-2 font-bold underline" @click="loadCompanies">{{ copy.retry }}</button>
               </div>
@@ -27,18 +32,23 @@
                 <select id="registration-company" v-model="companyId" name="company_id" class="field-control" :disabled="loading" :aria-invalid="Boolean(fieldError('company_id'))" @change="clearFieldError('company_id')">
                   <option value="">{{ copy.selectCompany }}</option><option v-for="company in companies" :key="company.id" :value="company.id">{{ company.name }}</option>
                 </select>
-                <p v-if="fieldError('company_id')" class="field-error">{{ fieldError('company_id') }}</p>
+                <p class="field-error" :role="fieldError('company_id') ? 'alert' : null">{{ fieldError('company_id') }}</p>
               </div>
               <p v-else-if="companies.length === 1" class="text-sm text-slate-500 dark:text-slate-400">{{ copy.company }}: <strong class="text-slate-900 dark:text-white">{{ companies[0].name }}</strong></p>
-              <div class="space-y-4">
+              <div class="space-y-1">
                 <div v-for="field in fields" :key="field.key">
                   <InputWithLabelIcon v-model="form[field.key]" :type="field.type" :name="field.key" :label="field.label" :label_-id="'registration-' + field.key" :for_-l-abel="'registration-' + field.key" :autocomplete="field.autocomplete" :placeholder="field.placeholder || ''" :maxlength="255" :disabled="loading" :required="field.required" :aria-invalid="Boolean(fieldError(field.key))" :classes="fieldError(field.key) ? '!border-rose-400' : ''" @input="clearFieldError(field.key)" />
                   <p v-if="field.key === 'job_title'" class="mt-2 text-xs leading-5 text-slate-500">{{ copy.jobHint }}</p>
-                  <p v-if="fieldError(field.key)" class="field-error">{{ fieldError(field.key) }}</p>
+                  <!-- Reserved line: a message appearing or clearing never moves the form. -->
+                  <p class="field-error" :role="fieldError(field.key) ? 'alert' : null">{{ fieldError(field.key) }}</p>
                 </div>
               </div>
-              <p class="text-xs leading-5 text-slate-500 dark:text-slate-400">{{ copy.sharedHint }}</p>
-              <div v-if="submitError" class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200" role="alert">{{ submitError }}</div>
+              <div class="relative">
+                <p class="text-xs leading-5 text-slate-500 dark:text-slate-400">{{ copy.sharedHint }}</p>
+                <transition enter-active-class="transition-opacity duration-150" enter-class="opacity-0" leave-active-class="transition-opacity duration-150" leave-to-class="opacity-0">
+                  <div v-if="submitError" class="absolute inset-x-0 bottom-0 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs leading-5 text-rose-700 dark:border-rose-900 dark:bg-rose-950 dark:text-rose-200" role="alert">{{ submitError }}</div>
+                </transition>
+              </div>
               <button type="submit" :disabled="loading || companiesLoading || Boolean(companiesError)" class="app-button-primary w-full">{{ loading ? copy.sending : copy.send }}</button>
             </form>
             <p class="mt-7 max-w-md border-t border-slate-100 pt-6 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
@@ -149,5 +159,5 @@ export default {
 <style scoped>
 .field-label{@apply mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400}
 .field-control{@apply block w-full min-w-0 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white}
-.field-error{@apply mt-2 text-xs font-semibold text-rose-600 dark:text-rose-300}
+.field-error{@apply mt-1.5 min-h-[1.125rem] text-xs font-semibold leading-[1.125rem] text-rose-600 dark:text-rose-300}
 </style>
