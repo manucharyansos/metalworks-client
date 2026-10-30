@@ -196,7 +196,7 @@
         </button>
       </div>
       <ul
-        class="mt-2 grid max-h-40 grid-cols-1 gap-1 overflow-auto sm:grid-cols-2"
+        class="mt-2 grid max-h-40 grid-cols-[repeat(auto-fill,minmax(min(100%,14rem),1fr))] gap-1 overflow-auto"
       >
         <li
           v-for="part in model.meshes"

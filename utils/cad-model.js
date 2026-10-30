@@ -34,7 +34,116 @@ function hasZeroNormal(normal) {
   return false
 }
 
-export function normalizeCadModel(source, format, unit) {
+// CAD systems name a shape by its type ("SOLID", "Body2") when the user gave
+// it no name; such names say nothing, so the viewer numbers those parts.
+const GENERIC_PART_NAME =
+  /^(solid|shell|compound|compsolid|body|part|mesh|default|unnamed|noname|none)[\s_-]*\d*$/i
+
+function cleanPartName(value) {
+  const name = String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 200)
+  return GENERIC_PART_NAME.test(name) ? '' : name
+}
+
+// Component names from the STEP/IGES assembly tree, for solids that carry no
+// name themselves: each mesh takes the nearest named node that lists it.
+function treePartNames(root) {
+  const names = new Map()
+  const seen = new Set()
+  const walk = (node, inherited, depth) => {
+    if (!node || typeof node !== 'object' || depth > 64 || seen.has(node)) return
+    seen.add(node)
+    const name = cleanPartName(node.name) || inherited
+    for (const index of Array.isArray(node.meshes) ? node.meshes : []) {
+      if (Number.isInteger(index) && name && !names.has(index))
+        names.set(index, name)
+    }
+    for (const child of Array.isArray(node.children) ? node.children : [])
+      walk(child, name, depth + 1)
+  }
+  walk(root, '', 0)
+  return names
+}
+
+// STEP strings escape non-ASCII text (ISO 10303-21): \X2\…\X0\ holds UTF-16
+// code units, \X4\…\X0\ code points, \X\hh and \S\c single Latin-1 letters.
+const STEP_ESCAPE =
+  /\\X2\\((?:[0-9A-Fa-f]{4})*)\\X0\\|\\X4\\((?:[0-9A-Fa-f]{8})*)\\X0\\|\\X\\([0-9A-Fa-f]{2})|\\S\\([\s\S])|\\P[A-I]\\|\\\\|''/g
+
+export function decodeStepString(value) {
+  return String(value ?? '').replace(
+    STEP_ESCAPE,
+    (match, utf16, utf32, latin1, high) => {
+      if (utf16 !== undefined)
+        return utf16.replace(/[0-9A-Fa-f]{4}/g, (hex) =>
+          String.fromCharCode(parseInt(hex, 16))
+        )
+      if (utf32 !== undefined)
+        return utf32.replace(/[0-9A-Fa-f]{8}/g, (hex) => {
+          const point = parseInt(hex, 16)
+          return point <= 0x10ffff ? String.fromCodePoint(point) : ''
+        })
+      if (latin1 !== undefined) return String.fromCharCode(parseInt(latin1, 16))
+      if (high !== undefined) return String.fromCharCode(high.charCodeAt(0) + 128)
+      if (match === '\\\\') return '\\'
+      if (match === "''") return "'"
+      return ''
+    }
+  )
+}
+
+const STEP_SOLID =
+  /#(\d+)\s*=\s*(?:MANIFOLD_SOLID_BREP|BREP_WITH_VOIDS|FACETED_BREP)\s*\(\s*'((?:[^']|'')*)'/g
+const STEP_SHAPE_ITEMS =
+  /=\s*[A-Z_]*SHAPE_REPRESENTATION\s*\(\s*'(?:[^']|'')*'\s*,\s*\(([^)]*)\)/g
+
+// Body names of a single-part STEP file (a SolidWorks multi-body part), in
+// the order OpenCascade reads the bodies. OpenCascade leaves these bodies
+// unnamed. Assemblies return null: their names come from the assembly tree.
+export function stepBodyNames(text) {
+  if (typeof text !== 'string') return null
+  const names = new Map()
+  for (const [, id, name] of text.matchAll(STEP_SOLID)) names.set(id, name)
+  if (names.size < 2) return null
+  let bodies = null
+  for (const [, items] of text.matchAll(STEP_SHAPE_ITEMS)) {
+    const solids = (items.match(/#\d+/g) || [])
+      .map((ref) => ref.slice(1))
+      .filter((id) => names.has(id))
+    if (!solids.length) continue
+    if (bodies) return null
+    bodies = solids
+  }
+  return bodies && bodies.map((id) => decodeStepString(names.get(id)))
+}
+
+function fileTitle(filename) {
+  const name = String(filename ?? '')
+    .split(/[\\/]/)
+    .pop()
+  return cleanPartName(name.replace(/\.[^.]*$/, '') || name)
+}
+
+// Repeated parts (six bolts) become "bolt (1)" … "bolt (6)".
+function numberRepeatedNames(meshes) {
+  const total = new Map()
+  for (const mesh of meshes)
+    if (mesh.name) total.set(mesh.name, (total.get(mesh.name) || 0) + 1)
+  const used = new Map()
+  for (const mesh of meshes) {
+    if (!mesh.name || total.get(mesh.name) < 2) continue
+    const number = (used.get(mesh.name) || 0) + 1
+    used.set(mesh.name, number)
+    mesh.name = `${mesh.name} (${number})`
+  }
+}
+
+// Part names, best first: the body name from the STEP text, the name the
+// importer gave the part, the nearest named assembly node, and for a single
+// part the file name. Parts left unnamed are numbered by the viewer.
+export function normalizeCadModel(source, format, unit, options = {}) {
   if (
     !source?.success ||
     !Array.isArray(source.meshes) ||
@@ -42,6 +151,13 @@ export function normalizeCadModel(source, format, unit) {
   )
     invalid('empty')
   if (source.meshes.length > MAX_MODEL_PARTS) invalid('too_complex')
+  const treeNames = treePartNames(source.root)
+  const bodyNames =
+    Array.isArray(options.bodyNames) &&
+    source.meshes.length > 1 &&
+    options.bodyNames.length === source.meshes.length
+      ? options.bodyNames
+      : null
   let triangles = 0
   let vertices = 0
   const bounds = {
@@ -109,7 +225,11 @@ export function normalizeCadModel(source, format, unit) {
     })
     return {
       id,
-      name: String(mesh.name || '').slice(0, 200),
+      name:
+        cleanPartName(bodyNames?.[id]) ||
+        cleanPartName(mesh.name) ||
+        treeNames.get(id) ||
+        '',
       position,
       normal,
       index,
@@ -119,6 +239,9 @@ export function normalizeCadModel(source, format, unit) {
   })
   if (!triangles || !bounds.max.some((value, axis) => value > bounds.min[axis]))
     invalid('empty')
+  if (meshes.length === 1 && !meshes[0].name)
+    meshes[0].name = fileTitle(options.filename)
+  numberRepeatedNames(meshes)
   return { format, unit, meshes, bounds, triangles, vertices }
 }
 

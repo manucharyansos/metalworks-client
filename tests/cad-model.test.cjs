@@ -13,6 +13,63 @@ const occt = () => runtime || (runtime = require('occt-import-js')({ print() {},
 const options = { linearUnit: 'millimeter', linearDeflectionType: 'bounding_box_ratio', linearDeflection: 0.001, angularDeflection: 0.3 }
 const sample = () => ({ success: true, meshes: [{ name: 'Part', attributes: { position: { array: [0, 0, 0, 10, 0, 0, 0, 20, 0] } }, index: { array: [0, 1, 2] } }] })
 
+// A single-part STEP file whose solid bodies are boxes, listed in the shape
+// representation in `order` (like a SolidWorks multi-body part).
+function boxesStep(boxes, order) {
+  const lines = []
+  let next = 0
+  const add = (entity) => { lines.push(`#${++next} = ${entity} ;`); return `#${next}` }
+  const real = (value) => value.toFixed(1)
+  const point = (p) => add(`CARTESIAN_POINT ( 'NONE', ( ${p.map(real).join(', ')} ) )`)
+  const direction = (d) => add(`DIRECTION ( 'NONE', ( ${d.map(real).join(', ')} ) )`)
+  const mm = add('( LENGTH_UNIT ( ) NAMED_UNIT ( * ) SI_UNIT ( .MILLI., .METRE. ) )')
+  const rad = add('( NAMED_UNIT ( * ) PLANE_ANGLE_UNIT ( ) SI_UNIT ( $, .RADIAN. ) )')
+  const sr = add('( NAMED_UNIT ( * ) SI_UNIT ( $, .STERADIAN. ) SOLID_ANGLE_UNIT ( ) )')
+  const accuracy = add(`UNCERTAINTY_MEASURE_WITH_UNIT ( LENGTH_MEASURE ( 1.0E-05 ), ${mm}, 'distance_accuracy_value', 'NONE' )`)
+  const context = add(`( GEOMETRIC_REPRESENTATION_CONTEXT ( 3 ) GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT ( ( ${accuracy} ) ) GLOBAL_UNIT_ASSIGNED_CONTEXT ( ( ${mm}, ${rad}, ${sr} ) ) REPRESENTATION_CONTEXT ( 'NONE', 'WORKASPACE' ) )`)
+  const solids = boxes.map(({ name, min, max }) => {
+    const v = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]]
+      .map((corner) => corner.map((c, axis) => (c ? max[axis] : min[axis])))
+    const vertices = v.map((p) => add(`VERTEX_POINT ( 'NONE', ${point(p)} )`))
+    const edges = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]].map(([a, b]) => {
+      const d = v[b].map((value, axis) => value - v[a][axis])
+      const length = Math.hypot(...d)
+      const line = add(`LINE ( 'NONE', ${point(v[a])}, ${add(`VECTOR ( 'NONE', ${direction(d.map((value) => value / length))}, ${real(length)} )`)} )`)
+      return add(`EDGE_CURVE ( 'NONE', ${vertices[a]}, ${vertices[b]}, ${line}, .T. )`)
+    })
+    // [edge, same direction] loops, counter-clockwise seen from outside.
+    const faces = [
+      [[0, 0, -1], [[3, 0], [2, 0], [1, 0], [0, 0]]],
+      [[0, 0, 1], [[4, 1], [5, 1], [6, 1], [7, 1]]],
+      [[0, -1, 0], [[0, 1], [9, 1], [4, 0], [8, 0]]],
+      [[0, 1, 0], [[2, 1], [11, 1], [6, 0], [10, 0]]],
+      [[-1, 0, 0], [[8, 1], [7, 0], [11, 0], [3, 1]]],
+      [[1, 0, 0], [[1, 1], [10, 1], [5, 0], [9, 0]]],
+    ].map(([normal, loop]) => {
+      const edgesOfLoop = loop.map(([edge, same]) => add(`ORIENTED_EDGE ( 'NONE', *, *, ${edges[edge]}, ${same ? '.T.' : '.F.'} )`))
+      const bound = add(`FACE_OUTER_BOUND ( 'NONE', ${add(`EDGE_LOOP ( 'NONE', ( ${edgesOfLoop.join(', ')} ) )`)}, .T. )`)
+      const origin = normal.map((n, axis) => (n > 0 ? max[axis] : min[axis]))
+      const reference = normal[0] ? [0, 1, 0] : [1, 0, 0]
+      const plane = add(`PLANE ( 'NONE', ${add(`AXIS2_PLACEMENT_3D ( 'NONE', ${point(origin)}, ${direction(normal)}, ${direction(reference)} )`)} )`)
+      return add(`ADVANCED_FACE ( 'NONE', ( ${bound} ), ${plane}, .T. )`)
+    })
+    return add(`MANIFOLD_SOLID_BREP ( '${name}', ${add(`CLOSED_SHELL ( 'NONE', ( ${faces.join(', ')} ) )`)} )`)
+  })
+  const placement = add(`AXIS2_PLACEMENT_3D ( 'NONE', ${point([0, 0, 0])}, ${direction([0, 0, 1])}, ${direction([1, 0, 0])} )`)
+  const representation = add(`ADVANCED_BREP_SHAPE_REPRESENTATION ( 'Bodies', ( ${order.map((i) => solids[i]).join(', ')}, ${placement} ), ${context} )`)
+  const application = add("APPLICATION_CONTEXT ( 'automotive_design' )")
+  add(`APPLICATION_PROTOCOL_DEFINITION ( 'international standard', 'automotive_design', 2000, ${application} )`)
+  const product = add(`PRODUCT ( 'Bodies', 'Bodies', '', ( ${add(`PRODUCT_CONTEXT ( 'NONE', ${application}, 'mechanical' )`)} ) )`)
+  const formation = add(`PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE ( 'ANY', '', ${product}, .NOT_KNOWN. )`)
+  const definition = add(`PRODUCT_DEFINITION ( 'UNKNOWN', '', ${formation}, ${add(`PRODUCT_DEFINITION_CONTEXT ( 'detailed design', ${application}, 'design' )`)} )`)
+  add(`SHAPE_DEFINITION_REPRESENTATION ( ${add(`PRODUCT_DEFINITION_SHAPE ( 'NONE', 'NONE', ${definition} )`)}, ${representation} )`)
+  return [
+    'ISO-10303-21;', 'HEADER;', "FILE_DESCRIPTION ( ( 'STEP AP214' ), '1' );",
+    "FILE_NAME ( 'Bodies.STEP', '2026-10-30T00:00:00', ( '' ), ( '' ), 'test', 'test', '' );",
+    "FILE_SCHEMA ( ( 'AUTOMOTIVE_DESIGN' ) );", 'ENDSEC;', '', 'DATA;', ...lines, 'ENDSEC;', 'END-ISO-10303-21;', '',
+  ].join('\r\n')
+}
+
 test('genuine IGES geometry is detected inside an IQS-named payload', async () => {
   const bytes = fs.readFileSync(path.join(fixtures, 'cube-10x10mm/Cube 10x10.igs'))
   const detected = await (await preview).inspectFactoryPreview(new Blob([bytes]), 'part.iqs', 'file')
@@ -42,10 +99,86 @@ test('an actual STEP assembly retains multiple named parts', async () => {
   const bytes = fs.readFileSync(path.join(fixtures, 'cax-if/as1_pe_203.stp'))
   const model = (await helpers).normalizeCadModel((await occt()).ReadStepFile(bytes, options), 'step', 'mm')
   assert.ok(model.meshes.length > 1)
-  assert.ok(model.meshes.some(mesh => mesh.name))
   assert.ok(model.triangles > 12)
   assert.ok(model.vertices > 8)
   assert.ok(model.bounds.min.every(Number.isFinite))
+  // The solids are only called "SOLID"; the assembly tree names them.
+  const names = model.meshes.map(mesh => mesh.name)
+  assert.equal(names[0], 'PLATE')
+  assert.ok(names.includes('L_BRACKET_ASSEMBLY_ASM (14)'))
+  assert.ok(names.includes('ROD_ASM (3)'))
+  assert.equal(new Set(names).size, names.length)
+})
+
+test('repeated part names are numbered and unique names stay as they are', async () => {
+  const bytes = fs.readFileSync(path.join(fixtures, 'cax-if/as1-oc-214.stp'))
+  const names = (await helpers).normalizeCadModel((await occt()).ReadStepFile(bytes, options), 'step', 'mm').meshes.map(mesh => mesh.name)
+  assert.deepEqual(names.filter(name => name.startsWith('nut')), ['nut (1)', 'nut (2)', 'nut (3)', 'nut (4)', 'nut (5)', 'nut (6)', 'nut (7)', 'nut (8)'])
+  assert.ok(names.includes('plate'))
+  assert.ok(names.includes('rod'))
+  assert.equal(new Set(names).size, names.length)
+})
+
+test('a multi-body STEP part takes the body names written in the file', async () => {
+  const { stepBodyNames, normalizeCadModel } = await helpers
+  const step = [
+    'DATA;',
+    "#10 = MANIFOLD_SOLID_BREP ( '\\X2\\0421043a044004430433043b0435043d04380435\\X0\\5', #20 ) ;",
+    "#11 = MANIFOLD_SOLID_BREP ( 'Boss-Extrude1', #21 ) ;",
+    "#12 = BREP_WITH_VOIDS ( 'Caf\\X\\E9 d''angle', #22, ( #23 ) ) ;",
+    "#13 = AXIS2_PLACEMENT_3D ( 'NONE', #1, #2, #3 ) ;",
+    "#14 = ADVANCED_BREP_SHAPE_REPRESENTATION ( 'Part', ( #11, #13,\r\n #10, #12 ), #30 ) ;",
+    "#15 = SHAPE_REPRESENTATION ( 'Part', ( #13 ), #30 ) ;",
+  ].join('\r\n')
+  const bodies = stepBodyNames(step)
+  assert.deepEqual(bodies, ['Boss-Extrude1', 'Скругление5', "Café d'angle"])
+  const source = sample()
+  source.meshes = [0, 1, 2].map(() => sample().meshes[0])
+  source.meshes.forEach(mesh => { mesh.name = '' })
+  source.root = { name: 'Moxraman', meshes: [0, 1, 2], children: [] }
+  assert.deepEqual(normalizeCadModel(source, 'step', 'mm', { bodyNames: bodies }).meshes.map(mesh => mesh.name), bodies)
+  // A body count that does not match the parts is not trusted.
+  assert.deepEqual(normalizeCadModel(source, 'step', 'mm', { bodyNames: bodies.slice(1) }).meshes.map(mesh => mesh.name), ['Moxraman (1)', 'Moxraman (2)', 'Moxraman (3)'])
+  // Assemblies (several parts with their own bodies) keep the tree names.
+  assert.equal(stepBodyNames(step + "\r\n#16 = ADVANCED_BREP_SHAPE_REPRESENTATION ( 'Other', ( #10 ), #30 ) ;"), null)
+  assert.equal(stepBodyNames(fs.readFileSync(path.join(fixtures, 'cax-if/as1-oc-214.stp'), 'utf8')), null)
+})
+
+test('each body name lands on the body it belongs to after OpenCascade import', async () => {
+  const { stepBodyNames, normalizeCadModel } = await helpers
+  const boxes = [
+    { name: 'Alpha', min: [0, 0, 0], max: [10, 10, 10] },
+    { name: '\\X2\\0411043504420430\\X0\\', min: [100, 0, 0], max: [130, 20, 5] },
+    { name: 'Gamma', min: [300, 0, 0], max: [310, 50, 50] },
+  ]
+  const step = boxesStep(boxes, [2, 0, 1])
+  const model = normalizeCadModel((await occt()).ReadStepFile(Buffer.from(step), options), 'step', 'mm', { bodyNames: stepBodyNames(step) })
+  assert.equal(model.meshes.length, 3)
+  const expected = ['Alpha', 'Бета', 'Gamma']
+  for (const mesh of model.meshes) {
+    let minX = Infinity
+    for (let i = 0; i < mesh.position.length; i += 3) minX = Math.min(minX, mesh.position[i])
+    const box = boxes.findIndex(({ min }) => Math.abs(min[0] - minX) < 0.01)
+    assert.equal(mesh.name, expected[box])
+  }
+  assert.deepEqual(model.meshes.map(mesh => mesh.name), ['Gamma', 'Alpha', 'Бета'])
+})
+
+test('the CAD worker parses with the webpack 4 parser, since Babel does not process it', () => {
+  const webpack = path.dirname(require.resolve('webpack/package.json'))
+  const acorn = require(require.resolve('acorn', { paths: [webpack] }))
+  assert.doesNotThrow(() => acorn.parse(read('workers/cad-model.worker.js'), { ecmaVersion: 11, sourceType: 'module' }))
+})
+
+test('type names such as SOLID or Body2 are not shown as part names', async () => {
+  const { normalizeCadModel } = await helpers
+  const source = sample()
+  source.meshes = ['SOLID', 'Body2', 'NONE', 'Bracket'].map(name => ({ ...sample().meshes[0], name }))
+  assert.deepEqual(normalizeCadModel(source, 'step', 'mm').meshes.map(mesh => mesh.name), ['', '', '', 'Bracket'])
+  // A single unnamed part is named after its file.
+  const bytes = fs.readFileSync(path.join(fixtures, 'cube-10x10mm/Cube 10x10.igs'))
+  const model = normalizeCadModel((await occt()).ReadIgesFile(bytes, options), 'iges', 'mm', { filename: 'uploads/Cube 10x10.igs' })
+  assert.deepEqual(model.meshes.map(mesh => mesh.name), ['Cube 10x10'])
 })
 
 test('ASCII and binary STL and negative-index OBJ are recognized by their contents', async () => {

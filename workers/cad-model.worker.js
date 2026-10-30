@@ -1,6 +1,10 @@
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
-import { normalizeCadModel, modelTransferables } from '~/utils/cad-model'
+import {
+  normalizeCadModel,
+  modelTransferables,
+  stepBodyNames,
+} from '~/utils/cad-model'
 
 const VENDOR_VERSION = '0.0.23'
 
@@ -62,7 +66,7 @@ self.onmessage = async ({ data }) => {
       const binary = count > 0 && 84 + count * 50 === bytes.length
       if (!binary && !/^\s*solid\b/i.test(header)) throw new Error('invalid')
       const geometry = new STLLoader().parse(data.buffer)
-      source = { success: true, meshes: [meshSource(geometry, data.filename)] }
+      source = { success: true, meshes: [meshSource(geometry, '')] }
       geometry.dispose()
     } else {
       const object = new OBJLoader().parse(
@@ -81,10 +85,20 @@ self.onmessage = async ({ data }) => {
       })
       source = { success: true, meshes }
     }
+    // A SolidWorks multi-body part keeps its body names only in the STEP text.
+    // (This file is not run through Babel: no optional chaining here.)
+    const bodyNames =
+      data.format === 'step' &&
+      source &&
+      Array.isArray(source.meshes) &&
+      source.meshes.length > 1
+        ? stepBodyNames(new TextDecoder().decode(bytes))
+        : null
     const model = normalizeCadModel(
       source,
       data.format,
-      ['iges', 'step'].includes(data.format) ? 'mm' : null
+      ['iges', 'step'].includes(data.format) ? 'mm' : null,
+      { bodyNames, filename: data.filename }
     )
     self.postMessage({ model }, modelTransferables(model))
   } catch (error) {

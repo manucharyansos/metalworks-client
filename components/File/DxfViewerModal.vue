@@ -29,13 +29,19 @@
     <canvas ref="canvas" class="w-full h-full block"></canvas>
 
     <div
-      v-if="showLaserInfo && laserLengthMmRounded > 0"
+      v-if="showLaserInfo && (laserLengthMmRounded > 0 || drawingSizeText)"
       class="absolute left-2 top-2 px-3 py-1.5 rounded-lg bg-black/70 text-[11px] text-white backdrop-blur-sm flex flex-col gap-0.5 max-w-[280px]"
+      data-dxf-info
     >
       <div v-if="materialInfo" class="font-medium truncate">
         {{ materialInfo }}
       </div>
-      <div class="opacity-80">
+      <div v-if="drawingSizeText" class="opacity-80" data-dxf-size>
+        {{ t.size }}:
+        <span class="font-semibold">{{ drawingSizeText }}</span>
+        {{ t.unitMm }}
+      </div>
+      <div v-if="laserLengthMmRounded > 0" class="opacity-80">
         {{ t.cutLength }}:
         <span class="font-semibold">{{ laserLengthMmRounded }}</span>
         {{ t.unitMm }}
@@ -66,6 +72,7 @@ import FileProductionAttributes from '@/components/File/FileProductionAttributes
 const COPY = {
   hy: {
     cutLength: 'Գծամետրում',
+    size: 'Լայնություն × բարձրություն',
     unitMm: 'մմ',
     dxfError: 'DXF սխալ',
     emptyFile: 'Ֆայլի տվյալները դատարկ են',
@@ -76,6 +83,7 @@ const COPY = {
   },
   ru: {
     cutLength: 'Длина реза',
+    size: 'Ширина × высота',
     unitMm: 'мм',
     dxfError: 'Ошибка DXF',
     emptyFile: 'Файл не содержит данных',
@@ -86,6 +94,7 @@ const COPY = {
   },
   en: {
     cutLength: 'Cut length',
+    size: 'Width × height',
     unitMm: 'mm',
     dxfError: 'DXF error',
     emptyFile: 'The file contains no data',
@@ -124,6 +133,8 @@ export default {
       error: null,
       raf: null,
       laserLengthMm: 0,
+      // Overall drawing extents (same units as the cut length).
+      drawingSize: null,
       loadRequest: 0,
     }
   },
@@ -136,6 +147,12 @@ export default {
     },
     t() {
       return COPY[this.locale] || COPY.hy
+    },
+    drawingSizeText() {
+      const size = this.drawingSize
+      if (!size || !(size.width > 0 || size.height > 0)) return ''
+      const round = (value) => Number(value.toFixed(1))
+      return `${round(size.width)} × ${round(size.height)}`
     },
     laserLengthMmRounded() {
       if (!this.laserLengthMm) return 0
@@ -164,10 +181,17 @@ export default {
   mounted() {
     this.loadDxfFile()
     window.addEventListener('resize', this.onResize)
+    // The drawing also resizes with its pane, not only with the window.
+    if (typeof ResizeObserver === 'function' && this.$refs.canvas) {
+      this.resizeObserver = new ResizeObserver(() => this.onResize())
+      this.resizeObserver.observe(this.$refs.canvas)
+    }
   },
   beforeDestroy() {
     ++this.loadRequest
     window.removeEventListener('resize', this.onResize)
+    this.resizeObserver?.disconnect()
+    this.resizeObserver = null
     this.cleanupThree()
   },
   methods: {
@@ -284,6 +308,7 @@ export default {
       this.controls = null
       this.dxfGroup = null
       this.laserLengthMm = 0
+      this.drawingSize = null
     },
 
     async loadDxfFile() {
@@ -478,6 +503,7 @@ export default {
           const box = new THREE.Box3().setFromObject(this.dxfGroup)
           const center = box.getCenter(new THREE.Vector3())
           const size = box.getSize(new THREE.Vector3())
+          this.drawingSize = { width: size.x, height: size.y }
           this.dxfGroup.position.sub(center)
 
           const maxDim = Math.max(size.x, size.y) || 100

@@ -1,6 +1,6 @@
 <template>
   <main
-    class="p-4 md:p-6 lg:p-8 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
+    class="files-page p-4 md:p-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800"
   >
     <div
       v-if="pageError"
@@ -35,36 +35,36 @@
 
     <section
       v-if="projectReady"
-      class="work-card mb-5 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-2 sm:p-5"
+      class="work-card mb-5 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-2 sm:p-5 lg:mb-3 lg:gap-3 lg:px-4 lg:py-2.5"
       aria-label="Նախագիծ"
     >
-      <div class="min-w-0">
-        <p class="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+      <div class="min-w-0 lg:flex lg:items-center lg:gap-3">
+        <p class="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400 lg:mb-0 lg:shrink-0">
           {{ $t('project_context.group') }}
         </p>
-        <div class="flex items-start gap-3">
+        <div class="flex min-w-0 items-start gap-3 lg:items-center">
           <span
             class="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-sm font-semibold text-slate-900 dark:bg-slate-800 dark:text-white"
             >{{ groupCode }}</span
           >
           <p
-            class="min-w-0 break-words text-sm font-semibold text-slate-900 dark:text-white"
+            class="min-w-0 break-words text-sm font-semibold text-slate-900 dark:text-white lg:truncate"
           >
             {{ getPmp.group_name || '—' }}
           </p>
         </div>
       </div>
-      <div v-if="selectedRemoteNumber" class="min-w-0">
-        <p class="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+      <div v-if="selectedRemoteNumber" class="min-w-0 lg:flex lg:items-center lg:gap-3">
+        <p class="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400 lg:mb-0 lg:shrink-0">
           {{ $t('project_context.subgroup') }}
         </p>
-        <div class="flex items-start gap-3">
+        <div class="flex min-w-0 items-start gap-3 lg:items-center">
           <span
             class="shrink-0 rounded-lg bg-blue-50 px-2.5 py-1 font-mono text-sm font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-200"
             >{{ subgroupCode }}</span
           >
           <p
-            class="min-w-0 break-words text-sm font-semibold text-slate-900 dark:text-white"
+            class="min-w-0 break-words text-sm font-semibold text-slate-900 dark:text-white lg:truncate"
           >
             {{ selectedRemoteNumber.remote_number_name || '—' }}
           </p>
@@ -205,7 +205,7 @@
       </div>
 
       <transition name="fade-scale">
-        <div v-if="isOpen === 'remote_number'" class="explorer-folders">
+        <div v-if="isOpen === 'remote_number'" class="explorer-folders explorer-subgroups">
           <button
             v-for="number in getPmp.remote_number"
             :key="number.id"
@@ -224,182 +224,193 @@
       </transition>
 
       <template v-if="isOpen === 'factories'">
-        <template v-if="infoSection">
-          <p class="explorer-caption">
-            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 4.5 19.5 9l-3 3-.5 4.5-4.5-4.5L7 16.5M15 4.5l-3 3-4.5-.5-1 1L16 17.5l1-1-.5-4.5" />
-            </svg>
-            Տեղեկատու
-          </p>
-          <button
-            type="button"
-            class="explorer-pinned"
-            :class="{ 'explorer-pinned--open': isSectionOpen(infoSection) }"
-            :disabled="loadingFactoryId === infoSection.id"
-            data-section="INFO"
-            @click="openSection(infoSection)"
-          >
-            <svg class="h-10 w-12 shrink-0" viewBox="0 0 48 40" aria-hidden="true">
-              <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#60A5FA" />
-              <path d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#93C5FD" />
-              <path d="M18 24h12M18 29h8" stroke="#1D4ED8" stroke-width="2.5" stroke-linecap="round" />
-            </svg>
-            <span class="min-w-0 flex-1 text-left">
-              <span class="explorer-folder__name">{{ infoSection.name || infoSection.value }}</span>
-              <span class="explorer-folder__meta">Տեքստ, նկար, ձայն և փաստաթղթեր</span>
-            </span>
-            <span class="explorer-count">{{ sectionFileCount(infoSection.id) }} ֆայլ</span>
-          </button>
-        </template>
-
-        <div v-if="productionSections.length" class="explorer-caption-row">
-          <p class="explorer-caption">
-            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
-            </svg>
-            Նախագծի բաժիններ
-          </p>
-          <div class="explorer-view-toggle" role="group" data-section-view>
-            <button
-              type="button"
-              class="explorer-icon-button"
-              :class="{ 'explorer-icon-button--on': sectionView === 'grid' }"
-              :aria-label="$t('file_explorer.sections_tiles')"
-              :title="$t('file_explorer.sections_tiles')"
-              :aria-pressed="sectionView === 'grid'"
-              @click="sectionView = 'grid'"
-            >
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <rect x="3" y="5" width="5" height="14" rx="1" /><rect x="10" y="5" width="5" height="14" rx="1" /><rect x="17" y="5" width="4" height="14" rx="1" />
-              </svg>
-            </button>
-            <button
-              type="button"
-              class="explorer-icon-button"
-              :class="{ 'explorer-icon-button--on': sectionView === 'list' }"
-              :aria-label="$t('file_explorer.sections_list')"
-              :title="$t('file_explorer.sections_list')"
-              :aria-pressed="sectionView === 'list'"
-              @click="sectionView = 'list'"
-            >
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <rect x="4" y="4" width="16" height="4" rx="1" /><rect x="4" y="10" width="16" height="4" rx="1" /><rect x="4" y="16" width="16" height="4" rx="1" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div
-          class="explorer-folders"
-          :class="{ 'explorer-folders--list': sectionView === 'list' }"
-        >
-          <button
-            v-for="factory in productionSections"
-            :key="factory.id"
-            type="button"
-            class="explorer-folder"
-            :class="{ 'explorer-folder--open': isSectionOpen(factory) }"
-            :disabled="loadingFactoryId === factory.id"
-            :data-section="factory.value"
-            @click="openSection(factory)"
-          >
-            <svg class="explorer-folder__icon" viewBox="0 0 48 40" aria-hidden="true">
-              <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#E9B949" />
-              <path
-                v-if="isSectionOpen(factory)"
-                d="M2 14h44l-4 20a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V14Z"
-                fill="#FBE29B"
-              />
-              <path v-else d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#F8D775" />
-            </svg>
-            <span class="explorer-folder__name">{{ factory.name || factory.value }}</span>
-            <span class="explorer-folder__meta">
-              <template v-if="factory.is_active === false">{{ $t('file_upload.archived_section_short') }}</template>
-              <template v-else>{{ sectionFileCount(factory.id) }} ֆայլ</template>
-            </span>
-          </button>
-        </div>
-
         <div class="explorer-split">
-          <div class="explorer-files" data-files-pane>
-            <template v-if="sectionOpen && $can('pmp_files.view')">
-              <p
-                v-if="selectedFactory?.is_active === false"
-                class="mb-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200"
-              >
-                {{ $t('file_upload.archived_section') }}
-              </p>
-              <div v-if="!visibleFiles.length" class="explorer-empty">
-                <svg class="h-10 w-12" viewBox="0 0 48 40" aria-hidden="true">
-                  <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#E2E8F0" />
-                  <path d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#F1F5F9" />
-                </svg>
-                <span>{{ fileQuery ? 'Ֆայլեր չեն գտնվել' : 'Թղթապանակը դատարկ է' }}</span>
-              </div>
-              <div
-                v-else
-                :class="fileView === 'grid' ? 'explorer-file-grid' : 'explorer-file-list'"
-              >
-                <div
-                  v-for="file in visibleFiles"
-                  :key="file.id"
-                  class="explorer-file group"
-                  :class="{ 'explorer-file--selected': selectedFile?.id === file.id }"
+          <div class="explorer-nav" data-explorer-nav>
+            <div class="explorer-nav__sections">
+              <template v-if="infoSection">
+                <p class="explorer-caption">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 4.5 19.5 9l-3 3-.5 4.5-4.5-4.5L7 16.5M15 4.5l-3 3-4.5-.5-1 1L16 17.5l1-1-.5-4.5" />
+                  </svg>
+                  Տեղեկատու
+                </p>
+                <button
+                  type="button"
+                  class="explorer-pinned"
+                  :class="{ 'explorer-pinned--open': isSectionOpen(infoSection) }"
+                  :disabled="loadingFactoryId === infoSection.id"
+                  data-section="INFO"
+                  @click="openSection(infoSection)"
                 >
+                  <svg class="h-10 w-12 shrink-0" viewBox="0 0 48 40" aria-hidden="true">
+                    <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#60A5FA" />
+                    <path d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#93C5FD" />
+                    <path d="M18 24h12M18 29h8" stroke="#1D4ED8" stroke-width="2.5" stroke-linecap="round" />
+                  </svg>
+                  <span class="min-w-0 flex-1 text-left">
+                    <span class="explorer-folder__name">{{ infoSection.name || infoSection.value }}</span>
+                    <span class="explorer-folder__meta">Տեքստ, նկար, ձայն և փաստաթղթեր</span>
+                  </span>
+                  <span class="explorer-count">{{ sectionFileCount(infoSection.id) }} ֆայլ</span>
+                </button>
+              </template>
+
+              <div v-if="productionSections.length" class="explorer-caption-row">
+                <p class="explorer-caption">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+                  </svg>
+                  Նախագծի բաժիններ
+                </p>
+                <div class="explorer-view-toggle" role="group" data-section-view>
                   <button
                     type="button"
-                    class="explorer-file__open"
-                    :title="file.original_name"
-                    @click="viewFile(file.path, file)"
+                    class="explorer-icon-button"
+                    :class="{ 'explorer-icon-button--on': sectionView === 'grid' }"
+                    :aria-label="$t('file_explorer.sections_tiles')"
+                    :title="$t('file_explorer.sections_tiles')"
+                    :aria-pressed="sectionView === 'grid'"
+                    @click="sectionView = 'grid'"
                   >
-                    <span class="explorer-file__icon" :data-kind="fileKind(file)" aria-hidden="true">
-                      <svg v-if="fileKind(file) === 'image'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="2" /><path d="m21 17-5-5-8 8" /></svg>
-                      <svg v-else-if="fileKind(file) === 'audio'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V6l11-2v12" /><circle cx="6" cy="18" r="3" /><circle cx="17" cy="16" r="3" /></svg>
-                      <svg v-else-if="fileKind(file) === 'video'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="m16 10 5-3v10l-5-3" /></svg>
-                      <svg v-else-if="fileKind(file) === 'model'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4 7.5 8 4.5 8-4.5M12 12v9" /></svg>
-                      <svg v-else-if="fileKind(file) === 'drawing'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M7 16 12 7l5 9M9 13h6" /></svg>
-                      <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></svg>
-                    </span>
-                    <span class="explorer-file__ext">{{ fileExt(file) || '—' }}<template v-if="hasCompanionModel(file)"> · 3D</template></span>
-                    <span class="explorer-file__name">{{ file.original_name }}</span>
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <rect x="3" y="5" width="5" height="14" rx="1" /><rect x="10" y="5" width="5" height="14" rx="1" /><rect x="17" y="5" width="4" height="14" rx="1" />
+                    </svg>
                   </button>
-                  <div class="explorer-file__actions">
-                    <button
-                      type="button"
-                      class="explorer-icon-button"
-                      aria-label="Ներբեռնել"
-                      title="Ներբեռնել"
-                      @click.stop="downloadFile(file)"
-                    >
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0 4-4m-4 4-4-4M4 18v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1" />
-                      </svg>
-                    </button>
-                    <button
-                      v-if="$can('pmp_files.delete')"
-                      type="button"
-                      class="explorer-icon-button text-rose-600"
-                      aria-label="Ջնջել"
-                      title="Ջնջել"
-                      @click.stop="openDelete(file.id)"
-                    >
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
-                      </svg>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    class="explorer-icon-button"
+                    :class="{ 'explorer-icon-button--on': sectionView === 'list' }"
+                    :aria-label="$t('file_explorer.sections_list')"
+                    :title="$t('file_explorer.sections_list')"
+                    :aria-pressed="sectionView === 'list'"
+                    @click="sectionView = 'list'"
+                  >
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <rect x="4" y="4" width="16" height="4" rx="1" /><rect x="4" y="10" width="16" height="4" rx="1" /><rect x="4" y="16" width="16" height="4" rx="1" />
+                    </svg>
+                  </button>
                 </div>
               </div>
-            </template>
-            <div v-else class="explorer-empty">
-              <svg class="h-10 w-12" viewBox="0 0 48 40" aria-hidden="true">
-                <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#E9B949" />
-                <path d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#F8D775" />
-              </svg>
-              <span>Ընտրեք թղթապանակ</span>
+              <div
+                class="explorer-folders"
+                :class="{ 'explorer-folders--list': sectionView === 'list' }"
+              >
+                <button
+                  v-for="factory in productionSections"
+                  :key="factory.id"
+                  type="button"
+                  class="explorer-folder"
+                  :class="{ 'explorer-folder--open': isSectionOpen(factory) }"
+                  :disabled="loadingFactoryId === factory.id"
+                  :data-section="factory.value"
+                  @click="openSection(factory)"
+                >
+                  <svg class="explorer-folder__icon" viewBox="0 0 48 40" aria-hidden="true">
+                    <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#E9B949" />
+                    <path
+                      v-if="isSectionOpen(factory)"
+                      d="M2 14h44l-4 20a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V14Z"
+                      fill="#FBE29B"
+                    />
+                    <path v-else d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#F8D775" />
+                  </svg>
+                  <span class="explorer-folder__name">{{ factory.name || factory.value }}</span>
+                  <span class="explorer-folder__meta">
+                    <template v-if="factory.is_active === false">{{ $t('file_upload.archived_section_short') }}</template>
+                    <template v-else>{{ sectionFileCount(factory.id) }} ֆայլ</template>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div ref="filesPane" class="explorer-files" data-files-pane>
+              <template v-if="sectionOpen && $can('pmp_files.view')">
+                <p v-if="selectedFactory" class="explorer-caption explorer-caption--files">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L21.5 12a1.5 1.5 0 0 0-1.4-2H8.3a2 2 0 0 0-1.9 1.4L4 19" />
+                  </svg>
+                  <span class="truncate">{{ selectedFactory.name || selectedFactory.value }}</span>
+                  <span class="ml-auto shrink-0 font-medium normal-case tracking-normal">{{ sectionFileCount(selectedFactory.id) }} ֆայլ</span>
+                </p>
+                <p
+                  v-if="selectedFactory?.is_active === false"
+                  class="mb-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200"
+                >
+                  {{ $t('file_upload.archived_section') }}
+                </p>
+                <div v-if="!visibleFiles.length" class="explorer-empty">
+                  <svg class="h-10 w-12" viewBox="0 0 48 40" aria-hidden="true">
+                    <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#E2E8F0" />
+                    <path d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#F1F5F9" />
+                  </svg>
+                  <span>{{ fileQuery ? 'Ֆայլեր չեն գտնվել' : 'Թղթապանակը դատարկ է' }}</span>
+                </div>
+                <div
+                  v-else
+                  :class="fileView === 'grid' ? 'explorer-file-grid' : 'explorer-file-list'"
+                >
+                  <div
+                    v-for="file in visibleFiles"
+                    :key="file.id"
+                    class="explorer-file group"
+                    :class="{ 'explorer-file--selected': selectedFile?.id === file.id }"
+                  >
+                    <button
+                      type="button"
+                      class="explorer-file__open"
+                      :title="file.original_name"
+                      @click="viewFile(file.path, file); revealPreview()"
+                    >
+                      <span class="explorer-file__icon" :data-kind="fileKind(file)" aria-hidden="true">
+                        <svg v-if="fileKind(file) === 'image'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="2" /><path d="m21 17-5-5-8 8" /></svg>
+                        <svg v-else-if="fileKind(file) === 'audio'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V6l11-2v12" /><circle cx="6" cy="18" r="3" /><circle cx="17" cy="16" r="3" /></svg>
+                        <svg v-else-if="fileKind(file) === 'video'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="13" height="12" rx="2" /><path d="m16 10 5-3v10l-5-3" /></svg>
+                        <svg v-else-if="fileKind(file) === 'model'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z" /><path d="m4 7.5 8 4.5 8-4.5M12 12v9" /></svg>
+                        <svg v-else-if="fileKind(file) === 'drawing'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M7 16 12 7l5 9M9 13h6" /></svg>
+                        <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></svg>
+                      </span>
+                      <span class="explorer-file__ext">{{ fileExt(file) || '—' }}<template v-if="hasCompanionModel(file)"> · 3D</template></span>
+                      <span class="explorer-file__name">{{ file.original_name }}</span>
+                    </button>
+                    <div class="explorer-file__actions">
+                      <button
+                        type="button"
+                        class="explorer-icon-button"
+                        aria-label="Ներբեռնել"
+                        title="Ներբեռնել"
+                        @click.stop="downloadFile(file)"
+                      >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0 4-4m-4 4-4-4M4 18v1a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1" />
+                        </svg>
+                      </button>
+                      <button
+                        v-if="$can('pmp_files.delete')"
+                        type="button"
+                        class="explorer-icon-button text-rose-600"
+                        aria-label="Ջնջել"
+                        title="Ջնջել"
+                        @click.stop="openDelete(file.id)"
+                      >
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <div v-else class="explorer-empty">
+                <svg class="h-10 w-12" viewBox="0 0 48 40" aria-hidden="true">
+                  <path d="M2 6a4 4 0 0 1 4-4h12l5 5h19a4 4 0 0 1 4 4v3H2V6Z" fill="#E9B949" />
+                  <path d="M2 12h44v22a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V12Z" fill="#F8D775" />
+                </svg>
+                <span>Ընտրեք թղթապանակ</span>
+              </div>
             </div>
           </div>
 
-          <section class="explorer-preview" data-preview-pane>
+          <section ref="previewPane" class="explorer-preview" data-preview-pane>
         <transition name="fade">
           <div class="flex-1 flex flex-col">
             <div
@@ -436,7 +447,7 @@
                   v-if="companionModel"
                   type="button"
                   class="rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-700"
-                  @click="openCompanionModel"
+                  @click="openCompanionModel(); revealPreview()"
                 >
                   {{ $t('cad_companion.open') }}
                 </button>
@@ -451,7 +462,7 @@
 
               <div
                 v-if="fileType === 'dxf' && dxfUrl && $can('pmp_files.view')"
-                class="flex-1 min-h-0"
+                class="flex-1 min-h-[22rem]"
               >
                 <DxfViewerModal
                   :dxf-url="dxfUrl"
@@ -1028,6 +1039,11 @@ export default {
   watch: {
     sectionView: 'saveExplorerViews',
     fileView: 'saveExplorerViews',
+    selectedFactoryId() {
+      this.$nextTick(() => {
+        if (this.$refs.filesPane) this.$refs.filesPane.scrollTop = 0
+      })
+    },
   },
 
   created() {
@@ -1790,6 +1806,20 @@ export default {
       )
     },
 
+    // Large screens show the preview pane beside the files: start it at the
+    // top. Small screens stack it under the files: bring it into view.
+    revealPreview() {
+      this.$nextTick(() => {
+        const pane = this.$refs.previewPane
+        if (!pane) return
+        if (window.matchMedia?.('(min-width: 1024px)').matches) {
+          pane.scrollTop = 0
+        } else if (pane.getBoundingClientRect().top > window.innerHeight * 0.75) {
+          const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+          pane.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' })
+        }
+      })
+    },
     openCompanionModel() {
       const file = this.companionModel
       if (!file) return
@@ -1872,7 +1902,10 @@ export default {
 }
 /* Explorer layout (Windows folders style) */
 .explorer {
-  @apply overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+  @apply rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900;
+  /* clip (unlike hidden) keeps the sticky address bar working */
+  overflow: hidden;
+  overflow: clip;
 }
 .explorer-bar {
   @apply flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-950/40;
@@ -1941,13 +1974,110 @@ export default {
   @apply shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-slate-900 dark:text-blue-300;
 }
 .explorer-split {
-  @apply grid border-t border-slate-200 dark:border-slate-800 xl:grid-cols-[minmax(18rem,1fr)_minmax(0,1.6fr)];
+  @apply border-t border-slate-200 dark:border-slate-800 lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] xl:grid-cols-[21rem_minmax(0,1fr)] 2xl:grid-cols-[24rem_minmax(0,1fr)];
+}
+.explorer-nav {
+  @apply min-w-0 lg:flex lg:min-h-0 lg:flex-col lg:border-r lg:border-slate-200 lg:dark:border-slate-800;
+}
+.explorer-nav__sections {
+  @apply pb-1 lg:max-h-[60%] lg:shrink-0 lg:overflow-y-auto;
 }
 .explorer-files {
-  @apply min-w-0 p-3;
+  @apply min-w-0 border-t border-slate-200 p-3 dark:border-slate-800 lg:min-h-0 lg:flex-1 lg:overflow-y-auto;
+}
+.explorer-caption--files {
+  @apply mx-1 mb-2 mt-0;
 }
 .explorer-preview {
-  @apply flex min-h-[60vh] min-w-0 flex-col border-t border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-950/30 sm:p-6 xl:border-l xl:border-t-0;
+  @apply flex min-h-[60vh] min-w-0 flex-col border-t border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-950/30 sm:p-6 lg:min-h-0 lg:overflow-y-auto lg:border-t-0;
+}
+/* Phones and tablets stack the preview under the files; opening a file
+   scrolls to it. On tablets the one-row address bar stays under the header. */
+@media (max-width: 1023.98px) {
+  .explorer-preview {
+    scroll-margin-top: 4.75rem;
+  }
+}
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .explorer-bar {
+    position: sticky;
+    top: 4rem;
+    z-index: 15;
+  }
+  .explorer-preview {
+    scroll-margin-top: 8rem;
+  }
+}
+/* Large screens: the explorer is a window that fits the screen. Folders and
+   files stay in the left pane, the preview scrolls on its own. */
+@media (min-width: 1024px) {
+  .files-page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 4rem);
+    height: calc(100dvh - 4rem);
+    min-height: 0;
+  }
+  .explorer {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 30rem;
+  }
+  .explorer-bar,
+  .explorer-toolbar,
+  .explorer-status {
+    flex-shrink: 0;
+  }
+  .explorer-split,
+  .explorer-subgroups {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .explorer-subgroups {
+    align-content: start;
+    overflow-y: auto;
+    padding-top: 0.75rem;
+  }
+  /* Compact folders so INFO and all sections fit above the files. */
+  .explorer-nav__sections .explorer-caption {
+    margin-top: 0.75rem;
+  }
+  .explorer-nav .explorer-pinned {
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+  }
+  .explorer-nav .explorer-pinned > svg {
+    height: 2rem;
+    width: 2.5rem;
+  }
+  .explorer-nav .explorer-folders {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding-bottom: 0.5rem;
+  }
+  .explorer-nav .explorer-folders--list {
+    display: flex;
+  }
+  .explorer-nav .explorer-folder {
+    gap: 0.125rem;
+    padding-bottom: 0.375rem;
+    padding-top: 0.375rem;
+  }
+  .explorer-nav .explorer-folder__icon {
+    height: 2.25rem;
+    width: 2.75rem;
+  }
+  .explorer-nav .explorer-folders--list .explorer-folder {
+    gap: 0.75rem;
+  }
+  .explorer-nav .explorer-folders--list .explorer-folder__icon {
+    height: 1.75rem;
+    width: 2.25rem;
+  }
+  .explorer-nav .explorer-file-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .explorer-empty {
   @apply flex min-h-[10rem] flex-col items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400;
