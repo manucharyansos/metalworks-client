@@ -43,7 +43,7 @@ async function harness(callback, setup, overrides = {}) {
   }
   let service
   try {
-    await plugin({ app: { i18n: { locale: 'ru' }, localePath: value => value, router: { options: { base: '/work/' }, afterEach() {} } }, store, $auth: auth, $axios: axios }, (_, value) => { service = value })
+    await plugin({ app: { i18n: { locale: 'ru' }, localePath: value => value, router: { currentRoute: { path: overrides.path || '/admin' }, options: { base: '/work/' }, afterEach() {} } }, store, $auth: auth, $axios: axios }, (_, value) => { service = value })
     await callback({ state, hooks, service, storage, watchers, replacements, calls, alerts, listeners, confirm: value => { confirmation = value } })
   } finally { global.window = originalWindow; global.document = originalDocument }
 }
@@ -269,3 +269,12 @@ test('a notification can focus a permitted assignment without copying a foreign 
     assert.deepEqual(replacements, ['/work/factory/laser?order=55&step=12'])
   }, null, { user: assignmentUser })
 })
+
+for (const path of ['/profile', '/ru/profile/']) {
+ test(`switching company from ${path} keeps the shared profile`, async () => {
+  await harness(async ({ service, replacements }) => {
+   await service.switchCompany(2)
+   assert.deepEqual(replacements, ['/work/profile'])
+  }, null, { path })
+ })
+}

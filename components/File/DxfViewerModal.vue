@@ -203,7 +203,7 @@ export default {
       const raw = String(this.dxfUrl || '')
       if (!raw) return null
 
-      if (/^https?:\/\//i.test(raw) || raw.startsWith('/api/secure-files/')) {
+      if (/^https?:\/\//i.test(raw) || raw.startsWith('/api/secure-files/') || /^\/api\/profile\/orders\/\d+\/files\/(order|selected)-\d+$/.test(raw)) {
         return raw
       }
 

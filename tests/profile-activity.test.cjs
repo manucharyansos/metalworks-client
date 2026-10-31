@@ -3,7 +3,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const vm = require('node:vm')
 const source = fs.readFileSync('pages/profile.vue', 'utf8').split('<script>')[1].split('</script>')[0].replace(/^import .*\n/gm, '').replace('export default', 'module.exports =')
-const sandbox = { WorkspaceTransition: {}, CompanySelector: {}, WorkspaceIdentity: {}, module: { exports: {} }, taskStatusText: s => s, workspaceCopy: () => ({}), Intl, Date }
+const sandbox = { ProfileOrderFiles: {}, WorkspaceTransition: {}, CompanySelector: {}, WorkspaceIdentity: {}, module: { exports: {} }, taskStatusText: s => s, workspaceCopy: () => ({}), Intl, Date }
 vm.runInNewContext(source, sandbox)
 const component = sandbox.module.exports
 function context() { const c = { ...component.data(), isFactory: false, activeTab: 'current' }; Object.assign(c, component.methods); return c }
@@ -24,4 +24,16 @@ test('logout calls server logout before returning to localized login', async () 
  c.$auth = { logout: async () => calls.push('logout') }; c.localePath = p => '/ru' + p
  c.$router = { replace: async p => calls.push(p) }
  await c.logout(); assert.deepEqual(calls, ['logout', '/ru/login']); assert.equal(c.loggingOut, false)
+})
+
+test('dates do not depend on browser Armenian locale support', () => {
+ const c = context(); c.$i18n = { locale: 'hy' }
+ assert.equal(c.formatDate('2026-10-31 18:00:00'), '31.10.2026, 18:00')
+ assert.equal(c.formatDate('bad-value'), 'bad-value')
+})
+
+test('completed orders are never marked overdue', () => {
+ const c = context(); c.activityFinishDate = () => '2020-01-01 00:00:00'
+ for (const status of ['completed', 'finished', 'done', 'canceled', 'cancelled', 'rejected']) assert.equal(c.isOverdue({ status }), false)
+ assert.equal(c.isOverdue({ status: 'pending' }), true)
 })

@@ -137,7 +137,7 @@
     "current_password_invalid": "The current password is incorrect.",
     "password_too_short": "The new password must be at least 8 characters.",
     "user": "User",
-    "order": "Task",
+    "order": "Order",
     "activity": "Activity",
     "verified": "Verified",
     "unverified": "Unverified",
@@ -163,7 +163,10 @@
     "load_failed": "Unable to load data.",
     "retry": "Retry",
     "overdue": "Overdue",
-    "logout_failed": "Unable to complete sign out. Please try again."
+    "logout_failed": "Unable to complete sign out. Please try again.",
+    "files": "Order files",
+    "no_files": "No files are attached to this order.",
+    "file_failed": "Unable to load the file. Please try again."
   },
   "workspace_layout": {
     "operator_workload": "Operator workload",

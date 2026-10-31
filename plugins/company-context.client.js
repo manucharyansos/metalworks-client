@@ -20,7 +20,8 @@ export default async ({ app, store, $axios, $auth }, inject) => {
     saveCompanySelection(storage, user.id, user.company.id, user.assignment_id)
     // A fresh document discards orders, private file blobs, module caches,
     // draft components and requests from the previous working context.
-    const path = app.localePath(companyHome(user))
+    const currentPath = String(app.router.currentRoute?.path || '').replace(/^\/(hy|ru|en)(?=\/|$)/, '').replace(/\/+$/, '')
+    const path = app.localePath(!focus && currentPath === '/profile' ? '/profile' : companyHome(user))
     const base = app.router.options.base || '/'
     const query = new URLSearchParams()
     for (const key of ['order', 'step']) {

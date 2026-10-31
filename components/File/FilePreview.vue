@@ -29,6 +29,7 @@
       </button>
     </div>
     <FileMetadataPanel
+      v-if="!customerFile"
       :file="file"
       :order-id="orderId"
       @loading="onDetailsLoading"
@@ -148,6 +149,7 @@ export default {
     file: { type: Object, required: true },
     orderId: { type: [Number, String], default: null },
     showDownload: Boolean,
+    customerFile: Boolean,
   },
   data: () => ({
     metadata: null,
@@ -164,6 +166,7 @@ export default {
   }),
   computed: {
     previewKey() {
+      if (this.customerFile) return `customer-${this.orderId}-${this.file.key}`
       return fileDetailsIdentity(
         this.file,
         this.orderId,
@@ -185,6 +188,7 @@ export default {
         .toUpperCase()
     },
     secureUrl() {
+      if (this.customerFile) return `/api/profile/orders/${this.orderId}/files/${this.file.key}`
       return this.file.id && this.$getPmpFileUrl
         ? this.$getPmpFileUrl(this.file)
         : this.$getFileUrl?.(this.file.path)
@@ -193,7 +197,11 @@ export default {
   watch: {
     previewKey() {
       this.onDetailsLoading()
+      if (this.customerFile) this.onDetailsLoaded(this.file)
     },
+  },
+  mounted() {
+    if (this.customerFile) this.onDetailsLoaded(this.file)
   },
   beforeDestroy() {
     this.clearPreview()

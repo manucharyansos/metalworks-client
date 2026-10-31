@@ -7,7 +7,7 @@
   >
     <section
       ref="panel"
-      class="relative flex max-h-[94vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900"
+      class="relative flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900"
       role="dialog"
       aria-modal="true"
       :aria-label="$t('file_details.preview')"
@@ -33,6 +33,7 @@
       <div class="min-h-0 overflow-y-auto p-4 sm:p-5">
         <FilePreview
           :file="file"
+          :customer-file="customerFile"
           :order-id="orderId"
           :show-download="showDownload"
           @close="$emit('close')"
@@ -50,6 +51,7 @@ export default {
     file: { type: Object, required: true },
     orderId: { type: [Number, String], default: null },
     showDownload: Boolean,
+    customerFile: Boolean,
   },
   mounted() {
     this.returnFocus = document.activeElement

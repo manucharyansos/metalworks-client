@@ -1,12 +1,12 @@
 <template>
-  <main class="min-h-screen w-full min-w-0 bg-slate-50 px-4 py-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8 lg:py-8">
+  <main class="profile-page min-h-screen w-full min-w-0 bg-slate-50 px-3 pb-6 pt-20 sm:pt-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8 lg:py-8">
     <WorkspaceTransition />
-    <div class="mx-auto max-w-6xl space-y-6">
+    <div class="mx-auto w-full max-w-6xl space-y-4 sm:space-y-6">
       <div v-if="$auth.user && $auth.user.role && $auth.user.role.name === 'authenticatedUser' && $auth.user.company" class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <WorkspaceIdentity class="p-4" /><CompanySelector />
       </div>
       <p v-if="$auth.user && Array.isArray($auth.user.companies) && !$auth.user.companies.length" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">{{ companyText.noAccess }}</p>
-      <section class="relative overflow-visible rounded-[30px] bg-slate-950 p-6 text-white shadow-xl sm:p-8">
+      <section class="relative overflow-visible rounded-[30px] bg-slate-950 p-4 text-white shadow-xl sm:p-8">
         <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-[30px]" aria-hidden="true">
           <div class="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/5 blur-2xl"></div>
           <div class="absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-slate-700/30 blur-3xl"></div>
@@ -19,9 +19,9 @@
             </div>
             <div class="min-w-0">
               <p class="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{{ $t('profile.title') }}</p>
-              <h1 class="mt-1 truncate text-2xl font-black tracking-tight sm:text-3xl">{{ fullName }}</h1>
+              <h1 class="mt-1 break-words text-2xl font-black tracking-tight sm:text-3xl">{{ fullName }}</h1>
               <div class="mt-1 flex flex-wrap items-center gap-2">
-                <p class="truncate text-sm text-slate-400">{{ profileUser.email || '' }}</p>
+                <p class="break-all text-sm text-slate-400">{{ profileUser.email || '' }}</p>
                 <span
                   class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"
                   :class="profileUser.email_verified ? 'bg-emerald-400/15 text-emerald-200' : 'bg-amber-400/15 text-amber-200'"
@@ -47,12 +47,13 @@
         </div>
       </section>
 
-      <nav class="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900" :aria-label="$t('profile.title')">
+      <nav class="grid grid-cols-1 gap-2 rounded-2xl sm:flex sm:flex-wrap border border-slate-200 bg-white p-2 shadow-sm dark:border-slate-800 dark:bg-slate-900" :aria-label="$t('profile.title')">
         <button
           v-for="tab in tabs"
           :key="tab.key"
+          :aria-current="activeTab === tab.key ? 'page' : null"
           type="button"
-          class="rounded-xl px-4 py-2.5 text-sm font-bold transition"
+          class="min-h-[44px] rounded-xl px-4 py-2.5 text-sm font-bold transition"
           :class="activeTab === tab.key ? 'bg-slate-950 text-white shadow-sm dark:bg-white dark:text-slate-950' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'"
           @click="selectTab(tab.key)"
         >
@@ -70,7 +71,7 @@
           {{ $t('profile.load_failed') }}
           <button type="button" class="ml-3 underline" @click="fetchProfile">{{ $t('profile.retry') }}</button>
         </div>
-        <div v-if="activeTab === 'settings'" class="grid gap-6 lg:grid-cols-2">
+        <div v-if="!loadError && activeTab === 'settings'" class="grid gap-6 lg:grid-cols-2">
           <form class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6" @submit.prevent="saveProfile">
             <div class="mb-6 flex items-start gap-3">
               <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -221,7 +222,7 @@
           </div>
         </div>
 
-        <section v-else class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <section v-else-if="!loadError" class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{{ $t('profile.activity') }}</p>
@@ -257,7 +258,7 @@
                 </div>
                 <div class="whitespace-nowrap text-xs font-semibold text-slate-400 md:text-right">{{ activityDate(item) }}</div>
               </div>
-              <details class="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
+              <details class="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700" @toggle="onOrderToggle(item, $event)">
                 <summary class="cursor-pointer text-sm font-bold">{{ $t('profile.order_details') }}</summary>
                 <p class="mt-3 break-words text-sm">{{ $t('profile.order') }}: {{ activityNumber(item) }}</p>
                 <ul class="mt-3 space-y-2">
@@ -266,6 +267,7 @@
                     <span>{{ statusText(step.status) }}</span>
                   </li>
                 </ul>
+                <ProfileOrderFiles v-if="isClient && openedOrders[activityOrder(item).id]" :order-id="activityOrder(item).id" />
               </details>
             </article>
           </div>
@@ -282,6 +284,7 @@
 </template>
 
 <script>
+import ProfileOrderFiles from '~/components/profile/ProfileOrderFiles.vue'
 import WorkspaceTransition from '~/components/layout/WorkspaceTransition.vue'
 import CompanySelector from '~/components/layout/CompanySelector.vue'
 import WorkspaceIdentity from '~/components/layout/WorkspaceIdentity.vue'
@@ -289,7 +292,7 @@ import { taskStatusText } from '~/utils/task-board'
 import { workspaceCopy } from '~/utils/company-copy'
 export default {
   name: 'ProfilePage',
-  components: { WorkspaceTransition, CompanySelector, WorkspaceIdentity },
+  components: { ProfileOrderFiles, WorkspaceTransition, CompanySelector, WorkspaceIdentity },
   layout(context) {
     const role = context.$auth?.user?.role?.name
     if (role === 'admin') return 'admin'
@@ -301,6 +304,7 @@ export default {
   data() {
     return {
       loading: true,
+      openedOrders: {},
       loadError: false,
       loggingOut: false,
       activityError: false,
@@ -421,13 +425,18 @@ export default {
         this.loggingOut = false
       }
     },
+    onOrderToggle(item, event) {
+      if (event.target.open) this.$set(this.openedOrders, this.activityOrder(item).id, true)
+    },
     statusText(status) { return taskStatusText(status, this.$i18n.locale) },
     activitySteps(item) { return this.isFactory ? [item] : item.factory_orders || [] },
     formatDate(value) {
       if (!value) return '—'
       const date = new Date(String(value).replace(' ', 'T'))
       if (Number.isNaN(date.getTime())) return value
-      return new Intl.DateTimeFormat(this.$i18n.locale === 'hy' ? 'hy-AM' : this.$i18n.locale, { dateStyle: 'medium', timeStyle: 'short' }).format(date)
+      // Numeric dates stay readable even in browsers without Armenian ICU data.
+      const pad = (number) => String(number).padStart(2, '0')
+      return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}, ${pad(date.getHours())}:${pad(date.getMinutes())}`
     },
     isOverdue(item) {
       const date = new Date(String(this.activityFinishDate(item)).replace(' ', 'T'))
@@ -454,6 +463,7 @@ export default {
     },
     async selectTab(tab) {
       this.activeTab = tab
+      this.openedOrders = {}
       if (tab !== 'settings') await this.loadActivity(1)
     },
     async saveProfile() {
@@ -644,3 +654,14 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.profile-page { overflow-wrap: anywhere; }
+.profile-page input { min-width: 0; width: 100%; }
+.profile-page button, .profile-page summary { touch-action: manipulation; }
+.profile-page summary { min-height: 44px; padding-top: 10px; padding-bottom: 10px; }
+@media (max-width: 639px) {
+  .profile-page input { font-size: 16px; }
+  .profile-page button { min-height: 44px; }
+}
+</style>

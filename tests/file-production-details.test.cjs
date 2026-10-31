@@ -232,3 +232,12 @@ test('bending and generic workshop task links open assigned work and discard old
     assert.equal(shown.length, 1, 'a previous company task cannot open after changing company')
   }
 })
+
+test('customer previews use the owned-order file URL and do not request staff metadata', () => {
+ const definition = load('components/File/FilePreview.vue').default
+ const context = { customerFile: true, orderId: 5, file: { key: 'selected-9', original_name: 'drawing.dxf' } }
+ assert.equal(definition.computed.secureUrl.call(context), '/api/profile/orders/5/files/selected-9')
+ assert.equal(definition.computed.previewKey.call(context), 'customer-5-selected-9')
+ const dxf = load('components/File/DxfViewerModal.vue').default
+ assert.equal(dxf.methods.resolveSecureUrl.call({ dxfUrl: '/api/profile/orders/5/files/selected-9', $getFileUrl() { assert.fail('must not rewrite customer file route') } }), '/api/profile/orders/5/files/selected-9')
+})
