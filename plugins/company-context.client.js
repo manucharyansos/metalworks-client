@@ -185,6 +185,9 @@ export default async ({ app, store, $axios, $auth }, inject) => {
     store.commit('workspace/switching', true)
     try {
       const user = await fetchContext(companyId, assignmentId)
+      if ($auth.user?.role?.name === 'authenticatedUser' && user.role?.name !== 'authenticatedUser') {
+        throw new Error('Customer company access changed')
+      }
       if (
         String(user.company?.id) !== String(companyId) ||
         String(user.id) !== String($auth.user?.id) ||

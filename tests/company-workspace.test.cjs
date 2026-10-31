@@ -278,3 +278,11 @@ for (const path of ['/profile', '/ru/profile/']) {
   }, null, { path })
  })
 }
+
+test('a stale customer selector cannot switch into an employee membership', async () => {
+ await harness(async ({ service, replacements, state }) => {
+  await service.switchCompany(2)
+  assert.deepEqual(replacements, [])
+  assert.equal(state.workspace.switching, false)
+ }, null, { user: { ...user, role: { name: 'authenticatedUser' } } })
+})
