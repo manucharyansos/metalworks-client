@@ -185,6 +185,101 @@
         >
           {{ itemError.message }}
         </p>
+        <section
+          v-if="!categories && functionDrafts[item.id]"
+          class="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800"
+          :data-workshop-functions="item.id"
+        >
+          <h3 class="text-sm font-semibold">{{ t.functions }}</h3>
+          <p class="mt-1 text-xs leading-5 text-slate-500">
+            {{ t.functionsHelp }}
+          </p>
+          <ul
+            v-if="(item.functions || []).length"
+            class="mt-3 flex flex-wrap gap-2"
+          >
+            <li
+              v-for="fn in item.functions"
+              :key="fn.id"
+              :data-workshop-function="fn.id"
+              class="inline-flex max-w-full items-center gap-1 rounded-full border py-1 pl-3 pr-1 text-xs font-semibold"
+              :class="
+                fn.is_active
+                  ? 'border-violet-200 bg-violet-50 text-violet-800 dark:border-violet-900 dark:bg-violet-950/40 dark:text-violet-200'
+                  : 'border-dashed border-slate-300 text-slate-400 line-through dark:border-slate-700'
+              "
+              :title="fn.is_active ? '' : t.functionArchivedHint"
+            >
+              <button
+                type="button"
+                class="min-w-0 break-words text-left hover:underline"
+                :disabled="saving"
+                :aria-label="`${t.edit} · ${fn.name}`"
+                data-function-edit
+                @click="editFunction(item, fn)"
+              >
+                {{ fn.name }}
+              </button>
+              <button
+                type="button"
+                class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full hover:bg-white/80 dark:hover:bg-slate-800"
+                :disabled="saving"
+                :aria-label="`${fn.is_active ? t.archive : t.restore} · ${fn.name}`"
+                :title="fn.is_active ? t.archive : t.restore"
+                data-function-toggle
+                @click="toggleFunction(item, fn)"
+              >
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                  <path v-if="fn.is_active" stroke-linecap="round" d="M6 6l12 12M18 6 6 18" />
+                  <path v-else stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 1 0 2.3-5.7M4 4v5h5" />
+                </svg>
+              </button>
+            </li>
+          </ul>
+          <p v-else class="mt-3 text-xs text-slate-400">
+            {{ t.noFunctions }}
+          </p>
+          <form
+            class="mt-3 flex flex-wrap gap-2"
+            data-function-form
+            @submit.prevent="saveFunction(item)"
+          >
+            <input
+              v-model.trim="functionDrafts[item.id].name"
+              type="text"
+              maxlength="150"
+              :placeholder="t.functionPlaceholder"
+              :aria-label="t.functions"
+              :disabled="saving || !item.is_active"
+              data-function-name
+              class="min-w-0 flex-1 basis-40 rounded-xl border border-slate-300 bg-transparent px-3 py-2 text-sm dark:border-slate-700"
+            />
+            <button
+              type="submit"
+              :disabled="saving || !item.is_active || !functionDrafts[item.id].name"
+              data-function-save
+              class="rounded-xl bg-slate-950 px-4 py-2 text-sm font-bold text-white disabled:opacity-50 dark:bg-white dark:text-slate-950"
+            >
+              {{ functionDrafts[item.id].id ? t.save : t.add }}
+            </button>
+            <button
+              v-if="functionDrafts[item.id].id"
+              type="button"
+              :disabled="saving"
+              class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold dark:border-slate-700"
+              @click="resetFunction(item)"
+            >
+              {{ t.cancel }}
+            </button>
+          </form>
+          <p
+            v-if="functionError.id === item.id"
+            role="alert"
+            class="mt-2 break-words text-sm text-rose-700 dark:text-rose-300"
+          >
+            {{ functionError.message }}
+          </p>
+        </section>
       </article>
     </div>
   </main>
@@ -211,6 +306,9 @@ export default {
     error: '',
     loadError: '',
     itemError: { id: null, message: '' },
+    // Workshop id -> { id, name } of the function being added or renamed.
+    functionDrafts: {},
+    functionError: { id: null, message: '' },
     requestVersion: 0,
   }),
   computed: {
@@ -319,6 +417,12 @@ export default {
         if (!current()) return
         this.items = rows
         this.workshops = workshops || []
+        this.functionDrafts = Object.fromEntries(
+          rows.map((row) => [
+            row.id,
+            this.functionDrafts[row.id] || { id: null, name: '' },
+          ])
+        )
         this.$store?.commit?.('workshops/SET_ITEMS', this.workshops)
       } catch (error) {
         if (current()) this.loadError = apiErrorMessage(error, this.t.failed)
@@ -364,6 +468,61 @@ export default {
       } catch (error) {
         if (current())
           this.itemError = { id: item.id, message: apiErrorMessage(error) }
+      } finally {
+        if (current()) this.saving = false
+      }
+    },
+    editFunction(item, fn) {
+      if (this.saving) return
+      this.$set(this.functionDrafts, item.id, { id: fn.id, name: fn.name })
+      this.functionError = { id: null, message: '' }
+      this.$nextTick(() =>
+        this.$el
+          ?.querySelector(`[data-workshop-functions="${item.id}"] [data-function-name]`)
+          ?.focus()
+      )
+    },
+    resetFunction(item) {
+      this.$set(this.functionDrafts, item.id, { id: null, name: '' })
+    },
+    // Adds a function to the workshop, or renames the one being edited.
+    async saveFunction(item) {
+      const draft = this.functionDrafts[item.id]
+      if (this.saving || !draft?.name || this.categories) return
+      const scope = this.scopeKey
+      const current = () => scope === this.scopeKey && !this._isDestroyed
+      this.saving = true
+      this.functionError = { id: null, message: '' }
+      try {
+        const base = `${this.endpoint}/${item.id}/functions`
+        if (draft.id)
+          await this.$axios.put(`${base}/${draft.id}`, { name: draft.name })
+        else await this.$axios.post(base, { name: draft.name })
+        if (!current()) return
+        this.resetFunction(item)
+        await this.load()
+      } catch (error) {
+        if (current())
+          this.functionError = { id: item.id, message: apiErrorMessage(error) }
+      } finally {
+        if (current()) this.saving = false
+      }
+    },
+    async toggleFunction(item, fn) {
+      if (this.saving || this.categories) return
+      const scope = this.scopeKey
+      const current = () => scope === this.scopeKey && !this._isDestroyed
+      this.saving = true
+      this.functionError = { id: null, message: '' }
+      try {
+        await this.$axios.put(`${this.endpoint}/${item.id}/functions/${fn.id}`, {
+          name: fn.name,
+          is_active: !fn.is_active,
+        })
+        if (current()) await this.load()
+      } catch (error) {
+        if (current())
+          this.functionError = { id: item.id, message: apiErrorMessage(error) }
       } finally {
         if (current()) this.saving = false
       }

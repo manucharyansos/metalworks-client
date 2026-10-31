@@ -425,6 +425,9 @@
   },
   "file_plan": {
     "title": "File production route",
+    "functions": "Functions",
+    "functions_count": "{count} functions",
+    "functions_help": "Tick the extra work this file needs. The workshop will see it in the task.",
     "help": "Choose workshops for this file. This route will be suggested when creating a task.",
     "cutting": "Cutting",
     "bending": "Bending",

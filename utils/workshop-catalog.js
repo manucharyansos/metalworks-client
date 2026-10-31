@@ -39,6 +39,16 @@ export const catalogCopy = {
     sections: 'Ընտրեք ֆայլերի բաժինը',
     archivedHelp:
       'Այս բաժինը արխիվացված է։ Առկա ֆայլերը հասանելի են դիտման համար։',
+    functions:
+      'Ֆունկցիաներ',
+    functionsHelp:
+      'Լրացուցիչ աշխատանքներ (փորագրում, մաքրում, պարուրակ…)։ Ինժեները դրանք նշում է ֆայլ ավելացնելիս, օպերատորը տեսնում է առաջադրանքում։',
+    functionPlaceholder:
+      'Օր․՝ Փորագրում',
+    noFunctions:
+      'Ֆունկցիաներ դեռ չկան։',
+    functionArchivedHint:
+      'Արխիվացված ֆունկցիան նոր ֆայլերի համար չի առաջարկվում։',
   },
   ru: {
     workshops: 'Цеха',
@@ -77,6 +87,16 @@ export const catalogCopy = {
     unassignedFile: 'Не назначен цеху',
     sections: 'Выберите раздел файлов',
     archivedHelp: 'Раздел в архиве. Существующие файлы доступны для просмотра.',
+    functions:
+      'Функции',
+    functionsHelp:
+      'Дополнительные работы (гравировка, зачистка, резьба…). Инженер отмечает их при добавлении файла, оператор видит их в задании.',
+    functionPlaceholder:
+      'Напр.: гравировка',
+    noFunctions:
+      'Функций пока нет.',
+    functionArchivedHint:
+      'Архивная функция не предлагается для новых файлов.',
   },
   en: {
     workshops: 'Workshops',
@@ -116,6 +136,16 @@ export const catalogCopy = {
     sections: 'Choose a file section',
     archivedHelp:
       'This section is archived. Existing files remain available to view.',
+    functions:
+      'Functions',
+    functionsHelp:
+      'Extra work (engraving, deburring, threading…). Engineers tick it when adding a file; operators see it in the task.',
+    functionPlaceholder:
+      'e.g. Engraving',
+    noFunctions:
+      'No functions yet.',
+    functionArchivedHint:
+      'Archived functions are not offered for new files.',
   },
 }
 export function catalogText(locale) {

@@ -831,7 +831,7 @@ export default {
       isSelectedMaterials: false,
       fileData: { quantity: null, material: '', thickness: '', file: null },
       pendingFiles: [],
-      filePlan: { production_factory_ids: null, inspection_required: false },
+      filePlan: { production_factory_ids: null, production_function_ids: null, inspection_required: false },
       productionWorkshopsLoading: false,
       productionWorkshopsError: '',
       productionWorkshops: [],
@@ -1213,7 +1213,7 @@ export default {
         }
         this.pendingFiles = file.map((item) => ({
           file: item,
-          plan: { production_factory_ids: null, inspection_required: false },
+          plan: { production_factory_ids: null, production_function_ids: null, inspection_required: false },
         }))
         this.fileData.file = null
         this.currentFile = {
@@ -1240,6 +1240,7 @@ export default {
       this.pendingFiles = []
       this.filePlan = {
         production_factory_ids: null,
+        production_function_ids: null,
         inspection_required: false,
       }
     },
@@ -1363,6 +1364,11 @@ export default {
             'inspection_required',
             this.filePlan.inspection_required ? '1' : '0'
           )
+          if (Array.isArray(this.filePlan.production_function_ids))
+            formData.append(
+              'production_function_ids',
+              JSON.stringify(this.filePlan.production_function_ids)
+            )
         }
       }
       formData.append('pmp_id', this.getPmp.id)
@@ -1659,6 +1665,7 @@ export default {
       this.pendingFiles = []
       this.filePlan = {
         production_factory_ids: null,
+        production_function_ids: null,
         inspection_required: false,
       }
       this.isSelectedMaterials = false

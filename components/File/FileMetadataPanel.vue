@@ -111,7 +111,7 @@
           <li
             v-for="workshop in model.workshops"
             :key="workshop.id"
-            class="flex min-w-0 max-w-full items-center gap-2 rounded-lg border px-3 py-2 text-xs"
+            class="min-w-0 max-w-full rounded-lg border px-3 py-2 text-xs"
             :class="
               workshop.current
                 ? 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200'
@@ -119,17 +119,32 @@
             "
             :data-file-workshop="workshop.id"
           >
-            <span class="break-words font-semibold">{{ workshop.name }}</span>
+            <span class="flex min-w-0 items-center gap-2">
+              <span class="break-words font-semibold">{{ workshop.name }}</span>
+              <span
+                v-if="workshop.current"
+                class="shrink-0 text-[10px] opacity-70"
+                >{{ $t('file_details.current_workshop') }}</span
+              >
+              <span
+                v-else-if="workshop.is_active === false"
+                class="text-[10px] opacity-60"
+                >{{ $t('file_details.archived') }}</span
+              >
+            </span>
             <span
-              v-if="workshop.current"
-              class="shrink-0 text-[10px] opacity-70"
-              >{{ $t('file_details.current_workshop') }}</span
+              v-if="(workshop.functions || []).length"
+              class="mt-1.5 flex flex-wrap gap-1"
+              :aria-label="$t('file_plan.functions')"
+              :data-file-workshop-functions="workshop.id"
             >
-            <span
-              v-else-if="workshop.is_active === false"
-              class="text-[10px] opacity-60"
-              >{{ $t('file_details.archived') }}</span
-            >
+              <span
+                v-for="fn in workshop.functions"
+                :key="fn.id || fn.name"
+                class="rounded-md bg-violet-100 px-1.5 py-0.5 text-[11px] font-semibold text-violet-800 dark:bg-violet-950/60 dark:text-violet-200"
+                >✓ {{ fn.name }}</span
+              >
+            </span>
           </li>
         </ul>
       </div>
