@@ -186,6 +186,13 @@ export const routeCopy = {
     stale: 'Երթուղին փոխվել է։ Թարմացրեք այն՝ փոփոխությունները տեսնելու համար։',
     failed: 'Չհաջողվեց պահպանել երթուղին',
     ready: 'Նախորդ փուլերն ավարտված են․ ձեր հերթն է',
+    withFiles: 'Ֆայլերով',
+    withoutFiles: 'Առանց ֆայլերի',
+    remove: 'Հանել երթուղուց',
+    addTitle: 'Ավելացնել արտադրամաս երթուղուն',
+    addHelp:
+      'Ներկում, զոդում և այլ փուլեր, որոնք ֆայլեր չեն ստանում, բայց պետք է անցնեն այս հերթականությամբ։',
+    clearDeadline: 'Մաքրել ժամկետը',
   },
   ru: {
     title: 'Производственный маршрут',
@@ -217,6 +224,13 @@ export const routeCopy = {
     stale: 'Маршрут изменён. Обновите его, чтобы увидеть изменения.',
     failed: 'Не удалось сохранить маршрут',
     ready: 'Предыдущие этапы завершены. Ваша очередь',
+    withFiles: 'С файлами',
+    withoutFiles: 'Без файлов',
+    remove: 'Убрать из маршрута',
+    addTitle: 'Добавить цех в маршрут',
+    addHelp:
+      'Покраска, сварка и другие этапы, которые не получают файлов, но должны пройти в этом порядке.',
+    clearDeadline: 'Очистить срок',
   },
   en: {
     title: 'Production route',
@@ -247,5 +261,12 @@ export const routeCopy = {
     stale: 'The route has changed. Refresh to review the changes.',
     failed: 'Could not save the route',
     ready: 'Previous stages finished. It is your turn',
+    withFiles: 'With files',
+    withoutFiles: 'No files',
+    remove: 'Remove from the route',
+    addTitle: 'Add a workshop to the route',
+    addHelp:
+      'Painting, welding and other stages that get no files but must follow this order.',
+    clearDeadline: 'Clear deadline',
   },
 }

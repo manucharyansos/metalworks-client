@@ -37,7 +37,18 @@
     "invalid_file_quantities": "Количество каждого выбранного файла должно быть целым числом от 1.",
     "confirmation_method_required": "В разделе подтверждения выберите фото, текст или оба способа.",
     "route_cycle": "Маршрут образует цикл. Проверьте раздел последовательности и сроков.",
-    "selected_count": "Выбрано: {count}"
+    "selected_count": "Выбрано: {count}",
+    "status_all_files": "Вся подгруппа · файлов: {count}",
+    "status_selected_files": "Выбрано файлов: {count}",
+    "status_route": "{mode} · этапов: {count}",
+    "status_confirmation_off": "Не требуется",
+    "status_confirmation_photo": "Обязательно: фото",
+    "status_confirmation_text": "Обязательно: текст",
+    "status_confirmation_photo_text": "Обязательно: фото и текст",
+    "status_confirmation_missing": "Выберите способ подтверждения",
+    "status_workshops_default": "Условия по умолчанию",
+    "status_workshops_custom": "Изменено: {count}",
+    "status_operators": "Назначено: {assigned} из {total}"
   },
   "employee_permissions": {
     "dependents_disabled": "Также отключены зависящие от этого доступа функции: {count}."

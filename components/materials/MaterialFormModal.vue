@@ -94,7 +94,7 @@ data-work-modal role="dialog" aria-modal="true"
             <div class="mt-5 rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
               <label class="mb-1.5 block text-xs font-bold text-slate-600 dark:text-slate-300">Նոր խմբի անուն</label>
               <div class="flex gap-2">
-                <input v-model.trim="newGroupName" type="text" class="field flex-1" placeholder="Օր. Մետաղներ" @keyup.enter.prevent="createGroup" />
+                <input v-model.trim="newGroupName" type="text" class="field flex-1" placeholder="Օր. Մետաղներ" data-enter="off" @keyup.enter.prevent="createGroup" />
                 <button type="button" class="rounded-xl bg-slate-950 px-4 py-2 text-xs font-bold text-white disabled:opacity-40 dark:bg-white dark:text-slate-950" :disabled="catalogSaving || !newGroupName" @click="createGroup">Ավելացնել</button>
               </div>
             </div>
@@ -107,7 +107,7 @@ data-work-modal role="dialog" aria-modal="true"
               </select>
 
               <label class="mb-1.5 mt-3 block text-xs font-bold text-slate-600 dark:text-slate-300">Նոր կատեգորիայի անուն</label>
-              <input v-model.trim="newCategoryName" type="text" class="field" placeholder="Օր. Չժանգոտվող պողպատ" @keyup.enter.prevent="createCategory" />
+              <input v-model.trim="newCategoryName" type="text" class="field" placeholder="Օր. Չժանգոտվող պողպատ" data-enter="off" @keyup.enter.prevent="createCategory" />
 
               <button type="button" class="mt-3 w-full rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40" :disabled="catalogSaving || !selectedGroupId || !newCategoryName" @click="createCategory">
                 {{ catalogSaving ? 'Պահվում է…' : 'Ստեղծել կատեգորիա' }}

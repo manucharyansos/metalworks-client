@@ -129,6 +129,7 @@ export default {
     { src: '~/plugins/moment.js', mode: 'client' },
     { src: '~/plugins/can.js', mode: 'client' },
     { src: '~/plugins/password-visibility.client.js', mode: 'client' },
+    { src: '~/plugins/enter-navigation.client.js', mode: 'client' },
     { src: '~/plugins/notifications-ssr', ssr: true },
     { src: '~/plugins/notifications-client', ssr: false },
     { src: '~/plugins/leaflet.js', mode: 'client' },

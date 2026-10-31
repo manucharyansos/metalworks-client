@@ -23,12 +23,12 @@
             <div class="relative">
               <label for="pmp-group-code" class="field-label">Ծածկագիր</label>
               <div class="relative">
-                <input id="pmp-group-code" v-model.trim="pmpGroup" :disabled="saving" type="text" maxlength="3" class="control pr-10 font-mono" placeholder="000" autocomplete="off" autocorrect="off" :spellcheck="false" @input="onGroupCodeInput" />
+                <input id="pmp-group-code" v-model.trim="pmpGroup" :disabled="saving" type="text" maxlength="3" class="control pr-10 font-mono" placeholder="000" autocomplete="off" autocorrect="off" :spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="pmp-groupCode-options" :aria-expanded="String(isDD.groupCode)" :aria-activedescendant="ariaOption('groupCode')" @input="onGroupCodeInput" @keydown="onFieldKeydown($event, 'groupCode')" />
                 <button type="button" class="picker-button" :disabled="saving" @click="toggleDropdown('groupCode')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
-                <div v-if="isDD.groupCode && filteredGroupsByGroup.length" class="dropdown-card">
-                  <button v-for="p in filteredGroupsByGroup" :key="p.id" type="button" :disabled="saving" class="dropdown-row" @click="applyGroup(p)"><span class="font-mono font-black text-slate-900 dark:text-white">{{ p.group }}</span><span class="min-w-0 flex-1 truncate text-right text-xs text-slate-500 dark:text-slate-400">{{ p.group_name }}</span></button>
+                <div v-if="isDD.groupCode && filteredGroupsByGroup.length" id="pmp-groupCode-options" role="listbox" class="dropdown-card">
+                  <button v-for="(p, index) in filteredGroupsByGroup" :id="'pmp-groupCode-option-' + index" :key="p.id" type="button" role="option" :aria-selected="String(index === ddHighlight.groupCode)" :disabled="saving" class="dropdown-row" :class="{ 'dropdown-row--active': index === ddHighlight.groupCode }" @mouseenter="ddActive.groupCode = index" @click="applyGroup(p)"><span class="font-mono font-black text-slate-900 dark:text-white">{{ p.group }}</span><span class="min-w-0 flex-1 truncate text-right text-xs text-slate-500 dark:text-slate-400">{{ p.group_name }}</span></button>
                 </div>
               </transition>
             </div>
@@ -36,12 +36,12 @@
             <div class="relative">
               <label for="pmp-group-name" class="field-label">Անվանում</label>
               <div class="relative">
-                <input id="pmp-group-name" v-model.trim="pmpGroupName" :disabled="saving" type="text" class="control pr-10" placeholder="Մուտքագրեք անվանում" autocomplete="off" autocorrect="off" :spellcheck="false" @input="onGroupNameInput" />
+                <input id="pmp-group-name" v-model.trim="pmpGroupName" :disabled="saving" type="text" class="control pr-10" placeholder="Մուտքագրեք անվանում" autocomplete="off" autocorrect="off" :spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="pmp-groupName-options" :aria-expanded="String(isDD.groupName)" :aria-activedescendant="ariaOption('groupName')" @input="onGroupNameInput" @keydown="onFieldKeydown($event, 'groupName')" />
                 <button type="button" class="picker-button" :disabled="saving" @click="toggleDropdown('groupName')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
-                <div v-if="isDD.groupName && filteredGroupsByName.length" class="dropdown-card">
-                  <button v-for="p in filteredGroupsByName" :key="p.id" type="button" :disabled="saving" class="dropdown-row" @click="applyGroup(p)"><span class="min-w-0 flex-1 truncate text-left font-bold text-slate-700 dark:text-slate-200">{{ p.group_name }}</span><span class="font-mono text-xs text-slate-400">{{ p.group }}</span></button>
+                <div v-if="isDD.groupName && filteredGroupsByName.length" id="pmp-groupName-options" role="listbox" class="dropdown-card">
+                  <button v-for="(p, index) in filteredGroupsByName" :id="'pmp-groupName-option-' + index" :key="p.id" type="button" role="option" :aria-selected="String(index === ddHighlight.groupName)" :disabled="saving" class="dropdown-row" :class="{ 'dropdown-row--active': index === ddHighlight.groupName }" @mouseenter="ddActive.groupName = index" @click="applyGroup(p)"><span class="min-w-0 flex-1 truncate text-left font-bold text-slate-700 dark:text-slate-200">{{ p.group_name }}</span><span class="font-mono text-xs text-slate-400">{{ p.group }}</span></button>
                 </div>
               </transition>
             </div>
@@ -62,12 +62,12 @@
             <div class="relative">
               <label for="pmp-remote-code" class="field-label">Համար</label>
               <div class="relative">
-                <input id="pmp-remote-code" v-model.trim="pmpRemoteNumber" type="text" maxlength="2" :disabled="saving || !isExistingGroup" class="control pr-10 font-mono" placeholder="00" autocomplete="off" autocorrect="off" :spellcheck="false" @input="onRemoteCodeInput" />
+                <input id="pmp-remote-code" v-model.trim="pmpRemoteNumber" type="text" maxlength="2" :disabled="saving || !isExistingGroup" class="control pr-10 font-mono" placeholder="00" autocomplete="off" autocorrect="off" :spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="pmp-remoteCode-options" :aria-expanded="String(isDD.remoteCode)" :aria-activedescendant="ariaOption('remoteCode')" @input="onRemoteCodeInput" @keydown="onFieldKeydown($event, 'remoteCode')" />
                 <button type="button" class="picker-button" :disabled="saving || !isExistingGroup" @click="toggleDropdown('remoteCode')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
-                <div v-if="isDD.remoteCode && filteredRemotesByNumber.length" class="dropdown-card">
-                  <button v-for="r in filteredRemotesByNumber" :key="r.id" type="button" :disabled="saving" class="dropdown-row" @click="applyRemote(r)"><span class="font-mono font-black text-slate-900 dark:text-white">{{ r.remote_number }}</span><span class="min-w-0 flex-1 truncate text-right text-xs text-slate-500 dark:text-slate-400">{{ r.remote_number_name }}</span></button>
+                <div v-if="isDD.remoteCode && filteredRemotesByNumber.length" id="pmp-remoteCode-options" role="listbox" class="dropdown-card">
+                  <button v-for="(r, index) in filteredRemotesByNumber" :id="'pmp-remoteCode-option-' + index" :key="r.id" type="button" role="option" :aria-selected="String(index === ddHighlight.remoteCode)" :disabled="saving" class="dropdown-row" :class="{ 'dropdown-row--active': index === ddHighlight.remoteCode }" @mouseenter="ddActive.remoteCode = index" @click="applyRemote(r)"><span class="font-mono font-black text-slate-900 dark:text-white">{{ r.remote_number }}</span><span class="min-w-0 flex-1 truncate text-right text-xs text-slate-500 dark:text-slate-400">{{ r.remote_number_name }}</span></button>
                 </div>
               </transition>
             </div>
@@ -75,12 +75,12 @@
             <div class="relative">
               <label for="pmp-remote-name" class="field-label">Նկարագրություն</label>
               <div class="relative">
-                <input id="pmp-remote-name" v-model.trim="pmpRemoteNumberName" type="text" :disabled="saving || !isExistingGroup" class="control pr-10" placeholder="Մուտքագրեք նկարագրություն" autocomplete="off" autocorrect="off" :spellcheck="false" @input="onRemoteNameInput" />
+                <input id="pmp-remote-name" v-model.trim="pmpRemoteNumberName" type="text" :disabled="saving || !isExistingGroup" class="control pr-10" placeholder="Մուտքագրեք նկարագրություն" autocomplete="off" autocorrect="off" :spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="pmp-remoteName-options" :aria-expanded="String(isDD.remoteName)" :aria-activedescendant="ariaOption('remoteName')" @input="onRemoteNameInput" @keydown="onFieldKeydown($event, 'remoteName')" />
                 <button type="button" class="picker-button" :disabled="saving || !isExistingGroup" @click="toggleDropdown('remoteName')"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m19 9-7 7-7-7" /></svg></button>
               </div>
               <transition name="fade">
-                <div v-if="isDD.remoteName && filteredRemotesByName.length" class="dropdown-card">
-                  <button v-for="r in filteredRemotesByName" :key="r.id" type="button" :disabled="saving" class="dropdown-row" @click="applyRemote(r)"><span class="min-w-0 flex-1 truncate text-left font-bold text-slate-700 dark:text-slate-200">{{ r.remote_number_name }}</span><span class="font-mono text-xs text-slate-400">{{ r.remote_number }}</span></button>
+                <div v-if="isDD.remoteName && filteredRemotesByName.length" id="pmp-remoteName-options" role="listbox" class="dropdown-card">
+                  <button v-for="(r, index) in filteredRemotesByName" :id="'pmp-remoteName-option-' + index" :key="r.id" type="button" role="option" :aria-selected="String(index === ddHighlight.remoteName)" :disabled="saving" class="dropdown-row" :class="{ 'dropdown-row--active': index === ddHighlight.remoteName }" @mouseenter="ddActive.remoteName = index" @click="applyRemote(r)"><span class="min-w-0 flex-1 truncate text-left font-bold text-slate-700 dark:text-slate-200">{{ r.remote_number_name }}</span><span class="font-mono text-xs text-slate-400">{{ r.remote_number }}</span></button>
                 </div>
               </transition>
             </div>
@@ -108,6 +108,16 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import { uploadErrorMessage } from '~/utils/factory-file-policy'
+import { activeOptionIndex, codeMatcher, focusFieldById, padCode, revealOption, stepOptionIndex } from '~/utils/combobox'
+
+// The four search-and-pick fields: how an option's code is read and how many
+// digits a full code has ("8" + Enter means "008").
+const PICKERS = {
+  groupCode: { code: (p) => p.group, size: 3 },
+  groupName: { code: (p) => p.group_name, size: 0 },
+  remoteCode: { code: (r) => r.remote_number, size: 2 },
+  remoteName: { code: (r) => r.remote_number_name, size: 0 },
+}
 
 export default {
   name: 'EngineerProjects',
@@ -124,6 +134,7 @@ export default {
       groupLookupField: 'code',
       remoteLookupField: 'number',
       isDD: { groupCode: false, groupName: false, remoteCode: false, remoteName: false },
+      ddActive: { groupCode: -1, groupName: -1, remoteCode: -1, remoteName: -1 },
       pmpId: null,
       remoteNumberId: null,
       pmpRemoteNumbers: [],
@@ -186,6 +197,13 @@ export default {
       return !(this.pmpRemoteNumbers || []).some((r) => String(r.remote_number) === this.pmpRemoteNumber.padStart(2, '0') || String(r.remote_number_name).trim().toLowerCase() === this.pmpRemoteNumberName.toLowerCase())
     },
     showView() { return !!this.existingRemote },
+    // Option Enter would take in each list (-1: none).
+    ddHighlight() {
+      const typed = { groupCode: this.pmpGroup, groupName: this.pmpGroupName, remoteCode: this.pmpRemoteNumber, remoteName: this.pmpRemoteNumberName }
+      const result = {}
+      for (const [which, { code, size }] of Object.entries(PICKERS)) result[which] = activeOptionIndex(this.dropdownOptions(which), this.ddActive[which], codeMatcher(typed[which], code, size))
+      return result
+    },
   },
   watch: {
     existingGroup() { this.onGroupFieldsChanged() },
@@ -194,8 +212,63 @@ export default {
   created() { this.fetchPmps() },
   methods: {
     ...mapActions('pmp', ['fetchPmps', 'createPmp', 'rememberNumberPmp']),
-    toggleDropdown(which) { Object.keys(this.isDD).forEach((k) => (this.isDD[k] = k === which ? !this.isDD[k] : false)) },
-    openDropdown(which) { Object.keys(this.isDD).forEach((k) => (this.isDD[k] = k === which)) },
+    toggleDropdown(which) { Object.keys(this.isDD).forEach((k) => { this.isDD[k] = k === which ? !this.isDD[k] : false; this.ddActive[k] = -1 }) },
+    openDropdown(which) { Object.keys(this.isDD).forEach((k) => { this.isDD[k] = k === which; this.ddActive[k] = -1 }) },
+    closeDropdowns() { Object.keys(this.isDD).forEach((k) => { this.isDD[k] = false; this.ddActive[k] = -1 }) },
+    dropdownOptions(which) {
+      return { groupCode: this.filteredGroupsByGroup, groupName: this.filteredGroupsByName, remoteCode: this.filteredRemotesByNumber, remoteName: this.filteredRemotesByName }[which] || []
+    },
+    ariaOption(which) {
+      return this.isDD[which] && this.ddHighlight[which] >= 0 ? `pmp-${which}-option-${this.ddHighlight[which]}` : null
+    },
+    // Arrows move through the open list, Escape closes it, Enter confirms the field.
+    onFieldKeydown(event, which) {
+      if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey) return
+      const options = this.dropdownOptions(which)
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (!options.length) return
+        event.preventDefault()
+        const open = this.isDD[which]
+        if (!open) this.openDropdown(which)
+        this.ddActive[which] = stepOptionIndex(open ? this.ddHighlight[which] : -1, options.length, event.key === 'ArrowDown' ? 1 : -1)
+        revealOption(this, `pmp-${which}-option-${this.ddActive[which]}`)
+      } else if (event.key === 'Escape') {
+        if (!this.isDD[which]) return
+        event.preventDefault()
+        this.closeDropdowns()
+      } else if (event.key === 'Enter') {
+        event.preventDefault()
+        if (this.saving) return
+        const index = this.isDD[which] ? this.ddHighlight[which] : -1
+        return this.confirmField(which, index >= 0 ? options[index] : null)
+      }
+    },
+    // Enter: take the highlighted option or the typed code, then go on: group ->
+    // subgroup -> its files. A new group or subgroup is created once its name is
+    // filled in.
+    async confirmField(which, picked) {
+      if (which === 'groupCode' || which === 'groupName') {
+        if (picked) this.applyGroup(picked)
+        else if (which === 'groupCode' && padCode(this.pmpGroup, 3) !== this.pmpGroup) { this.pmpGroup = padCode(this.pmpGroup, 3); this.onGroupFieldsChanged() }
+        this.closeDropdowns()
+        if (this.isExistingGroup) return focusFieldById(this, 'pmp-remote-code')
+        if (which === 'groupCode') return focusFieldById(this, 'pmp-group-name')
+        if (this.canCreateGroup && this.$can('pmp.create')) {
+          await this.addPmpGroup()
+          if (this.isExistingGroup) focusFieldById(this, 'pmp-remote-code')
+          return
+        }
+        return focusFieldById(this, this.pmpGroup ? 'pmp-group-name' : 'pmp-group-code')
+      }
+      if (!this.isExistingGroup) return
+      if (picked) this.applyRemote(picked)
+      else if (which === 'remoteCode' && padCode(this.pmpRemoteNumber, 2) !== this.pmpRemoteNumber) { this.pmpRemoteNumber = padCode(this.pmpRemoteNumber, 2); this.remoteLookupField = 'number'; this.linkRemoteByInputs() }
+      this.closeDropdowns()
+      if (this.existingRemote) return this.viewFiles()
+      if (which === 'remoteCode') return focusFieldById(this, 'pmp-remote-name')
+      if (this.canCreateRemote && this.$can('pmp.create')) return this.addPmpGroupRemoteNumber()
+      return focusFieldById(this, this.pmpRemoteNumber ? 'pmp-remote-name' : 'pmp-remote-code')
+    },
     onGroupCodeInput() { this.groupLookupField = 'code'; this.openDropdown('groupCode'); this.onGroupFieldsChanged() },
     onGroupNameInput() { this.groupLookupField = 'name'; this.openDropdown('groupName'); this.onGroupFieldsChanged() },
     onRemoteCodeInput() { if (this.isExistingGroup) { this.remoteLookupField = 'number'; this.openDropdown('remoteCode'); this.linkRemoteByInputs() } },
@@ -313,7 +386,7 @@ export default {
       this.pmpId = null
       this.remoteNumberId = null
       this.pmpRemoteNumbers = []
-      Object.keys(this.isDD).forEach((k) => (this.isDD[k] = false))
+      this.closeDropdowns()
     },
   },
 }
@@ -330,6 +403,7 @@ export default {
 .picker-button { @apply absolute inset-y-0 right-0 flex w-10 items-center justify-center text-slate-400 transition hover:text-slate-700 disabled:opacity-40 dark:hover:text-slate-200; }
 .dropdown-card { @apply absolute z-30 mt-2 max-h-64 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900; }
 .dropdown-row { @apply flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800; }
+.dropdown-row--active { @apply bg-slate-100 ring-1 ring-slate-300 dark:bg-slate-800 dark:ring-slate-600; }
 .action-button:disabled { opacity: 0.5; cursor: not-allowed; }
 .action-button { @apply flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left shadow-sm transition; }
 .action-button span:last-child { @apply flex min-w-0 flex-1 flex-col; }

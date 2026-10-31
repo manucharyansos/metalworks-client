@@ -37,7 +37,18 @@
     "invalid_file_quantities": "Յուրաքանչյուր ընտրված ֆայլի քանակը պետք է լինի ամբողջ թիվ՝ 1 կամ ավելի։",
     "confirmation_method_required": "«Ավարտի հաստատում» բաժնում ընտրեք նկար, տեքստ կամ երկուսը միասին։",
     "route_cycle": "Արտադրամասերի հերթականությունը շրջան է կազմում։ Ստուգեք «Հերթականություն և ժամկետներ» բաժինը։",
-    "selected_count": "Ընտրված է՝ {count}"
+    "selected_count": "Ընտրված է՝ {count}",
+    "status_all_files": "Ամբողջ ենթախումբը · {count} ֆայլ",
+    "status_selected_files": "Ընտրված է՝ {count} ֆայլ",
+    "status_route": "{mode} · {count} փուլ",
+    "status_confirmation_off": "Պարտադիր չէ",
+    "status_confirmation_photo": "Պարտադիր՝ նկար",
+    "status_confirmation_text": "Պարտադիր՝ տեքստ",
+    "status_confirmation_photo_text": "Պարտադիր՝ նկար և տեքստ",
+    "status_confirmation_missing": "Ընտրեք հաստատման եղանակը",
+    "status_workshops_default": "Լռելյայն պայմաններ",
+    "status_workshops_custom": "Փոփոխված է՝ {count}",
+    "status_operators": "Նշանակված է՝ {assigned} / {total}"
   },
   "employee_permissions": {
     "dependents_disabled": "Անջատվեցին նաև այս հասանելիությունից կախված {count} ֆունկցիաները։"

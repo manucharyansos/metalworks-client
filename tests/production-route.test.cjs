@@ -152,3 +152,22 @@ test('a ready notification arriving before the next poll loads the task through 
   await options.methods.openNotificationTask.call(vm)
   assert.equal(opened, task)
 })
+
+test('the route editor offers the other workshops and lets only stages without files be removed', () => {
+  const factories = [{ id: 1, name: 'Laser' }, { id: 3, name: 'Powder' }]
+  const creating = component('components/engineer/ProductionRouteEditor.vue', {
+    value: { mode: 'sequential', stages: [] }, factories,
+    available: [{ id: 2, name: 'Bend' }, { id: 3, name: 'Powder' }], fileWorkshopIds: [1],
+  })
+  assert.deepEqual(creating.addable.map((row) => row.id), [2])
+  assert.equal(creating.hasFiles(1), true)
+  assert.equal(creating.removable(1), false)
+  assert.equal(creating.removable(3), true)
+  assert.equal(creating.overallDate, '')
+  creating.$destroy()
+  const saved = component('components/engineer/ProductionRouteEditor.vue', { value: { mode: 'sequential', stages: [] }, factories, overallDeadline: '2026-11-20T18:00' })
+  assert.equal(saved.removable(3), false, 'a saved task route never offers removal here')
+  assert.deepEqual(saved.addable, [])
+  assert.equal(saved.overallDate, '2026-11-20')
+  saved.$destroy()
+})

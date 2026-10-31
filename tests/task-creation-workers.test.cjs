@@ -20,6 +20,7 @@ async function component(file, { render = false } = {}) {
     /import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g,
     (_, names, specifier) => {
       if (specifier === '@/utils/workshop-catalog') return `import ${names} from '${catalogUrl}'`
+      if (specifier === '@/utils/combobox') return `import ${names} from '${moduleUrl(read('utils/combobox.js'))}'`
       if (specifier === '@/utils/production-route') return `import ${names} from '${moduleUrl(read('utils/production-route.js'))}'`
       if (specifier === '@/utils/task-workflow') return `import ${names} from '${workflowUrl}'`
       if (specifier === '@/utils/task-routing') return `import ${names} from '${routingUrl}'`
@@ -495,4 +496,64 @@ test('the settings accordion opens one section at a time without losing its slot
   vm.disabled = true
   vm.toggleSection('files')
   assert.equal(vm.activeSection, null)
+})
+
+test('Enter takes a group typed without zeros, then the subgroup, and the lists follow the arrows', async () => {
+  const { vm } = await orderPage()
+  const key = (name) => ({ key: name, preventDefault() {} })
+  vm.getPmpes = { pmp: [
+    { id: 10, group: '001', group_name: 'First', remote_number: [{ id: 101, remote_number: '01' }, { id: 102, remote_number: '02' }] },
+    { id: 20, group: '010', group_name: 'Ten', remote_number: [] },
+  ] }
+  vm.pmpGroupSearch = '10'
+  vm.filterPmpGroups()
+  vm.onPmpKeydown(key('Enter'), 'group')
+  assert.equal(vm.selectedPmp.id, 20, '"10" means group 010')
+  vm.pmpGroupSearch = '1'
+  vm.filterPmpGroups()
+  assert.equal(vm.groupHighlight, 0, '"1" means 001, not 010')
+  vm.onPmpKeydown(key('ArrowDown'), 'group')
+  assert.equal(vm.groupHighlight, 1)
+  vm.onPmpKeydown(key('ArrowUp'), 'group')
+  vm.onPmpKeydown(key('Enter'), 'group')
+  await Vue.nextTick()
+  assert.equal(vm.selectedPmp.id, 10)
+  vm.pmpNameSearch = '2'
+  vm.filterPmpNames()
+  vm.onPmpKeydown(key('Enter'), 'subgroup')
+  await Vue.nextTick()
+  assert.equal(vm.selectedPmpRemoteNumber, '02')
+  assert.equal(vm.remote_number_id, 102)
+  vm.pmpNameSearch = ''
+  vm.filterPmpNames()
+  assert.equal(vm.subgroupHighlight, -1, 'an empty field picks nothing on Enter')
+})
+
+test('the route can add a workshop without files that gets its own settings and operator', async () => {
+  const { vm, requests } = await orderPage()
+  vm.getFactory = [...vm.getFactory, { id: 3, value: 'POWDER', name: 'Powder' }]
+  await Vue.nextTick()
+  assert.deepEqual(vm.taskWorkshops.map((factory) => factory.id), [1, 2])
+  assert.deepEqual(vm.addableWorkshops.map((factory) => factory.id), [3])
+  vm.addRouteWorkshop(3)
+  vm.addRouteWorkshop(3)
+  assert.deepEqual(vm.taskWorkshops.map((factory) => factory.id), [1, 2, 3])
+  assert.deepEqual(vm.addableWorkshops, [])
+  assert.deepEqual(vm.productionRoutePayload.stages.map((stage) => stage.factory_id), [1, 2, 3], 'added at the end')
+  vm.removeRouteWorkshop(1)
+  assert.deepEqual(vm.taskWorkshops.map((factory) => factory.id), [1, 2, 3], 'workshops with files stay')
+  vm.removeRouteWorkshop(3)
+  assert.deepEqual(vm.taskWorkshops.map((factory) => factory.id), [1, 2])
+  assert.deepEqual(vm.productionRoutePayload.stages.map((stage) => stage.factory_id), [1, 2])
+  vm.addRouteWorkshop(3)
+  await Vue.nextTick()
+  assert.ok(3 in vm.factoryOperators, 'the added workshop can get an operator')
+  vm.workshopSettings = { 3: { inherit: true, deadline: '', priority: 'urgent', confirmation_required: false, confirmation_method: '' } }
+  vm.factoryOperators = { 1: 8, 2: null, 3: null }
+  assert.match(vm.configurationStatus.route, /status_route/)
+  await vm.pmpFiles()
+  const sent = requests.at(-1)
+  assert.deepEqual(sent.production_route.stages.map((stage) => stage.factory_id), [1, 2, 3])
+  assert.equal(sent.workshop_settings.find((row) => row.factory_id === 3).priority, 'urgent')
+  assert.ok(sent.file_routing.every((row) => !row.factory_ids.includes(3)), 'no files are sent to it')
 })

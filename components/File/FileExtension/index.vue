@@ -29,7 +29,7 @@
           <div v-else class="flex items-center gap-2">
             <div class="relative min-w-0 flex-1">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-xs font-bold text-slate-400">.</span>
-              <input v-model="editedExtension" type="text" class="w-full rounded-xl border border-slate-300 bg-white py-2 pl-6 pr-3 font-mono text-xs font-bold text-slate-700 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" @keyup.enter="saveEdit(extension.id)" @keyup.esc="cancelEdit" />
+              <input v-model="editedExtension" type="text" class="w-full rounded-xl border border-slate-300 bg-white py-2 pl-6 pr-3 font-mono text-xs font-bold text-slate-700 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200" data-enter="off" @keyup.enter="saveEdit(extension.id)" @keyup.esc="cancelEdit" />
             </div>
             <button type="button" class="rounded-xl bg-slate-950 p-2 text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950" aria-label="Պահպանել ֆայլի տեսակը" @click="saveEdit(extension.id)">
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m4.5 12.75 6 6 9-13.5" /></svg>

@@ -65,6 +65,7 @@
         max="500"
         class="w-20 rounded-lg border px-2 py-2 dark:bg-gray-800 dark:text-gray-100"
         placeholder="qty"
+        data-enter="off"
         @keyup.enter="applyCustom"
         @blur="applyCustom"
       />

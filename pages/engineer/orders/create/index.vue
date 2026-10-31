@@ -161,6 +161,7 @@
 
         <section
           class="work-card min-w-0 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
+          data-enter-scope
         >
           <h2 class="mb-5 text-base font-semibold">
             {{ $t('order_create.order_details') }}
@@ -189,6 +190,16 @@
                     id="pmpGroup"
                     v-model="pmpGroupSearch"
                     type="text"
+                    role="combobox"
+                    autocomplete="off"
+                    aria-autocomplete="list"
+                    aria-controls="pmp-group-options"
+                    :aria-expanded="String(isSelectPmpGroup)"
+                    :aria-activedescendant="
+                      isSelectPmpGroup && groupHighlight >= 0
+                        ? 'pmp-group-option-' + groupHighlight
+                        : null
+                    "
                     class="order-input pr-10"
                     :class="{
                       'border-red-500 ring-2 ring-red-100':
@@ -197,6 +208,7 @@
                     :placeholder="$t('order_create.search_group')"
                     @focus="isSelectPmpGroup = true"
                     @input="filterPmpGroups"
+                    @keydown="onPmpKeydown($event, 'group')"
                   />
                   <button
                     type="button"
@@ -222,11 +234,21 @@
                   </button>
                 </div>
                 <div v-if="isSelectPmpGroup" class="order-menu">
-                  <ul class="py-1">
-                    <li v-for="pmp in filteredPmpGroups" :key="pmp.id">
+                  <ul id="pmp-group-options" role="listbox" class="py-1">
+                    <li
+                      v-for="(pmp, index) in filteredPmpGroups"
+                      :key="pmp.id"
+                      role="none"
+                    >
                       <button
+                        :id="'pmp-group-option-' + index"
                         type="button"
+                        role="option"
+                        tabindex="-1"
+                        :aria-selected="String(index === groupHighlight)"
                         class="order-option"
+                        :class="{ 'order-option--active': index === groupHighlight }"
+                        @mouseenter="groupActive = index"
                         @click="selectPmpGroup(pmp)"
                       >
                         <span class="font-mono text-sm font-semibold">{{
@@ -259,6 +281,16 @@
                     id="pmpRemoteNumberName"
                     v-model="pmpNameSearch"
                     type="text"
+                    role="combobox"
+                    autocomplete="off"
+                    aria-autocomplete="list"
+                    aria-controls="pmp-subgroup-options"
+                    :aria-expanded="String(isSelectPmpName && !!selectedPmp)"
+                    :aria-activedescendant="
+                      isSelectPmpName && subgroupHighlight >= 0
+                        ? 'pmp-subgroup-option-' + subgroupHighlight
+                        : null
+                    "
                     :disabled="!selectedPmp"
                     class="order-input pr-10"
                     :class="{
@@ -268,6 +300,7 @@
                     :placeholder="$t('order_create.search_subgroup')"
                     @focus="isSelectPmpName = !!selectedPmp"
                     @input="filterPmpNames"
+                    @keydown="onPmpKeydown($event, 'subgroup')"
                   />
                   <button
                     type="button"
@@ -294,14 +327,23 @@
                   </button>
                 </div>
                 <div v-if="isSelectPmpName && selectedPmp" class="order-menu">
-                  <ul class="py-1">
+                  <ul id="pmp-subgroup-options" role="listbox" class="py-1">
                     <li
                       v-for="(remoteNumber, index) in filteredPmpNames"
                       :key="index"
+                      role="none"
                     >
                       <button
+                        :id="'pmp-subgroup-option-' + index"
                         type="button"
+                        role="option"
+                        tabindex="-1"
+                        :aria-selected="String(index === subgroupHighlight)"
                         class="order-option"
+                        :class="{
+                          'order-option--active': index === subgroupHighlight,
+                        }"
+                        @mouseenter="subgroupActive = index"
                         @click="selectPmpRemoteNumber(remoteNumber)"
                       >
                         <span class="font-mono text-sm font-semibold">{{
@@ -495,7 +537,8 @@
         ref="configurationEditor"
         :disabled="isLoading"
         :file-count="effectiveFiles.length"
-        :workshop-count="selectedFactories.length"
+        :workshop-count="taskWorkshops.length"
+        :status="configurationStatus"
         :can-submit="canSubmit"
         :submit-issue="submissionIssue ? $t(submissionIssue) : ''"
         :working-file-count="workingFiles.length"
@@ -588,9 +631,13 @@
           <ProductionRouteEditor
             v-model="productionRouteModel"
             class="!mt-0 !border-0 !bg-transparent !p-0"
-            :factories="selectedFactories"
+            :factories="taskWorkshops"
+            :available="addableWorkshops"
+            :file-workshop-ids="fileWorkshopIds"
             :overall-deadline="finishDate"
             :disabled="isLoading"
+            @add="addRouteWorkshop"
+            @remove="removeRouteWorkshop"
           />
         </template>
         <template #confirmation>
@@ -611,7 +658,7 @@
             v-model="workshopSettings"
             class="!mt-0 !border-0 !bg-transparent !p-0"
             hide-deadline
-            :factories="selectedFactories"
+            :factories="routeOrderedWorkshops"
             :disabled="isLoading"
           />
         </template>
@@ -619,7 +666,7 @@
           <TaskOperatorPicker
             v-model="factoryOperators"
             class="!mt-0 !border-0 !bg-transparent !p-0"
-            :factories="selectedFactories"
+            :factories="routeOrderedWorkshops"
             :workload="workload"
             :error="workloadError"
             :loading="workloadLoading"
@@ -665,9 +712,17 @@ import TaskWorkshopOptions from '@/components/engineer/TaskWorkshopOptions.vue'
 import ProductionRouteEditor from '@/components/engineer/ProductionRouteEditor.vue'
 import {
   normalizeRoute,
+  routeCopy,
   routeHasCycle,
   routeFromFilePlans,
 } from '@/utils/production-route'
+import {
+  activeOptionIndex,
+  codeMatcher,
+  focusFieldById,
+  revealOption,
+  stepOptionIndex,
+} from '@/utils/combobox'
 import TaskOperatorPicker from '@/components/engineer/TaskOperatorPicker.vue'
 import {
   confirmationMethods,
@@ -704,6 +759,8 @@ export default {
       isSelectedClient: false,
       isSelectPmpGroup: false,
       isSelectPmpName: false,
+      groupActive: -1,
+      subgroupActive: -1,
       selectedClient: null,
       pmpGroupSearch: '',
       pmpNameSearch: '',
@@ -738,6 +795,8 @@ export default {
       fileRouting: {},
       workshopSettings: {},
       productionRoute: null,
+      // Workshops added only to the production route (no files of their own).
+      routeExtraIds: [],
     }
   },
   computed: {
@@ -858,6 +917,27 @@ export default {
         .map((factory) => ({ ...factory, operators: factory.operators || [] }))
     },
 
+    fileWorkshopIds() {
+      return this.selectedFactories.map((factory) => Number(factory.id))
+    },
+    // Workshops of the task: those receiving its files plus those added only to
+    // the production route (painting, welding…), in catalog order.
+    taskWorkshops() {
+      const ids = new Set([
+        ...this.fileWorkshopIds,
+        ...this.routeExtraIds.map(Number),
+      ])
+      return this.subgroupFactories.filter((factory) =>
+        ids.has(Number(factory.id))
+      )
+    },
+    addableWorkshops() {
+      const ids = new Set(this.taskWorkshops.map((factory) => Number(factory.id)))
+      return this.subgroupFactories.filter(
+        (factory) => !ids.has(Number(factory.id))
+      )
+    },
+
     productionRouteModel: {
       get() {
         return (
@@ -879,7 +959,56 @@ export default {
       },
     },
     productionRoutePayload() {
-      return normalizeRoute(this.productionRouteModel, this.selectedFactories)
+      return normalizeRoute(this.productionRouteModel, this.taskWorkshops)
+    },
+    // Task workshops in route order, for the conditions and operator lists.
+    routeOrderedWorkshops() {
+      const order = this.productionRoutePayload.stages.map(
+        (stage) => stage.factory_id
+      )
+      return [...this.taskWorkshops].sort(
+        (a, b) => order.indexOf(Number(a.id)) - order.indexOf(Number(b.id))
+      )
+    },
+    // One line per settings section, shown in its header.
+    configurationStatus() {
+      const route = this.productionRoutePayload
+      const modes = routeCopy[this.$i18n?.locale] || routeCopy.hy
+      const ids = this.taskWorkshops.map((factory) => Number(factory.id))
+      const custom = ids.filter((id) => {
+        const row = this.workshopSettings[id]
+        return row && (row.inherit === false || (row.priority && row.priority !== 'normal'))
+      }).length
+      const assigned = ids.filter((id) => this.factoryOperators[id] != null).length
+      return {
+        files: this.files_existing
+          ? this.$t('order_configuration.status_selected_files', {
+              count: this.selectedFiles.length,
+            })
+          : this.$t('order_configuration.status_all_files', {
+              count: this.subgroupFiles.length,
+            }),
+        route: this.$t('order_configuration.status_route', {
+          mode: modes[route.mode] || route.mode,
+          count: route.stages.length,
+        }),
+        confirmation: this.confirmationRequired
+          ? this.$t(
+              `order_configuration.status_confirmation_${
+                this.confirmationMethod || 'missing'
+              }`
+            )
+          : this.$t('order_configuration.status_confirmation_off'),
+        workshops: custom
+          ? this.$t('order_configuration.status_workshops_custom', {
+              count: custom,
+            })
+          : this.$t('order_configuration.status_workshops_default'),
+        operators: this.$t('order_configuration.status_operators', {
+          assigned,
+          total: ids.length,
+        }),
+      }
     },
 
     canProceedToFiles() {
@@ -955,6 +1084,24 @@ export default {
     isEditingMode() {
       return this.$route.path.includes('/editing')
     },
+
+    // Option Enter takes in the group/subgroup lists (-1: none).
+    groupHighlight() {
+      return activeOptionIndex(
+        this.filteredPmpGroups,
+        this.groupActive,
+        codeMatcher(this.pmpGroupSearch, (pmp) => pmp.group, 3),
+        Boolean(String(this.pmpGroupSearch || '').trim())
+      )
+    },
+    subgroupHighlight() {
+      return activeOptionIndex(
+        this.filteredPmpNames,
+        this.subgroupActive,
+        codeMatcher(this.pmpNameSearch, (row) => row.remote_number, 2),
+        Boolean(String(this.pmpNameSearch || '').trim())
+      )
+    },
   },
   watch: {
     confirmationRequired(value) {
@@ -968,7 +1115,7 @@ export default {
         this.resetPmpFileSelection()
       }
     },
-    selectedFactories(newFactories) {
+    taskWorkshops(newFactories) {
       newFactories.forEach((factory) => {
         if (!(factory.id in this.factoryOperators)) {
           this.$set(this.factoryOperators, factory.id, null)
@@ -1082,6 +1229,7 @@ export default {
 
     resetPmpFileSelection() {
       this.productionRoute = null
+      this.routeExtraIds = []
       this.destinationsOpen = false
       this.selectedFiles = []
       this.fileQuantities = {}
@@ -1097,11 +1245,102 @@ export default {
     },
 
     filterPmpGroups() {
+      this.groupActive = -1
       this.isSelectPmpGroup = true
     },
 
     filterPmpNames() {
+      this.subgroupActive = -1
       this.isSelectPmpName = true
+    },
+
+    // Group and subgroup fields: the arrows choose, Enter takes the option (a
+    // code typed without its zeros too) and moves on to the next field.
+    onPmpKeydown(event, which) {
+      if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey)
+        return
+      const group = which === 'group'
+      if (!group && !this.selectedPmp) return
+      const options = group ? this.filteredPmpGroups : this.filteredPmpNames
+      const open = group ? this.isSelectPmpGroup : this.isSelectPmpName
+      const highlight = group ? this.groupHighlight : this.subgroupHighlight
+      const setOpen = (value) => {
+        if (group) this.isSelectPmpGroup = value
+        else this.isSelectPmpName = value
+      }
+      const setActive = (value) => {
+        if (group) this.groupActive = value
+        else this.subgroupActive = value
+      }
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (!options.length) return
+        event.preventDefault()
+        if (!open) setOpen(true)
+        const next = stepOptionIndex(
+          open ? highlight : -1,
+          options.length,
+          event.key === 'ArrowDown' ? 1 : -1
+        )
+        setActive(next)
+        revealOption(this, `pmp-${which}-option-${next}`)
+      } else if (event.key === 'Escape') {
+        if (!open) return
+        event.preventDefault()
+        setOpen(false)
+        setActive(-1)
+      } else if (event.key === 'Enter') {
+        event.preventDefault()
+        const option = options[highlight]
+        if (!option) return
+        setActive(-1)
+        if (group) {
+          this.selectPmpGroup(option)
+          focusFieldById(this, 'pmpRemoteNumberName')
+        } else {
+          this.selectPmpRemoteNumber(option)
+          focusFieldById(this, 'finishDate')
+        }
+      }
+    },
+
+    // The route may include workshops that get no files (painting, welding…).
+    addRouteWorkshop(id) {
+      const factoryId = Number(id)
+      if (
+        this.taskWorkshops.some((factory) => Number(factory.id) === factoryId) ||
+        !this.subgroupFactories.some((factory) => Number(factory.id) === factoryId)
+      )
+        return
+      const plan = normalizeRoute(this.productionRouteModel, this.taskWorkshops)
+      this.routeExtraIds = [...this.routeExtraIds, factoryId]
+      this.productionRouteModel = {
+        ...plan,
+        stages: [
+          ...plan.stages,
+          { factory_id: factoryId, predecessor_factory_ids: [], deadline: null },
+        ],
+      }
+    },
+    removeRouteWorkshop(id) {
+      const factoryId = Number(id)
+      if (
+        !this.routeExtraIds.includes(factoryId) ||
+        this.fileWorkshopIds.includes(factoryId)
+      )
+        return
+      const plan = normalizeRoute(this.productionRouteModel, this.taskWorkshops)
+      this.routeExtraIds = this.routeExtraIds.filter((value) => value !== factoryId)
+      this.productionRouteModel = {
+        ...plan,
+        stages: plan.stages
+          .filter((stage) => stage.factory_id !== factoryId)
+          .map((stage) => ({
+            ...stage,
+            predecessor_factory_ids: stage.predecessor_factory_ids.filter(
+              (value) => value !== factoryId
+            ),
+          })),
+      }
     },
 
     handleFilesSelected(files) {
@@ -1255,7 +1494,7 @@ export default {
         return
       }
       const inTask = new Set(
-        this.selectedFactories.map((factory) => Number(factory.id))
+        this.taskWorkshops.map((factory) => Number(factory.id))
       )
       const factoryOperatorsArray = Object.entries(this.factoryOperators)
         .filter(
@@ -1267,7 +1506,7 @@ export default {
         }))
 
       const workshopSettings = workshopSettingsPayload(
-        this.selectedFactories,
+        this.taskWorkshops,
         this.workshopSettings,
         this.confirmationRequired,
         this.confirmationMethod
@@ -1511,6 +1750,9 @@ export default {
 }
 .order-option {
   @apply w-full break-words px-4 py-3 text-left transition hover:bg-slate-50 focus:bg-slate-50 dark:hover:bg-slate-800 dark:focus:bg-slate-800;
+}
+.order-option--active {
+  @apply bg-blue-50 dark:bg-slate-800;
 }
 .order-form {
   @apply border-0 bg-transparent p-0 shadow-none;

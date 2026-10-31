@@ -202,6 +202,7 @@
         <button
           class="work-button"
           data-variant="primary"
+          data-enter-submit
           :disabled="submitting"
           @click="submit"
         >

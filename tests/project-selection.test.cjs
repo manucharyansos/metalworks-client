@@ -8,10 +8,12 @@ const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')
 const moduleUrl = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`
 const taskUrl = moduleUrl(read('utils/task-workflow.js'))
 const policyUrl = moduleUrl(read('utils/factory-file-policy.js'))
+const comboboxUrl = moduleUrl(read('utils/combobox.js'))
 async function component(file) {
   let source = read(file).match(/<script>([\s\S]*?)<\/script>/)[1]
   source = source.replace(/import\s+([\s\S]*?)\s+from\s+['"]([^'"]+)['"]/g, (_, names, specifier) => {
     if (specifier === '~/utils/factory-file-policy') return `import ${names} from '${policyUrl}'`
+    if (specifier === '~/utils/combobox') return `import ${names} from '${comboboxUrl}'`
     if (specifier === 'vuex') return 'const mapActions = () => ({}); const mapGetters = () => ({})'
     return `const ${names} = {}`
   })
@@ -349,4 +351,68 @@ test('file breadcrumbs retain both project codes and never show files from anoth
   vm.selectBreadcrumb(0)
   assert.equal(vm.selectedRemoteNumber, null)
   assert.deepEqual(vm.breadcrumb, ['001 — First group'])
+})
+
+const key = (name) => ({ key: name, preventDefault() { this.prevented = true } })
+
+test('Enter completes short codes, moves from group to subgroup and opens an existing subgroup', async () => {
+  const { vm, routes, enter } = await selection()
+  await enter('pmpGroup', '1', 'onGroupCodeInput')
+  await vm.onFieldKeydown(key('Enter'), 'groupCode')
+  await Vue.nextTick()
+  assert.equal(vm.pmpGroup, '001')
+  assert.equal(vm.pmpGroupName, 'First group')
+  assert.equal(vm.isExistingGroup, true)
+  assert.equal(routes.length, 0)
+  await enter('pmpRemoteNumber', '2', 'onRemoteCodeInput')
+  await vm.onFieldKeydown(key('Enter'), 'remoteCode')
+  assert.equal(vm.pmpRemoteNumber, '02')
+  assert.deepEqual(routes.at(-1), { path: '/ru/engineer/files/view', query: { id: 102 } })
+})
+
+test('arrows choose a listed group and Escape closes the list without choosing', async () => {
+  const { vm, enter } = await selection()
+  await enter('pmpGroupName', 'group', 'onGroupNameInput')
+  vm.onFieldKeydown(key('ArrowDown'), 'groupName')
+  vm.onFieldKeydown(key('ArrowDown'), 'groupName')
+  assert.equal(vm.ddHighlight.groupName, 1)
+  vm.onFieldKeydown(key('Escape'), 'groupName')
+  assert.equal(vm.isDD.groupName, false)
+  assert.equal(vm.isExistingGroup, false)
+  vm.onFieldKeydown(key('ArrowUp'), 'groupName')
+  assert.equal(vm.isDD.groupName, true)
+  assert.equal(vm.ddHighlight.groupName, 1, 'reopening starts from the bottom')
+  await vm.onFieldKeydown(key('Enter'), 'groupName')
+  await Vue.nextTick()
+  assert.equal(vm.pmpGroup, '002')
+  assert.equal(vm.isExistingGroup, true)
+})
+
+test('Enter creates a new group from its name and a new subgroup from its description', async () => {
+  const { vm, routes, enter } = await selection()
+  const created = []
+  vm.createPmp = async (payload) => {
+    created.push(['group', payload.group, payload.group_name])
+    vm.getPmpes = { pmp: [...vm.getPmpes.pmp, { id: 30, group: payload.group, group_name: payload.group_name, remote_number: [] }] }
+  }
+  vm.rememberNumberPmp = async (payload) => {
+    created.push(['subgroup', payload.remote_number, payload.remote_number_name])
+    return { remote_number_id: 301 }
+  }
+  await enter('pmpGroup', '123', 'onGroupCodeInput')
+  await vm.onFieldKeydown(key('Enter'), 'groupCode')
+  assert.equal(created.length, 0, 'a new code alone creates nothing')
+  await enter('pmpGroupName', 'Brand new', 'onGroupNameInput')
+  await vm.onFieldKeydown(key('Enter'), 'groupName')
+  await Vue.nextTick()
+  assert.deepEqual(created, [['group', '123', 'Brand new']])
+  assert.equal(vm.isExistingGroup, true)
+  await enter('pmpRemoteNumber', '5', 'onRemoteCodeInput')
+  await vm.onFieldKeydown(key('Enter'), 'remoteCode')
+  assert.equal(vm.pmpRemoteNumber, '05')
+  assert.equal(created.length, 1, 'a new subgroup number alone creates nothing')
+  await enter('pmpRemoteNumberName', 'Doors', 'onRemoteNameInput')
+  await vm.onFieldKeydown(key('Enter'), 'remoteName')
+  assert.deepEqual(created.at(-1), ['subgroup', '05', 'Doors'])
+  assert.deepEqual(routes.at(-1), { path: '/ru/engineer/files/view', query: { id: 301 } })
 })

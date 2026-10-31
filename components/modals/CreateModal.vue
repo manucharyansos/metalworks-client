@@ -42,6 +42,7 @@
         </div>
         <button
           class="py-1.5 px-10 bg-green-400 rounded-2xl text-white font-bold font-montserrat"
+          data-enter-submit
           @click="$emit('addButton')"
         >
           Add

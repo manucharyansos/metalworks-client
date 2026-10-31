@@ -29,6 +29,7 @@ async function component(file, render = false) {
     if (specifier === '~/utils/membership-copy') return `import ${names} from '${membershipUrl}'`
     if (specifier === '~/static/logo.png') return `const ${names} = '/work/_nuxt/img/metalworks-test.png'`
     if (specifier === '@/utils/workshop-catalog') return `import ${names} from '${catalogUrl}'`
+    if (specifier === '@/utils/combobox') return `import ${names} from '${moduleUrl(read('utils/combobox.js'))}'`
     if (specifier === '@/utils/production-route') return `import ${names} from '${moduleUrl(read('utils/production-route.js'))}'`
       if (specifier === '@/utils/task-workflow') return `import ${names} from '${taskUrl}'`
     if (specifier === '@/utils/task-board') return `import ${names} from '${taskBoardUrl}'`

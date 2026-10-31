@@ -33,45 +33,6 @@
       </div>
     </transition>
 
-    <section
-      v-if="projectReady"
-      class="work-card mb-5 grid gap-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:grid-cols-2 sm:p-5 lg:mb-3 lg:gap-3 lg:px-4 lg:py-2.5"
-      aria-label="Նախագիծ"
-    >
-      <div class="min-w-0 lg:flex lg:items-center lg:gap-3">
-        <p class="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400 lg:mb-0 lg:shrink-0">
-          {{ $t('project_context.group') }}
-        </p>
-        <div class="flex min-w-0 items-start gap-3 lg:items-center">
-          <span
-            class="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-sm font-semibold text-slate-900 dark:bg-slate-800 dark:text-white"
-            >{{ groupCode }}</span
-          >
-          <p
-            class="min-w-0 break-words text-sm font-semibold text-slate-900 dark:text-white lg:truncate"
-          >
-            {{ getPmp.group_name || '—' }}
-          </p>
-        </div>
-      </div>
-      <div v-if="selectedRemoteNumber" class="min-w-0 lg:flex lg:items-center lg:gap-3">
-        <p class="mb-1 text-xs font-medium text-slate-500 dark:text-slate-400 lg:mb-0 lg:shrink-0">
-          {{ $t('project_context.subgroup') }}
-        </p>
-        <div class="flex min-w-0 items-start gap-3 lg:items-center">
-          <span
-            class="shrink-0 rounded-lg bg-blue-50 px-2.5 py-1 font-mono text-sm font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-200"
-            >{{ subgroupCode }}</span
-          >
-          <p
-            class="min-w-0 break-words text-sm font-semibold text-slate-900 dark:text-white lg:truncate"
-          >
-            {{ selectedRemoteNumber.remote_number_name || '—' }}
-          </p>
-        </div>
-      </div>
-    </section>
-
     <!-- Windows Explorer style: address bar, toolbar, pinned INFO folder,
          production folders, then the opened folder's files and the preview.
          All actions call the same methods as before. -->

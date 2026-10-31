@@ -64,6 +64,17 @@
               "
               >{{ $t(`order_configuration.${section}_hint`) }}</span
             >
+            <span
+              v-if="status[section]"
+              class="mt-2 inline-flex max-w-full rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-5"
+              :class="
+                activeSection === section
+                  ? 'bg-white/20 text-white'
+                  : 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-200'
+              "
+              :data-task-config-status="section"
+              ><span class="truncate">{{ status[section] }}</span></span
+            >
           </span>
           <span class="shrink-0 text-lg leading-6" aria-hidden="true">{{
             activeSection === section ? '−' : '+'
@@ -162,6 +173,8 @@ export default {
     referenceFileCount: { type: Number, default: 0 },
     canSubmit: Boolean,
     submitIssue: { type: String, default: '' },
+    // Current state of each section, shown under its title.
+    status: { type: Object, default: () => ({}) },
   },
   data() {
     return {

@@ -26,7 +26,7 @@
         <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <div class="relative xl:col-span-2">
             <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0Z" /></svg>
-            <input v-model.trim="query.search" class="control pr-10" :placeholder="t.searchPlaceholder" @keyup.enter="applyFilters" />
+            <input v-model.trim="query.search" class="control pr-10" :placeholder="t.searchPlaceholder" data-enter="off" @keyup.enter="applyFilters" />
           </div>
           <select v-model="query.user_id" class="control"><option value="">{{ t.allEmployees }}</option><option v-for="actor in filterOptions.actors" :key="actor.id" :value="String(actor.id)">{{ actor.display_name || actor.name }}</option></select>
           <select v-model="query.role" class="control"><option value="">{{ t.allRoles }}</option><option v-for="role in filterOptions.roles" :key="role.name" :value="role.name">{{ roleLabel(role) }}</option></select>

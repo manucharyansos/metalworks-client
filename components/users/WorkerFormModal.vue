@@ -73,6 +73,7 @@
         <button
           class="rounded-lg bg-slate-950 px-4 py-2 text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-950"
           :disabled="submitting"
+          data-enter-submit
           @click="submit"
         >
           {{ submitting ? t.saving : isEdit ? t.save : t.create }}

@@ -158,6 +158,7 @@
               type="button"
               :disabled="!canSubmit || busy || policyLoading || !!policyError"
               class="rounded-lg bg-green-600 hover:bg-green-700 px-3 py-3 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              data-enter-submit
               @click="$emit('createFile')"
             >
               {{ $t(busy ? 'file_upload.saving' : 'file_upload.add') }}

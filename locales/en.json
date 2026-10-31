@@ -37,7 +37,18 @@
     "invalid_file_quantities": "Each selected file needs a whole-number quantity of at least 1.",
     "confirmation_method_required": "Choose a photo, text or both in Completion approval.",
     "route_cycle": "The route contains a cycle. Check Production route and deadlines.",
-    "selected_count": "Selected: {count}"
+    "selected_count": "Selected: {count}",
+    "status_all_files": "Whole subgroup · {count} files",
+    "status_selected_files": "{count} files selected",
+    "status_route": "{mode} · {count} stages",
+    "status_confirmation_off": "Not required",
+    "status_confirmation_photo": "Required: photo",
+    "status_confirmation_text": "Required: text",
+    "status_confirmation_photo_text": "Required: photo and text",
+    "status_confirmation_missing": "Choose how to confirm",
+    "status_workshops_default": "Default conditions",
+    "status_workshops_custom": "{count} changed",
+    "status_operators": "{assigned} of {total} assigned"
   },
   "employee_permissions": {
     "dependents_disabled": "Also disabled {count} functions that depend on this access."
