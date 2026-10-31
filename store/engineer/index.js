@@ -1,6 +1,7 @@
 const STAGES = ['created', 'accepted', 'in_progress', 'completed']
 const scopeKey = (root) =>
   `${root?.auth?.user?.id || ''}:${root?.workspace?.company?.id || ''}`
+const canLoadBoard = root => Boolean(root?.workspace?.company?.id && !root?.workspace?.switching && (['admin', 'manager'].includes(root?.auth?.user?.role?.name) || root?.auth?.user?.permissions?.includes('orders.view')))
 const emptyColumns = () =>
   Object.fromEntries(
     STAGES.map((stage) => [
@@ -144,6 +145,7 @@ export const actions = {
     { commit, dispatch, rootState },
     { search, confirmation, perPage, reset = false } = {}
   ) {
+    if (!canLoadBoard(rootState)) return false
     if (search !== undefined) commit('SET_SEARCH', search)
     if (confirmation !== undefined) commit('SET_CONFIRMATION', confirmation)
     if (perPage !== undefined) commit('SET_BOARD_PER_PAGE', perPage)
@@ -154,7 +156,7 @@ export const actions = {
     return results.every(Boolean)
   },
   async fetchBoardColumn({ commit, state, rootState }, { stage, page } = {}) {
-    if (!STAGES.includes(stage)) return false
+    if (!canLoadBoard(rootState) || !STAGES.includes(stage)) return false
     const scope = scopeKey(rootState)
     if (state.boardScope !== scope) return false
     const boardVersion = state.boardVersion

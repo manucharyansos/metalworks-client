@@ -241,3 +241,11 @@ test('customer previews use the owned-order file URL and do not request staff me
  const dxf = load('components/File/DxfViewerModal.vue').default
  assert.equal(dxf.methods.resolveSecureUrl.call({ dxfUrl: '/api/profile/orders/5/files/selected-9', $getFileUrl() { assert.fail('must not rewrite customer file route') } }), '/api/profile/orders/5/files/selected-9')
 })
+
+test('notifications wait for a selected stable company', () => {
+ const enabled = load('components/layout/NotificationBell.vue').default.computed.enabled
+ const vm = { $auth: { loggedIn: true, user: { id: 7 } }, companyId: null, $store: { state: { workspace: { switching: false } } } }
+ assert.equal(enabled.call(vm), false)
+ vm.companyId = 2; assert.equal(enabled.call(vm), true)
+ vm.$store.state.workspace.switching = true; assert.equal(enabled.call(vm), false)
+})

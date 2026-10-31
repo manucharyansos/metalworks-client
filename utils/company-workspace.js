@@ -32,7 +32,7 @@ export function companyHome(user) {
     if (permissions.includes('orders.view')) return '/engineer'
     if (permissions.includes('pmp.view')) return '/engineer/files'
     if (permissions.includes('orders.create')) return '/engineer/orders/create'
-    return '/engineer'
+    return '/profile'
   }
   return { laser: '/factory/laser', bend: '/factory/bend', powder_catting: '/factory/powder', operator: '/factory/workspace' }[role] || '/profile'
 }

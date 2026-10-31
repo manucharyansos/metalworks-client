@@ -394,7 +394,8 @@
     }
   },
   "auth": {
-    "workspace_title": "Աշխատանքային հարթակ"
+    "workspace_title": "Աշխատանքային հարթակ",
+    "retry_after": "Կրկին փորձեք {seconds} վայրկյանից։"
   },
   "operations_dashboard": {
     "created": "Ստեղծված առաջադրանքներ",

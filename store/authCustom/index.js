@@ -1,4 +1,5 @@
 export const state = () => ({
+  loginBlockedUntil: 0,
   resMessage: null,
   error: null,
   errorMessage: null,
@@ -38,7 +39,8 @@ export const actions = {
     }
   },
 
-  async loginUser({ commit }, userData) {
+  async loginUser({ commit, state }, userData) {
+    if (Date.now() < (state?.loginBlockedUntil || 0)) return false
     try {
       commit('setErrorMessage', null)
       try {
@@ -52,6 +54,10 @@ export const actions = {
       }
       return true
     } catch (err) {
+      if (err?.response?.status === 429) {
+        const seconds = Math.max(1, Math.min(3600, Number(err.response.data?.retry_after || err.response.headers?.['retry-after']) || 60))
+        commit('setLoginBlockedUntil', Date.now() + seconds * 1000)
+      }
       commit(
         'setErrorMessage',
         err?.response?.data?.error || err?.response?.data?.message || 'Login failed'
@@ -115,6 +121,7 @@ export const actions = {
 }
 
 export const mutations = {
+  setLoginBlockedUntil(state, value) { state.loginBlockedUntil = value },
   setRegistrationErrors(state, errors) {
     state.registrationErrors = errors || {}
   },

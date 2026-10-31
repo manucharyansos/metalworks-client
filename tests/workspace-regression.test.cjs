@@ -141,3 +141,14 @@ test('refreshing the same account clears and reloads its sidebar identity', asyn
   assert.equal(context.identity, null)
   assert.equal(reloads, 1)
 })
+
+test('rate-limited login is not automatically retried and blocks repeated submissions', async () => {
+ const { actions, mutations, state: makeState } = await sourceModule('store/authCustom/index.js')
+ const state = makeState(); let requests = 0
+ const context = { state, commit(name, value) { mutations[name](state, value) } }
+ const runtime = { $auth: { async loginWith() { requests++; throw { response: { status: 429, data: { retry_after: 45 } } } } } }
+ assert.equal(await actions.loginUser.call(runtime, context, payload), false)
+ assert.ok(state.loginBlockedUntil > Date.now() + 40000)
+ assert.equal(await actions.loginUser.call(runtime, context, payload), false)
+ assert.equal(requests, 1)
+})

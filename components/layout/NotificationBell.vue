@@ -154,7 +154,7 @@ export default {
       return this.$auth?.user?.role?.name || ''
     },
     enabled() {
-      return Boolean(this.$auth?.loggedIn && this.$auth?.user?.id)
+      return Boolean(this.$auth?.loggedIn && this.$auth?.user?.id && this.companyId && !this.$store?.state?.workspace?.switching)
     },
     companyId() {
       return this.$store?.state?.workspace?.company?.id || null

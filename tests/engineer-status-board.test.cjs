@@ -16,7 +16,7 @@ const { notificationTarget } = load('utils/task-notifications.js')
 const stages = ['created', 'accepted', 'in_progress', 'completed']
 function store() {
   const definition = load('store/engineer/index.js'), state = definition.state(), requests = []
-  const rootState = { workspace: { company: { id: 1 } }, auth: { user: { id: 7 } } }
+  const rootState = { workspace: { company: { id: 1 } }, auth: { user: { id: 7, permissions: ['orders.view'] } } }
   const runtime = { $axios: { get(url, config) { return new Promise((resolve, reject) => requests.push({ url, params: { ...config.params }, resolve, reject })) } } }
   const context = { state, rootState, commit(name, value) { definition.mutations[name](state, value) }, dispatch(name, value) { return definition.actions[name].call(runtime, context, value) } }
   return { ...context, requests, definition }
@@ -97,4 +97,11 @@ test('closing the engineer board invalidates pending work and per-column size re
   s.commit('INVALIDATE_BOARD');s.requests.forEach(r => r.resolve(result(r.params.stage, 9)));await pending
   assert.deepEqual(s.state.boardColumns.created.orders, [])
   assert.equal(s.state.boardColumns.created.loading, false)
+})
+
+test('denied or switching workspaces never issue engineer board requests', async () => {
+ const s = store(); s.rootState.auth.user.permissions = []
+ assert.equal(await s.dispatch('fetchBoard'), false); assert.equal(s.requests.length, 0)
+ s.rootState.auth.user.permissions = ['orders.view']; s.rootState.workspace.switching = true
+ assert.equal(await s.dispatch('fetchBoard'), false); assert.equal(s.requests.length, 0)
 })

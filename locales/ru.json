@@ -394,7 +394,8 @@
     }
   },
   "auth": {
-    "workspace_title": "Рабочая платформа"
+    "workspace_title": "Рабочая платформа",
+    "retry_after": "Повторите попытку через {seconds} сек."
   },
   "operations_dashboard": {
     "created": "Созданные задания",

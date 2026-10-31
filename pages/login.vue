@@ -84,9 +84,10 @@
               </nuxt-link>
             </div>
 
+            <p v-if="retrySeconds > 0" role="status" class="mb-3 text-sm text-amber-700">{{ $t('auth.retry_after', { seconds: retrySeconds }) }}</p>
             <button
               type="submit"
-              :disabled="loading"
+              :disabled="loading || retrySeconds > 0"
               class="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-4 py-3.5 text-sm font-black text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 dark:focus:ring-slate-700"
             >
               <svg v-if="loading" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -116,6 +117,7 @@
 </template>
 
 <script>
+import { companyHome } from '~/utils/company-workspace'
 import { mapActions, mapGetters } from 'vuex'
 import inputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import WorkspaceBranding from '~/components/auth/WorkspaceBranding.vue'
@@ -137,12 +139,16 @@ export default {
         general: '',
       },
       loading: false,
+      clock: Date.now(),
       // Fields are validated live only after the first sign-in attempt.
       submitted: false,
     }
   },
   computed: {
     ...mapGetters('authCustom', ['getError', 'getErrorMessage']),
+    retrySeconds() {
+      return Math.max(0, Math.ceil(((this.$store.state.authCustom?.loginBlockedUntil || 0) - this.clock) / 1000))
+    },
     errors() {
       return this.getErrorMessage
     },
@@ -160,6 +166,8 @@ export default {
       if (val) this.clearGeneralError()
     },
   },
+  mounted() { this.retryTimer = setInterval(() => { this.clock = Date.now() }, 1000) },
+  beforeDestroy() { clearInterval(this.retryTimer) },
   methods: {
     ...mapActions('authCustom', ['loginUser']),
     clearGeneralError() {
@@ -167,7 +175,7 @@ export default {
       if (this.getErrorMessage) this.$store.commit('authCustom/setErrorMessage', null)
     },
     async login() {
-      if (this.loading) return
+      if (this.loading || this.retrySeconds > 0) return
       this.submitted = true
       this.loading = true
       this.errorMessage.general = ''
@@ -185,17 +193,7 @@ export default {
             this.email = ''
             this.password = ''
 
-            const role = this.$auth.user.role.name
-            const map = {
-              admin: '/admin',
-              manager: '/manager',
-              engineer: '/engineer',
-              laser: '/factory/laser',
-              bend: '/factory/bend',
-              operator: '/factory/bend',
-            }
-
-            const target = this.localePath(map[role] || '/')
+            const target = this.localePath(companyHome(this.$auth.user))
             await this.$router.replace(target)
           } else if (typeof this.getErrorMessage === 'string') {
             this.errorMessage.general = this.getErrorMessage

@@ -9,7 +9,7 @@ const engineerHome = (user) => {
   if (has(user, 'orders.view')) return '/engineer'
   if (has(user, 'pmp.view')) return '/engineer/files'
   if (has(user, 'orders.create')) return '/engineer/orders/create'
-  return '/engineer'
+  return '/profile'
 }
 
 const factoryHome = (user) => {

@@ -395,7 +395,8 @@
     }
   },
   "auth": {
-    "workspace_title": "Work platform"
+    "workspace_title": "Work platform",
+    "retry_after": "Try again in {seconds} seconds."
   },
   "operations_dashboard": {
     "created": "Created tasks",

@@ -206,11 +206,13 @@ export default {
     },
   },
   created() {
+    if (!this.$can('orders.view')) return
     this.confirmationFilter = this.filters.confirmation || ''
     this.fetchBoard({ reset: true })
     this.openFromQuery()
   },
   mounted() {
+    if (!this.$can('orders.view')) return
     this.refreshTimer = setInterval(() => {
       if (!document.hidden && !this.loading) this.refreshOrders()
     }, 30000)
@@ -239,6 +241,7 @@ export default {
       })
     },
     async openFromQuery() {
+      if (!this.$can('orders.view')) return
       const version = ++this.openQueryVersion
       const id = Number(this.$route.query.order)
       if (!Number.isSafeInteger(id) || id <= 0) return
@@ -271,7 +274,7 @@ export default {
       if (result && result.catch) result.catch(() => {})
     },
     refreshOrders() {
-      if (!this.loading)
+      if (this.$can('orders.view') && !this.$store.state.workspace?.switching && !this.loading)
         return this.fetchBoard({ confirmation: this.confirmationFilter })
     },
     onTaskUpdated(order) {

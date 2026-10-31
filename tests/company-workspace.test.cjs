@@ -232,7 +232,7 @@ test('revoking an active assignment refreshes identity without replaying the fai
     assert.equal(calls[0].url, '/api/user')
     assert.equal(calls[0].method, 'get')
     assert.equal(calls[0].headers['X-Assignment-ID'], undefined)
-    assert.deepEqual(replacements, ['/work/engineer'])
+    assert.deepEqual(replacements, ['/work/profile'])
   }, null, { user: assignmentUser })
 })
 
