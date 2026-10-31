@@ -166,7 +166,7 @@ export default {
   }),
   computed: {
     previewKey() {
-      if (this.customerFile) return `customer-${this.orderId}-${this.file.key}`
+      if (this.customerFile) return `customer-${this.file.customer_company_id || ''}-${this.orderId}-${this.file.key}`
       return fileDetailsIdentity(
         this.file,
         this.orderId,
@@ -188,7 +188,7 @@ export default {
         .toUpperCase()
     },
     secureUrl() {
-      if (this.customerFile) return `/api/profile/orders/${this.orderId}/files/${this.file.key}`
+      if (this.customerFile) return `/api/profile/orders/${this.orderId}/files/${this.file.key}${this.file.customer_company_id ? '?customer_company_id=' + Number(this.file.customer_company_id) : ''}`
       return this.file.id && this.$getPmpFileUrl
         ? this.$getPmpFileUrl(this.file)
         : this.$getFileUrl?.(this.file.path)

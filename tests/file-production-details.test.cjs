@@ -237,7 +237,7 @@ test('customer previews use the owned-order file URL and do not request staff me
  const definition = load('components/File/FilePreview.vue').default
  const context = { customerFile: true, orderId: 5, file: { key: 'selected-9', original_name: 'drawing.dxf' } }
  assert.equal(definition.computed.secureUrl.call(context), '/api/profile/orders/5/files/selected-9')
- assert.equal(definition.computed.previewKey.call(context), 'customer-5-selected-9')
+ assert.equal(definition.computed.previewKey.call(context), 'customer--5-selected-9')
  const dxf = load('components/File/DxfViewerModal.vue').default
  assert.equal(dxf.methods.resolveSecureUrl.call({ dxfUrl: '/api/profile/orders/5/files/selected-9', $getFileUrl() { assert.fail('must not rewrite customer file route') } }), '/api/profile/orders/5/files/selected-9')
 })
@@ -248,4 +248,13 @@ test('notifications wait for a selected stable company', () => {
  assert.equal(enabled.call(vm), false)
  vm.companyId = 2; assert.equal(enabled.call(vm), true)
  vm.$store.state.workspace.switching = true; assert.equal(enabled.call(vm), false)
+})
+
+test('customer drawing URLs carry the independent customer company', () => {
+ const definition = load('components/File/FilePreview.vue').default
+ const vm = { customerFile: true, orderId: 5, file: { key: 'selected-9', customer_company_id: 22 } }
+ const url = definition.computed.secureUrl.call(vm)
+ assert.equal(url, '/api/profile/orders/5/files/selected-9?customer_company_id=22')
+ const dxf = load('components/File/DxfViewerModal.vue').default
+ assert.equal(dxf.methods.resolveSecureUrl.call({ dxfUrl: url, $getFileUrl() { assert.fail('must preserve customer scope') } }), url)
 })

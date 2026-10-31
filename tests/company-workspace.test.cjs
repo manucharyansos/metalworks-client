@@ -286,3 +286,10 @@ test('a stale customer selector cannot switch into an employee membership', asyn
   assert.equal(state.workspace.switching, false)
  }, null, { user: { ...user, role: { name: 'authenticatedUser' } } })
 })
+
+test('employee access opens only on an explicit employee workspace action', async () => {
+ await harness(async ({ service, replacements }) => {
+  await service.openEmployeeCompany(2)
+  assert.deepEqual(replacements, ['/work/factory/laser'])
+ }, null, { user: { ...user, role: { name: 'authenticatedUser' } } })
+})

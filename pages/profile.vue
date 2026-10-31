@@ -2,10 +2,20 @@
   <main class="profile-page min-h-screen w-full min-w-0 bg-slate-50 px-3 pb-6 pt-20 sm:pt-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8 lg:py-8">
     <WorkspaceTransition />
     <div class="mx-auto w-full max-w-6xl space-y-4 sm:space-y-6">
-      <div v-if="$auth.user && $auth.user.role && $auth.user.role.name === 'authenticatedUser' && $auth.user.company" class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <WorkspaceIdentity class="p-4" /><CompanySelector />
+      <div v-if="customerMode && customerCompanies.length" class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <WorkspaceIdentity :brand="selectedCustomerCompany" class="p-4" />
+        <label class="block px-4 pb-4">
+          <span class="mb-2 block text-sm font-semibold">{{ companyText.select }}</span>
+          <select v-model="customerCompanyId" class="app-control" :disabled="loading" @change="switchCustomerCompany">
+            <option v-for="company in customerCompanies" :key="company.id" :value="company.id">{{ company.name }}</option>
+          </select>
+        </label>
+        <button v-if="employeeCompanyIds.some(id => String(id) === String(customerCompanyId))" type="button" class="app-button-secondary mx-4 mb-4" @click="$workspace.openEmployeeCompany(customerCompanyId)">{{ $t('profile.employee_workspace') }}</button>
       </div>
       <p v-if="$auth.user && Array.isArray($auth.user.companies) && !$auth.user.companies.length" class="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">{{ companyText.noAccess }}</p>
+      <nuxt-link v-if="!customerMode && customerCompanies.length" :to="localePath({ path: '/profile', query: { view: 'customer' } })" class="app-button-secondary">{{ $t('profile.current_orders') }}</nuxt-link>
+      <p v-if="customerMode && !customerDirectoryError && !loading && !customerCompanies.length" class="rounded-xl bg-white p-4 text-sm text-slate-500">{{ companyText.noAccess }}</p>
+      <p v-if="customerDirectoryError" role="alert" class="rounded-xl bg-rose-50 p-4 text-rose-700">{{ $t('profile.load_failed') }} <button type="button" class="underline" @click="initializeProfile">{{ $t('profile.retry') }}</button></p>
       <section class="relative overflow-visible rounded-[30px] bg-slate-950 p-4 text-white shadow-xl sm:p-8">
         <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-[30px]" aria-hidden="true">
           <div class="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/5 blur-2xl"></div>
@@ -71,7 +81,7 @@
           {{ $t('profile.load_failed') }}
           <button type="button" class="ml-3 underline" @click="fetchProfile">{{ $t('profile.retry') }}</button>
         </div>
-        <div v-if="!loadError && activeTab === 'settings'" class="grid gap-6 lg:grid-cols-2">
+        <div v-if="!customerDirectoryError && (!customerMode || customerCompanyId) && !loadError && activeTab === 'settings'" class="grid gap-6 lg:grid-cols-2">
           <form class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6" @submit.prevent="saveProfile">
             <div class="mb-6 flex items-start gap-3">
               <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
@@ -222,7 +232,7 @@
           </div>
         </div>
 
-        <section v-else-if="!loadError" class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+        <section v-else-if="!customerDirectoryError && (!customerMode || customerCompanyId) && !loadError" class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p class="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">{{ $t('profile.activity') }}</p>
@@ -244,7 +254,7 @@
             <p class="mt-3 text-sm font-bold text-slate-700 dark:text-slate-200">{{ $t('profile.no_data') }}</p>
           </div>
           <div v-else class="space-y-3">
-            <article v-for="item in activityData.data" :key="activityKey(item)" class="work-card rounded-2xl border border-slate-200 p-4 transition hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:hover:border-slate-700">
+            <article v-for="item in activityData.data" :key="String(customerCompanyId) + '-' + activityKey(item)" class="work-card rounded-2xl border border-slate-200 p-4 transition hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:hover:border-slate-700">
               <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div class="min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
@@ -267,7 +277,7 @@
                     <span>{{ statusText(step.status) }}</span>
                   </li>
                 </ul>
-                <ProfileOrderFiles v-if="isClient && openedOrders[activityOrder(item).id]" :order-id="activityOrder(item).id" />
+                <ProfileOrderFiles v-if="isClient && openedOrders[activityOrder(item).id]" :order-id="activityOrder(item).id" :company-id="customerMode ? customerCompanyId : null" />
               </details>
             </article>
           </div>
@@ -294,6 +304,7 @@ export default {
   name: 'ProfilePage',
   components: { ProfileOrderFiles, WorkspaceTransition, CompanySelector, WorkspaceIdentity },
   layout(context) {
+    if (context.route?.query?.view === 'customer') return 'default'
     const role = context.$auth?.user?.role?.name
     if (role === 'admin') return 'admin'
     if (role === 'manager') return 'manager'
@@ -303,6 +314,11 @@ export default {
   },
   data() {
     return {
+      customerCompanies: [],
+      employeeCompanyIds: [],
+      customerCompanyId: null,
+      customerDirectoryError: false,
+      profileRequest: 0,
       loading: true,
       openedOrders: {},
       loadError: false,
@@ -343,11 +359,14 @@ export default {
     }
   },
   computed: {
+    customerMode() { return this.$auth.user?.role?.name === 'authenticatedUser' || this.$route.query.view === 'customer' },
+    selectedCustomerCompany() { return this.customerCompanies.find(company => String(company.id) === String(this.customerCompanyId)) || null },
     companyText() { return workspaceCopy(this.$i18n?.locale) },
     roleName() {
       return this.profileUser?.role?.name || this.$auth.user?.role?.name || ''
     },
     isEmployee() {
+      if (this.customerMode) return false
       return ['admin', 'manager', 'engineer', 'laser', 'bend', 'powder_catting', 'operator'].includes(this.roleName)
     },
     roleLabel() {
@@ -377,7 +396,7 @@ export default {
         .join('') || 'U'
     },
     isClient() {
-      return !!this.capabilities.client_orders
+      return this.customerMode && !!this.capabilities.client_orders
     },
     isFactory() {
       return !!this.capabilities.factory_work
@@ -410,10 +429,45 @@ export default {
       return this.isFactory ? this.$t('profile.factory_scope') : this.$t('profile.client_scope')
     },
   },
+  watch: {
+    customerMode() {
+      this.activeTab = 'settings'
+      this.openedOrders = {}
+      ++this.activityRequest
+      this.initializeProfile()
+    },
+  },
   async mounted() {
-    await this.fetchProfile()
+    await this.initializeProfile()
   },
   methods: {
+    customerConfig(extra = {}) {
+      return { ...extra, params: { ...extra.params, ...(this.customerMode && this.customerCompanyId ? { customer_company_id: this.customerCompanyId } : {}) } }
+    },
+    async initializeProfile() {
+      this.customerDirectoryError = false
+      try {
+        const { data } = await this.$axios.get('/api/profile/customer-companies')
+        this.customerCompanies = data.companies || []
+        this.employeeCompanyIds = data.employee_company_ids || []
+        if (this.customerMode) {
+          let saved
+          try { saved = sessionStorage.getItem(`customer-company-${this.$auth.user.id}`) } catch (_) {}
+          this.customerCompanyId = this.customerCompanies.find(c => String(c.id) === String(saved))?.id || this.customerCompanies[0]?.id || null
+          if (!this.customerCompanyId) { this.profileUser = { ...this.$auth.user }; this.capabilities = {}; this.loading = false; return }
+        }
+        await this.fetchProfile()
+      } catch (_) { this.customerDirectoryError = true; this.loading = false }
+    },
+    async switchCustomerCompany() {
+      ++this.activityRequest
+      this.activityData = { data: [], total: 0, current_page: 1, last_page: 1 }
+      this.openedOrders = {}
+      this.profileUser = {}
+      try { sessionStorage.setItem(`customer-company-${this.$auth.user.id}`, this.customerCompanyId) } catch (_) {}
+      await this.fetchProfile()
+      if (this.activeTab !== 'settings' && !this.loadError) await this.loadActivity(1)
+    },
     async logout() {
       this.loggingOut = true
       try {
@@ -446,7 +500,7 @@ export default {
       this.loadError = false
       this.loading = true
       try {
-        const { data } = await this.$axios.get('/api/profile')
+        const { data } = await this.$axios.get('/api/profile', this.customerConfig())
         this.profileUser = data.user || {}
         this.capabilities = data.capabilities || {}
         this.form.name = this.profileUser.name || ''
@@ -480,7 +534,7 @@ export default {
           address: this.form.address || null,
         }
         const pendingEmail = this.form.email
-        const { data } = await this.$axios.patch('/api/profile', payload)
+        const { data } = await this.$axios.patch('/api/profile', payload, this.customerConfig())
         this.profileUser = data.user || this.profileUser
         this.capabilities = data.capabilities || this.capabilities
         this.form.name = this.profileUser.name || ''
@@ -609,7 +663,7 @@ export default {
       this.activityData = { data: [], total: 0, current_page: page, last_page: 1 }
       try {
         const endpoint = this.isFactory ? '/api/profile/factory-work' : '/api/profile/orders'
-        const { data } = await this.$axios.get(endpoint, { params: { scope, page } })
+        const { data } = await this.$axios.get(endpoint, this.customerConfig({ params: { scope, page } }))
         if (request === this.activityRequest) this.activityData = data
       } catch (error) {
         if (request === this.activityRequest) this.activityError = true

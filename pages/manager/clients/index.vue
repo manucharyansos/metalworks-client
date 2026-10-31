@@ -26,7 +26,7 @@
       @submit="handleSubmit"
     />
 
-    <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" @saved="loadClients" />
+    <CompanyMembershipModal access-type="customer" v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" @saved="loadClients" />
     <ConfirmDelete v-if="$can('clients.delete')" :item="deleteTarget" :submitting="submitting" @close="deleteTarget = null" @confirm="doDelete" />
     <notifications />
   </main>

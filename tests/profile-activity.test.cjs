@@ -37,3 +37,12 @@ test('completed orders are never marked overdue', () => {
  for (const status of ['completed', 'finished', 'done', 'canceled', 'cancelled', 'rejected']) assert.equal(c.isOverdue({ status }), false)
  assert.equal(c.isOverdue({ status: 'pending' }), true)
 })
+
+test('customer company requests use an independent explicit scope', () => {
+ const c = context(); c.customerMode = true; c.customerCompanyId = 22
+ const config = c.customerConfig({ params: { scope: 'history', page: 2 } })
+ assert.equal(config.params.customer_company_id, 22)
+ assert.equal(config.params.scope, 'history')
+ c.customerMode = false
+ assert.equal(c.customerConfig().params.customer_company_id, undefined)
+})

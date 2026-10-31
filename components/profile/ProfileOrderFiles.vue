@@ -25,20 +25,21 @@ import { saveAs } from 'file-saver'
 import FilePreviewModal from '~/components/File/FilePreviewModal.vue'
 export default {
   components: { FilePreviewModal },
-  props: { orderId: { type: [Number, String], required: true } },
+  props: { companyId: { type: [Number, String], default: null }, orderId: { type: [Number, String], required: true } },
   data: () => ({ files: [], loading: false, error: false, preview: null, downloading: {}, downloadErrors: {}, request: 0 }),
-  watch: { orderId() { this.preview = null; this.load() } },
+  watch: { companyId() { this.preview = null; this.load() }, orderId() { this.preview = null; this.load() } },
   mounted() { this.load() },
   beforeDestroy() { ++this.request },
   methods: {
+    config(extra = {}) { return { ...extra, params: { ...extra.params, ...(this.companyId ? { customer_company_id: this.companyId } : {}) } } },
     async load() {
       const request = ++this.request
       this.loading = true
       this.error = false
       this.files = []
       try {
-        const { data } = await this.$axios.get(`/api/profile/orders/${this.orderId}/files`)
-        if (request === this.request) this.files = data.files || []
+        const { data } = await this.$axios.get(`/api/profile/orders/${this.orderId}/files`, this.config())
+        if (request === this.request) this.files = (data.files || []).map(file => ({ ...file, customer_company_id: this.companyId }))
       } catch (_) {
         if (request === this.request) this.error = true
       } finally {
@@ -51,7 +52,7 @@ export default {
       this.$set(this.downloading, file.key, true)
       this.$set(this.downloadErrors, file.key, false)
       try {
-        const { data } = await this.$axios.get(`/api/profile/orders/${this.orderId}/files/${file.key}`, { params: { download: 1 }, responseType: 'blob' })
+        const { data } = await this.$axios.get(`/api/profile/orders/${this.orderId}/files/${file.key}`, this.config({ params: { download: 1 }, responseType: 'blob' }))
         if (request === this.request) saveAs(data, file.original_name)
       } catch (_) {
         if (request === this.request) this.$set(this.downloadErrors, file.key, true)

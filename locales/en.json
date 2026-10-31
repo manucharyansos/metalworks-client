@@ -166,7 +166,8 @@
     "logout_failed": "Unable to complete sign out. Please try again.",
     "files": "Order files",
     "no_files": "No files are attached to this order.",
-    "file_failed": "Unable to load the file. Please try again."
+    "file_failed": "Unable to load the file. Please try again.",
+    "employee_workspace": "Employee workspace"
   },
   "workspace_layout": {
     "operator_workload": "Operator workload",

@@ -180,12 +180,12 @@ export default async ({ app, store, $axios, $auth }, inject) => {
     dirtyForms.clear()
   })
 
-  const changeContext = async (companyId, assignmentId, focus) => {
+  const changeContext = async (companyId, assignmentId, focus, employeeMode = false) => {
     if (!maySwitch()) return
     store.commit('workspace/switching', true)
     try {
       const user = await fetchContext(companyId, assignmentId)
-      if ($auth.user?.role?.name === 'authenticatedUser' && user.role?.name !== 'authenticatedUser') {
+      if (!employeeMode && $auth.user?.role?.name === 'authenticatedUser' && user.role?.name !== 'authenticatedUser') {
         throw new Error('Customer company access changed')
       }
       if (
@@ -194,7 +194,8 @@ export default async ({ app, store, $axios, $auth }, inject) => {
         (assignmentId && String(user.assignment_id) !== String(assignmentId))
       )
         throw new Error('Workspace access changed')
-      reloadWith(user, focus)
+      if (employeeMode && user.role?.name === 'authenticatedUser') throw new Error('Employee access denied')
+      reloadWith(user, employeeMode ? {} : focus)
     } catch (_) {
       store.commit('workspace/switching', false)
       app.$notify?.({ type: 'error', text: copy().failed })
@@ -204,6 +205,9 @@ export default async ({ app, store, $axios, $auth }, inject) => {
     setDirty(value) {
       dirty = Boolean(value)
       if (!value) dirtyForms.clear()
+    },
+    async openEmployeeCompany(id) {
+      await changeContext(id, null, null, true)
     },
     async switchCompany(id) {
       if (

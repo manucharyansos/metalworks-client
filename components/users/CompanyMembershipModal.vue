@@ -33,12 +33,12 @@ import { assignmentRows, assignmentError, assignmentCopy, newCompanyAssignments 
 
 export default {
   components: { StaffAssignmentsEditor, CheckboxSelect },
-  props: { user: { type: Object, required: true }, sourceCompanyId: { type: [Number, String], default: null } },
+  props: { accessType: { type: String, default: '' }, user: { type: Object, required: true }, sourceCompanyId: { type: [Number, String], default: null } },
   data() { return { companies: [], unmanagedCompanies: [], roles: [], rows: [], originals: [], targetType: 'employee', currentCompanyId: null, loading: true, loadError: '', saveError: '', errors: {}, busy: false, sequence: 0, returnFocus: null, previousOverflow: '' } },
   computed: {
     copy() { return membershipCopy(this.$i18n?.locale) },
     userId() { return this.user.user_id || this.user.user?.id || this.user.id },
-    isClient() { return this.targetType === 'client' },
+    isClient() { return this.accessType === 'customer' || this.targetType === 'client' },
     selectedCompanyIds() { return this.rows.filter(row => row.enabled).map(row => row.company_id) },
     selectedCompanies() { return this.companies.filter(company => this.row(company.id).enabled) },
     companyOptions() { return [...this.companies.map(company => ({ id: company.id, label: company.name, disabled: Boolean(company.selection_locked || company.read_only), note: company.read_only ? (this.isClient ? this.copy.protectedEmployee : this.copy.protected) : String(company.id) === String(this.currentCompanyId) ? this.copy.current : '' })), ...this.unmanagedCompanies.map(company => ({ id: company.id, label: company.name, disabled: true, note: this.copy.notManaged }))] },
@@ -51,7 +51,7 @@ export default {
   beforeDestroy() { this.sequence++; document.body.style.overflow = this.previousOverflow; this.returnFocus?.focus() },
   methods: {
     assignmentRows,
-    requestConfig() { return { timeout: 15000, ...(this.sourceCompanyId ? { params: { source_company_id: this.sourceCompanyId } } : {}) } },
+    requestConfig() { return { timeout: 15000, params: { ...(this.sourceCompanyId ? { source_company_id: this.sourceCompanyId } : {}), ...(this.accessType === 'customer' ? { access_type: 'customer' } : {}) } } },
     setCompanyIds(ids) {
       for (const company of this.companies) {
         if (company.selection_locked || company.read_only) continue
