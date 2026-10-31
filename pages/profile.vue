@@ -33,9 +33,10 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <div class="rounded-xl border border-white/10 bg-white/10 px-1 py-0.5 text-white [&_button]:!text-white">
+            <div v-if="isEmployee" class="rounded-xl border border-white/10 bg-white/10 px-1 py-0.5 text-white [&_button]:!text-white">
               <language-dropdown />
             </div>
+            <button type="button" class="rounded-xl border border-white/20 px-4 py-2 text-sm font-bold hover:bg-white/10 disabled:opacity-50" :disabled="loggingOut" @click="logout">{{ $t('logout') }}</button>
             <span v-if="isEmployee" data-profile-position class="rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-bold text-slate-200">
               {{ roleLabel }}
             </span>
@@ -65,6 +66,10 @@
       </div>
 
       <template v-else>
+        <div v-if="loadError" role="alert" class="rounded-2xl bg-rose-50 p-4 text-rose-700">
+          {{ $t('profile.load_failed') }}
+          <button type="button" class="ml-3 underline" @click="fetchProfile">{{ $t('profile.retry') }}</button>
+        </div>
         <div v-if="activeTab === 'settings'" class="grid gap-6 lg:grid-cols-2">
           <form class="work-card rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6" @submit.prevent="saveProfile">
             <div class="mb-6 flex items-start gap-3">
@@ -229,6 +234,10 @@
           </div>
 
           <div v-if="activityLoading" class="py-12 text-center text-sm font-semibold text-slate-400">{{ $t('profile.loading') }}</div>
+          <div v-else-if="activityError" role="alert" class="rounded-2xl bg-rose-50 p-4 text-rose-700">
+            {{ $t('profile.load_failed') }}
+            <button type="button" class="ml-3 underline" @click="loadActivity(activityData.current_page)">{{ $t('profile.retry') }}</button>
+          </div>
           <div v-else-if="!activityData.data || !activityData.data.length" class="rounded-2xl border border-dashed border-slate-200 py-12 text-center dark:border-slate-800">
             <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-xl dark:bg-slate-800">📋</div>
             <p class="mt-3 text-sm font-bold text-slate-700 dark:text-slate-200">{{ $t('profile.no_data') }}</p>
@@ -244,10 +253,20 @@
                   <p class="mt-1 text-xs font-semibold text-slate-400">{{ activityNumber(item) }}</p>
                   <p v-if="activityDescription(item)" class="mt-3 whitespace-pre-line text-sm leading-6 text-slate-700 dark:text-slate-300">{{ activityDescription(item) }}</p>
                   <p v-if="activityFactory(item)" class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ $t('profile.factory') }}: {{ activityFactory(item) }}</p>
-                  <p v-if="activityFinishDate(item)" class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $t('profile.finish_date') }}: {{ activityFinishDate(item) }}</p>
+                  <p v-if="activityFinishDate(item)" class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ $t('profile.finish_date') }}: {{ formatDate(activityFinishDate(item)) }} <span v-if="isOverdue(item)" class="font-bold text-rose-600">· {{ $t('profile.overdue') }}</span></p>
                 </div>
                 <div class="whitespace-nowrap text-xs font-semibold text-slate-400 md:text-right">{{ activityDate(item) }}</div>
               </div>
+              <details class="mt-4 border-t border-slate-200 pt-3 dark:border-slate-700">
+                <summary class="cursor-pointer text-sm font-bold">{{ $t('profile.order_details') }}</summary>
+                <p class="mt-3 break-words text-sm">{{ $t('profile.order') }}: {{ activityNumber(item) }}</p>
+                <ul class="mt-3 space-y-2">
+                  <li v-for="step in activitySteps(item)" :key="step.id" class="flex flex-wrap justify-between gap-2 rounded-xl bg-slate-50 p-3 text-sm dark:bg-slate-800">
+                    <span>{{ step.factory ? step.factory.name : '—' }}</span>
+                    <span>{{ statusText(step.status) }}</span>
+                  </li>
+                </ul>
+              </details>
             </article>
           </div>
 
@@ -266,6 +285,7 @@
 import WorkspaceTransition from '~/components/layout/WorkspaceTransition.vue'
 import CompanySelector from '~/components/layout/CompanySelector.vue'
 import WorkspaceIdentity from '~/components/layout/WorkspaceIdentity.vue'
+import { taskStatusText } from '~/utils/task-board'
 import { workspaceCopy } from '~/utils/company-copy'
 export default {
   name: 'ProfilePage',
@@ -281,6 +301,10 @@ export default {
   data() {
     return {
       loading: true,
+      loadError: false,
+      loggingOut: false,
+      activityError: false,
+      activityRequest: 0,
       activeTab: 'settings',
       profileUser: {},
       capabilities: {},
@@ -386,7 +410,31 @@ export default {
     await this.fetchProfile()
   },
   methods: {
+    async logout() {
+      this.loggingOut = true
+      try {
+        await this.$auth.logout()
+        await this.$router.replace(this.localePath('/login'))
+      } catch (error) {
+        this.$notify({ type: 'error', text: this.$t('profile.logout_failed') })
+      } finally {
+        this.loggingOut = false
+      }
+    },
+    statusText(status) { return taskStatusText(status, this.$i18n.locale) },
+    activitySteps(item) { return this.isFactory ? [item] : item.factory_orders || [] },
+    formatDate(value) {
+      if (!value) return '—'
+      const date = new Date(String(value).replace(' ', 'T'))
+      if (Number.isNaN(date.getTime())) return value
+      return new Intl.DateTimeFormat(this.$i18n.locale === 'hy' ? 'hy-AM' : this.$i18n.locale, { dateStyle: 'medium', timeStyle: 'short' }).format(date)
+    },
+    isOverdue(item) {
+      const date = new Date(String(this.activityFinishDate(item)).replace(' ', 'T'))
+      return this.activeTab === 'current' && !['completed', 'finished', 'done', 'canceled', 'cancelled', 'rejected'].includes(item.status) && date.getTime() < Date.now()
+    },
     async fetchProfile() {
+      this.loadError = false
       this.loading = true
       try {
         const { data } = await this.$axios.get('/api/profile')
@@ -398,6 +446,8 @@ export default {
         this.form.email = this.profileUser.email || ''
         this.form.phone = this.profileUser.phone || this.profileUser.client?.phone || ''
         this.form.address = this.profileUser.address || this.profileUser.client?.address || ''
+      } catch (error) {
+        this.loadError = true
       } finally {
         this.loading = false
       }
@@ -542,15 +592,19 @@ export default {
       }
     },
     async loadActivity(page = 1) {
+      const request = ++this.activityRequest
+      const scope = this.activeTab
       this.activityLoading = true
+      this.activityError = false
+      this.activityData = { data: [], total: 0, current_page: page, last_page: 1 }
       try {
         const endpoint = this.isFactory ? '/api/profile/factory-work' : '/api/profile/orders'
-        const { data } = await this.$axios.get(endpoint, { params: { scope: this.activeTab, page } })
-        this.activityData = data
+        const { data } = await this.$axios.get(endpoint, { params: { scope, page } })
+        if (request === this.activityRequest) this.activityData = data
       } catch (error) {
-        this.activityData = { data: [], total: 0, current_page: 1, last_page: 1 }
+        if (request === this.activityRequest) this.activityError = true
       } finally {
-        this.activityLoading = false
+        if (request === this.activityRequest) this.activityLoading = false
       }
     },
     activityOrder(item) {
@@ -564,7 +618,7 @@ export default {
       return order.name || `${this.$t('profile.order')} #${order.id || item.id}`
     },
     activityStatus(item) {
-      return item.status || '—'
+      return this.statusText(item.status)
     },
     activityNumber(item) {
       const order = this.activityOrder(item)

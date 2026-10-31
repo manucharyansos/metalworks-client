@@ -103,8 +103,8 @@
   "profile": {
     "title": "Личный кабинет",
     "settings": "Настройки",
-    "current_orders": "Текущие задания",
-    "order_history": "История заданий",
+    "current_orders": "Мои текущие заказы",
+    "order_history": "История заказов",
     "current_work": "Текущие работы",
     "completed_work": "Выполненные",
     "personal_data": "Личные данные",
@@ -124,10 +124,10 @@
     "finish_date": "Плановое завершение",
     "current_work_title": "Текущие работы",
     "completed_work_title": "Выполненные работы",
-    "current_orders_title": "Текущие задания",
-    "past_orders_title": "Прошлые задания",
+    "current_orders_title": "Мои текущие заказы",
+    "past_orders_title": "Завершённые заказы",
     "factory_scope": "Показываются только работы, назначенные вашему цеху.",
-    "client_scope": "Показываются только задания, принадлежащие вашему аккаунту.",
+    "client_scope": "Показаны только заказы вашего аккаунта.",
     "profile_saved": "Изменения сохранены.",
     "profile_save_failed": "Не удалось сохранить изменения.",
     "password_mismatch": "Новые пароли не совпадают.",
@@ -157,7 +157,12 @@
     "email_changed_verified": "Электронная почта успешно изменена и подтверждена.",
     "code_invalid": "Код подтверждения неверный или истёк.",
     "code_verify_failed": "Не удалось подтвердить код.",
-    "language": "Язык"
+    "language": "Язык",
+    "order_details": "Подробности заказа",
+    "load_failed": "Не удалось загрузить данные.",
+    "retry": "Повторить",
+    "overdue": "Просрочено",
+    "logout_failed": "Не удалось завершить выход. Повторите попытку."
   },
   "workspace_layout": {
     "operator_workload": "Загрузка операторов",

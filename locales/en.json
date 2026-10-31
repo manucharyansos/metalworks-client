@@ -104,8 +104,8 @@
   "profile": {
     "title": "Personal account",
     "settings": "Settings",
-    "current_orders": "Current tasks",
-    "order_history": "Task history",
+    "current_orders": "My current orders",
+    "order_history": "Order history",
     "current_work": "Current work",
     "completed_work": "Completed",
     "personal_data": "Personal details",
@@ -125,10 +125,10 @@
     "finish_date": "Planned completion",
     "current_work_title": "Current work",
     "completed_work_title": "Completed work",
-    "current_orders_title": "Current tasks",
-    "past_orders_title": "Past tasks",
+    "current_orders_title": "My current orders",
+    "past_orders_title": "Completed orders",
     "factory_scope": "Only work assigned to your factory is shown.",
-    "client_scope": "Only tasks belonging to your account are shown.",
+    "client_scope": "Only orders belonging to your account are shown.",
     "profile_saved": "Changes saved.",
     "profile_save_failed": "Could not save changes.",
     "password_mismatch": "The new passwords do not match.",
@@ -158,7 +158,12 @@
     "email_changed_verified": "Email changed and verified successfully.",
     "code_invalid": "The verification code is incorrect or expired.",
     "code_verify_failed": "Could not verify the code.",
-    "language": "Language"
+    "language": "Language",
+    "order_details": "Order details",
+    "load_failed": "Unable to load data.",
+    "retry": "Retry",
+    "overdue": "Overdue",
+    "logout_failed": "Unable to complete sign out. Please try again."
   },
   "workspace_layout": {
     "operator_workload": "Operator workload",
