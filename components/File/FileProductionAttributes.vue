@@ -23,7 +23,7 @@
       <span
         v-for="name in functions"
         :key="name"
-        class="rounded-md bg-violet-50 px-2 py-1 font-semibold text-violet-800 dark:bg-violet-950/40 dark:text-violet-200"
+        class="max-w-full whitespace-pre-wrap break-words rounded-md bg-violet-50 px-2 py-1 font-semibold text-violet-800 dark:bg-violet-950/40 dark:text-violet-200"
         >✓ {{ name }}</span
       >
     </span>
@@ -61,9 +61,9 @@ export default {
         }
       }
       return Array.isArray(rows)
-        ? [...new Set(rows.map((row) => String(row?.name || '').trim()))].filter(
-            Boolean
-          )
+        ? [
+            ...new Set(rows.map((row) => String(row?.name || '').trim())),
+          ].filter(Boolean)
         : []
     },
   },

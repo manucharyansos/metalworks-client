@@ -68,7 +68,11 @@
       <div
         v-if="showRoute"
         class="space-y-3 px-4 py-4"
-        :class="visibleFields.length ? 'border-t border-slate-100 dark:border-slate-800' : ''"
+        :class="
+          visibleFields.length
+            ? 'border-t border-slate-100 dark:border-slate-800'
+            : ''
+        "
       >
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h5 class="text-xs font-semibold text-slate-600 dark:text-slate-300">
@@ -141,12 +145,43 @@
               <span
                 v-for="fn in workshop.functions"
                 :key="fn.id || fn.name"
-                class="rounded-md bg-violet-100 px-1.5 py-0.5 text-[11px] font-semibold text-violet-800 dark:bg-violet-950/60 dark:text-violet-200"
+                class="max-w-full whitespace-pre-wrap break-words rounded-md bg-violet-100 px-1.5 py-0.5 text-[11px] font-semibold text-violet-800 dark:bg-violet-950/60 dark:text-violet-200"
                 >✓ {{ fn.name }}</span
               >
             </span>
+            <label
+              v-if="details?.can_edit_instructions"
+              class="mt-3 block text-xs font-semibold"
+            >
+              {{ $t('file_plan.instruction') }}
+              <textarea
+                v-model="instructionDrafts[workshop.id]"
+                :disabled="savingInstructions"
+                maxlength="1000"
+                rows="2"
+                :data-edit-file-instruction="workshop.id"
+                class="mt-1 block w-full min-w-0 rounded-lg border border-slate-300 bg-white p-2 text-sm font-normal dark:border-slate-700 dark:bg-slate-900"
+              />
+            </label>
           </li>
         </ul>
+        <div v-if="details?.can_edit_instructions" class="space-y-2">
+          <p class="text-xs text-slate-500">
+            {{ $t('file_plan.instruction_history') }}
+          </p>
+          <p v-if="instructionError" role="alert" class="text-sm text-red-600">
+            {{ instructionError }}
+          </p>
+          <button
+            type="button"
+            :disabled="savingInstructions"
+            data-save-file-instructions
+            class="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            @click="saveInstructions"
+          >
+            {{ $t('file_plan.save_instructions') }}
+          </button>
+        </div>
       </div>
     </template>
   </section>
@@ -164,7 +199,15 @@ export default {
     file: { type: Object, required: true },
     orderId: { type: [Number, String], default: null },
   },
-  data: () => ({ details: null, loading: false, error: '', request: 0 }),
+  data: () => ({
+    details: null,
+    loading: false,
+    error: '',
+    request: 0,
+    instructionDrafts: {},
+    instructionError: '',
+    savingInstructions: false,
+  }),
   computed: {
     scopeKey() {
       return fileDetailsIdentity(
@@ -213,6 +256,45 @@ export default {
     ++this.request
   },
   methods: {
+    async saveInstructions() {
+      if (this.savingInstructions || !this.details?.can_edit_instructions)
+        return
+      const request = this.request
+      this.savingInstructions = true
+      this.instructionError = ''
+      try {
+        const data = await this.$axios.$put(
+          `/api/project-files/${encodeURIComponent(this.file.id)}/instructions`,
+          {
+            production_instructions: this.details.workshops.map((row) => ({
+              factory_id: Number(row.id),
+              text: this.instructionDrafts[row.id] || '',
+            })),
+            previous_instructions: this.details.production_instructions || [],
+          }
+        )
+        if (request !== this.request) return
+        this.details = data.details
+        this.resetInstructions()
+        this.$emit('loaded', this.details)
+      } catch (error) {
+        if (request === this.request)
+          this.instructionError =
+            Object.values(error.response?.data?.errors || {}).flat()[0] ||
+            error.response?.data?.message ||
+            this.$t('file_plan.instruction_failed')
+      } finally {
+        if (request === this.request) this.savingInstructions = false
+      }
+    },
+    resetInstructions() {
+      this.instructionDrafts = Object.fromEntries(
+        (this.details?.production_instructions || []).map((row) => [
+          row.factory_id,
+          row.text,
+        ])
+      )
+    },
     isSet(value) {
       return !(value === null || value === undefined || value === '')
     },
@@ -222,6 +304,9 @@ export default {
     async load() {
       const request = ++this.request
       this.details = null
+      this.instructionDrafts = {}
+      this.instructionError = ''
+      this.savingInstructions = false
       this.error = ''
       this.loading = true
       this.$emit('loading')
@@ -241,6 +326,7 @@ export default {
           )
             throw new Error('Invalid file details')
           this.details = data.details
+          this.resetInstructions()
         }
         if (request === this.request) this.$emit('loaded', this.details)
       } catch (error) {

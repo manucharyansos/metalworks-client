@@ -116,3 +116,68 @@ test('function texts exist in every language', () => {
     assert.match(plan.functions_count, /\{count\}/)
   }
 })
+
+test('file-only instructions follow the selected workshop, survive other toggles and are removed with it', async () => {
+  const options = await component('components/engineer/FileProductionPlan.vue')
+  const vm = new Vue({
+    ...options,
+    propsData: {
+      factories: factories(),
+      value: { production_factory_ids: [1], inspection_required: false },
+    },
+    methods: { ...options.methods, $t: translate },
+  })
+  let output
+  vm.$on('input', (value) => {
+    output = value
+  })
+  vm.open = true
+  const html = await renderer.renderToString(vm)
+  assert.match(html, /data-file-plan-instruction="1"/)
+  assert.doesNotMatch(html, /data-file-plan-instruction="2"/)
+  vm.setInstruction(1, 'Mark part 12\nDo not scratch')
+  assert.deepEqual(output.production_instructions, [
+    { factory_id: 1, text: 'Mark part 12\nDo not scratch' },
+  ])
+  vm.value = output
+  vm.select(2, true)
+  assert.deepEqual(output.production_instructions, [
+    { factory_id: 1, text: 'Mark part 12\nDo not scratch' },
+  ])
+  vm.value = output
+  vm.select(1, false)
+  assert.deepEqual(output.production_instructions, [])
+  vm.disabled = true
+  output = null
+  vm.setInstruction(2, 'Forbidden edit')
+  assert.equal(output, null)
+  vm.$destroy()
+})
+
+test('file instructions display as escaped text in operator file details', async () => {
+  const options = await component(
+    'components/File/FileProductionAttributes.vue'
+  )
+  const vm = new Vue({
+    ...options,
+    propsData: {
+      file: {
+        pivot: {
+          production_functions: [
+            {
+              id: 0,
+              name: '<script>bad()</script>\nMark 12',
+              kind: 'instruction',
+            },
+          ],
+        },
+      },
+    },
+    methods: { ...options.methods, $t: translate },
+  })
+  const html = await renderer.renderToString(vm)
+  assert.match(html, /&lt;script&gt;/)
+  assert.doesNotMatch(html, /<script>/)
+  assert.match(html, /Mark 12/)
+  vm.$destroy()
+})

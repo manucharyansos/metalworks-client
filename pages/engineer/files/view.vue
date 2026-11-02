@@ -1364,6 +1364,8 @@ export default {
             'inspection_required',
             this.filePlan.inspection_required ? '1' : '0'
           )
+          if (Array.isArray(this.filePlan.production_instructions))
+            formData.append('production_instructions', JSON.stringify(this.filePlan.production_instructions))
           if (Array.isArray(this.filePlan.production_function_ids))
             formData.append(
               'production_function_ids',
