@@ -18,9 +18,9 @@
         </nuxt-link>
 
         <div class="mt-7">
-          <p class="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Նոր գաղտնաբառ</p>
-          <h1 class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Պաշտպանեք ձեր հաշիվը</h1>
-          <p class="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
+          <p class="text-xs font-black uppercase tracking-[0.14em] text-slate-400">{{ successMessage ? 'Պատրաստ է' : 'Նոր գաղտնաբառ' }}</p>
+          <h1 class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">{{ successMessage ? 'Գաղտնաբառը փոխված է' : 'Պաշտպանեք ձեր հաշիվը' }}</h1>
+          <p v-if="!successMessage" class="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
             Ստեղծեք նոր գաղտնաբառ։ Այն պետք է պարունակի առնվազն 8 նիշ։
           </p>
         </div>
@@ -33,13 +33,13 @@
         </div>
 
         <div
-          v-if="!token || !email"
+          v-if="!successMessage && (!token || !email)"
           class="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200"
         >
           Վերականգնման հղումը թերի է։ Խնդրում ենք նոր հղում պահանջել։
         </div>
 
-        <form v-else class="mt-7 space-y-5" @submit.prevent="submit">
+        <form v-if="!successMessage && token && email" class="mt-7 space-y-5" @submit.prevent="submit">
           <label class="block">
             <span class="mb-2 block text-xs font-bold uppercase tracking-[0.08em] text-slate-500 dark:text-slate-400">Նոր գաղտնաբառ</span>
             <PasswordField
@@ -71,7 +71,7 @@
             {{ errorMessage }}
           </p>
 
-          <button type="submit" :disabled="loading || Boolean(successMessage)" class="app-button-primary w-full gap-2">
+          <button type="submit" :disabled="loading" class="app-button-primary w-full gap-2">
             <svg v-if="loading" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle class="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" />
               <path class="opacity-75" fill="currentColor" d="M21 12a9 9 0 0 0-9-9v3a6 6 0 0 1 6 6h3Z" />
