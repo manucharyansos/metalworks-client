@@ -35,9 +35,13 @@ export default async function ({ app, route, redirect, $auth }) {
   const currentPath = normalizePath(route.path)
   const isPublicAuthPath = publicAuthPaths.includes(currentPath)
 
-  // An emailed reset link must remain usable even when the browser still has
-  // an authenticated session. Never redirect a valid reset form to a workspace.
-  if (currentPath === normalizePath(localePath('/reset-password'))) return
+  // Password recovery must remain accessible even when the browser has an
+  // authenticated session. Login/register keep their existing redirect rules.
+  const passwordRecoveryPaths = [
+    localePath('/forgot-password'),
+    localePath('/reset-password'),
+  ].map(normalizePath)
+  if (passwordRecoveryPaths.includes(currentPath)) return
 
   if (!$auth.loggedIn) {
     if (!isPublicAuthPath) return redirect(loginPath)
