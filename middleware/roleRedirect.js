@@ -35,6 +35,14 @@ export default async function ({ app, route, redirect, $auth }) {
   const currentPath = normalizePath(route.path)
   const isPublicAuthPath = publicAuthPaths.includes(currentPath)
 
+  // Password recovery must remain accessible even when the browser has an
+  // authenticated session. Login/register keep their existing redirect rules.
+  const passwordRecoveryPaths = [
+    localePath('/forgot-password'),
+    localePath('/reset-password'),
+  ].map(normalizePath)
+  if (passwordRecoveryPaths.includes(currentPath)) return
+
   if (!$auth.loggedIn) {
     if (!isPublicAuthPath) return redirect(loginPath)
     return
