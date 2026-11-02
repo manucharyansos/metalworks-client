@@ -71,7 +71,7 @@
             {{ errorMessage }}
           </p>
 
-          <button type="submit" :disabled="loading || successMessage" class="app-button-primary w-full gap-2">
+          <button type="submit" :disabled="loading || Boolean(successMessage)" class="app-button-primary w-full gap-2">
             <svg v-if="loading" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle class="opacity-25" cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" />
               <path class="opacity-75" fill="currentColor" d="M21 12a9 9 0 0 0-9-9v3a6 6 0 0 1 6 6h3Z" />
