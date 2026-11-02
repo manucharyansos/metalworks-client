@@ -124,6 +124,22 @@
     <p v-else-if="!$can('factory.order_update')" class="work-meta">
       Փոփոխման իրավունքը տրված չէ
     </p>
+    <div
+      v-if="instructionFiles.length"
+      class="space-y-2"
+      data-card-file-instructions
+    >
+      <div
+        v-for="file in instructionFiles"
+        :key="file.id"
+        class="min-w-0 rounded-lg bg-violet-50 p-2 dark:bg-violet-950/30"
+      >
+        <p class="break-words text-xs font-semibold">
+          {{ file.original_name }}
+        </p>
+        <FileProductionAttributes :file="file" />
+      </div>
+    </div>
     <footer class="work-task-card__footer">
       <div class="min-w-0 w-full">
         <TaskDeadline
@@ -172,6 +188,7 @@
 
 <script>
 import { routeCopy } from '@/utils/production-route'
+import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 import PersonAvatar from '@/components/ui/PersonAvatar.vue'
 import TaskDeadline from '@/components/ui/TaskDeadline.vue'
 import { boardCopy, stepStatusText } from '@/utils/task-board'
@@ -188,7 +205,7 @@ import {
 
 export default {
   name: 'OrderCard',
-  components: { PersonAvatar, TaskDeadline },
+  components: { PersonAvatar, TaskDeadline, FileProductionAttributes },
   props: {
     order: { type: Object, required: true },
     factoryId: { type: [Number, String], required: true },
@@ -197,6 +214,13 @@ export default {
     saving: { type: Boolean, default: false },
   },
   computed: {
+    instructionFiles() {
+      return (this.factoryOrder?.files || []).filter(
+        (file) =>
+          Array.isArray(file.pivot?.production_functions) &&
+          file.pivot.production_functions.length
+      )
+    },
     cardTone() {
       return this.awaitingEngineer || this.pendingRequest
         ? 'amber'

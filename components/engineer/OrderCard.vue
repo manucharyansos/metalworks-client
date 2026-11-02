@@ -68,6 +68,18 @@
               >{{ t[step.priority || 'normal'] }}</span
             >
           </p>
+          <div
+            v-for="file in (step.files || []).filter(
+              (row) => row.pivot?.production_functions?.length
+            )"
+            :key="file.id"
+            class="mt-2 min-w-0"
+          >
+            <p class="break-words text-xs font-semibold">
+              {{ file.original_name }}
+            </p>
+            <FileProductionAttributes :file="file" />
+          </div>
           <p
             v-if="step.confirmation_required"
             class="work-meta text-indigo-700 dark:text-indigo-300"
@@ -137,6 +149,7 @@
 </template>
 
 <script>
+import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 import PersonAvatar from '@/components/ui/PersonAvatar.vue'
 import TaskDeadline from '@/components/ui/TaskDeadline.vue'
 import {
@@ -155,7 +168,7 @@ import {
 import { routingCopy } from '@/utils/task-routing'
 
 export default {
-  components: { PersonAvatar, TaskDeadline },
+  components: { FileProductionAttributes, PersonAvatar, TaskDeadline },
   props: { order: { type: Object, required: true }, readOnly: Boolean },
   computed: {
     isManagement() {

@@ -76,7 +76,10 @@
             >
           </label>
           <div
-            v-if="ids.includes(Number(factory.id)) && activeFunctions(factory).length"
+            v-if="
+              ids.includes(Number(factory.id)) &&
+              activeFunctions(factory).length
+            "
             class="mt-2 flex flex-wrap gap-1.5 pl-8"
             role="group"
             :aria-label="`${$t('file_plan.functions')} · ${factory.name}`"
@@ -103,6 +106,22 @@
               <span class="min-w-0 break-words">{{ fn.name }}</span>
             </label>
           </div>
+          <label
+            v-if="ids.includes(Number(factory.id))"
+            class="mt-3 block text-xs font-semibold"
+          >
+            {{ $t('file_plan.instruction') }}
+            <textarea
+              :value="instruction(factory.id)"
+              :disabled="disabled"
+              maxlength="1000"
+              rows="2"
+              :data-file-plan-instruction="factory.id"
+              :placeholder="$t('file_plan.instruction_placeholder')"
+              class="mt-1 block w-full min-w-0 rounded-lg border border-slate-300 bg-white p-2 text-sm font-normal dark:border-slate-700 dark:bg-slate-900"
+              @input="setInstruction(factory.id, $event.target.value)"
+            />
+          </label>
         </div>
       </div>
       <p
@@ -193,6 +212,25 @@ export default {
     },
   },
   methods: {
+    instruction(id) {
+      return (
+        (this.value.production_instructions || []).find(
+          (row) => Number(row.factory_id) === Number(id)
+        )?.text || ''
+      )
+    },
+    setInstruction(id, text) {
+      const rows = (this.value.production_instructions || []).filter(
+        (row) => Number(row.factory_id) !== Number(id)
+      )
+      if (text) rows.push({ factory_id: Number(id), text })
+      this.emit(
+        this.ids,
+        this.value.inspection_required,
+        this.functionIds,
+        rows
+      )
+    },
     activeFunctions(factory) {
       return (factory.functions || []).filter((fn) => fn.is_active !== false)
     },
@@ -209,7 +247,12 @@ export default {
       this.emit(this.ids, this.value.inspection_required, [...ids])
     },
     // Functions of workshops that are no longer on the path are dropped.
-    emit(ids, inspection, functions = this.functionIds) {
+    emit(
+      ids,
+      inspection,
+      functions = this.functionIds,
+      instructions = this.value.production_instructions
+    ) {
       if (this.disabled) return
       const chosen = this.workshops.filter((factory) =>
         ids.includes(Number(factory.id))
@@ -220,6 +263,13 @@ export default {
         )
       )
       this.$emit('input', {
+        ...(instructions
+          ? {
+              production_instructions: instructions.filter((row) =>
+                ids.includes(Number(row.factory_id))
+              ),
+            }
+          : {}),
         production_factory_ids: chosen.map((factory) => Number(factory.id)),
         production_function_ids: functions
           .map(Number)

@@ -424,6 +424,12 @@
     "operator_tasks": "{name} · current tasks"
   },
   "file_plan": {
+    "instruction": "Special instruction for this file only",
+    "instruction_placeholder": "For example: mark the part number after cutting",
+    "save_instructions": "Save instructions",
+    "instruction_history": "Changes apply to new tasks. Existing tasks keep their original instructions.",
+    "instruction_failed": "Could not save. Please try again.",
+
     "title": "File production route",
     "functions": "Functions",
     "functions_count": "{count} functions",
