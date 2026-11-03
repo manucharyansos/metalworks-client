@@ -283,16 +283,6 @@ export default {
           icon: 'orders',
         },
         {
-          to: '/manager/file-categories',
-          label: {
-            hy: 'Նախագծերի թղթապանակ',
-            ru: 'Папки проектов',
-            en: 'Project folders',
-          },
-          permission: null,
-          icon: 'orders',
-        },
-        {
           to: '/manager/materials',
           labelKey: 'workspace_layout.materials',
           permission: 'materials.view',

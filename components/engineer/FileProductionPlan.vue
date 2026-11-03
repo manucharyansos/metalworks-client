@@ -106,12 +106,15 @@
               <span class="min-w-0 break-words">{{ fn.name }}</span>
             </label>
           </div>
-          <label
+          <details
             v-if="ids.includes(Number(factory.id))"
             class="mt-3 block text-xs font-semibold"
           >
-            {{ $t('file_plan.instruction') }}
+            <summary class="cursor-pointer py-2">
+              {{ $t('file_plan.instruction') }}
+            </summary>
             <textarea
+              :aria-label="$t('file_plan.instruction')"
               :value="instruction(factory.id)"
               :disabled="disabled"
               maxlength="1000"
@@ -121,7 +124,7 @@
               class="mt-1 block w-full min-w-0 rounded-lg border border-slate-300 bg-white p-2 text-sm font-normal dark:border-slate-700 dark:bg-slate-900"
               @input="setInstruction(factory.id, $event.target.value)"
             />
-          </label>
+          </details>
         </div>
       </div>
       <p

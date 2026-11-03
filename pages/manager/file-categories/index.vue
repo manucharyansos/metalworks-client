@@ -1,10 +1,11 @@
-<template><ProjectFolderSettings /></template>
+<template><div /></template>
 <script>
-import ProjectFolderSettings from '@/components/settings/ProjectFolderSettings.vue'
 export default {
-  components: { ProjectFolderSettings },
   layout: 'manager',
   middleware: ['role-guard'],
   meta: { role: 'manager' },
+  asyncData({ app, redirect }) {
+    return redirect(app.localePath('/manager/workshops'))
+  },
 }
 </script>
