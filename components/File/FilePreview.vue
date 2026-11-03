@@ -113,6 +113,7 @@
         :src="blobUrl"
         class="max-h-[520px] w-full"
       />
+      <DldViewer v-else-if="kind === 'dld'" :text="text" />
       <pre
         v-else-if="kind === 'text'"
         class="max-h-[520px] overflow-auto whitespace-pre-wrap break-words p-4 text-sm text-slate-700 dark:text-slate-200"
@@ -135,6 +136,7 @@
 <script>
 import FileMetadataPanel from '@/components/File/FileMetadataPanel.vue'
 import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
+import DldViewer from '~/components/File/DldViewer.vue'
 import ModelViewer from '@/components/File/ModelViewer.vue'
 import ImageZoomViewer from '@/components/File/ImageZoomViewer.vue'
 import { inspectFactoryPreview } from '@/utils/factory-preview'
@@ -144,7 +146,7 @@ import CadModelWorker from '~/workers/cad-model.worker.js'
 import CadPreviewWorker from '~/workers/cad-preview.worker.js'
 
 export default {
-  components: { FileMetadataPanel, DxfViewerModal, ModelViewer, ImageZoomViewer },
+  components: { DldViewer, FileMetadataPanel, DxfViewerModal, ModelViewer, ImageZoomViewer },
   props: {
     file: { type: Object, required: true },
     orderId: { type: [Number, String], default: null },
@@ -278,7 +280,7 @@ export default {
             )
             this.note = 'file_preview.saved_view'
           } else this.note = 'file_preview.no_saved_view'
-        } else if (preview.type === 'text') {
+        } else if (['text', 'dld'].includes(preview.type)) {
           this.text = preview.text
           if (preview.truncated) this.note = 'file_preview.truncated'
         } else if (preview.blob)
