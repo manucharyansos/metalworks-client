@@ -102,6 +102,11 @@ export async function inspectFactoryPreview(blob, filename, declaredType) {
         return { type: 'dxf' }
       const textModel = detectModelFormat(bytes, filename, text)
       if (textModel) return { type: 'model', format: textModel, bytes }
+      if (
+        /\.dld$/i.test(filename) ||
+        (/www\.delem\.com\/delem/.test(text) && /<Workpiece[\s>]/.test(text))
+      )
+        return { type: 'dld', text }
       return {
         type: 'text',
         text: text.slice(0, MAX_TEXT_CHARACTERS),

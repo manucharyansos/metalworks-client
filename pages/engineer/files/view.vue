@@ -499,6 +499,7 @@
                 preload="metadata"
                 class="w-full max-h-[60vh]"
               />
+              <DldViewer v-else-if="fileType === 'dld'" :text="previewText" />
               <pre
                 v-else-if="fileType === 'text'"
                 class="whitespace-pre-wrap break-words rounded-lg bg-gray-50 dark:bg-gray-900 p-4 text-sm overflow-auto max-h-[60vh]"
@@ -758,6 +759,7 @@ import FileMetadataPanel from '@/components/File/FileMetadataPanel.vue'
 import { needsIndividualFileAttributes } from '@/utils/workshop-catalog'
 import CadPreviewWorker from '~/workers/cad-preview.worker.js'
 import CadModelWorker from '~/workers/cad-model.worker.js'
+import DldViewer from '~/components/File/DldViewer.vue'
 import ModelViewer from '~/components/File/ModelViewer.vue'
 import ImageZoomViewer from '~/components/File/ImageZoomViewer.vue'
 import { inspectFactoryPreview } from '~/utils/factory-preview'
@@ -782,6 +784,7 @@ export default {
     DxfViewerModal,
     InfoContentInput,
     ModelViewer,
+    DldViewer,
     ImageZoomViewer,
   },
   layout: 'engineer',
@@ -1452,7 +1455,7 @@ export default {
           if (result.model) this.previewModel = Object.freeze(result.model)
           else
             this.previewError = this.$t('model_preview.error_' + result.error)
-        } else if (preview.type === 'text') {
+        } else if (['text', 'dld'].includes(preview.type)) {
           this.previewText = preview.text
           if (preview.truncated) this.previewNote = 'file_preview.truncated'
         } else if (preview.type === 'cad') {
