@@ -1,4 +1,9 @@
 import prepareCadAssets from './build/prepare-cad-assets.cjs'
+import writeVersionFile from './build/write-version-file.cjs'
+
+// Identifies this build; open tabs reload when version.json names a newer one.
+const buildId =
+  process.env.BUILD_ID || new Date().toISOString().replace(/\D/g, '').slice(0, 14)
 
 const PRODUCTION_API_BASE_URL = 'https://api.metalworks.am'
 const configuredApiBaseURL =
@@ -109,6 +114,7 @@ export default {
 
   publicRuntimeConfig: {
     baseURL: apiBaseURL,
+    buildId,
     managerRole: process.env.MANAGER_ROLE || 'manager',
     engineerRole: process.env.ENGINEER_ROLE || 'engineer',
     adminRole: process.env.ADMIN_ROLE || 'admin',
@@ -130,6 +136,7 @@ export default {
     { src: '~/plugins/can.js', mode: 'client' },
     { src: '~/plugins/password-visibility.client.js', mode: 'client' },
     { src: '~/plugins/enter-navigation.client.js', mode: 'client' },
+    { src: '~/plugins/app-version.client.js', mode: 'client' },
     { src: '~/plugins/notifications-ssr', ssr: true },
     { src: '~/plugins/notifications-client', ssr: false },
     { src: '~/plugins/leaflet.js', mode: 'client' },
@@ -203,6 +210,7 @@ export default {
 
   hooks: {
     'build:before': () => prepareCadAssets(__dirname),
+    'generate:done': (generator) => writeVersionFile(generator.distPath, buildId),
   },
 
   build: {

@@ -1,7 +1,7 @@
 <template>
   <main class="profile-page min-h-screen w-full min-w-0 bg-slate-50 px-3 pb-6 pt-20 sm:pt-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8 lg:py-8">
     <WorkspaceTransition />
-    <div class="mx-auto w-full max-w-6xl space-y-4 sm:space-y-6">
+    <div class="mx-auto w-full space-y-4 sm:space-y-6">
       <div v-if="customerMode && customerCompanies.length" class="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
         <WorkspaceIdentity :brand="selectedCustomerCompany" class="p-4" />
         <label class="block px-4 pb-4">
@@ -16,7 +16,7 @@
       <nuxt-link v-if="!customerMode && customerCompanies.length" :to="localePath({ path: '/profile', query: { view: 'customer' } })" class="app-button-secondary">{{ $t('profile.current_orders') }}</nuxt-link>
       <p v-if="customerMode && !customerDirectoryError && !loading && !customerCompanies.length" class="rounded-xl bg-white p-4 text-sm text-slate-500">{{ companyText.noAccess }}</p>
       <p v-if="customerDirectoryError" role="alert" class="rounded-xl bg-rose-50 p-4 text-rose-700">{{ $t('profile.load_failed') }} <button type="button" class="underline" @click="initializeProfile">{{ $t('profile.retry') }}</button></p>
-      <section class="relative overflow-visible rounded-[30px] bg-slate-950 p-4 text-white shadow-xl sm:p-8">
+      <section class="relative overflow-visible rounded-[30px] bg-slate-950 p-4 text-white shadow-xl">
         <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-[30px]" aria-hidden="true">
           <div class="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/5 blur-2xl"></div>
           <div class="absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-slate-700/30 blur-3xl"></div>
@@ -296,13 +296,12 @@
 <script>
 import ProfileOrderFiles from '~/components/profile/ProfileOrderFiles.vue'
 import WorkspaceTransition from '~/components/layout/WorkspaceTransition.vue'
-import CompanySelector from '~/components/layout/CompanySelector.vue'
 import WorkspaceIdentity from '~/components/layout/WorkspaceIdentity.vue'
 import { taskStatusText } from '~/utils/task-board'
 import { workspaceCopy } from '~/utils/company-copy'
 export default {
   name: 'ProfilePage',
-  components: { ProfileOrderFiles, WorkspaceTransition, CompanySelector, WorkspaceIdentity },
+  components: { ProfileOrderFiles, WorkspaceTransition, WorkspaceIdentity },
   layout(context) {
     if (context.route?.query?.view === 'customer') return 'default'
     const role = context.$auth?.user?.role?.name

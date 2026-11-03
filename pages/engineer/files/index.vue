@@ -1,6 +1,6 @@
 <template>
-  <main data-workspace-form class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-    <div class="mx-auto max-w-[1400px] space-y-6">
+  <main data-workspace-form class="px-4 py-6">
+    <div class="mx-auto space-y-6">
       <section class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div class="flex items-center gap-2">
           <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Նախագծեր և ֆայլեր</h1>

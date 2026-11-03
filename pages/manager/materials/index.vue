@@ -1,6 +1,6 @@
 <template>
   <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-    <div v-if="$can('materials.view')" class="mx-auto max-w-[1500px] space-y-6">
+    <div v-if="$can('materials.view')" class="mx-auto space-y-6">
       <MaterialsToolbar
         :categories="$can('material_categories.view') ? allCategories : []"
         :selected-category="selectedCategory"

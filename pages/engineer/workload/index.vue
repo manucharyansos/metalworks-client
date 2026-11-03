@@ -1,6 +1,6 @@
 <template>
   <main
-    class="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6"
+    class="mx-auto space-y-6 px-4 py-8"
     data-engineer-workload
   >
     <div class="flex flex-wrap items-start justify-between gap-3">

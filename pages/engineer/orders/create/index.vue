@@ -3,7 +3,7 @@
     data-workspace-form
     class="order-create-page min-h-screen bg-slate-50 p-4 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:p-6 lg:p-8"
   >
-    <div v-if="$can('orders.create')" class="mx-auto max-w-7xl">
+    <div v-if="$can('orders.create')" class="mx-auto">
       <div
         class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >

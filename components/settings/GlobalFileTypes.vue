@@ -1,5 +1,5 @@
 <template>
-  <section class="mx-auto max-w-6xl px-4 pb-8 sm:px-6" data-global-file-types>
+  <section class="mx-auto px-4 pb-8 sm:px-6" data-global-file-types>
     <div class="work-card work-section space-y-4">
       <div>
         <h2 class="work-section__title">{{ t.title }}</h2>

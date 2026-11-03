@@ -1,5 +1,5 @@
 <template>
-  <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+  <main class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
     <h1 class="text-2xl font-black tracking-tight sm:text-3xl">{{ copy.requests }}</h1>
     <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{{ copy.reviewIntro }}</p>
     <nuxt-link :to="localePath(($auth.user?.role?.name === 'admin' ? '/admin' : '/manager') + '/users')" class="mt-3 inline-block text-sm font-semibold underline">{{ staffCopy.permissions }} →</nuxt-link>

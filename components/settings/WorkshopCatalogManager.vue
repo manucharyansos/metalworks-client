@@ -1,12 +1,10 @@
 <template>
-  <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6" data-workshop-catalog>
+  <main class="mx-auto px-4 py-6 sm:px-6" data-workshop-catalog>
     <header class="mb-6">
       <h1 class="text-2xl font-black text-slate-900 dark:text-white">
         {{ title || (categories ? t.categories : t.workshops) }}
       </h1>
-      <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-        {{ categories ? t.categoryHelp : t.workshopHelp }}
-      </p>
+
     </header>
     <form
       class="work-card mb-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-6"

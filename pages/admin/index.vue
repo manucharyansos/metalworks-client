@@ -209,9 +209,6 @@
             <h2 class="mt-1 text-lg font-bold text-slate-950 dark:text-white">
               Աշխատակիցների ծանրաբեռնվածություն
             </h2>
-            <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Ցուցիչը հիմնված է ակտիվ և ուշացած առաջադրանքների իրական քանակի վրա
-            </p>
           </div>
 
           <div class="mb-4 grid gap-2 sm:grid-cols-3">
@@ -325,10 +322,6 @@
               >
                 Առաջադրանքների ամբողջական որոնում
               </h2>
-              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                {{ pagination.total || 0 }} արդյունք ·
-                {{ activeFilterCount }} ակտիվ ֆիլտր
-              </p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button
