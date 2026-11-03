@@ -318,8 +318,13 @@ export default {
     endpoint() {
       return this.categories ? '/api/file-categories' : '/api/workshops'
     },
+    workshopOptions() {
+      return this.categories && this.$store?.state?.workshops?.loaded
+        ? this.$store.state.workshops.items
+        : this.workshops
+    },
     activeWorkshops() {
-      return this.workshops.filter(
+      return this.workshopOptions.filter(
         (row) => row.is_active && row.is_workshop !== false
       )
     },
@@ -371,7 +376,7 @@ export default {
     },
     defaultName(item) {
       return (
-        this.workshops.find(
+        this.workshopOptions.find(
           (row) => Number(row.id) === Number(item.default_factory_id)
         )?.name || this.t.none
       )

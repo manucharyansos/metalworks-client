@@ -149,20 +149,23 @@
                 >✓ {{ fn.name }}</span
               >
             </span>
-            <label
+            <details
               v-if="details?.can_edit_instructions"
               class="mt-3 block text-xs font-semibold"
             >
-              {{ $t('file_plan.instruction') }}
+              <summary class="cursor-pointer py-2">
+                {{ $t('file_plan.instruction') }}
+              </summary>
               <textarea
                 v-model="instructionDrafts[workshop.id]"
+                :aria-label="$t('file_plan.instruction')"
                 :disabled="savingInstructions"
                 maxlength="1000"
                 rows="2"
                 :data-edit-file-instruction="workshop.id"
                 class="mt-1 block w-full min-w-0 rounded-lg border border-slate-300 bg-white p-2 text-sm font-normal dark:border-slate-700 dark:bg-slate-900"
               />
-            </label>
+            </details>
           </li>
         </ul>
         <div v-if="details?.can_edit_instructions" class="space-y-2">
