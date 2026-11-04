@@ -1,4 +1,8 @@
 {
+  "app_update": {
+    "available": "A new version is available.",
+    "reload": "Reload page"
+  },
   "order_configuration": {
     "edit": "Edit",
     "optional": "optional",

@@ -90,12 +90,15 @@
         {{ search ? t.noResults : t.noOperators }}
       </p>
     </section>
+    <OperatorCalendar />
     <notifications />
   </main>
 </template>
 <script>
+import OperatorCalendar from '@/components/engineer/OperatorCalendar.vue'
 import { routingCopy } from '@/utils/task-routing'
 export default {
+  components: { OperatorCalendar },
   layout: 'engineer',
   middleware: ['role-guard'],
   meta: { role: 'engineer' },
