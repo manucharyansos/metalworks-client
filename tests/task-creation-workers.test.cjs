@@ -232,7 +232,7 @@ test('the configuration editor has one operator picker backed by the existing ch
   const source = compiler.compile(compiler.parseComponent(read('pages/engineer/orders/create/index.vue')).template.content)
   const uses = source.render.match(/_c\('TaskOperatorPicker'/g) || []
   assert.equal(uses.length, 1, 'configuration editor owns the single operator picker')
-  assert.doesNotMatch(source.render, /factoryOperators\[factory\.id\]/, 'no second hand-written operator list is left')
+  assert.doesNotMatch(source.render, /\$set\(factoryOperators,/, 'no inline picker independently writes operator assignments')
 })
 
 test('Back from the file picker with nothing chosen returns to whole-subgroup creation', async () => {
