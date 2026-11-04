@@ -272,12 +272,23 @@ export default {
           icon: 'workers',
           wrap: true,
         },
+        { to: '/manager/workload', labelKey: 'workspace_layout.operator_workload', permission: null, icon: 'orders' },
         {
           to: '/manager/workshops',
           label: {
             hy: 'Արտադրամասերի կառավարում',
             ru: 'Управление цехами',
             en: 'Manage workshops',
+          },
+          permission: null,
+          icon: 'orders',
+        },
+        {
+          to: '/manager/file-categories',
+          label: {
+            hy: 'Նախագծերի թղթապանակ',
+            ru: 'Папки проектов',
+            en: 'Project folders',
           },
           permission: null,
           icon: 'orders',

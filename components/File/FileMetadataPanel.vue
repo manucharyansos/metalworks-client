@@ -1,6 +1,6 @@
 <template>
   <section
-    v-if="error || hasContent"
+    v-if="error || hasContent || details?.can_edit_plan"
     class="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
     data-file-metadata
     :aria-busy="loading"
@@ -150,7 +150,7 @@
               >
             </span>
             <details
-              v-if="details?.can_edit_instructions"
+              v-if="details?.can_edit_instructions && !details?.can_edit_plan"
               class="mt-3 block text-xs font-semibold"
             >
               <summary class="cursor-pointer py-2">
@@ -168,7 +168,10 @@
             </details>
           </li>
         </ul>
-        <div v-if="details?.can_edit_instructions" class="space-y-2">
+        <div
+          v-if="details?.can_edit_instructions && !details?.can_edit_plan"
+          class="space-y-2"
+        >
           <p class="text-xs text-slate-500">
             {{ $t('file_plan.instruction_history') }}
           </p>
@@ -186,11 +189,18 @@
           </button>
         </div>
       </div>
+      <FilePlanEditor
+        v-if="details?.can_edit_plan"
+        :key="scopeKey"
+        :details="details"
+        @saved="onPlanSaved"
+      />
     </template>
   </section>
 </template>
 
 <script>
+import FilePlanEditor from '@/components/File/FilePlanEditor.vue'
 import {
   fileDetailsContext,
   fileDetailsFallback,
@@ -198,6 +208,7 @@ import {
 } from '@/utils/file-production-details'
 
 export default {
+  components: { FilePlanEditor },
   props: {
     file: { type: Object, required: true },
     orderId: { type: [Number, String], default: null },
@@ -259,6 +270,11 @@ export default {
     ++this.request
   },
   methods: {
+    onPlanSaved(details) {
+      this.details = details
+      this.resetInstructions()
+      this.$emit('loaded', details)
+    },
     async saveInstructions() {
       if (this.savingInstructions || !this.details?.can_edit_instructions)
         return
