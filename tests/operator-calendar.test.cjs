@@ -13,3 +13,10 @@ test('calendar weeks cross month boundaries and invalid dates do not crash',asyn
  assert.deepEqual(weekDates('2026-11-01'),['2026-10-26','2026-10-27','2026-10-28','2026-10-29','2026-10-30','2026-10-31','2026-11-01']);
  assert.deepEqual(weekDates(''),[]);
 });
+test('a suggested slot fits the whole estimate after prerequisites and other reservations',async()=>{
+ const {firstStageSlot}=await helpers;
+ const shifts=[interval('09:00','12:00'), interval('13:00','18:00')];
+ const jobs=[interval('10:00','11:00'),interval('13:30','14:30')];
+ assert.equal(firstStageSlot(shifts,jobs,120,'2098-01-06 11:30'),'2098-01-06 14:30');
+ assert.equal(firstStageSlot(shifts,jobs,240,'2098-01-06 11:30'),null);
+});

@@ -673,6 +673,10 @@
             :disabled="isLoading"
             @refresh="loadWorkload"
           />
+          <StageTimePicker v-for="factory in routeOrderedWorkshops" :key="factory.id + ':' + factoryOperators[factory.id]"
+            :factory="factory" :operator-id="factoryOperators[factory.id]" :schedule="activeSchedule"
+            :stage="productionRoutePayload.stages.find(stage => stage.factory_id === Number(factory.id))"
+            :disabled="isLoading" @update="updateStageSchedule" />
         </template>
       </TaskConfigurationEditor>
 
@@ -723,6 +727,7 @@ import {
   revealOption,
   stepOptionIndex,
 } from '@/utils/combobox'
+import StageTimePicker from '@/components/engineer/StageTimePicker.vue'
 import TaskOperatorPicker from '@/components/engineer/TaskOperatorPicker.vue'
 import {
   confirmationMethods,
@@ -745,6 +750,7 @@ export default {
     TaskWorkshopOptions,
     ProductionRouteEditor,
     TaskOperatorPicker,
+    StageTimePicker,
     PermissionDenied,
     InputWithLabels,
     SelectWithLabel,
@@ -785,6 +791,7 @@ export default {
       factoriesLoadError: false,
 
       factoryOperators: {},
+      stageSchedule: {},
       workload: null,
       workloadError: '',
       workloadLoading: false,
@@ -957,6 +964,11 @@ export default {
         this.productionRoute = value
         this.$workspace?.setDirty(true)
       },
+    },
+    activeSchedule() {
+      return Object.fromEntries(Object.entries(this.stageSchedule).filter(([id, row]) =>
+        row.estimated_minutes > 0 && Number(this.factoryOperators[id]) === row.operator_id &&
+        this.taskWorkshops.some(f => Number(f.id) === Number(id))))
     },
     productionRoutePayload() {
       return normalizeRoute(this.productionRouteModel, this.taskWorkshops)
@@ -1144,6 +1156,10 @@ export default {
     this.loadWorkload()
   },
   methods: {
+    updateStageSchedule(row) {
+      this.$set(this.stageSchedule, row.factory_id, row)
+      this.$workspace?.setDirty(true)
+    },
     ...mapActions('factory', ['fetchFactory', 'fetchFileCategories']),
     ...mapActions('clients', ['fetchClients']),
     ...mapActions('engineer', ['createNewOrder']),
@@ -1233,6 +1249,7 @@ export default {
       this.destinationsOpen = false
       this.selectedFiles = []
       this.fileQuantities = {}
+      this.stageSchedule = {}
       this.factoryOperators = {}
       this.referenceVisibility = {}
       this.fileRouting = {}
@@ -1576,6 +1593,7 @@ export default {
           quantity: this.fileQuantities[id],
         })),
         factory_operators: factoryOperatorsArray,
+        stage_schedule: Object.values(this.activeSchedule),
       }
 
       try {
@@ -1601,7 +1619,7 @@ export default {
           .find((message) => typeof message === 'string')
         this.$notify({
           text: `Սխալ՝ ${
-            validationMessage || error.response?.data?.error || error.message
+            validationMessage || error.response?.data?.message || error.response?.data?.error || error.message
           }`,
           duration: 3000,
           speed: 1000,

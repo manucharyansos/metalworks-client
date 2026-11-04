@@ -292,12 +292,12 @@ test('workload labels show actual counts in every language and company refresh c
       `Sos · ${routingCopy[locale].active}: 3 · ${routingCopy[locale].overdue}: 1`
     )
   assert.equal(operatorWorkloadLabel({ name: 'Sos' }, 'en'), 'Sos')
-  const vm = component('pages/engineer/workload/index.vue', {
-    state: { factories: workload().factories },
+  const vm = component('components/engineer/OperatorCalendar.vue', {
+    state: { date: '2026-11-04', data: workload() },
   })
-  vm.$axios = { get: async () => ({ data: { company_id: 2, factories: [] } }) }
+  vm.$axios = { $get: async () => ({ factories: [], tasks: [], bookings: [], shifts: [] }) }
   await vm.refresh()
-  assert.deepEqual([...vm.factories], [])
+  assert.deepEqual([...vm.data.factories], [])
   assert.equal(vm.loading, false)
   vm.$destroy()
 })

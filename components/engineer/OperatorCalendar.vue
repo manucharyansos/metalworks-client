@@ -14,6 +14,13 @@
           class="calendar-control"
           @change="refresh"
       /></label>
+      <input
+        v-model.trim="search"
+        type="search"
+        :placeholder="t.operator"
+        :aria-label="t.operator"
+        class="calendar-control"
+      />
       <select v-model="factoryId" :aria-label="t.all" class="calendar-control">
         <option value="">{{ t.all }}</option>
         <option v-for="f in data.factories" :key="f.id" :value="String(f.id)">
@@ -45,18 +52,69 @@
           <tbody>
             <tr v-for="operator in operators" :key="operator.id">
               <th class="border p-2 text-left align-top">
-                {{ operator.name }}
-                <p class="mt-2 font-normal text-amber-700">
-                  {{ t.queue }}: {{ unplannedFor(operator.id) }}
-                </p>
+                <details>
+                  <summary class="cursor-pointer py-1">
+                    <strong>{{ operator.name }}</strong>
+                    <span class="mt-1 block font-normal"
+                      >{{ t.openJobs }} ·
+                      {{ assignments(operator.id).length }}</span
+                    >
+                    <span
+                      v-if="overdueCount(operator.id)"
+                      class="block text-rose-700"
+                      >{{ t.late }} · {{ overdueCount(operator.id) }}</span
+                    >
+                    <span
+                      v-if="undatedCount(operator.id)"
+                      class="block text-slate-500"
+                      >{{ t.undated }} · {{ undatedCount(operator.id) }}</span
+                    >
+                  </summary>
+                  <ul class="mt-2 space-y-2 font-normal">
+                    <li
+                      v-for="job in assignments(operator.id)"
+                      :key="job.id"
+                      class="border-t pt-1"
+                    >
+                      <strong>{{ job.name }}</strong> · {{ job.workshop }}
+                      <p>{{ job.engineer }}</p>
+                      <p
+                        :class="{
+                          'text-rose-700': job.due_date && job.due_date < today,
+                        }"
+                      >
+                        {{ deadlineLabel(job) }} {{ job.due_date }}
+                      </p>
+                      <p v-if="job.estimated_minutes">
+                        {{ job.estimated_minutes }} {{ t.minutes }}
+                      </p>
+                    </li>
+                  </ul>
+                </details>
               </th>
               <td v-for="day in days" :key="day" class="border p-2 align-top">
-                <p
-                  v-if="!shiftsFor(operator.id, day).length"
-                  class="text-slate-500"
+                <article
+                  v-for="job in dueOn(operator.id, day)"
+                  :key="'due' + job.id"
+                  class="mb-2 rounded-lg border border-amber-200 p-2"
                 >
-                  {{ t.empty }}
-                </p>
+                  <strong>{{ deadlineLabel(job) }}</strong>
+                  <p>{{ job.name }} · {{ job.workshop }}</p>
+                  <p>{{ job.engineer }}</p>
+                  <p v-if="job.estimated_minutes">
+                    {{ job.estimated_minutes }} {{ t.minutes }}
+                  </p>
+                </article>
+                <span
+                  v-if="
+                    !dueOn(operator.id, day).length &&
+                    !bookingsFor(operator.id, day).length &&
+                    !shiftsFor(operator.id, day).length
+                  "
+                  class="text-slate-400"
+                  :aria-label="t.empty"
+                  >—</span
+                >
                 <div
                   v-for="shift in shiftsFor(operator.id, day)"
                   :key="'s' + shift.id"
@@ -237,9 +295,9 @@
         </p>
       </details>
       <section>
-        <h3 class="font-semibold">{{ t.queue }} ({{ queue.length }})</h3>
+        <h3 class="font-semibold">{{ t.unassigned }} ({{ queue.length }})</h3>
         <p class="text-xs text-slate-500">{{ t.queueHelp }}</p>
-        <p v-if="!queue.length" class="mt-2 text-sm">{{ t.noTasks }}</p>
+        <p v-if="!queue.length" class="mt-2 text-sm">{{ t.noUnassigned }}</p>
         <ul class="mt-3 grid gap-2 sm:grid-cols-2">
           <li
             v-for="task in queue"
@@ -276,6 +334,7 @@ export default {
       new Date()
     ),
     factoryId: '',
+    search: '',
     loading: false,
     busy: false,
     error: '',
@@ -294,6 +353,14 @@ export default {
     t() {
       return calendarCopy[this.$i18n?.locale] || calendarCopy.hy
     },
+    today() {
+      return (
+        this.data.today ||
+        new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Yerevan' }).format(
+          new Date()
+        )
+      )
+    },
     days() {
       return weekDates(this.date)
     },
@@ -305,6 +372,18 @@ export default {
         .filter((f) => !this.factoryId || String(f.id) === this.factoryId)
         .flatMap((f) => f.operators)
       const map = new Map(rows.map((op) => [Number(op.id), op]))
+      for (const job of this.data.tasks) {
+        if (
+          !job.operator_id ||
+          (this.factoryId && String(job.factory_id) !== this.factoryId)
+        )
+          continue
+        if (!map.has(Number(job.operator_id)))
+          map.set(Number(job.operator_id), {
+            id: job.operator_id,
+            name: job.operator_name || '#' + job.operator_id,
+          })
+      }
       if (!this.factoryId)
         for (const row of [...this.data.bookings, ...this.data.shifts])
           if (!map.has(Number(row.operator_id)))
@@ -312,12 +391,36 @@ export default {
               id: row.operator_id,
               name: `${this.t.unknown} #${row.operator_id}`,
             })
-      return [...map.values()]
+      return [...map.values()].filter(
+        (op) =>
+          !this.search ||
+          op.name.toLowerCase().includes(this.search.toLowerCase())
+      )
+    },
+    groupedJobs() {
+      const groups = new Map()
+      for (const job of this.data.tasks) {
+        if (
+          !job.operator_id ||
+          (this.factoryId && String(job.factory_id) !== this.factoryId)
+        )
+          continue
+        const id = Number(job.operator_id)
+        if (!groups.has(id)) groups.set(id, [])
+        groups.get(id).push(job)
+      }
+      for (const jobs of groups.values())
+        jobs.sort(
+          (a, b) =>
+            (a.due_date || '9999').localeCompare(b.due_date || '9999') ||
+            a.id - b.id
+        )
+      return groups
     },
     queue() {
       return this.data.tasks.filter(
         (t) =>
-          !t.planned &&
+          !t.operator_id &&
           (!this.factoryId || String(t.factory_id) === this.factoryId)
       )
     },
@@ -375,10 +478,26 @@ export default {
             `#${id}`
         : this.t.unassigned
     },
-    unplannedFor(id) {
-      return this.data.tasks.filter(
-        (t) => !t.planned && Number(t.operator_id) === Number(id)
+    assignments(id) {
+      return this.groupedJobs.get(Number(id)) || []
+    },
+    overdueCount(id) {
+      return this.assignments(id).filter(
+        (j) => j.due_date && j.due_date < this.today
       ).length
+    },
+    undatedCount(id) {
+      return this.assignments(id).filter((j) => !j.due_date).length
+    },
+    dueOn(id, day) {
+      return this.assignments(id).filter((j) => j.due_date === day)
+    },
+    deadlineLabel(job) {
+      return !job.due_date
+        ? this.t.undated
+        : job.deadline_source === 'stage'
+        ? this.t.stageDue
+        : this.t.orderDue
     },
     shiftsFor(id, day) {
       return this.data.shifts.filter(

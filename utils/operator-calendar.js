@@ -30,6 +30,24 @@ export function weekDates(date) {
 }
 export const calendarCopy = {
   hy: {
+    openJobs: 'Կցված աշխատանքներ',
+    late: 'Ուշացած',
+    undated: 'Առանց ժամկետի',
+    stageDue: 'Հանձնել՝ քայլ',
+    orderDue: 'Հանձնել՝ պատվեր',
+    minutes: 'րոպե',
+    noUnassigned: 'Բոլոր աշխատանքներն ունեն կատարող։',
+    duration: 'Նախատեսվող տևողություն (րոպե)',
+    findSlot: 'Գտնել ազատ ժամ',
+    suggested: 'Առաջարկվող սկիզբ',
+    confirmSlot: 'Հաստատել ժամը',
+    confirmed: 'Հաստատված ժամ',
+    change: 'Փոխել',
+    noSlot:
+      'Այս միջակայքում ազատ ժամ չկա։ Ընտրեք այլ օր կամ պահպանեք միայն տևողությունը։',
+    predecessor: 'Նախ հաստատեք նախորդ քայլի ժամը։',
+    searchFrom: 'Որոնել այս ամսաթվից',
+
     title: 'Օպերատորների օրացույց',
     help: 'Ժամերը՝ Երևանի ժամով։ Ազատ միջակայքերը հաշվարկվում են աշխատանքային գրաֆիկից և ամրագրումներից։ Չպլանավորված աշխատանքների առկայության դեպքում դրանք ամբողջ ծանրաբեռնվածությունը չեն արտացոլում։',
     refresh: 'Թարմացնել',
@@ -64,6 +82,24 @@ export const calendarCopy = {
     date: 'Շաբաթ',
   },
   ru: {
+    openJobs: 'Назначенные работы',
+    late: 'Просрочено',
+    undated: 'Без срока',
+    stageDue: 'Сдать этап',
+    orderDue: 'Сдать заказ',
+    minutes: 'мин',
+    noUnassigned: 'Все работы назначены.',
+    duration: 'Длительность (минуты)',
+    findSlot: 'Найти время',
+    suggested: 'Предлагаемое начало',
+    confirmSlot: 'Подтвердить время',
+    confirmed: 'Подтверждено',
+    change: 'Изменить',
+    noSlot:
+      'Нет свободного интервала. Выберите другую дату или сохраните только длительность.',
+    predecessor: 'Сначала подтвердите время предыдущего этапа.',
+    searchFrom: 'Искать с даты',
+
     title: 'Календарь операторов',
     help: 'Время Еревана. Свободные интервалы рассчитаны по рабочему графику и броням. При наличии незапланированных работ они не отражают полную загрузку.',
     refresh: 'Обновить',
@@ -98,6 +134,23 @@ export const calendarCopy = {
     date: 'Неделя',
   },
   en: {
+    openJobs: 'Assigned work',
+    late: 'Overdue',
+    undated: 'No deadline',
+    stageDue: 'Stage due',
+    orderDue: 'Order due',
+    minutes: 'min',
+    noUnassigned: 'All jobs have an operator.',
+    duration: 'Estimated duration (minutes)',
+    findSlot: 'Find a slot',
+    suggested: 'Suggested start',
+    confirmSlot: 'Confirm time',
+    confirmed: 'Time confirmed',
+    change: 'Change',
+    noSlot: 'No slot found. Pick another date or save just the estimate.',
+    predecessor: 'Confirm the preceding stage first.',
+    searchFrom: 'Search from',
+
     title: 'Operator calendar',
     help: 'Yerevan time. Free intervals use working hours and reservations. Unscheduled work means these gaps do not represent total available capacity.',
     refresh: 'Refresh',
@@ -131,4 +184,25 @@ export const calendarCopy = {
     noOptions: 'Select an operator and a task assigned to them.',
     date: 'Week',
   },
+}
+
+// Treat schedule strings as Yerevan wall-clock values, independent of the browser zone.
+export function endOfSlot(start, minutes) {
+  const ms = Date.parse(start.slice(0, 16).replace(' ', 'T') + ':00Z')
+  return new Date(ms + Number(minutes) * 60000)
+    .toISOString()
+    .slice(0, 16)
+    .replace('T', ' ')
+}
+export function firstStageSlot(shifts, bookings, minutes, earliest) {
+  if (!Number.isInteger(minutes) || minutes < 1) return null
+  const gaps = freeIntervals(
+    [...shifts].sort((a, b) => a.starts_at.localeCompare(b.starts_at)),
+    bookings
+  )
+  for (const gap of gaps) {
+    const start = [gap.starts_at.slice(0, 16), earliest.slice(0, 16)].sort()[1]
+    if (endOfSlot(start, minutes) <= gap.ends_at.slice(0, 16)) return start
+  }
+  return null
 }
