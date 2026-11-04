@@ -1,141 +1,134 @@
 <template>
-  <main class="min-h-screen w-full bg-slate-50 dark:bg-slate-950">
-    <div v-if="$can('orders.view')" class="w-full px-4 py-6 sm:px-6 lg:px-8">
-      <div class="flex items-center gap-2">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">
-          Իմ առաջադրանքները
-        </h1>
-        <InfoTooltip
-          >Ձեր ստեղծած առաջադրանքները՝ ըստ աշխատանքի ընթացքի։</InfoTooltip
+  <main class="min-h-screen min-w-0 p-4 sm:p-6">
+    <section v-if="$can('orders.view')" class="space-y-4">
+      <h1 class="text-2xl font-bold">{{ c.title }}</h1>
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <label
+          >{{ c.search
+          }}<input v-model.trim="filters.search" type="search" class="control"
+        /></label>
+        <label
+          >{{ c.workshop
+          }}<select v-model="filters.factory_id" class="control">
+            <option value="">{{ c.all }}</option>
+            <option v-for="f in options.factories" :key="f.id" :value="f.id">
+              {{ f.name }}
+            </option>
+          </select></label
         >
+        <label
+          >{{ c.operator
+          }}<select v-model="filters.operator_id" class="control">
+            <option value="">{{ c.all }}</option>
+            <option v-for="o in options.operators" :key="o.id" :value="o.id">
+              {{ o.name }}
+            </option>
+          </select></label
+        >
+        <label
+          >{{ c.status
+          }}<select v-model="filters.stage" class="control">
+            <option value="">{{ c.all }}</option>
+            <option v-for="stage in stages" :key="stage" :value="stage">
+              {{ boardText[stage] }}
+            </option>
+          </select></label
+        >
+        <label
+          >{{ c.from
+          }}<input v-model="filters.due_from" type="date" class="control"
+        /></label>
+        <label
+          >{{ c.to
+          }}<input v-model="filters.due_to" type="date" class="control"
+        /></label>
+        <label class="flex items-center gap-2"
+          ><input v-model="waiting" type="checkbox" />{{ t.pending }}</label
+        >
+        <button type="button" class="work-button" @click="resetFilters">
+          {{ c.clear }}
+        </button>
       </div>
-      <div class="mt-5 flex flex-wrap items-end gap-4">
-        <div class="min-w-0 flex-1">
-          <OrdersToolbar
-            data-engineer-toolbar
-            :search="filters.search"
-            :per-page="getBoardPerPage"
-            :per-page-label="boardText.perColumn"
-            @update:search="onSetSearch"
-            @update:per-page="onSetPerPage"
-          />
-        </div>
-        <select
-          v-model="confirmationFilter"
-          data-engineer-confirmation-filter
-          :aria-label="t.pending"
-          class="w-full rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:w-auto sm:max-w-xs"
-          @change="selectConfirmation"
+      <p v-if="error" role="alert">
+        {{ error }}
+        <button type="button" class="underline" @click="fetchRows">
+          {{ boardText.retry }}
+        </button>
+      </p>
+      <p v-else-if="loading" role="status">{{ boardText.loading }}</p>
+      <div
+        v-else-if="orders.length"
+        class="overflow-x-auto rounded-xl border"
+        tabindex="0"
+      >
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr>
+              <th
+                v-for="key in ['task', 'workshop', 'operator', 'status', 'due']"
+                :key="key"
+              >
+                {{ c[key] }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="order in orders"
+              :key="order.id"
+              class="cursor-pointer border-t hover:bg-blue-50 dark:hover:bg-slate-800"
+              @click="openOrder(order)"
+            >
+              <td>
+                <button
+                  type="button"
+                  class="text-left font-semibold underline"
+                  @click.stop="openOrder(order)"
+                >
+                  #{{ order.order_number?.number || order.id }} ·
+                  {{ order.name }}
+                </button>
+              </td>
+              <td>{{ stepNames(order, 'factory') }}</td>
+              <td>{{ stepNames(order, 'operator') }}</td>
+              <td>{{ boardText[order.workflow_stage] || order.status }}</td>
+              <td>{{ (order.dates?.finish_date || '—').slice(0, 10) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p v-else>{{ boardText.empty }}</p>
+      <div v-if="!error" class="flex items-center gap-3">
+        <button
+          class="work-button"
+          type="button"
+          :disabled="loading || page <= 1"
+          :aria-label="boardText.previousPage"
+          @click="go(page - 1)"
         >
-          <option value="">{{ t.all }}</option>
-          <option value="waiting">{{ t.pending }}</option>
+          ‹
+        </button>
+        <span>{{ page }} / {{ lastPage }}</span
+        ><button
+          class="work-button"
+          type="button"
+          :disabled="loading || page >= lastPage"
+          :aria-label="boardText.nextPage"
+          @click="go(page + 1)"
+        >
+          ›
+        </button>
+        <select
+          v-model.number="filters.per_page"
+          class="work-button"
+          aria-label="Rows"
+        >
+          <option v-for="n in [10, 25, 50, 100]" :key="n" :value="n">
+            {{ n }}
+          </option>
         </select>
       </div>
-      <div
-        class="mt-6 grid grid-cols-1 items-start gap-4 md:grid-cols-2 xl:grid-cols-4"
-        data-engineer-board
-      >
-        <section
-          v-for="stage in stages"
-          :key="stage"
-          :data-engineer-board-stage="stage"
-          class="work-card engineer-board-column flex min-w-0 flex-col overflow-hidden"
-          :aria-label="boardText[stage]"
-          :aria-busy="columns[stage].loading ? 'true' : 'false'"
-        >
-          <header
-            class="flex shrink-0 items-center justify-between gap-2 border-b border-slate-200 px-4 py-4 dark:border-slate-800"
-          >
-            <h2 class="min-w-0 text-sm font-bold">{{ boardText[stage] }}</h2>
-            <span
-              class="work-status shrink-0"
-              :data-tone="stageTone(stage)"
-              data-stage-count
-              >{{ columns[stage].pagination.total }}</span
-            >
-          </header>
-          <div
-            class="engineer-board-column__body min-h-0 flex-1 space-y-4 overflow-y-auto bg-slate-50/60 p-3 dark:bg-slate-950/20"
-          >
-            <p
-              v-if="columns[stage].loading && !columns[stage].loaded"
-              role="status"
-              class="py-8 text-center text-sm text-slate-500"
-            >
-              {{ boardText.loading }}
-            </p>
-            <div
-              v-if="columns[stage].error"
-              role="alert"
-              class="rounded-xl bg-rose-50 p-4 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-300"
-            >
-              <p>{{ boardText.loadFailed }}</p>
-              <button
-                type="button"
-                class="mt-2 font-bold underline"
-                :disabled="columns[stage].loading"
-                @click="
-                  changePage(stage, columns[stage].pagination.current_page)
-                "
-              >
-                {{ boardText.retry }}
-              </button>
-            </div>
-            <p
-              v-else-if="columns[stage].loaded && !columns[stage].orders.length"
-              class="rounded-xl border border-dashed border-slate-200 px-3 py-8 text-center text-sm text-slate-500 dark:border-slate-700"
-            >
-              {{ boardText.empty }}
-            </p>
-            <OrderCard
-              v-for="order in columns[stage].orders"
-              :key="order.id"
-              :order="order"
-              @open="openOrder"
-            />
-          </div>
-          <footer
-            class="flex shrink-0 items-center justify-between gap-2 border-t border-slate-200 p-3 text-xs dark:border-slate-800"
-          >
-            <button
-              type="button"
-              class="work-button"
-              :aria-label="boardText.previousPage"
-              :disabled="
-                columns[stage].loading ||
-                columns[stage].pagination.current_page <= 1
-              "
-              data-column-previous
-              @click="
-                changePage(stage, columns[stage].pagination.current_page - 1)
-              "
-            >
-              ‹
-            </button>
-            <span class="text-slate-500 dark:text-slate-400"
-              >{{ columns[stage].pagination.current_page }} /
-              {{ columns[stage].pagination.last_page }}</span
-            >
-            <button
-              type="button"
-              class="work-button"
-              :aria-label="boardText.nextPage"
-              :disabled="
-                columns[stage].loading ||
-                columns[stage].pagination.current_page >=
-                  columns[stage].pagination.last_page
-              "
-              data-column-next
-              @click="
-                changePage(stage, columns[stage].pagination.current_page + 1)
-              "
-            >
-              ›
-            </button>
-          </footer>
-        </section>
-      </div>
-    </div>
+    </section>
     <PermissionDenied v-else />
     <OrderDetailsModal
       :visible="isDetailsOpen && $can('orders.view')"
@@ -147,23 +140,38 @@
   </main>
 </template>
 <script>
-import { mapActions, mapGetters } from 'vuex'
 import { apiErrorMessage, taskCopy } from '@/utils/task-workflow'
 import { boardCopy } from '@/utils/task-board'
-import OrdersToolbar from '~/components/engineer/OrdersToolbar.vue'
-import OrderCard from '~/components/engineer/OrderCard.vue'
+import { planningCopy } from '@/utils/planning-copy'
 import OrderDetailsModal from '~/components/engineer/OrderDetailsModal.vue'
 import PermissionDenied from '@/components/modals/permission/PermissionDenied.vue'
-
+const defaults = () => ({
+  search: '',
+  factory_id: '',
+  operator_id: '',
+  stage: '',
+  due_from: '',
+  due_to: '',
+  confirmation: '',
+  per_page: 25,
+})
 export default {
-  components: { PermissionDenied, OrdersToolbar, OrderCard, OrderDetailsModal },
+  components: { OrderDetailsModal, PermissionDenied },
   layout: 'engineer',
   middleware: ['role-guard'],
   meta: { role: 'engineer' },
   data: () => ({
-    isDetailsOpen: false,
-    confirmationFilter: '',
+    orders: [],
+    options: { factories: [], operators: [] },
+    filters: defaults(),
+    page: 1,
+    lastPage: 1,
+    loading: false,
+    error: '',
+    serial: 0,
+    timer: null,
     refreshTimer: null,
+    isDetailsOpen: false,
     selectedOrder: null,
     focusTarget: null,
     openQueryVersion: 0,
@@ -176,69 +184,119 @@ export default {
     t() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
-    ...mapGetters('engineer', [
-      'getBoardColumns',
-      'getBoardPerPage',
-      'getFilters',
-    ]),
-    columns() {
-      return this.getBoardColumns
+    c() {
+      return planningCopy[this.$i18n?.locale] || planningCopy.hy
     },
-    filters() {
-      return this.getFilters
+    scope() {
+      return this.$store?.state?.workspace?.company?.id
     },
-    orders() {
-      return this.stages.flatMap((stage) => this.columns[stage].orders)
-    },
-    loading() {
-      return this.stages.some((stage) => this.columns[stage].loading)
+    waiting: {
+      get() {
+        return this.filters.confirmation === 'waiting'
+      },
+      set(v) {
+        this.filters.confirmation = v ? 'waiting' : ''
+      },
     },
   },
   watch: {
     '$route.query'() {
       this.openFromQuery()
     },
-    orders(rows) {
-      if (this.selectedOrder)
-        this.selectedOrder =
-          rows.find((row) => row.id === this.selectedOrder.id) ||
-          this.selectedOrder
+    filters: {
+      deep: true,
+      handler() {
+        ++this.serial
+        this.page = 1
+        this.loading = true
+        clearTimeout(this.timer)
+        this.timer = setTimeout(() => this.fetchRows(), 200)
+      },
+    },
+    scope() {
+      ++this.openQueryVersion
+      this.selectedOrder = null
+      this.isDetailsOpen = false
+      this.options = { factories: [], operators: [] }
+      this.orders = []
+      this.resetFilters()
     },
   },
   created() {
-    if (!this.$can('orders.view')) return
-    this.confirmationFilter = this.filters.confirmation || ''
-    this.fetchBoard({ reset: true })
-    this.openFromQuery()
+    if (this.$can('orders.view')) {
+      this.fetchRows()
+      this.openFromQuery()
+    }
   },
   mounted() {
-    if (!this.$can('orders.view')) return
     this.refreshTimer = setInterval(() => {
-      if (!document.hidden && !this.loading) this.refreshOrders()
+      if (!document.hidden && !this.loading) this.fetchRows()
     }, 30000)
-    window.addEventListener('focus', this.refreshOrders)
   },
   beforeDestroy() {
-    this.openQueryVersion++
-    this.$store.commit('engineer/INVALIDATE_BOARD')
+    ++this.serial
+    ++this.openQueryVersion
+    clearTimeout(this.timer)
     clearInterval(this.refreshTimer)
-    window.removeEventListener('focus', this.refreshOrders)
   },
   methods: {
-    ...mapActions('engineer', ['fetchBoard', 'fetchBoardColumn']),
-    stageTone(stage) {
-      return {
-        created: 'neutral',
-        accepted: 'blue',
-        in_progress: 'blue',
-        completed: 'green',
-      }[stage]
+    resetFilters() {
+      this.filters = defaults()
     },
-    selectConfirmation() {
-      return this.fetchBoard({
-        confirmation: this.confirmationFilter,
-        reset: true,
-      })
+    go(page) {
+      this.page = page
+      this.fetchRows()
+    },
+    stepNames(order, key) {
+      return (
+        [
+          ...new Set(
+            (order.factory_orders || [])
+              .filter((s) => s.factory?.is_workshop !== false)
+              .map((s) => s[key]?.name)
+              .filter(Boolean)
+          ),
+        ].join(', ') || '—'
+      )
+    },
+    async fetchRows() {
+      if (!this.$can('orders.view')) return
+      const id = ++this.serial
+      this.error = ''
+      if (
+        this.filters.due_from &&
+        this.filters.due_to &&
+        this.filters.due_from > this.filters.due_to
+      ) {
+        this.error = this.c.invalid
+        this.loading = false
+        return
+      }
+      this.loading = true
+      try {
+        const { data } = await this.$axios.get('/api/engineers/engineer', {
+          params: {
+            ...Object.fromEntries(
+              Object.entries(this.filters).filter(([, v]) => v !== '')
+            ),
+            page: this.page,
+            filter_options: 1,
+          },
+        })
+        if (id !== this.serial) return
+        this.lastPage = Math.max(1, data.pagination.last_page)
+        if (this.page > this.lastPage) {
+          this.go(this.lastPage)
+          return
+        }
+        this.orders = data.orders
+        this.options = data.filter_options || { factories: [], operators: [] }
+      } catch (e) {
+        if (id === this.serial)
+          this.error = apiErrorMessage(e, this.boardText.loadFailed)
+      } finally {
+        if (id === this.serial) this.loading = false
+      }
     },
     async openFromQuery() {
       if (!this.$can('orders.view')) return
@@ -273,39 +331,33 @@ export default {
       const result = this.$router.replace({ path: this.$route.path, query })
       if (result && result.catch) result.catch(() => {})
     },
-    refreshOrders() {
-      if (this.$can('orders.view') && !this.$store.state.workspace?.switching && !this.loading)
-        return this.fetchBoard({ confirmation: this.confirmationFilter })
-    },
-    onTaskUpdated(order) {
-      this.selectedOrder = order
-      this.fetchBoard({ confirmation: this.confirmationFilter })
-    },
-    onSetSearch(search) {
-      return this.fetchBoard({ search, reset: true })
-    },
-    onSetPerPage(perPage) {
-      return this.fetchBoard({ perPage, reset: true })
-    },
-    changePage(stage, page) {
-      return this.fetchBoardColumn({ stage, page })
-    },
     openOrder(order, target = null) {
       this.selectedOrder = order
       this.focusTarget = target
       this.isDetailsOpen = true
     },
+    onTaskUpdated(order) {
+      this.selectedOrder = order
+      this.fetchRows()
+    },
   },
 }
 </script>
 <style scoped>
-@media (min-width: 768px) {
-  .engineer-board-column {
-    height: clamp(440px, calc(100vh - 245px), 1100px);
-    height: clamp(440px, calc(100dvh - 245px), 1100px);
-  }
+.control {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #94a3b8;
+  border-radius: 8px;
+  background: transparent;
+  padding: 6px;
 }
-.engineer-board-column__body > .work-task-card {
-  height: auto;
+th,
+td {
+  padding: 12px;
+}
+th {
+  white-space: nowrap;
 }
 </style>

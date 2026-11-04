@@ -20,3 +20,8 @@ test('a suggested slot fits the whole estimate after prerequisites and other res
  assert.equal(firstStageSlot(shifts,jobs,120,'2098-01-06 11:30'),'2098-01-06 14:30');
  assert.equal(firstStageSlot(shifts,jobs,240,'2098-01-06 11:30'),null);
 });
+test('day and month filters use inclusive civil-date bounds including leap day',async()=>{
+  const {calendarDays}=await helpers;
+  assert.deepEqual(calendarDays('2028-02-29','day'),['2028-02-29']);
+  const month=calendarDays('2028-02-17','month');assert.equal(month.length,29);assert.equal(month[0],'2028-02-01');assert.equal(month[28],'2028-02-29');
+});

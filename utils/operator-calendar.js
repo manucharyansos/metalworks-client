@@ -206,3 +206,15 @@ export function firstStageSlot(shifts, bookings, minutes, earliest) {
   }
   return null
 }
+export function calendarDays(date, period) {
+  if (!/^\d{4}-\d\d-\d\d$/.test(date)) return []
+  if (period === 'day') return [date]
+  if (period !== 'month') return weekDates(date)
+  const prefix = date.slice(0, 7)
+  const [year, month] = prefix.split('-').map(Number)
+  const count = new Date(Date.UTC(year, month, 0)).getUTCDate()
+  return Array.from(
+    { length: count },
+    (_, index) => prefix + '-' + String(index + 1).padStart(2, '0')
+  )
+}
