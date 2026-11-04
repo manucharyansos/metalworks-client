@@ -7,20 +7,34 @@
     <p class="text-sm text-slate-500">{{ t.help }}</p>
     <div class="flex flex-wrap items-end gap-3">
       <label class="text-sm"
-        >{{ t.date
+        >{{ c[period]
         }}<input
           v-model="date"
           type="date"
           class="calendar-control"
           @change="refresh"
       /></label>
-      <input
-        v-model.trim="search"
-        type="search"
-        :placeholder="t.operator"
-        :aria-label="t.operator"
-        class="calendar-control"
-      />
+      <label
+        >{{ c.period
+        }}<select v-model="period" class="calendar-control" @change="refresh">
+          <option
+            v-for="key in ['day', 'week', 'month']"
+            :key="key"
+            :value="key"
+          >
+            {{ c[key] }}
+          </option>
+        </select></label
+      >
+      <label
+        >{{ c.operator
+        }}<select v-model="operatorFilter" class="calendar-control">
+          <option value="">{{ c.all }}</option>
+          <option v-for="op in roster" :key="op.id" :value="String(op.id)">
+            {{ op.name }}
+          </option>
+        </select></label
+      >
       <select v-model="factoryId" :aria-label="t.all" class="calendar-control">
         <option value="">{{ t.all }}</option>
         <option v-for="f in data.factories" :key="f.id" :value="String(f.id)">
@@ -37,9 +51,28 @@
       </button>
     </div>
     <p v-if="error" role="alert" class="text-sm text-red-600">{{ error }}</p>
+    <p v-if="actionError" role="alert" class="text-sm text-red-600">
+      {{ actionError }}
+    </p>
     <p v-if="loading" role="status">{{ $t('file_details.loading') }}</p>
     <template v-if="!error">
-      <div class="overflow-x-auto" tabindex="0" :aria-label="t.title">
+      <div
+        v-if="period === 'month'"
+        class="grid grid-cols-2 gap-1 sm:grid-cols-7"
+      >
+        <button
+          v-for="day in days"
+          :key="day"
+          type="button"
+          class="min-w-0 rounded-lg border p-2 text-left text-xs"
+          @click="openDay(day)"
+        >
+          <strong>{{ labelDay(day) }}</strong>
+          <p>{{ t.busy }} · {{ monthCount(day, 'booked') }}</p>
+          <p>{{ c.due }} · {{ monthCount(day, 'due') }}</p>
+        </button>
+      </div>
+      <div v-else class="overflow-x-auto" tabindex="0" :aria-label="t.title">
         <table class="w-full border-collapse text-xs">
           <thead>
             <tr>
@@ -226,29 +259,16 @@
       <details class="rounded-lg border p-3">
         <summary class="cursor-pointer font-semibold">{{ t.plan }}</summary>
         <p class="my-2 text-xs text-slate-500">
-          {{ t.queueHelp }} {{ t.partial }}
+          {{ c.hours }}
         </p>
         <form class="flex flex-wrap items-end gap-3" @submit.prevent="book">
-          <label
-            >{{ t.operator
-            }}<select
-              v-model="booking.operator_id"
-              required
-              class="calendar-control"
-              @change="booking.factory_order_id = ''"
-            >
-              <option disabled value="">—</option>
-              <option v-for="op in operators" :key="op.id" :value="op.id">
-                {{ op.name }}
-              </option>
-            </select></label
-          >
           <label class="min-w-0 max-w-full"
-            >{{ t.task
+            >{{ c.existing
             }}<select
               v-model="booking.factory_order_id"
               required
               class="calendar-control max-w-full"
+              @change="selectTask"
             >
               <option disabled value="">—</option>
               <option
@@ -256,7 +276,25 @@
                 :key="task.id"
                 :value="task.id"
               >
-                #{{ task.id }} · {{ task.name }} · {{ task.workshop }}
+                #{{ task.order_id }} · {{ task.name }} · {{ task.workshop }}
+              </option>
+            </select></label
+          >
+          <label
+            >{{ t.operator
+            }}<select
+              v-model="booking.operator_id"
+              :disabled="!selectedStage"
+              required
+              class="calendar-control"
+            >
+              <option disabled value="">—</option>
+              <option
+                v-for="op in eligibleOperators"
+                :key="op.id"
+                :value="op.id"
+              >
+                {{ op.name }}
               </option>
             </select></label
           >
@@ -264,6 +302,7 @@
             >{{ t.day
             }}<input
               v-model="booking.day"
+              @change="syncBookingDay"
               required
               type="date"
               class="calendar-control" /></label
@@ -283,42 +322,49 @@
               class="calendar-control"
           /></label>
           <button
-            :disabled="busy || !booking.factory_order_id"
+            :disabled="busy || !selectedStage || !booking.operator_id"
             type="submit"
             class="calendar-button"
           >
             {{ t.save }}
           </button>
         </form>
+        <div
+          v-if="
+            booking.operator_id && booking.day && days.includes(booking.day)
+          "
+          class="mt-3 flex flex-wrap items-center gap-2 text-sm"
+        >
+          <span>{{ t.free }}</span>
+          <button
+            v-for="gap in gaps(booking.operator_id, booking.day)"
+            :key="gap.starts_at"
+            class="underline"
+            type="button"
+            @click="chooseGap(gap)"
+          >
+            {{ time(gap.starts_at) }}–{{ time(gap.ends_at) }}
+          </button>
+          <span v-if="!gaps(booking.operator_id, booking.day).length">{{
+            shiftsFor(booking.operator_id, booking.day).length ? '—' : t.empty
+          }}</span>
+        </div>
+        <p v-if="bookingSaved" role="status" class="mt-2 text-green-700">
+          {{ t.confirmed }} · {{ bookingSaved }}
+        </p>
         <p v-if="!editableTasks.length" class="mt-2 text-sm text-slate-500">
-          {{ t.noOptions }}
+          {{ c.none }}
         </p>
       </details>
-      <section>
-        <h3 class="font-semibold">{{ t.unassigned }} ({{ queue.length }})</h3>
-        <p class="text-xs text-slate-500">{{ t.queueHelp }}</p>
-        <p v-if="!queue.length" class="mt-2 text-sm">{{ t.noUnassigned }}</p>
-        <ul class="mt-3 grid gap-2 sm:grid-cols-2">
-          <li
-            v-for="task in queue"
-            :key="task.id"
-            class="rounded-lg border p-3 text-sm"
-          >
-            <strong>#{{ task.id }} · {{ task.name }}</strong>
-            <p>{{ task.workshop }} · {{ task.engineer }}</p>
-            <p>{{ operatorName(task.operator_id) }}</p>
-            <p v-if="task.blocked" class="text-amber-700">{{ t.pending }}</p>
-          </li>
-        </ul>
-      </section>
     </template>
   </section>
 </template>
 <script>
+import { planningCopy } from '@/utils/planning-copy'
 import {
   calendarCopy,
   freeIntervals,
-  weekDates,
+  calendarDays,
 } from '@/utils/operator-calendar'
 const empty = () => ({
   factories: [],
@@ -334,7 +380,10 @@ export default {
       new Date()
     ),
     factoryId: '',
-    search: '',
+    period: 'week',
+    operatorFilter: '',
+    actionError: '',
+    bookingSaved: '',
     loading: false,
     busy: false,
     error: '',
@@ -350,6 +399,9 @@ export default {
     },
   }),
   computed: {
+    c() {
+      return planningCopy[this.$i18n?.locale] || planningCopy.hy
+    },
     t() {
       return calendarCopy[this.$i18n?.locale] || calendarCopy.hy
     },
@@ -362,12 +414,12 @@ export default {
       )
     },
     days() {
-      return weekDates(this.date)
+      return calendarDays(this.date, this.period)
     },
     scope() {
       return `${this.$auth?.user?.id}:${this.$store?.state?.workspace?.company?.id}`
     },
-    operators() {
+    roster() {
       const rows = this.data.factories
         .filter((f) => !this.factoryId || String(f.id) === this.factoryId)
         .flatMap((f) => f.operators)
@@ -391,10 +443,11 @@ export default {
               id: row.operator_id,
               name: `${this.t.unknown} #${row.operator_id}`,
             })
-      return [...map.values()].filter(
-        (op) =>
-          !this.search ||
-          op.name.toLowerCase().includes(this.search.toLowerCase())
+      return [...map.values()]
+    },
+    operators() {
+      return this.roster.filter(
+        (op) => !this.operatorFilter || String(op.id) === this.operatorFilter
       )
     },
     groupedJobs() {
@@ -417,25 +470,43 @@ export default {
         )
       return groups
     },
-    queue() {
-      return this.data.tasks.filter(
-        (t) =>
-          !t.operator_id &&
-          (!this.factoryId || String(t.factory_id) === this.factoryId)
-      )
-    },
     editableTasks() {
       return this.data.tasks.filter(
         (t) =>
           t.can_edit &&
-          Number(t.operator_id) === Number(this.booking.operator_id) &&
-          this.booking.operator_id
+          (!this.factoryId || String(t.factory_id) === this.factoryId)
+      )
+    },
+    selectedStage() {
+      return this.editableTasks.find(
+        (t) => Number(t.id) === Number(this.booking.factory_order_id)
+      )
+    },
+    eligibleOperators() {
+      if (!this.selectedStage) return []
+      const factory = this.data.factories.find(
+        (f) => Number(f.id) === Number(this.selectedStage.factory_id)
+      )
+      return (factory?.operators || []).filter(
+        (op) =>
+          !this.selectedStage.operator_id ||
+          Number(op.id) === Number(this.selectedStage.operator_id)
       )
     },
   },
   watch: {
+    factoryId() {
+      this.operatorFilter = ''
+      this.booking.factory_order_id = ''
+      this.booking.operator_id = ''
+    },
     scope() {
       ++this.request
+      this.factoryId =
+        this.operatorFilter =
+        this.actionError =
+        this.bookingSaved =
+          ''
       this.busy = false
       this.data = empty()
       this.booking = {
@@ -463,6 +534,38 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
+    syncBookingDay() {
+      if (this.booking.day && !this.days.includes(this.booking.day)) {
+        this.date = this.booking.day
+        this.refresh()
+      }
+    },
+    chooseGap(gap) {
+      this.booking.start = this.time(gap.starts_at)
+      this.booking.end = this.time(gap.ends_at)
+    },
+    selectTask() {
+      this.bookingSaved = ''
+      this.booking.operator_id = this.selectedStage?.operator_id || ''
+      this.booking.day = this.date
+      this.actionError = ''
+    },
+    openDay(day) {
+      this.date = day
+      this.period = 'day'
+      this.refresh()
+    },
+    monthCount(day, kind) {
+      return this.operators.reduce(
+        (sum, op) =>
+          sum +
+          (kind === 'due'
+            ? this.dueOn(op.id, day)
+            : this.bookingsFor(op.id, day)
+          ).length,
+        0
+      )
+    },
     time(v) {
       return String(v).slice(11, 16)
     },
@@ -530,7 +633,7 @@ export default {
       this.error = ''
       try {
         const data = await this.$axios.$get('/api/operator-calendar', {
-          params: { from: this.days[0], to: this.days[6] },
+          params: { from: this.days[0], to: this.days[this.days.length - 1] },
         })
         if (request === this.request) this.data = data
       } catch (e) {
@@ -543,13 +646,13 @@ export default {
       if (this.busy) return
       const scope = this.scope
       this.busy = true
-      this.error = ''
+      this.actionError = ''
       try {
         await fn()
         if (scope === this.scope && !this._isDestroyed) await this.refresh()
       } catch (e) {
         if (scope === this.scope && !this._isDestroyed)
-          this.error = this.message(e)
+          this.actionError = this.message(e)
       } finally {
         if (scope === this.scope && !this._isDestroyed) this.busy = false
       }
@@ -560,14 +663,21 @@ export default {
       )
     },
     book() {
-      return this.mutate(() =>
-        this.$axios.$post('/api/operator-calendar/bookings', {
+      const scope = this.scope
+      this.bookingSaved = ''
+      return this.mutate(async () => {
+        await this.$axios.$post('/api/operator-calendar/bookings', {
+          assign_if_unassigned:
+            !!this.selectedStage && !this.selectedStage.operator_id,
           factory_order_id: this.booking.factory_order_id,
           operator_id: this.booking.operator_id,
           starts_at: `${this.booking.day} ${this.booking.start}`,
           ends_at: `${this.booking.day} ${this.booking.end}`,
         })
-      )
+        if (scope === this.scope)
+          this.bookingSaved =
+            this.booking.day + ' ' + this.booking.start + '–' + this.booking.end
+      })
     },
     remove(kind, id) {
       if (window.confirm(this.t.confirm))
