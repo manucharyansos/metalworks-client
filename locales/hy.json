@@ -1,4 +1,8 @@
 {
+  "app_update": {
+    "available": "Հասանելի է կայքի նոր տարբերակը։",
+    "reload": "Թարմացնել էջը"
+  },
   "order_configuration": {
     "edit": "Խմբագրել",
     "optional": "ոչ պարտադիր",

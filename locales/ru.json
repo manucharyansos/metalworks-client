@@ -1,4 +1,8 @@
 {
+  "app_update": {
+    "available": "Доступна новая версия сайта.",
+    "reload": "Обновить страницу"
+  },
   "order_configuration": {
     "edit": "Редактировать",
     "optional": "необязательно",
