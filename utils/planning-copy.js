@@ -1,5 +1,20 @@
 export const planningCopy = {
   hy: {
+    sort: 'Դասավորել',
+    byPriority: 'Առաջնահերթություն, ապա վերջնաժամկետ',
+    newest: 'Նորերը սկզբում',
+    priority: 'Առաջնահերթություն',
+    urgent: 'Շտապ',
+    high: 'Բարձր',
+    normal: 'Սովորական',
+    choose: 'Ընտրեք առաջադրանքը',
+    chooseOperator: 'Ընտրեք օպերատորին',
+    manual:
+      'Այս օրվա աշխատանքային գրաֆիկը սահմանված չէ։ Կարող եք ձեռքով ամրագրել ժամերը․ ազատ ժամանակի հաշվարկը հասանելի չէ։',
+    readOnly:
+      'Պլանավորման համար հասանելի են ձեր ստեղծած բաց քայլերը՝ խմբագրման իրավունքի առկայությամբ։',
+    schedule: 'Պլանավորել',
+
     title: 'Իմ առաջադրանքները',
     search: 'Որոնել անունով կամ համարով',
     task: 'Առաջադրանք',
@@ -17,10 +32,26 @@ export const planningCopy = {
     period: 'Ժամանակահատված',
     existing: 'Ընտրեք ստեղծված առաջադրանքն ու արտադրական քայլը',
     none: 'Պլանավորման համար հասանելի բաց քայլ չկա։',
-    hours: 'Ամրագրման համար անհրաժեշտ է օպերատորի աշխատանքային գրաֆիկ։',
+    hours:
+      'Ընտրեք առաջադրանքը, կատարողին և ժամերը։ Համընկնող ամրագրումները չեն թույլատրվում։',
     invalid: 'Վերջի ամսաթիվը պետք է լինի սկզբի ամսաթվից հետո կամ նույն օրը։',
   },
   ru: {
+    sort: 'Сортировка',
+    byPriority: 'Приоритет, затем срок',
+    newest: 'Сначала новые',
+    priority: 'Приоритет',
+    urgent: 'Срочный',
+    high: 'Высокий',
+    normal: 'Обычный',
+    choose: 'Выберите задание',
+    chooseOperator: 'Выберите оператора',
+    manual:
+      'Рабочие часы на этот день не заданы. Можно забронировать время вручную; свободная загрузка неизвестна.',
+    readOnly:
+      'Планировать можно свои открытые этапы при наличии права редактирования заданий.',
+    schedule: 'Планировать',
+
     title: 'Мои задания',
     search: 'Поиск по названию или номеру',
     task: 'Задание',
@@ -38,10 +69,26 @@ export const planningCopy = {
     period: 'Период',
     existing: 'Выберите созданное задание и этап',
     none: 'Нет доступных для планирования открытых этапов.',
-    hours: 'Для брони нужны рабочие часы оператора.',
+    hours:
+      'Выберите задание, оператора и время. Пересечения бронирований не допускаются.',
     invalid: 'Конечная дата должна быть не раньше начальной.',
   },
   en: {
+    sort: 'Sort',
+    byPriority: 'Priority, then deadline',
+    newest: 'Newest first',
+    priority: 'Priority',
+    urgent: 'Urgent',
+    high: 'High',
+    normal: 'Normal',
+    choose: 'Select a task',
+    chooseOperator: 'Select an operator',
+    manual:
+      'No working hours configured for this day. You can reserve times manually; available capacity is unknown.',
+    readOnly:
+      'You can plan your own open stages when you have permission to edit orders.',
+    schedule: 'Schedule',
+
     title: 'My tasks',
     search: 'Search by name or number',
     task: 'Task',
@@ -59,7 +106,8 @@ export const planningCopy = {
     period: 'Period',
     existing: 'Select an existing task and stage',
     none: 'No open stages available to schedule.',
-    hours: 'Booking requires configured working hours for the operator.',
+    hours:
+      'Select a task, operator and times. Overlapping reservations are not allowed.',
     invalid: 'The end date must be on or after the start date.',
   },
 }

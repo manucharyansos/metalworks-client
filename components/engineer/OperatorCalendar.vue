@@ -134,6 +134,14 @@
                   <strong>{{ deadlineLabel(job) }}</strong>
                   <p>{{ job.name }} · {{ job.workshop }}</p>
                   <p>{{ job.engineer }}</p>
+                  <button
+                    v-if="job.can_edit"
+                    type="button"
+                    class="mt-1 underline"
+                    @click="planJob(job, day)"
+                  >
+                    {{ c.schedule }}
+                  </button>
                   <p v-if="job.estimated_minutes">
                     {{ job.estimated_minutes }} {{ t.minutes }}
                   </p>
@@ -256,7 +264,7 @@
           </button>
         </form>
       </details>
-      <details class="rounded-lg border p-3">
+      <details ref="planner" class="rounded-lg border p-3">
         <summary class="cursor-pointer font-semibold">{{ t.plan }}</summary>
         <p class="my-2 text-xs text-slate-500">
           {{ c.hours }}
@@ -270,7 +278,9 @@
               class="calendar-control max-w-full"
               @change="selectTask"
             >
-              <option disabled value="">—</option>
+              <option disabled value="">
+                {{ c.choose }} ({{ editableTasks.length }})
+              </option>
               <option
                 v-for="task in editableTasks"
                 :key="task.id"
@@ -288,7 +298,7 @@
               required
               class="calendar-control"
             >
-              <option disabled value="">—</option>
+              <option disabled value="">{{ c.chooseOperator }}</option>
               <option
                 v-for="op in eligibleOperators"
                 :key="op.id"
@@ -346,14 +356,14 @@
             {{ time(gap.starts_at) }}–{{ time(gap.ends_at) }}
           </button>
           <span v-if="!gaps(booking.operator_id, booking.day).length">{{
-            shiftsFor(booking.operator_id, booking.day).length ? '—' : t.empty
+            shiftsFor(booking.operator_id, booking.day).length ? '—' : c.manual
           }}</span>
         </div>
         <p v-if="bookingSaved" role="status" class="mt-2 text-green-700">
           {{ t.confirmed }} · {{ bookingSaved }}
         </p>
         <p v-if="!editableTasks.length" class="mt-2 text-sm text-slate-500">
-          {{ c.none }}
+          {{ c.none }} {{ c.readOnly }}
         </p>
       </details>
     </template>
@@ -534,6 +544,14 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
+    planJob(job, day) {
+      this.booking.factory_order_id = job.id
+      this.selectTask()
+      this.booking.day = day < this.today ? this.today : day
+      this.syncBookingDay()
+      this.$refs.planner.open = true
+      this.$refs.planner.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    },
     syncBookingDay() {
       if (this.booking.day && !this.days.includes(this.booking.day)) {
         this.date = this.booking.day
@@ -547,7 +565,9 @@ export default {
     selectTask() {
       this.bookingSaved = ''
       this.booking.operator_id = this.selectedStage?.operator_id || ''
-      this.booking.day = this.date
+      this.booking.day = this.date < this.today ? this.today : this.date
+      this.booking.start = this.booking.end = ''
+      this.syncBookingDay()
       this.actionError = ''
     },
     openDay(day) {
@@ -667,6 +687,10 @@ export default {
       this.bookingSaved = ''
       return this.mutate(async () => {
         await this.$axios.$post('/api/operator-calendar/bookings', {
+          allow_without_shift: !this.shiftsFor(
+            this.booking.operator_id,
+            this.booking.day
+          ).length,
           assign_if_unassigned:
             !!this.selectedStage && !this.selectedStage.operator_id,
           factory_order_id: this.booking.factory_order_id,

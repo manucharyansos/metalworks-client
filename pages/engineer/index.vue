@@ -42,6 +42,13 @@
           >{{ c.to
           }}<input v-model="filters.due_to" type="date" class="control"
         /></label>
+        <label
+          >{{ c.sort
+          }}<select v-model="filters.sort" class="control">
+            <option value="priority">{{ c.byPriority }}</option>
+            <option value="newest">{{ c.newest }}</option>
+          </select></label
+        >
         <label class="flex items-center gap-2"
           ><input v-model="waiting" type="checkbox" />{{ t.pending }}</label
         >
@@ -65,7 +72,14 @@
           <thead>
             <tr>
               <th
-                v-for="key in ['task', 'workshop', 'operator', 'status', 'due']"
+                v-for="key in [
+                  'task',
+                  'workshop',
+                  'operator',
+                  'status',
+                  'priority',
+                  'due',
+                ]"
                 :key="key"
               >
                 {{ c[key] }}
@@ -76,7 +90,8 @@
             <tr
               v-for="order in orders"
               :key="order.id"
-              class="cursor-pointer border-t hover:bg-blue-50 dark:hover:bg-slate-800"
+              class="task-row cursor-pointer border-t"
+              :data-stage="order.workflow_stage"
               @click="openOrder(order)"
             >
               <td>
@@ -91,7 +106,26 @@
               </td>
               <td>{{ stepNames(order, 'factory') }}</td>
               <td>{{ stepNames(order, 'operator') }}</td>
-              <td>{{ boardText[order.workflow_stage] || order.status }}</td>
+              <td>
+                <span class="status-badge">{{
+                  boardText[order.workflow_stage] || order.status
+                }}</span>
+              </td>
+              <td>
+                <strong
+                  :class="{
+                    'text-rose-700': Number(order.priority_rank) === 2,
+                    'text-amber-700': Number(order.priority_rank) === 1,
+                  }"
+                  >{{
+                    c[
+                      ['normal', 'high', 'urgent'][
+                        Number(order.priority_rank) || 0
+                      ]
+                    ]
+                  }}</strong
+                >
+              </td>
               <td>{{ (order.dates?.finish_date || '—').slice(0, 10) }}</td>
             </tr>
           </tbody>
@@ -147,6 +181,7 @@ import OrderDetailsModal from '~/components/engineer/OrderDetailsModal.vue'
 import PermissionDenied from '@/components/modals/permission/PermissionDenied.vue'
 const defaults = () => ({
   search: '',
+  sort: 'priority',
   factory_id: '',
   operator_id: '',
   stage: '',
@@ -359,5 +394,32 @@ td {
 }
 th {
   white-space: nowrap;
+}
+.task-row[data-stage='created'] {
+  background: #f1f5f9;
+  color: #334155;
+}
+.task-row[data-stage='accepted'] {
+  background: #eff6ff;
+  color: #1e40af;
+}
+.task-row[data-stage='in_progress'] {
+  background: #fffbeb;
+  color: #92400e;
+}
+.task-row[data-stage='completed'] {
+  background: #f0fdf4;
+  color: #166534;
+}
+.task-row:hover {
+  box-shadow: inset 4px 0 #2563eb;
+}
+.status-badge {
+  display: inline-block;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 3px 9px;
+  white-space: nowrap;
+  font-weight: 600;
 }
 </style>
