@@ -159,6 +159,15 @@
                     class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400"
                   >
                     {{ factoryOrder(order)?.operator?.name || t.unassigned }}
+                    <span
+                      v-if="factoryOrder(order)?.helpers?.length"
+                      class="block text-xs"
+                      >{{
+                        factoryOrder(order)
+                          .helpers.map((h) => h.name)
+                          .join(', ')
+                      }}</span
+                    >
                   </td>
                   <td class="px-4 py-4">
                     <span
@@ -209,6 +218,15 @@
               <p class="mt-3 text-xs text-slate-500 dark:text-slate-400">
                 {{ t.operator }}՝
                 {{ factoryOrder(order)?.operator?.name || t.unassigned }}
+                <span
+                  v-if="factoryOrder(order)?.helpers?.length"
+                  class="block text-xs"
+                  >{{
+                    factoryOrder(order)
+                      .helpers.map((h) => h.name)
+                      .join(', ')
+                  }}</span
+                >
               </p>
               <div class="mt-4 flex justify-end gap-2">
                 <button

@@ -44,6 +44,10 @@
           :class="operatorName ? '' : 'text-amber-700 dark:text-amber-300'"
         >
           {{ operatorName || boardText.noOperator }}
+          <span v-if="factoryOrder?.helpers?.length" class="block text-xs"
+            >{{ helperLabel }}:
+            {{ factoryOrder.helpers.map((h) => h.name).join(', ') }}</span
+          >
         </p>
       </div>
     </div>
@@ -214,6 +218,13 @@ export default {
     saving: { type: Boolean, default: false },
   },
   computed: {
+    helperLabel() {
+      return this.$i18n?.locale === 'ru'
+        ? 'Помощники'
+        : this.$i18n?.locale === 'en'
+        ? 'Helpers'
+        : 'Օգնականներ'
+    },
     instructionFiles() {
       return (this.factoryOrder?.files || []).filter(
         (file) =>

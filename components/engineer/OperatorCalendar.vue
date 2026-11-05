@@ -111,6 +111,9 @@
                     >
                       <strong>{{ job.name }}</strong> · {{ job.workshop }}
                       <p>{{ job.engineer }}</p>
+                      <p v-if="job.helper" class="font-semibold">
+                        {{ c.helper }}
+                      </p>
                       <p
                         :class="{
                           'text-rose-700': job.due_date && job.due_date < today,
@@ -134,6 +137,7 @@
                   <strong>{{ deadlineLabel(job) }}</strong>
                   <p>{{ job.name }} · {{ job.workshop }}</p>
                   <p>{{ job.engineer }}</p>
+                  <p v-if="job.helper" class="font-semibold">{{ c.helper }}</p>
                   <button
                     v-if="job.can_edit"
                     type="button"
@@ -187,6 +191,9 @@
                     {{ booking.task }} · {{ booking.workshop }}
                   </p>
                   <p>{{ booking.engineer }}</p>
+                  <p v-if="booking.is_helper" class="font-semibold">
+                    {{ c.helper }}
+                  </p>
                   <p v-if="booking.blocked" class="text-amber-700">
                     {{ t.pending }}
                   </p>
@@ -290,24 +297,19 @@
               </option>
             </select></label
           >
-          <label
-            >{{ t.operator
-            }}<select
-              v-model="booking.operator_id"
-              :disabled="!selectedStage"
-              required
-              class="calendar-control"
-            >
-              <option disabled value="">{{ c.chooseOperator }}</option>
-              <option
-                v-for="op in eligibleOperators"
-                :key="op.id"
-                :value="op.id"
-              >
-                {{ op.name }}
-              </option>
-            </select></label
-          >
+          <TaskTeamEditor
+            class="w-full"
+            v-if="selectedStage"
+            :key="selectedStage.id"
+            :step="selectedStage"
+            :workers="data.workers || []"
+            :disabled="busy || loading"
+            @saved="teamSaved"
+            @dirty="teamDirty = $event"
+          />
+          <p v-if="selectedStage" class="text-sm">
+            {{ c.primary }}: {{ selectedStage.operator_name || t.unassigned }}
+          </p>
           <label
             >{{ t.day
             }}<input
@@ -332,13 +334,20 @@
               class="calendar-control"
           /></label>
           <button
-            :disabled="busy || !selectedStage || !booking.operator_id"
+            :disabled="
+              busy ||
+              loading ||
+              teamDirty ||
+              !selectedStage ||
+              !booking.operator_id
+            "
             type="submit"
             class="calendar-button"
           >
             {{ t.save }}
           </button>
         </form>
+
         <div
           v-if="
             booking.operator_id && booking.day && days.includes(booking.day)
@@ -370,6 +379,7 @@
   </section>
 </template>
 <script>
+import TaskTeamEditor from '@/components/order/TaskTeamEditor.vue'
 import { planningCopy } from '@/utils/planning-copy'
 import {
   calendarCopy,
@@ -378,12 +388,14 @@ import {
 } from '@/utils/operator-calendar'
 const empty = () => ({
   factories: [],
+  workers: [],
   shifts: [],
   bookings: [],
   tasks: [],
   can_manage_shifts: false,
 })
 export default {
+  components: { TaskTeamEditor },
   data: () => ({
     data: empty(),
     date: new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Yerevan' }).format(
@@ -394,6 +406,7 @@ export default {
     operatorFilter: '',
     actionError: '',
     bookingSaved: '',
+    teamDirty: false,
     loading: false,
     busy: false,
     error: '',
@@ -434,6 +447,14 @@ export default {
         .filter((f) => !this.factoryId || String(f.id) === this.factoryId)
         .flatMap((f) => f.operators)
       const map = new Map(rows.map((op) => [Number(op.id), op]))
+      if (!this.factoryId)
+        for (const worker of this.data.workers || [])
+          map.set(Number(worker.id), worker)
+      for (const job of this.data.tasks.filter(
+        (j) => !this.factoryId || String(j.factory_id) === this.factoryId
+      ))
+        for (const helper of job.helpers || [])
+          map.set(Number(helper.id), helper)
       for (const job of this.data.tasks) {
         if (
           !job.operator_id ||
@@ -468,9 +489,16 @@ export default {
           (this.factoryId && String(job.factory_id) !== this.factoryId)
         )
           continue
-        const id = Number(job.operator_id)
-        if (!groups.has(id)) groups.set(id, [])
-        groups.get(id).push(job)
+        const people = [
+          { id: job.operator_id, helper: false },
+          ...(job.helpers || []).map((h) => ({ id: h.id, helper: true })),
+        ]
+        for (const person of people) {
+          const id = Number(person.id)
+          if (!id) continue
+          if (!groups.has(id)) groups.set(id, [])
+          groups.get(id).push({ ...job, helper: person.helper })
+        }
       }
       for (const jobs of groups.values())
         jobs.sort(
@@ -490,17 +518,6 @@ export default {
     selectedStage() {
       return this.editableTasks.find(
         (t) => Number(t.id) === Number(this.booking.factory_order_id)
-      )
-    },
-    eligibleOperators() {
-      if (!this.selectedStage) return []
-      const factory = this.data.factories.find(
-        (f) => Number(f.id) === Number(this.selectedStage.factory_id)
-      )
-      return (factory?.operators || []).filter(
-        (op) =>
-          !this.selectedStage.operator_id ||
-          Number(op.id) === Number(this.selectedStage.operator_id)
       )
     },
   },
@@ -552,6 +569,10 @@ export default {
       this.$refs.planner.open = true
       this.$refs.planner.scrollIntoView({ behavior: 'smooth', block: 'center' })
     },
+    async teamSaved() {
+      await this.refresh()
+      this.booking.operator_id = this.selectedStage?.operator_id || ''
+    },
     syncBookingDay() {
       if (this.booking.day && !this.days.includes(this.booking.day)) {
         this.date = this.booking.day
@@ -563,6 +584,7 @@ export default {
       this.booking.end = this.time(gap.ends_at)
     },
     selectTask() {
+      this.teamDirty = false
       this.bookingSaved = ''
       this.booking.operator_id = this.selectedStage?.operator_id || ''
       this.booking.day = this.date < this.today ? this.today : this.date
@@ -683,6 +705,8 @@ export default {
       )
     },
     book() {
+      if (this.teamDirty || this.loading || !this.selectedStage?.operator_id)
+        return
       const scope = this.scope
       this.bookingSaved = ''
       return this.mutate(async () => {

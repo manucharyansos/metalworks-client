@@ -1,5 +1,16 @@
 export const planningCopy = {
   hy: {
+    primary: 'Հիմնական կատարող',
+    helpers: 'Օգնականներ',
+    teamHelp:
+      'Ընտրեք աշխատանքի կատարողին և օգնականներին։ Նշանակումը վերաբերում է միայն այս աշխատանքին։ Նախ պահպանեք կազմը, ապա ամրագրեք ժամերը։',
+    saveTeam: 'Պահպանել կազմը',
+    teamSaved: 'Աշխատանքի կազմը պահպանվեց։',
+    noWorkers: 'Հասանելի արտադրական աշխատակից չկա։',
+    teamFailed: 'Չհաջողվեց պահպանել կազմը։',
+    helper: 'Օգնական',
+    workshops: 'Իմ աշխատանքների արտադրամասերը',
+
     sort: 'Դասավորել',
     byPriority: 'Առաջնահերթություն, ապա վերջնաժամկետ',
     newest: 'Նորերը սկզբում',
@@ -37,6 +48,17 @@ export const planningCopy = {
     invalid: 'Վերջի ամսաթիվը պետք է լինի սկզբի ամսաթվից հետո կամ նույն օրը։',
   },
   ru: {
+    primary: 'Основной исполнитель',
+    helpers: 'Помощники',
+    teamHelp:
+      'Назначьте исполнителя и помощников только для этой работы. Сохраните состав перед бронированием времени.',
+    saveTeam: 'Сохранить состав',
+    teamSaved: 'Состав сохранён.',
+    noWorkers: 'Нет доступных производственных сотрудников.',
+    teamFailed: 'Не удалось сохранить состав.',
+    helper: 'Помощник',
+    workshops: 'Цеха с моими заданиями',
+
     sort: 'Сортировка',
     byPriority: 'Приоритет, затем срок',
     newest: 'Сначала новые',
@@ -74,6 +96,17 @@ export const planningCopy = {
     invalid: 'Конечная дата должна быть не раньше начальной.',
   },
   en: {
+    primary: 'Primary operator',
+    helpers: 'Helpers',
+    teamHelp:
+      'Assign an operator and helpers to this task only. Save the team before reserving time.',
+    saveTeam: 'Save team',
+    teamSaved: 'Task team saved.',
+    noWorkers: 'No eligible production staff available.',
+    teamFailed: 'Unable to save task team.',
+    helper: 'Helper',
+    workshops: 'Workshops with my tasks',
+
     sort: 'Sort',
     byPriority: 'Priority, then deadline',
     newest: 'Newest first',

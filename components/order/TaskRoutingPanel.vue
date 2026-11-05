@@ -91,37 +91,13 @@
       <p v-if="locked(step)" class="mt-2 text-sm text-slate-500">
         {{ step.operator?.name || t.unassigned }} · {{ t.locked }}
       </p>
-      <div v-else class="mt-2 flex flex-col gap-2 sm:flex-row">
-        <select
-          v-model="assignmentDrafts[step.id]"
-          :aria-label="`${t.operator} · ${step.factory?.name}`"
-          :disabled="loading || saving || !workload"
-          class="min-w-0 w-full flex-1 rounded-xl border border-slate-300 bg-white p-3 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-          data-assignment-select
-        >
-          <option value="">{{ t.unassigned }}</option>
-          <option
-            v-for="operator in operatorsFor(step.factory_id)"
-            :key="operator.id"
-            :value="String(operator.id)"
-          >
-            {{ operatorLabel(operator) }}
-          </option>
-        </select>
-        <button
-          type="button"
-          :disabled="
-            saving ||
-            !workload ||
-            assignmentDrafts[step.id] === currentOperator(step)
-          "
-          class="rounded-xl bg-blue-600 px-4 py-3 text-sm font-bold text-white disabled:opacity-40"
-          data-assignment-save
-          @click="assign(step)"
-        >
-          {{ savingStepId === step.id ? t.saving : t.save }}
-        </button>
-      </div>
+      <TaskTeamEditor
+        v-else
+        :step="step"
+        :workers="workload?.workers || []"
+        :disabled="loading || saving"
+        @saved="handleSettingsUpdated"
+      />
     </div>
     <details
       v-if="availableFactories.length && !isCanceled"
@@ -258,6 +234,7 @@
 </template>
 
 <script>
+import TaskTeamEditor from '@/components/order/TaskTeamEditor.vue'
 import { workshopSteps } from '@/utils/task-board'
 import TaskEvidenceSettings from '@/components/order/TaskEvidenceSettings.vue'
 import TaskFileVersions from '@/components/order/TaskFileVersions.vue'
@@ -278,6 +255,7 @@ import {
 } from '@/utils/task-routing'
 export default {
   components: {
+    TaskTeamEditor,
     TaskEvidenceSettings,
     TaskFileVersions,
     TaskWorkshopOptions,
