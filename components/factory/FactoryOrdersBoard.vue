@@ -412,7 +412,7 @@ export default {
     }
     const factoryId = this.$auth.user?.factory_id
     const userId = this.$auth.user?.id
-    this.currentFactoryId = factoryId || null
+    this.currentFactoryId = factoryId || this.teamWorkshops[0]?.id || null
     this.currentUserId = userId || null
 
     if (this.currentFactoryId) {
