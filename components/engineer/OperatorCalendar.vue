@@ -356,7 +356,7 @@
         >
           <span>{{ t.free }}</span>
           <button
-            v-for="gap in gaps(booking.operator_id, booking.day)"
+            v-for="gap in bookingGaps"
             :key="gap.starts_at"
             class="underline"
             type="button"
@@ -364,8 +364,8 @@
           >
             {{ time(gap.starts_at) }}–{{ time(gap.ends_at) }}
           </button>
-          <span v-if="!gaps(booking.operator_id, booking.day).length">{{
-            shiftsFor(booking.operator_id, booking.day).length ? '—' : c.manual
+          <span v-if="!bookingGaps.length">{{
+            teamHasShifts ? '—' : c.manual
           }}</span>
         </div>
         <p v-if="bookingSaved" role="status" class="mt-2 text-green-700">
@@ -514,6 +514,36 @@ export default {
           t.can_edit &&
           (!this.factoryId || String(t.factory_id) === this.factoryId)
       )
+    },
+    bookingPeople() {
+      return [
+        this.selectedStage?.operator_id,
+        ...(this.selectedStage?.helpers || []).map((h) => h.id),
+      ].filter(Boolean)
+    },
+    teamHasShifts() {
+      return (
+        this.bookingPeople.length > 0 &&
+        this.bookingPeople.every(
+          (id) => this.shiftsFor(id, this.booking.day).length
+        )
+      )
+    },
+    bookingGaps() {
+      if (!this.teamHasShifts) return []
+      let available = this.gaps(this.bookingPeople[0], this.booking.day)
+      for (const id of this.bookingPeople.slice(1)) {
+        const other = this.gaps(id, this.booking.day)
+        available = available.flatMap((a) =>
+          other
+            .map((b) => ({
+              starts_at: a.starts_at > b.starts_at ? a.starts_at : b.starts_at,
+              ends_at: a.ends_at < b.ends_at ? a.ends_at : b.ends_at,
+            }))
+            .filter((g) => g.starts_at < g.ends_at)
+        )
+      }
+      return available
     },
     selectedStage() {
       return this.editableTasks.find(
@@ -711,10 +741,8 @@ export default {
       this.bookingSaved = ''
       return this.mutate(async () => {
         await this.$axios.$post('/api/operator-calendar/bookings', {
-          allow_without_shift: !this.shiftsFor(
-            this.booking.operator_id,
-            this.booking.day
-          ).length,
+          allow_without_shift: true,
+          team_version: this.selectedStage.team_version,
           assign_if_unassigned:
             !!this.selectedStage && !this.selectedStage.operator_id,
           factory_order_id: this.booking.factory_order_id,
