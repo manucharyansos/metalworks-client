@@ -288,7 +288,11 @@ export default {
           ...new Set(
             (order.factory_orders || [])
               .filter((s) => s.factory?.is_workshop !== false)
-              .map((s) => s[key]?.name)
+              .flatMap((s) =>
+                key === 'operator'
+                  ? [s.operator?.name, ...(s.helpers || []).map((h) => h.name)]
+                  : [s[key]?.name]
+              )
               .filter(Boolean)
           ),
         ].join(', ') || '—'

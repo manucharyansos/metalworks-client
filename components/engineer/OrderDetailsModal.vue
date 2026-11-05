@@ -122,8 +122,11 @@
                       >
                     </div>
                     <p class="work-meta">
-                      {{ fo.operator?.name || boardText.noOperator }} ·
-                      {{ boardText.files }}: {{ countFactoryFiles(fo) }}
+                      {{ fo.operator?.name || boardText.noOperator }}
+                      <span v-if="fo.helpers?.length">
+                        · {{ fo.helpers.map((h) => h.name).join(', ') }}</span
+                      >
+                      · {{ boardText.files }}: {{ countFactoryFiles(fo) }}
                     </p>
                   </div>
                 </div>

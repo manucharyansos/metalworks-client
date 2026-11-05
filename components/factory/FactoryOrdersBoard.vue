@@ -1,5 +1,21 @@
 <template>
   <main class="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
+    <label v-if="teamWorkshops.length > 1" class="m-4 block text-sm"
+      >{{ teamCopy.workshops }}
+      <select
+        v-model.number="currentFactoryId"
+        class="mt-1 block w-full rounded border bg-transparent p-3"
+        @change="changeWorkshop"
+      >
+        <option
+          v-for="workshop in teamWorkshops"
+          :key="workshop.id"
+          :value="workshop.id"
+        >
+          {{ workshop.name }}
+        </option>
+      </select>
+    </label>
     <!-- Orders Board -->
     <template v-if="getOrderByFactories && !isModal">
       <div class="container mx-auto px-4 py-6 sm:py-10 flex-1 flex flex-col">
@@ -181,6 +197,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import { planningCopy } from '@/utils/planning-copy'
 import {
   boardColumnForStep,
   factoryBoardColumns,
@@ -232,6 +249,7 @@ export default {
       selectedStatuses: [],
       currentPage: 1,
       perPage: 12,
+      teamWorkshops: [],
       currentFactoryId: null,
       currentUserId: null,
 
@@ -246,6 +264,9 @@ export default {
     }
   },
   computed: {
+    teamCopy() {
+      return planningCopy[this.$i18n?.locale] || planningCopy.hy
+    },
     ...mapGetters('factory', [
       'getOrderByFactories',
       'getActionError',
@@ -381,9 +402,17 @@ export default {
       })
     }
 
+    try {
+      this.teamWorkshops = await this.$axios.$get('/api/factories/factory')
+    } catch (e) {
+      this.$notify({
+        type: 'error',
+        text: e.response?.data?.message || 'Չհաջողվեց բեռնել արտադրամասերը։',
+      })
+    }
     const factoryId = this.$auth.user?.factory_id
     const userId = this.$auth.user?.id
-    this.currentFactoryId = factoryId || null
+    this.currentFactoryId = factoryId || this.teamWorkshops[0]?.id || null
     this.currentUserId = userId || null
 
     if (this.currentFactoryId) {
@@ -397,6 +426,13 @@ export default {
     clearInterval(this.refreshTimer)
   },
   methods: {
+    async changeWorkshop() {
+      this.isOpenDetails = false
+      this.isModal = false
+      this.currentPage = 1
+      this.clearDrag()
+      await this.fetchOrdersByFactory(this.currentFactoryId)
+    },
     async openNotificationTask() {
       const id = Number(this.$route?.query?.order)
       if (!Number.isSafeInteger(id) || id <= 0 || !this.currentFactoryId) return
