@@ -33,12 +33,13 @@
         <button
           type="button"
           class="text-blue-600 underline"
+          v-if="file.can_download !== false"
           data-preview-file-version
           @click="preview(file)"
         >
           {{ t.view }}
         </button>
-        <a :href="$getPmpFileUrl(file, true)" class="text-blue-600 underline">{{
+        <a v-if="file.can_download !== false" :href="$getPmpFileUrl(file, true)" class="text-blue-600 underline">{{
           t.download
         }}</a>
       </div>
@@ -70,12 +71,14 @@
             <button
               type="button"
               class="text-blue-600 underline"
-              data-preview-file-version
+              v-if="file.can_download !== false"
+          data-preview-file-version
               @click="preview(file, version)"
             >
               {{ t.view }}
             </button>
             <a
+              v-if="file.can_download !== false"
               :href="$getTaskRevisionUrl(version.id, true)"
               class="text-blue-600 underline"
               >{{ t.download }}</a
