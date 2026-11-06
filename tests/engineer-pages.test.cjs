@@ -586,5 +586,21 @@ test('a free period opened on the create page fills the deadline and an optional
     }),
     false
   )
+  // The free-days calendar is a dialog: picking a day fills the form and closes it.
+  vm.openWorkload()
+  assert.equal(vm.workloadOpen, true)
+  vm.pickSlot({
+    operator: { id: 4, name: 'Cutter' },
+    factoryIds: [2],
+    start: '2099-03-02',
+    end: '2099-03-06',
+  })
+  assert.equal(vm.workloadOpen, false)
+  assert.equal(vm.finishDate, '2099-03-06T18:00')
+  vm.openWorkload()
+  vm.pickSlot({ operator: { id: 4 }, factoryIds: [], start: 'bad', end: 'x' })
+  assert.equal(vm.workloadOpen, true, 'an invalid pick keeps the calendar open')
+  vm.closeWorkload()
+  assert.equal(vm.workloadOpen, false)
   vm.$destroy()
 })

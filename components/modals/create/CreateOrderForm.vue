@@ -28,10 +28,12 @@
     <div
       class="mt-6 w-full border-t border-slate-200 pt-5 dark:border-slate-800"
     >
-      <div class="flex w-full flex-wrap items-center justify-between gap-3">
+      <div
+        class="flex w-full flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+      >
         <!-- Cancel -->
         <button
-          class="flex items-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+          class="flex items-center justify-center rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           type="button"
           @click="$emit('cancelButton')"
         >
@@ -51,8 +53,8 @@
           {{ cancelButton }}
         </button>
 
-        <div class="flex flex-row flex-wrap gap-3">
-          <!-- Ընտրել այլ գործարանից – միշտ ակտիվ -->
+        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <!-- Optional settings: files, route, workshops and operators. -->
           <button
             type="button"
             data-edit-task-configuration
@@ -60,7 +62,7 @@
             aria-controls="task-configuration"
             :disabled="!canProceedToFiles"
             :class="[
-              'flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition',
+              'flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition',
               canProceedToFiles
                 ? 'border border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
                 : 'bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800 dark:text-slate-500',
@@ -72,12 +74,13 @@
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
+              aria-hidden="true"
             >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                stroke-width="2"
-                d="m16 4 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15l-1 6 5-2"
+                stroke-width="1.8"
+                d="M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6"
               />
             </svg>
             {{ $t('order_configuration.edit') }}
@@ -89,7 +92,7 @@
             :disabled="!canSubmit"
             :aria-describedby="submitIssue ? 'task-create-issue' : null"
             :class="[
-              'flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition',
+              'flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition',
               canSubmit
                 ? 'bg-slate-900 text-white hover:bg-slate-700 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200'
                 : 'bg-slate-100 text-slate-400 cursor-not-allowed dark:bg-slate-800 dark:text-slate-500',

@@ -5,10 +5,12 @@
   >
     <div v-if="$can('orders.create')" class="mx-auto">
       <div
-        class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
       >
-        <div>
-          <h1 class="text-2xl font-semibold tracking-tight">
+        <div class="min-w-0">
+          <h1
+            class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl"
+          >
             {{
               $t(
                 isEditingMode ? 'order_create.edit_title' : 'order_create.title'
@@ -19,30 +21,30 @@
             {{ $t('order_create.subtitle') }}
           </p>
         </div>
-        <div
-          class="flex items-center gap-2 text-xs font-medium"
+        <ol
+          class="flex flex-wrap items-center gap-2 text-xs font-semibold"
           aria-live="polite"
+          data-create-steps
         >
-          <span
-            class="rounded-lg px-3 py-2"
-            :class="
-              !isFiles
-                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-            "
-            >{{ $t('order_create.details') }}</span
+          <li
+            class="create-step"
+            :data-active="String(!isFiles)"
+            :aria-current="!isFiles ? 'step' : null"
           >
-          <span
-            class="rounded-lg px-3 py-2"
-            :class="
-              isFiles
-                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-            "
+            <span class="create-step__number">1</span
+            >{{ $t('order_create.details') }}
+          </li>
+          <li class="h-px w-5 bg-slate-300 dark:bg-slate-700" aria-hidden="true"></li>
+          <li
+            class="create-step"
+            :data-active="String(isFiles)"
+            :aria-current="isFiles ? 'step' : null"
+          >
+            <span class="create-step__number">2</span
             >{{ $t('order_configuration.short_title') }} ·
-            {{ $t('order_configuration.optional') }}</span
-          >
-        </div>
+            {{ $t('order_configuration.optional') }}
+          </li>
+        </ol>
       </div>
 
       <div
@@ -162,10 +164,10 @@
           </div>
           <div
             v-else
-            class="mt-5 rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center dark:border-slate-700"
+            class="mt-4 flex items-center gap-3 rounded-xl border border-dashed border-slate-200 px-4 py-3 dark:border-slate-700"
           >
             <svg
-              class="mx-auto mb-3 h-8 w-8 text-slate-400"
+              class="h-6 w-6 shrink-0 text-slate-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -178,7 +180,7 @@
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
               />
             </svg>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
+            <p class="text-left text-xs leading-5 text-slate-500 dark:text-slate-400">
               {{ $t('order_create.client_hint') }}
             </p>
           </div>
@@ -406,6 +408,48 @@
                       formSubmitted && !finishDate,
                   }"
                 />
+                <div
+                  class="mt-2 flex flex-wrap items-center gap-1.5"
+                  role="group"
+                  :aria-label="$t('order_create.quick_deadline')"
+                  data-quick-deadlines
+                >
+                  <button
+                    v-for="option in deadlineOptions"
+                    :key="option.key"
+                    type="button"
+                    class="deadline-chip"
+                    :aria-pressed="String(finishDate === option.value)"
+                    @click="finishDate = option.value"
+                  >
+                    {{ $t(option.key) }}
+                  </button>
+                </div>
+                <button
+                  v-if="!isEditingMode"
+                  ref="workloadTrigger"
+                  type="button"
+                  class="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 underline-offset-4 hover:underline dark:text-blue-300"
+                  aria-haspopup="dialog"
+                  data-open-create-workload
+                  @click="openWorkload"
+                >
+                  <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.8"
+                      d="M7 3v3m10-3v3M4 9h16M6 5h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2Z"
+                    />
+                  </svg>
+                  {{ $t('order_create.see_free_operators') }}
+                </button>
               </div>
             </template>
             <template #description>
@@ -426,6 +470,48 @@
               </div>
             </template>
             <template #requirements>
+              <div
+                v-if="!isEditingMode && missingFields.length"
+                class="mt-5 rounded-xl border border-slate-200 p-3 dark:border-slate-700"
+                data-create-readiness
+              >
+                <p
+                  class="text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                >
+                  {{ $t('order_create.required_title') }}
+                </p>
+                <ul class="mt-2 flex flex-wrap gap-1.5">
+                  <li
+                    v-for="item in readiness"
+                    :key="item.key"
+                    class="ready-chip"
+                    :data-done="String(item.done)"
+                  >
+                    <svg
+                      class="h-3.5 w-3.5 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        v-if="item.done"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.4"
+                        d="m5 13 4 4L19 7"
+                      />
+                      <circle v-else cx="12" cy="12" r="7" stroke-width="2" />
+                    </svg>
+                    <span
+                      >{{ item.label
+                      }}<span class="sr-only">{{
+                        item.done ? ' ✓' : ''
+                      }}</span></span
+                    >
+                  </li>
+                </ul>
+              </div>
               <section
                 v-if="pmpFilesReady"
                 ref="fileDestinations"
@@ -519,9 +605,6 @@
               </div>
             </template>
           </create-order-form>
-          <p class="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
-            {{ $t('order_configuration.entry_hint') }}
-          </p>
 
           <div
             v-if="pmpFilesReady"
@@ -551,45 +634,86 @@
               })
             }}</span>
           </div>
-          <p class="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
-            {{ $t('order_create.files_hint') }}
-          </p>
+          <div
+            class="mt-4 flex gap-3 rounded-xl bg-blue-50/70 p-3 text-xs leading-5 text-slate-600 dark:bg-blue-950/30 dark:text-slate-300"
+            data-create-hints
+          >
+            <svg
+              class="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="9" stroke-width="1.8" />
+              <path stroke-linecap="round" stroke-width="1.8" d="M12 11v5m0-8h.01" />
+            </svg>
+            <div class="space-y-1">
+              <p>{{ $t('order_configuration.entry_hint') }}</p>
+              <p>{{ $t('order_create.files_hint') }}</p>
+            </div>
+          </div>
         </section>
       </div>
 
-      <section
-        v-if="!isEditingMode"
-        class="work-card mt-5 min-w-0 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
+      <div
+        v-if="workloadOpen && !isEditingMode"
+        class="fixed inset-0 z-[1200] flex items-stretch justify-center bg-slate-950/40 backdrop-blur-sm sm:items-center sm:p-6"
         data-create-workload
+        @click.self="closeWorkload"
       >
-        <button
-          type="button"
-          class="flex w-full items-start justify-between gap-3 p-5 text-left sm:px-6"
-          :aria-expanded="String(workloadOpen)"
-          aria-controls="create-workload-panel"
-          @click="workloadOpen = !workloadOpen"
+        <section
+          ref="workloadDialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-workload-title"
+          tabindex="-1"
+          class="flex max-h-full w-full max-w-6xl flex-col overflow-hidden bg-white shadow-2xl outline-none dark:bg-slate-900 sm:max-h-[90vh] sm:rounded-3xl"
+          @keydown.esc="closeWorkload"
         >
-          <span class="min-w-0">
-            <span class="block text-base font-semibold">{{
-              $t('order_create.workload_title')
-            }}</span>
-            <span
-              class="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400"
-              >{{ $t('order_create.workload_help') }}</span
+          <header
+            class="flex items-start justify-between gap-3 border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5"
+          >
+            <div class="min-w-0">
+              <h2
+                id="create-workload-title"
+                class="text-lg font-black text-slate-950 dark:text-white"
+              >
+                {{ $t('order_create.workload_title') }}
+              </h2>
+              <p
+                class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400"
+              >
+                {{ $t('order_create.workload_help') }}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="shrink-0 rounded-xl p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
+              :aria-label="$t('order_create.workload_close')"
+              data-close-create-workload
+              @click="closeWorkload"
             >
-          </span>
-          <span class="shrink-0 text-lg" aria-hidden="true">{{
-            workloadOpen ? '−' : '+'
-          }}</span>
-        </button>
-        <div
-          v-if="workloadOpen"
-          id="create-workload-panel"
-          class="border-t border-slate-200 p-4 dark:border-slate-800 sm:p-6"
-        >
-          <OperatorCalendar picker @pick="pickSlot" />
-        </div>
-      </section>
+              <svg
+                class="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-width="1.8"
+                  d="M6 18 18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </header>
+          <div class="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+            <OperatorCalendar picker @pick="pickSlot" />
+          </div>
+        </section>
+      </div>
 
       <TaskConfigurationEditor
         v-if="isFiles"
@@ -1162,6 +1286,60 @@ export default {
       return this.$route.path.includes('/editing')
     },
 
+    // Common deadlines, at the end of the working day.
+    deadlineOptions() {
+      const now = new Date()
+      const pad = (number) => String(number).padStart(2, '0')
+      const day = (offset) => {
+        const date = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() + offset
+        )
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+          date.getDate()
+        )}T18:00`
+      }
+      return [
+        { key: 'order_create.deadline_tomorrow', value: day(1) },
+        { key: 'order_create.deadline_3days', value: day(3) },
+        { key: 'order_create.deadline_week', value: day(7) },
+      ]
+    },
+    // What the Create button still waits for, in the order of the form.
+    readiness() {
+      return [
+        {
+          key: 'client',
+          label: this.$t('order_create.client_details'),
+          done: Boolean(this.selectedClient),
+        },
+        {
+          key: 'group',
+          label: this.$t('order_create.group_code'),
+          done: Boolean(this.selectedPmp),
+        },
+        {
+          key: 'subgroup',
+          label: this.$t('order_create.subgroup'),
+          done: Boolean(this.selectedPmpRemoteNumber),
+        },
+        {
+          key: 'deadline',
+          label: this.$t('order_create.finish_date'),
+          done: Boolean(this.finishDate),
+        },
+        {
+          key: 'files',
+          label: this.$t('order_create.files_ready'),
+          done: Boolean(this.pmpFilesReady && this.subgroupFiles.length),
+        },
+      ]
+    },
+    missingFields() {
+      return this.readiness.filter((item) => !item.done)
+    },
+
     slotOperatorName() {
       if (!this.slot) return ''
       const id = Number(this.slot.operator.id)
@@ -1250,9 +1428,29 @@ export default {
     this.loadWorkload()
     this.slotFromQuery()
   },
+  beforeDestroy() {
+    // Leaving with the calendar open must not keep the page from scrolling.
+    if (this.workloadOpen) this.lockPageScroll(false)
+  },
   methods: {
     slotDay(day) {
       return formatWallDate(day)
+    },
+    // The calendar opens over the form, so the engineer keeps their place.
+    openWorkload() {
+      this.workloadOpen = true
+      this.lockPageScroll(true)
+      this.$nextTick(() => this.$refs.workloadDialog?.focus())
+    },
+    closeWorkload() {
+      if (!this.workloadOpen) return
+      this.workloadOpen = false
+      this.lockPageScroll(false)
+      this.$nextTick(() => this.$refs.workloadTrigger?.focus())
+    },
+    lockPageScroll(locked) {
+      if (typeof document !== 'undefined' && document.body)
+        document.body.style.overflow = locked ? 'hidden' : ''
     },
     // A link from the operator calendar carries the free period it was opened from.
     slotFromQuery() {
@@ -1270,8 +1468,9 @@ export default {
       })
     },
     pickSlot(slot) {
-      if (this.applySlot(slot))
-        this.$notify?.({ type: 'success', text: this.slotStatus })
+      if (!this.applySlot(slot)) return
+      this.closeWorkload()
+      this.$notify?.({ type: 'success', text: this.slotStatus })
     },
     // Fills the deadline and, where the task uses the operator's workshop, the
     // operator. Both stay editable and the operator remains optional.
@@ -1912,6 +2111,30 @@ export default {
 </script>
 
 <style scoped>
+.create-step {
+  @apply inline-flex items-center gap-2 rounded-full bg-slate-100 py-1.5 pl-1.5 pr-3 text-slate-500 dark:bg-slate-800 dark:text-slate-400;
+}
+.create-step[data-active='true'] {
+  @apply bg-slate-950 text-white dark:bg-white dark:text-slate-950;
+}
+.create-step__number {
+  @apply inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-[11px] font-black text-slate-700 dark:bg-slate-700 dark:text-slate-200;
+}
+.create-step[data-active='true'] .create-step__number {
+  @apply bg-white/20 text-white dark:bg-slate-950/10 dark:text-slate-950;
+}
+.deadline-chip {
+  @apply rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300;
+}
+.deadline-chip[aria-pressed='true'] {
+  @apply border-slate-950 bg-slate-950 text-white dark:border-white dark:bg-white dark:text-slate-950;
+}
+.ready-chip {
+  @apply inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300;
+}
+.ready-chip[data-done='true'] {
+  @apply bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300;
+}
 .order-mode-button {
   @apply rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold transition hover:border-blue-400 dark:border-slate-700;
 }

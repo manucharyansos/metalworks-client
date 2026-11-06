@@ -19,7 +19,8 @@
         v-bind="$attrs"
         :disabled="dataValue.length === 0"
       >
-        <option value="" disabled selected hidden>
+        <!-- Its value follows the empty model (null or ''), so the prompt shows. -->
+        <option :value="emptyValue" disabled hidden>
           {{ placeholder || 'Ընտրեք տարբերակը' }}
         </option>
         <option
@@ -56,7 +57,7 @@
     <!-- Empty State Message -->
     <p
       v-if="!dataValue || dataValue.length === 0"
-      class="mt-2 text-xs text-red-600 dark:text-red-400 animate-fade-in"
+      class="mt-2 text-xs text-slate-500 dark:text-slate-400 animate-fade-in"
     >
       Տվյալներ չկան։
     </p>
@@ -104,6 +105,12 @@ export default {
       selectValue: this.value,
       isOpen: false,
     }
+  },
+  computed: {
+    emptyValue() {
+      const value = this.selectValue
+      return value === null || value === undefined || value === '' ? value : ''
+    },
   },
   watch: {
     value(newVal) {

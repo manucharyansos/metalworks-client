@@ -4,11 +4,11 @@
     "reload": "Reload page"
   },
   "order_configuration": {
-    "edit": "Edit",
+    "edit": "Settings",
     "optional": "optional",
     "short_title": "Settings",
     "title": "Task settings",
-    "entry_hint": "Create directly with all files. Choose recipients in File destinations. Use Edit to change individual files, quantities and the remaining task settings.",
+    "entry_hint": "You can create the task right away with every file of the subgroup. Choose file recipients in File destinations; use Settings to change files, quantities, the route and operators.",
     "help": "Open a section. Your choices stay when switching sections and are applied when you create the task.",
     "summary": "Files: {files} · Workshops: {workshops}",
     "files": "Files and quantities",
@@ -345,7 +345,16 @@
     "slot_selected": "Selected free time: {operator} · {start} – {end}",
     "slot_applied": "Operator assigned: {workshops}. Completion date: {end}.",
     "slot_pending": "The deadline is filled in. The operator is assigned once the task uses their workshop.",
-    "slot_clear": "Clear selection"
+    "slot_clear": "Clear selection",
+    "quick_deadline": "Quick pick",
+    "deadline_tomorrow": "Tomorrow",
+    "deadline_3days": "In 3 days",
+    "deadline_week": "In a week",
+    "see_free_operators": "See operators’ free days",
+    "required_title": "Still needed",
+    "files_ready": "Subgroup files",
+    "step": "Step {number}",
+    "workload_close": "Close"
   },
   "model_preview": {
     "part_count": "Parts: {count}",
