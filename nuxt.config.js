@@ -50,7 +50,7 @@ export default {
 
   css: ['~/assets/css/main.css', 'leaflet/dist/leaflet.css'],
   router: {
-    base: process.env.NUXT_ROUTER_BASE || '/',
+    base: process.env.NUXT_ROUTER_BASE || (isProduction ? '/work/' : '/'),
     middleware: ['roleRedirect', 'permission-guard'],
   },
 
