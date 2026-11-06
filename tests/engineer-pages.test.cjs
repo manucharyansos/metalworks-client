@@ -490,7 +490,7 @@ test('a free day in the embedded calendar is reported to the form instead of a d
   )
   vm.openSlot(row, '2026-11-12')
   assert.deepEqual(
-    vm.slot && { ...vm.slot, operator: { ...vm.slot.operator } },
+    vm.slot && { ...vm.slot, operator: { ...vm.slot.operator }, factoryIds: [...vm.slot.factoryIds] },
     {
       operator: { id: 4, name: 'Cutter' },
       factoryIds: [2],
@@ -502,7 +502,7 @@ test('a free day in the embedded calendar is reported to the form instead of a d
     }
   )
   assert.deepEqual(
-    vm.slotCandidates.map((task) => task.id),
+    Array.from(vm.slotCandidates, (task) => task.id),
     [8]
   )
   vm.closeSlot()
