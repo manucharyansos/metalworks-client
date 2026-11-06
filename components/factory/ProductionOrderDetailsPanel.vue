@@ -330,7 +330,7 @@
                     </div>
                     <FileProductionAttributes :file="file" />
                   </div>
-                  <div class="flex shrink-0 gap-2">
+                  <div v-if="!file.operator_download_restricted" class="flex shrink-0 gap-2">
                     <button
                       type="button"
                       class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
