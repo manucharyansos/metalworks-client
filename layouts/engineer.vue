@@ -34,6 +34,7 @@
               <svg v-if="item.icon === 'orders'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2Zm2 4h6M9 12h6M9 16h4" /></svg>
               <svg v-else-if="item.icon === 'files'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 3h7l5 5v13H7a2 2 0 01-2-2V5a2 2 0 012-2Zm7 0v6h5M9 13h6M9 17h5" /></svg>
               <svg v-else-if="item.icon === 'plus'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 5v14M5 12h14" /></svg>
+              <svg v-else-if="item.icon === 'calendar'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 3v3m10-3v3M4 9h16M6 5h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2Zm2 8h2m4 0h2m-8 4h2" /></svg>
               <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 21a8 8 0 10-16 0m8-10a4 4 0 100-8 4 4 0 000 8Z" /></svg>
             </span>
             <span class="min-w-0 flex-1 whitespace-normal break-words leading-5">{{ $t(item.labelKey) }}</span>
@@ -94,7 +95,7 @@ export default {
       isSidebarOpen: false,
       navItems: [
         { to: '/engineer', labelKey: 'workspace_layout.orders', permission: 'orders.view', icon: 'orders', exact: true },
-        { to: '/engineer/workload', labelKey: 'workspace_layout.operator_workload', permission: 'orders.view', icon: 'orders', exact: true },
+        { to: '/engineer/workload', labelKey: 'workspace_layout.operator_workload', permission: 'orders.view', icon: 'calendar', exact: true },
         { to: '/engineer/files', labelKey: 'workspace_layout.projects_files', permission: 'pmp.view', icon: 'files', exact: false },
         { to: '/engineer/orders/create', labelKey: 'workspace_layout.create_order', permission: 'orders.create', icon: 'plus', exact: true },
         { to: '/profile', labelKey: 'workspace_layout.profile', permission: null, icon: 'profile', exact: true },

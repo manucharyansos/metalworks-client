@@ -18,6 +18,111 @@ export function freeIntervals(shifts, bookings) {
   }
   return result
 }
+const DAY = /^\d{4}-\d{2}-\d{2}$/
+
+// Overdue work has no known end: it keeps the operator busy until it is done.
+export const OPEN_END = '9999-12-31'
+
+// An open job keeps its operator busy from the day it can start until its
+// deadline (or, once overdue, until it is finished).
+export function jobWindow(job, today) {
+  const due = job?.due_date
+  if (!DAY.test(due || '')) return null
+  const start =
+    DAY.test(job.starts_on || '') && job.starts_on < due ? job.starts_on : due
+  const overdue = Boolean(today && due < today)
+  return { start, end: overdue ? OPEN_END : due, due, overdue }
+}
+
+// Rows for the visible days so jobs that overlap never share a row.
+export function jobLanes(jobs, days) {
+  if (!days.length) return []
+  const first = days[0]
+  const last = days[days.length - 1]
+  const lanes = []
+  return jobs
+    .filter(
+      (job) => job.window && job.window.end >= first && job.window.start <= last
+    )
+    .sort(
+      (a, b) =>
+        a.window.start.localeCompare(b.window.start) ||
+        a.window.end.localeCompare(b.window.end) ||
+        a.id - b.id
+    )
+    .map((job) => {
+      const from = days.indexOf(
+        job.window.start < first ? first : job.window.start
+      )
+      const to = days.indexOf(job.window.end > last ? last : job.window.end)
+      let lane = lanes.findIndex((end) => end < from)
+      if (lane === -1) {
+        lane = lanes.length
+        lanes.push(to)
+      } else lanes[lane] = to
+      return {
+        job,
+        from,
+        to,
+        lane,
+        continuesBefore: job.window.start < first,
+        continuesAfter: job.window.end > last,
+      }
+    })
+}
+
+function addDays(day, count) {
+  const date = new Date(`${day}T12:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + count)
+  return date.toISOString().slice(0, 10)
+}
+
+// The free days around `day` for one operator: never before today and at most
+// `limit` days on either side, so an idle operator gets a usable range.
+export function freeSegment(jobs, day, today, limit = 13) {
+  const busy = (date) =>
+    jobs.some(
+      (job) => job.window && job.window.start <= date && date <= job.window.end
+    )
+  if (!DAY.test(day || '') || day < today || busy(day)) return null
+  let start = day
+  let end = day
+  for (let i = 0; i < limit; i++) {
+    const before = addDays(start, -1)
+    if (before < today || busy(before)) break
+    start = before
+  }
+  for (let i = 0; i < limit; i++) {
+    const after = addDays(end, 1)
+    if (busy(after)) break
+    end = after
+  }
+  return { start, end }
+}
+
+// How busy one operator is on a day, by the number of open jobs it holds.
+export function loadLevel(count) {
+  if (count <= 0) return 'free'
+  if (count === 1) return 'light'
+  return count === 2 ? 'busy' : 'heavy'
+}
+
+export function jobCount(count, locale = 'hy') {
+  if (locale === 'ru') {
+    const ones = count % 10
+    const tens = count % 100
+    const word =
+      ones === 1 && tens !== 11
+        ? 'работа'
+        : ones >= 2 && ones <= 4 && (tens < 12 || tens > 14)
+        ? 'работы'
+        : 'работ'
+    return `${count} ${word}`
+  }
+  if (locale === 'en') return `${count} ${count === 1 ? 'job' : 'jobs'}`
+  return `${count} աշխատանք`
+}
+
 export function weekDates(date) {
   const d = new Date(date + 'T12:00:00Z')
   if (Number.isNaN(d.getTime())) return []
@@ -33,8 +138,8 @@ export const calendarCopy = {
     openJobs: 'Կցված աշխատանքներ',
     late: 'Ուշացած',
     undated: 'Առանց ժամկետի',
-    stageDue: 'Հանձնել՝ քայլ',
-    orderDue: 'Հանձնել՝ պատվեր',
+    stageDue: 'Արտադրամասի ժամկետ',
+    orderDue: 'Ընդհանուր ժամկետ',
     minutes: 'րոպե',
     noUnassigned: 'Բոլոր աշխատանքներն ունեն կատարող։',
     duration: 'Նախատեսվող տևողություն (րոպե)',
@@ -49,7 +154,7 @@ export const calendarCopy = {
     searchFrom: 'Որոնել այս ամսաթվից',
 
     title: 'Օպերատորների օրացույց',
-    help: 'Ժամերը՝ Երևանի ժամով։ Ազատ միջակայքերը հաշվարկվում են աշխատանքային գրաֆիկից և ամրագրումներից։ Չպլանավորված աշխատանքների առկայության դեպքում դրանք ամբողջ ծանրաբեռնվածությունը չեն արտացոլում։',
+    help: 'Ծանրաբեռնվածությունը հաշվարկվում է առաջադրանքներից․ յուրաքանչյուր աշխատանք օպերատորին զբաղեցնում է սկսելու օրից մինչև արտադրամասին տրված ժամկետը, իսկ եթե այն չկա՝ մինչև առաջադրանքի ընդհանուր ժամկետը։ Կանաչ օրերն ազատ են։',
     refresh: 'Թարմացնել',
     all: 'Բոլոր արտադրամասերը',
     shift: 'Աշխատանքային գրաֆիկ',
@@ -80,13 +185,40 @@ export const calendarCopy = {
     other: 'Այլ ինժիների առաջադրանք',
     noOptions: 'Նախ ընտրեք օպերատորի և նրան նշանակված առաջադրանքը։',
     date: 'Շաբաթ',
+    loading: 'Բեռնվում է…',
+    freeDay: 'Ազատ',
+    freeShort: 'ազատ',
+    available: 'Ազատ է',
+    busyUntil: 'Զբաղված է մինչև',
+    lateWork: 'Ունի ուշացած աշխատանք',
+    slotTitle: 'Ազատ ժամանակ',
+    placeExisting: 'Տեղադրել առկա աշխատանք',
+    placeHelp:
+      'Ընտրված աշխատանքը կնշանակվի օպերատորին, իսկ արտադրամասի ժամկետը կդառնա ընտրված օրը։',
+    noCandidates: 'Այս օպերատորի արտադրամասերում չնշանակված աշխատանք չկա։',
+    chooseWork: 'Ընտրեք աշխատանքը',
+    place: 'Տեղադրել',
+    placed: 'Աշխատանքը տեղադրվեց',
+    createNew: 'Ստեղծել նոր առաջադրանք',
+    createHelp:
+      'Ստեղծման էջում կլրացվեն օպերատորը և ժամկետը։ Կատարող նշանակելը պարտադիր չէ։',
+    close: 'Փակել',
+    pickHint: 'Սեղմեք օպերատորի ազատ օրվա վրա՝ աշխատանք տեղադրելու համար։',
+    freeDays: 'Ազատ օրեր',
+    estimate: 'Գնահատված ժամանակ',
+    hours: 'ժ',
+    waiting: 'Սպասում է նախորդ արտադրամասին',
+    reserved: 'Պլանավորված ժամ',
+    legend: 'Ծանրաբեռնվածություն',
+    busyOperators: 'զբաղված',
+    noOperators: 'Ընտրված ֆիլտրերով օպերատոր չկա։',
   },
   ru: {
     openJobs: 'Назначенные работы',
     late: 'Просрочено',
     undated: 'Без срока',
-    stageDue: 'Сдать этап',
-    orderDue: 'Сдать заказ',
+    stageDue: 'Срок цеха',
+    orderDue: 'Общий срок',
     minutes: 'мин',
     noUnassigned: 'Все работы назначены.',
     duration: 'Длительность (минуты)',
@@ -101,7 +233,7 @@ export const calendarCopy = {
     searchFrom: 'Искать с даты',
 
     title: 'Календарь операторов',
-    help: 'Время Еревана. Свободные интервалы рассчитаны по рабочему графику и броням. При наличии незапланированных работ они не отражают полную загрузку.',
+    help: 'Загрузка рассчитывается по заданиям: каждая работа занимает оператора со дня начала до срока цеха, а если его нет — до общего срока задания. Зелёные дни свободны.',
     refresh: 'Обновить',
     all: 'Все цеха',
     shift: 'Рабочий график',
@@ -132,13 +264,40 @@ export const calendarCopy = {
     other: 'Задание другого инженера',
     noOptions: 'Выберите оператора и назначенное ему задание.',
     date: 'Неделя',
+    loading: 'Загрузка…',
+    freeDay: 'Свободен',
+    freeShort: 'свободны',
+    available: 'Свободен',
+    busyUntil: 'Занят до',
+    lateWork: 'Есть просроченная работа',
+    slotTitle: 'Свободное время',
+    placeExisting: 'Поставить существующую работу',
+    placeHelp:
+      'Выбранная работа будет назначена оператору, а срок цеха станет выбранным днём.',
+    noCandidates: 'В цехах этого оператора нет неназначенных работ.',
+    chooseWork: 'Выберите работу',
+    place: 'Поставить',
+    placed: 'Работа поставлена',
+    createNew: 'Создать новое задание',
+    createHelp:
+      'На странице создания будут заполнены оператор и сроки. Назначать исполнителя не обязательно.',
+    close: 'Закрыть',
+    pickHint: 'Нажмите на свободный день оператора, чтобы поставить работу.',
+    freeDays: 'Свободные дни',
+    estimate: 'Оценка времени',
+    hours: 'ч',
+    waiting: 'Ждёт предыдущий цех',
+    reserved: 'Запланированное время',
+    legend: 'Загрузка',
+    busyOperators: 'заняты',
+    noOperators: 'Нет операторов по выбранным фильтрам.',
   },
   en: {
     openJobs: 'Assigned work',
     late: 'Overdue',
     undated: 'No deadline',
-    stageDue: 'Stage due',
-    orderDue: 'Order due',
+    stageDue: 'Workshop deadline',
+    orderDue: 'Task deadline',
     minutes: 'min',
     noUnassigned: 'All jobs have an operator.',
     duration: 'Estimated duration (minutes)',
@@ -152,7 +311,7 @@ export const calendarCopy = {
     searchFrom: 'Search from',
 
     title: 'Operator calendar',
-    help: 'Yerevan time. Free intervals use working hours and reservations. Unscheduled work means these gaps do not represent total available capacity.',
+    help: 'Workload comes from your tasks: each job keeps its operator busy from the day it can start until its workshop deadline, or the task deadline when the workshop has none. Green days are free.',
     refresh: 'Refresh',
     all: 'All workshops',
     shift: 'Working hours',
@@ -183,6 +342,33 @@ export const calendarCopy = {
     other: 'Another engineer’s task',
     noOptions: 'Select an operator and a task assigned to them.',
     date: 'Week',
+    loading: 'Loading…',
+    freeDay: 'Free',
+    freeShort: 'free',
+    available: 'Available',
+    busyUntil: 'Busy until',
+    lateWork: 'Has overdue work',
+    slotTitle: 'Free time',
+    placeExisting: 'Place existing work',
+    placeHelp:
+      'The selected work is assigned to this operator and its workshop deadline becomes the chosen day.',
+    noCandidates: 'No unassigned work in this operator’s workshops.',
+    chooseWork: 'Select work',
+    place: 'Place',
+    placed: 'Work placed',
+    createNew: 'Create a new task',
+    createHelp:
+      'The create page opens with this operator and the dates filled in. Assigning an operator stays optional.',
+    close: 'Close',
+    pickHint: 'Click an operator’s free day to place work there.',
+    freeDays: 'Free days',
+    estimate: 'Estimated time',
+    hours: 'h',
+    waiting: 'Waiting for the previous workshop',
+    reserved: 'Reserved time',
+    legend: 'Workload',
+    busyOperators: 'busy',
+    noOperators: 'No operators match the selected filters.',
   },
 }
 

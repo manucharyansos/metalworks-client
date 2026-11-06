@@ -167,6 +167,7 @@
 import { operatorWorkloadLabel } from '@/utils/task-routing'
 import { apiErrorMessage, taskCopy } from '@/utils/task-workflow'
 import { boardCopy, stepStatusText } from '@/utils/task-board'
+import { formatWallDate } from '@/utils/wall-time'
 
 const KNOWN_REASONS = ['unclear', 'wrong_data', 'no_material', 'other']
 
@@ -240,11 +241,7 @@ export default {
   },
   methods: {
     day(value) {
-      if (!value) return '—'
-      const date = new Date(`${String(value).slice(0, 10)}T00:00:00`)
-      return Number.isNaN(date.getTime())
-        ? String(value)
-        : date.toLocaleDateString()
+      return value ? formatWallDate(String(value).slice(0, 10)) : '—'
     },
     operatorLabel(operator) {
       return operatorWorkloadLabel(operator, this.$i18n?.locale || 'hy')

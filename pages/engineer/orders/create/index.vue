@@ -46,6 +46,31 @@
       </div>
 
       <div
+        v-if="slot"
+        role="status"
+        class="mb-5 flex flex-wrap items-start justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
+        data-free-slot-banner
+      >
+        <p class="min-w-0">
+          <strong class="block">{{
+            $t('order_create.slot_selected', {
+              operator: slotOperatorName,
+              start: slotDay(slot.start),
+              end: slotDay(slot.end),
+            })
+          }}</strong>
+          <span class="mt-1 block text-xs">{{ slotStatus }}</span>
+        </p>
+        <button
+          type="button"
+          class="shrink-0 font-semibold underline"
+          @click="clearSlot"
+        >
+          {{ $t('order_create.slot_clear') }}
+        </button>
+      </div>
+
+      <div
         v-if="orderFileIssue"
         role="status"
         class="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
@@ -532,6 +557,40 @@
         </section>
       </div>
 
+      <section
+        v-if="!isEditingMode"
+        class="work-card mt-5 min-w-0 rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
+        data-create-workload
+      >
+        <button
+          type="button"
+          class="flex w-full items-start justify-between gap-3 p-5 text-left sm:px-6"
+          :aria-expanded="String(workloadOpen)"
+          aria-controls="create-workload-panel"
+          @click="workloadOpen = !workloadOpen"
+        >
+          <span class="min-w-0">
+            <span class="block text-base font-semibold">{{
+              $t('order_create.workload_title')
+            }}</span>
+            <span
+              class="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400"
+              >{{ $t('order_create.workload_help') }}</span
+            >
+          </span>
+          <span class="shrink-0 text-lg" aria-hidden="true">{{
+            workloadOpen ? '−' : '+'
+          }}</span>
+        </button>
+        <div
+          v-if="workloadOpen"
+          id="create-workload-panel"
+          class="border-t border-slate-200 p-4 dark:border-slate-800 sm:p-6"
+        >
+          <OperatorCalendar picker @pick="pickSlot" />
+        </div>
+      </section>
+
       <TaskConfigurationEditor
         v-if="isFiles"
         ref="configurationEditor"
@@ -729,6 +788,8 @@ import {
 } from '@/utils/combobox'
 import StageTimePicker from '@/components/engineer/StageTimePicker.vue'
 import TaskOperatorPicker from '@/components/engineer/TaskOperatorPicker.vue'
+import OperatorCalendar from '@/components/engineer/OperatorCalendar.vue'
+import { formatWallDate } from '@/utils/wall-time'
 import {
   confirmationMethods,
   taskCopy,
@@ -751,6 +812,7 @@ export default {
     ProductionRouteEditor,
     TaskOperatorPicker,
     StageTimePicker,
+    OperatorCalendar,
     PermissionDenied,
     InputWithLabels,
     SelectWithLabel,
@@ -792,6 +854,9 @@ export default {
 
       factoryOperators: {},
       stageSchedule: {},
+      // A free period chosen on the operator calendar: { operator, factoryIds, start, end }.
+      slot: null,
+      workloadOpen: false,
       workload: null,
       workloadError: '',
       workloadLoading: false,
@@ -1097,6 +1162,34 @@ export default {
       return this.$route.path.includes('/editing')
     },
 
+    slotOperatorName() {
+      if (!this.slot) return ''
+      const id = Number(this.slot.operator.id)
+      const known = (this.workload?.factories || [])
+        .flatMap((factory) => factory.operators || [])
+        .find((operator) => Number(operator.id) === id)
+      return known?.name || this.slot.operator.name || `#${id}`
+    },
+    // Task workshops the chosen operator now performs.
+    slotWorkshops() {
+      if (!this.slot) return []
+      return this.taskWorkshops.filter(
+        (factory) =>
+          this.slot.factoryIds.includes(Number(factory.id)) &&
+          Number(this.factoryOperators[factory.id]) ===
+            Number(this.slot.operator.id)
+      )
+    },
+    slotStatus() {
+      if (!this.slot) return ''
+      return this.slotWorkshops.length
+        ? this.$t('order_create.slot_applied', {
+            workshops: this.slotWorkshops.map((f) => f.name).join(', '),
+            end: this.slotDay(this.slot.end),
+          })
+        : this.$t('order_create.slot_pending')
+    },
+
     // Option Enter takes in the group/subgroup lists (-1: none).
     groupHighlight() {
       return activeOptionIndex(
@@ -1133,6 +1226,7 @@ export default {
           this.$set(this.factoryOperators, factory.id, null)
         }
       })
+      this.applySlotOperator()
     },
     // Choices follow the subgroup, not the momentary file selection: opening the
     // file picker or deselecting a file must not erase
@@ -1154,8 +1248,83 @@ export default {
     this.fetchFileCategories().catch(() => {})
     this.fetchPmps()
     this.loadWorkload()
+    this.slotFromQuery()
   },
   methods: {
+    slotDay(day) {
+      return formatWallDate(day)
+    },
+    // A link from the operator calendar carries the free period it was opened from.
+    slotFromQuery() {
+      if (this.isEditingMode) return
+      const { operator_id: operator, factory_id: factory, start, end } =
+        this.$route.query || {}
+      const id = Number(operator)
+      if (!Number.isSafeInteger(id) || id <= 0) return
+      const workshop = Number(factory)
+      this.applySlot({
+        operator: { id, name: '' },
+        factoryIds: Number.isSafeInteger(workshop) && workshop > 0 ? [workshop] : [],
+        start,
+        end,
+      })
+    },
+    pickSlot(slot) {
+      if (this.applySlot(slot))
+        this.$notify?.({ type: 'success', text: this.slotStatus })
+    },
+    // Fills the deadline and, where the task uses the operator's workshop, the
+    // operator. Both stay editable and the operator remains optional.
+    applySlot(slot) {
+      const day = /^\d{4}-\d{2}-\d{2}$/
+      if (!slot || !day.test(slot.start || '') || !day.test(slot.end || ''))
+        return false
+      if (slot.start > slot.end) return false
+      // A new choice replaces the operator the previous one filled in.
+      this.clearSlot()
+      this.slot = {
+        operator: slot.operator,
+        factoryIds: (slot.factoryIds || []).map(Number),
+        start: slot.start,
+        end: slot.end,
+      }
+      this.finishDate = `${slot.end}T18:00`
+      this.applySlotOperator()
+      this.$workspace?.setDirty(true)
+      return true
+    },
+    applySlotOperator() {
+      if (!this.slot) return
+      for (const factory of this.taskWorkshops)
+        if (
+          this.slot.factoryIds.includes(Number(factory.id)) &&
+          this.factoryOperators[factory.id] == null
+        )
+          this.$set(
+            this.factoryOperators,
+            factory.id,
+            Number(this.slot.operator.id)
+          )
+    },
+    slotPlannedStarts() {
+      if (!this.slot) return []
+      const finish = String(this.finishDate || '').slice(0, 10)
+      const today = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Yerevan',
+      }).format(new Date())
+      const start = this.slot.start < today ? today : this.slot.start
+      if (!finish || start > finish) return []
+      return this.slotWorkshops.map((factory) => ({
+        factory_id: Number(factory.id),
+        starts_on: start,
+      }))
+    },
+    clearSlot() {
+      if (!this.slot) return
+      for (const factory of this.slotWorkshops)
+        this.$set(this.factoryOperators, factory.id, null)
+      this.slot = null
+    },
     updateStageSchedule(row) {
       this.$set(this.stageSchedule, row.factory_id, row)
       this.$workspace?.setDirty(true)
@@ -1595,6 +1764,9 @@ export default {
         factory_operators: factoryOperatorsArray,
         stage_schedule: Object.values(this.activeSchedule),
       }
+      // Work placed into an operator's free time starts on the period's first day.
+      const plannedStarts = this.slotPlannedStarts()
+      if (plannedStarts.length) data.planned_starts = plannedStarts
 
       try {
         await this.createNewOrder(data)

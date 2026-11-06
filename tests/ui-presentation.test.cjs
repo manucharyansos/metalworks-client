@@ -9,7 +9,8 @@ function load(file) {
   if (file.endsWith('.vue')) source = compiler.parseComponent(source).script.content
   const code = transformSync(source, { configFile: false, babelrc: false, plugins: [require('@babel/plugin-transform-modules-commonjs')] }).code
   const module = { exports: {} }
-  new Function('module', 'exports', code)(module, module.exports)
+  const dependency = (request) => (request.startsWith('@/') ? load(request.slice(2) + '.js') : require(request))
+  new Function('require', 'module', 'exports', code)(dependency, module, module.exports)
   return module.exports
 }
 const { taskDeadline } = load('utils/task-deadline.js')

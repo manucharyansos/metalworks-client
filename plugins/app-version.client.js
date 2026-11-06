@@ -8,9 +8,10 @@ import {
 } from '~/utils/app-version'
 
 // Brings tabs that stay open across a deploy onto the new build.
-export default ({ app, $config }) => {
+export default ({ app, $config, isDev }) => {
   const current = $config?.buildId
-  if (!current) return
+  // The dev server has no version.json; checking there only logs 404s.
+  if (!current || isDev) return
   const url = versionUrl(app.router?.options?.base)
   const storage = window.sessionStorage
   let latest = current

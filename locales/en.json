@@ -339,7 +339,13 @@
     "thickness": "Thickness",
     "no_files": "No files found",
     "confirm_files": "Confirm selection",
-    "choose_other_factory": "Another factory"
+    "choose_other_factory": "Another factory",
+    "workload_title": "Operator workload",
+    "workload_help": "Click an operator’s free day to fill in the operator and the deadline. Assigning an operator is optional.",
+    "slot_selected": "Selected free time: {operator} · {start} – {end}",
+    "slot_applied": "Operator assigned: {workshops}. Completion date: {end}.",
+    "slot_pending": "The deadline is filled in. The operator is assigned once the task uses their workshop.",
+    "slot_clear": "Clear selection"
   },
   "model_preview": {
     "part_count": "Parts: {count}",
@@ -433,7 +439,6 @@
     "save_instructions": "Save instructions",
     "instruction_history": "Changes apply to new tasks. Existing tasks keep their original instructions.",
     "instruction_failed": "Could not save. Please try again.",
-
     "title": "File production route",
     "functions": "Functions",
     "functions_count": "{count} functions",

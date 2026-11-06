@@ -1,3 +1,5 @@
+import { parseWallTime } from '@/utils/wall-time'
+
 const COPY = {
   hy: {
     remaining: 'Մնացել է՝',
@@ -37,7 +39,7 @@ export function taskDeadline(
   const copy = COPY[locale] || COPY.hy
   if (rejected) return { label: copy.rejected, tone: 'neutral' }
   if (completed) return { label: copy.completed, tone: 'green' }
-  const end = value ? new Date(value).getTime() : NaN
+  const end = parseWallTime(value)
   if (!Number.isFinite(end)) return { label: copy.none, tone: 'neutral' }
   const difference = end - now
   const hours = Math.floor(Math.abs(difference) / 3600000)

@@ -117,8 +117,8 @@
 </template>
 
 <script>
-import { companyHome } from '~/utils/company-workspace'
 import { mapActions, mapGetters } from 'vuex'
+import { companyHome } from '~/utils/company-workspace'
 import inputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import WorkspaceBranding from '~/components/auth/WorkspaceBranding.vue'
 

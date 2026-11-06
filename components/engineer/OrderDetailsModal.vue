@@ -200,6 +200,7 @@ import {
   workshopSteps,
   taskActionTarget,
 } from '@/utils/task-board'
+import { formatWallDate, formatWallDateTime } from '@/utils/wall-time'
 import FileGallery from '~/components/engineer/FileGallery.vue'
 
 export default {
@@ -373,15 +374,12 @@ export default {
     stepLabel(step) {
       return stepStatusText(step, this.$i18n?.locale)
     },
+    // Numeric dates read the same in every browser and interface language.
     safeDate(d) {
-      if (!d) return '—'
-      const dt = new Date(d)
-      return isNaN(dt) ? d : dt.toLocaleDateString()
+      return formatWallDate(d)
     },
     safeDateTime(d) {
-      if (!d) return '—'
-      const dt = new Date(d)
-      return isNaN(dt) ? d : dt.toLocaleString()
+      return formatWallDateTime(d)
     },
     countFactoryFiles(fo) {
       return (fo?.files || []).reduce((b, f) => {

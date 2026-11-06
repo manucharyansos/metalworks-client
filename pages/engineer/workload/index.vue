@@ -3,7 +3,7 @@
     class="mx-auto min-w-0 space-y-4 px-4 py-6 sm:px-6"
     data-engineer-workload
   >
-    <OperatorCalendar />
+    <OperatorCalendar create-path="/engineer/orders/create" />
     <notifications />
   </main>
 </template>

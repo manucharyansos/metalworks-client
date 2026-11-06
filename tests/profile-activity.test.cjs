@@ -2,7 +2,7 @@ const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const vm = require('node:vm')
-const source = fs.readFileSync('pages/profile.vue', 'utf8').split('<script>')[1].split('</script>')[0].replace(/^import .*\n/gm, '').replace('export default', 'module.exports =')
+const source = fs.readFileSync('pages/profile.vue', 'utf8').split('<script>')[1].split('</script>')[0].replace(/^import .*\r?\n/gm, '').replace('export default', 'module.exports =')
 const sandbox = { ProfileOrderFiles: {}, WorkspaceTransition: {}, CompanySelector: {}, WorkspaceIdentity: {}, module: { exports: {} }, taskStatusText: s => s, workspaceCopy: () => ({}), Intl, Date }
 vm.runInNewContext(source, sandbox)
 const component = sandbox.module.exports
