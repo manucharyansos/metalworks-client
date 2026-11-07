@@ -1,125 +1,57 @@
 <template>
-  <main class="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
-    <label v-if="teamWorkshops.length > 1" class="m-4 block text-sm"
-      >{{ teamCopy.workshops }}
-      <select
-        v-model.number="currentFactoryId"
-        class="mt-1 block w-full rounded border bg-transparent p-3"
-        @change="changeWorkshop"
-      >
-        <option
-          v-for="workshop in teamWorkshops"
-          :key="workshop.id"
-          :value="workshop.id"
-        >
-          {{ workshop.name }}
-        </option>
-      </select>
-    </label>
-    <!-- Orders Board -->
-    <template v-if="getOrderByFactories && !isModal">
-      <div class="container mx-auto px-4 py-6 sm:py-10 flex-1 flex flex-col">
-        <!-- Toolbar -->
-        <OrdersToolbar
-          :search="searchable"
-          :status-options="boardStatusOptions"
-          :selected-statuses="selectedStatuses"
-          @update:search="(v) => (searchable = v)"
-          @update:selected-statuses="(v) => (selectedStatuses = v)"
-        />
-
-        <p
-          class="mt-3 text-xs text-slate-500 dark:text-slate-400"
-          data-board-retention
-        >
-          {{ boardText.recentHelp }}
-        </p>
-
-        <!-- Kanban board -->
-        <div v-if="boardColumns.length" class="mt-4 flex-1">
-          <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4 h-full">
-            <div
-              v-for="column in boardColumns"
-              :key="column.id"
-              :data-board-column="column.value"
-              class="work-board-column flex h-[calc(100vh-260px)] flex-col rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60"
-              @dragover.prevent
-              @drop.prevent="onDrop(column)"
+  <main
+    class="min-h-screen min-w-0 px-4 py-6 sm:px-6 lg:px-8"
+    data-workshop-board
+  >
+    <FactoryTaskBoard
+      v-if="!isModal"
+      :subtitle="boardText.recentHelp"
+      :chips="stageChips"
+      :total="searchMatches.length"
+      :selected.sync="selectedStatuses"
+      :search.sync="searchable"
+      :columns="boardColumns"
+      :loaded="loaded"
+      :load-failed="loadFailed"
+      :has-tasks="allOrders.length > 0"
+      :has-results="filteredBySearch.length > 0"
+      :factory-id="currentFactoryId"
+      :current-user-id="currentUserId"
+      :status-options="boardStatusOptions"
+      :saving="isSaving"
+      :pagination="paginationMeta"
+      :per-page="perPage"
+      @retry="retryLoad"
+      @drag-start="onDragStart"
+      @drag-end="clearDrag"
+      @drop="onDrop"
+      @view-details="toggleDetails"
+      @edit="updateOrder"
+      @page="handlePageChange"
+    >
+      <template v-if="teamWorkshops.length > 1" #actions>
+        <label class="block min-w-[14rem]">
+          <span
+            class="mb-1.5 block text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+            >{{ teamCopy.workshops }}</span
+          >
+          <select
+            v-model.number="currentFactoryId"
+            class="app-control !py-2.5"
+            data-team-workshop
+            @change="changeWorkshop"
+          >
+            <option
+              v-for="workshop in teamWorkshops"
+              :key="workshop.id"
+              :value="workshop.id"
             >
-              <!-- Column header -->
-              <div class="mb-2 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-2">
-                  <span
-                    class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold text-white"
-                    :style="{ backgroundColor: column.color || '#6B7280' }"
-                  >
-                    {{ column.icon }}
-                  </span>
-                  <h3
-                    class="text-sm font-semibold text-gray-800 dark:text-gray-100"
-                  >
-                    {{ column.label }}
-                  </h3>
-                </div>
-                <span
-                  class="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200"
-                >
-                  {{ column.orders.length }}
-                </span>
-              </div>
-
-              <!-- Scrollable cards area -->
-              <div class="mt-1 flex-1 overflow-y-auto pr-1 space-y-3">
-                <transition-group
-                  name="fade-list"
-                  tag="div"
-                  class="flex flex-col gap-3"
-                >
-                  <OrderCard
-                    v-for="order in column.orders"
-                    :key="order.id"
-                    :order="order"
-                    :factory-id="currentFactoryId"
-                    :current-user-id="currentUserId"
-                    :status-options="boardStatusOptions"
-                    :saving="isSaving"
-                    @drag-start="onDragStart(order, column)"
-                    @drag-end="clearDrag"
-                    @view-details="toggleDetails"
-                    @edit="updateOrder"
-                  />
-                </transition-group>
-
-                <!-- empty state -->
-                <div
-                  v-if="!column.orders.length"
-                  class="mt-2 flex items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white/60 p-3 text-center text-xs text-gray-400 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-500"
-                >
-                  Քաշեք առաջադրանքներ այստեղ
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Եթե լրիվ առաջադրանքներ չկան -->
-        <div
-          v-else
-          class="mt-10 flex items-center justify-center rounded-2xl bg-white p-8 text-center text-sm text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-300"
-        >
-          Առաջադրանքներ չկան։
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-8 flex justify-center">
-          <Pagination
-            v-if="paginationMeta.total > perPage"
-            :meta="paginationMeta"
-            @change="handlePageChange"
-          />
-        </div>
-      </div>
-    </template>
+              {{ workshop.name }}
+            </option>
+          </select>
+        </label>
+      </template>
+    </FactoryTaskBoard>
 
     <OrderActionModal
       :is-open="isModal"
@@ -137,59 +69,23 @@
       @confirm="handleModalConfirm"
     />
 
-    <!-- Details Modal -->
-    <template v-if="isOpenDetails">
-      <div
-        class="work-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      >
-        <div
-          data-work-modal
-          role="dialog"
-          aria-modal="true"
-          class="work-modal relative max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
-        >
-          <button
-            class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            @click="isOpenDetails = false"
-          >
-            <svg
-              class="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-
-          <FactoryOrderDetailsPanel
-            :details="details"
-            :dxf-url="dxfUrl"
-            @view-file="viewFile"
-            @download-file="downloadFile"
-            @close-dxf="dxfUrl = ''"
-            @updated="onRequestChanged"
-          />
-          <div
-            v-if="canUpdateDetails"
-            class="mt-4 flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700"
-          >
-            <button
-              type="button"
-              class="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white dark:bg-white dark:text-slate-950"
-              @click="updateOrder(details)"
-            >
-              {{ $t('factory_order_actions.change_status') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </template>
+    <TaskDetailsDialog
+      v-if="isOpenDetails"
+      :details="details"
+      :step="detailsStep"
+      :can-update="canUpdateDetails"
+      @close="isOpenDetails = false"
+      @change-status="updateOrder(details)"
+    >
+      <FactoryOrderDetailsPanel
+        :details="details"
+        :dxf-url="dxfUrl"
+        @view-file="viewFile"
+        @download-file="downloadFile"
+        @close-dxf="dxfUrl = ''"
+        @updated="onRequestChanged"
+      />
+    </TaskDetailsDialog>
 
     <notifications />
   </main>
@@ -211,9 +107,8 @@ import {
   localFactoryTimestamp,
 } from '@/utils/factory-order-status'
 import { isStepRejected, taskCopy } from '@/utils/task-workflow'
-import OrdersToolbar from '@/components/factory/OrdersToolbar.vue'
-import OrderCard from '@/components/factory/OrderCard.vue'
-import Pagination from '@/components/ui/Pagination.vue'
+import FactoryTaskBoard from '@/components/factory/FactoryTaskBoard.vue'
+import TaskDetailsDialog from '@/components/factory/TaskDetailsDialog.vue'
 import OrderActionModal from '@/components/factory/OrderActionModal.vue'
 import FactoryOrderDetailsPanel from '@/components/factory/FactoryOrderDetailsPanel.vue'
 
@@ -222,13 +117,14 @@ export default {
   components: {
     OrderActionModal,
     FactoryOrderDetailsPanel,
-    OrdersToolbar,
-    OrderCard,
-    Pagination,
+    FactoryTaskBoard,
+    TaskDetailsDialog,
   },
   data() {
     return {
       searchable: '',
+      loaded: false,
+      loadFailed: false,
       isModal: false,
       isSaving: false,
       refreshTimer: null,
@@ -279,6 +175,25 @@ export default {
     taskText() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
+    // Tasks matching the search alone: the stage buttons count these.
+    searchMatches() {
+      const term = this.searchable.trim().toLowerCase()
+      if (!term) return this.allOrders
+      return this.allOrders.filter((order) => this.matchesSearch(order, term))
+    },
+    stageChips() {
+      return factoryBoardColumns(
+        this.searchMatches,
+        this.currentFactoryId,
+        this.statusOptions,
+        this.$i18n?.locale
+      )
+    },
+    detailsStep() {
+      return this.details?.id
+        ? this.getFactoryOrderForCurrentFactory(this.details)
+        : null
+    },
 
     selectedFactoryOrder() {
       return this.getFactoryOrderForCurrentFactory(this.selectedOrder)
@@ -320,18 +235,9 @@ export default {
       const searchTerm = this.searchable.trim().toLowerCase()
       if (!searchTerm) return this.filteredByStatus
 
-      return this.filteredByStatus.filter((order) => {
-        const orderNumber = order.order_number?.number?.toLowerCase() || ''
-        const name = order.name?.toLowerCase() || ''
-        const description = order.description?.toLowerCase() || ''
-        const prefixCode = order.prefix_code?.code?.toLowerCase() || ''
-        return (
-          orderNumber.includes(searchTerm) ||
-          description.includes(searchTerm) ||
-          name.includes(searchTerm) ||
-          prefixCode.includes(searchTerm)
-        )
-      })
+      return this.filteredByStatus.filter((order) =>
+        this.matchesSearch(order, searchTerm)
+      )
     },
 
     paginatedOrders() {
@@ -385,6 +291,13 @@ export default {
     '$route.query.order'() {
       this.openNotificationTask()
     },
+    // A new filter starts from the first page; a later page may be empty.
+    searchable() {
+      this.currentPage = 1
+    },
+    selectedStatuses() {
+      this.currentPage = 1
+    },
   },
   async mounted() {
     try {
@@ -416,16 +329,41 @@ export default {
     this.currentUserId = userId || null
 
     if (this.currentFactoryId) {
-      await this.fetchOrdersByFactory(this.currentFactoryId)
+      await this.loadBoard()
       await this.openNotificationTask()
       // The engineer answers requests and returns work at any moment.
       this.refreshTimer = setInterval(this.refreshQuietly, 30000)
+    } else {
+      this.loaded = true
     }
   },
   beforeDestroy() {
     clearInterval(this.refreshTimer)
   },
   methods: {
+    // The first load shows a placeholder; a failure without data offers a retry.
+    async loadBoard() {
+      const result = await this.fetchOrdersByFactory(this.currentFactoryId)
+      this.loadFailed = result === false
+      this.loaded = true
+    },
+    retryLoad() {
+      if (!this.currentFactoryId) return
+      this.loaded = false
+      return this.loadBoard()
+    },
+    matchesSearch(order, term) {
+      return [
+        order.order_number?.number,
+        order.name,
+        order.description,
+        order.prefix_code?.code,
+      ].some((value) =>
+        String(value || '')
+          .toLowerCase()
+          .includes(term)
+      )
+    },
     async changeWorkshop() {
       this.isOpenDetails = false
       this.isModal = false
@@ -793,15 +731,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-.fade-list-enter-active,
-.fade-list-leave-active {
-  transition: all 0.2s ease;
-}
-.fade-list-enter-from,
-.fade-list-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
-}
-</style>

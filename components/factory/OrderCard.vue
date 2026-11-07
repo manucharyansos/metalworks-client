@@ -166,6 +166,21 @@
           · {{ boardText.files }}: {{ factoryOrder?.files?.length || 0
           }}<span v-if="order.created_at"> · {{ order.created_at }}</span>
         </p>
+        <p
+          v-if="compact && fileSummary.shown.length"
+          class="mt-1.5 flex flex-wrap gap-1"
+          data-card-file-types
+        >
+          <span
+            v-for="row in fileSummary.shown"
+            :key="row.label"
+            class="card-file-chip"
+            :data-kind="row.kind"
+            >{{ row.label }} · {{ row.count }}</span
+          ><span v-if="fileSummary.more" class="card-file-chip"
+            >+{{ fileSummary.more }}</span
+          >
+        </p>
       </div>
       <div class="work-task-card__actions w-full justify-between">
         <button
@@ -195,6 +210,7 @@
 
 <script>
 import { routeCopy } from '@/utils/production-route'
+import { fileTypeSummary } from '@/utils/file-kind'
 import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 import PersonAvatar from '@/components/ui/PersonAvatar.vue'
 import TaskDeadline from '@/components/ui/TaskDeadline.vue'
@@ -229,6 +245,10 @@ export default {
         : this.$i18n?.locale === 'en'
         ? 'Helpers'
         : 'Օգնականներ'
+    },
+    // Which kinds of files this workshop gets (DXF, DLD, PDF …).
+    fileSummary() {
+      return fileTypeSummary(this.factoryOrder?.files || [])
     },
     instructionFiles() {
       return (this.factoryOrder?.files || []).filter(
@@ -409,6 +429,40 @@ export default {
 .work-task-card--compact .work-task-card__title {
   margin-top: 3px;
   font-size: 16px;
+}
+.card-file-chip {
+  padding: 0 6px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.7;
+}
+.card-file-chip[data-kind='program'] {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.card-file-chip[data-kind='drawing'] {
+  background: #ffe4e6;
+  color: #be123c;
+}
+.card-file-chip[data-kind='image'] {
+  background: #d1fae5;
+  color: #047857;
+}
+.card-file-chip[data-kind='model'] {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+.card-file-chip[data-kind='cad'] {
+  background: #fef3c7;
+  color: #b45309;
+}
+.dark .card-file-chip {
+  background: #1e293b;
+  color: #cbd5e1;
 }
 .work-task-card--compact .work-task-card__description {
   -webkit-line-clamp: 2;

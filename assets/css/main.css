@@ -461,6 +461,11 @@
 .work-button[data-variant='answer']:hover:not(:disabled) {
   background: #d97706;
 }
+/* Without its own hover colour the dark button turned pale and hid its
+   white text. */
+.work-button[data-variant='dark']:hover:not(:disabled) {
+  background: #1e293b;
+}
 .dark .work-button[data-variant='open'] {
   background: #173151;
   color: #a4c8ff;
@@ -468,6 +473,9 @@
 .dark .work-button[data-variant='dark'] {
   background: #e2e8f0;
   color: #0f172a;
+}
+.dark .work-button[data-variant='dark']:hover:not(:disabled) {
+  background: #cbd5e1;
 }
 .work-modal-backdrop {
   display: flex;

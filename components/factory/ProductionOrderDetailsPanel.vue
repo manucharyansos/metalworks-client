@@ -267,7 +267,11 @@
             Ֆայլերի ցանկը հասանելի չէ այս աշխատակցին։
           </p>
         </div>
-        <div v-else-if="factoryOrders.length" class="space-y-3 p-4 sm:p-5">
+        <div
+          v-else-if="factoryOrders.length"
+          class="max-h-[min(60vh,560px)] space-y-3 overflow-y-auto overscroll-contain p-4 sm:p-5"
+          data-files-scroll
+        >
           <article
             v-for="order in factoryOrders"
             :key="order.id"
@@ -303,16 +307,25 @@
                 v-for="file in order.files"
                 :key="file.id"
                 class="work-file-row"
+                :data-active="String(isPreviewed(file))"
               >
                 <div
                   class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div class="min-w-0 flex-1">
-                    <p
-                      class="truncate text-xs font-bold text-slate-800 dark:text-slate-100"
-                      :title="file.original_name"
-                    >
-                      {{ file.original_name || 'Ֆայլ' }}
+                    <p class="flex min-w-0 items-start gap-2">
+                      <span
+                        class="file-badge"
+                        :data-kind="fileKind(file.original_name || file.path)"
+                        >{{
+                          fileExtensionOf(file.original_name || file.path).toUpperCase() ||
+                          '—'
+                        }}</span
+                      ><span
+                        class="line-clamp-2 break-all text-sm font-bold text-slate-800 dark:text-slate-100"
+                        :title="file.original_name"
+                        >{{ file.original_name || 'Ֆայլ' }}</span
+                      >
                     </p>
                     <div
                       class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400"
@@ -388,6 +401,11 @@ import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
 import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 import FilePreview from '@/components/File/FilePreview.vue'
 import { fileAttribute } from '@/utils/file-production-details'
+import {
+  fileExtensionOf,
+  fileKind,
+  preferredPreviewFile,
+} from '@/utils/file-kind'
 
 export default {
   name: 'ProductionOrderDetailsPanel',
@@ -499,13 +517,39 @@ export default {
   watch: {
     'details.id'() {
       this.activePreviewFile = null
+      this.$nextTick(() => this.autoPreview())
     },
     previewUrl(value, previous) {
       if (!value && previous) this.activePreviewFile = null
     },
   },
+  mounted() {
+    this.autoPreview()
+  },
   methods: {
     fileAttribute,
+    fileExtensionOf,
+    fileKind,
+    isPreviewed(file) {
+      const shown = this.previewFile
+      return Boolean(shown && file && Number(shown.id) === Number(file.id))
+    },
+    // Opening a task shows its most useful file right away: the workshop's
+    // program (DXF, DLD), else a drawing, image, 3D model or CAD view.
+    autoPreview() {
+      if (!this.canDownload || this.activePreviewFile) return
+      if (this.previewUrl) {
+        if (this.previewFile) return
+        // A preview left over from another task is cleared first.
+        this.$emit('close-preview')
+      }
+      const file = preferredPreviewFile(
+        this.factoryOrders.flatMap((step) => step.files || [])
+      )
+      if (!file) return
+      this.activePreviewFile = file
+      this.$emit('view-file', file)
+    },
     openFile(file) {
       this.activePreviewFile = file
       this.$emit('view-file', file)
@@ -550,3 +594,68 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.work-file-row[data-active='true'] {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+/* File type badges: programs blue, drawings red, images green, 3D violet,
+   CAD views amber. */
+.file-badge {
+  flex-shrink: 0;
+  margin-top: 1px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
+.file-badge[data-kind='program'] {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.file-badge[data-kind='drawing'] {
+  background: #ffe4e6;
+  color: #be123c;
+}
+.file-badge[data-kind='image'] {
+  background: #d1fae5;
+  color: #047857;
+}
+.file-badge[data-kind='model'] {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+.file-badge[data-kind='cad'] {
+  background: #fef3c7;
+  color: #b45309;
+}
+.dark .file-badge {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+.dark .file-badge[data-kind='program'] {
+  background: #172554;
+  color: #93c5fd;
+}
+.dark .file-badge[data-kind='drawing'] {
+  background: #4c0519;
+  color: #fda4af;
+}
+.dark .file-badge[data-kind='image'] {
+  background: #052e2b;
+  color: #6ee7b7;
+}
+.dark .file-badge[data-kind='model'] {
+  background: #2e1065;
+  color: #c4b5fd;
+}
+.dark .file-badge[data-kind='cad'] {
+  background: #422006;
+  color: #fcd34d;
+}
+</style>
