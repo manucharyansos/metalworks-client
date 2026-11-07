@@ -3,7 +3,10 @@
     :data-task-id="order.id"
     class="work-card work-task-card"
     :data-tone="cardTone"
-    :class="isLocked ? 'cursor-default' : 'cursor-move'"
+    :class="[
+      isLocked ? 'cursor-default' : 'cursor-move',
+      { 'work-task-card--compact': compact },
+    ]"
     :draggable="!isLocked"
     @dragstart="onDragStart"
     @dragend="$emit('drag-end')"
@@ -176,7 +179,7 @@
           type="button"
           :disabled="isLocked"
           class="work-button"
-          :data-variant="isRejected ? 'answer' : 'primary'"
+          :data-variant="isRejected ? 'answer' : compact ? 'dark' : 'primary'"
           @click.stop="!isLocked && $emit('edit', order)"
         >
           {{
@@ -216,6 +219,8 @@ export default {
     currentUserId: { type: [Number, String], required: true },
     statusOptions: { type: Array, default: () => [] },
     saving: { type: Boolean, default: false },
+    // Denser card for narrow board columns: smaller title, two-line text.
+    compact: { type: Boolean, default: false },
   },
   computed: {
     helperLabel() {
@@ -369,3 +374,46 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.work-task-card--compact {
+  gap: 12px;
+  padding: 16px 16px 16px 18px;
+}
+/* Number and status never break mid-word; the status moves down when the
+   column is too narrow for both. */
+.work-task-card--compact .work-task-card__top {
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 4px;
+}
+.work-task-card--compact .work-task-card__top > .work-task-card__meta {
+  flex: 0 1 auto;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+.work-task-card--compact .work-task-card__top > .work-status {
+  max-width: 100%;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+.work-task-card--compact .work-task-card__actions {
+  flex-direction: column;
+  align-items: stretch;
+}
+.work-task-card--compact .work-task-card__actions > .work-button {
+  width: 100%;
+  padding-right: 8px;
+  padding-left: 8px;
+}
+.work-task-card--compact .work-task-card__title {
+  margin-top: 3px;
+  font-size: 16px;
+}
+.work-task-card--compact .work-task-card__description {
+  -webkit-line-clamp: 2;
+  min-height: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+</style>

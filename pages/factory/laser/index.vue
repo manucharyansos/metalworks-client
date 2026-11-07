@@ -1,108 +1,230 @@
 <template>
-  <main class="min-h-screen bg-gray-100 dark:bg-gray-900 flex flex-col">
-    <!-- Orders Board -->
-    <template v-if="getOrderByFactories && !isModal">
-      <div class="container mx-auto px-4 py-6 sm:py-10 flex-1 flex flex-col">
-        <!-- Toolbar -->
-        <OrdersToolbar
-          :search="searchable"
-          :status-options="boardStatusOptions"
-          :selected-statuses="selectedStatuses"
-          @update:search="(v) => (searchable = v)"
-          @update:selected-statuses="(v) => (selectedStatuses = v)"
-        />
-
+  <main class="min-h-screen min-w-0 px-4 py-6 sm:px-6 lg:px-8" data-laser-board>
+    <section v-if="!isModal" class="mx-auto space-y-5">
+      <header class="min-w-0">
+        <h1
+          class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl"
+        >
+          {{ copy.title }}
+        </h1>
         <p
-          class="mt-3 text-xs text-slate-500 dark:text-slate-400"
+          class="mt-1 text-sm text-slate-500 dark:text-slate-400"
           data-board-retention
         >
           {{ boardText.recentHelp }}
         </p>
+      </header>
 
-        <!-- Kanban board -->
-        <div v-if="boardColumns.length" class="mt-4 flex-1">
-          <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4 h-full">
-            <div
-              v-for="column in boardColumns"
-              :key="column.id"
-              :data-board-column="column.value"
-              class="work-board-column flex h-[calc(100vh-260px)] flex-col rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60"
-              @dragover.prevent
-              @drop.prevent="onDrop(column)"
+      <nav
+        class="chip-row -mx-1 flex gap-2 overflow-x-auto px-1 py-0.5"
+        :aria-label="copy.status"
+      >
+        <button
+          type="button"
+          class="stage-chip"
+          data-tone="all"
+          :aria-pressed="String(!selectedStatuses.length)"
+          @click="selectedStatuses = []"
+        >
+          <span class="whitespace-nowrap">{{ copy.all }}</span>
+          <span class="stage-chip__count">{{ searchMatches.length }}</span>
+        </button>
+        <button
+          v-for="column in stageChips"
+          :key="column.id"
+          type="button"
+          class="stage-chip"
+          :data-tone="tone(column)"
+          :data-stage="column.value"
+          :aria-pressed="String(selectedStatuses.includes(column.value))"
+          @click="toggleStage(column.value)"
+        >
+          <span class="stage-chip__dot" aria-hidden="true"></span>
+          <span class="whitespace-nowrap">{{ label(column) }}</span>
+          <span class="stage-chip__count">{{ column.orders.length }}</span>
+        </button>
+      </nav>
+
+      <section
+        class="app-surface flex flex-col gap-3 rounded-3xl p-4 sm:flex-row sm:items-center sm:p-5"
+      >
+        <label class="min-w-0 flex-1">
+          <span class="sr-only">{{ copy.search }}</span>
+          <span class="relative block">
+            <svg
+              class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
             >
-              <!-- Column header -->
-              <div class="mb-2 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-2">
-                  <span
-                    class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold text-white"
-                    :style="{ backgroundColor: column.color || '#6B7280' }"
-                  >
-                    {{ column.icon }}
-                  </span>
-                  <h3
-                    class="text-sm font-semibold text-gray-800 dark:text-gray-100"
-                  >
-                    {{ column.label }}
-                  </h3>
-                </div>
-                <span
-                  class="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-200"
-                >
-                  {{ column.orders.length }}
-                </span>
-              </div>
+              <circle cx="11" cy="11" r="7" stroke-width="1.8" />
+              <path
+                stroke-linecap="round"
+                stroke-width="1.8"
+                d="m20 20-3.5-3.5"
+              />
+            </svg>
+            <input
+              v-model="searchable"
+              type="search"
+              maxlength="120"
+              class="app-control !pl-11"
+              :placeholder="copy.search"
+              data-board-search
+            />
+          </span>
+        </label>
+        <button
+          v-if="hasFilters"
+          type="button"
+          class="shrink-0 text-sm font-bold text-slate-600 underline-offset-4 transition hover:text-slate-950 hover:underline dark:text-slate-300 dark:hover:text-white"
+          data-clear-board-filters
+          @click="clearFilters"
+        >
+          {{ copy.clear }}
+        </button>
+      </section>
 
-              <!-- Scrollable cards area -->
-              <div class="mt-1 flex-1 overflow-y-auto pr-1 space-y-3">
-                <transition-group
-                  name="fade-list"
-                  tag="div"
-                  class="flex flex-col gap-3"
-                >
-                  <OrderCard
-                    v-for="order in column.orders"
-                    :key="order.id"
-                    :order="order"
-                    :factory-id="currentFactoryId"
-                    :current-user-id="currentUserId"
-                    :status-options="boardStatusOptions"
-                    :saving="isSaving"
-                    @drag-start="onDragStart(order, column)"
-                    @drag-end="clearDrag"
-                    @view-details="toggleDetails"
-                    @edit="updateOrder"
-                  />
-                </transition-group>
+      <div
+        v-if="!loaded"
+        class="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
+        role="status"
+        data-board-loading
+      >
+        <span class="sr-only">{{ copy.loading }}</span>
+        <div
+          v-for="n in 4"
+          :key="n"
+          class="animate-pulse space-y-3 rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60"
+        >
+          <div class="h-4 w-28 rounded bg-slate-200 dark:bg-slate-700"></div>
+          <div class="h-32 rounded-2xl bg-white dark:bg-slate-800"></div>
+          <div class="h-32 rounded-2xl bg-white/70 dark:bg-slate-800/70"></div>
+        </div>
+      </div>
 
-                <!-- empty state -->
-                <div
-                  v-if="!column.orders.length"
-                  class="mt-2 flex items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white/60 p-3 text-center text-xs text-gray-400 dark:border-gray-600 dark:bg-gray-900/40 dark:text-gray-500"
-                >
-                  Քաշեք առաջադրանքներ այստեղ
-                </div>
-              </div>
+      <div
+        v-else-if="loadFailed && !allOrders.length"
+        role="alert"
+        class="app-surface flex flex-col items-center gap-3 rounded-3xl px-6 py-12 text-center"
+      >
+        <p class="text-sm font-semibold text-rose-600 dark:text-rose-300">
+          {{ copy.loadFailed }}
+        </p>
+        <button
+          type="button"
+          class="app-button-secondary !py-2"
+          @click="retryLoad"
+        >
+          {{ copy.retry }}
+        </button>
+      </div>
+
+      <div
+        v-else-if="!filteredBySearch.length"
+        class="app-surface flex flex-col items-center gap-3 rounded-3xl px-6 py-14 text-center"
+        data-board-empty
+      >
+        <span
+          class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800"
+        >
+          <svg
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.7"
+              d="M7 4h10a2 2 0 012 2v14H5V6a2 2 0 012-2Zm2 4h6M9 12h6M9 16h4"
+            />
+          </svg>
+        </span>
+        <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">
+          {{ allOrders.length ? copy.noResults : copy.empty }}
+        </p>
+        <p
+          v-if="!allOrders.length"
+          class="max-w-sm text-xs leading-5 text-slate-500 dark:text-slate-400"
+        >
+          {{ copy.emptyHelp }}
+        </p>
+        <button
+          v-if="hasFilters"
+          type="button"
+          class="app-button-secondary !py-2"
+          @click="clearFilters"
+        >
+          {{ copy.clear }}
+        </button>
+      </div>
+
+      <div v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div
+          v-for="column in boardColumns"
+          :key="column.id"
+          :data-board-column="column.value"
+          :data-tone="tone(column)"
+          class="work-board-column board-column flex h-[calc(100vh-300px)] min-h-[420px] flex-col rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60"
+          @dragover.prevent
+          @drop.prevent="onDrop(column)"
+        >
+          <div
+            class="mb-3 flex shrink-0 items-center justify-between gap-2 px-1"
+          >
+            <h2
+              class="flex min-w-0 items-center gap-2 text-sm font-bold text-slate-800 dark:text-slate-100"
+            >
+              <span class="board-column__dot" aria-hidden="true"></span>
+              <span class="truncate">{{ label(column) }}</span>
+            </h2>
+            <span
+              class="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-slate-600 shadow-sm dark:bg-slate-800 dark:text-slate-300"
+            >
+              {{ column.orders.length }}
+            </span>
+          </div>
+
+          <div class="flex-1 space-y-3 overflow-y-auto pr-1">
+            <transition-group
+              name="fade-list"
+              tag="div"
+              class="flex flex-col gap-3"
+            >
+              <OrderCard
+                v-for="order in column.orders"
+                :key="order.id"
+                compact
+                :order="order"
+                :factory-id="currentFactoryId"
+                :current-user-id="currentUserId"
+                :status-options="boardStatusOptions"
+                :saving="isSaving"
+                @drag-start="onDragStart(order, column)"
+                @drag-end="clearDrag"
+                @view-details="toggleDetails"
+                @edit="updateOrder"
+              />
+            </transition-group>
+
+            <div
+              v-if="!column.orders.length"
+              class="flex items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white/60 p-3 text-center text-xs text-slate-400 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-500"
+            >
+              {{ copy.dropHere }}
             </div>
           </div>
         </div>
-        <!-- Եթե լրիվ առաջադրանքներ չկան -->
-        <div
-          v-else
-          class="mt-10 flex items-center justify-center rounded-2xl bg-white p-8 text-center text-sm text-gray-500 shadow-sm dark:bg-gray-800 dark:text-gray-300"
-        >
-          Առաջադրանքներ չկան։
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-8 flex justify-center">
-          <Pagination
-            v-if="paginationMeta.total > perPage"
-            :meta="paginationMeta"
-            @change="handlePageChange"
-          />
-        </div>
       </div>
-    </template>
+
+      <div v-if="paginationMeta.total > perPage" class="flex justify-center">
+        <Pagination :meta="paginationMeta" @change="handlePageChange" />
+      </div>
+    </section>
 
     <OrderActionModal
       :is-open="isModal"
@@ -120,33 +242,54 @@
       @confirm="handleModalConfirm"
     />
 
-    <!-- Details Modal -->
-    <template v-if="isOpenDetails">
-      <div
-        class="work-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    <div
+      v-if="isOpenDetails"
+      class="work-modal-frame work-modal-backdrop fixed inset-0 z-50"
+      @click.self="isOpenDetails = false"
+    >
+      <section
+        ref="detailsDialog"
+        data-work-modal
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="laser-details-title"
+        tabindex="-1"
+        class="work-modal work-modal--structured w-full max-w-6xl outline-none"
+        @keydown.esc="isOpenDetails = false"
       >
-        <div
-data-work-modal role="dialog" aria-modal="true"
-          class="work-modal relative max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
+        <header
+          class="work-modal__header flex items-start justify-between gap-4"
         >
-          <button
-            class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-            @click="isOpenDetails = false"
-          >
-            <svg
-              class="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div class="min-w-0">
+            <p class="work-task-card__meta whitespace-nowrap">
+              #{{ details.order_number?.number || details.id }} ·
+              {{ details.prefix_code?.code || '—' }}
+            </p>
+            <h2
+              id="laser-details-title"
+              class="truncate text-lg font-black text-slate-950 dark:text-white sm:text-xl"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+              {{ details.name || copy.title }}
+            </h2>
+          </div>
+          <div class="flex shrink-0 items-center gap-2">
+            <span
+              v-if="detailsStep"
+              class="work-status whitespace-nowrap"
+              :data-tone="detailsTone"
+              >{{ detailsStatus }}</span
+            >
+            <button
+              type="button"
+              class="work-modal__close"
+              :aria-label="copy.close"
+              @click="isOpenDetails = false"
+            >
+              ✕
+            </button>
+          </div>
+        </header>
+        <div class="work-modal__body">
           <LaserOrderDetailsPanel
             :details="details"
             :dxf-url="dxfUrl"
@@ -155,21 +298,21 @@ data-work-modal role="dialog" aria-modal="true"
             @close-dxf="dxfUrl = ''"
             @updated="onRequestChanged"
           />
-          <div
-            v-if="canUpdateDetails"
-            class="mt-4 flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700"
-          >
-            <button
-              type="button"
-              class="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white dark:bg-white dark:text-slate-950"
-              @click="updateOrder(details)"
-            >
-              {{ $t('factory_order_actions.change_status') }}
-            </button>
-          </div>
         </div>
-      </div>
-    </template>
+        <footer
+          v-if="canUpdateDetails"
+          class="work-modal__footer flex justify-end"
+        >
+          <button
+            type="button"
+            class="app-button-primary !rounded-xl !py-2.5"
+            @click="updateOrder(details)"
+          >
+            {{ $t('factory_order_actions.change_status') }}
+          </button>
+        </footer>
+      </section>
+    </div>
 
     <notifications />
   </main>
@@ -181,7 +324,13 @@ import {
   boardColumnForStep,
   factoryBoardColumns,
   boardCopy,
+  stepStatusText,
 } from '@/utils/task-board'
+import {
+  columnLabel,
+  columnTone,
+  factoryBoardCopy,
+} from '@/utils/factory-board-copy'
 import { sortWorkshopTasks } from '@/utils/task-routing'
 import {
   isFactoryOrderFinished,
@@ -190,7 +339,6 @@ import {
   localFactoryTimestamp,
 } from '@/utils/factory-order-status'
 import { isStepRejected, taskCopy } from '@/utils/task-workflow'
-import OrdersToolbar from '@/components/factory/OrdersToolbar.vue'
 import OrderCard from '@/components/factory/OrderCard.vue'
 import Pagination from '@/components/ui/Pagination.vue'
 import LaserOrderDetailsPanel from '@/components/factory/laser/LaserOrderDetailsPanel.vue'
@@ -200,7 +348,6 @@ export default {
   components: {
     OrderActionModal,
     LaserOrderDetailsPanel,
-    OrdersToolbar,
     OrderCard,
     Pagination,
   },
@@ -210,6 +357,8 @@ export default {
   data() {
     return {
       searchable: '',
+      loaded: false,
+      loadFailed: false,
       isModal: false,
       isSaving: false,
       refreshTimer: null,
@@ -259,6 +408,46 @@ export default {
     taskText() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
+    copy() {
+      return factoryBoardCopy[this.$i18n?.locale] || factoryBoardCopy.hy
+    },
+    // Tasks matching the search alone: the stage buttons count these.
+    searchMatches() {
+      const term = this.searchable.trim().toLowerCase()
+      if (!term) return this.allOrders
+      return this.allOrders.filter((order) => this.matchesSearch(order, term))
+    },
+    stageChips() {
+      return factoryBoardColumns(
+        this.searchMatches,
+        this.currentFactoryId,
+        this.statusOptions,
+        this.$i18n?.locale
+      )
+    },
+    hasFilters() {
+      return Boolean(this.searchable.trim() || this.selectedStatuses.length)
+    },
+    detailsStep() {
+      return this.details?.id
+        ? this.getFactoryOrderForCurrentFactory(this.details)
+        : null
+    },
+    detailsStatus() {
+      return stepStatusText(this.detailsStep, this.$i18n?.locale)
+    },
+    detailsTone() {
+      const step = this.detailsStep
+      if (!step) return 'neutral'
+      if (step.awaiting_engineer_confirmation) return 'amber'
+      if (isStepRejected(step)) return 'red'
+      if (isFactoryOrderFinished(step.status)) return 'green'
+      return ['accepted', 'confirmed', 'in_progress', 'date_changed'].includes(
+        step.status
+      )
+        ? 'blue'
+        : 'neutral'
+    },
 
     selectedFactoryOrder() {
       return this.getFactoryOrderForCurrentFactory(this.selectedOrder)
@@ -300,18 +489,9 @@ export default {
       const searchTerm = this.searchable.trim().toLowerCase()
       if (!searchTerm) return this.filteredByStatus
 
-      return this.filteredByStatus.filter((order) => {
-        const orderNumber = order.order_number?.number?.toLowerCase() || ''
-        const name = order.name?.toLowerCase() || ''
-        const description = order.description?.toLowerCase() || ''
-        const prefixCode = order.prefix_code?.code?.toLowerCase() || ''
-        return (
-          orderNumber.includes(searchTerm) ||
-          description.includes(searchTerm) ||
-          name.includes(searchTerm) ||
-          prefixCode.includes(searchTerm)
-        )
-      })
+      return this.filteredByStatus.filter((order) =>
+        this.matchesSearch(order, searchTerm)
+      )
     },
 
     paginatedOrders() {
@@ -364,6 +544,18 @@ export default {
       return localFactoryDate(d)
     },
   },
+  watch: {
+    // A new filter starts from the first page; a later page may be empty.
+    searchable() {
+      this.currentPage = 1
+    },
+    selectedStatuses() {
+      this.currentPage = 1
+    },
+    isOpenDetails(open) {
+      if (open) this.$nextTick(() => this.$refs.detailsDialog?.focus())
+    },
+  },
   async mounted() {
     try {
       const [actionsRes, filtersRes] = await Promise.all([
@@ -386,15 +578,56 @@ export default {
     this.currentUserId = userId || null
 
     if (this.currentFactoryId) {
-      await this.fetchOrdersByFactory(this.currentFactoryId)
+      await this.loadBoard()
       // The engineer answers requests and returns work at any moment.
       this.refreshTimer = setInterval(this.refreshQuietly, 30000)
+    } else {
+      this.loaded = true
     }
   },
   beforeDestroy() {
     clearInterval(this.refreshTimer)
   },
   methods: {
+    // The first load shows a placeholder; a failure without data offers a retry.
+    async loadBoard() {
+      const result = await this.fetchOrdersByFactory(this.currentFactoryId)
+      this.loadFailed = result === false
+      this.loaded = true
+    },
+    retryLoad() {
+      if (!this.currentFactoryId) return
+      this.loaded = false
+      return this.loadBoard()
+    },
+    matchesSearch(order, term) {
+      return [
+        order.order_number?.number,
+        order.name,
+        order.description,
+        order.prefix_code?.code,
+      ].some((value) =>
+        String(value || '')
+          .toLowerCase()
+          .includes(term)
+      )
+    },
+    tone(column) {
+      return columnTone(column)
+    },
+    label(column) {
+      return columnLabel(column, this.boardText)
+    },
+    toggleStage(value) {
+      this.selectedStatuses = this.selectedStatuses.includes(value)
+        ? this.selectedStatuses.filter((item) => item !== value)
+        : [...this.selectedStatuses, value]
+    },
+    clearFilters() {
+      this.searchable = ''
+      this.selectedStatuses = []
+    },
+
     async refreshQuietly() {
       if (
         document.hidden ||
@@ -762,6 +995,93 @@ export default {
 </script>
 
 <style scoped>
+.chip-row {
+  scrollbar-width: none;
+}
+.chip-row::-webkit-scrollbar {
+  display: none;
+}
+/* Stage colours match the engineer task list: grey, blue, amber, red. */
+[data-tone='created'] {
+  --tone: #94a3b8;
+}
+[data-tone='accepted'] {
+  --tone: #3b82f6;
+}
+[data-tone='in_progress'] {
+  --tone: #f59e0b;
+}
+[data-tone='rejected'] {
+  --tone: #f43f5e;
+}
+.stage-chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 8px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+.stage-chip:hover {
+  border-color: #cbd5e1;
+}
+.stage-chip:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+.stage-chip__dot,
+.board-column__dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--tone, #94a3b8);
+}
+.stage-chip__count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  text-align: center;
+}
+.stage-chip[aria-pressed='true'] {
+  border-color: #020617;
+  background: #020617;
+  color: #fff;
+}
+.stage-chip[aria-pressed='true'] .stage-chip__count {
+  background: rgb(255 255 255 / 18%);
+  color: #fff;
+}
+.board-column {
+  border-top: 3px solid var(--tone, #94a3b8);
+}
+.dark .stage-chip {
+  border-color: #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+.dark .stage-chip__count {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+.dark .stage-chip[aria-pressed='true'] {
+  border-color: #f8fafc;
+  background: #f8fafc;
+  color: #020617;
+}
+.dark .stage-chip[aria-pressed='true'] .stage-chip__count {
+  background: #e2e8f0;
+  color: #020617;
+}
 .fade-list-enter-active,
 .fade-list-leave-active {
   transition: all 0.2s ease;
