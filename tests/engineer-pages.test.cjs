@@ -203,6 +203,57 @@ test('task rows show numbers, priorities and overdue only for open work', () => 
   vm.$destroy()
 })
 
+test('the client column names the client and shows the description and times', () => {
+  const vm = tasksPage()
+  assert.deepEqual(vm.columns, ['task', 'client', 'status', 'due'])
+  assert.equal(vm.c.client, 'Պատվիրատու')
+  const order = {
+    client: { company_name: '', name: 'Աննա', last_name: 'Պետրոսյան' },
+    created_at: '28/10/2026',
+    created_time: '2026-10-28T06:15:00+00:00',
+    completed_at: '2026-10-31T12:20:00.000000Z',
+    dates: { finish_date: '2026-10-30 11:40:00' },
+  }
+  assert.equal(vm.customer(order), 'Աննա Պետրոսյան')
+  assert.equal(
+    vm.customer({ client: { company_name: 'Metal LLC', name: 'Aram' } }),
+    'Metal LLC'
+  )
+  assert.equal(vm.customer({ client: { user: { name: 'Portal' } } }), 'Portal')
+  assert.equal(vm.customer({}), '')
+  // 990.01 is project 990, item 01: their names lead, the code moves aside.
+  const named = {
+    name: '990.01',
+    remote_number: { remote_number_name: 'Շրջանակ', pmp: { group_name: 'Դարպաս' } },
+  }
+  assert.equal(vm.taskTitle(named), 'Դարպաս · Շրջանակ')
+  assert.equal(vm.taskCode(named), '990.01')
+  assert.equal(vm.taskTitle({ name: '990.01' }), '990.01', 'no names: the code')
+  assert.equal(vm.taskCode({ name: '990.01' }), '')
+  const same = { remote_number_name: 'Test', pmp: { group_name: 'Test' } }
+  assert.equal(vm.taskTitle({ name: '1.01', remote_number: same }), 'Test')
+  // The hour comes from the zoned value, shown in the viewer's own time zone.
+  const local = new Date('2026-10-28T06:15:00Z')
+  const pad = (n) => String(n).padStart(2, '0')
+  assert.equal(
+    vm.createdText(order),
+    `${pad(local.getDate())}.${pad(local.getMonth() + 1)}.${local.getFullYear()}, ${pad(local.getHours())}:${pad(local.getMinutes())}`
+  )
+  assert.equal(
+    vm.createdText({ created_at: '28/10/2026' }),
+    '28.10.2026',
+    'a server without created_time still shows the day'
+  )
+  assert.equal(vm.createdText({}), '—')
+  assert.equal(vm.dueText(order), '30.10.2026, 11:40')
+  assert.match(vm.completedText(order), /^31\.10\.2026, \d\d:\d\d$/)
+  const { planningCopy } = load('utils/planning-copy.js')
+  for (const locale of ['hy', 'ru', 'en'])
+    for (const key of ['client', 'createdAt', 'finishAt', 'completedAt'])
+      assert.ok(planningCopy[locale][key], `${locale}.${key}`)
+  vm.$destroy()
+})
+
 function calendar(state = {}) {
   const vm = component('components/engineer/OperatorCalendar.vue', { state })
   vm.refresh = async () => {}

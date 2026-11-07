@@ -46,8 +46,21 @@
       <div class="work-modal__body">
         <slot />
       </div>
-      <footer v-if="canUpdate" class="work-modal__footer flex justify-end">
+      <footer
+        v-if="canUpdate || waiting"
+        class="work-modal__footer flex flex-wrap items-center justify-end gap-3"
+      >
+        <p
+          v-if="waiting"
+          class="work-alert m-0 min-w-0 flex-1 flex-col !gap-1"
+          role="status"
+          data-step-waiting
+        >
+          <span class="font-semibold">{{ waitingText }}</span>
+          <span class="text-xs font-normal">{{ routing.blockedHelp }}</span>
+        </p>
         <button
+          v-if="canUpdate"
           type="button"
           class="app-button-primary !rounded-xl !py-2.5"
           @click="$emit('change-status')"
@@ -62,7 +75,8 @@
 <script>
 import { stepStatusText } from '@/utils/task-board'
 import { factoryBoardCopy } from '@/utils/factory-board-copy'
-import { isStepRejected } from '@/utils/task-workflow'
+import { routingCopy } from '@/utils/task-routing'
+import { isStepRejected, isStepWaiting } from '@/utils/task-workflow'
 import { isFactoryOrderFinished } from '@/utils/factory-order-status'
 
 let dialogIds = 0
@@ -82,8 +96,21 @@ export default {
     copy() {
       return factoryBoardCopy[this.$i18n?.locale] || factoryBoardCopy.hy
     },
+    routing() {
+      return routingCopy[this.$i18n?.locale] || routingCopy.hy
+    },
     titleId() {
       return `task-details-title-${this.uid}`
+    },
+    // The same reason the card shows, with the workshops still to finish.
+    waiting() {
+      return isStepWaiting(this.step)
+    },
+    waitingText() {
+      const names = (this.step?.waiting_for || []).filter(Boolean)
+      return names.length
+        ? `${this.routing.blocked} · ${names.join(', ')}`
+        : this.routing.blocked
     },
     status() {
       return stepStatusText(this.step, this.$i18n?.locale)

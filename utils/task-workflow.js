@@ -333,6 +333,13 @@ export function isStepRejected(step) {
   return ['canceled', 'cancelled'].includes(step?.status)
 }
 
+// A stage whose earlier workshops have not finished (or whose finished work still
+// waits for the engineer's approval) cannot be accepted, started or finished:
+// the server refuses. A rejected stage may still ask to be reopened.
+export function isStepWaiting(step) {
+  return Boolean(step?.is_blocked) && !isStepRejected(step)
+}
+
 export function requestIsPending(step) {
   return Boolean(step?.pending_request)
 }

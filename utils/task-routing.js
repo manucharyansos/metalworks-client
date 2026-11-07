@@ -31,6 +31,8 @@ export const routingCopy = {
     independent: 'Անկախ աշխատանք',
     afterSuffix: 'աշխատանքն ավարտված է',
     blocked: 'Սպասում է նախորդ արտադրամասի ավարտին',
+    blockedHelp:
+      'Կարգավիճակը կարող եք փոխել, երբ նախորդ արտադրամասերն ավարտեն աշխատանքը, իսկ հաստատում պահանջող աշխատանքը հաստատի ինժեները։',
     files: 'Այս առաջադրանքի ֆայլերը',
     filesHelp:
       'Նույն ֆայլը կարող եք կցել նաև այլ արտադրամասին։ Նշված ֆայլերը հասանելի կլինեն այդ արտադրամասի կատարողին։',
@@ -83,6 +85,8 @@ export const routingCopy = {
     independent: 'Независимая работа',
     afterSuffix: 'работа завершена',
     blocked: 'Ожидает завершения предыдущего цеха',
+    blockedHelp:
+      'Статус можно изменить, когда предыдущие цеха завершат работу, а работу с подтверждением одобрит инженер.',
     files: 'Файлы этого задания',
     filesHelp:
       'Тот же файл можно назначить другому цеху. Выбранные файлы будут доступны исполнителю этого цеха.',
@@ -135,6 +139,8 @@ export const routingCopy = {
     independent: 'Independent job',
     afterSuffix: 'job is complete',
     blocked: 'Waiting for the previous workshop',
+    blockedHelp:
+      'You can change the status once the previous workshops finish and the engineer approves any work that needs confirmation.',
     files: 'Files in this task',
     filesHelp:
       'You can assign the same file to another workshop. The selected files will be available to that workshop’s operator.',

@@ -3,7 +3,7 @@
     class="min-h-screen min-w-0 px-4 py-6 sm:px-6 lg:px-8"
     data-engineer-tasks
   >
-    <section v-if="$can('orders.view')" class="mx-auto max-w-7xl space-y-5">
+    <section v-if="$can('orders.view')" class="mx-auto space-y-5">
       <header class="flex flex-wrap items-end justify-between gap-4">
         <div class="min-w-0">
           <h1
@@ -331,28 +331,63 @@
                     >
                       <span
                         class="block text-xs font-semibold text-slate-500 dark:text-slate-400"
-                        >#{{ orderNumber(order) }}</span
+                        >#{{ orderNumber(order)
+                        }}<template v-if="taskCode(order)">
+                          · {{ taskCode(order) }}</template
+                        ></span
                       >
                       <span
                         class="mt-0.5 block break-words font-bold text-slate-950 hover:underline dark:text-white"
-                        >{{ order.name }}</span
-                      >
-                      <span
-                        v-if="customer(order)"
-                        class="mt-0.5 block truncate text-xs text-slate-500 dark:text-slate-400"
-                        >{{ customer(order) }}</span
+                        data-task-title
+                        >{{ taskTitle(order) }}</span
                       >
                     </button>
                   </td>
-                  <td class="min-w-[12rem] px-4 py-4">
-                    <span class="block text-slate-700 dark:text-slate-200">{{
-                      stepNames(order, 'factory')
-                    }}</span>
-                    <span
-                      class="mt-1 block text-xs text-slate-500 dark:text-slate-400"
-                      >{{ c.operator }}:
-                      {{ stepNames(order, 'operator') }}</span
-                    >
+                  <td class="min-w-[14rem] px-4 py-4" data-client-cell>
+                    <div class="max-w-md">
+                      <span
+                        class="block break-words font-semibold text-slate-800 dark:text-slate-100"
+                        >{{ customer(order) || '—' }}</span
+                      >
+                      <span
+                        v-if="order.description"
+                        class="mt-1 line-clamp-2 break-words text-xs leading-5 text-slate-600 dark:text-slate-300"
+                        :title="order.description"
+                        >{{ order.description }}</span
+                      >
+                      <dl
+                        class="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs"
+                      >
+                        <dt class="text-slate-500 dark:text-slate-400">
+                          {{ c.createdAt }}
+                        </dt>
+                        <dd
+                          class="font-medium text-slate-700 dark:text-slate-200"
+                          data-created-at
+                        >
+                          {{ createdText(order) }}
+                        </dd>
+                        <dt class="text-slate-500 dark:text-slate-400">
+                          {{ c.finishAt }}
+                        </dt>
+                        <dd
+                          class="font-medium text-slate-700 dark:text-slate-200"
+                        >
+                          {{ dueText(order) }}
+                        </dd>
+                        <template v-if="order.completed_at">
+                          <dt class="text-slate-500 dark:text-slate-400">
+                            {{ c.completedAt }}
+                          </dt>
+                          <dd
+                            class="font-medium text-emerald-700 dark:text-emerald-300"
+                            data-completed-at
+                          >
+                            {{ completedText(order) }}
+                          </dd>
+                        </template>
+                      </dl>
+                    </div>
                   </td>
                   <td class="px-4 py-4">
                     <span class="flex flex-col items-start gap-1.5">
@@ -404,11 +439,14 @@
                   <span class="min-w-0">
                     <span
                       class="block text-xs font-semibold text-slate-500 dark:text-slate-400"
-                      >#{{ orderNumber(order) }}</span
+                      >#{{ orderNumber(order)
+                      }}<template v-if="taskCode(order)">
+                        · {{ taskCode(order) }}</template
+                      ></span
                     >
                     <span
                       class="mt-0.5 block break-words font-bold text-slate-950 dark:text-white"
-                      >{{ order.name }}</span
+                      >{{ taskTitle(order) }}</span
                     >
                   </span>
                   <span
@@ -420,15 +458,18 @@
                   >
                 </span>
                 <span
-                  class="mt-2 block text-sm text-slate-600 dark:text-slate-300"
-                  >{{ stepNames(order, 'factory') }}</span
+                  class="mt-2 block break-words text-sm font-semibold text-slate-700 dark:text-slate-200"
+                  >{{ customer(order) || '—' }}</span
+                >
+                <span
+                  v-if="order.description"
+                  class="mt-0.5 line-clamp-2 break-words text-xs leading-5 text-slate-500 dark:text-slate-400"
+                  >{{ order.description }}</span
                 >
                 <span
                   class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-slate-500 dark:text-slate-400"
                 >
-                  <span
-                    >{{ c.operator }}: {{ stepNames(order, 'operator') }}</span
-                  >
+                  <span>{{ c.createdAt }}: {{ createdText(order) }}</span>
                   <span
                     class="priority-badge"
                     :data-priority="priorityKey(order)"
@@ -552,7 +593,7 @@ export default {
     focusTarget: null,
     openQueryVersion: 0,
     stages: ['created', 'accepted', 'in_progress', 'completed'],
-    columns: ['task', 'workshop', 'status', 'due'],
+    columns: ['task', 'client', 'status', 'due'],
   }),
   computed: {
     boardText() {
@@ -668,8 +709,34 @@ export default {
     orderNumber(order) {
       return order.order_number?.number || order.id
     },
+    // The project and item names that the order code (990.01) stands for.
+    taskTitle(order) {
+      const item = order.remote_number
+      const names = [item?.pmp?.group_name, item?.remote_number_name]
+        .map((name) => String(name || '').trim())
+        .filter(Boolean)
+      return [...new Set(names)].join(' · ') || order.name || '—'
+    },
+    // Once a name takes its place, the code is shown next to the number.
+    taskCode(order) {
+      return order.name && this.taskTitle(order) !== order.name
+        ? order.name
+        : ''
+    },
+    // A company by its name, a person by first and last name.
     customer(order) {
-      return order.client?.company_name || order.client?.name || ''
+      const client = order.client
+      if (!client) return ''
+      const person = [client.name, client.last_name].filter(Boolean).join(' ')
+      return client.company_name || person || client.user?.name || ''
+    },
+    // created_time carries the hour and zone; created_at alone is a d/m/Y day.
+    createdText(order) {
+      if (order.created_time) return formatWallDateTime(order.created_time)
+      return String(order.created_at || '').replace(/\//g, '.') || '—'
+    },
+    completedText(order) {
+      return formatWallDateTime(order.completed_at)
     },
     dueText(order) {
       return formatWallDateTime(order.dates?.finish_date)
@@ -679,22 +746,6 @@ export default {
         return false
       const due = parseWallTime(order.dates?.finish_date)
       return Number.isFinite(due) && due < Date.now()
-    },
-    stepNames(order, key) {
-      return (
-        [
-          ...new Set(
-            (order.factory_orders || [])
-              .filter((s) => s.factory?.is_workshop !== false)
-              .flatMap((s) =>
-                key === 'operator'
-                  ? [s.operator?.name, ...(s.helpers || []).map((h) => h.name)]
-                  : [s[key]?.name]
-              )
-              .filter(Boolean)
-          ),
-        ].join(', ') || '—'
-      )
     },
     async fetchRows() {
       if (!this.$can('orders.view')) return

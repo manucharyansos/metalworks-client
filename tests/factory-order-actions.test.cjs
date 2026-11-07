@@ -127,6 +127,19 @@ for (const name of ['pages/factory/laser/index.vue', 'pages/factory/bend/index.v
     })
   }
 
+  test(`${name}: a stage waiting for earlier workshops offers no status change`, () => {
+    const waiting = order('pending', null)
+    Object.assign(waiting.factory_orders[0], { is_blocked: true, waiting_for: ['Laser'] })
+    const vm = board({ state: { details: waiting, isOpenDetails: true } })
+    assert.equal(vm.canUpdateDetails, false)
+    assert.deepEqual(vm.detailsStep.waiting_for, ['Laser'])
+    // A rejected stage may still ask to be reopened even while it waits.
+    vm.details = order('canceled', null)
+    vm.details.factory_orders[0].is_blocked = true
+    assert.equal(vm.canUpdateDetails, true)
+    vm.$destroy()
+  })
+
   test(`${name}: confirmed opens status actions from card and details`, () => {
     const vm = board({ state: { details: order(), isOpenDetails: true } })
     assert.equal(vm.canUpdateDetails, true)

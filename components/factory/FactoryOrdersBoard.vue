@@ -106,7 +106,7 @@ import {
   localFactoryDate,
   localFactoryTimestamp,
 } from '@/utils/factory-order-status'
-import { isStepRejected, taskCopy } from '@/utils/task-workflow'
+import { isStepRejected, isStepWaiting, taskCopy } from '@/utils/task-workflow'
 import FactoryTaskBoard from '@/components/factory/FactoryTaskBoard.vue'
 import TaskDetailsDialog from '@/components/factory/TaskDetailsDialog.vue'
 import OrderActionModal from '@/components/factory/OrderActionModal.vue'
@@ -206,6 +206,7 @@ export default {
         this.$can('factory.order_update') &&
         !!fo &&
         !isFactoryOrderFinished(fo.status) &&
+        !isStepWaiting(fo) &&
         (!fo.operator_id ||
           String(fo.operator_id) === String(this.currentUserId))
       )

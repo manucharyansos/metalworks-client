@@ -131,6 +131,32 @@ test('board columns get short titles and the engineer colours', () => {
       assert.ok(factoryBoardCopy[locale][key], `${locale}.${key}`)
 })
 
+test('details of a stage waiting for earlier workshops name them instead of a button', () => {
+  const { routingCopy } = load('utils/task-routing.js')
+  const details = { id: 1, name: 'Frame' }
+  const vm = component('components/factory/TaskDetailsDialog.vue', {
+    propsData: {
+      details,
+      step: { status: null, is_blocked: true, waiting_for: ['Bend', 'Laser'] },
+    },
+  })
+  assert.equal(vm.waiting, true)
+  assert.equal(vm.waitingText, `${routingCopy.hy.blocked} · Bend, Laser`)
+  vm.$destroy()
+  const unnamed = component('components/factory/TaskDetailsDialog.vue', {
+    propsData: { details, step: { status: null, is_blocked: true } },
+  })
+  assert.equal(unnamed.waitingText, routingCopy.hy.blocked)
+  unnamed.$destroy()
+  const rejected = component('components/factory/TaskDetailsDialog.vue', {
+    propsData: { details, step: { status: 'canceled', is_blocked: true } },
+  })
+  assert.equal(rejected.waiting, false, 'a rejected stage can ask to reopen')
+  rejected.$destroy()
+  for (const locale of ['hy', 'ru', 'en'])
+    assert.ok(routingCopy[locale].blockedHelp, locale)
+})
+
 test('the shared board toggles stages and clears every filter', () => {
   const vm = component('components/factory/FactoryTaskBoard.vue', {
     propsData: { selected: ['accepted'], search: '  990 ' },

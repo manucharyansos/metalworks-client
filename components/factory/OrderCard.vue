@@ -97,10 +97,16 @@
     <p v-if="isTakenByOther" class="work-alert" data-tone="red">
       Առաջադրանքը վերցված է այլ օպերատորի կողմից
     </p>
-    <p v-else-if="factoryOrder?.is_blocked" class="work-alert">
-      {{ routingText.blocked
-      }}<span v-if="factoryOrder.waiting_for?.length">
-        · {{ factoryOrder.waiting_for.join(', ') }}</span
+    <p
+      v-else-if="factoryOrder?.is_blocked"
+      class="work-alert"
+      data-step-waiting
+    >
+      <span
+        >{{ routingText.blocked
+        }}<template v-if="factoryOrder.waiting_for?.length">
+          · {{ factoryOrder.waiting_for.join(', ') }}</template
+        ></span
       >
     </p>
     <p
