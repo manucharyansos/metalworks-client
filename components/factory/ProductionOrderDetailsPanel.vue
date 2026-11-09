@@ -302,9 +302,13 @@
               >
             </div>
 
-            <div v-if="order.files?.length" class="space-y-2">
+            <TaskFileFolders
+              v-if="order.files?.length"
+              :items="order.files"
+              v-slot="{ items: files }"
+            >
               <div
-                v-for="file in order.files"
+                v-for="file in files"
                 :key="file.id"
                 class="work-file-row"
                 :data-active="String(isPreviewed(file))"
@@ -361,7 +365,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </TaskFileFolders>
             <p v-else class="py-3 text-center text-xs text-slate-400">
               Ֆայլեր չկան։
             </p>
@@ -398,6 +402,7 @@ import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
 import TaskChangeRequestPanel from '@/components/order/TaskChangeRequestPanel.vue'
 import TaskFileVersions from '@/components/order/TaskFileVersions.vue'
 import DxfViewerModal from '@/components/File/DxfViewerModal.vue'
+import TaskFileFolders from '@/components/File/TaskFileFolders.vue'
 import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 import FilePreview from '@/components/File/FilePreview.vue'
 import { fileAttribute } from '@/utils/file-production-details'
@@ -412,6 +417,7 @@ export default {
   components: {
     FilePreview,
     FileProductionAttributes,
+    TaskFileFolders,
     DxfViewerModal,
     TaskCompletionProof,
     TaskChangeRequestPanel,
