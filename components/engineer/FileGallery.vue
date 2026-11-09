@@ -1,8 +1,8 @@
 <template>
   <div class="my-3 min-w-0" data-file-gallery>
-    <div class="grid gap-3 sm:grid-cols-2">
+    <TaskFileFolders :items="items" v-slot="{ items: files }">
       <article
-        v-for="file in items"
+        v-for="file in files"
         :key="file.id || file.path"
         class="min-w-0 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900"
         :data-gallery-file="file.id"
@@ -44,7 +44,7 @@
           </button>
         </div>
       </article>
-    </div>
+    </TaskFileFolders>
     <FilePreviewModal
       v-if="previewFile"
       :file="previewFile"
@@ -57,11 +57,12 @@
 </template>
 <script>
 import { mapActions } from 'vuex'
+import TaskFileFolders from '@/components/File/TaskFileFolders.vue'
 import FilePreviewModal from '@/components/File/FilePreviewModal.vue'
 import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
 export default {
   name: 'FileGallery',
-  components: { FilePreviewModal, FileProductionAttributes },
+  components: { FilePreviewModal, FileProductionAttributes, TaskFileFolders },
   props: {
     items: { type: Array, default: () => [] },
     orderId: { type: [Number, String], default: null },

@@ -296,7 +296,7 @@
         </section>
 
         <section class="grid gap-5 xl:grid-cols-2">
-          <div class="work-card panel-card">
+          <div class="work-card panel-card min-w-0">
             <div class="panel-heading">
               <div><h3 class="panel-title">Ընտրված ֆայլեր</h3></div>
               <span
@@ -304,9 +304,15 @@
                 >{{ localOrder.selected_files?.length || 0 }}</span
               >
             </div>
-            <div v-if="localOrder.selected_files?.length" class="space-y-2">
+            <TaskFileFolders
+              v-if="localOrder.selected_files?.length"
+              :key="localOrder.id"
+              :items="localOrder.selected_files"
+              file-field="pmp_file"
+              v-slot="{ items: files }"
+            >
               <div
-                v-for="sf in localOrder.selected_files"
+                v-for="sf in files"
                 :key="sf.id"
                 class="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/70 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-950/35"
               >
@@ -319,7 +325,7 @@
                   >×{{ sf.quantity }}</span
                 >
               </div>
-            </div>
+            </TaskFileFolders>
             <p v-else class="py-8 text-center text-xs text-slate-400">
               Ընտրված ֆայլեր չկան։
             </p>
@@ -408,10 +414,11 @@
 <script>
 import { workshopSteps } from '@/utils/task-board'
 import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
+import TaskFileFolders from '@/components/File/TaskFileFolders.vue'
 import TaskRoutingPanel from '@/components/order/TaskRoutingPanel.vue'
 import { isStepCompleted } from '@/utils/task-workflow'
 export default {
-  components: { TaskCompletionProof, TaskRoutingPanel },
+  components: { TaskCompletionProof, TaskRoutingPanel, TaskFileFolders },
   props: { order: { type: Object, required: true } },
   emits: ['close', 'saved', 'routing-updated'],
   data() {
