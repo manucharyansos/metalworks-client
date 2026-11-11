@@ -20,18 +20,33 @@ export function freeIntervals(shifts, bookings) {
 }
 const DAY = /^\d{4}-\d{2}-\d{2}$/
 
-// Overdue work has no known end: it keeps the operator busy until it is done.
-export const OPEN_END = '9999-12-31'
-
 // An open job keeps its operator busy from the day it can start until its
-// deadline (or, once overdue, until it is finished).
+// deadline. Overdue work is due now: it fills today, not every future day, so
+// the calendar still shows what is planned ahead; overdue counts are shown apart.
 export function jobWindow(job, today) {
   const due = job?.due_date
   if (!DAY.test(due || '')) return null
   const start =
     DAY.test(job.starts_on || '') && job.starts_on < due ? job.starts_on : due
   const overdue = Boolean(today && due < today)
-  return { start, end: overdue ? OPEN_END : due, due, overdue }
+  return { start, end: overdue ? today : due, due, overdue }
+}
+
+const covers = (jobs, day) =>
+  jobs.some(
+    (job) => job.window && job.window.start <= day && day <= job.window.end
+  )
+
+// The first day from today on which none of the jobs holds the operator, or
+// '' when every day up to `limit` days ahead is taken.
+export function firstFreeDay(jobs, today, limit = 120) {
+  if (!DAY.test(today || '')) return ''
+  let day = today
+  for (let i = 0; i <= limit; i++) {
+    if (!covers(jobs, day)) return day
+    day = addDays(day, 1)
+  }
+  return ''
 }
 
 // Rows for the visible days so jobs that overlap never share a row.
@@ -80,10 +95,7 @@ function addDays(day, count) {
 // The free days around `day` for one operator: never before today and at most
 // `limit` days on either side, so an idle operator gets a usable range.
 export function freeSegment(jobs, day, today, limit = 13) {
-  const busy = (date) =>
-    jobs.some(
-      (job) => job.window && job.window.start <= date && date <= job.window.end
-    )
+  const busy = (date) => covers(jobs, date)
   if (!DAY.test(day || '') || day < today || busy(day)) return null
   let start = day
   let end = day
@@ -154,7 +166,8 @@ export const calendarCopy = {
     searchFrom: 'Որոնել այս ամսաթվից',
 
     title: 'Օպերատորների օրացույց',
-    help: 'Ծանրաբեռնվածությունը հաշվարկվում է առաջադրանքներից․ յուրաքանչյուր աշխատանք օպերատորին զբաղեցնում է սկսելու օրից մինչև արտադրամասին տրված ժամկետը, իսկ եթե այն չկա՝ մինչև առաջադրանքի ընդհանուր ժամկետը։ Կանաչ օրերն ազատ են։',
+    help: 'Յուրաքանչյուր աշխատանք օպերատորին զբաղեցնում է սկսելու օրից մինչև արտադրամասին տրված ժամկետը, իսկ եթե այն չկա՝ մինչև առաջադրանքի ընդհանուր ժամկետը։ Թիվը ցույց է տալիս, թե քանի աշխատանք ունի օպերատորն այդ օրը։ Ուշացած աշխատանքը հաշվվում է որպես այսօրվա աշխատանք և նշվում է կարմիր «!» նշանով։',
+    how: 'Ինչպե՞ս է հաշվվում',
     refresh: 'Թարմացնել',
     all: 'Բոլոր արտադրամասերը',
     shift: 'Աշխատանքային գրաֆիկ',
@@ -212,6 +225,28 @@ export const calendarCopy = {
     legend: 'Ծանրաբեռնվածություն',
     busyOperators: 'զբաղված',
     noOperators: 'Ընտրված ֆիլտրերով օպերատոր չկա։',
+    lead: 'Զբաղվածությունը հաշվարկվում է առաջադրանքների ժամկետներից։ Սեղմեք ազատ օրվա վրա՝ աշխատանք տեղադրելու, կամ օպերատորի վրա՝ նրա աշխատանքները տեսնելու համար։',
+    freeToday: 'Այսօր ազատ',
+    busyToday: 'Այսօր զբաղված',
+    lateJobs: 'Ուշացած աշխատանքներ',
+    unassignedJobs: 'Առանց կատարողի',
+    statusFree: 'Ազատ է այսօր',
+    statusFreeFrom: 'Ազատ՝ {date}-ից',
+    statusBusyLong: 'Զբաղված է {days}+ օր',
+    statusNoWork: 'Աշխատանք չունի',
+    busyDays: 'Զբաղված՝ {busy}/{total} օր',
+    jobs: 'Աշխատանքներ',
+    noJobs: 'Աշխատանք չկա',
+    showAll: 'Ցույց տալ բոլորը',
+    jobsOnDay: '{day}-ի աշխատանքները',
+    dueMark: 'Աշխատանքի ժամկետ',
+    lateMark: 'Ունի ուշացած աշխատանք',
+    pastDay: 'Անցած օր',
+    placeHere: 'Տեղադրել աշխատանք',
+    planJob: 'Պլանավորել ժամերը',
+    freeOperators: 'Ազատ օպերատորներ',
+    lateWarning: 'Այս օպերատորն ունի {count} ուշացած աշխատանք։',
+    reservations: 'Ամրագրված ժամեր',
   },
   ru: {
     openJobs: 'Назначенные работы',
@@ -233,7 +268,8 @@ export const calendarCopy = {
     searchFrom: 'Искать с даты',
 
     title: 'Календарь операторов',
-    help: 'Загрузка рассчитывается по заданиям: каждая работа занимает оператора со дня начала до срока цеха, а если его нет — до общего срока задания. Зелёные дни свободны.',
+    help: 'Каждая работа занимает оператора со дня начала до срока цеха, а если его нет — до общего срока задания. Число показывает, сколько работ у оператора в этот день. Просроченная работа считается работой на сегодня и отмечена красным «!».',
+    how: 'Как считается?',
     refresh: 'Обновить',
     all: 'Все цеха',
     shift: 'Рабочий график',
@@ -291,6 +327,28 @@ export const calendarCopy = {
     legend: 'Загрузка',
     busyOperators: 'заняты',
     noOperators: 'Нет операторов по выбранным фильтрам.',
+    lead: 'Загрузка считается по срокам заданий. Нажмите на свободный день, чтобы поставить работу, или на оператора, чтобы увидеть его работы.',
+    freeToday: 'Свободны сегодня',
+    busyToday: 'Заняты сегодня',
+    lateJobs: 'Просроченные работы',
+    unassignedJobs: 'Без исполнителя',
+    statusFree: 'Свободен сегодня',
+    statusFreeFrom: 'Свободен с {date}',
+    statusBusyLong: 'Занят {days}+ дней',
+    statusNoWork: 'Нет работ',
+    busyDays: 'Занят {busy} из {total} дн.',
+    jobs: 'Работы',
+    noJobs: 'Нет работ',
+    showAll: 'Показать все',
+    jobsOnDay: 'Работы на {day}',
+    dueMark: 'Срок работы',
+    lateMark: 'Есть просроченная работа',
+    pastDay: 'Прошедший день',
+    placeHere: 'Поставить работу',
+    planJob: 'Запланировать часы',
+    freeOperators: 'Свободные операторы',
+    lateWarning: 'У этого оператора просроченных работ: {count}.',
+    reservations: 'Забронированное время',
   },
   en: {
     openJobs: 'Assigned work',
@@ -311,7 +369,8 @@ export const calendarCopy = {
     searchFrom: 'Search from',
 
     title: 'Operator calendar',
-    help: 'Workload comes from your tasks: each job keeps its operator busy from the day it can start until its workshop deadline, or the task deadline when the workshop has none. Green days are free.',
+    help: 'Each job keeps its operator busy from the day it can start until its workshop deadline, or the task deadline when the workshop has none. The number shows how many jobs the operator has that day. Overdue work counts as today’s work and is marked with a red “!”.',
+    how: 'How is it calculated?',
     refresh: 'Refresh',
     all: 'All workshops',
     shift: 'Working hours',
@@ -369,6 +428,28 @@ export const calendarCopy = {
     legend: 'Workload',
     busyOperators: 'busy',
     noOperators: 'No operators match the selected filters.',
+    lead: 'Workload comes from task deadlines. Click a free day to place work there, or an operator to see their jobs.',
+    freeToday: 'Free today',
+    busyToday: 'Busy today',
+    lateJobs: 'Overdue jobs',
+    unassignedJobs: 'Without an operator',
+    statusFree: 'Free today',
+    statusFreeFrom: 'Free from {date}',
+    statusBusyLong: 'Busy {days}+ days',
+    statusNoWork: 'No work',
+    busyDays: 'Busy {busy} of {total} days',
+    jobs: 'Jobs',
+    noJobs: 'No jobs',
+    showAll: 'Show all',
+    jobsOnDay: 'Jobs on {day}',
+    dueMark: 'Job deadline',
+    lateMark: 'Has overdue work',
+    pastDay: 'Past day',
+    placeHere: 'Place work',
+    planJob: 'Plan hours',
+    freeOperators: 'Free operators',
+    lateWarning: 'This operator has {count} overdue jobs.',
+    reservations: 'Reserved hours',
   },
 }
 

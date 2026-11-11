@@ -278,7 +278,7 @@ test('calendar arrows move by the selected period and Today returns to today', (
 })
 
 test('a job occupies its operator from its start to its workshop deadline', () => {
-  const { jobWindow, jobLanes, loadLevel, jobCount, OPEN_END } = load(
+  const { jobWindow, jobLanes, loadLevel, jobCount, firstFreeDay } = load(
     'utils/operator-calendar.js'
   )
   const today = '2026-11-06'
@@ -297,12 +297,21 @@ test('a job occupies its operator from its start to its workshop deadline', () =
     '2026-11-12'
   )
   assert.equal(jobWindow({ due_date: '2026-11-12' }, today).start, '2026-11-12')
-  // Unfinished overdue work keeps the operator busy until it is done.
+  // Unfinished overdue work is due now: it holds the operator today, not every
+  // future day, so planned free days stay visible.
   assert.deepEqual(
     jobWindow({ starts_on: '2026-10-31', due_date: '2026-11-05' }, today),
-    { start: '2026-10-31', end: OPEN_END, due: '2026-11-05', overdue: true }
+    { start: '2026-10-31', end: today, due: '2026-11-05', overdue: true }
   )
   assert.equal(jobWindow({ due_date: null }, today), null)
+  const held = [
+    { window: { start: '2026-11-01', end: '2026-11-07' } },
+    { window: { start: '2026-11-08', end: '2026-11-09' } },
+    { window: null },
+  ]
+  assert.equal(firstFreeDay(held, today), '2026-11-10', 'back-to-back jobs')
+  assert.equal(firstFreeDay([], today), today)
+  assert.equal(firstFreeDay(held, today, 2), '', 'nothing free in the range')
 
   const days = [
     '2026-11-09',
@@ -423,8 +432,13 @@ test('the workload view shows each operator’s busy days, free days and deadlin
   )
   assert.equal(cutter.counts['2026-11-14'], 0)
   assert.equal(cutter.busyUntil, '2026-11-13')
-  assert.equal(vm.summary(cutter), 'Զբաղված է մինչև 13.11.2026')
+  assert.equal(cutter.freeFrom, '2026-11-14')
+  assert.equal(vm.statusText(cutter), 'Ազատ՝ 14.11.2026-ից')
+  assert.equal(vm.statusTone(cutter), 'blue')
+  assert.equal(vm.busyText(cutter), 'Զբաղված՝ 5/7 օր')
+  assert.equal(cutter.meterTone, 'amber')
   assert.equal(bender.counts['2026-11-11'], 0)
+  assert.equal(vm.statusText(bender), 'Ազատ է այսօր')
   assert.equal(bender.undated, 1)
   assert.equal(bender.minutes, 90)
   assert.equal(
@@ -432,35 +446,139 @@ test('the workload view shows each operator’s busy days, free days and deadlin
     5,
     'free from Monday to Sunday except its two job days'
   )
-  assert.equal(vm.barState(bender.lanes[0].job), 'waiting')
-  assert.equal(cutter.lanes[1].job.helper, true)
-  assert.equal(
-    vm.barState(cutter.lanes[1].job),
-    'waiting',
-    'waiting wins over helper'
+  const bend = (row) => row.jobs.find((job) => job.id === 8)
+  assert.equal(vm.barState(bend(bender)), 'waiting')
+  assert.equal(bend(cutter).helper, true)
+  assert.equal(vm.barState(bend(cutter)), 'waiting', 'waiting wins over helper')
+  assert.equal(vm.barState({ ...bend(cutter), blocked: false }), 'helper')
+  // One cell per day: how many jobs, the colour, and a deadline mark.
+  const busyDay = cutter.cells.find((cell) => cell.day === '2026-11-12')
+  assert.equal(busyDay.count, 2)
+  assert.equal(busyDay.level, 'busy')
+  assert.equal(busyDay.due, 1)
+  assert.equal(busyDay.clickable, true, 'a busy day opens its jobs')
+  const freeDay = cutter.cells.find((cell) => cell.day === '2026-11-14')
+  assert.equal(freeDay.level, 'free')
+  assert.equal(freeDay.slot, false, 'nothing to place without edit rights')
+  assert.equal(freeDay.clickable, false)
+  assert.match(vm.cellTitle(cutter, busyDay), /#2026-10-0003 · 990.01 · Laser/)
+  vm.cellClick(cutter, busyDay)
+  assert.equal(vm.expanded, 4)
+  assert.deepEqual(
+    vm.detailJobs(cutter).map((job) => job.id),
+    [7, 8]
   )
-  assert.equal(
-    vm.barState({ ...cutter.lanes[1].job, blocked: false }),
-    'helper'
-  )
+  vm.toggleRow(cutter)
+  assert.equal(vm.focusDay, '', 'the name shows all of their jobs')
+  vm.toggleRow(cutter)
+  assert.equal(vm.expanded, null)
   assert.deepEqual(vm.dayTotals['2026-11-12'], { free: 0, busy: 2, due: 1 })
   assert.deepEqual(vm.dayTotals['2026-11-14'], { free: 2, busy: 0, due: 0 })
+  assert.deepEqual(
+    { ...vm.overview },
+    { freeToday: 1, busyToday: 1, late: 0, unassigned: 0 }
+  )
   assert.equal(vm.loadText(0), 'Ազատ')
-  assert.equal(vm.monthLevel('2026-11-12'), 'heavy')
-  assert.equal(vm.monthText('2026-11-14'), '2 ազատ · 0 զբաղված')
   vm.operatorFilter = '5'
-  assert.equal(vm.monthText('2026-11-12'), '1 աշխատանք')
+  assert.deepEqual(
+    vm.timelineRows.map((row) => row.operator.name),
+    ['Bender']
+  )
   vm.$destroy()
 })
 
-test('month days sit under their weekday and tasks use visible order numbers', () => {
+test('overdue work is today’s work: it is flagged and later days stay free', () => {
+  const vm = calendar({ date: '2026-11-09', period: 'week' })
+  vm.data = {
+    today: '2026-11-10',
+    factories: [
+      { id: 2, name: 'Laser', operators: [{ id: 4, name: 'Cutter' }] },
+    ],
+    workers: [],
+    shifts: [],
+    bookings: [],
+    tasks: [
+      {
+        id: 7,
+        order_id: 3,
+        name: '990.01',
+        title: 'Gate · Frame',
+        workshop: 'Laser',
+        factory_id: 2,
+        operator_id: 4,
+        helpers: [],
+        starts_on: '2026-11-01',
+        due_date: '2026-11-05',
+        deadline_source: 'stage',
+      },
+      {
+        id: 8,
+        order_id: 4,
+        name: '991.01',
+        workshop: 'Laser',
+        factory_id: 2,
+        operator_id: null,
+        helpers: [],
+        due_date: '2026-11-30',
+        can_edit: true,
+      },
+    ],
+  }
+  const [row] = vm.timelineRows
+  const cell = (day) => row.cells.find((item) => item.day === day)
+  assert.equal(row.late, 1)
+  assert.equal(cell('2026-11-10').count, 1, 'overdue work fills today')
+  assert.equal(cell('2026-11-10').late, true)
+  assert.equal(cell('2026-11-11').count, 0, 'but not the days after it')
+  assert.equal(cell('2026-11-11').slot, true)
+  assert.equal(cell('2026-11-09').past, true)
+  assert.equal(row.freeFrom, '2026-11-11')
+  assert.equal(vm.statusText(row), 'Ազատ՝ 11.11.2026-ից')
+  assert.deepEqual(
+    { ...vm.overview },
+    { freeToday: 0, busyToday: 1, late: 1, unassigned: 1 }
+  )
+  vm.cellClick(row, cell('2026-11-11'))
+  assert.equal(vm.slot.late, 1, 'placing work warns about the overdue job')
+  assert.equal(
+    vm.fill(vm.t.lateWarning, { count: vm.slot.late }),
+    'Այս օպերատորն ունի 1 ուշացած աշխատանք։'
+  )
+  vm.closeSlot()
+  vm.cellClick(row, cell('2026-11-10'))
+  assert.equal(vm.expanded, 4)
+  assert.equal(vm.focusDay, '2026-11-10')
+  assert.deepEqual(
+    vm.detailJobs(row).map((job) => job.id),
+    [7]
+  )
+  assert.equal(vm.jobTitle(vm.detailJobs(row)[0]), '#3 · Gate · Frame')
+  vm.cellClick(row, cell('2026-11-10'))
+  assert.equal(vm.expanded, null, 'a second click closes the jobs')
+  vm.$destroy()
+})
+
+test('a month shows every day as a column and tasks use their project names', () => {
   const vm = calendar({ date: '2026-11-06', period: 'month' })
   assert.equal(vm.days[0], '2026-11-01')
-  assert.equal(vm.monthLead, 6, '1 November 2026 is a Sunday')
-  assert.equal(vm.weekdayNames[0], 'Երկ')
+  assert.equal(vm.days.length, 30)
+  assert.equal(vm.gridStyle['--days'], 30)
+  assert.equal(vm.gridStyle['--cell-min'], '1.55rem', 'narrow month columns')
+  assert.equal(vm.weekdayOf('2026-11-02'), 'Երկ')
+  assert.equal(vm.dateOf('2026-11-02'), '2 նոյ')
   assert.equal(
     vm.jobTitle({ order_id: 1, order_number: '2026-10-0001', name: '990.01' }),
     '#2026-10-0001 · 990.01'
+  )
+  assert.equal(
+    vm.jobTitle({
+      order_id: 1,
+      order_number: '2026-10-0001',
+      name: '990.01',
+      title: 'Դարպաս · Շրջանակ',
+    }),
+    '#2026-10-0001 · Դարպաս · Շրջանակ',
+    'the names replace the 990.01 code when the server sends them'
   )
   assert.equal(vm.jobTitle({ order_id: 1, name: '990.01' }), '#1 · 990.01')
   assert.equal(
@@ -472,7 +590,7 @@ test('month days sit under their weekday and tasks use visible order numbers', (
     '#2026-10-0002 · Frame'
   )
   vm.period = 'week'
-  assert.equal(vm.monthLead, 0)
+  assert.equal(vm.gridStyle['--cell-min'], '3.25rem')
   vm.$destroy()
 })
 
@@ -547,6 +665,7 @@ test('a free day in the embedded calendar is reported to the form instead of a d
       factoryIds: [2],
       start: '2026-11-11',
       end: '2026-11-25',
+      late: 0,
       stageId: '',
       startsOn: '2026-11-11',
       deadline: '2026-11-25',

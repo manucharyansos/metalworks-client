@@ -1,7 +1,6 @@
 <template>
   <main class="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
     <div class="mx-auto space-y-6">
-      <OperatorCalendar />
       <section
         class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between"
       >
@@ -42,6 +41,10 @@
           Թարմացնել
         </button>
       </section>
+
+      <!-- The busy and free days of every operator come first; the
+           distribution tools below act on them. -->
+      <OperatorCalendar />
 
       <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div class="work-card metric-card">

@@ -1,18 +1,22 @@
 <template>
   <section
-    class="space-y-5"
+    class="space-y-4"
     :class="{ 'app-surface rounded-3xl p-4 sm:p-6': !picker }"
     data-operator-calendar
   >
-    <header v-if="!picker" class="max-w-4xl">
+    <header v-if="!picker" class="max-w-3xl">
       <h2
         class="text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl"
       >
         {{ t.title }}
       </h2>
       <p class="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
-        {{ t.help }}
+        {{ t.lead }}
       </p>
+      <details class="calendar-how">
+        <summary>{{ t.how }}</summary>
+        <p>{{ t.help }}</p>
+      </details>
     </header>
 
     <div
@@ -126,262 +130,366 @@
     <p v-if="actionError" role="alert" class="calendar-alert">
       {{ actionError }}
     </p>
-    <p
-      v-if="loading"
-      role="status"
-      class="text-xs font-semibold text-slate-500 dark:text-slate-400"
-    >
-      {{ t.loading }}
-    </p>
     <template v-if="!error">
-      <div v-if="period === 'month'" class="space-y-2">
-        <div
-          class="hidden grid-cols-7 gap-2 px-1 text-center text-[11px] font-bold uppercase tracking-wide text-slate-400 sm:grid"
-          aria-hidden="true"
-        >
-          <span v-for="name in weekdayNames" :key="name">{{ name }}</span>
-        </div>
-        <div class="grid grid-cols-2 gap-2 sm:grid-cols-7">
-          <span
-            v-for="n in monthLead"
-            :key="'lead' + n"
-            class="hidden sm:block"
-            aria-hidden="true"
-          ></span>
-          <button
-            v-for="day in days"
-            :key="day"
-            type="button"
-            class="calendar-month-day"
-            :data-level="monthLevel(day)"
-            :data-today="String(day === today)"
-            :aria-current="day === today ? 'date' : null"
-            :aria-label="monthDayLabel(day)"
-            @click="openDay(day)"
-          >
-            <strong class="block text-sm sm:hidden">{{ labelDay(day) }}</strong>
-            <strong class="hidden text-base sm:block">{{
-              Number(day.slice(8, 10))
-            }}</strong>
-            <span class="mt-1 block text-[11px] font-semibold">{{
-              monthText(day)
-            }}</span>
-            <span
-              v-if="dayTotals[day].due"
-              class="calendar-count mt-1 inline-block"
-              data-tone="amber"
-              :title="c.due"
-              >● {{ dayTotals[day].due }}</span
+      <dl class="grid grid-cols-2 gap-2 lg:grid-cols-4" data-calendar-summary>
+        <div class="calendar-stat" data-tone="green">
+          <dt>{{ t.freeToday }}</dt>
+          <dd>
+            {{ overview.freeToday
+            }}<span class="calendar-stat__of">
+              / {{ timelineRows.length }}</span
             >
-          </button>
+          </dd>
         </div>
-      </div>
+        <div class="calendar-stat" data-tone="blue">
+          <dt>{{ t.busyToday }}</dt>
+          <dd>{{ overview.busyToday }}</dd>
+        </div>
+        <div
+          class="calendar-stat"
+          :data-tone="overview.late ? 'red' : 'neutral'"
+        >
+          <dt>{{ t.lateJobs }}</dt>
+          <dd>{{ overview.late }}</dd>
+        </div>
+        <div
+          class="calendar-stat"
+          :data-tone="overview.unassigned ? 'amber' : 'neutral'"
+        >
+          <dt>{{ t.unassignedJobs }}</dt>
+          <dd>{{ overview.unassigned }}</dd>
+        </div>
+      </dl>
+
       <div
-        v-else
-        class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800"
-        tabindex="0"
+        ref="scroll"
+        class="calendar-scroll"
+        :data-period="period"
+        :aria-busy="String(loading)"
         :aria-label="t.title"
       >
-        <div :style="{ minWidth: timelineWidth }">
-          <div class="calendar-row calendar-row--head">
-            <div class="calendar-person calendar-person--head">
-              {{ t.operator }}
-            </div>
-            <div class="calendar-days" :style="dayColumns">
-              <div
-                v-for="day in days"
-                :key="day"
-                class="calendar-day-head"
-                :data-today="String(day === today)"
-                :aria-current="day === today ? 'date' : null"
-              >
-                <span class="block font-bold"
-                  >{{ labelDay(day)
-                  }}<span v-if="day === today" class="calendar-today-badge">{{
-                    c.today
-                  }}</span></span
-                >
-                <span
-                  class="mt-0.5 block font-semibold"
-                  :class="
-                    dayTotals[day].free
-                      ? 'text-emerald-700 dark:text-emerald-300'
-                      : 'text-slate-400'
-                  "
-                  >{{ dayTotals[day].free }} {{ t.freeShort }}</span
-                >
-              </div>
-            </div>
-          </div>
-          <p
-            v-if="!operators.length"
-            class="p-6 text-center text-sm text-slate-500 dark:text-slate-400"
+        <div class="calendar-grid" :style="gridStyle" data-calendar-grid>
+          <div class="calendar-corner">{{ t.operator }}</div>
+          <div
+            v-for="day in days"
+            :key="'head-' + day"
+            class="calendar-head"
+            :data-today="String(day === today)"
+            :data-past="String(day < today)"
+            :aria-current="day === today ? 'date' : null"
+            :title="headTitle(day)"
           >
+            <span class="calendar-head__weekday">{{ weekdayOf(day) }}</span>
+            <span class="calendar-head__date">{{
+              period === 'month' ? Number(day.slice(8, 10)) : dateOf(day)
+            }}</span>
+            <span
+              v-if="day >= today && timelineRows.length"
+              class="calendar-head__free"
+              :data-none="String(!dayTotals[day].free)"
+              >{{
+                period === 'month'
+                  ? dayTotals[day].free
+                  : `${dayTotals[day].free} ${t.freeShort}`
+              }}</span
+            >
+          </div>
+
+          <p v-if="!timelineRows.length" class="calendar-empty">
             {{ loading ? t.loading : t.noOperators }}
           </p>
-          <div
-            v-for="row in timelineRows"
-            :key="row.operator.id"
-            class="calendar-row"
-            data-operator-row
-          >
-            <div class="calendar-person">
-              <strong
-                class="block truncate text-sm text-slate-900 dark:text-white"
-                >{{ row.operator.name }}</strong
-              >
-              <span
-                class="mt-1 block font-semibold"
-                :class="
-                  !row.jobs.length
-                    ? 'text-emerald-700 dark:text-emerald-300'
-                    : row.busyUntil
-                    ? 'text-slate-700 dark:text-slate-200'
-                    : 'text-rose-600 dark:text-rose-300'
-                "
-                >{{ summary(row) }}</span
-              >
-              <span class="mt-1 block text-slate-500 dark:text-slate-400"
-                >{{ t.openJobs }} · {{ row.jobs.length }}</span
-              >
-              <span
-                v-if="row.upcomingDays"
-                class="mt-0.5 block text-slate-500 dark:text-slate-400"
-                >{{ t.freeDays }} · {{ row.freeDays }}/{{
-                  row.upcomingDays
-                }}</span
-              >
-              <span
-                v-if="row.late"
-                class="mt-0.5 block font-semibold text-rose-600 dark:text-rose-300"
-                >{{ t.late }} · {{ row.late }}</span
-              >
-              <span v-if="row.undated" class="mt-0.5 block text-slate-500"
-                >{{ t.undated }} · {{ row.undated }}</span
-              >
-              <span v-if="row.minutes" class="mt-0.5 block text-slate-500"
-                >{{ t.estimate }} · {{ hoursText(row.minutes) }}</span
-              >
-            </div>
-            <div
-              class="calendar-days calendar-lanes"
-              :style="{ ...dayColumns, '--days': days.length }"
+
+          <template v-for="row in timelineRows">
+            <button
+              :key="'name-' + row.operator.id"
+              type="button"
+              class="calendar-name"
+              :aria-expanded="String(expanded === row.operator.id)"
+              :title="row.workshops.join(', ')"
+              data-operator-row
+              @click="toggleRow(row)"
             >
+              <span class="calendar-name__person">
+                <strong class="truncate">{{ row.operator.name }}</strong>
+                <span
+                  v-if="row.late"
+                  class="calendar-late-badge"
+                  :title="t.lateMark"
+                  >! {{ row.late }}</span
+                >
+              </span>
               <span
-                v-if="todayIndex >= 0"
-                class="calendar-today-column"
-                :style="todayColumnStyle"
-                aria-hidden="true"
-              ></span>
-              <component
-                :is="slotOpen(row, day) ? 'button' : 'span'"
-                v-for="(day, index) in days"
-                :key="'load-' + day"
-                :type="slotOpen(row, day) ? 'button' : null"
-                class="calendar-load"
-                :data-level="loadLevelOf(row.counts[day])"
-                :data-slot="String(slotOpen(row, day))"
-                :title="slotOpen(row, day) ? t.pickHint : null"
-                :style="{ gridColumn: index + 1, gridRow: 1 }"
-                @click="openSlot(row, day)"
-                >{{ loadText(row.counts[day])
-                }}<span v-if="slotOpen(row, day)" aria-hidden="true">
-                  +</span
-                ></component
+                class="calendar-name__status"
+                :data-tone="statusTone(row)"
+                >{{ statusText(row) }}</span
               >
-              <component
-                :is="bar.job.can_edit ? 'button' : 'div'"
-                v-for="bar in row.lanes"
-                :key="'bar-' + bar.job.id + (bar.job.helper ? '-helper' : '')"
-                :type="bar.job.can_edit ? 'button' : null"
-                class="calendar-bar"
-                :data-state="barState(bar.job)"
-                :data-cut-start="String(bar.continuesBefore)"
-                :data-cut-end="String(bar.continuesAfter)"
-                :style="{
-                  gridColumn: bar.from + 1 + ' / ' + (bar.to + 2),
-                  gridRow: bar.lane + 2,
-                }"
-                :title="jobTooltip(bar.job)"
-                @click="openBar(bar)"
-              >
-                <span class="block truncate font-bold">{{
-                  jobTitle(bar.job)
-                }}</span>
-                <span class="block truncate opacity-80"
-                  >{{ bar.job.workshop
-                  }}<template v-if="bar.job.helper"> · {{ c.helper }}</template
-                  ><template v-if="bar.job.blocked">
-                    · {{ t.waiting }}</template
+              <template v-if="row.upcomingDays">
+                <span
+                  class="calendar-meter"
+                  :data-tone="row.meterTone"
+                  aria-hidden="true"
+                >
+                  <span :style="{ width: row.busyPercent + '%' }"></span>
+                </span>
+                <span class="calendar-name__meta">{{ busyText(row) }}</span>
+              </template>
+            </button>
+            <component
+              :is="cell.clickable ? 'button' : 'span'"
+              v-for="cell in row.cells"
+              :key="row.operator.id + '-' + cell.day"
+              :type="cell.clickable ? 'button' : null"
+              class="calendar-cell"
+              :data-level="cell.level"
+              :data-past="String(cell.past)"
+              :data-today="String(cell.today)"
+              :data-slot="String(cell.slot)"
+              :data-late="String(cell.late)"
+              :data-reserved="String(cell.reserved)"
+              :data-focus="
+                String(expanded === row.operator.id && focusDay === cell.day)
+              "
+              :title="cellTitle(row, cell)"
+              :aria-label="cellTitle(row, cell)"
+              @click="cellClick(row, cell)"
+            >
+              <template v-if="period === 'day'">
+                <span v-if="!cell.jobs.length" class="calendar-cell__free"
+                  >{{ t.freeDay
+                  }}<template v-if="cell.slot">
+                    · + {{ t.placeHere }}</template
                   ></span
                 >
-                <span class="block truncate font-semibold">{{
-                  barDue(bar.job)
-                }}</span>
-              </component>
-              <div
-                v-for="cell in row.reservations"
-                :key="'reserved-' + cell.day"
-                class="space-y-1 px-1"
-                :style="{
-                  gridColumn: cell.index + 1,
-                  gridRow: row.laneCount + 2,
-                }"
-              >
-                <div
-                  v-for="reservation in cell.items"
-                  :key="reservation.id"
-                  class="calendar-item"
-                  data-tone="blue"
+                <span
+                  v-for="job in cell.jobs"
+                  :key="'chip-' + job.id + (job.helper ? '-helper' : '')"
+                  class="calendar-chip"
+                  :data-state="barState(job)"
                 >
-                  <strong class="block"
-                    >{{ time(reservation.starts_at) }}–{{
-                      time(reservation.ends_at)
-                    }}</strong
+                  <strong class="block truncate">{{ jobTitle(job) }}</strong>
+                  <span class="block truncate"
+                    >{{ job.workshop }} · {{ barDue(job) }}</span
                   >
-                  <span class="block break-words">{{
-                    bookingTitle(reservation)
-                  }}</span>
-                  <span
-                    v-if="reservation.is_helper"
-                    class="block font-semibold"
-                    >{{ c.helper }}</span
+                </span>
+              </template>
+              <template v-else>
+                <span class="calendar-cell__count">{{
+                  cell.count || (cell.slot ? '+' : '')
+                }}</span>
+                <span
+                  v-if="cell.due"
+                  class="calendar-cell__due"
+                  aria-hidden="true"
+                ></span>
+                <span
+                  v-if="cell.late"
+                  class="calendar-cell__late"
+                  aria-hidden="true"
+                  >!</span
+                >
+              </template>
+            </component>
+            <div
+              v-if="expanded === row.operator.id"
+              :key="'detail-' + row.operator.id"
+              class="calendar-detail"
+              data-operator-detail
+            >
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="calendar-label !mb-0">
+                    {{
+                      focusDay
+                        ? fill(t.jobsOnDay, { day: labelDay(focusDay) })
+                        : t.jobs
+                    }}
+                  </p>
+                  <h3
+                    class="text-base font-black text-slate-950 dark:text-white"
                   >
-                  <span
-                    v-if="reservation.assignment_changed"
-                    class="block font-semibold text-rose-600 dark:text-rose-300"
-                    >{{ t.changed }}</span
+                    {{ row.operator.name }}
+                  </h3>
+                  <p
+                    v-if="row.workshops.length || row.minutes"
+                    class="text-xs text-slate-500 dark:text-slate-400"
                   >
+                    {{ row.workshops.join(', ')
+                    }}<template v-if="row.minutes">
+                      · {{ t.estimate }}: {{ hoursText(row.minutes) }}</template
+                    >
+                  </p>
+                </div>
+                <div class="flex items-center gap-2">
                   <button
-                    v-if="reservation.can_edit"
+                    v-if="focusDay"
                     type="button"
-                    :disabled="busy"
-                    class="calendar-item__action !text-rose-600 dark:!text-rose-300"
-                    @click="remove('bookings', reservation.id)"
+                    class="app-button-secondary !rounded-xl !px-3 !py-1.5 !text-xs"
+                    @click="focusDay = ''"
                   >
-                    {{ t.remove }}
+                    {{ t.showAll }} ({{ row.jobs.length }})
+                  </button>
+                  <button
+                    type="button"
+                    class="calendar-detail__close"
+                    :aria-label="t.close"
+                    :title="t.close"
+                    @click="closeDetail"
+                  >
+                    ✕
                   </button>
                 </div>
               </div>
+              <p
+                v-if="!detailJobs(row).length"
+                class="mt-3 text-sm text-slate-500 dark:text-slate-400"
+              >
+                {{ t.noJobs }}
+              </p>
+              <ul v-else class="mt-3 grid gap-2 xl:grid-cols-2">
+                <li
+                  v-for="job in detailJobs(row)"
+                  :key="'job-' + job.id + (job.helper ? '-helper' : '')"
+                  class="calendar-job"
+                  :data-state="job.window ? barState(job) : 'undated'"
+                  :title="jobTooltip(job)"
+                >
+                  <div class="min-w-0 flex-1">
+                    <p class="line-clamp-2 break-words text-sm font-bold">
+                      {{ jobTitle(job) }}
+                    </p>
+                    <p class="truncate text-xs opacity-80">
+                      {{ job.workshop
+                      }}<template v-if="job.engineer">
+                        · {{ job.engineer }}</template
+                      >
+                    </p>
+                    <p class="mt-1 text-xs font-semibold">
+                      {{ jobDates(job) }}
+                    </p>
+                    <p
+                      v-if="
+                        (job.window && job.window.overdue) ||
+                        job.blocked ||
+                        job.helper ||
+                        !job.window
+                      "
+                      class="mt-1.5 flex flex-wrap gap-1"
+                    >
+                      <span
+                        v-if="job.window && job.window.overdue"
+                        class="calendar-tag"
+                        data-tone="red"
+                        >{{ t.late }}</span
+                      >
+                      <span
+                        v-if="job.blocked"
+                        class="calendar-tag"
+                        data-tone="slate"
+                        >{{ t.waiting }}</span
+                      >
+                      <span
+                        v-if="job.helper"
+                        class="calendar-tag"
+                        data-tone="violet"
+                        >{{ c.helper }}</span
+                      >
+                      <span
+                        v-if="!job.window"
+                        class="calendar-tag"
+                        data-tone="slate"
+                        >{{ t.undated }}</span
+                      >
+                    </p>
+                  </div>
+                  <button
+                    v-if="!picker && job.can_edit && job.window"
+                    type="button"
+                    class="calendar-job__action"
+                    @click="openBar({ job })"
+                  >
+                    {{ t.planJob }}
+                  </button>
+                </li>
+              </ul>
+              <div v-if="row.reservations.length" class="mt-4">
+                <p class="calendar-label">{{ t.reservations }}</p>
+                <ul class="flex flex-wrap gap-2">
+                  <li
+                    v-for="reservation in row.reservations"
+                    :key="'reserved-' + reservation.id"
+                    class="calendar-item"
+                    data-tone="blue"
+                  >
+                    <strong class="block"
+                      >{{
+                        formatDay(String(reservation.starts_at).slice(0, 10))
+                      }}
+                      {{ time(reservation.starts_at) }}–{{
+                        time(reservation.ends_at)
+                      }}</strong
+                    >
+                    <span class="block break-words">{{
+                      bookingTitle(reservation)
+                    }}</span>
+                    <span
+                      v-if="reservation.is_helper"
+                      class="block font-semibold"
+                      >{{ c.helper }}</span
+                    >
+                    <span
+                      v-if="reservation.assignment_changed"
+                      class="block font-semibold text-rose-600 dark:text-rose-300"
+                      >{{ t.changed }}</span
+                    >
+                    <button
+                      v-if="reservation.can_edit && !picker"
+                      type="button"
+                      :disabled="busy"
+                      class="calendar-item__action !text-rose-600 dark:!text-rose-300"
+                      @click="remove('bookings', reservation.id)"
+                    >
+                      {{ t.remove }}
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
+          </template>
         </div>
       </div>
 
       <div
-        v-if="period !== 'month'"
-        class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400"
+        class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400"
+        data-calendar-legend
       >
-        <span>{{ t.legend }}:</span>
-        <span class="calendar-load" data-level="free">{{ t.freeDay }}</span>
-        <span class="calendar-load" data-level="light">{{ loadText(1) }}</span>
-        <span class="calendar-load" data-level="busy">{{ loadText(2) }}</span>
-        <span class="calendar-load" data-level="heavy">{{
-          loadText(3).replace('3', '3+')
-        }}</span>
-        <span class="calendar-key" data-state="late">{{ t.late }}</span>
-        <span class="calendar-key" data-state="waiting">{{ t.waiting }}</span>
-        <span class="calendar-key" data-state="helper">{{ c.helper }}</span>
+        <span class="calendar-legend-item"
+          ><span class="calendar-swatch" data-level="free"></span
+          >{{ t.freeDay }}</span
+        >
+        <span class="calendar-legend-item"
+          ><span class="calendar-swatch" data-level="light">1</span
+          >{{ loadText(1) }}</span
+        >
+        <span class="calendar-legend-item"
+          ><span class="calendar-swatch" data-level="busy">2</span
+          >{{ loadText(2) }}</span
+        >
+        <span class="calendar-legend-item"
+          ><span class="calendar-swatch" data-level="heavy">3+</span
+          >{{ loadText(3).replace('3', '3+') }}</span
+        >
+        <span class="calendar-legend-item"
+          ><span class="calendar-swatch calendar-swatch--due"></span
+          >{{ t.dueMark }}</span
+        >
+        <span class="calendar-legend-item"
+          ><span class="calendar-swatch calendar-swatch--late">!</span
+          >{{ t.lateMark }}</span
+        >
+        <span class="calendar-legend-item"
+          ><span class="calendar-swatch" data-past="true"></span
+          >{{ t.pastDay }}</span
+        >
         <span v-if="canPlace || canCreate || picker" class="basis-full">{{
           t.pickHint
         }}</span>
@@ -421,6 +529,13 @@
             class="mt-1 text-sm font-semibold text-emerald-700 dark:text-emerald-300"
           >
             {{ formatDay(slot.start) }} – {{ formatDay(slot.end) }}
+          </p>
+          <p
+            v-if="slot.late"
+            class="mt-2 rounded-xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-200"
+            data-slot-late
+          >
+            {{ fill(t.lateWarning, { count: slot.late }) }}
           </p>
 
           <section
@@ -644,9 +759,9 @@ import { planningCopy } from '@/utils/planning-copy'
 import {
   calendarCopy,
   calendarDays,
+  firstFreeDay,
   freeSegment,
   jobCount,
-  jobLanes,
   jobWindow,
   loadLevel,
 } from '@/utils/operator-calendar'
@@ -672,6 +787,8 @@ const yerevanToday = () =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Yerevan' }).format(
     new Date()
   )
+// How far ahead "free from" looks for an operator's first free day.
+const FREE_LOOKAHEAD = 120
 let calendarIds = 0
 const empty = () => ({
   factories: [],
@@ -708,6 +825,12 @@ export default {
     request: 0,
     timer: null,
     uid: ++calendarIds,
+    // The operator whose jobs are open under their row, and the day picked.
+    expanded: null,
+    focusDay: '',
+    visibleWidth: 0,
+    // The period last scrolled to today, so refreshes do not move the view.
+    scrolledView: '',
     booking: {
       operator_id: '',
       factory_order_id: '',
@@ -731,19 +854,6 @@ export default {
     },
     days() {
       return calendarDays(this.date, this.period)
-    },
-    // Blank cells before the 1st so month days sit under their weekday.
-    monthLead() {
-      if (this.period !== 'month' || !this.days.length) return 0
-      return (new Date(`${this.days[0]}T12:00:00Z`).getUTCDay() + 6) % 7
-    },
-    weekdayNames() {
-      // 2026-11-02 is a Monday; the labels follow the interface language.
-      return Array.from(
-        { length: 7 },
-        (_, index) =>
-          this.labelDay(moveDay('2026-11-02', { days: index })).split(',')[0]
-      )
     },
     periodLabelId() {
       return `calendar-period-${this.uid}`
@@ -816,25 +926,54 @@ export default {
         )
       return groups
     },
-    // Per operator: job rows for the visible days, jobs per day and a summary.
+    // Per operator: one cell per visible day (how many jobs hold them, any
+    // deadline that day) and a summary of when they are free.
     timelineRows() {
-      const upcoming = this.days.filter((day) => day >= this.today)
+      const today = this.today
+      const upcoming = this.days.filter((day) => day >= today)
       return this.operators.map((operator) => {
         const jobs = this.assignments(operator.id)
+        const late = jobs.filter((job) => job.window?.overdue).length
+        const reservations = this.data.bookings.filter(
+          (b) =>
+            Number(b.operator_id) === Number(operator.id) &&
+            this.days.includes(String(b.starts_at).slice(0, 10))
+        )
         const counts = {}
-        for (const day of this.days)
-          counts[day] = jobs.filter(
+        const cells = this.days.map((day) => {
+          const active = jobs.filter(
             (job) =>
               job.window && job.window.start <= day && day <= job.window.end
-          ).length
-        const lanes = jobLanes(jobs, this.days)
-        return {
+          )
+          counts[day] = active.length
+          return {
+            day,
+            count: active.length,
+            level: loadLevel(active.length),
+            jobs: active,
+            due: jobs.filter((job) => job.due_date === day).length,
+            reserved: reservations.some(
+              (b) => String(b.starts_at).slice(0, 10) === day
+            ),
+            past: day < today,
+            today: day === today,
+            late: day === today && late > 0,
+          }
+        })
+        const freeDays = upcoming.filter((day) => !counts[day]).length
+        const busyDays = upcoming.length - freeDays
+        const busyPercent = upcoming.length
+          ? Math.round((busyDays / upcoming.length) * 100)
+          : 0
+        const row = {
           operator,
           jobs,
           counts,
-          lanes,
-          laneCount: lanes.reduce((max, bar) => Math.max(max, bar.lane + 1), 0),
-          // Overdue work has no known end, so it is reported separately.
+          cells,
+          late,
+          workshops: this.workshopsOf(operator.id),
+          freeFrom: firstFreeDay(jobs, today, FREE_LOOKAHEAD),
+          // The end of planned (not overdue) work, for the tooltip and tests.
           busyUntil: jobs.reduce(
             (last, job) =>
               job.window && !job.window.overdue && job.window.end > last
@@ -842,7 +981,6 @@ export default {
                 : last,
             ''
           ),
-          late: jobs.filter((job) => job.window?.overdue).length,
           undated: jobs.filter((job) => !job.window).length,
           minutes: jobs
             .filter((job) => !job.helper)
@@ -851,15 +989,18 @@ export default {
               0
             ),
           upcomingDays: upcoming.length,
-          freeDays: upcoming.filter((day) => !counts[day]).length,
-          reservations: this.days
-            .map((day, index) => ({
-              day,
-              index,
-              items: this.bookingsFor(operator.id, day),
-            }))
-            .filter((cell) => cell.items.length),
+          freeDays,
+          busyDays,
+          busyPercent,
+          meterTone:
+            busyPercent >= 85 ? 'red' : busyPercent >= 50 ? 'amber' : 'blue',
+          reservations,
         }
+        for (const cell of cells) {
+          cell.slot = this.slotOpen(row, cell.day)
+          cell.clickable = cell.slot || cell.count > 0
+        }
+        return row
       })
     },
     dayTotals() {
@@ -879,21 +1020,33 @@ export default {
       }
       return totals
     },
-    dayColumns() {
+    // Today's picture for the shown operators, whatever period is on screen.
+    overview() {
+      const rows = this.timelineRows
+      const freeToday = rows.filter((row) => row.freeFrom === this.today).length
+      const late = new Set()
+      for (const row of rows)
+        for (const job of row.jobs) if (job.window?.overdue) late.add(job.id)
       return {
-        gridTemplateColumns: `repeat(${this.days.length}, minmax(0, 1fr))`,
+        freeToday,
+        busyToday: rows.length - freeToday,
+        late: late.size,
+        unassigned: this.data.tasks.filter(
+          (task) =>
+            !task.operator_id &&
+            (!this.factoryId || String(task.factory_id) === this.factoryId)
+        ).length,
       }
     },
-    timelineWidth() {
-      const column = this.days.length === 1 ? 320 : 120
-      return `${220 + this.days.length * column}px`
-    },
-    todayIndex() {
-      return this.days.indexOf(this.today)
-    },
-    todayColumnStyle() {
-      const width = 100 / this.days.length
-      return { left: `${this.todayIndex * width}%`, width: `${width}%` }
+    gridStyle() {
+      const style = {
+        '--days': this.days.length,
+        '--cell-min':
+          { day: '16rem', month: '1.55rem' }[this.period] || '3.25rem',
+      }
+      // The open jobs stay as wide as what is on screen, even in a long month.
+      if (this.visibleWidth) style['--visible-width'] = `${this.visibleWidth}px`
+      return style
     },
     editableTasks() {
       return this.data.tasks.filter(
@@ -948,6 +1101,11 @@ export default {
       this.operatorFilter = ''
       this.booking.factory_order_id = ''
       this.booking.operator_id = ''
+      this.closeDetail()
+    },
+    // A picked day that is no longer on screen stops filtering the details.
+    days(days) {
+      if (this.focusDay && !days.includes(this.focusDay)) this.focusDay = ''
     },
     scope() {
       ++this.request
@@ -960,6 +1118,7 @@ export default {
       this.slot = null
       this.busy = false
       this.data = empty()
+      this.closeDetail()
       this.booking = {
         operator_id: '',
         factory_order_id: '',
@@ -975,12 +1134,21 @@ export default {
     this.timer = setInterval(() => {
       if (!document.hidden && !this.busy && !this.loading) this.refresh()
     }, 30000)
+    if (typeof window !== 'undefined')
+      window.addEventListener('resize', this.measure)
   },
   beforeDestroy() {
     ++this.request
     clearInterval(this.timer)
+    if (typeof window !== 'undefined')
+      window.removeEventListener('resize', this.measure)
   },
   methods: {
+    fill(text, values) {
+      return String(text).replace(/\{(\w+)\}/g, (match, key) =>
+        values[key] === undefined ? match : values[key]
+      )
+    },
     slotOpen(row, day) {
       return (
         (this.picker || this.canPlace || this.canCreate) &&
@@ -994,6 +1162,13 @@ export default {
           (f.operators || []).some((op) => Number(op.id) === Number(id))
         )
         .map((f) => Number(f.id))
+    },
+    workshopsOf(id) {
+      return this.data.factories
+        .filter((f) =>
+          (f.operators || []).some((op) => Number(op.id) === Number(id))
+        )
+        .map((f) => f.name)
     },
     openSlot(row, day) {
       if (!this.slotOpen(row, day)) return
@@ -1012,6 +1187,7 @@ export default {
       this.placedText = this.slotError = ''
       this.slot = {
         ...slot,
+        late: row.late,
         stageId: '',
         startsOn: range.start,
         deadline: range.end,
@@ -1096,41 +1272,114 @@ export default {
     formatDay(day) {
       return day ? formatWallDate(day) : ''
     },
-    loadLevelOf(count) {
-      return loadLevel(count || 0)
-    },
     loadText(count) {
       return count ? jobCount(count, this.locale) : this.t.freeDay
     },
     hoursText(minutes) {
       return `${Math.round((minutes / 60) * 10) / 10} ${this.t.hours}`
     },
-    summary(row) {
-      if (!row.jobs.length) return this.t.available
-      if (row.busyUntil)
-        return `${this.t.busyUntil} ${this.formatDay(row.busyUntil)}`
-      return row.late ? this.t.lateWork : this.t.undated
+    statusText(row) {
+      if (!row.jobs.length) return this.t.statusNoWork
+      if (row.freeFrom === this.today) return this.t.statusFree
+      if (row.freeFrom)
+        return this.fill(this.t.statusFreeFrom, {
+          date: this.formatDay(row.freeFrom),
+        })
+      return this.fill(this.t.statusBusyLong, { days: FREE_LOOKAHEAD })
     },
-    // One operator: their own load; several: the share of busy operators.
-    monthLevel(day) {
-      const rows = this.timelineRows
-      if (!rows.length) return 'free'
-      if (rows.length === 1) return loadLevel(rows[0].counts[day] || 0)
-      const share = this.dayTotals[day].busy / rows.length
-      if (!share) return 'free'
-      if (share <= 1 / 3) return 'light'
-      return share <= 2 / 3 ? 'busy' : 'heavy'
+    statusTone(row) {
+      if (!row.jobs.length || row.freeFrom === this.today) return 'green'
+      return row.freeFrom ? 'blue' : 'red'
     },
-    monthText(day) {
-      const rows = this.timelineRows
-      if (rows.length === 1) return this.loadText(rows[0].counts[day])
-      const { free, busy } = this.dayTotals[day]
-      return `${free} ${this.t.freeShort} · ${busy} ${this.t.busyOperators}`
+    busyText(row) {
+      return this.fill(this.t.busyDays, {
+        busy: row.busyDays,
+        total: row.upcomingDays,
+      })
     },
-    monthDayLabel(day) {
-      return `${this.labelDay(day)} · ${this.monthText(day)} · ${this.c.due}: ${
-        this.dayTotals[day].due
-      }`
+    weekdayOf(day) {
+      return this.labelDay(day).split(', ')[0]
+    },
+    dateOf(day) {
+      return this.labelDay(day).split(', ').slice(1).join(', ') || day
+    },
+    headTitle(day) {
+      const totals = this.dayTotals[day]
+      return totals
+        ? `${this.labelDay(day)} · ${this.t.freeOperators}: ${totals.free}`
+        : this.labelDay(day)
+    },
+    cellTitle(row, cell) {
+      const head = `${row.operator.name} · ${this.labelDay(cell.day)}`
+      if (!cell.count)
+        return cell.slot
+          ? `${head} · ${this.t.freeDay} · ${this.t.pickHint}`
+          : `${head} · ${this.t.freeDay}`
+      return [
+        `${head} · ${this.loadText(cell.count)}`,
+        ...cell.jobs.map(
+          (job) =>
+            `${this.jobTitle(job)} · ${job.workshop}${
+              job.window.overdue ? ` · ${this.t.late}` : ''
+            }`
+        ),
+      ].join('\n')
+    },
+    // A free day takes work; a busy one shows what holds the operator then.
+    cellClick(row, cell) {
+      if (cell.slot) return this.openSlot(row, cell.day)
+      if (cell.count) this.toggleRow(row, cell.day)
+    },
+    toggleRow(row, day = '') {
+      const id = row.operator.id
+      if (this.expanded === id && this.focusDay === day) {
+        this.closeDetail()
+        return
+      }
+      this.expanded = id
+      this.focusDay = day
+      this.measure()
+    },
+    measure() {
+      this.visibleWidth = this.$refs.scroll?.clientWidth || 0
+    },
+    // On a narrow screen the days scroll; start next to today, not on the 1st.
+    scrollToToday() {
+      const box = this.$refs.scroll
+      const grid = box?.firstElementChild
+      const index = this.days.indexOf(this.today)
+      if (!grid || index < 1 || box.scrollWidth <= box.clientWidth) return
+      const names = grid.firstElementChild?.offsetWidth || 0
+      const column = (grid.scrollWidth - names) / this.days.length
+      box.scrollLeft = Math.max(0, column * (index - 1))
+    },
+    closeDetail() {
+      this.expanded = null
+      this.focusDay = ''
+    },
+    // Overdue first, then by deadline; a picked day shows only its jobs.
+    detailJobs(row) {
+      const day = this.focusDay
+      const jobs = day
+        ? row.jobs.filter(
+            (job) =>
+              job.window && job.window.start <= day && day <= job.window.end
+          )
+        : row.jobs
+      return [...jobs].sort(
+        (a, b) =>
+          Number(Boolean(b.window?.overdue)) -
+            Number(Boolean(a.window?.overdue)) ||
+          (a.due_date || '9999').localeCompare(b.due_date || '9999') ||
+          a.id - b.id
+      )
+    },
+    jobDates(job) {
+      if (!job.window) return this.t.undated
+      const due = `${this.deadlineLabel(job)}: ${this.dueText(job)}`
+      return job.window.start === job.due_date
+        ? due
+        : `${this.t.start}: ${this.formatDay(job.window.start)} · ${due}`
     },
     barState(job) {
       if (job.window.overdue) return 'late'
@@ -1177,12 +1426,15 @@ export default {
         bar.job.window.start > this.today ? bar.job.window.start : this.today
       )
     },
-    // Tasks are named by their visible order number, like the task list.
+    // Tasks are named by their visible order number and, when the server
+    // knows them, the project and item names instead of a code like 990.01.
     jobTitle(job) {
-      return `#${job.order_number || job.order_id} · ${job.name}`
+      return `#${job.order_number || job.order_id} · ${job.title || job.name}`
     },
     bookingTitle(booking) {
-      return `#${booking.order_number || booking.order_id} · ${booking.task}`
+      return `#${booking.order_number || booking.order_id} · ${
+        booking.title || booking.task
+      }`
     },
     planJob(job, day) {
       this.booking.factory_order_id = job.id
@@ -1211,11 +1463,6 @@ export default {
       this.syncBookingDay()
       this.actionError = ''
     },
-    openDay(day) {
-      this.date = day
-      this.period = 'day'
-      this.refresh()
-    },
     time(v) {
       return String(v).slice(11, 16)
     },
@@ -1231,13 +1478,6 @@ export default {
         : job.deadline_source === 'stage'
         ? this.t.stageDue
         : this.t.orderDue
-    },
-    bookingsFor(id, day) {
-      return this.data.bookings.filter(
-        (b) =>
-          Number(b.operator_id) === Number(id) &&
-          b.starts_at.slice(0, 10) === day
-      )
     },
     message(e) {
       return (
@@ -1255,7 +1495,14 @@ export default {
         const data = await this.$axios.$get('/api/operator-calendar', {
           params: { from: this.days[0], to: this.days[this.days.length - 1] },
         })
-        if (request === this.request) this.data = data
+        if (request === this.request) {
+          this.data = data
+          const view = `${this.period}:${this.days[0]}`
+          if (view !== this.scrolledView) {
+            this.scrolledView = view
+            this.$nextTick(this.scrollToToday)
+          }
+        }
       } catch (e) {
         if (request === this.request) this.error = this.message(e)
       } finally {
@@ -1317,6 +1564,23 @@ export default {
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+.calendar-how {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.calendar-how summary {
+  width: fit-content;
+  cursor: pointer;
+  color: #334155;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.calendar-how p {
+  margin-top: 6px;
+}
 .calendar-icon-button {
   display: inline-flex;
   width: 40px;
@@ -1351,9 +1615,12 @@ export default {
 }
 .calendar-icon-button:focus-visible,
 .calendar-segment:focus-visible,
-.calendar-month-day:focus-visible,
-.calendar-bar:focus-visible,
-.calendar-item__action:focus-visible {
+.calendar-name:focus-visible,
+.calendar-cell:focus-visible,
+.calendar-detail__close:focus-visible,
+.calendar-job__action:focus-visible,
+.calendar-item__action:focus-visible,
+.calendar-how summary:focus-visible {
   outline: 3px solid #93c5fd;
   outline-offset: 2px;
 }
@@ -1366,26 +1633,83 @@ export default {
   font-size: 14px;
   font-weight: 600;
 }
-.calendar-row {
-  display: flex;
-  border-bottom: 1px solid #e2e8f0;
+
+/* Today in numbers. */
+.calendar-stat {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
 }
-.calendar-row:last-child {
-  border-bottom: 0;
+.calendar-stat dt {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
-.calendar-person {
+.calendar-stat dd {
+  margin: 2px 0 0;
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+.calendar-stat__of {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+}
+.calendar-stat[data-tone='green'] dd {
+  color: #047857;
+}
+.calendar-stat[data-tone='blue'] dd {
+  color: #1d4ed8;
+}
+.calendar-stat[data-tone='red'] {
+  border-color: #fecdd3;
+  background: #fff1f2;
+}
+.calendar-stat[data-tone='red'] dd {
+  color: #be123c;
+}
+.calendar-stat[data-tone='amber'] {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+.calendar-stat[data-tone='amber'] dd {
+  color: #b45309;
+}
+
+/* Operators down, days across: one coloured cell per operator and day. */
+.calendar-scroll {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+}
+.calendar-grid {
+  --name-width: 15rem;
+  display: grid;
+  min-width: min-content;
+  grid-template-columns:
+    var(--name-width)
+    repeat(var(--days, 7), minmax(var(--cell-min, 3.25rem), 1fr));
+}
+.calendar-corner,
+.calendar-name {
   position: sticky;
   left: 0;
-  z-index: 3;
-  width: 220px;
-  flex-shrink: 0;
-  padding: 12px;
+  z-index: 2;
   background: #fff;
   box-shadow: 1px 0 0 #e2e8f0;
-  font-size: 12px;
-  line-height: 1.5;
 }
-.calendar-person--head {
+.calendar-corner {
+  display: flex;
+  align-items: flex-end;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e2e8f0;
   background: #f8fafc;
   color: #64748b;
   font-size: 11px;
@@ -1393,135 +1717,376 @@ export default {
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.calendar-days {
-  position: relative;
-  display: grid;
+.calendar-head {
+  display: flex;
   min-width: 0;
-  flex: 1;
-}
-.calendar-day-head {
-  padding: 10px 8px;
-  border-left: 1px solid #e2e8f0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1px;
+  padding: 8px 2px;
+  border-bottom: 1px solid #e2e8f0;
   background: #f8fafc;
   color: #475569;
   font-size: 12px;
+  text-align: center;
 }
-.calendar-day-head[data-today='true'] {
-  background: #eff6ff;
+.calendar-head[data-past='true'] {
+  color: #94a3b8;
+}
+.calendar-head[data-today='true'] {
+  background: #dbeafe;
   color: #1d4ed8;
 }
-.calendar-today-badge {
-  margin-left: 6px;
-  padding: 1px 6px;
+.calendar-head__weekday {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.calendar-head__date {
+  font-weight: 800;
+  white-space: nowrap;
+}
+.calendar-head__free {
+  margin-top: 2px;
+  padding: 0 6px;
   border-radius: 999px;
-  background: #2563eb;
+  background: #dcfce7;
+  color: #047857;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.calendar-head__free[data-none='true'] {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+.calendar-empty {
+  grid-column: 1 / -1;
+  padding: 24px;
+  color: #64748b;
+  font-size: 14px;
+  text-align: center;
+}
+.calendar-name {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 14px;
+  border-top: 1px solid #eef2f7;
+  color: #0f172a;
+  font-size: 12px;
+  line-height: 1.35;
+  text-align: left;
+  transition: background 150ms ease;
+}
+.calendar-name:hover,
+.calendar-name[aria-expanded='true'] {
+  background: #f8fafc;
+}
+.calendar-name[aria-expanded='true'] {
+  box-shadow: inset 3px 0 0 #0f172a, 1px 0 0 #e2e8f0;
+}
+.calendar-name__person {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.calendar-late-badge {
+  flex-shrink: 0;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #e11d48;
   color: #fff;
   font-size: 10px;
+  font-weight: 800;
+  line-height: 18px;
 }
-.calendar-lanes {
-  align-content: start;
-  row-gap: 6px;
-  padding: 8px 0 10px;
-  background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px);
-  background-size: calc(100% / var(--days, 7)) 100%;
+.calendar-name__status {
+  font-weight: 700;
 }
-.calendar-today-column {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  background: rgb(37 99 235 / 6%);
-  pointer-events: none;
+.calendar-name__status[data-tone='green'] {
+  color: #047857;
 }
-.calendar-load {
-  position: relative;
-  z-index: 1;
+.calendar-name__status[data-tone='blue'] {
+  color: #1d4ed8;
+}
+.calendar-name__status[data-tone='red'] {
+  color: #be123c;
+}
+.calendar-name__meta {
+  color: #64748b;
+  font-size: 11px;
+}
+.calendar-meter {
+  display: block;
+  height: 5px;
   overflow: hidden;
-  margin: 0 4px;
-  padding: 3px 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+.calendar-meter span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #3b82f6;
+}
+.calendar-meter[data-tone='amber'] span {
+  background: #f59e0b;
+}
+.calendar-meter[data-tone='red'] span {
+  background: #ef4444;
+}
+.calendar-cell {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 66px;
+  align-items: center;
+  justify-content: center;
+  margin: 3px 2px;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  transition: box-shadow 150ms ease, background 150ms ease;
+}
+.calendar-cell[data-level='free'] {
+  background: #ecfdf5;
+  color: #059669;
+}
+.calendar-cell[data-level='light'] {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+.calendar-cell[data-level='busy'] {
+  background: #fde68a;
+  color: #92400e;
+}
+.calendar-cell[data-level='heavy'] {
+  background: #fecaca;
+  color: #b91c1c;
+}
+.calendar-cell[data-past='true'] {
+  opacity: 0.4;
+}
+.calendar-cell[data-today='true'] {
+  box-shadow: inset 0 0 0 2px #2563eb;
+}
+.calendar-cell[data-reserved='true']::before {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  right: 6px;
+  height: 3px;
+  border-radius: 999px;
+  background: #2563eb;
+  content: '';
+}
+button.calendar-cell {
+  cursor: pointer;
+}
+button.calendar-cell:hover {
+  box-shadow: inset 0 0 0 2px #0f172a;
+}
+.calendar-cell[data-slot='true'] {
+  box-shadow: inset 0 0 0 1px #6ee7b7;
+}
+.calendar-cell[data-slot='true']:hover {
+  background: #bbf7d0;
+  box-shadow: inset 0 0 0 2px #10b981;
+}
+.calendar-cell[data-focus='true'] {
+  box-shadow: inset 0 0 0 3px #0f172a;
+}
+.calendar-cell__due {
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.calendar-cell__late {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e11d48;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+}
+/* A month has narrow columns: the colour and the number carry the meaning. */
+[data-period='month'] .calendar-grid {
+  --name-width: 12rem;
+}
+[data-period='month'] .calendar-head {
+  padding: 6px 0;
+}
+[data-period='month'] .calendar-head__weekday {
+  font-size: 8px;
+  letter-spacing: 0;
+}
+[data-period='month'] .calendar-head__free {
+  padding: 0 4px;
+}
+[data-period='month'] .calendar-cell {
+  min-height: 58px;
+  margin: 3px 1px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+[data-period='month'] .calendar-cell__due {
+  bottom: 5px;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+}
+[data-period='month'] .calendar-cell__late {
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  font-size: 8px;
+}
+/* One day: each cell lists the jobs that hold the operator. */
+[data-period='day'] .calendar-cell {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: left;
+}
+.calendar-cell__free {
+  font-weight: 800;
+  text-align: center;
+}
+.calendar-chip {
+  display: block;
+  min-width: 0;
+  padding: 6px 9px;
+  border-left: 4px solid #2563eb;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 72%);
+  color: #1e3a8a;
+  font-size: 11px;
+}
+.calendar-chip[data-state='late'] {
+  border-left-color: #e11d48;
+  color: #9f1239;
+}
+.calendar-chip[data-state='waiting'] {
+  border-left-style: dashed;
+  border-left-color: #94a3b8;
+  color: #475569;
+}
+.calendar-chip[data-state='helper'] {
+  border-left-color: #7c3aed;
+  color: #4c1d95;
+}
+
+/* The jobs of one operator, opened under their row. */
+.calendar-detail {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  grid-column: 1 / -1;
+  justify-self: start;
+  width: var(--visible-width, auto);
+  min-width: 0;
+  max-width: 100%;
+  padding: 16px;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+.calendar-detail__close {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #64748b;
+}
+.calendar-detail__close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.calendar-job {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #2563eb;
+  border-radius: 12px;
+  background: #fff;
+  color: #0f172a;
+}
+.calendar-job[data-state='late'] {
+  border-left-color: #e11d48;
+  background: #fff1f2;
+}
+.calendar-job[data-state='waiting'] {
+  border-left-style: dashed;
+  border-left-color: #94a3b8;
+}
+.calendar-job[data-state='helper'] {
+  border-left-color: #7c3aed;
+}
+.calendar-job[data-state='undated'] {
+  border-left-color: #cbd5e1;
+}
+.calendar-job__action {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 700;
+}
+.calendar-job__action:hover {
+  background: #f1f5f9;
+}
+.calendar-tag {
+  padding: 1px 8px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 700;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
-.calendar-load[data-level='free'] {
-  background: #ecfdf5;
-  color: #047857;
-}
-.calendar-load[data-slot='true'] {
-  cursor: pointer;
-  box-shadow: inset 0 0 0 1px #6ee7b7;
-}
-.calendar-load[data-slot='true']:hover {
-  background: #d1fae5;
-}
-.calendar-load[data-slot='true']:focus-visible {
-  outline: 3px solid #93c5fd;
-  outline-offset: 1px;
-}
-.calendar-load[data-level='light'] {
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-.calendar-load[data-level='busy'] {
-  background: #fffbeb;
-  color: #b45309;
-}
-.calendar-load[data-level='heavy'] {
-  background: #fff1f2;
+.calendar-tag[data-tone='red'] {
+  background: #ffe4e6;
   color: #be123c;
 }
-.calendar-bar,
-.calendar-key {
-  position: relative;
-  z-index: 1;
-  min-width: 0;
-  border-left: 4px solid #2563eb;
-  border-radius: 10px;
-  background: #e8f0fe;
-  color: #1e3a8a;
-  font-size: 11px;
-  line-height: 1.45;
-  text-align: left;
-}
-.calendar-bar {
-  margin: 0 4px;
-  padding: 6px 9px;
-}
-.calendar-key {
-  padding: 2px 8px;
-}
-button.calendar-bar:hover {
-  box-shadow: 0 4px 12px -6px rgb(30 58 138 / 45%);
-}
-.calendar-bar[data-state='helper'],
-.calendar-key[data-state='helper'] {
-  border-left-color: #7c3aed;
-  background: #f3efff;
-  color: #4c1d95;
-}
-.calendar-bar[data-state='late'],
-.calendar-key[data-state='late'] {
-  border-left-color: #e11d48;
-  background: #ffe4e6;
-  color: #9f1239;
-}
-.calendar-bar[data-state='waiting'],
-.calendar-key[data-state='waiting'] {
-  border: 1px dashed #94a3b8;
-  border-left: 4px dashed #94a3b8;
-  background: #f8fafc;
+.calendar-tag[data-tone='slate'] {
+  background: #f1f5f9;
   color: #475569;
 }
-.calendar-bar[data-cut-start='true'] {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-.calendar-bar[data-cut-end='true'] {
-  margin-right: 0;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+.calendar-tag[data-tone='violet'] {
+  background: #f3efff;
+  color: #5b21b6;
 }
 .calendar-item {
   display: block;
@@ -1544,54 +2109,67 @@ button.calendar-bar:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.calendar-month-day {
-  min-width: 0;
-  min-height: 76px;
-  padding: 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  background: #fff;
-  color: #0f172a;
-  text-align: left;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+/* Legend swatches use the same colours as the cells. */
+.calendar-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-.calendar-month-day:hover {
-  border-color: #94a3b8;
-  box-shadow: 0 4px 14px -8px rgb(15 23 42 / 35%);
+.calendar-swatch {
+  position: relative;
+  display: inline-flex;
+  width: 22px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  background: #ecfdf5;
+  box-shadow: inset 0 0 0 1px #6ee7b7;
+  color: #059669;
+  font-size: 10px;
+  font-weight: 900;
 }
-.calendar-month-day[data-level='free'] {
-  border-color: #bbf7d0;
-  background: #f0fdf4;
-  color: #065f46;
+.calendar-swatch[data-level='light'] {
+  background: #dbeafe;
+  box-shadow: none;
+  color: #1d4ed8;
 }
-.calendar-month-day[data-level='light'] {
-  border-color: #bfdbfe;
-  background: #eff6ff;
-  color: #1e3a8a;
-}
-.calendar-month-day[data-level='busy'] {
-  border-color: #fde68a;
-  background: #fffbeb;
+.calendar-swatch[data-level='busy'] {
+  background: #fde68a;
+  box-shadow: none;
   color: #92400e;
 }
-.calendar-month-day[data-level='heavy'] {
-  border-color: #fecdd3;
-  background: #fff1f2;
-  color: #9f1239;
+.calendar-swatch[data-level='heavy'] {
+  background: #fecaca;
+  box-shadow: none;
+  color: #b91c1c;
 }
-.calendar-month-day[data-today='true'] {
-  box-shadow: inset 0 0 0 2px #2563eb;
+.calendar-swatch[data-past='true'] {
+  background: #e2e8f0;
+  box-shadow: none;
+  opacity: 0.6;
 }
-.calendar-count {
-  padding: 1px 7px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
+.calendar-swatch--due {
+  background: #dbeafe;
+  box-shadow: none;
 }
-.calendar-count[data-tone='amber'] {
-  background: #fef3c7;
-  color: #b45309;
+.calendar-swatch--due::after {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #1d4ed8;
+  content: '';
 }
+.calendar-swatch--late {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e11d48;
+  box-shadow: none;
+  color: #fff;
+}
+
 .calendar-panel {
   padding: 14px 16px;
   border: 1px solid #e2e8f0;
@@ -1605,39 +2183,180 @@ button.calendar-bar:hover {
   font-weight: 800;
 }
 @media (max-width: 640px) {
-  .calendar-person {
-    width: 150px;
+  .calendar-grid,
+  [data-period] .calendar-grid {
+    --name-width: 9.5rem;
+  }
+  .calendar-corner,
+  .calendar-name {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .calendar-name__meta {
+    display: none;
   }
 }
+
 /* The app switches themes with a .dark class, like assets/css/main.css. */
-.dark .calendar-label {
+.dark .calendar-label,
+.dark .calendar-how {
   color: #94a3b8;
 }
+.dark .calendar-how summary {
+  color: #cbd5e1;
+}
 .dark .calendar-icon-button,
-.dark .calendar-month-day,
 .dark .calendar-panel,
-.dark .calendar-person {
+.dark .calendar-stat,
+.dark .calendar-scroll,
+.dark .calendar-job,
+.dark .calendar-job__action {
   border-color: #334155;
   background: #0f172a;
   color: #e2e8f0;
 }
-.dark .calendar-person,
-.dark .calendar-row {
-  box-shadow: 1px 0 0 #1e293b;
-  border-color: #1e293b;
+.dark .calendar-stat dd {
+  color: #f8fafc;
 }
-.dark .calendar-person--head,
-.dark .calendar-day-head {
+.dark .calendar-stat[data-tone='green'] dd {
+  color: #6ee7b7;
+}
+.dark .calendar-stat[data-tone='blue'] dd {
+  color: #93c5fd;
+}
+.dark .calendar-stat[data-tone='red'] {
+  border-color: #881337;
+  background: #4c0519;
+}
+.dark .calendar-stat[data-tone='red'] dd {
+  color: #fecdd3;
+}
+.dark .calendar-stat[data-tone='amber'] {
+  border-color: #78350f;
+  background: #422006;
+}
+.dark .calendar-stat[data-tone='amber'] dd {
+  color: #fde68a;
+}
+.dark .calendar-corner,
+.dark .calendar-head {
   border-color: #1e293b;
   background: #111c30;
   color: #cbd5e1;
 }
-.dark .calendar-day-head[data-today='true'] {
+.dark .calendar-head[data-past='true'] {
+  color: #64748b;
+}
+.dark .calendar-head[data-today='true'] {
   background: #172554;
   color: #bfdbfe;
 }
-.dark .calendar-lanes {
-  background-image: linear-gradient(to right, #1e293b 1px, transparent 1px);
+.dark .calendar-head__free {
+  background: #052e2b;
+  color: #6ee7b7;
+}
+.dark .calendar-head__free[data-none='true'] {
+  background: #1e293b;
+  color: #64748b;
+}
+.dark .calendar-corner,
+.dark .calendar-name {
+  box-shadow: 1px 0 0 #1e293b;
+}
+.dark .calendar-name {
+  border-color: #1e293b;
+  background: #0f172a;
+  color: #f8fafc;
+}
+.dark .calendar-name:hover,
+.dark .calendar-name[aria-expanded='true'] {
+  background: #111c30;
+}
+.dark .calendar-name[aria-expanded='true'] {
+  box-shadow: inset 3px 0 0 #f8fafc, 1px 0 0 #1e293b;
+}
+.dark .calendar-name__status[data-tone='green'] {
+  color: #6ee7b7;
+}
+.dark .calendar-name__status[data-tone='blue'] {
+  color: #93c5fd;
+}
+.dark .calendar-name__status[data-tone='red'] {
+  color: #fda4af;
+}
+.dark .calendar-name__meta {
+  color: #94a3b8;
+}
+.dark .calendar-meter {
+  background: #1e293b;
+}
+.dark .calendar-cell[data-level='free'],
+.dark .calendar-swatch {
+  background: #052e2b;
+  color: #6ee7b7;
+}
+.dark .calendar-cell[data-level='light'],
+.dark .calendar-swatch[data-level='light'] {
+  background: #1e3a8a;
+  color: #dbeafe;
+}
+.dark .calendar-cell[data-level='busy'],
+.dark .calendar-swatch[data-level='busy'] {
+  background: #78350f;
+  color: #fef3c7;
+}
+.dark .calendar-cell[data-level='heavy'],
+.dark .calendar-swatch[data-level='heavy'] {
+  background: #881337;
+  color: #ffe4e6;
+}
+.dark .calendar-cell[data-today='true'] {
+  box-shadow: inset 0 0 0 2px #60a5fa;
+}
+.dark button.calendar-cell:hover,
+.dark .calendar-cell[data-focus='true'] {
+  box-shadow: inset 0 0 0 3px #f8fafc;
+}
+.dark .calendar-cell[data-slot='true']:hover {
+  background: #064e3b;
+}
+.dark .calendar-chip {
+  background: rgb(15 23 42 / 60%);
+  color: #dbeafe;
+}
+.dark .calendar-detail {
+  border-color: #1e293b;
+  background: #111c30;
+}
+.dark .calendar-detail__close:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+.dark .calendar-job[data-state='late'] {
+  background: #4c0519;
+}
+.dark .calendar-job__action:hover {
+  background: #1e293b;
+}
+.dark .calendar-tag[data-tone='red'] {
+  background: #4c0519;
+  color: #fecdd3;
+}
+.dark .calendar-tag[data-tone='slate'] {
+  background: #1e293b;
+  color: #cbd5e1;
+}
+.dark .calendar-tag[data-tone='violet'] {
+  background: #2e1065;
+  color: #ddd6fe;
+}
+.dark .calendar-item[data-tone='blue'] {
+  border-color: #1e3a8a;
+  background: #172554;
+  color: #bfdbfe;
+}
+.dark .calendar-item__action {
+  color: #93c5fd;
 }
 .dark .calendar-segment {
   color: #cbd5e1;
@@ -1650,54 +2369,6 @@ button.calendar-bar:hover {
   border-color: #881337;
   background: #4c0519;
   color: #fecdd3;
-}
-.dark .calendar-load[data-level='free'],
-.dark .calendar-month-day[data-level='free'] {
-  border-color: #065f46;
-  background: #052e2b;
-  color: #6ee7b7;
-}
-.dark .calendar-load[data-level='light'],
-.dark .calendar-month-day[data-level='light'] {
-  border-color: #1e3a8a;
-  background: #172554;
-  color: #bfdbfe;
-}
-.dark .calendar-load[data-level='busy'],
-.dark .calendar-month-day[data-level='busy'] {
-  border-color: #78350f;
-  background: #422006;
-  color: #fde68a;
-}
-.dark .calendar-load[data-level='heavy'],
-.dark .calendar-month-day[data-level='heavy'] {
-  border-color: #881337;
-  background: #4c0519;
-  color: #fecdd3;
-}
-.dark .calendar-bar,
-.dark .calendar-key,
-.dark .calendar-item[data-tone='blue'] {
-  background: #172554;
-  color: #bfdbfe;
-}
-.dark .calendar-bar[data-state='helper'],
-.dark .calendar-key[data-state='helper'] {
-  background: #2e1065;
-  color: #ddd6fe;
-}
-.dark .calendar-bar[data-state='late'],
-.dark .calendar-key[data-state='late'] {
-  background: #4c0519;
-  color: #fecdd3;
-}
-.dark .calendar-bar[data-state='waiting'],
-.dark .calendar-key[data-state='waiting'] {
-  background: #0f172a;
-  color: #cbd5e1;
-}
-.dark .calendar-item__action {
-  color: #93c5fd;
 }
 .dark .calendar-panel__summary {
   color: #f8fafc;
