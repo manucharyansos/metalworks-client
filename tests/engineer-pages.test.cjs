@@ -558,6 +558,148 @@ test('overdue work is today’s work: it is flagged and later days stay free', (
   vm.$destroy()
 })
 
+test('hours planned on a day put the work on that day, and overdue work moves there', async () => {
+  const { holds } = load('utils/operator-calendar.js')
+  assert.equal(holds({ window: null, booked: ['2026-11-17'] }, '2026-11-17'), true)
+  assert.equal(
+    holds({ window: { start: '2026-11-10', end: '2026-11-12' } }, '2026-11-17'),
+    false
+  )
+  const vm = calendar({ date: '2026-11-16', period: 'week' })
+  const reserved = (id, step, from, to, extra = {}) => ({
+    id,
+    operator_id: 4,
+    factory_order_id: step,
+    starts_at: from,
+    ends_at: to,
+    order_id: 3,
+    task: '990.01',
+    workshop: 'Laser',
+    can_edit: true,
+    ...extra,
+  })
+  vm.data = {
+    today: '2026-11-12',
+    factories: [
+      { id: 2, name: 'Laser', operators: [{ id: 4, name: 'Cutter' }] },
+    ],
+    workers: [],
+    shifts: [],
+    bookings: [
+      reserved(21, 7, '2026-11-17 10:00:00', '2026-11-17 12:00:00'),
+      // Planned after the shown week: that day is not offered as free.
+      reserved(22, 7, '2026-11-25 09:00:00', '2026-11-25 11:00:00'),
+      // Hours for work the operator no longer holds still occupy them.
+      reserved(23, 99, '2026-11-19 08:00:00', '2026-11-19 09:00:00', {
+        task: '555.01',
+        can_edit: false,
+        assignment_changed: true,
+      }),
+    ],
+    tasks: [
+      {
+        id: 7,
+        order_id: 3,
+        name: '990.01',
+        title: 'Gate · Frame',
+        workshop: 'Laser',
+        factory_id: 2,
+        operator_id: 4,
+        helpers: [],
+        starts_on: '2026-11-01',
+        due_date: '2026-11-09',
+        order_due_at: '2026-11-10 18:00:00',
+        deadline_source: 'stage',
+        can_edit: true,
+      },
+    ],
+  }
+  const [row] = vm.timelineRows
+  const cell = (day) => row.cells.find((item) => item.day === day)
+  const job = row.jobs.find((item) => item.id === 7)
+  assert.equal(row.late, 1, 'the work is still overdue')
+  assert.equal(job.window.rescheduled, true)
+  assert.equal(row.freeFrom, '2026-11-12', 'it no longer fills today')
+  assert.equal(cell('2026-11-17').count, 1, 'it shows on its planned day')
+  assert.equal(cell('2026-11-17').reserved, true)
+  assert.equal(cell('2026-11-17').slot, false, 'a planned day is not free')
+  assert.match(vm.cellTitle(row, cell('2026-11-17')), /10:00–12:00/)
+  assert.equal(vm.timesOn(job, '2026-11-17'), '10:00–12:00')
+  assert.equal(
+    vm.plannedText(job),
+    '17.11.2026 10:00–12:00, 25.11.2026 09:00–11:00'
+  )
+  assert.equal(cell('2026-11-19').count, 1, 'leftover hours occupy the day')
+  assert.equal(vm.isUndated(row.jobs.find((item) => item.id === 99)), false)
+  assert.equal(cell('2026-11-18').slot, true)
+  vm.cellClick(row, cell('2026-11-17'))
+  assert.deepEqual(
+    vm.detailJobs(row).map((item) => item.id),
+    [7]
+  )
+  // A free day takes the operator's own work too, up to the next planned day.
+  vm.openSlot(row, '2026-11-20')
+  assert.equal(vm.slot.end, '2026-11-24', 'the 25th is planned already')
+  assert.deepEqual(
+    vm.slotGroups.map((group) => [group.key, group.items.map((t) => t.id)]),
+    [['own', [7]]]
+  )
+  vm.slot.stageId = 7
+  vm.syncSlotDeadline()
+  assert.equal(vm.slotOrderPassed, true, 'the task deadline is behind')
+  assert.equal(vm.slot.extendOrder, true, 'so moving the work moves it too')
+  assert.equal(vm.slotLimitBinds, true)
+  assert.equal(vm.slotBlocked, false)
+  assert.equal(vm.slotExtends, true)
+  assert.equal(vm.slotDeadlineMax, null, 'any later day is accepted')
+  const placedBodies = []
+  vm.$axios = {
+    $post: (url, body) => {
+      placedBodies.push(body)
+      return Promise.resolve({})
+    },
+  }
+  await vm.placeStage()
+  assert.equal(placedBodies[0].extend_order, true)
+  assert.equal(placedBodies[0].deadline, '2026-11-24')
+  assert.match(vm.placedText, /Ընդհանուր ժամկետ՝ 24\.11\.2026/)
+  // Left unticked, the days do not fit, but hours can still be planned.
+  vm.openSlot(row, '2026-11-20')
+  vm.slot.stageId = 7
+  vm.syncSlotDeadline()
+  vm.slot.extendOrder = false
+  vm.syncSlotLimit()
+  assert.equal(vm.slotBlocked, true)
+  const planned = []
+  vm.planJob = (task, day) => planned.push([task.id, day])
+  vm.planFromSlot()
+  assert.deepEqual(planned, [[7, '2026-11-20']])
+  assert.equal(vm.slot, null)
+  // Saving hours opens that day's jobs so the move is visible at once.
+  const posted = []
+  vm.$axios = {
+    $post: (url, body) => {
+      posted.push([url, body.starts_at])
+      return Promise.resolve({})
+    },
+  }
+  vm.booking = {
+    operator_id: 4,
+    factory_order_id: 7,
+    day: '2026-11-21',
+    start: '10:00',
+    end: '11:00',
+  }
+  vm.closeDetail()
+  await vm.book()
+  assert.deepEqual(posted, [
+    ['/api/operator-calendar/bookings', '2026-11-21 10:00'],
+  ])
+  assert.equal(vm.expanded, 4)
+  assert.equal(vm.focusDay, '2026-11-21')
+  vm.$destroy()
+})
+
 test('a month shows every day as a column and tasks use their project names', () => {
   const vm = calendar({ date: '2026-11-06', period: 'month' })
   assert.equal(vm.days[0], '2026-11-01')
@@ -669,6 +811,7 @@ test('a free day in the embedded calendar is reported to the form instead of a d
       stageId: '',
       startsOn: '2026-11-11',
       deadline: '2026-11-25',
+      extendOrder: false,
     }
   )
   assert.deepEqual(

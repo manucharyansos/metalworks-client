@@ -270,6 +270,12 @@
                   <span class="block truncate"
                     >{{ job.workshop }} · {{ barDue(job) }}</span
                   >
+                  <span
+                    v-if="timesOn(job, cell.day)"
+                    class="block truncate font-bold"
+                    data-chip-hours
+                    >{{ t.reserved }}: {{ timesOn(job, cell.day) }}</span
+                  >
                 </span>
               </template>
               <template v-else>
@@ -350,7 +356,7 @@
                   v-for="job in detailJobs(row)"
                   :key="'job-' + job.id + (job.helper ? '-helper' : '')"
                   class="calendar-job"
-                  :data-state="job.window ? barState(job) : 'undated'"
+                  :data-state="isUndated(job) ? 'undated' : barState(job)"
                   :title="jobTooltip(job)"
                 >
                   <div class="min-w-0 flex-1">
@@ -363,15 +369,22 @@
                         · {{ job.engineer }}</template
                       >
                     </p>
-                    <p class="mt-1 text-xs font-semibold">
+                    <p v-if="jobDates(job)" class="mt-1 text-xs font-semibold">
                       {{ jobDates(job) }}
+                    </p>
+                    <p
+                      v-if="plannedText(job)"
+                      class="mt-1 text-xs font-bold text-blue-700 dark:text-blue-300"
+                      data-job-planned
+                    >
+                      {{ fill(t.plannedOn, { when: plannedText(job) }) }}
                     </p>
                     <p
                       v-if="
                         (job.window && job.window.overdue) ||
                         job.blocked ||
                         job.helper ||
-                        !job.window
+                        isUndated(job)
                       "
                       class="mt-1.5 flex flex-wrap gap-1"
                     >
@@ -394,7 +407,7 @@
                         >{{ c.helper }}</span
                       >
                       <span
-                        v-if="!job.window"
+                        v-if="isUndated(job)"
                         class="calendar-tag"
                         data-tone="slate"
                         >{{ t.undated }}</span
@@ -487,6 +500,10 @@
           >{{ t.lateMark }}</span
         >
         <span class="calendar-legend-item"
+          ><span class="calendar-swatch calendar-swatch--reserved"></span
+          >{{ t.reservedMark }}</span
+        >
+        <span class="calendar-legend-item"
           ><span class="calendar-swatch" data-past="true"></span
           >{{ t.pastDay }}</span
         >
@@ -566,15 +583,39 @@
                   @change="syncSlotDeadline"
                 >
                   <option disabled value="">{{ t.chooseWork }}</option>
-                  <option
-                    v-for="task in slotCandidates"
-                    :key="task.id"
-                    :value="task.id"
+                  <optgroup
+                    v-for="group in slotGroups"
+                    :key="group.key"
+                    :label="group.label"
                   >
-                    {{ jobTitle(task) }} · {{ task.workshop }}
-                  </option>
+                    <option
+                      v-for="task in group.items"
+                      :key="task.id"
+                      :value="task.id"
+                    >
+                      {{ candidateText(task) }}
+                    </option>
+                  </optgroup>
                 </select>
               </label>
+              <div
+                v-if="slotBlocked"
+                class="rounded-xl bg-amber-50 px-3 py-2 text-xs font-semibold leading-5 text-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
+                data-slot-order-passed
+              >
+                <p>
+                  {{
+                    fill(t.orderDuePassed, { date: formatDay(slotStageLimit) })
+                  }}
+                </p>
+                <button
+                  type="button"
+                  class="mt-2 font-bold underline underline-offset-4"
+                  @click="planFromSlot"
+                >
+                  {{ t.planHoursHere }}
+                </button>
+              </div>
               <div class="grid gap-3 sm:grid-cols-2">
                 <label class="block">
                   <span class="calendar-label">{{ t.start }}</span>
@@ -595,10 +636,30 @@
                     type="date"
                     class="app-control !py-2.5"
                     :min="slot.startsOn || today"
-                    :max="slotStageLimit || null"
+                    :max="slotDeadlineMax"
                   />
                 </label>
               </div>
+              <label
+                v-if="slotLimitBinds"
+                class="flex cursor-pointer items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2.5 text-xs font-semibold leading-5 text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100"
+                data-slot-extend
+              >
+                <input
+                  v-model="slot.extendOrder"
+                  type="checkbox"
+                  class="mt-0.5 h-4 w-4 shrink-0 rounded border-amber-300 text-slate-950 focus:ring-amber-300"
+                  @change="syncSlotLimit"
+                />
+                <span>{{
+                  slotExtends
+                    ? fill(t.extendOrderTo, {
+                        to: formatDay(slot.deadline),
+                        from: formatDay(slotStageLimit),
+                      })
+                    : fill(t.extendOrder, { from: formatDay(slotStageLimit) })
+                }}</span>
+              </label>
               <p
                 v-if="slotError"
                 role="alert"
@@ -609,7 +670,9 @@
               <button
                 type="submit"
                 class="app-button-primary w-full !rounded-xl !py-2.5"
-                :disabled="placing || !slot.stageId || !slot.deadline"
+                :disabled="
+                  placing || !slot.stageId || !slot.deadline || slotBlocked
+                "
               >
                 {{ t.place }}
               </button>
@@ -761,6 +824,7 @@ import {
   calendarDays,
   firstFreeDay,
   freeSegment,
+  holds,
   jobCount,
   jobWindow,
   loadLevel,
@@ -900,13 +964,21 @@ export default {
         (op) => !this.operatorFilter || String(op.id) === this.operatorFilter
       )
     },
-    // Open jobs per person (primary operator or helper) with the days they span.
-    // Work in every workshop counts: the workshop filter only picks operators.
+    // Open jobs per person (primary operator or helper) with the days they span
+    // and the hours reserved for them. Work in every workshop counts: the
+    // workshop filter only picks operators.
     groupedJobs() {
+      const today = this.today
+      const yesterday = moveDay(today, { days: -1 })
+      const dayOf = (booking) => String(booking.starts_at).slice(0, 10)
       const groups = new Map()
+      const add = (id, entry) => {
+        if (!groups.has(id)) groups.set(id, [])
+        groups.get(id).push(entry)
+      }
+      const matched = new Set()
       for (const job of this.data.tasks) {
         if (!job.operator_id) continue
-        const window = jobWindow(job, this.today)
         const people = [
           { id: job.operator_id, helper: false },
           ...(job.helpers || []).map((h) => ({ id: h.id, helper: true })),
@@ -914,10 +986,54 @@ export default {
         for (const person of people) {
           const id = Number(person.id)
           if (!id) continue
-          if (!groups.has(id)) groups.set(id, [])
-          groups.get(id).push({ ...job, helper: person.helper, window })
+          const reservations = this.data.bookings.filter(
+            (b) =>
+              Number(b.factory_order_id) === Number(job.id) &&
+              Number(b.operator_id) === id
+          )
+          for (const b of reservations) matched.add(b.id)
+          const booked = [...new Set(reservations.map(dayOf))].sort()
+          let window = jobWindow(job, today)
+          // Overdue work given hours on a later day moves there: it stops
+          // filling today but stays overdue.
+          if (window?.overdue && booked.some((day) => day >= today))
+            window = { ...window, end: yesterday, rescheduled: true }
+          add(id, {
+            ...job,
+            helper: person.helper,
+            window,
+            booked,
+            reservations,
+          })
         }
       }
+      // Hours reserved for work the person no longer holds still occupy them.
+      const leftover = new Map()
+      for (const b of this.data.bookings) {
+        if (matched.has(b.id)) continue
+        const key = `${b.operator_id}:${b.factory_order_id}`
+        if (!leftover.has(key))
+          leftover.set(key, {
+            id: Number(b.factory_order_id),
+            order_id: b.order_id,
+            order_number: b.order_number,
+            name: b.task,
+            title: b.title,
+            workshop: b.workshop,
+            engineer: b.engineer,
+            blocked: Boolean(b.blocked),
+            helper: Boolean(b.is_helper),
+            can_edit: false,
+            window: null,
+            booked: [],
+            reservations: [],
+            operatorId: Number(b.operator_id),
+          })
+        const entry = leftover.get(key)
+        entry.reservations.push(b)
+        if (!entry.booked.includes(dayOf(b))) entry.booked.push(dayOf(b))
+      }
+      for (const entry of leftover.values()) add(entry.operatorId, entry)
       for (const jobs of groups.values())
         jobs.sort(
           (a, b) =>
@@ -941,10 +1057,7 @@ export default {
         )
         const counts = {}
         const cells = this.days.map((day) => {
-          const active = jobs.filter(
-            (job) =>
-              job.window && job.window.start <= day && day <= job.window.end
-          )
+          const active = jobs.filter((job) => holds(job, day))
           counts[day] = active.length
           return {
             day,
@@ -981,7 +1094,7 @@ export default {
                 : last,
             ''
           ),
-          undated: jobs.filter((job) => !job.window).length,
+          undated: jobs.filter((job) => this.isUndated(job)).length,
           minutes: jobs
             .filter((job) => !job.helper)
             .reduce(
@@ -1075,14 +1188,32 @@ export default {
     canPlace() {
       return !this.picker && this.data.tasks.some((t) => t.can_edit)
     },
+    // Unassigned work in the operator's workshops, or the operator's own work
+    // to move to the free days.
     slotCandidates() {
       if (!this.slot) return []
+      const operator = Number(this.slot.operator.id)
       return this.data.tasks.filter(
         (t) =>
           t.can_edit &&
-          !t.operator_id &&
-          this.slot.factoryIds.includes(Number(t.factory_id))
+          ((!t.operator_id &&
+            this.slot.factoryIds.includes(Number(t.factory_id))) ||
+            Number(t.operator_id) === operator)
       )
+    },
+    slotGroups() {
+      return [
+        {
+          key: 'unassigned',
+          label: this.t.unassignedWork,
+          items: this.slotCandidates.filter((t) => !t.operator_id),
+        },
+        {
+          key: 'own',
+          label: this.t.operatorWork,
+          items: this.slotCandidates.filter((t) => t.operator_id),
+        },
+      ].filter((group) => group.items.length)
     },
     slotStage() {
       return this.slotCandidates.find(
@@ -1094,6 +1225,43 @@ export default {
       return this.slotStage?.order_due_at
         ? String(this.slotStage.order_due_at).slice(0, 10)
         : ''
+    },
+    // The task's overall deadline is already behind: no new workshop deadline
+    // fits unless that deadline moves too.
+    slotOrderPassed() {
+      return Boolean(this.slotStageLimit && this.slotStageLimit < this.today)
+    },
+    // The task deadline cuts into the free days, so moving it is offered.
+    slotLimitBinds() {
+      const limit = this.slotStageLimit
+      return Boolean(
+        limit &&
+          (limit < this.today ||
+            limit < this.slot?.end ||
+            limit < this.slot?.deadline)
+      )
+    },
+    slotExtends() {
+      return Boolean(
+        this.slot?.extendOrder &&
+          this.slotStageLimit &&
+          this.slot.deadline > this.slotStageLimit
+      )
+    },
+    // Without moving the task deadline the chosen days do not fit.
+    slotBlocked() {
+      const limit = this.slotStageLimit
+      return Boolean(
+        limit &&
+          !this.slot?.extendOrder &&
+          (limit < this.today || this.slot?.deadline > limit)
+      )
+    },
+    slotDeadlineMax() {
+      const limit = this.slotStageLimit
+      return limit && !this.slot?.extendOrder && limit >= this.today
+        ? limit
+        : null
     },
   },
   watch: {
@@ -1191,23 +1359,54 @@ export default {
         stageId: '',
         startsOn: range.start,
         deadline: range.end,
+        extendOrder: false,
       }
       this.$nextTick(() => this.$refs.slotDialog?.focus())
     },
     closeSlot() {
       if (!this.placing) this.slot = null
     },
+    // A newly chosen job: when its task deadline has passed, the only way to
+    // give it new days is to move that deadline too, so that is preselected.
     syncSlotDeadline() {
+      this.slot.extendOrder = this.slotOrderPassed
+      this.syncSlotLimit()
+    },
+    // Keep the workshop deadline inside the task deadline unless it moves.
+    syncSlotLimit() {
       const limit = this.slotStageLimit
-      if (limit && this.slot.deadline > limit)
-        this.slot.deadline = limit < this.today ? this.today : limit
+      if (
+        limit &&
+        !this.slot.extendOrder &&
+        limit >= this.today &&
+        this.slot.deadline > limit
+      )
+        this.slot.deadline = limit
       if (this.slot.startsOn > this.slot.deadline)
         this.slot.startsOn = this.slot.deadline
+    },
+    // Hours can be planned even when no new deadline fits.
+    planFromSlot() {
+      const stage = this.slotStage
+      const day = this.slot?.startsOn || this.slot?.start
+      if (!stage || !day) return
+      this.slot = null
+      this.planJob(stage, day)
+    },
+    candidateText(task) {
+      const due = task.due_date
+        ? ` · ${this.barDue(this.withWindow(task))}`
+        : ''
+      return `${this.jobTitle(task)} · ${task.workshop}${due}`
+    },
+    withWindow(task) {
+      return { ...task, window: jobWindow(task, this.today) }
     },
     async placeStage() {
       const slot = this.slot
       const stage = this.slotStage
-      if (this.placing || !slot || !stage) return
+      if (this.placing || !slot || !stage || this.slotBlocked) return
+      const extend = this.slotExtends
       this.placing = true
       this.slotError = ''
       try {
@@ -1216,15 +1415,23 @@ export default {
           operator_id: slot.operator.id,
           starts_on: slot.startsOn || null,
           deadline: slot.deadline,
+          extend_order: extend,
         })
         if (this._isDestroyed) return
         this.placedText = `${this.t.placed}: ${this.jobTitle(stage)} · ${
           stage.workshop
         } → ${slot.operator.name}, ${this.formatDay(
           slot.startsOn
-        )} – ${this.formatDay(slot.deadline)}`
+        )} – ${this.formatDay(slot.deadline)}${
+          extend
+            ? ` · ${this.fill(this.t.taskDeadline, {
+                date: this.formatDay(slot.deadline),
+              })}`
+            : ''
+        }`
         this.slot = null
         await this.refresh()
+        this.showPlanned(Number(slot.operator.id), slot.startsOn || slot.start)
       } catch (e) {
         if (this.slot === slot) this.slotError = this.message(e)
       } finally {
@@ -1317,13 +1524,36 @@ export default {
           : `${head} · ${this.t.freeDay}`
       return [
         `${head} · ${this.loadText(cell.count)}`,
-        ...cell.jobs.map(
-          (job) =>
-            `${this.jobTitle(job)} · ${job.workshop}${
-              job.window.overdue ? ` · ${this.t.late}` : ''
-            }`
-        ),
+        ...cell.jobs.map((job) => {
+          const hours = this.timesOn(job, cell.day)
+          return `${this.jobTitle(job)} · ${job.workshop}${
+            job.window?.overdue ? ` · ${this.t.late}` : ''
+          }${hours ? ` · ${this.t.reserved}: ${hours}` : ''}`
+        }),
       ].join('\n')
+    },
+    // "10:00–12:00, 14:00–15:00": the hours reserved for a job on one day.
+    timesOn(job, day) {
+      return (job.reservations || [])
+        .filter((b) => String(b.starts_at).slice(0, 10) === day)
+        .map((b) => `${this.time(b.starts_at)}–${this.time(b.ends_at)}`)
+        .join(', ')
+    },
+    // Every planned slot of a job from today on, earliest first.
+    plannedText(job) {
+      return (job.reservations || [])
+        .filter((b) => String(b.ends_at).slice(0, 10) >= this.today)
+        .sort((a, b) => String(a.starts_at).localeCompare(String(b.starts_at)))
+        .map(
+          (b) =>
+            `${this.formatDay(String(b.starts_at).slice(0, 10))} ${this.time(
+              b.starts_at
+            )}–${this.time(b.ends_at)}`
+        )
+        .join(', ')
+    },
+    isUndated(job) {
+      return !job.window && !(job.booked && job.booked.length)
     },
     // A free day takes work; a busy one shows what holds the operator then.
     cellClick(row, cell) {
@@ -1360,12 +1590,7 @@ export default {
     // Overdue first, then by deadline; a picked day shows only its jobs.
     detailJobs(row) {
       const day = this.focusDay
-      const jobs = day
-        ? row.jobs.filter(
-            (job) =>
-              job.window && job.window.start <= day && day <= job.window.end
-          )
-        : row.jobs
+      const jobs = day ? row.jobs.filter((job) => holds(job, day)) : row.jobs
       return [...jobs].sort(
         (a, b) =>
           Number(Boolean(b.window?.overdue)) -
@@ -1375,14 +1600,14 @@ export default {
       )
     },
     jobDates(job) {
-      if (!job.window) return this.t.undated
+      if (!job.window) return this.isUndated(job) ? this.t.undated : ''
       const due = `${this.deadlineLabel(job)}: ${this.dueText(job)}`
       return job.window.start === job.due_date
         ? due
         : `${this.t.start}: ${this.formatDay(job.window.start)} · ${due}`
     },
     barState(job) {
-      if (job.window.overdue) return 'late'
+      if (job.window?.overdue) return 'late'
       if (job.blocked) return 'waiting'
       return job.helper ? 'helper' : 'active'
     },
@@ -1398,6 +1623,7 @@ export default {
       return this.formatDay(job.due_date)
     },
     barDue(job) {
+      if (!job.window) return this.isUndated(job) ? this.t.undated : ''
       return job.window.overdue
         ? `${this.t.late} · ${this.formatDay(job.due_date)}`
         : `${this.deadlineLabel(job)}: ${this.dueText(job)}`
@@ -1524,12 +1750,14 @@ export default {
         if (scope === this.scope && !this._isDestroyed) this.busy = false
       }
     },
-    book() {
+    async book() {
       if (this.teamDirty || this.loading || !this.selectedStage?.operator_id)
         return
       const scope = this.scope
+      const operator = Number(this.booking.operator_id)
+      const day = this.booking.day
       this.bookingSaved = ''
-      return this.mutate(async () => {
+      await this.mutate(async () => {
         await this.$axios.$post('/api/operator-calendar/bookings', {
           allow_without_shift: true,
           team_version: this.selectedStage.team_version,
@@ -1544,6 +1772,24 @@ export default {
           this.bookingSaved =
             this.booking.day + ' ' + this.booking.start + '–' + this.booking.end
       })
+      // Show the work on its new day right away, with that day's jobs open.
+      if (this.bookingSaved && scope === this.scope && !this._isDestroyed)
+        this.showPlanned(operator, day)
+    },
+    showPlanned(operator, day) {
+      if (!this.days.includes(day)) {
+        this.date = day
+        this.refresh()
+      }
+      this.expanded = operator
+      this.focusDay = day
+      this.measure()
+      this.$nextTick(() =>
+        this.$refs.scroll?.scrollIntoView?.({
+          behavior: 'smooth',
+          block: 'center',
+        })
+      )
     },
     remove(kind, id) {
       if (window.confirm(this.t.confirm))
@@ -2168,6 +2414,20 @@ button.calendar-cell:hover {
   background: #e11d48;
   box-shadow: none;
   color: #fff;
+}
+.calendar-swatch--reserved {
+  background: #dbeafe;
+  box-shadow: none;
+}
+.calendar-swatch--reserved::before {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  right: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: #2563eb;
+  content: '';
 }
 
 .calendar-panel {

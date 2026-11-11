@@ -32,10 +32,16 @@ export function jobWindow(job, today) {
   return { start, end: overdue ? today : due, due, overdue }
 }
 
-const covers = (jobs, day) =>
-  jobs.some(
-    (job) => job.window && job.window.start <= day && day <= job.window.end
+// Whether a job holds its operator on a day: inside its deadline window, or on
+// a day with hours reserved for it (`booked`, a list of "YYYY-MM-DD" days).
+export function holds(job, day) {
+  return Boolean(
+    (job?.window && job.window.start <= day && day <= job.window.end) ||
+      (Array.isArray(job?.booked) && job.booked.includes(day))
   )
+}
+
+const covers = (jobs, day) => jobs.some((job) => holds(job, day))
 
 // The first day from today on which none of the jobs holds the operator, or
 // '' when every day up to `limit` days ahead is taken.
@@ -205,9 +211,9 @@ export const calendarCopy = {
     busyUntil: 'Զբաղված է մինչև',
     lateWork: 'Ունի ուշացած աշխատանք',
     slotTitle: 'Ազատ ժամանակ',
-    placeExisting: 'Տեղադրել առկա աշխատանք',
+    placeExisting: 'Տեղադրել կամ տեղափոխել աշխատանք',
     placeHelp:
-      'Ընտրված աշխատանքը կնշանակվի օպերատորին, իսկ արտադրամասի ժամկետը կդառնա ընտրված օրը։',
+      'Չնշանակված աշխատանքը կնշանակվի այս օպերատորին, իսկ նրա սեփական աշխատանքը կտեղափոխվի այս օրերին։ Սկիզբը և արտադրամասի ժամկետը կդառնան ընտրված օրերը։',
     noCandidates: 'Այս օպերատորի արտադրամասերում չնշանակված աշխատանք չկա։',
     chooseWork: 'Ընտրեք աշխատանքը',
     place: 'Տեղադրել',
@@ -247,6 +253,16 @@ export const calendarCopy = {
     freeOperators: 'Ազատ օպերատորներ',
     lateWarning: 'Այս օպերատորն ունի {count} ուշացած աշխատանք։',
     reservations: 'Ամրագրված ժամեր',
+    unassignedWork: 'Չնշանակված աշխատանքներ',
+    operatorWork: 'Այս օպերատորի աշխատանքները',
+    plannedOn: 'Պլանավորված՝ {when}',
+    orderDuePassed:
+      'Արտադրամասի ժամկետը չի կարող լինել առաջադրանքի ընդհանուր ժամկետից ({date}) ուշ։ Նշեք ներքևում՝ ընդհանուր ժամկետն էլ տեղափոխելու համար, կամ պլանավորեք ժամեր այս օրը։',
+    planHoursHere: 'Պլանավորել ժամեր այս օրը',
+    extendOrder: 'Տեղափոխել նաև առաջադրանքի ընդհանուր ժամկետը (հիմա՝ {from})',
+    extendOrderTo: 'Առաջադրանքի ընդհանուր ժամկետը կդառնա {to} (հիմա՝ {from})',
+    taskDeadline: 'Ընդհանուր ժամկետ՝ {date}',
+    reservedMark: 'Ամրագրված ժամեր',
   },
   ru: {
     openJobs: 'Назначенные работы',
@@ -307,9 +323,9 @@ export const calendarCopy = {
     busyUntil: 'Занят до',
     lateWork: 'Есть просроченная работа',
     slotTitle: 'Свободное время',
-    placeExisting: 'Поставить существующую работу',
+    placeExisting: 'Поставить или перенести работу',
     placeHelp:
-      'Выбранная работа будет назначена оператору, а срок цеха станет выбранным днём.',
+      'Неназначенная работа будет назначена этому оператору, а его собственная работа перенесена на эти дни. Начало и срок цеха станут выбранными днями.',
     noCandidates: 'В цехах этого оператора нет неназначенных работ.',
     chooseWork: 'Выберите работу',
     place: 'Поставить',
@@ -349,6 +365,16 @@ export const calendarCopy = {
     freeOperators: 'Свободные операторы',
     lateWarning: 'У этого оператора просроченных работ: {count}.',
     reservations: 'Забронированное время',
+    unassignedWork: 'Неназначенные работы',
+    operatorWork: 'Работы этого оператора',
+    plannedOn: 'Запланировано: {when}',
+    orderDuePassed:
+      'Срок цеха не может быть позже общего срока задания ({date}). Отметьте ниже перенос общего срока или запланируйте часы на этот день.',
+    planHoursHere: 'Запланировать часы на этот день',
+    extendOrder: 'Перенести и общий срок задания (сейчас {from})',
+    extendOrderTo: 'Общий срок задания станет {to} (сейчас {from})',
+    taskDeadline: 'Общий срок: {date}',
+    reservedMark: 'Забронированные часы',
   },
   en: {
     openJobs: 'Assigned work',
@@ -408,9 +434,9 @@ export const calendarCopy = {
     busyUntil: 'Busy until',
     lateWork: 'Has overdue work',
     slotTitle: 'Free time',
-    placeExisting: 'Place existing work',
+    placeExisting: 'Place or move work',
     placeHelp:
-      'The selected work is assigned to this operator and its workshop deadline becomes the chosen day.',
+      'Unassigned work is assigned to this operator, and their own work moves to these days. The start and the workshop deadline become the chosen days.',
     noCandidates: 'No unassigned work in this operator’s workshops.',
     chooseWork: 'Select work',
     place: 'Place',
@@ -450,6 +476,16 @@ export const calendarCopy = {
     freeOperators: 'Free operators',
     lateWarning: 'This operator has {count} overdue jobs.',
     reservations: 'Reserved hours',
+    unassignedWork: 'Unassigned work',
+    operatorWork: 'This operator’s work',
+    plannedOn: 'Planned: {when}',
+    orderDuePassed:
+      'A workshop deadline cannot be later than the task deadline ({date}). Tick below to move the task deadline too, or plan hours on this day.',
+    planHoursHere: 'Plan hours on this day',
+    extendOrder: 'Also move the task deadline (now {from})',
+    extendOrderTo: 'The task deadline becomes {to} (now {from})',
+    taskDeadline: 'Task deadline: {date}',
+    reservedMark: 'Reserved hours',
   },
 }
 
