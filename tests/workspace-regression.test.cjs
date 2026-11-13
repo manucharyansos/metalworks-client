@@ -83,6 +83,27 @@ test('persistent CSRF errors stop after one retry and retain the server explanat
   assert.deepEqual(commits.at(-1), ['setErrorMessage', 'CSRF token mismatch.'])
 })
 
+const rejectedAt = (url, message) => ({ ...failure(401, message), config: { url } })
+
+test('a session dropped right after a successful sign-in recovers on one click', async () => {
+  const { calls, commits, result } = await attemptLogin([rejectedAt('/api/user', 'Unauthenticated.'), null])
+  assert.equal(result, true)
+  assert.equal(calls.length, 2)
+  assert.deepEqual(commits, [['setErrorMessage', null]])
+})
+
+test('a repeated identity rejection stops after one retry', async () => {
+  const { calls, result } = await attemptLogin([rejectedAt('/api/user', 'Unauthenticated.'), rejectedAt('/api/user', 'Unauthenticated.')])
+  assert.equal(result, false)
+  assert.equal(calls.length, 2)
+})
+
+test('wrong credentials are never sent twice', async () => {
+  const { calls, result } = await attemptLogin([rejectedAt('/api/login', 'Invalid credentials')])
+  assert.equal(result, false)
+  assert.equal(calls.length, 1)
+})
+
 for (const status of [401, 403, 422, 429, 500]) {
   test(`HTTP ${status} does not trigger another login`, async () => {
     const { calls, result } = await attemptLogin([failure(status, 'Rejected')])

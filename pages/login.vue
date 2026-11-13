@@ -118,6 +118,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import { isNavigationFailure } from 'vue-router'
 import { companyHome } from '~/utils/company-workspace'
 import inputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import WorkspaceBranding from '~/components/auth/WorkspaceBranding.vue'
@@ -178,7 +179,7 @@ export default {
       if (this.loading || this.retrySeconds > 0) return
       this.submitted = true
       this.loading = true
-      this.errorMessage.general = ''
+      this.clearGeneralError()
       try {
         if (this.email && this.password.length >= 6) {
           const response = await this.loginUser({
@@ -190,11 +191,13 @@ export default {
           })
 
           if (response) {
-            this.email = ''
-            this.password = ''
-
+            // The filled form stays until the next page replaces it: clearing it
+            // here showed empty fields with "required" messages meanwhile.
             const target = this.localePath(companyHome(this.$auth.user))
-            await this.$router.replace(target)
+            await this.$router.replace(target).catch((failure) => {
+              // A page guard sending the account elsewhere is still a sign-in.
+              if (!isNavigationFailure(failure)) throw failure
+            })
           } else if (typeof this.getErrorMessage === 'string') {
             this.errorMessage.general = this.getErrorMessage
           } else {

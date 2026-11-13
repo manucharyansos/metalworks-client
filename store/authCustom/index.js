@@ -1,3 +1,10 @@
+// The identity request that follows a successful sign-in. A 401 there means
+// the server dropped a stale session, so signing in once more starts clean;
+// wrong credentials are a 401 from the sign-in request and are never resent.
+const rejectedIdentity = (error) =>
+  error?.response?.status === 401 &&
+  /\/api\/user(?:\?|$)/.test(String(error?.config?.url || ''))
+
 export const state = () => ({
   loginBlockedUntil: 0,
   resMessage: null,
@@ -46,7 +53,7 @@ export const actions = {
       try {
         await this.$auth.loginWith('runtimeSanctum', userData)
       } catch (error) {
-        if (error?.response?.status !== 419) throw error
+        if (error?.response?.status !== 419 && !rejectedIdentity(error)) throw error
 
         // CookieScheme refreshes Sanctum's CSRF cookie before each login.
         // A stale session after logout may require one fresh handshake.
