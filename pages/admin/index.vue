@@ -84,14 +84,9 @@
           <div
             class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
           >
-            <div>
-              <h2 class="mt-1 text-lg font-bold text-slate-950 dark:text-white">
-                Արտադրամասերի վիճակ
-              </h2>
-              <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                Ակտիվ, ուշացած, չնշանակված և հաստատման սպասող աշխատանքներ
-              </p>
-            </div>
+            <h2 class="text-lg font-bold text-slate-950 dark:text-white">
+              Արտադրամասերի վիճակ
+            </h2>
             <div class="flex gap-2">
               <select v-model="factoryHealthFilter" class="small-control">
                 <option value="">Բոլոր վիճակները</option>
@@ -125,7 +120,6 @@
                   <p
                     class="mt-1 text-[11px] text-slate-500 dark:text-slate-400"
                   >
-                    {{ factory.value || '—' }} ·
                     {{ factory.operators_count }} աշխատակից
                   </p>
                 </div>
@@ -170,22 +164,28 @@
                   </p>
                 </div>
               </div>
+              <!-- Only what has happened: a row of zeros says nothing. -->
               <div
+                v-if="
+                  factory.due_today ||
+                  factory.awaiting_admin_confirmation ||
+                  factory.completed_30d
+                "
                 class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500 dark:text-slate-400"
               >
-                <span
+                <span v-if="factory.due_today"
                   >Այսօր՝
                   <strong class="text-slate-700 dark:text-slate-200">{{
                     factory.due_today
                   }}</strong></span
                 >
-                <span
+                <span v-if="factory.awaiting_admin_confirmation"
                   >{{ $t('operations_dashboard.awaiting') }}՝
                   <strong class="text-slate-700 dark:text-slate-200">{{
                     factory.awaiting_admin_confirmation
                   }}</strong></span
                 >
-                <span
+                <span v-if="factory.completed_30d"
                   >30 օրում ավարտված՝
                   <strong class="text-slate-700 dark:text-slate-200">{{
                     factory.completed_30d
@@ -534,37 +534,41 @@
           </div>
 
           <div v-if="orders.length" class="hidden overflow-x-auto lg:block">
-            <table class="w-full min-w-[1050px] text-left">
+            <table class="w-full min-w-[940px] text-left">
               <thead
                 class="bg-slate-50/80 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40"
               >
                 <tr>
-                  <th class="px-6 py-3.5">Առաջադրանք</th>
+                  <th class="px-5 py-3.5">Առաջադրանք</th>
                   <th class="px-4 py-3.5">Պատվիրատու</th>
                   <th class="px-4 py-3.5">Արտադրամաս / աշխատակից</th>
                   <th class="px-4 py-3.5">Վերջնաժամկետ</th>
-                  <th class="px-4 py-3.5">Ստատուս</th>
-                  <th class="px-6 py-3.5 text-right">Գործողություն</th>
+                  <th class="px-4 py-3.5">Կարգավիճակ</th>
+                  <th class="px-5 py-3.5">
+                    <span class="sr-only">Դիտել</span>
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                 <tr
                   v-for="order in orders"
                   :key="order.id"
-                  class="transition hover:bg-slate-50/70 dark:hover:bg-slate-950/30"
+                  class="cursor-pointer align-top transition hover:bg-slate-50/70 dark:hover:bg-slate-950/30"
+                  @click="openOrder(order)"
                 >
-                  <td class="px-6 py-4">
-                    <p class="text-xs font-bold text-slate-900 dark:text-white">
-                      {{ orderNumber(order) }}
+                  <td class="px-5 py-4">
+                    <p
+                      class="text-xs font-semibold text-slate-500 dark:text-slate-400"
+                    >
+                      {{ taskReference(order) }}
                     </p>
                     <p
-                      class="mt-1 max-w-[260px] truncate text-sm font-semibold text-slate-700 dark:text-slate-200"
+                      class="mt-0.5 max-w-[260px] break-words text-sm font-bold text-slate-900 dark:text-white"
                     >
-                      {{ order.name || 'Առանց անվանման' }}
+                      {{ taskTitle(order) }}
                     </p>
-                    <p class="mt-1 text-[10px] text-slate-400">
-                      {{ order.prefix_code?.code || '—' }} ·
-                      {{ formatDate(order.created_at) }}
+                    <p class="mt-1 text-[11px] text-slate-400">
+                      {{ createdText(order) }}
                     </p>
                   </td>
                   <td class="px-4 py-4">
@@ -587,18 +591,18 @@
                         class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                       >
                         {{ fo.factory?.name || '—' }} ·
-                        {{ fo.operator?.name || 'չնշ.' }}
+                        {{ fo.operator?.name || 'չնշանակված' }}
                       </span>
                     </div>
                   </td>
-                  <td class="px-4 py-4">
+                  <td class="whitespace-nowrap px-4 py-4">
                     <span
                       class="rounded-full px-2.5 py-1 text-[10px] font-bold"
                       :class="deadlineClass(order)"
                       >{{ deadlineLabel(order) }}</span
                     >
-                    <p class="mt-1 text-[10px] text-slate-400">
-                      {{ formatDate(order.dates?.finish_date) }}
+                    <p class="mt-1.5 text-[11px] text-slate-400">
+                      {{ formatDateTime(order.dates?.finish_date) || '—' }}
                     </p>
                   </td>
                   <td class="px-4 py-4">
@@ -607,10 +611,11 @@
                       >{{ statusText(order.status) }}</span
                     >
                   </td>
-                  <td class="px-6 py-4 text-right">
+                  <td class="px-5 py-4 text-right">
                     <button
-                      class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
-                      @click="openOrder(order)"
+                      type="button"
+                      class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-950 hover:bg-slate-950 hover:text-white dark:border-slate-700 dark:text-slate-200 dark:hover:bg-white dark:hover:text-slate-950"
+                      @click.stop="openOrder(order)"
                     >
                       Դիտել
                     </button>
@@ -738,6 +743,8 @@
 
 <script>
 import { taskStatusText, workshopSteps } from '@/utils/task-board'
+import { taskReference, taskTitle } from '@/utils/task-names'
+import { formatWallDateTime, parseWallTime } from '@/utils/wall-time'
 import { metricTaskFilters, operatorTaskFilters } from '@/utils/dashboard-tasks'
 import DashboardTasksModal from '@/components/admin/dashboard/TasksModal.vue'
 import AdminOrderCard from '@/components/admin/orders/OrderCard.vue'
@@ -799,7 +806,7 @@ export default {
         to: 0,
       },
       filters: emptyFilters(),
-      showAdvanced: true,
+      showAdvanced: false,
       operatorSearch: '',
       operatorFactoryFilter: '',
       workloadFilter: '',
@@ -825,11 +832,11 @@ export default {
           icon: '+',
           tone: 'blue',
         },
+        // The labels say it all; only the created card adds how many are open.
         {
           key: 'overdue',
           label: this.$t('operations_dashboard.overdue'),
           value: this.summary.overdue_orders || 0,
-          description: this.$t('operations_dashboard.overdue_description'),
           icon: '!',
           tone: 'red',
         },
@@ -840,7 +847,6 @@ export default {
             this.summary.awaiting_engineer_confirmation ??
             this.summary.awaiting_admin_confirmation ??
             0,
-          description: this.$t('operations_dashboard.awaiting_description'),
           icon: '…',
           tone: 'amber',
         },
@@ -848,7 +854,6 @@ export default {
           key: 'completed',
           label: this.$t('operations_dashboard.completed'),
           value: this.summary.completed_orders || 0,
-          description: this.$t('operations_dashboard.completed_description'),
           icon: '✓',
           tone: 'green',
         },
@@ -856,7 +861,6 @@ export default {
           key: 'canceled',
           label: this.$t('operations_dashboard.canceled'),
           value: this.summary.canceled_orders || 0,
-          description: this.$t('operations_dashboard.canceled_description'),
           icon: '×',
           tone: 'neutral',
         },
@@ -967,6 +971,13 @@ export default {
   },
   methods: {
     workshopSteps,
+    taskTitle,
+    taskReference,
+    // created_time carries the hour; created_at alone is a d/m/Y day.
+    createdText(order) {
+      if (order.created_time) return formatWallDateTime(order.created_time)
+      return String(order.created_at || '').replace(/\//g, '.') || '—'
+    },
     async loadDashboard() {
       const version = ++this.dashboardRequestVersion
       const scope = this.scope
@@ -1107,9 +1118,6 @@ export default {
       this.selectedOrder = order
       await this.refreshAll()
     },
-    orderNumber(order) {
-      return `#${order.order_number?.number || order.id}`
-    },
     clientName(order) {
       return order.client?.user?.name || order.user?.name || '—'
     },
@@ -1117,10 +1125,8 @@ export default {
       return order.client?.user?.email || order.user?.email || ''
     },
     deadlineDate(order) {
-      const value = order.dates?.finish_date
-      if (!value) return null
-      const date = new Date(value)
-      return Number.isNaN(date.getTime()) ? null : date
+      const time = parseWallTime(order.dates?.finish_date)
+      return Number.isFinite(time) ? new Date(time) : null
     },
     deadlineLabel(order) {
       const date = this.deadlineDate(order)
@@ -1223,26 +1229,9 @@ export default {
         .map((part) => part.charAt(0).toUpperCase())
         .join('')
     },
-    formatDate(value) {
-      if (!value) return '—'
-      if (/^\d{2}\/\d{2}\/\d{4}$/.test(String(value))) return value
-      const date = new Date(value)
-      if (Number.isNaN(date.getTime())) return String(value)
-      return new Intl.DateTimeFormat('hy-AM', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      }).format(date)
-    },
+    // Browsers without Armenian locale data printed 11/19/2026, 06:00 PM.
     formatDateTime(value) {
-      const date = new Date(value)
-      if (Number.isNaN(date.getTime())) return ''
-      return new Intl.DateTimeFormat('hy-AM', {
-        day: '2-digit',
-        month: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(date)
+      return value ? formatWallDateTime(value, '') : ''
     },
   },
 }

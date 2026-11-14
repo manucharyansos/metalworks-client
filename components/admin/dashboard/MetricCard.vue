@@ -8,7 +8,7 @@
     <div class="flex items-start justify-between gap-4">
       <div class="min-w-0">
         <p
-          class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400"
+          class="text-sm font-semibold leading-5 text-slate-500 dark:text-slate-400"
         >
           {{ label }}
         </p>

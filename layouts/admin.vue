@@ -55,7 +55,7 @@
         </p>
         <div class="space-y-1">
           <nuxt-link
-            v-for="item in navigation"
+            v-for="(item, index) in navigation"
             :key="item.to"
             :to="localePath(item.to)"
             :exact="item.exact"
@@ -67,7 +67,7 @@
             <span
               class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-500 transition group-hover:bg-white dark:bg-slate-900 dark:text-slate-300 dark:group-hover:bg-slate-800"
             >
-              {{ item.short }}
+              {{ String(index + 1).padStart(2, '0') }}
             </span>
             <span class="min-w-0 flex-1 whitespace-normal break-words leading-5">{{
               navigationLabel(item)
@@ -271,9 +271,22 @@ export default {
     },
     pageTitle() {
       const path = this.$route.path
-      const item = this.navigation.find((entry) =>
-        isWorkspaceRouteActive(path, entry)
-      )
+      // Pages reached from other pages rather than the menu name themselves too.
+      const item = [
+        ...this.navigation,
+        {
+          to: '/admin/companies',
+          label: {
+            hy: 'Կազմակերպություններ',
+            ru: 'Организации',
+            en: 'Organizations',
+          },
+        },
+        {
+          to: '/admin/factories',
+          label: { hy: 'Արտադրամասեր', ru: 'Цеха', en: 'Workshops' },
+        },
+      ].find((entry) => isWorkspaceRouteActive(path, entry))
       return item
         ? this.navigationLabel(item)
         : this.$t('admin_layout.dashboard')

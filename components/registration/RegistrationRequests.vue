@@ -1,14 +1,16 @@
 <template>
   <main class="mx-auto px-4 py-6 sm:px-6 lg:px-8">
-    <h1 class="text-2xl font-black tracking-tight sm:text-3xl">{{ copy.requests }}</h1>
-    <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{{ copy.reviewIntro }}</p>
-    <nuxt-link :to="localePath(($auth.user?.role?.name === 'admin' ? '/admin' : '/manager') + '/users')" class="mt-3 inline-block text-sm font-semibold underline">{{ staffCopy.permissions }} →</nuxt-link>
+    <div class="flex items-center gap-2">
+      <h1 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">{{ copy.requests }}</h1>
+      <InfoTooltip>{{ copy.reviewIntro }}</InfoTooltip>
+    </div>
     <p v-if="notice" class="mt-4 rounded-xl bg-slate-100 p-3 text-sm dark:bg-slate-800" role="status">{{ notice }}</p>
     <div class="mt-6 flex flex-wrap items-center gap-2" role="group" :aria-label="copy.requests">
       <button v-for="tab in statuses" :key="tab" type="button" class="rounded-xl border px-3 py-2 text-sm font-semibold" :class="status === tab ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="status === tab" :data-request-status="tab" @click="changeStatus(tab)">{{ tab === 'all' ? copy.allStatuses : copy[tab] }} <span class="ml-1 opacity-70">{{ tab === 'all' ? totalCount : counts[tab] }}</span></button>
     </div>
-    <div class="mt-4 grid gap-2 sm:max-w-2xl sm:grid-cols-3" role="group" :aria-label="copy.allTypes" data-request-types>
-      <button v-for="item in requestTypes" :key="item.value" type="button" class="min-w-0 rounded-xl border px-3 py-3 text-left text-sm font-semibold" :class="type === item.value ? 'border-blue-600 bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-200' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="type === item.value" :data-request-type="item.value || 'all'" @click="changeType(item.value)">{{ item.label }} <span v-if="item.count !== null" class="ml-1 opacity-70">{{ item.count }}</span></button>
+    <!-- The request kinds look like the status tabs, in blue to tell the two apart. -->
+    <div class="mt-3 flex flex-wrap items-center gap-2" role="group" :aria-label="copy.allTypes" data-request-types>
+      <button v-for="item in requestTypes" :key="item.value" type="button" class="min-w-0 rounded-xl border px-3 py-2 text-sm font-semibold" :class="type === item.value ? 'border-blue-600 bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-200' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'" :aria-pressed="type === item.value" :data-request-type="item.value || 'all'" @click="changeType(item.value)">{{ item.label }} <span v-if="item.count !== null" class="ml-1 opacity-70">{{ item.count }}</span></button>
     </div>
     <div class="mt-4 max-w-sm"><label for="request-company" class="sr-only">{{ copy.allCompanies }}</label><select id="request-company" v-model="companyId" class="field-control" @change="page = 1; loadRequests()"><option value="">{{ copy.allCompanies }}</option><option v-for="company in companies" :key="company.id" :value="company.id">{{ company.name }}</option><option v-for="company in unmanagedCompanies" :key="company.id" :value="company.id" disabled>{{ company.name }} — {{ companyAccessCopy.notManaged }}</option></select></div>
     <p v-if="unmanagedCompanies.length" class="mt-2 max-w-xl text-xs leading-5 text-slate-500">{{ companyAccessCopy.managementHint }}</p>

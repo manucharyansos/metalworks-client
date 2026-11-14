@@ -4,7 +4,7 @@
       <section class="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
         <div>
           <div class="flex min-w-0 items-start gap-2">
-            <h1 class="min-w-0 flex-1 break-words text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատակիցների կառավարում</h1>
+            <h1 class="min-w-0 flex-1 break-words text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">Աշխատակիցների իրավունքներ</h1>
             <div class="group relative inline-flex shrink-0">
               <button
                 type="button"
@@ -18,7 +18,6 @@
               </div>
             </div>
           </div>
-          <nuxt-link :to="localePath(($auth.user?.role?.name === 'admin' ? '/admin' : '/manager') + '/registration-requests')" class="mt-2 inline-block text-xs font-semibold underline">{{ staffCopy.requests }} →</nuxt-link>
         </div>
         <button
           type="button"
@@ -34,9 +33,8 @@
 
       <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div v-for="stat in stats" :key="stat.label" class="work-card rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">{{ stat.label }}</p>
-          <p class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">{{ stat.value }}</p>
-          <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{{ stat.hint }}</p>
+          <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ stat.label }}</p>
+          <p class="mt-1 text-2xl font-black tracking-tight text-slate-950 dark:text-white">{{ stat.value }}</p>
         </div>
       </section>
 
@@ -76,10 +74,7 @@
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-xs font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ initials(user.name) }}</div>
-                    <div class="min-w-0">
-                      <p class="truncate text-sm font-bold text-slate-900 dark:text-white">{{ user.name }}</p>
-                      <p class="mt-0.5 text-[10px] text-slate-400">ID {{ user.id }}</p>
-                    </div>
+                    <p class="min-w-0 truncate text-sm font-bold text-slate-900 dark:text-white">{{ user.name }}</p>
                   </div>
                 </td>
                 <td class="px-4 py-4">
@@ -90,17 +85,21 @@
                   <span v-else class="text-xs text-slate-400">—</span>
                 </td>
                 <td class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400">{{ user.email }}</td>
-                <td class="px-6 py-4 text-right">
-                  <div class="mb-2 flex flex-wrap justify-end gap-2"><button v-if="canEditAssignments(user)" type="button" class="app-button-secondary" @click="assignmentTarget = user">{{ staffCopy.edit }}</button><button v-if="!user.is_platform_admin" type="button" class="app-button-secondary" @click="accessTarget = user">{{ staffCopy.companies }}</button></div>
-                  <span v-if="user.fullAccess" class="inline-flex rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
-                  <button
-                    v-else
-                    type="button"
-                    class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
-                    @click="openPermissionModal(user)"
-                  >
-                    Խմբագրել
-                  </button>
+                <td class="px-6 py-4">
+                  <!-- One row of actions, the access level last. -->
+                  <div class="flex flex-wrap items-center justify-end gap-2">
+                    <button v-if="canEditAssignments(user)" type="button" class="app-button-secondary" @click="assignmentTarget = user">{{ staffCopy.edit }}</button>
+                    <button v-if="!user.is_platform_admin" type="button" class="app-button-secondary" @click="accessTarget = user">{{ staffCopy.companies }}</button>
+                    <span v-if="user.fullAccess" class="inline-flex rounded-xl bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300">Լիարժեք մուտք</span>
+                    <button
+                      v-else
+                      type="button"
+                      class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+                      @click="openPermissionModal(user)"
+                    >
+                      Խմբագրել
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -237,10 +236,10 @@ export default {
         this.normalizedUsers.flatMap((u) => u.roleNames).filter(Boolean)
       ).size
       return [
-        { label: 'Աշխատակիցներ', value: this.normalizedUsers.length, hint: 'աշխատակիցների հաշիվները' },
-        { label: 'Լիարժեք մուտք', value: fullAccess, hint: 'Ադմինիստրատոր և մենեջեր' },
-        { label: 'Արտադրամասով', value: assignedFactories, hint: 'արտադրամաս նշանակված' },
-        { label: 'Հաստիքներ', value: rolesInUse, hint: 'աշխատողի տեսակներ' },
+        { label: 'Աշխատակիցներ', value: this.normalizedUsers.length },
+        { label: 'Լիարժեք մուտք', value: fullAccess },
+        { label: 'Արտադրամասով', value: assignedFactories },
+        { label: 'Հաստիքներ', value: rolesInUse },
       ]
     },
     permissionGroups() {

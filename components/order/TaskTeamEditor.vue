@@ -3,28 +3,29 @@
     class="my-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-900/60"
     data-task-team
   >
-    <p class="mb-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
-      {{ c.teamHelp }}
-    </p>
-    <label class="block max-w-md">
-      <span
-        class="mb-1.5 block text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400"
-        >{{ c.primary }}</span
-      >
-      <select
-        v-model.number="operator"
-        :disabled="busy || disabled"
-        class="app-control !py-2.5"
-        @change="
-          helpers = helpers.filter((id) => Number(id) !== Number(operator))
-        "
-      >
-        <option value="">{{ c.chooseOperator }}</option>
-        <option v-for="worker in workers" :key="worker.id" :value="worker.id">
-          {{ worker.name }}
-        </option>
-      </select>
-    </label>
+    <!-- The how-to sits behind "i": every workshop step shows this editor. -->
+    <div class="flex max-w-md items-end gap-2">
+      <label class="block min-w-0 flex-1">
+        <span
+          class="mb-1.5 block text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+          >{{ c.primary }}</span
+        >
+        <select
+          v-model.number="operator"
+          :disabled="busy || disabled"
+          class="app-control !py-2.5"
+          @change="
+            helpers = helpers.filter((id) => Number(id) !== Number(operator))
+          "
+        >
+          <option value="">{{ c.chooseOperator }}</option>
+          <option v-for="worker in workers" :key="worker.id" :value="worker.id">
+            {{ worker.name }}
+          </option>
+        </select>
+      </label>
+      <InfoTooltip class="mb-1.5" align="right">{{ c.teamHelp }}</InfoTooltip>
+    </div>
     <fieldset class="mt-4" :disabled="busy || disabled">
       <legend
         class="text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400"

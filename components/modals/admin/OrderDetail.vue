@@ -17,18 +17,18 @@
             >
           </div>
           <h2
-            class="mt-2 truncate text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl"
+            class="mt-2 break-words text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl"
           >
-            {{ localOrder.name || `Առաջադրանք #${localOrder.id}` }}
+            {{ taskTitle(localOrder) }}
           </h2>
           <div
             class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400"
           >
-            <span>#{{ localOrder.order_number?.number || localOrder.id }}</span>
+            <span>{{ taskReference(localOrder) }}</span>
             <span v-if="localOrder.prefix_code?.code"
               >Կոդ՝ {{ localOrder.prefix_code.code }}</span
             >
-            <span>Ստեղծվել է՝ {{ formatDate(localOrder.created_at) }}</span>
+            <span>Ստեղծվել է՝ {{ createdText }}</span>
           </div>
         </div>
         <button
@@ -56,17 +56,8 @@
 
     <div class="work-modal__body custom-scroll">
       <div class="mx-auto max-w-6xl space-y-5">
-        <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div class="work-card info-tile">
-            <p class="info-label">Առաջադրանքի համար</p>
-            <p class="info-value">
-              {{ localOrder.order_number?.number || `#${localOrder.id}` }}
-            </p>
-          </div>
-          <div class="work-card info-tile">
-            <p class="info-label">Կոդ</p>
-            <p class="info-value">{{ localOrder.prefix_code?.code || '—' }}</p>
-          </div>
+        <!-- The number and code are in the header; these are what changes. -->
+        <section class="grid gap-3 sm:grid-cols-2">
           <div
             class="work-card info-tile"
             :class="
@@ -240,7 +231,7 @@
                 <span
                   class="shrink-0 rounded-full px-2.5 py-1 text-[9px] font-bold"
                   :class="factoryStatusClass(fo.status)"
-                  >{{ factoryStatusLabel(fo.status) }}</span
+                  >{{ stepStatusText(fo, $i18n?.locale) }}</span
                 >
               </div>
 
@@ -357,13 +348,13 @@
                       {{ log.user?.name || 'Համակարգ' }}
                     </p>
                     <p class="text-[10px] text-slate-400">
-                      {{ formatDate(log.created_at) }}
+                      {{ formatDate(log.created_time || log.created_at) }}
                     </p>
                   </div>
                   <p
                     class="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400"
                   >
-                    {{ log.message }}
+                    {{ logText(log.message) }}
                   </p>
                 </div>
               </div>
@@ -379,13 +370,8 @@
     <footer
       class="work-modal__footer shrink-0 border-t border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900 sm:px-6"
     >
-      <div
-        class="mx-auto flex max-w-6xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between"
-      >
-        <p class="text-[10px] text-slate-400">
-          Փոփոխությունները պահպանվելու են առաջադրանքի ընթացիկ տվյալներում։
-        </p>
-        <div class="flex gap-2">
+      <div class="mx-auto flex max-w-6xl justify-end">
+        <div class="flex w-full gap-2 sm:w-auto">
           <button
             type="button"
             class="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 sm:flex-none"
@@ -412,11 +398,26 @@
 </template>
 
 <script>
-import { workshopSteps } from '@/utils/task-board'
+import { stepStatusText, workshopSteps } from '@/utils/task-board'
+import { taskReference, taskTitle } from '@/utils/task-names'
+import { formatWallDateTime, parseWallTime } from '@/utils/wall-time'
 import TaskCompletionProof from '@/components/order/TaskCompletionProof.vue'
 import TaskFileFolders from '@/components/File/TaskFileFolders.vue'
 import TaskRoutingPanel from '@/components/order/TaskRoutingPanel.vue'
 import { isStepCompleted } from '@/utils/task-workflow'
+
+// Older history lines name statuses by their codes ("pending → accepted").
+const STATUS_WORDS = {
+  pending: 'Սպասում է',
+  accepted: 'Ընդունված',
+  in_process: 'Կատարվում է',
+  in_progress: 'Կատարվում է',
+  finished: 'Ավարտված',
+  completed: 'Ավարտված',
+  canceled: 'Մերժված',
+  cancelled: 'Մերժված',
+  date_changed: 'Ժամկետը փոխված է',
+}
 export default {
   components: { TaskCompletionProof, TaskRoutingPanel, TaskFileFolders },
   props: { order: { type: Object, required: true } },
@@ -434,8 +435,16 @@ export default {
       return workshopSteps(this.localOrder)
     },
     finishDate() {
-      if (!this.localOrder?.dates?.finish_date) return null
-      return new Date(this.localOrder.dates.finish_date)
+      const time = parseWallTime(this.localOrder?.dates?.finish_date)
+      return Number.isFinite(time) ? new Date(time) : null
+    },
+    // created_time carries the hour; created_at alone is a d/m/Y day.
+    createdText() {
+      if (this.localOrder?.created_time)
+        return formatWallDateTime(this.localOrder.created_time)
+      return (
+        String(this.localOrder?.created_at || '').replace(/\//g, '.') || '—'
+      )
     },
     customerName() {
       return (
@@ -557,24 +566,10 @@ export default {
         return 'pending'
       return s
     },
-    factoryStatusLabel(status) {
-      const code = this.normalizeStatus(status)
-      switch (code) {
-        case 'finished':
-          return 'Ավարտված'
-        case 'canceled':
-          return 'Մերժված'
-        case 'confirmed':
-          return 'Կատարվում է'
-        case 'date_changed':
-          return 'Ժամկետը փոփոխված'
-        case 'pending':
-        default:
-          return 'Սպասում է'
-      }
-    },
     factoryStatusClass(status) {
       const code = this.normalizeStatus(status)
+      if (['accepted', 'in_process', 'in_progress'].includes(code))
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300'
       if (code === 'finished')
         return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
       if (code === 'canceled')
@@ -595,11 +590,26 @@ export default {
       this.localOrder = cloned
       this.storeLinkUrl = cloned.store_link.url || ''
     },
+    taskTitle,
+    taskReference,
+    stepStatusText,
+    // A d/m/Y day has no hour, so it is not shown as midnight.
     formatDate(date) {
       if (!date) return '—'
-      const m = this.$moment(date)
-      if (!m.isValid()) return date
-      return m.format('DD/MM/YYYY HH:mm')
+      if (/^\d{2}\/\d{2}\/\d{4}$/.test(String(date)))
+        return String(date).replace(/\//g, '.')
+      return formatWallDateTime(date)
+    },
+    logText(message) {
+      return String(message || '')
+        .replace(
+          /\b(pending|accepted|in_process|in_progress|finished|completed|canceled|cancelled|date_changed)\b/g,
+          (code) => STATUS_WORDS[code]
+        )
+        .replace(
+          /\b\d{4}-\d{2}-\d{2}(?!\d)(?:[ T]\d{2}:\d{2}(?::\d{2})?)?/g,
+          (value) => formatWallDateTime(value.slice(0, 16))
+        )
     },
     async save() {
       if (!this.localOrder) return

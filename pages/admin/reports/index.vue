@@ -55,19 +55,9 @@
           :class="presetClass(preset.key)"
           @click="applyPreset(preset.key)"
         >
-          <div class="flex items-center justify-between gap-2">
-            <p class="text-xs font-bold text-slate-800 dark:text-slate-100">
-              {{ preset.label }}
-            </p>
-            <span
-              class="rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-black text-slate-600 ring-1 ring-slate-200 dark:bg-slate-900/70 dark:text-slate-300 dark:ring-slate-700"
-              >{{ preset.value }}</span
-            >
-          </div>
-          <p
-            class="mt-2 text-[11px] leading-5 text-slate-500 dark:text-slate-400"
-          >
-            {{ preset.hint }}
+          <p class="text-sm font-semibold opacity-70">{{ preset.label }}</p>
+          <p class="mt-1 text-2xl font-black tracking-tight">
+            {{ preset.value }}
           </p>
         </button>
       </section>
@@ -150,7 +140,7 @@
                 :key="status"
                 :value="status"
               >
-                {{ status }}
+                {{ statusText(status) }}
               </option>
             </select>
             <select v-model="filters.factory_status" class="control">
@@ -231,18 +221,14 @@
         </div>
 
         <div
-          class="grid gap-4 border-b border-slate-100 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-950/30 sm:grid-cols-4 sm:p-6"
+          class="grid gap-4 border-b border-slate-100 bg-slate-50/60 p-5 dark:border-slate-800 dark:bg-slate-950/30 sm:grid-cols-3 sm:p-6"
         >
           <div>
             <p class="stat-label">Արդյունքներ</p>
             <p class="stat-value">{{ pagination.total || 0 }}</p>
           </div>
           <div>
-            <p class="stat-label">Այս էջում</p>
-            <p class="stat-value">{{ orders.length }}</p>
-          </div>
-          <div>
-            <p class="stat-label">Ուշացած նախադիտման մեջ</p>
+            <p class="stat-label">Ուշացած</p>
             <p class="stat-value text-rose-600 dark:text-rose-300">
               {{ previewOverdueCount }}
             </p>
@@ -282,16 +268,18 @@
                 <tr
                   v-for="order in orders"
                   :key="order.id"
-                  class="hover:bg-slate-50/70 dark:hover:bg-slate-950/30"
+                  class="align-top hover:bg-slate-50/70 dark:hover:bg-slate-950/30"
                 >
                   <td class="px-6 py-4">
-                    <p class="text-xs font-bold text-slate-900 dark:text-white">
-                      #{{ order.order_number?.number || order.id }}
+                    <p
+                      class="text-xs font-semibold text-slate-500 dark:text-slate-400"
+                    >
+                      {{ taskReference(order) }}
                     </p>
                     <p
-                      class="mt-1 max-w-[240px] truncate text-sm font-semibold text-slate-700 dark:text-slate-200"
+                      class="mt-0.5 max-w-[260px] break-words text-sm font-bold text-slate-900 dark:text-white"
                     >
-                      {{ order.name || '—' }}
+                      {{ taskTitle(order) }}
                     </p>
                   </td>
                   <td class="px-4 py-4">
@@ -317,17 +305,20 @@
                       >
                     </div>
                   </td>
-                  <td class="px-4 py-4">
+                  <td class="whitespace-nowrap px-4 py-4">
                     <span
                       class="rounded-full px-2.5 py-1 text-[10px] font-bold"
                       :class="deadlineClass(order)"
                       >{{ deadlineLabel(order) }}</span
                     >
+                    <p class="mt-1.5 text-[11px] text-slate-400">
+                      {{ formatWallDateTime(order.dates?.finish_date) }}
+                    </p>
                   </td>
                   <td class="px-6 py-4">
                     <span
                       class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                      >{{ order.status || 'pending' }}</span
+                      >{{ statusText(order.status) }}</span
                     >
                   </td>
                 </tr>
@@ -344,12 +335,12 @@
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <p class="text-[10px] font-bold text-slate-400">
-                    #{{ order.order_number?.number || order.id }}
+                    {{ taskReference(order) }}
                   </p>
                   <p
-                    class="mt-1 truncate text-sm font-bold text-slate-900 dark:text-white"
+                    class="mt-1 break-words text-sm font-bold text-slate-900 dark:text-white"
                   >
-                    {{ order.name || '—' }}
+                    {{ taskTitle(order) }}
                   </p>
                   <p
                     class="mt-1 truncate text-xs text-slate-500 dark:text-slate-400"
@@ -369,7 +360,7 @@
                   :key="fo.id"
                   class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300"
                   >{{ fo.factory?.name || '—' }} ·
-                  {{ fo.operator?.name || 'չնշ.' }}</span
+                  {{ fo.operator?.name || 'չնշանակված' }}</span
                 >
               </div>
             </article>
@@ -420,20 +411,14 @@
           </div>
         </div>
       </section>
-
-      <section
-        class="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-800 dark:border-blue-950/60 dark:bg-blue-950/20 dark:text-blue-200"
-      >
-        CSV արտահանումը ներառում է ամբողջ ֆիլտրված արդյունքը, ոչ միայն
-        նախադիտման ընթացիկ էջը։ Հայերեն տեքստը Excel-ում ճիշտ բացվելու համար
-        ֆայլը պահվում է UTF‑8 BOM ձևաչափով։
-      </section>
     </div>
   </main>
 </template>
 
 <script>
-import { workshopSteps } from '@/utils/task-board'
+import { taskStatusText, workshopSteps } from '@/utils/task-board'
+import { taskReference, taskTitle } from '@/utils/task-names'
+import { formatWallDateTime, parseWallTime } from '@/utils/wall-time'
 const emptyFilters = () => ({
   search: '',
   factory_id: '',
@@ -487,31 +472,26 @@ export default {
           key: 'overdue',
           label: 'Ուշացած առաջադրանքներ',
           value: this.summary.overdue_orders || 0,
-          hint: 'Ակտիվ առաջադրանքներ անցած վերջնաժամկետով',
         },
         {
           key: 'today',
           label: 'Այսօր ավարտվող',
           value: this.summary.due_today || 0,
-          hint: 'Այսօրվա վերջնաժամկետով աշխատանքներ',
         },
         {
           key: 'unassigned',
           label: 'Չնշանակված',
           value: this.summary.unassigned_factory_steps || 0,
-          hint: 'Արտադրամասային քայլեր առանց աշխատակցի',
         },
         {
           key: 'confirmation',
           label: 'Ինժեների հաստատում',
           value: this.summary.awaiting_admin_confirmation || 0,
-          hint: 'Ավարտված, բայց դեռ չհաստատված քայլեր',
         },
         {
           key: 'nodeadline',
           label: 'Առանց ժամկետի',
           value: this.summary.without_deadline || 0,
-          hint: 'Ակտիվ առաջադրանքներ առանց վերջնաժամկետի',
         },
       ]
     },
@@ -550,6 +530,12 @@ export default {
   },
   methods: {
     workshopSteps,
+    taskTitle,
+    taskReference,
+    formatWallDateTime,
+    statusText(status) {
+      return taskStatusText(status || 'pending', this.$i18n?.locale)
+    },
     async loadOptions() {
       try {
         const { data } = await this.$axios.get('/api/admin/dashboard')
@@ -664,10 +650,8 @@ export default {
       return order.client?.user?.email || order.user?.email || ''
     },
     finishDate(order) {
-      const value = order.dates?.finish_date
-      if (!value) return null
-      const date = new Date(value)
-      return Number.isNaN(date.getTime()) ? null : date
+      const time = parseWallTime(order.dates?.finish_date)
+      return Number.isFinite(time) ? new Date(time) : null
     },
     isOverdue(order) {
       const date = this.finishDate(order)

@@ -42,38 +42,10 @@
         </button>
       </section>
 
-      <!-- The busy and free days of every operator come first; the
+      <!-- The busy and free days of every operator come first, with their
+           own counts of free, busy, late and unassigned work; the
            distribution tools below act on them. -->
-      <OperatorCalendar />
-
-      <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="work-card metric-card">
-          <p class="metric-label">Չնշանակված քայլեր</p>
-          <p class="metric-value text-amber-600 dark:text-amber-300">
-            {{ summary.unassigned_factory_steps || 0 }}
-          </p>
-          <p class="metric-hint">պահանջում են աշխատակից</p>
-        </div>
-        <div class="work-card metric-card">
-          <p class="metric-label">Գերբեռնված</p>
-          <p class="metric-value text-rose-600 dark:text-rose-300">
-            {{ overloadedCount }}
-          </p>
-          <p class="metric-hint">աշխատակից</p>
-        </div>
-        <div class="work-card metric-card">
-          <p class="metric-label">Ակտիվ աշխատանք</p>
-          <p class="metric-value">{{ totalActiveWork }}</p>
-          <p class="metric-hint">արտադրամասային քայլ</p>
-        </div>
-        <div class="work-card metric-card">
-          <p class="metric-label">Ուշացած աշխատանք</p>
-          <p class="metric-value text-rose-600 dark:text-rose-300">
-            {{ totalOverdueWork }}
-          </p>
-          <p class="metric-hint">աշխատակիցներին նշանակված</p>
-        </div>
-      </section>
+      <OperatorCalendar ref="calendar" hide-refresh @changed="refreshLists" />
 
       <section class="grid gap-6 2xl:grid-cols-[1.05fr_1.25fr]">
         <div
@@ -252,7 +224,7 @@
                     <div class="flex flex-wrap items-center gap-2">
                       <span
                         class="rounded-lg bg-slate-100 px-2 py-1 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                        >#{{ step.order_number || step.order_id }}</span
+                        >{{ step.reference }}</span
                       >
                       <span
                         class="rounded-lg bg-amber-100 px-2 py-1 text-[10px] font-bold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300"
@@ -265,14 +237,14 @@
                       >
                     </div>
                     <p
-                      class="mt-2 truncate text-sm font-bold text-slate-900 dark:text-white"
+                      class="mt-2 break-words text-sm font-bold text-slate-900 dark:text-white"
                     >
-                      {{ step.order_name || 'Առանց անվանման' }}
+                      {{ step.title }}
                     </p>
                     <p
                       class="mt-1 text-[11px] text-slate-500 dark:text-slate-400"
                     >
-                      Վերջնաժամկետ՝ {{ formatDate(step.finish_date) }}
+                      Վերջնաժամկետ՝ {{ formatWallDateTime(step.finish_date) }}
                     </p>
                   </div>
 
@@ -378,14 +350,6 @@
                 <strong>{{ selectedOperator.completed_30d }}</strong>
               </div>
             </div>
-
-            <div
-              class="mt-4 rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-500 dark:bg-slate-950/40 dark:text-slate-400"
-            >
-              Նոր չնշանակված աշխատանք ընտրելիս այս աշխատակիցը առաջարկվում է
-              միայն այն դեպքում, երբ աշխատանքը պատկանում է նույն արտադրամասին։
-              Սերվերը նույնպես ստուգում է արտադրամասի համապատասխանությունը։
-            </div>
           </section>
         </div>
       </section>
@@ -396,6 +360,8 @@
 <script>
 import OperatorCalendar from '@/components/engineer/OperatorCalendar.vue'
 import { workshopSteps } from '@/utils/task-board'
+import { taskReference, taskTitle } from '@/utils/task-names'
+import { formatWallDateTime, parseWallTime } from '@/utils/wall-time'
 export default {
   components: { OperatorCalendar },
   name: 'AdminWorkload',
@@ -407,7 +373,6 @@ export default {
       loading: false,
       queueLoading: false,
       assignmentSavingId: null,
-      summary: {},
       factories: [],
       operators: [],
       unassignedOrders: [],
@@ -420,22 +385,6 @@ export default {
     }
   },
   computed: {
-    overloadedCount() {
-      return this.operators.filter((row) => row.workload === 'overloaded')
-        .length
-    },
-    totalActiveWork() {
-      return this.operators.reduce(
-        (sum, row) => sum + Number(row.active_orders || 0),
-        0
-      )
-    },
-    totalOverdueWork() {
-      return this.operators.reduce(
-        (sum, row) => sum + Number(row.overdue_orders || 0),
-        0
-      )
-    },
     filteredOperators() {
       const term = this.operatorSearch.trim().toLowerCase()
       return this.operators.filter((row) => {
@@ -475,8 +424,8 @@ export default {
             factory_id: fo.factory_id,
             factory_name: fo.factory?.name || 'Արտադրամաս',
             order_id: order.id,
-            order_number: order.order_number?.number || '',
-            order_name: order.name || '',
+            reference: taskReference(order),
+            title: taskTitle(order),
             finish_date: finishDate,
             overdue: this.isOverdue(finishDate, order.status),
           })
@@ -495,17 +444,21 @@ export default {
   },
   methods: {
     workshopSteps,
+    formatWallDateTime,
+    // The header button refreshes the calendar and the lists below it.
     async refreshAll() {
       this.loading = true
       try {
-        await Promise.all([this.loadDashboard(), this.loadUnassigned()])
+        await Promise.all([this.$refs.calendar?.refresh(), this.refreshLists()])
       } finally {
         this.loading = false
       }
     },
+    async refreshLists() {
+      await Promise.all([this.loadDashboard(), this.loadUnassigned()])
+    },
     async loadDashboard() {
       const { data } = await this.$axios.get('/api/admin/dashboard')
-      this.summary = data.summary || {}
       this.factories = data.factories || []
       this.operators = data.operators || []
     },
@@ -559,7 +512,8 @@ export default {
           type: 'success',
           text: data.message || 'Աշխատակիցը նշանակվեց։',
         })
-        await Promise.all([this.loadDashboard(), this.loadUnassigned()])
+        // The operator's new work shows in the calendar too.
+        await Promise.all([this.$refs.calendar?.refresh(), this.refreshLists()])
       } catch (error) {
         this.$notify?.({
           type: 'error',
@@ -612,38 +566,14 @@ export default {
     isOverdue(value, status) {
       if (!value || ['completed', 'canceled', 'cancelled'].includes(status))
         return false
-      const date = new Date(value)
-      return !Number.isNaN(date.getTime()) && date < new Date()
-    },
-    formatDate(value) {
-      if (!value) return '—'
-      const date = new Date(value)
-      if (Number.isNaN(date.getTime())) return String(value)
-      return new Intl.DateTimeFormat('hy-AM', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(date)
+      const time = parseWallTime(value)
+      return Number.isFinite(time) && time < Date.now()
     },
   },
 }
 </script>
 
 <style scoped>
-.metric-card {
-  @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900;
-}
-.metric-label {
-  @apply text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400;
-}
-.metric-value {
-  @apply mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white;
-}
-.metric-hint {
-  @apply mt-1 text-[11px] text-slate-500 dark:text-slate-400;
-}
 .eyebrow {
   @apply text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400;
 }

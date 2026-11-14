@@ -119,7 +119,7 @@ test('engineer cards show workshop ownership, both proof requirements and approv
   const row = task('finished', { confirmation_required: true, confirmation_method: 'photo_text', awaiting_engineer_confirmation: true, operator: { name: 'QA Operator' }, deadline: '2026-10-18', priority: 'urgent', files: [{ id: 4 }] })
   const vm = component('components/engineer/OrderCard.vue', { propsData: { order: row }, render: true })
   const html = await require('vue-server-renderer').createRenderer().renderToString(vm)
-  assert.equal(vm.stage, 'in_progress'); assert.equal(vm.completedSteps, 0); assert.match(html, /QA Operator/); assert.match(html, /2026-10-18/); assert.match(html, /Նկար \+ Տեքստ/); assert.match(html, /Սպասում է ինժեների հաստատմանը/)
+  assert.equal(vm.stage, 'in_progress'); assert.equal(vm.completedSteps, 0); assert.match(html, /QA Operator/); assert.match(html, /18\.10\.2026/); assert.match(html, /Նկար \+ Տեքստ/); assert.match(html, /Սպասում է ինժեների հաստատմանը/)
   vm.order = { ...row, factory_orders: [{ ...row.factory_orders[0], completed_at: '2026-10-15', engineer_confirmation_at: '2026-10-15', awaiting_engineer_confirmation: false }] }
   assert.equal(vm.stage, 'completed'); assert.equal(vm.isOverdue, false)
   vm.$destroy()

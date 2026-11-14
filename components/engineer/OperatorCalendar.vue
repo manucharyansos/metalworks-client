@@ -100,6 +100,7 @@
         </select>
       </label>
       <button
+        v-if="!hideRefresh"
         type="button"
         :disabled="loading || busy"
         class="app-button-primary gap-2 !rounded-xl !py-2.5"
@@ -507,9 +508,8 @@
           ><span class="calendar-swatch" data-past="true"></span
           >{{ t.pastDay }}</span
         >
-        <span v-if="canPlace || canCreate || picker" class="basis-full">{{
-          t.pickHint
-        }}</span>
+        <!-- Outside a form the header already says what a click does. -->
+        <span v-if="picker" class="basis-full">{{ t.pickHint }}</span>
       </div>
 
       <p
@@ -869,6 +869,8 @@ export default {
     picker: Boolean,
     // Where "Create a new task" leads from a free day; empty hides the choice.
     createPath: { type: String, default: '' },
+    // The page has its own refresh button, which refreshes this calendar too.
+    hideRefresh: Boolean,
   },
   data: () => ({
     data: empty(),
@@ -1742,7 +1744,11 @@ export default {
       this.actionError = ''
       try {
         await fn()
-        if (scope === this.scope && !this._isDestroyed) await this.refresh()
+        if (scope === this.scope && !this._isDestroyed) {
+          await this.refresh()
+          // Placed or planned work changes the page's other lists too.
+          this.$emit('changed')
+        }
       } catch (e) {
         if (scope === this.scope && !this._isDestroyed)
           this.actionError = this.message(e)

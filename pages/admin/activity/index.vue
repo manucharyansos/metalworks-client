@@ -12,10 +12,10 @@
       </section>
 
       <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="work-card metric-card"><p class="metric-label">{{ t.today }}</p><p class="metric-value">{{ summary.today || 0 }}</p><p class="metric-hint">{{ t.actions }}</p></div>
-        <div class="work-card metric-card"><p class="metric-label">{{ t.last7 }}</p><p class="metric-value">{{ summary.last_7_days || 0 }}</p><p class="metric-hint">{{ t.actions }}</p></div>
-        <div class="work-card metric-card"><p class="metric-label">{{ t.filesToday }}</p><p class="metric-value">{{ summary.files_today || 0 }}</p><p class="metric-hint">{{ t.fileChanges }}</p></div>
-        <div class="work-card metric-card"><p class="metric-label">{{ t.ordersToday }}</p><p class="metric-value">{{ summary.orders_today || 0 }}</p><p class="metric-hint">{{ t.orderChanges }}</p></div>
+        <div class="work-card metric-card"><p class="metric-label">{{ t.today }}</p><p class="metric-value">{{ summary.today || 0 }}</p></div>
+        <div class="work-card metric-card"><p class="metric-label">{{ t.last7 }}</p><p class="metric-value">{{ summary.last_7_days || 0 }}</p></div>
+        <div class="work-card metric-card"><p class="metric-label">{{ t.filesToday }}</p><p class="metric-value">{{ summary.files_today || 0 }}</p></div>
+        <div class="work-card metric-card"><p class="metric-label">{{ t.ordersToday }}</p><p class="metric-value">{{ summary.orders_today || 0 }}</p></div>
       </section>
 
       <section class="work-card rounded-[28px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
@@ -31,7 +31,7 @@
           <select v-model="query.user_id" class="control"><option value="">{{ t.allEmployees }}</option><option v-for="actor in filterOptions.actors" :key="actor.id" :value="String(actor.id)">{{ actor.display_name || actor.name }}</option></select>
           <select v-model="query.role" class="control"><option value="">{{ t.allRoles }}</option><option v-for="role in filterOptions.roles" :key="role.name" :value="role.name">{{ roleLabel(role) }}</option></select>
           <select v-model="query.category" class="control"><option value="">{{ t.allCategories }}</option><option v-for="category in filterOptions.categories" :key="category" :value="category">{{ categoryLabel(category) }}</option></select>
-          <select v-model="query.action" class="control"><option value="">{{ t.allActions }}</option><option v-for="action in filterOptions.actions" :key="action" :value="action">{{ actionLabel(action) }}</option></select>
+          <select v-model="query.action" class="control"><option value="">{{ t.allActions }}</option><option v-for="action in filterOptions.actions" :key="action" :value="action">{{ actionOption(action) }}</option></select>
           <label><span class="field-label">{{ t.from }}</span><input v-model="query.date_from" type="date" class="control" @change="activePreset = 'custom'" /></label>
           <label><span class="field-label">{{ t.to }}</span><input v-model="query.date_to" type="date" class="control" @change="activePreset = 'custom'" /></label>
         </div>
@@ -47,14 +47,14 @@
 
           <article v-for="log in group.items" :key="log.id" class="work-card rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
             <div class="flex flex-col gap-4 lg:flex-row">
-              <div class="shrink-0 lg:w-28"><p class="font-mono text-sm font-black text-slate-900 dark:text-white">{{ formatTime(log.created_at) }}</p><p class="mt-1 text-[10px] font-bold text-slate-400">#{{ log.id }}</p></div>
+              <div class="shrink-0 lg:w-24"><p class="font-mono text-sm font-black text-slate-900 dark:text-white">{{ formatTime(log.created_at) }}</p></div>
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ categoryLabel(log.category) }}</span><span class="text-xs font-black text-slate-950 dark:text-white">{{ actionLabel(log.action) }}</span></div>
                 <div class="mt-2 flex flex-wrap items-center gap-2 text-sm"><span class="font-black text-slate-900 dark:text-white">{{ actorName(log) }}</span><span v-if="log.user?.role" class="text-slate-300">•</span><span v-if="log.user?.role" class="font-semibold text-slate-500 dark:text-slate-400">{{ roleLabel(log.user.role) }}</span><span v-if="log.user?.factory" class="text-slate-300">•</span><span v-if="log.user?.factory" class="text-slate-500 dark:text-slate-400">{{ log.user.factory.name }}</span></div>
                 <div v-if="log.subject_label || log.subject_id" class="mt-3 rounded-2xl bg-slate-50 px-3.5 py-3 dark:bg-slate-950/45"><p class="text-[10px] font-black uppercase tracking-[0.12em] text-slate-400">{{ subjectTypeLabel(log.subject_type) }}</p><p class="mt-1 break-words text-sm font-bold text-slate-700 dark:text-slate-200">{{ subjectLabel(log) }}</p></div>
                 <button v-if="hasDetails(log)" type="button" class="mt-3 text-xs font-black text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white" @click="toggleDetails(log.id)">{{ expanded[log.id] ? t.hideDetails : t.showDetails }}</button>
                 <div v-if="expanded[log.id]" class="mt-3 space-y-2 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-950/35">
-                  <div v-for="entry in changeEntries(log)" :key="entry.field" class="grid gap-1 rounded-xl bg-white p-3 text-xs dark:bg-slate-900 sm:grid-cols-[160px_1fr]"><span class="font-black text-slate-600 dark:text-slate-300">{{ fieldLabel(entry.field) }}</span><span v-if="entry.private" class="text-slate-400">{{ t.valueChanged }}</span><span v-else class="break-words text-slate-500 dark:text-slate-400">{{ prettyValue(entry.from) }} → {{ prettyValue(entry.to) }}</span></div>
+                  <div v-for="entry in changeEntries(log)" :key="entry.field" class="grid gap-1 rounded-xl bg-white p-3 text-xs dark:bg-slate-900 sm:grid-cols-[160px_1fr]"><span class="font-black text-slate-600 dark:text-slate-300">{{ fieldLabel(entry.field) }}</span><span v-if="entry.private" class="text-slate-400">{{ t.valueChanged }}</span><span v-else class="break-words text-slate-500 dark:text-slate-400">{{ prettyValue(entry.from, entry.field, log) }} → {{ prettyValue(entry.to, entry.field, log) }}</span></div>
                   <div v-if="permissionList(log).length" class="flex flex-wrap gap-1.5"><span v-for="permission in permissionList(log)" :key="permission" class="rounded-lg bg-white px-2.5 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-900 dark:text-slate-300">{{ permission }}</span></div>
                 </div>
               </div>
@@ -72,6 +72,8 @@
 </template>
 
 <script>
+import { formatWallDateTime } from '@/utils/wall-time'
+
 const COPY = {
   hy: { title:'Աշխատակիցների գործունեություն',help:'Տեսեք՝ ով, երբ և ինչ է ստեղծել, փոխել կամ ջնջել համակարգում։',refresh:'Թարմացնել',today:'Այսօր',last7:'Վերջին 7 օրը',filesToday:'Ֆայլեր այսօր',ordersToday:'Առաջադրանքներ այսօր',actions:'գործողություն',fileChanges:'ֆայլային գործողություն',orderChanges:'առաջադրանք/արտադրություն',searchPlaceholder:'Որոնել աշխատակցով, առաջադրանքով կամ ֆայլով...',allEmployees:'Բոլոր աշխատակիցները',allRoles:'Բոլոր հաստիքները',allCategories:'Բոլոր բաժինները',allActions:'Բոլոր գործողությունները',from:'Սկսած',to:'Մինչև',reset:'Մաքրել',apply:'Կիրառել',presetToday:'Այսօր',preset7:'7 օր',preset30:'30 օր',allTime:'Ամբողջ ժամանակը',emptyTitle:'Գործողություններ չեն գտնվել',emptyText:'Փոխեք ֆիլտրերը կամ ժամանակահատվածը։',showDetails:'Տեսնել փոփոխությունները',hideDetails:'Փակել մանրամասները',valueChanged:'Արժեքը փոխվել է',previous:'Նախորդ',next:'Հաջորդ',item:'Տվյալ' },
   ru: { title:'Активность сотрудников',help:'Смотрите, кто, когда и что создал, изменил или удалил в системе.',refresh:'Обновить',today:'Сегодня',last7:'Последние 7 дней',filesToday:'Файлы сегодня',ordersToday:'Задания сегодня',actions:'действий',fileChanges:'операций с файлами',orderChanges:'задания/производство',searchPlaceholder:'Поиск по сотруднику, заданию или файлу...',allEmployees:'Все сотрудники',allRoles:'Все должности',allCategories:'Все разделы',allActions:'Все действия',from:'С',to:'По',reset:'Сбросить',apply:'Применить',presetToday:'Сегодня',preset7:'7 дней',preset30:'30 дней',allTime:'Всё время',emptyTitle:'Действия не найдены',emptyText:'Измените фильтры или период.',showDetails:'Показать изменения',hideDetails:'Скрыть детали',valueChanged:'Значение изменено',previous:'Назад',next:'Далее',item:'Объект' },
@@ -85,16 +87,38 @@ const ROLE_LABELS = {
 }
 
 const CATEGORY_LABELS = {
-  hy:{orders:'Առաջադրանքներ',files:'Ֆայլեր',pmp:'Նախագիծ',production:'Արտադրություն',staff:'Աշխատակիցներ',clients:'Պատվիրատուներ',materials:'Նյութեր',settings:'Կարգավորումներ',permissions:'Թույլտվություններ'},
-  ru:{orders:'Задания',files:'Файлы',pmp:'Проект',production:'Производство',staff:'Сотрудники',clients:'Заказчики',materials:'Материалы',settings:'Настройки',permissions:'Разрешения'},
-  en:{orders:'Tasks',files:'Files',pmp:'Project',production:'Production',staff:'Employees',clients:'Customers',materials:'Materials',settings:'Settings',permissions:'Permissions'},
+  hy:{orders:'Առաջադրանքներ',files:'Ֆայլեր',pmp:'Նախագիծ',projects:'Նախագծեր',production:'Արտադրություն',staff:'Աշխատակիցներ',clients:'Պատվիրատուներ',materials:'Նյութեր',settings:'Կարգավորումներ',permissions:'Թույլտվություններ',access:'Իրավունքներ'},
+  ru:{orders:'Задания',files:'Файлы',pmp:'Проект',projects:'Проекты',production:'Производство',staff:'Сотрудники',clients:'Заказчики',materials:'Материалы',settings:'Настройки',permissions:'Разрешения',access:'Права'},
+  en:{orders:'Tasks',files:'Files',pmp:'Project',projects:'Projects',production:'Production',staff:'Employees',clients:'Customers',materials:'Materials',settings:'Settings',permissions:'Permissions',access:'Access'},
 }
 
+// Keys are whole actions ("file.uploaded") or their last part ("created").
 const ACTION_LABELS = {
-  hy:{created:'Ստեղծեց',updated:'Փոխեց',deleted:'Ջնջեց','file.uploaded':'Ավելացրեց ֆայլ','file.deleted':'Ջնջեց ֆայլ','permissions.updated':'Փոխեց թույլտվությունները'},
-  ru:{created:'Создал',updated:'Изменил',deleted:'Удалил','file.uploaded':'Добавил файл','file.deleted':'Удалил файл','permissions.updated':'Изменил разрешения'},
-  en:{created:'Created',updated:'Updated',deleted:'Deleted','file.uploaded':'Uploaded file','file.deleted':'Deleted file','permissions.updated':'Changed permissions'},
+  hy:{created:'Ստեղծեց',updated:'Փոխեց',deleted:'Ջնջեց','file.uploaded':'Ավելացրեց ֆայլ','file.deleted':'Ջնջեց ֆայլ','permissions.updated':'Փոխեց թույլտվությունները',permissions_updated:'Փոխեց թույլտվությունները',status_changed:'Փոխեց կարգավիճակը',operator_changed:'Փոխեց կատարողին',deadline_changed:'Փոխեց ժամկետը',restored:'Վերականգնեց'},
+  ru:{created:'Создал',updated:'Изменил',deleted:'Удалил','file.uploaded':'Добавил файл','file.deleted':'Удалил файл','permissions.updated':'Изменил разрешения',permissions_updated:'Изменил разрешения',status_changed:'Изменил статус',operator_changed:'Сменил исполнителя',deadline_changed:'Изменил срок',restored:'Восстановил'},
+  en:{created:'Created',updated:'Updated',deleted:'Deleted','file.uploaded':'Uploaded file','file.deleted':'Deleted file','permissions.updated':'Changed permissions',permissions_updated:'Changed permissions',status_changed:'Changed status',operator_changed:'Changed operator',deadline_changed:'Changed deadline',restored:'Restored'},
 }
+
+// What an action's first part ("order" in "order.created") acts on, so the
+// action list can tell apart the many "Created" and "Updated" entries.
+const ACTION_SUBJECTS = {
+  hy:{order:'առաջադրանք',file:'ֆայլ',project:'նախագիծ','project.subgroup':'ենթախումբ',production:'արտադրական աշխատանք',worker:'աշխատակից',user:'օգտատեր',client:'պատվիրատու',material:'նյութ',factory:'արտադրամաս',file_type:'ֆայլի տեսակ',role:'հաստիք',access:'իրավունքներ'},
+  ru:{order:'задание',file:'файл',project:'проект','project.subgroup':'подгруппа',production:'производственная работа',worker:'сотрудник',user:'пользователь',client:'заказчик',material:'материал',factory:'цех',file_type:'тип файла',role:'должность',access:'права'},
+  en:{order:'task',file:'file',project:'project','project.subgroup':'subgroup',production:'production work',worker:'employee',user:'user',client:'customer',material:'material',factory:'workshop',file_type:'file type',role:'position',access:'access'},
+}
+
+// Field names in the change list, with their values where they are codes.
+const FIELD_LABELS = {
+  hy:{status:'Կարգավիճակ',operator_id:'Կատարող',finish_date:'Ավարտի ժամկետ',deadline:'Ժամկետ',name:'Անվանում',description:'Նկարագրություն',priority:'Առաջնահերթություն',planned_start:'Պլանավորված սկիզբ',factory_id:'Արտադրամաս',email:'Էլ․ փոստ',phone:'Հեռախոս',role_id:'Հաստիք',last_name:'Ազգանուն',address:'Հասցե'},
+  ru:{status:'Статус',operator_id:'Исполнитель',finish_date:'Срок завершения',deadline:'Срок',name:'Название',description:'Описание',priority:'Приоритет',planned_start:'Плановое начало',factory_id:'Цех',email:'Эл. почта',phone:'Телефон',role_id:'Должность',last_name:'Фамилия',address:'Адрес'},
+  en:{status:'Status',operator_id:'Operator',finish_date:'Finish date',deadline:'Deadline',name:'Name',description:'Description',priority:'Priority',planned_start:'Planned start',factory_id:'Workshop',email:'Email',phone:'Phone',role_id:'Position',last_name:'Last name',address:'Address'},
+}
+const STATUS_VALUES = {
+  hy:{pending:'Սպասում է',accepted:'Ընդունված',in_process:'Կատարվում է',in_progress:'Կատարվում է',finished:'Ավարտված',completed:'Ավարտված',canceled:'Մերժված',cancelled:'Մերժված',date_changed:'Ժամկետը փոխված է',urgent:'Շտապ',high:'Բարձր',normal:'Սովորական'},
+  ru:{pending:'Ожидает',accepted:'Принято',in_process:'Выполняется',in_progress:'Выполняется',finished:'Завершено',completed:'Завершено',canceled:'Отклонено',cancelled:'Отклонено',date_changed:'Срок изменён',urgent:'Срочно',high:'Высокий',normal:'Обычный'},
+  en:{pending:'Pending',accepted:'Accepted',in_process:'In progress',in_progress:'In progress',finished:'Finished',completed:'Completed',canceled:'Rejected',cancelled:'Rejected',date_changed:'Deadline changed',urgent:'Urgent',high:'High',normal:'Normal'},
+}
+const HY_MONTHS = ['հունվարի','փետրվարի','մարտի','ապրիլի','մայիսի','հունիսի','հուլիսի','օգոստոսի','սեպտեմբերի','հոկտեմբերի','նոյեմբերի','դեկտեմբերի']
 
 export default {
   name:'AdminActivityPage',layout:'admin',middleware:['role-guard'],meta:{role:'admin'},
@@ -102,7 +126,7 @@ export default {
   computed:{
     locale(){const code=String(this.$i18n?.locale||'hy').toLowerCase().split('-')[0];return['hy','ru','en'].includes(code)?code:'hy'},t(){return COPY[this.locale]||COPY.hy},
     presets(){return[{key:'today',label:this.t.presetToday},{key:'7',label:this.t.preset7},{key:'30',label:this.t.preset30},{key:'all',label:this.t.allTime}]},
-    groupedLogs(){const groups=new Map();this.logs.forEach((log)=>{const d=new Date(log.created_at);const key=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;if(!groups.has(key))groups.set(key,{key,label:new Intl.DateTimeFormat(this.locale,{year:'numeric',month:'long',day:'numeric'}).format(d),items:[]});groups.get(key).items.push(log)});return Array.from(groups.values())},
+    groupedLogs(){const groups=new Map();this.logs.forEach((log)=>{const d=new Date(log.created_at);const key=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;if(!groups.has(key))groups.set(key,{key,label:this.dayLabel(d),items:[]});groups.get(key).items.push(log)});return Array.from(groups.values())},
   },
   created(){this.applyPreset('7')},
   methods:{
@@ -111,11 +135,15 @@ export default {
     applyFilters(){this.loadActivity(1)},resetFilters(){this.query={search:'',user_id:'',role:'',category:'',action:'',date_from:'',date_to:''};this.applyPreset('7')},
     async loadActivity(page=1){this.loading=true;this.error='';try{const params={page,per_page:40};Object.entries(this.query).forEach(([k,v])=>{if(v)params[k]=v});const data=await this.$axios.$get('/api/admin/activity',{params});this.logs=Array.isArray(data.logs)?data.logs:[];this.summary=data.summary||{};this.filterOptions=data.filters||{actors:[],roles:[],categories:[],actions:[]};this.pagination=data.pagination||this.pagination}catch(e){this.error=e?.response?.data?.message||e?.message||'Error'}finally{this.loading=false}},
     formatTime(value){return new Intl.DateTimeFormat(this.locale,{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date(value))},
+    // Browsers have no Armenian month names, so "12 նոյեմբերի 2026" is built here.
+    dayLabel(d){if(this.locale==='hy')return`${d.getDate()} ${HY_MONTHS[d.getMonth()]} ${d.getFullYear()}`;return new Intl.DateTimeFormat(this.locale,{year:'numeric',month:'long',day:'numeric'}).format(d)},
+    actionOption(key){const label=this.actionLabel(key);const parts=String(key||'').split('.');if(ACTION_LABELS[this.locale]?.[key]||parts.length<2)return label;const subject=ACTION_SUBJECTS[this.locale]?.[parts.slice(0,-1).join('.')];return subject?`${label} · ${subject}`:label},
     subjectLabel(log){const label=log.subject_label||'';return log.subject_type==='pmp'&&/^PMP\s+#\d+$/.test(label)?`${this.subjectTypeLabel('pmp')} #${log.subject_id}`:label||`${this.t.item} #${log.subject_id}`},
-    actorName(log){return log.user?.display_name||log.user?.name||'—'},roleLabel(role){const name=role?.name||role||'';return ROLE_LABELS[this.locale]?.[name]||role?.value||name||'—'},categoryLabel(key){return CATEGORY_LABELS[this.locale]?.[key]||key||'—'},actionLabel(key){const simple=String(key||'').split('.').pop();return ACTION_LABELS[this.locale]?.[key]||ACTION_LABELS[this.locale]?.[simple]||key||'—'},subjectTypeLabel(type){const map={order:{hy:'Առաջադրանք',ru:'Заказ',en:'Order'},pmp_file:{hy:'Ֆայլ',ru:'Файл',en:'File'},pmp:{hy:'Project',ru:'Project',en:'Project'},worker:{hy:'Աշխատակից',ru:'Сотрудник',en:'Employee'},factory_order:{hy:'Արտադրական աշխատանք',ru:'Производственная работа',en:'Production work'}};return map[type]?.[this.locale]||type||this.t.item},
+    actorName(log){return log.user?.display_name||log.user?.name||'—'},roleLabel(role){const name=role?.name||role||'';return ROLE_LABELS[this.locale]?.[name]||role?.value||name||'—'},categoryLabel(key){return CATEGORY_LABELS[this.locale]?.[key]||key||'—'},actionLabel(key){const simple=String(key||'').split('.').pop();return ACTION_LABELS[this.locale]?.[key]||ACTION_LABELS[this.locale]?.[simple]||key||'—'},subjectTypeLabel(type){const map={order:{hy:'Առաջադրանք',ru:'Задание',en:'Task'},pmp_file:{hy:'Ֆայլ',ru:'Файл',en:'File'},pmp:{hy:'Նախագիծ',ru:'Проект',en:'Project'},pmp_subgroup:{hy:'Ենթախումբ',ru:'Подгруппа',en:'Subgroup'},worker:{hy:'Աշխատակից',ru:'Сотрудник',en:'Employee'},user:{hy:'Օգտատեր',ru:'Пользователь',en:'User'},client:{hy:'Պատվիրատու',ru:'Заказчик',en:'Customer'},material:{hy:'Նյութ',ru:'Материал',en:'Material'},factory:{hy:'Արտադրամաս',ru:'Цех',en:'Workshop'},factory_file_extension:{hy:'Ֆայլի տեսակ',ru:'Тип файла',en:'File type'},role:{hy:'Հաստիք',ru:'Должность',en:'Position'},factory_order:{hy:'Արտադրական աշխատանք',ru:'Производственная работа',en:'Production work'}};return map[type]?.[this.locale]||type||this.t.item},
     hasDetails(log){return this.changeEntries(log).length>0||this.permissionList(log).length>0},toggleDetails(id){this.$set(this.expanded,id,!this.expanded[id])},
     changeEntries(log){const changes=log?.meta?.changes||{};return Object.keys(changes).map((field)=>({field,from:changes[field]?.from,to:changes[field]?.to,private:Boolean(changes[field]?.private)}))},permissionList(log){return log?.meta?.permissions||log?.meta?.permission_slugs||[]},
-    fieldLabel(field){return String(field||'').replace(/_/g,' ')},prettyValue(value){if(value===null||value===undefined||value==='')return'—';if(typeof value==='object')return JSON.stringify(value);return String(value)},
+    fieldLabel(field){return FIELD_LABELS[this.locale]?.[field]||String(field||'').replace(/_/g,' ')},
+    prettyValue(value,field){if(value===null||value===undefined||value==='')return'—';if(typeof value==='object')return JSON.stringify(value);if(['status','priority'].includes(field))return STATUS_VALUES[this.locale]?.[value]||String(value);if(field==='operator_id'){const person=(this.filterOptions.actors||[]).find((actor)=>String(actor.id)===String(value));return person?person.display_name||person.name:`#${value}`}if(/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}(:\d{2})?)?$/.test(String(value)))return formatWallDateTime(String(value).slice(0,16));return String(value)},
   },
 }
 </script>

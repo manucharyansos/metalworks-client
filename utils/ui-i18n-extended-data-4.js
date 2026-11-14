@@ -110,4 +110,5 @@ export default [
 // The seeded "laser" position is stored with this spelling.
 ['Լազերաին կտրում', 'Лазерная резка', 'Laser cutting'],
 ['Վալց', 'Вальцовка', 'Rolling'],
+['Աշխատակիցների իրավունքներ', 'Права сотрудников', 'Employee permissions'],
 ]

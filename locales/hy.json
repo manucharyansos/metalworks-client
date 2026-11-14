@@ -418,11 +418,11 @@
     "retry_after": "Կրկին փորձեք {seconds} վայրկյանից։"
   },
   "operations_dashboard": {
-    "created": "Ստեղծված առաջադրանքներ",
-    "overdue": "Ուշացված առաջադրանքներ",
-    "awaiting": "Ինժեների հաստատմանը սպասող",
-    "completed": "Ավարտը հաստատված",
-    "active_count": "Ընթացիկ առաջադրանքներ՝ {count}",
+    "created": "Ստեղծված",
+    "overdue": "Ուշացած",
+    "awaiting": "Հաստատման սպասող",
+    "completed": "Ավարտված",
+    "active_count": "Ընթացիկ՝ {count}",
     "overdue_description": "Վերջնաժամկետն անցած առաջադրանքներ",
     "awaiting_description": "Առաջադրանքներ՝ ստեղծող ինժեների հաստատմանը սպասող աշխատանքներով",
     "canceled_count": "Չեղարկված՝ {count}",

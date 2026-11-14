@@ -39,29 +39,8 @@
         </div>
       </section>
 
-      <section class="grid gap-3 sm:grid-cols-3">
-        <div class="work-card metric">
-          <p class="metric-label">{{ t.factory }}</p>
-          <p
-            class="mt-2 truncate text-sm font-black text-slate-950 dark:text-white"
-          >
-            {{ selectedFactoryName }}
-          </p>
-        </div>
-        <div class="work-card metric">
-          <p class="metric-label">{{ t.orders }}</p>
-          <p class="metric-value">{{ filteredOrders.length }}</p>
-        </div>
-        <div class="work-card metric">
-          <p class="metric-label">{{ t.access }}</p>
-          <p
-            class="mt-2 text-sm font-black text-emerald-600 dark:text-emerald-300"
-          >
-            {{ t.fullAccess }}
-          </p>
-        </div>
-      </section>
-
+      <!-- The workshop is in the title and the selector; its task count sits
+           by the list. -->
       <section
         class="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
@@ -70,6 +49,10 @@
         >
           <h2 class="text-lg font-black text-slate-900 dark:text-white">
             {{ t.factoryOrders }}
+            <span
+              class="ml-1 rounded-full bg-slate-100 px-2.5 py-0.5 align-middle text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+              >{{ filteredOrders.length }}</span
+            >
           </h2>
           <div class="relative w-full sm:w-80">
             <svg
@@ -121,14 +104,12 @@
 
         <template v-else>
           <div class="hidden overflow-x-auto md:block">
-            <table class="w-full min-w-[980px] text-left">
+            <table class="w-full min-w-[760px] text-left">
               <thead
                 class="bg-slate-50/80 text-[10px] font-black uppercase tracking-[0.12em] text-slate-400 dark:bg-slate-950/40"
               >
                 <tr>
                   <th class="px-6 py-3.5">{{ t.order }}</th>
-                  <th class="px-4 py-3.5">{{ t.code }}</th>
-                  <th class="px-4 py-3.5">{{ t.name }}</th>
                   <th class="px-4 py-3.5">{{ t.operator }}</th>
                   <th class="px-4 py-3.5">{{ t.status }}</th>
                   <th class="px-6 py-3.5 text-right">{{ t.actions }}</th>
@@ -140,20 +121,17 @@
                   :key="order.id"
                   class="transition hover:bg-slate-50/70 dark:hover:bg-slate-950/30"
                 >
-                  <td
-                    class="px-6 py-4 text-xs font-black text-slate-900 dark:text-white"
-                  >
-                    {{ order.order_number?.number || `#${order.id}` }}
-                  </td>
-                  <td
-                    class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400"
-                  >
-                    {{ order.prefix_code?.code || '—' }}
-                  </td>
-                  <td
-                    class="max-w-xs px-4 py-4 text-xs font-semibold text-slate-700 dark:text-slate-200"
-                  >
-                    <span class="block truncate">{{ order.name || '—' }}</span>
+                  <td class="max-w-md px-6 py-4">
+                    <p
+                      class="text-xs font-semibold text-slate-500 dark:text-slate-400"
+                    >
+                      {{ taskReference(order) }}
+                    </p>
+                    <p
+                      class="mt-0.5 break-words text-sm font-bold text-slate-900 dark:text-white"
+                    >
+                      {{ taskTitle(order) }}
+                    </p>
                   </td>
                   <td
                     class="px-4 py-4 text-xs text-slate-500 dark:text-slate-400"
@@ -201,13 +179,15 @@
             >
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
-                  <p class="text-xs font-black text-slate-900 dark:text-white">
-                    {{ order.order_number?.number || `#${order.id}` }}
+                  <p
+                    class="text-xs font-semibold text-slate-500 dark:text-slate-400"
+                  >
+                    {{ taskReference(order) }}
                   </p>
                   <p
-                    class="mt-1 truncate text-sm font-semibold text-slate-700 dark:text-slate-200"
+                    class="mt-1 break-words text-sm font-bold text-slate-900 dark:text-white"
                   >
-                    {{ order.name || '—' }}
+                    {{ taskTitle(order) }}
                   </p>
                 </div>
                 <span
@@ -311,6 +291,7 @@ import BendOrderDetailsPanel from '@/components/factory/bend/BendOrderDetailsPan
 import { isWorkshop, workshopKind } from '@/utils/workshop-catalog'
 import FactoryOrderDetailsPanel from '@/components/factory/FactoryOrderDetailsPanel.vue'
 import TaskRoutingPanel from '@/components/order/TaskRoutingPanel.vue'
+import { taskReference, taskTitle } from '@/utils/task-names'
 
 const COPY = {
   hy: {
@@ -551,6 +532,7 @@ export default {
         [
           o.order_number?.number,
           o.name,
+          taskTitle(o),
           o.prefix_code?.code,
           o.description,
         ].some((v) =>
@@ -584,6 +566,8 @@ export default {
     await Promise.all([this.loadFactories(), this.loadOptions()])
   },
   methods: {
+    taskTitle,
+    taskReference,
     async handleRoutingUpdated(order) {
       this.selectedOrder = order
       await this.loadOrders()
@@ -734,15 +718,6 @@ export default {
 </script>
 
 <style scoped>
-.metric {
-  @apply rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900;
-}
-.metric-label {
-  @apply text-[10px] font-black uppercase tracking-[0.12em] text-slate-400;
-}
-.metric-value {
-  @apply mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white;
-}
 .control {
   @apply w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-900/5 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200;
 }

@@ -418,11 +418,11 @@
     "retry_after": "Повторите попытку через {seconds} сек."
   },
   "operations_dashboard": {
-    "created": "Созданные задания",
-    "overdue": "Просроченные задания",
-    "awaiting": "Ожидают инженера",
-    "completed": "Завершение подтверждено",
-    "active_count": "Текущие задания: {count}",
+    "created": "Созданные",
+    "overdue": "Просроченные",
+    "awaiting": "Ждут подтверждения",
+    "completed": "Завершённые",
+    "active_count": "Текущие: {count}",
     "overdue_description": "Задания с истёкшим сроком",
     "awaiting_description": "Задания с работами, ожидающими подтверждения создавшего инженера",
     "canceled_count": "Отменённые: {count}",

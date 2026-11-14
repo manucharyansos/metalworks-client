@@ -419,11 +419,11 @@
     "retry_after": "Try again in {seconds} seconds."
   },
   "operations_dashboard": {
-    "created": "Created tasks",
-    "overdue": "Overdue tasks",
-    "awaiting": "Awaiting engineer confirmation",
-    "completed": "Completion confirmed",
-    "active_count": "Current tasks: {count}",
+    "created": "Created",
+    "overdue": "Overdue",
+    "awaiting": "Awaiting confirmation",
+    "completed": "Completed",
+    "active_count": "Open: {count}",
     "overdue_description": "Tasks past their deadline",
     "awaiting_description": "Tasks with work awaiting confirmation by their creating engineer",
     "canceled_count": "Canceled: {count}",

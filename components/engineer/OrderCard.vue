@@ -11,10 +11,7 @@
     </div>
     <header class="work-task-card__header">
       <div class="work-task-card__top">
-        <p class="work-task-card__meta">
-          #{{ order.order_number?.number || order.id }} ·
-          {{ order.prefix_code?.code || '—' }}
-        </p>
+        <p class="work-task-card__meta">{{ taskReference(order) }}</p>
         <span
           class="work-status"
           :data-tone="badgeTone"
@@ -22,7 +19,7 @@
           >{{ overallStatusText }}</span
         >
       </div>
-      <h3 class="work-task-card__title">{{ order.name || 'Առաջադրանք' }}</h3>
+      <h3 class="work-task-card__title">{{ taskTitle(order) }}</h3>
       <p v-if="customerName" class="work-task-card__customer">
         <svg
           class="h-4 w-4 shrink-0"
@@ -166,6 +163,8 @@ import {
   workshopSteps,
 } from '@/utils/task-board'
 import { routingCopy } from '@/utils/task-routing'
+import { taskReference, taskTitle } from '@/utils/task-names'
+import { formatWallDateTime } from '@/utils/wall-time'
 
 export default {
   components: { FileProductionAttributes, PersonAvatar, TaskDeadline },
@@ -298,6 +297,8 @@ export default {
     },
   },
   methods: {
+    taskTitle,
+    taskReference,
     stepTone(step) {
       return step.pending_request || step.awaiting_engineer_confirmation
         ? 'amber'
@@ -324,8 +325,9 @@ export default {
         ? 'blue'
         : 'neutral'
     },
+    // A bare deadline day is shown as a day, not as 04:00 of UTC midnight.
     date(value) {
-      return value ? this.$formatDate(value, 'dd.MM.yyyy') : '—'
+      return formatWallDateTime(value)
     },
     statusText(step) {
       return stepStatusText(step, this.$i18n?.locale)

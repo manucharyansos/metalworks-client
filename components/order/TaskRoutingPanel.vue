@@ -58,7 +58,12 @@
       <p class="font-semibold">{{ step.factory?.name }}</p>
       <p class="mt-1 text-xs text-slate-500">
         {{ workflowText.deadline }}:
-        {{ step.deadline || (order.dates?.finish_date || '—').slice(0, 10) }} ·
+        {{
+          formatWallDate(
+            step.deadline || String(order.dates?.finish_date || '').slice(0, 10)
+          )
+        }}
+        ·
         {{ workflowText.priority }}:
         {{ workflowText[step.priority || 'normal'] }}
       </p>
@@ -236,6 +241,7 @@
 <script>
 import TaskTeamEditor from '@/components/order/TaskTeamEditor.vue'
 import { workshopSteps } from '@/utils/task-board'
+import { formatWallDate } from '@/utils/wall-time'
 import TaskEvidenceSettings from '@/components/order/TaskEvidenceSettings.vue'
 import TaskFileVersions from '@/components/order/TaskFileVersions.vue'
 import TaskWorkshopOptions from '@/components/engineer/TaskWorkshopOptions.vue'
@@ -405,6 +411,7 @@ export default {
   },
   methods: {
     workshopSteps,
+    formatWallDate,
     handleSettingsUpdated(order) {
       this.$emit('updated', order)
       this.$nextTick(() => this.loadWorkload())

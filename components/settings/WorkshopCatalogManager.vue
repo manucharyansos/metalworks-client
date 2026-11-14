@@ -1,18 +1,24 @@
 <template>
   <main class="mx-auto px-4 py-6 sm:px-6" data-workshop-catalog>
-    <header class="mb-6">
-      <h1 class="text-2xl font-black text-slate-900 dark:text-white">
+    <header class="mb-6 flex items-center gap-2">
+      <h1
+        class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl"
+      >
         {{ title || (categories ? t.categories : t.workshops) }}
       </h1>
-
+      <!-- What workshop functions are, said once instead of on every card. -->
+      <InfoTooltip v-if="!categories">{{ t.functionsHelp }}</InfoTooltip>
     </header>
     <form
-      class="work-card mb-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
+      class="work-card mb-6 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-5"
+      :class="{
+        'sm:flex sm:flex-wrap sm:items-end sm:gap-3 sm:space-y-0': !categories,
+      }"
       :aria-busy="saving ? 'true' : 'false'"
       data-catalog-form
       @submit.prevent="save"
     >
-      <label class="block text-sm font-semibold"
+      <label class="block min-w-0 text-sm font-semibold sm:flex-1"
         >{{ t.name }}
         <input
           v-model.trim="draft.name"
@@ -66,11 +72,11 @@
       <p
         v-if="error"
         role="alert"
-        class="break-words rounded-xl bg-rose-50 p-3 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-300"
+        class="break-words rounded-xl bg-rose-50 p-3 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-300 sm:order-last sm:basis-full"
       >
         {{ error }}
       </p>
-      <div class="flex flex-wrap gap-3">
+      <div class="flex shrink-0 flex-wrap gap-3">
         <button
           type="submit"
           data-catalog-save
@@ -189,9 +195,6 @@
           :data-workshop-functions="item.id"
         >
           <h3 class="text-sm font-semibold">{{ t.functions }}</h3>
-          <p class="mt-1 text-xs leading-5 text-slate-500">
-            {{ t.functionsHelp }}
-          </p>
           <ul
             v-if="(item.functions || []).length"
             class="mt-3 flex flex-wrap gap-2"
