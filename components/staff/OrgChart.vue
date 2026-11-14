@@ -66,6 +66,42 @@
         </button>
       </div>
 
+      <!-- An empty chart leads with how to start it, before anyone can be placed. -->
+      <section
+        v-if="loaded && !tree.length"
+        class="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900"
+        data-org-empty
+      >
+        <h2 class="text-lg font-black text-slate-900 dark:text-white">
+          {{ t.empty }}
+        </h2>
+        <p
+          class="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400"
+        >
+          {{ t.emptyHint }}
+        </p>
+        <div class="mt-5 flex flex-wrap justify-center gap-2">
+          <button
+            v-if="unplaced.length"
+            type="button"
+            class="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50 dark:bg-white dark:text-slate-950"
+            :disabled="busy"
+            data-org-generate
+            @click="generate"
+          >
+            {{ t.generate }}
+          </button>
+          <button
+            type="button"
+            class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200"
+            :disabled="busy"
+            @click="openPosition(null)"
+          >
+            + {{ t.addTop }}
+          </button>
+        </div>
+      </section>
+
       <section
         v-if="unplaced.length"
         class="work-card rounded-3xl border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-900/50 dark:bg-amber-950/20"
@@ -114,41 +150,6 @@
           class="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-slate-800 dark:border-slate-700 dark:border-t-white"
         ></span>
       </div>
-
-      <section
-        v-else-if="loaded && !tree.length"
-        class="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-900"
-        data-org-empty
-      >
-        <h2 class="text-lg font-black text-slate-900 dark:text-white">
-          {{ t.empty }}
-        </h2>
-        <p
-          class="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-slate-400"
-        >
-          {{ t.emptyHint }}
-        </p>
-        <div class="mt-5 flex flex-wrap justify-center gap-2">
-          <button
-            v-if="unplaced.length"
-            type="button"
-            class="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50 dark:bg-white dark:text-slate-950"
-            :disabled="busy"
-            data-org-generate
-            @click="generate"
-          >
-            {{ t.generate }}
-          </button>
-          <button
-            type="button"
-            class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200"
-            :disabled="busy"
-            @click="openPosition(null)"
-          >
-            + {{ t.addTop }}
-          </button>
-        </div>
-      </section>
 
       <section
         v-else-if="tree.length"
@@ -334,6 +335,32 @@
         <p v-if="person && person.locked" class="org-note mt-5">
           {{ t.locked }}
         </p>
+        <!-- Nowhere to put the employee yet: start the chart first. -->
+        <div v-else-if="noTargets" class="mt-5 space-y-4" data-org-no-positions>
+          <p class="org-note">{{ t.noPositions }}</p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-if="!tree.length && unplaced.length"
+              type="button"
+              class="org-primary"
+              :disabled="busy"
+              @click="generateFromDialog"
+            >
+              {{ t.generate }}
+            </button>
+            <button
+              type="button"
+              class="org-secondary"
+              :disabled="busy"
+              @click="newPositionFromDialog"
+            >
+              + {{ t.addTop }}
+            </button>
+          </div>
+          <p v-if="dialogError" role="alert" class="org-error">
+            {{ dialogError }}
+          </p>
+        </div>
         <div v-else class="mt-5 space-y-4">
           <label v-if="placing.fixedPosition" class="org-field">
             <span>{{ t.employee }}</span>
@@ -432,7 +459,7 @@
               {{ t.cancel }}
             </button>
             <button
-              v-if="!(person && person.locked)"
+              v-if="!(person && person.locked) && !noTargets"
               type="submit"
               class="org-primary"
               :disabled="busy || !placing.user_id || !targetPosition"
@@ -569,6 +596,14 @@ export default {
       const id = this.placing?.fixedPosition?.id || this.placing?.position_id
       return this.chart.positions.find((row) => row.id === id) || null
     },
+    // An employee opened from the list has no position to go to yet.
+    noTargets() {
+      return Boolean(
+        this.placing &&
+          !this.placing.fixedPosition &&
+          !this.targetChoices.length
+      )
+    },
   },
   watch: {
     scope() {
@@ -695,6 +730,16 @@ export default {
         this.error = this.dialogError
         this.dialogError = ''
       }
+    },
+    async generateFromDialog() {
+      const done = await this.send(() =>
+        this.$axios.post('/api/org-chart/generate')
+      )
+      if (done) this.placing = null
+    },
+    newPositionFromDialog() {
+      this.placing = null
+      this.openPosition(null)
     },
     // From a position: choose who goes there.
     openToPosition(position) {

@@ -15,6 +15,8 @@ export const orgChartCopy = {
     emptyHint:
       'Ստեղծեք այն աշխատակիցների ներկա հաստիքներից կամ ավելացրեք առաջին հաստիքը։',
     generate: 'Ստեղծել ներկա հաստիքներից',
+    noPositions:
+      'Դեռ հաստիք չկա, որտեղ աշխատակցին տեղավորել։ Նախ ստեղծեք կառուցվածքը կամ ավելացրեք հաստիք։',
     unplaced: 'Չտեղավորված աշխատակիցներ',
     place: 'Տեղավորել',
     move: 'Տեղափոխել',
@@ -61,6 +63,8 @@ export const orgChartCopy = {
     emptyHint:
       'Создайте её из текущих должностей сотрудников или добавьте первую должность.',
     generate: 'Создать из текущих должностей',
+    noPositions:
+      'Пока нет должности, куда разместить сотрудника. Сначала создайте оргструктуру или добавьте должность.',
     unplaced: 'Сотрудники вне структуры',
     place: 'Разместить',
     move: 'Переместить',
@@ -107,6 +111,8 @@ export const orgChartCopy = {
     emptyHint:
       'Create it from the positions employees hold now, or add the first position.',
     generate: 'Create from current positions',
+    noPositions:
+      'There is no position to place the employee in yet. Create the chart first or add a position.',
     unplaced: 'Employees outside the chart',
     place: 'Place',
     move: 'Move',
