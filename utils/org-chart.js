@@ -25,6 +25,12 @@ export const orgChartCopy = {
     parent: 'Ենթակա է',
     noParent: 'Վերին մակարդակ',
     access: 'Մուտքի մակարդակ',
+    accessNone: 'Մուտքը չի փոխում',
+    accessNoneOption: 'Չի փոխում աշխատակցի մուտքը',
+    accessKeeps:
+      'Աշխատակիցը կպահի իր ներկա մուտքը։ Հարմար է օգնականների և բանվորների համար։',
+    accessGives: 'Այս հաստիքի աշխատակիցները կստանան ընտրված մուտքը։',
+    keepAccess: 'Աշխատակցի մուտքը չի փոխվի։',
     workshop: 'Արտադրամաս',
     chooseWorkshop: 'Ընտրեք արտադրամասը',
     duties: 'Պարտականություններ',
@@ -45,6 +51,8 @@ export const orgChartCopy = {
     locked: 'Ադմինիստրատորին փոխում է միայն պլատֆորմի ադմինիստրատորը։',
     loadFailed: 'Չհաջողվեց բեռնել կառուցվածքը։',
     retry: 'Կրկին փորձել',
+    noReply: 'Սերվերը չպատասխանեց։ Ստուգեք կապը և փորձեք կրկին։',
+    saveFailed: 'Չհաջողվեց պահպանել',
     zoomIn: 'Մեծացնել',
     zoomOut: 'Փոքրացնել',
     actions: 'Գործողություններ',
@@ -73,6 +81,12 @@ export const orgChartCopy = {
     parent: 'Подчиняется',
     noParent: 'Верхний уровень',
     access: 'Уровень доступа',
+    accessNone: 'Доступ не меняет',
+    accessNoneOption: 'Не меняет доступ сотрудника',
+    accessKeeps:
+      'Сотрудник сохранит свой текущий доступ. Подходит для помощников и рабочих.',
+    accessGives: 'Сотрудники этой должности получат выбранный доступ.',
+    keepAccess: 'Доступ сотрудника не изменится.',
     workshop: 'Цех',
     chooseWorkshop: 'Выберите цех',
     duties: 'Обязанности',
@@ -93,6 +107,8 @@ export const orgChartCopy = {
     locked: 'Администратора меняет только администратор платформы.',
     loadFailed: 'Не удалось загрузить оргструктуру.',
     retry: 'Повторить',
+    noReply: 'Сервер не ответил. Проверьте связь и попробуйте снова.',
+    saveFailed: 'Не удалось сохранить',
     zoomIn: 'Увеличить',
     zoomOut: 'Уменьшить',
     actions: 'Действия',
@@ -121,6 +137,12 @@ export const orgChartCopy = {
     parent: 'Reports to',
     noParent: 'Top level',
     access: 'Access level',
+    accessNone: 'Keeps access',
+    accessNoneOption: 'Keeps the employee’s access',
+    accessKeeps:
+      'The employee keeps their current access. Suits assistants and workers.',
+    accessGives: 'Employees in this position get the chosen access.',
+    keepAccess: 'The employee’s access does not change.',
     workshop: 'Workshop',
     chooseWorkshop: 'Choose the workshop',
     duties: 'Responsibilities',
@@ -141,6 +163,8 @@ export const orgChartCopy = {
     locked: 'Only the platform administrator changes an administrator.',
     loadFailed: 'Could not load the org chart.',
     retry: 'Retry',
+    noReply: 'The server did not answer. Check the connection and try again.',
+    saveFailed: 'Could not save',
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
     actions: 'Actions',
@@ -234,7 +258,8 @@ export function departmentTones(tree = [], tones = 6) {
 }
 
 // "Laser cutting · Sheet workshop": the access level and, for production, the workshop.
-export function accessText(role, factory, roleNames = {}) {
+export function accessText(role, factory, roleNames = {}, none = '') {
+  if (!role) return none
   const label = roleNames[role?.name] || role?.value || role?.name || ''
   return factory?.name ? `${label} · ${factory.name}` : label
 }

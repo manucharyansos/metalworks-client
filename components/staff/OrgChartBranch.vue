@@ -191,10 +191,20 @@ export default {
       )
     },
     access() {
-      return accessText(this.node.role, this.node.factory, this.roleNames)
+      return accessText(
+        this.node.role,
+        this.node.factory,
+        this.roleNames,
+        this.t.accessNone
+      )
     },
+    // A position that leaves access alone is anyone's to edit; the others
+    // only for those who may hand out their access level.
     editable() {
-      return this.editableRoles.includes(Number(this.node.role?.id))
+      return (
+        !this.node.role ||
+        this.editableRoles.includes(Number(this.node.role.id))
+      )
     },
   },
   methods: { initials },

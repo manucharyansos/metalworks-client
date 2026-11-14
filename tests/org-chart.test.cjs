@@ -129,6 +129,11 @@ test('people list every position they hold and the places still outside the char
     'Լազերային կտրում · Sheets'
   )
   assert.equal(accessText(role(2, 'engineer'), null, {}), 'engineer')
+  assert.equal(
+    accessText(null, null, {}, 'Keeps access'),
+    'Keeps access',
+    'A position without an access level says it keeps the employee’s.'
+  )
 })
 
 test('every interface language names the same things', async () => {

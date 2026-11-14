@@ -225,9 +225,10 @@
               <span>{{ t.access }}</span>
               <select
                 v-model.number="draft.role_id"
-                required
                 class="app-control"
+                data-org-access
               >
+                <option :value="null">{{ t.accessNoneOption }}</option>
                 <option
                   v-for="role in chart.roles"
                   :key="role.id"
@@ -255,6 +256,11 @@
               </select>
             </label>
           </div>
+          <p
+            class="-mt-2 text-[11px] leading-4 text-slate-500 dark:text-slate-400"
+          >
+            {{ draft.role_id ? t.accessGives : t.accessKeeps }}
+          </p>
           <label class="org-field">
             <span>{{ t.duties }}</span>
             <textarea
@@ -266,7 +272,9 @@
             ></textarea>
           </label>
           <p
-            v-if="draft.id && draftAccessChanged && draftHolders"
+            v-if="
+              draft.id && draft.role_id && draftAccessChanged && draftHolders
+            "
             class="org-note"
           >
             {{ t.accessNote }}
@@ -327,7 +335,8 @@
             accessText(
               placing.fixedPosition.role,
               placing.fixedPosition.factory,
-              roleNames
+              roleNames,
+              t.accessNone
             )
           }}
         </p>
@@ -407,8 +416,10 @@
                 type="radio"
                 :value="row.assignment_id"
               />
+              <!-- Into a position that keeps access, one of the employee's
+                   places moves as it is; otherwise it is replaced. -->
               <span>
-                {{ t.instead }} ·
+                {{ keepsAccess ? t.move : t.instead }} ·
                 <strong>{{
                   row.position
                     ? row.position.name
@@ -416,12 +427,15 @@
                 }}</strong>
               </span>
             </label>
-            <label class="org-choice">
+            <label v-if="!keepsAccess" class="org-choice">
               <input v-model="placing.replace" type="radio" :value="null" />
               <span>{{ t.extra }}</span>
             </label>
           </fieldset>
-          <p v-if="targetPosition" class="org-note">
+          <p v-if="targetPosition && keepsAccess" class="org-note">
+            {{ t.keepAccess }}
+          </p>
+          <p v-else-if="targetPosition" class="org-note">
             {{ t.accessNote }}
             <strong>{{
               accessText(targetPosition.role, targetPosition.factory, roleNames)
@@ -559,7 +573,7 @@ export default {
       )
       if (!position) return false
       return (
-        Number(position.role?.id) !== Number(this.draft.role_id) ||
+        Number(position.role?.id || 0) !== Number(this.draft.role_id || 0) ||
         Number(position.factory?.id || 0) !==
           Number((this.draftIsProduction && this.draft.factory_id) || 0)
       )
@@ -589,12 +603,17 @@ export default {
       const from = this.placedAssignment?.position?.id
       return flatPositions(this.chart.positions).filter(
         (row) =>
-          row.id !== from && this.editableRoles.includes(Number(row.role?.id))
+          row.id !== from &&
+          (!row.role || this.editableRoles.includes(Number(row.role.id)))
       )
     },
     targetPosition() {
       const id = this.placing?.fixedPosition?.id || this.placing?.position_id
       return this.chart.positions.find((row) => row.id === id) || null
+    },
+    // The chosen position leaves the employee's access as it is.
+    keepsAccess() {
+      return Boolean(this.targetPosition && !this.targetPosition.role)
     },
     // An employee opened from the list has no position to go to yet.
     noTargets() {
@@ -612,6 +631,11 @@ export default {
       this.draft = null
       this.placing = null
       this.load()
+    },
+    // Moving into a position that keeps access needs one of the employee's places.
+    keepsAccess(keeps) {
+      if (keeps && this.placing && this.placing.replace === null)
+        this.pickDefaultReplace()
     },
   },
   created() {
@@ -662,11 +686,20 @@ export default {
         this.chart = response.data
         return true
       } catch (error) {
-        this.dialogError = apiErrorMessage(error, this.t.loadFailed)
+        this.dialogError = this.failure(error)
         return false
       } finally {
         this.busy = false
       }
+    },
+    // What went wrong with a change: the server's own words, or that it did
+    // not answer, or at least its status code.
+    failure(error) {
+      if (!error?.response) return this.t.noReply
+      return (
+        apiErrorMessage(error, '') ||
+        `${this.t.saveFailed} (HTTP ${error.response.status})`
+      )
     },
     openPosition(position, parent = null) {
       this.dialogError = ''
@@ -679,15 +712,13 @@ export default {
             factory_id: position.factory?.id ?? null,
             description: position.description || '',
           }
-        : {
+        : // A new position, even under an engineer, gives no access until
+          // the manager chooses one: an assistant is not an engineer.
+          {
             id: null,
             name: '',
             parent_id: parent?.id ?? null,
-            role_id:
-              parent?.role?.id &&
-              this.editableRoles.includes(Number(parent.role.id))
-                ? parent.role.id
-                : this.chart.roles[0]?.id ?? null,
+            role_id: null,
             factory_id: parent?.factory?.id ?? null,
             description: '',
           }
