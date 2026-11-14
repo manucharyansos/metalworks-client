@@ -220,7 +220,9 @@
               </option>
             </select>
           </label>
-          <div class="grid gap-4 sm:grid-cols-2">
+          <!-- One field per row: side by side the dialog is too narrow for
+               the access and workshop names. -->
+          <div class="grid gap-4">
             <label class="org-field">
               <span>{{ t.access }}</span>
               <select
