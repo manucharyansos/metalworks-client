@@ -262,6 +262,12 @@ export default {
           icon: 'workers',
         },
         {
+          to: '/manager/org-chart',
+          label: { hy: 'Կառուցվածք', ru: 'Оргструктура', en: 'Org chart' },
+          permission: null,
+          icon: 'workers',
+        },
+        {
           to: '/manager/registration-requests',
           label: {
             hy: 'Պատվիրատուների և աշխատակիցների հայտեր',

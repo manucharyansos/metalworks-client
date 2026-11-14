@@ -238,6 +238,11 @@ export default {
           exact: false,
         },
         {
+          to: '/admin/org-chart',
+          label: { hy: 'Կառուցվածք', ru: 'Оргструктура', en: 'Org chart' },
+          exact: false,
+        },
+        {
           to: '/admin/registration-requests',
           label: {
             hy: 'Գրանցման հարցումներ',

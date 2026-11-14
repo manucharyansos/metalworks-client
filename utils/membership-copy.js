@@ -23,7 +23,7 @@ const copy = {
       authenticatedUser: 'Պատվիրատու',
       admin: 'Ադմինիստրատոր',
       manager: 'Մենեջեր',
-      engineer: 'Ինժիներ',
+      engineer: 'Ինժեներ',
       laser: 'Լազերային կտրում',
       bend: 'Կռում',
       operator: 'Օպերատոր',
