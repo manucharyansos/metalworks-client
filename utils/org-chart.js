@@ -7,6 +7,9 @@ export const orgChartCopy = {
     help: 'Ընկերության հաստիքները և նրանց ենթակա հաստիքները։ Յուրաքանչյուր հաստիք իր աշխատակիցներին տալիս է մուտքի մակարդակ, իսկ արտադրական հաստիքները՝ նաև արտադրամաս։',
     addTop: 'Նոր հաստիք',
     addChild: 'Ենթակա հաստիք',
+    addSibling: 'Նույն մակարդակի հաստիք',
+    parentHint:
+      'Ընտրեք անմիջական վերադասին։ Նույն վերադասով հաստիքները ցուցադրվում են իրար կողքի։ Ենթակայությունը մուտքի իրավունքներ չի տալիս։',
     addEmployee: 'Աշխատակից',
     edit: 'Խմբագրել',
     remove: 'Ջնջել',
@@ -28,7 +31,7 @@ export const orgChartCopy = {
     accessNone: 'Մուտքը չի փոխում',
     accessNoneOption: 'Չի փոխում աշխատակցի մուտքը',
     accessKeeps:
-      'Աշխատակիցը կպահի իր ներկա մուտքը։ Հարմար է օգնականների և բանվորների համար։',
+      'Աշխատակիցը կպահի իր ներկա մուտքը՝ անկախ հաստիքի անվանումից և վերադասից։',
     accessGives: 'Այս հաստիքի աշխատակիցները կստանան ընտրված մուտքը։',
     keepAccess: 'Աշխատակցի մուտքը չի փոխվի։',
     workshop: 'Արտադրամաս',
@@ -63,6 +66,9 @@ export const orgChartCopy = {
     help: 'Должности компании и подчинённые им должности. Каждая должность даёт своим сотрудникам уровень доступа, а производственные — ещё и цех.',
     addTop: 'Новая должность',
     addChild: 'Подчинённая должность',
+    addSibling: 'Должность на том же уровне',
+    parentHint:
+      'Выберите непосредственного руководителя. Должности с общим руководителем показаны рядом. Подчинение не даёт прав доступа.',
     addEmployee: 'Сотрудник',
     edit: 'Изменить',
     remove: 'Удалить',
@@ -84,7 +90,7 @@ export const orgChartCopy = {
     accessNone: 'Доступ не меняет',
     accessNoneOption: 'Не меняет доступ сотрудника',
     accessKeeps:
-      'Сотрудник сохранит свой текущий доступ. Подходит для помощников и рабочих.',
+      'Сотрудник сохранит свой текущий доступ независимо от названия должности и руководителя.',
     accessGives: 'Сотрудники этой должности получат выбранный доступ.',
     keepAccess: 'Доступ сотрудника не изменится.',
     workshop: 'Цех',
@@ -119,6 +125,9 @@ export const orgChartCopy = {
     help: 'The company’s positions and the positions under them. Each position gives its employees an access level, and production positions also a workshop.',
     addTop: 'New position',
     addChild: 'Subordinate position',
+    addSibling: 'Position at the same level',
+    parentHint:
+      'Choose the direct supervisor. Positions with the same supervisor appear side by side. Reporting relationships do not grant access.',
     addEmployee: 'Employee',
     edit: 'Edit',
     remove: 'Delete',
@@ -140,7 +149,7 @@ export const orgChartCopy = {
     accessNone: 'Keeps access',
     accessNoneOption: 'Keeps the employee’s access',
     accessKeeps:
-      'The employee keeps their current access. Suits assistants and workers.',
+      'The employee keeps their current access regardless of the position name or supervisor.',
     accessGives: 'Employees in this position get the chosen access.',
     keepAccess: 'The employee’s access does not change.',
     workshop: 'Workshop',

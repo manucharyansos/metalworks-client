@@ -140,15 +140,20 @@
       >
         + {{ t.addEmployee }}
       </button>
+      <button
+        v-if="editable"
+        type="button"
+        class="org-card__add block"
+        :aria-label="`${t.addSibling} · ${node.name}`"
+        data-org-add-sibling
+        @click="$emit('add-sibling', node)"
+      >
+        + {{ t.addSibling }}
+      </button>
     </article>
 
-    <!-- Units with their own subordinates sit side by side; plain positions
-         line up under their head. -->
-    <div
-      v-if="node.children.length"
-      class="org-children"
-      :class="nested ? 'org-children--row' : 'org-children--stack'"
-    >
+    <!-- Siblings always share a row, regardless of whether they have children. -->
+    <div v-if="node.children.length" class="org-children org-children--row">
       <OrgChartBranch
         v-for="child in node.children"
         :key="child.id"
@@ -181,15 +186,6 @@ export default {
       const tone = this.tones.get(this.node.id)
       return tone === null || tone === undefined ? 'top' : String(tone)
     },
-    // Departments under the top of the chart stand side by side, and so do
-    // units that have their own subordinates; plain positions inside a
-    // department line up under its head.
-    nested() {
-      return (
-        this.tone === 'top' ||
-        this.node.children.some((child) => child.children.length)
-      )
-    },
     access() {
       return accessText(
         this.node.role,
@@ -213,7 +209,7 @@ export default {
 
 <style scoped>
 .org-branch {
-  @apply flex flex-col items-start;
+  @apply flex shrink-0 flex-col items-start;
 }
 .org-branch--group {
   @apply rounded-3xl border p-3;
@@ -225,12 +221,9 @@ export default {
   @apply mt-3 flex;
 }
 .org-children--row {
-  @apply items-start gap-3;
+  @apply flex-nowrap items-start gap-3;
 }
-.org-children--stack {
-  @apply w-full flex-col gap-2;
-}
-.org-children--stack > .org-branch > .org-card {
+.org-card {
   @apply w-full;
 }
 .org-card {

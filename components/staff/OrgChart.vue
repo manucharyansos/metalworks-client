@@ -166,6 +166,7 @@
             :editable-roles="editableRoles"
             :t="t"
             @add-child="openPosition(null, $event)"
+            @add-sibling="openSibling"
             @edit="openPosition($event)"
             @remove="removePosition"
             @add-member="openToPosition"
@@ -209,7 +210,11 @@
           </label>
           <label class="org-field">
             <span>{{ t.parent }}</span>
-            <select v-model="draft.parent_id" class="app-control">
+            <select
+              v-model="draft.parent_id"
+              class="app-control"
+              data-org-parent
+            >
               <option :value="null">{{ t.noParent }}</option>
               <option
                 v-for="row in parentChoices"
@@ -220,6 +225,9 @@
               </option>
             </select>
           </label>
+          <p class="text-xs leading-5 text-slate-500 dark:text-slate-400">
+            {{ t.parentHint }}
+          </p>
           <!-- One field per row: side by side the dialog is too narrow for
                the access and workshop names. -->
           <div class="grid gap-4">
@@ -702,6 +710,12 @@ export default {
         apiErrorMessage(error, '') ||
         `${this.t.saveFailed} (HTTP ${error.response.status})`
       )
+    },
+    openSibling(position) {
+      const parent = this.chart.positions.find(
+        (row) => row.id === position.parent_id
+      )
+      this.openPosition(null, parent || null)
     },
     openPosition(position, parent = null) {
       this.dialogError = ''
