@@ -357,6 +357,17 @@ export function apiErrorMessage(error, fallback = '') {
   )
 }
 
+// A powder-coating job's colour and primer request. Only filled-in values are
+// sent; the server keeps them for powder coating alone.
+export function paintSettings(row = {}) {
+  const ral = String(row.paint_ral || '').trim()
+  if (!ral && !row.primer_required) return {}
+  return {
+    paint_ral: ral || null,
+    primer_required: Boolean(row.primer_required),
+  }
+}
+
 export function workshopSettingsPayload(
   factories = [],
   drafts = {},
@@ -379,6 +390,7 @@ export function workshopSettingsPayload(
           ? method
           : row.confirmation_method || ''
         : null,
+      ...paintSettings(row),
     }
   })
 }

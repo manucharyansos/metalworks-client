@@ -54,13 +54,13 @@ export function fileKind(name) {
 }
 
 // The file to show first: machine programs, then drawings, images, 3D models
-// and CAD views, in list order within each kind. Files the operator may not
-// open are skipped.
+// and CAD views, in list order within each kind. View-only models open in the
+// viewer like any other file.
 export function preferredPreviewFile(files) {
   let best = null
   let bestRank = Infinity
   for (const file of files || []) {
-    if (!file || file.operator_download_restricted) continue
+    if (!file) continue
     const entry = kindOf(file.original_name || file.path)
     if (entry && entry.rank < bestRank) {
       best = file

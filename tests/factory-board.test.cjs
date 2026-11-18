@@ -73,11 +73,19 @@ test('each workshop opens its own program first, then drawings, images and model
   )
   assert.equal(
     preferredPreviewFile([
-      file(1, 'cut.dxf', { operator_download_restricted: true }),
-      file(2, 'photo.jpg'),
+      file(1, 'frame.SLDPRT', { operator_download_restricted: true }),
+      file(2, 'frame.step', { operator_download_restricted: true }),
     ]).id,
     2,
-    'files the operator may not open are skipped'
+    'view-only models open in the viewer too, the 3D model before the saved CAD view'
+  )
+  assert.equal(
+    preferredPreviewFile([
+      file(1, 'frame.step', { operator_download_restricted: true }),
+      file(2, 'cut.dxf'),
+    ]).id,
+    2,
+    'the workshop program still comes before a model'
   )
   assert.equal(preferredPreviewFile([file(1, 'archive.zip')]), null)
   assert.deepEqual(

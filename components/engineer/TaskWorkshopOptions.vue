@@ -51,6 +51,36 @@
           t.deadlineHelp
         }}</span>
       </label>
+      <div
+        v-if="isPowder(factory)"
+        class="mt-3 rounded-xl bg-violet-50 p-3 dark:bg-violet-950/30"
+        data-create-paint
+      >
+        <label class="block text-sm font-semibold"
+          >{{ paint.colour }}
+          <input
+            :value="row(factory.id).paint_ral"
+            type="text"
+            maxlength="40"
+            autocomplete="off"
+            :placeholder="paint.placeholder"
+            :disabled="disabled"
+            data-create-paint-ral
+            class="mt-2 block w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:max-w-xs"
+            @input="set(factory.id, 'paint_ral', $event.target.value)"
+          />
+        </label>
+        <label class="mt-3 flex items-start gap-3 text-sm">
+          <input
+            type="checkbox"
+            :checked="row(factory.id).primer_required"
+            :disabled="disabled"
+            data-create-primer
+            class="mt-0.5 h-5 w-5 shrink-0"
+            @change="set(factory.id, 'primer_required', $event.target.checked)"
+          /><span>{{ paint.primer }}</span>
+        </label>
+      </div>
       <label class="mt-3 flex items-start gap-3 text-sm">
         <input
           type="checkbox"
@@ -80,6 +110,8 @@
 <script>
 import TaskCreationOptions from '@/components/engineer/TaskCreationOptions.vue'
 import { taskCopy } from '@/utils/task-workflow'
+import { workshopKind } from '@/utils/workshop-catalog'
+import { paintCopy } from '@/utils/task-paint'
 export default {
   components: { TaskCreationOptions },
   props: {
@@ -93,8 +125,14 @@ export default {
     t() {
       return taskCopy[this.$i18n?.locale] || taskCopy.hy
     },
+    paint() {
+      return paintCopy(this.$i18n?.locale)
+    },
   },
   methods: {
+    isPowder(factory) {
+      return workshopKind(factory) === 'powder'
+    },
     row(id) {
       return (
         this.value[id] || {
@@ -103,6 +141,8 @@ export default {
           priority: 'normal',
           confirmation_required: false,
           confirmation_method: '',
+          paint_ral: '',
+          primer_required: false,
         }
       )
     },

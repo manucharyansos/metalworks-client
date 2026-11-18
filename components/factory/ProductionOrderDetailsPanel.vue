@@ -60,7 +60,7 @@
           v-else-if="previewFile"
           :file="previewFile"
           :order-id="details.id"
-          show-download
+          :show-download="canDownloadFile(previewFile)"
           @download="$emit('download-file', $event)"
           @close="closePreview"
         />
@@ -302,6 +302,25 @@
               >
             </div>
 
+            <div
+              v-if="isPaintStep(order)"
+              class="paint-box"
+              :data-primer="String(Boolean(order.primer_required))"
+              data-paint-settings
+            >
+              <p class="paint-box__label">{{ copy.paint }}</p>
+              <p class="paint-box__colour" data-paint-ral>
+                {{ order.paint_ral || copy.noColour }}
+              </p>
+              <p
+                class="paint-box__primer"
+                :class="{ 'paint-box__primer--on': order.primer_required }"
+                data-paint-primer
+              >
+                {{ order.primer_required ? copy.primerYes : copy.primerNo }}
+              </p>
+            </div>
+
             <TaskFileFolders
               v-if="order.files?.length"
               :items="order.files"
@@ -347,17 +366,26 @@
                     </div>
                     <FileProductionAttributes :file="file" />
                   </div>
-                  <div v-if="!file.operator_download_restricted" class="flex shrink-0 gap-2">
+                  <div class="flex shrink-0 flex-wrap items-center gap-2">
+                    <span
+                      v-if="!canDownloadFile(file)"
+                      class="view-only-pill"
+                      data-view-only
+                      >{{ copy.viewOnly }}</span
+                    >
                     <button
                       type="button"
                       class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                      data-view-file
                       @click="openFile(file)"
                     >
                       Դիտել
                     </button>
                     <button
+                      v-if="canDownloadFile(file)"
                       type="button"
                       class="rounded-xl bg-slate-950 px-3 py-2 text-xs font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+                      data-download-file
                       @click="$emit('download-file', file)"
                     >
                       Ներբեռնել
@@ -379,6 +407,58 @@
               :creator-id="details.creator_id"
               @updated="$emit('updated', $event)"
             />
+          </article>
+          <!-- The task's SolidWorks and STEP models: every workshop may look
+               at them, none may download them. -->
+          <article
+            v-if="modelFiles.length"
+            class="work-card rounded-2xl border border-slate-200 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-950/35"
+            data-task-models
+          >
+            <div class="mb-3">
+              <p class="text-sm font-bold text-slate-800 dark:text-slate-100">
+                {{ copy.models }}
+              </p>
+              <p class="mt-0.5 text-xs text-slate-400">{{ copy.modelsHelp }}</p>
+            </div>
+            <div class="space-y-2">
+              <div
+                v-for="file in modelFiles"
+                :key="'model-' + file.id"
+                class="work-file-row"
+                :data-active="String(isPreviewed(file))"
+                :data-task-model="file.id"
+              >
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <p class="flex min-w-0 flex-1 items-start gap-2">
+                    <span
+                      class="file-badge"
+                      :data-kind="fileKind(file.original_name || file.path)"
+                      >{{
+                        fileExtensionOf(
+                          file.original_name || file.path
+                        ).toUpperCase() || '—'
+                      }}</span
+                    ><span
+                      class="line-clamp-2 break-all text-sm font-bold text-slate-800 dark:text-slate-100"
+                      :title="file.original_name"
+                      >{{ file.original_name }}</span
+                    >
+                  </p>
+                  <div class="flex shrink-0 items-center gap-2">
+                    <span class="view-only-pill">{{ copy.viewOnly }}</span>
+                    <button
+                      type="button"
+                      class="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                      data-view-file
+                      @click="openFile(file)"
+                    >
+                      Դիտել
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </article>
         </div>
         <div v-else class="p-8 text-center text-xs text-slate-400">
@@ -411,6 +491,37 @@ import {
   fileKind,
   preferredPreviewFile,
 } from '@/utils/file-kind'
+import { workshopKind } from '@/utils/workshop-catalog'
+
+const panelCopy = {
+  hy: {
+    viewOnly: 'Միայն դիտում',
+    models: '3D մոդելներ',
+    modelsHelp: 'Առաջադրանքի մոդելները կարող եք դիտել, բայց ոչ ներբեռնել։',
+    paint: 'Ներկում',
+    noColour: 'Գույնը նշված չէ',
+    primerYes: 'Գրունտ՝ ներկելուց առաջ',
+    primerNo: 'Առանց գրունտի',
+  },
+  ru: {
+    viewOnly: 'Только просмотр',
+    models: '3D-модели',
+    modelsHelp: 'Модели задания можно смотреть, но не скачивать.',
+    paint: 'Покраска',
+    noColour: 'Цвет не указан',
+    primerYes: 'Грунт перед покраской',
+    primerNo: 'Без грунта',
+  },
+  en: {
+    viewOnly: 'View only',
+    models: '3D models',
+    modelsHelp: 'You can look at the task’s models but not download them.',
+    paint: 'Painting',
+    noColour: 'No colour given',
+    primerYes: 'Primer before painting',
+    primerNo: 'No primer',
+  },
+}
 
 export default {
   name: 'ProductionOrderDetailsPanel',
@@ -430,10 +541,29 @@ export default {
   },
   data: () => ({ activePreviewFile: null }),
   computed: {
+    copy() {
+      return (
+        panelCopy[String(this.$i18n?.locale || 'hy').split('-')[0]] ||
+        panelCopy.hy
+      )
+    },
+    // Office roles download everything; workshop staff only look at models.
+    isStaff() {
+      return ['admin', 'manager', 'engineer'].includes(
+        this.$auth?.user?.role?.name
+      )
+    },
+    modelFiles() {
+      return Array.isArray(this.details?.model_files)
+        ? this.details.model_files
+        : []
+    },
     previewFile() {
       if (this.activePreviewFile) return this.activePreviewFile
       if (!this.previewUrl) return null
-      const files = this.factoryOrders.flatMap((step) => step.files || [])
+      const files = this.factoryOrders
+        .flatMap((step) => step.files || [])
+        .concat(this.modelFiles)
       const raw = decodeURIComponent(String(this.previewUrl).split('?')[0])
       const id = raw.match(/\/pmp\/(\d+)$/)?.[1]
       const revision = raw.match(/\/task-revisions\/(\d+)$/)?.[1]
@@ -458,7 +588,7 @@ export default {
     totalFiles() {
       return this.factoryOrders.reduce(
         (sum, order) => sum + (order.files?.length || 0),
-        0
+        this.modelFiles.length
       )
     },
     resolvedPreviewUrl() {
@@ -536,6 +666,18 @@ export default {
     fileAttribute,
     fileExtensionOf,
     fileKind,
+    canDownloadFile(file) {
+      return this.isStaff || !file?.operator_download_restricted
+    },
+    // Powder coating shows its colour and primer request, even when the
+    // engineer left them empty.
+    isPaintStep(step) {
+      return Boolean(
+        step?.paint_ral ||
+          step?.primer_required ||
+          workshopKind(step?.factory) === 'powder'
+      )
+    },
     isPreviewed(file) {
       const shown = this.previewFile
       return Boolean(shown && file && Number(shown.id) === Number(file.id))
@@ -550,7 +692,9 @@ export default {
         this.$emit('close-preview')
       }
       const file = preferredPreviewFile(
-        this.factoryOrders.flatMap((step) => step.files || [])
+        this.factoryOrders
+          .flatMap((step) => step.files || [])
+          .concat(this.modelFiles)
       )
       if (!file) return
       this.activePreviewFile = file
@@ -602,6 +746,25 @@ export default {
 </script>
 
 <style scoped>
+.view-only-pill {
+  @apply rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-800 dark:bg-amber-950/40 dark:text-amber-300;
+}
+/* The colour is what the powder line needs first, so it reads at a glance. */
+.paint-box {
+  @apply mb-3 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 dark:border-violet-900/60 dark:bg-violet-950/30;
+}
+.paint-box__label {
+  @apply text-[11px] font-bold uppercase tracking-[0.12em] text-violet-500 dark:text-violet-300;
+}
+.paint-box__colour {
+  @apply mt-1 text-xl font-black text-slate-950 dark:text-white;
+}
+.paint-box__primer {
+  @apply mt-1 text-sm font-semibold text-slate-600 dark:text-slate-300;
+}
+.paint-box__primer--on {
+  @apply text-violet-700 dark:text-violet-200;
+}
 .work-file-row[data-active='true'] {
   border-color: #3b82f6;
   box-shadow: 0 0 0 1px #3b82f6;

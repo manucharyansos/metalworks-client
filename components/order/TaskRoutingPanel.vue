@@ -67,6 +67,13 @@
         {{ workflowText.priority }}:
         {{ workflowText[step.priority || 'normal'] }}
       </p>
+      <TaskPaintSettings
+        v-if="isPowderStep(step)"
+        :order="order"
+        :step="step"
+        :disabled="loading || saving"
+        @updated="handleSettingsUpdated"
+      />
       <details
         v-if="
           !step.engineer_confirmation_at &&
@@ -259,10 +266,13 @@ import {
   routingCopy,
   taskFiles,
 } from '@/utils/task-routing'
+import { workshopKind } from '@/utils/workshop-catalog'
+import TaskPaintSettings from '@/components/order/TaskPaintSettings.vue'
 export default {
   components: {
     TaskTeamEditor,
     TaskEvidenceSettings,
+    TaskPaintSettings,
     TaskFileVersions,
     TaskWorkshopOptions,
     ProductionRoutePanel,
@@ -415,6 +425,15 @@ export default {
     handleSettingsUpdated(order) {
       this.$emit('updated', order)
       this.$nextTick(() => this.loadWorkload())
+    },
+    // Powder coating carries a colour; a job that already has one keeps
+    // showing it even if the workshop was renamed.
+    isPowderStep(step) {
+      return Boolean(
+        workshopKind(step?.factory) === 'powder' ||
+          step?.paint_ral ||
+          step?.primer_required
+      )
     },
     locked(step) {
       return this.isCanceled || assignmentLocked(step)

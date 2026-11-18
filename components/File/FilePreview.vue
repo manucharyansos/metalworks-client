@@ -243,8 +243,11 @@ export default {
       }
       this.loading = true
       try {
+        // The header tells the server this is the in-app viewer, which is how
+        // workshop staff may look at view-only models (SolidWorks, STEP).
         const { data } = await this.$axios.get(this.secureUrl, {
           responseType: 'blob',
+          headers: { 'X-File-Preview': '1' },
         })
         if (request !== this.request) return
         const preview = await inspectFactoryPreview(data, filename, type)

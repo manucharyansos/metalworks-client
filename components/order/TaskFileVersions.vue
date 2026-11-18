@@ -33,7 +33,7 @@
         <button
           type="button"
           class="text-blue-600 underline"
-          v-if="file.can_download !== false"
+          v-if="file.can_view !== false"
           data-preview-file-version
           @click="preview(file)"
         >
@@ -71,7 +71,7 @@
             <button
               type="button"
               class="text-blue-600 underline"
-              v-if="file.can_download !== false"
+              v-if="file.can_view !== false"
           data-preview-file-version
               @click="preview(file, version)"
             >
@@ -142,7 +142,7 @@
       v-if="previewFile"
       :file="previewFile"
       :order-id="order.id"
-      show-download
+      :show-download="previewFile.can_download !== false"
       @close="previewFile = null"
       @download="downloadPreview"
     />
