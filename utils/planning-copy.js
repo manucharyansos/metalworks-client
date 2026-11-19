@@ -8,6 +8,10 @@ export const planningCopy = {
     teamSaved: 'Աշխատանքի կազմը պահպանվեց։',
     noWorkers: 'Հասանելի արտադրական աշխատակից չկա։',
     teamFailed: 'Չհաջողվեց պահպանել կազմը։',
+    staleHelpers:
+      'Այլևս արտադրական աշխատակից չեն, պահպանելիս կհանվեն օգնականներից՝ {names}։',
+    staleOperator:
+      'Ներկայիս կատարողը՝ {name}, այլևս արտադրական աշխատակից չէ։ Ընտրեք նոր կատարող։',
     helper: 'Օգնական',
     workshops: 'Իմ աշխատանքների արտադրամասերը',
 
@@ -72,6 +76,10 @@ export const planningCopy = {
     teamSaved: 'Состав сохранён.',
     noWorkers: 'Нет доступных производственных сотрудников.',
     teamFailed: 'Не удалось сохранить состав.',
+    staleHelpers:
+      'Больше не производственные сотрудники и при сохранении выйдут из помощников: {names}.',
+    staleOperator:
+      'Текущий исполнитель, {name}, больше не производственный сотрудник. Выберите нового.',
     helper: 'Помощник',
     workshops: 'Цеха с моими заданиями',
 
@@ -136,6 +144,10 @@ export const planningCopy = {
     teamSaved: 'Task team saved.',
     noWorkers: 'No eligible production staff available.',
     teamFailed: 'Unable to save task team.',
+    staleHelpers:
+      'No longer production staff, so they leave the helpers when you save: {names}.',
+    staleOperator:
+      'The current operator, {name}, is no longer production staff. Choose a new one.',
     helper: 'Helper',
     workshops: 'Workshops with my tasks',
 

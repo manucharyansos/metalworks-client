@@ -54,6 +54,27 @@
     >
       {{ c.noWorkers }}
     </p>
+    <!-- People saved on the step who are no longer production staff (now an
+         engineer, or switched off) have no checkbox, so they are named here. -->
+    <p
+      v-if="staleOperator"
+      class="mt-2 text-sm font-semibold text-amber-700 dark:text-amber-300"
+      data-team-stale-operator
+    >
+      {{ c.staleOperator.replace('{name}', staleOperator.name || '#' + staleOperator.id) }}
+    </p>
+    <p
+      v-if="staleHelpers.length"
+      class="mt-2 text-sm font-semibold text-amber-700 dark:text-amber-300"
+      data-team-stale-helpers
+    >
+      {{
+        c.staleHelpers.replace(
+          '{names}',
+          staleHelpers.map((h) => h.name || '#' + h.id).join(', ')
+        )
+      }}
+    </p>
     <p
       v-if="error"
       role="alert"
@@ -104,10 +125,32 @@ export default {
     signature() {
       return `${this.scope}:${this.step.team_version}`
     },
+    workerIds() {
+      return new Set(this.workers.map((worker) => Number(worker.id)))
+    },
+    // Helpers saved on the step who are no longer production staff. They
+    // leave the team on the next save instead of blocking it.
+    staleHelpers() {
+      if (!this.workers.length) return []
+      return (this.step.helpers || []).filter(
+        (helper) => !this.workerIds.has(Number(helper.id))
+      )
+    },
+    staleOperator() {
+      const id = Number(this.step.operator_id)
+      if (!id || !this.workers.length || this.workerIds.has(id)) return null
+      return this.step.operator || { id }
+    },
+    // What a save sends: the chosen helpers who are still production staff.
+    keptHelpers() {
+      return this.workers.length
+        ? this.helpers.filter((id) => this.workerIds.has(Number(id)))
+        : this.helpers
+    },
     changed() {
       return (
         Number(this.operator) !== Number(this.step.operator_id) ||
-        JSON.stringify([...this.helpers].sort()) !==
+        JSON.stringify([...this.keptHelpers].sort()) !==
           JSON.stringify(
             (this.step.helpers || []).map((h) => Number(h.id)).sort()
           )
@@ -148,7 +191,7 @@ export default {
           `/api/tasks/${this.step.order_id}/workshops/${this.step.id}/team`,
           {
             operator_id: Number(this.operator),
-            helper_ids: this.helpers,
+            helper_ids: this.keptHelpers,
             team_version: this.step.team_version,
           }
         )
