@@ -76,6 +76,8 @@
       </header>
       <Nuxt />
     </div>
+    <!-- Messages that must outlive a page change, e.g. after deleting a project. -->
+    <notifications group="workspace" />
   </div>
 </template>
 

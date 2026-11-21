@@ -81,6 +81,13 @@
             </button>
           </template>
         </nav>
+        <ProjectSubgroupActions
+          v-if="selectedRemoteNumber"
+          :pmp="getPmp"
+          :remote="selectedRemoteNumber"
+          @renamed="onProjectRenamed"
+          @deleted="onProjectDeleted"
+        />
         <label
           v-if="sectionOpen && $can('pmp_files.view')"
           class="explorer-search"
@@ -756,7 +763,9 @@ import InputWithLabelIcon from '~/components/form/InputWithLabelIcon.vue'
 import InfoContentInput from '~/components/modals/add-file/InfoContentInput.vue'
 import FileProductionPlan from '@/components/engineer/FileProductionPlan.vue'
 import FileMetadataPanel from '@/components/File/FileMetadataPanel.vue'
+import ProjectSubgroupActions from '@/components/engineer/ProjectSubgroupActions.vue'
 import { needsIndividualFileAttributes } from '@/utils/workshop-catalog'
+import { projectCopy } from '@/utils/project-copy'
 import CadPreviewWorker from '~/workers/cad-preview.worker.js'
 import CadModelWorker from '~/workers/cad-model.worker.js'
 import DldViewer from '~/components/File/DldViewer.vue'
@@ -786,6 +795,7 @@ export default {
     ModelViewer,
     DldViewer,
     ImageZoomViewer,
+    ProjectSubgroupActions,
   },
   layout: 'engineer',
   middleware: ['role-guard'],
@@ -1565,6 +1575,27 @@ export default {
       if (!file) return null
       if (file.id && this.$getPmpFileUrl) return this.$getPmpFileUrl(file)
       return this.$getFileUrl ? this.$getFileUrl(file.path) : null
+    },
+
+    // The names changed on the server; the open section and file stay open.
+    onProjectRenamed(pmp) {
+      if (!pmp?.id) return
+      this.$store.commit('pmp/SET_PMP', pmp)
+      const number = (this.getPmp.remote_number || []).find(
+        (remote) => this.n(remote.id) === this.selectedRemoteNumberId
+      )
+      if (number) this.selectedRemoteNumber = number
+    },
+    onProjectDeleted({ groupDeleted }) {
+      const copy = projectCopy(this.$i18n?.locale)
+      this.clearPreview()
+      // The layout keeps this message on screen while the project list opens.
+      this.$notify({
+        group: 'workspace',
+        type: 'success',
+        text: groupDeleted ? copy.deletedGroup : copy.deleted,
+      })
+      this.$router.push({ path: this.localePath('/engineer/files') })
     },
 
     openDelete(id) {
