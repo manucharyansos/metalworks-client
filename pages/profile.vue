@@ -309,6 +309,7 @@ export default {
     if (role === 'manager') return 'manager'
     if (role === 'engineer') return 'engineer'
     if (['laser', 'bend', 'powder_catting', 'operator'].includes(role)) return 'factory'
+    if (role === 'authenticatedUser') return 'customer'
     return 'default'
   },
   data() {

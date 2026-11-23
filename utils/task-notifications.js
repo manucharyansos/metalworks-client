@@ -3,6 +3,10 @@
 // `message` is only a fallback for types this file does not know yet.
 import { taskCopy } from '@/utils/task-workflow'
 
+// Same as formatMoney in utils/quote-copy.js; kept here so this file only needs task-workflow.
+const money = (value) =>
+  `${String(Math.round(Number(value))).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} ֏`
+
 export const notificationCopy = {
   hy: {
     title: 'Ծանուցումներ',
@@ -12,6 +16,7 @@ export const notificationCopy = {
     loadFailed: 'Չհաջողվեց բեռնել ծանուցումները',
     markFailed: 'Չհաջողվեց նշել կարդացված։ Կրկին փորձեք։',
     task: 'Առաջադրանք',
+    request: 'Հայտ',
     supplement: ' Լրացրեք հավաստումը և կրկին ուղարկեք ավարտը։',
     statuses: {
       pending: 'Սպասում',
@@ -60,6 +65,12 @@ export const notificationCopy = {
         'Ինժեները վերադարձրել է աշխատանքը վերանայման՝ {noteText}',
       'step.assigned': 'Ձեզ նշանակվել է աշխատանք՝ «{factory}» արտադրամաս',
       'step.unassigned': 'Աշխատանքը փոխանցվել է մեկ այլ կատարողի',
+      'quote.submitted': '{actor}՝ նոր պատվերի հայտ',
+      'quote.cancelled': '{actor}՝ չեղարկել է հայտը',
+      'quote.accepted': '{actor}՝ ընդունել է առաջարկը',
+      'quote.declined': '{actor}՝ մերժել է առաջարկը',
+      'quote.quoted': 'Ձեր հայտին պատասխանել են. արժեքը՝ {price}',
+      'quote.rejected': 'Ձեր հայտը մերժվել է',
     },
   },
   ru: {
@@ -70,6 +81,7 @@ export const notificationCopy = {
     loadFailed: 'Не удалось загрузить уведомления',
     markFailed: 'Не удалось отметить прочитанными. Попробуйте ещё раз.',
     task: 'Задание',
+    request: 'Заявка',
     supplement: ' Дополните подтверждение и отправьте завершение ещё раз.',
     statuses: {
       pending: 'Ожидание',
@@ -116,6 +128,12 @@ export const notificationCopy = {
       'step.finish_returned': 'Инженер вернул работу на доработку: {noteText}',
       'step.assigned': 'Вам назначена работа в цехе «{factory}»',
       'step.unassigned': 'Работа передана другому исполнителю',
+      'quote.submitted': '{actor}: новая заявка на заказ',
+      'quote.cancelled': '{actor}: заявка отменена',
+      'quote.accepted': '{actor}: предложение принято',
+      'quote.declined': '{actor}: предложение отклонено',
+      'quote.quoted': 'На вашу заявку ответили: {price}',
+      'quote.rejected': 'Ваша заявка отклонена',
     },
   },
   en: {
@@ -126,6 +144,7 @@ export const notificationCopy = {
     loadFailed: 'Could not load notifications',
     markFailed: 'Could not mark as read. Please try again.',
     task: 'Task',
+    request: 'Request',
     supplement: ' Add the missing evidence and submit completion again.',
     statuses: {
       pending: 'Waiting',
@@ -172,6 +191,12 @@ export const notificationCopy = {
       'step.finish_returned': 'The engineer sent the work back: {noteText}',
       'step.assigned': 'You were assigned a job in “{factory}”',
       'step.unassigned': 'The job was handed to another operator',
+      'quote.submitted': '{actor}: a new order request',
+      'quote.cancelled': '{actor} cancelled the request',
+      'quote.accepted': '{actor} accepted the offer',
+      'quote.declined': '{actor} declined the offer',
+      'quote.quoted': 'Your request has an offer: {price}',
+      'quote.rejected': 'Your request was rejected',
     },
   },
 }
@@ -192,6 +217,7 @@ export function describeNotification(notification, locale = 'hy') {
   const data = notification?.data || {}
   const ref =
     data.order_number ||
+    data.quote_number ||
     data.order_name ||
     (notification?.order_id ? `#${notification.order_id}` : '')
   const key =
@@ -228,6 +254,7 @@ export function describeNotification(notification, locale = 'hy') {
       supplement: data.needs_supplement ? t.supplement : '',
       fileName: data.file_name || '',
       version: data.version || '',
+      price: data.price ? money(data.price) : '',
     }),
   }
 }
@@ -242,6 +269,16 @@ const FACTORY_HOME = {
 // Where a notification leads, for the signed-in role. Engineers land on the
 // task itself; everyone else lands on their own workspace.
 export function notificationTarget(notification, role) {
+  // Order requests open where each side handles them.
+  if (String(notification?.type || '').startsWith('quote.')) {
+    const id = Number(notification?.data?.quote_id)
+    const query =
+      Number.isSafeInteger(id) && id > 0 ? { quote: String(id) } : {}
+    if (role === 'authenticatedUser')
+      return { path: '/customer/requests', query }
+    if (role === 'admin') return { path: '/admin/quotes', query }
+    if (role === 'manager') return { path: '/manager/quotes', query }
+  }
   if (role === 'engineer') {
     const query = notification?.order_id
       ? { order: String(notification.order_id) }

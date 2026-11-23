@@ -6,6 +6,7 @@ const ROLE_HOMES = {
   bend: '/factory/bend',
   powder_catting: '/factory/powder',
   operator: '/factory/workspace',
+  authenticatedUser: '/customer',
 }
 
 export default async function ({ app, route, redirect }) {

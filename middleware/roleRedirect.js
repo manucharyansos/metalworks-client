@@ -78,6 +78,10 @@ export default async function ({ app, route, redirect, $auth }) {
   } else if (FACTORY_ROLES.includes(role) || user.factory_id) {
     homeRaw = factoryHome(user)
     allowedBase = '/factory'
+  } else if (role === 'authenticatedUser') {
+    // Customers start on their order request page.
+    homeRaw = '/customer'
+    allowedBase = '/customer'
   }
 
   // Profile is shared, but pages/profile.vue chooses the same role layout.

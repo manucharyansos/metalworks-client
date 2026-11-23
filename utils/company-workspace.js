@@ -34,7 +34,7 @@ export function companyHome(user) {
     if (permissions.includes('orders.create')) return '/engineer/orders/create'
     return '/profile'
   }
-  return { laser: '/factory/laser', bend: '/factory/bend', powder_catting: '/factory/powder', operator: '/factory/workspace' }[role] || '/profile'
+  return { laser: '/factory/laser', bend: '/factory/bend', powder_catting: '/factory/powder', operator: '/factory/workspace', authenticatedUser: '/customer' }[role] || '/profile'
 }
 
 export function isCompanyRequest(url) {

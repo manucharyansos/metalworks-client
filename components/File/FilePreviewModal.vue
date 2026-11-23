@@ -34,6 +34,7 @@
         <FilePreview
           :file="file"
           :customer-file="customerFile"
+          :source-url="sourceUrl"
           :order-id="orderId"
           :show-download="showDownload"
           @close="$emit('close')"
@@ -52,6 +53,7 @@ export default {
     orderId: { type: [Number, String], default: null },
     showDownload: Boolean,
     customerFile: Boolean,
+    sourceUrl: { type: String, default: '' },
   },
   mounted() {
     this.returnFocus = document.activeElement

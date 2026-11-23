@@ -264,6 +264,18 @@ export default {
           short: '07',
           exact: false,
         },
+        {
+          to: '/admin/quotes',
+          label: { hy: 'Պատվերի հայտեր', ru: 'Заявки на заказ', en: 'Order requests' },
+          short: '10',
+          exact: false,
+        },
+        {
+          to: '/admin/pricing',
+          label: { hy: 'Գնացուցակ', ru: 'Прайс-лист', en: 'Price list' },
+          short: '11',
+          exact: false,
+        },
       ],
     }
   },

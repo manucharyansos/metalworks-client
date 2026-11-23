@@ -27,14 +27,14 @@
               <div v-else-if="companiesError" class="rounded-xl bg-rose-50 p-4 text-sm text-rose-700 dark:bg-rose-950/30 dark:text-rose-200" role="alert">
                 <p>{{ companiesError }}</p><button type="button" class="mt-2 font-bold underline" @click="loadCompanies">{{ copy.retry }}</button>
               </div>
-              <div v-else-if="companies.length > 1">
+              <div v-else-if="companies.length > 1 && !presetCompany">
                 <label for="registration-company" class="field-label">{{ copy.company }}</label>
                 <select id="registration-company" v-model="companyId" name="company_id" class="field-control" :disabled="loading" :aria-invalid="Boolean(fieldError('company_id'))" @change="clearFieldError('company_id')">
                   <option value="">{{ copy.selectCompany }}</option><option v-for="company in companies" :key="company.id" :value="company.id">{{ company.name }}</option>
                 </select>
                 <p class="field-error" :role="fieldError('company_id') ? 'alert' : null">{{ fieldError('company_id') }}</p>
               </div>
-              <p v-else-if="companies.length === 1" class="text-sm text-slate-500 dark:text-slate-400">{{ copy.company }}: <strong class="text-slate-900 dark:text-white">{{ companies[0].name }}</strong></p>
+              <p v-else-if="presetCompany || companies.length === 1" class="text-sm text-slate-500 dark:text-slate-400">{{ copy.company }}: <strong class="text-slate-900 dark:text-white">{{ (presetCompany || companies[0]).name }}</strong></p>
               <div class="space-y-1">
                 <div v-for="field in fields" :key="field.key">
                   <InputWithLabelIcon v-model="form[field.key]" :type="field.type" :name="field.key" :label="field.label" :label_-id="'registration-' + field.key" :for_-l-abel="'registration-' + field.key" :autocomplete="field.autocomplete" :placeholder="field.placeholder || ''" :maxlength="255" :disabled="loading" :required="field.required" :aria-invalid="Boolean(fieldError(field.key))" :classes="fieldError(field.key) ? '!border-rose-400' : ''" @input="clearFieldError(field.key)" />
@@ -77,6 +77,11 @@ export default {
   computed: {
     ...mapGetters('authCustom', ['getErrorMessage', 'getRegistrationErrors']),
     copy() { return registrationCopy(this.$i18n?.locale) },
+    // A link from the company's own site names it: ?company_id=1.
+    presetCompany() {
+      const id = String(this.$route.query.company_id || '')
+      return id ? this.companies.find(company => String(company.id) === id) || null : null
+    },
     fields() {
       const field = (key, label, type = 'text', required = true, autocomplete = 'off') => ({ key, label, type, required, autocomplete })
       return [
@@ -112,7 +117,8 @@ export default {
       try {
         const response = await this.$axios.$get('/api/registration/companies', { timeout: 15000 })
         this.companies = Array.isArray(response?.companies) ? response.companies : []
-        if (this.companies.length === 1) this.companyId = this.companies[0].id
+        if (this.presetCompany) this.companyId = this.presetCompany.id
+        else if (this.companies.length === 1) this.companyId = this.companies[0].id
         else if (!this.companies.some(company => String(company.id) === String(this.companyId))) this.companyId = ''
         if (!this.companies.length) this.companiesError = this.copy.noCompanies
       } catch (_) { this.companiesError = this.copy.unavailable }

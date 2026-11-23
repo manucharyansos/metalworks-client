@@ -244,6 +244,18 @@ export default {
           exact: true,
         },
         {
+          to: '/manager/quotes',
+          label: { hy: 'Պատվերի հայտեր', ru: 'Заявки на заказ', en: 'Order requests' },
+          permission: null,
+          icon: 'orders',
+        },
+        {
+          to: '/manager/pricing',
+          label: { hy: 'Գնացուցակ', ru: 'Прайс-лист', en: 'Price list' },
+          permission: null,
+          icon: 'orders',
+        },
+        {
           to: '/manager/clients',
           labelKey: 'workspace_layout.clients',
           permission: 'clients.view',

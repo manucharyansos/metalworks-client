@@ -29,7 +29,7 @@
       </button>
     </div>
     <FileMetadataPanel
-      v-if="!customerFile"
+      v-if="!direct"
       :file="file"
       :order-id="orderId"
       @loading="onDetailsLoading"
@@ -71,6 +71,7 @@
           :key="previewKey"
           :file-meta="effectiveFile"
           :dxf-url="secureUrl"
+          :exact-url="Boolean(sourceUrl)"
           :show-production-attributes="false"
           class="h-full w-full"
           @close="$emit('close')"
@@ -152,6 +153,8 @@ export default {
     orderId: { type: [Number, String], default: null },
     showDownload: Boolean,
     customerFile: Boolean,
+    // A ready file address (e.g. a part of a customer request): nothing else to load.
+    sourceUrl: { type: String, default: '' },
   },
   data: () => ({
     metadata: null,
@@ -167,7 +170,11 @@ export default {
     cancelWorker: null,
   }),
   computed: {
+    direct() {
+      return this.customerFile || Boolean(this.sourceUrl)
+    },
     previewKey() {
+      if (this.sourceUrl) return `source-${this.sourceUrl}`
       if (this.customerFile) return `customer-${this.file.customer_company_id || ''}-${this.orderId}-${this.file.key}`
       return fileDetailsIdentity(
         this.file,
@@ -190,6 +197,7 @@ export default {
         .toUpperCase()
     },
     secureUrl() {
+      if (this.sourceUrl) return this.sourceUrl
       if (this.customerFile) return `/api/profile/orders/${this.orderId}/files/${this.file.key}${this.file.customer_company_id ? '?customer_company_id=' + Number(this.file.customer_company_id) : ''}`
       return this.file.id && this.$getPmpFileUrl
         ? this.$getPmpFileUrl(this.file)
@@ -199,11 +207,11 @@ export default {
   watch: {
     previewKey() {
       this.onDetailsLoading()
-      if (this.customerFile) this.onDetailsLoaded(this.file)
+      if (this.direct) this.onDetailsLoaded(this.file)
     },
   },
   mounted() {
-    if (this.customerFile) this.onDetailsLoaded(this.file)
+    if (this.direct) this.onDetailsLoaded(this.file)
   },
   beforeDestroy() {
     this.clearPreview()

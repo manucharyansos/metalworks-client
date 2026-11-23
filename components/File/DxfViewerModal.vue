@@ -41,10 +41,21 @@
         <span class="font-semibold">{{ drawingSizeText }}</span>
         {{ t.unitMm }}
       </div>
-      <div v-if="laserLengthMmRounded > 0" class="opacity-80">
+      <div v-if="laserLengthMmRounded > 0" class="opacity-80" data-dxf-cut>
         {{ t.cutLength }}:
         <span class="font-semibold">{{ laserLengthMmRounded }}</span>
         {{ t.unitMm }}
+      </div>
+      <div v-if="measure" class="opacity-80" data-dxf-pierces>
+        {{ t.pierces }}:
+        <span class="font-semibold">{{ measure.pierces }}</span>
+      </div>
+      <div v-if="measure && measure.bends" class="opacity-80" data-dxf-bends>
+        {{ t.bends }}:
+        <span class="font-semibold">{{ measure.bends }}</span>
+      </div>
+      <div v-if="areaText" class="opacity-80" data-dxf-area>
+        {{ t.area }}: <span class="font-semibold">{{ areaText }}</span>
       </div>
     </div>
 
@@ -68,12 +79,18 @@ import * as THREE from 'three'
 import DxfParser from 'dxf-parser'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import FileProductionAttributes from '@/components/File/FileProductionAttributes.vue'
+import { measureDxf } from '@/utils/dxf-measure'
 
 const COPY = {
   hy: {
     cutLength: 'Գծամետրում',
     size: 'Լայնություն × բարձրություն',
     unitMm: 'մմ',
+    pierces: 'Ծակումներ',
+    bends: 'Ծռման գծեր',
+    area: 'Մակերես',
+    unitM2: 'մ²',
+    unitCm2: 'սմ²',
     dxfError: 'DXF սխալ',
     emptyFile: 'Ֆայլի տվյալները դատարկ են',
     loadError: 'Չհաջողվեց բեռնել DXF-ը',
@@ -85,6 +102,11 @@ const COPY = {
     cutLength: 'Длина реза',
     size: 'Ширина × высота',
     unitMm: 'мм',
+    pierces: 'Врезки',
+    bends: 'Линии гиба',
+    area: 'Площадь',
+    unitM2: 'м²',
+    unitCm2: 'см²',
     dxfError: 'Ошибка DXF',
     emptyFile: 'Файл не содержит данных',
     loadError: 'Не удалось загрузить DXF',
@@ -96,6 +118,11 @@ const COPY = {
     cutLength: 'Cut length',
     size: 'Width × height',
     unitMm: 'mm',
+    pierces: 'Pierces',
+    bends: 'Bend lines',
+    area: 'Area',
+    unitM2: 'm²',
+    unitCm2: 'cm²',
     dxfError: 'DXF error',
     emptyFile: 'The file contains no data',
     loadError: 'Could not load DXF',
@@ -122,6 +149,7 @@ export default {
       type: Boolean,
       default: true,
     },
+    exactUrl: Boolean,
   },
   data() {
     return {
@@ -135,6 +163,8 @@ export default {
       laserLengthMm: 0,
       // Overall drawing extents (same units as the cut length).
       drawingSize: null,
+      // The measurement the server prices with (utils/dxf-measure.js).
+      measure: null,
       loadRequest: 0,
     }
   },
@@ -149,14 +179,24 @@ export default {
       return COPY[this.locale] || COPY.hy
     },
     drawingSizeText() {
-      const size = this.drawingSize
+      const size = this.measure
+        ? { width: this.measure.widthMm, height: this.measure.heightMm }
+        : this.drawingSize
       if (!size || !(size.width > 0 || size.height > 0)) return ''
       const round = (value) => Number(value.toFixed(1))
       return `${round(size.width)} × ${round(size.height)}`
     },
     laserLengthMmRounded() {
-      if (!this.laserLengthMm) return 0
-      return Number(this.laserLengthMm.toFixed(1))
+      const length = this.measure ? this.measure.cutLengthMm : this.laserLengthMm
+      if (!length) return 0
+      return Number(length.toFixed(1))
+    },
+    areaText() {
+      const area = this.measure?.areaMm2
+      if (!(area > 0)) return ''
+      // Small parts read better in cm², sheets in m².
+      if (area >= 100000) return `${(area / 1e6).toFixed(2)} ${this.t.unitM2}`
+      return `${(area / 100).toFixed(1)} ${this.t.unitCm2}`
     },
     materialInfo() {
       if (!this.fileMeta) return ''
@@ -196,6 +236,8 @@ export default {
   },
   methods: {
     resolveSecureUrl() {
+      // A file that is not a project file (e.g. a customer request part) brings its own address.
+      if (this.exactUrl && this.dxfUrl) return this.dxfUrl
       if (this.fileMeta?.id && this.$getPmpFileUrl) {
         return this.$getPmpFileUrl(this.fileMeta)
       }
@@ -309,6 +351,7 @@ export default {
       this.dxfGroup = null
       this.laserLengthMm = 0
       this.drawingSize = null
+      this.measure = null
     },
 
     async loadDxfFile() {
@@ -343,6 +386,12 @@ export default {
         if (!current()) return
         if (!this.scene || !this.camera || !this.renderer) this.initThree()
         this.parseDxf(dxfText)
+        try {
+          this.measure = measureDxf(dxfText)
+        } catch (_) {
+          // Drawn but not measurable (e.g. no closed cut contours): keep the drawing's own numbers.
+          this.measure = null
+        }
       } catch (e) {
         if (!current()) return
         console.error(e)

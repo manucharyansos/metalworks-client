@@ -76,7 +76,7 @@
               <span
                 v-if="row.view.ref"
                 class="block text-xs font-bold text-slate-500 dark:text-slate-400"
-                >{{ t.task }} {{ row.view.ref }}</span
+                >{{ refLabel(row) }} {{ row.view.ref }}</span
               >
               <span
                 class="mt-0.5 block break-words text-sm text-slate-800 dark:text-slate-100"
@@ -109,7 +109,7 @@
         <span
           v-if="toast.view.ref"
           class="block text-xs font-bold text-slate-500 dark:text-slate-400"
-          >{{ t.task }} {{ toast.view.ref }}</span
+          >{{ refLabel(toast) }} {{ toast.view.ref }}</span
         >
         <span
           class="mt-0.5 block break-words text-sm text-slate-800 dark:text-slate-100"
@@ -301,6 +301,12 @@ export default {
           this.error = this.t.markFailed
         return false
       }
+    },
+    // Order requests are not tasks yet.
+    refLabel(item) {
+      return String(item?.type || '').startsWith('quote.')
+        ? this.t.request
+        : this.t.task
     },
     markAll() {
       return this.markRead(null)
