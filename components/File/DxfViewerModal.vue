@@ -54,6 +54,13 @@
         {{ t.bends }}:
         <span class="font-semibold">{{ measure.bends }}</span>
       </div>
+      <div
+        v-if="measure && measure.openContours"
+        class="font-semibold text-amber-300"
+        data-dxf-open
+      >
+        {{ t.openOutlines }}: {{ measure.openContours }}
+      </div>
       <div v-if="areaText" class="opacity-80" data-dxf-area>
         {{ t.area }}: <span class="font-semibold">{{ areaText }}</span>
       </div>
@@ -88,6 +95,7 @@ const COPY = {
     unitMm: 'մմ',
     pierces: 'Ծակումներ',
     bends: 'Ծռման գծեր',
+    openOutlines: 'Չփակված եզրագծեր',
     area: 'Մակերես',
     unitM2: 'մ²',
     unitCm2: 'սմ²',
@@ -104,6 +112,7 @@ const COPY = {
     unitMm: 'мм',
     pierces: 'Врезки',
     bends: 'Линии гиба',
+    openOutlines: 'Незамкнутые контуры',
     area: 'Площадь',
     unitM2: 'м²',
     unitCm2: 'см²',
@@ -120,6 +129,7 @@ const COPY = {
     unitMm: 'mm',
     pierces: 'Pierces',
     bends: 'Bend lines',
+    openOutlines: 'Open outlines',
     area: 'Area',
     unitM2: 'm²',
     unitCm2: 'cm²',

@@ -1,6 +1,7 @@
 // Measures a flat (laser) DXF the way the server prices it (app/Support/DxfMeasure.php):
-// cut length, separate contours (pierces), bend lines, bounding size and the net
-// area (outer contours minus holes), all in millimetres. Keep the two in step;
+// cut length, separate contours (pierces) and how many of them never close, bend
+// lines, bounding size and the net area (outer contours minus holes), all in
+// millimetres. Keep the two in step;
 // tests/dxf-measure.test.cjs and tests/Unit/DxfMeasureTest.php share their cases.
 // No imports: tests load this file directly.
 
@@ -349,12 +350,19 @@ function contours(paths) {
     if (!groups.has(root)) groups.set(root, [])
     groups.get(root).push(member)
   }
+  let unclosed = 0
   for (const members of groups.values()) {
     pierces++
     const loop = walk(members, paths)
     if (loop) loops.push(loop)
+    // An end that no other piece meets leaves the cut open; where pieces meet
+    // in pairs (even a figure of eight) the outline is closed.
+    const degree = new Map()
+    for (const [, a, b] of members)
+      for (const key of [a, b]) degree.set(key, (degree.get(key) || 0) + 1)
+    if ([...degree.values()].some((count) => count % 2)) unclosed++
   }
-  return [pierces, loops]
+  return [pierces, loops, unclosed]
 }
 
 function walk(members, paths) {
@@ -433,7 +441,7 @@ function netArea(loops) {
 
 const round1 = (value) => Math.round(value * 10) / 10
 
-/** { cutLengthMm, pierces, bends, widthMm, heightMm, areaMm2 } for an ASCII DXF text. */
+/** { cutLengthMm, pierces, openContours, bends, widthMm, heightMm, areaMm2 } for an ASCII DXF text. */
 export function measureDxf(text) {
   if (String(text).startsWith('AutoCAD Binary DXF'))
     throw new Error('Binary DXF is not supported.')
@@ -497,10 +505,11 @@ export function measureDxf(text) {
       maxY = Math.max(maxY, y)
     }
   }
-  const [pierces, loops] = contours(paths)
+  const [pierces, loops, openContours] = contours(paths)
   return {
     cutLengthMm: round1(length),
     pierces,
+    openContours,
     bends: all.length - paths.length,
     widthMm: round1(maxX - minX),
     heightMm: round1(maxY - minY),

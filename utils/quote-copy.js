@@ -43,6 +43,7 @@ const copy = {
       material: 'Ընտրեք նյութն ու հաստությունը ցանկից՝ գինը տեսնելու համար։',
       service: 'Զոդումը, վալցումը և խողովակների կտրումը գնահատում է մենեջերը։',
       bends: 'Նշեք ծռումների քանակը։',
+      open: 'Գծագրում կա չփակված եզրագիծ, ուստի ավտոմատ գին չի հաշվվում։ Ստուգեք գծագիրը, կամ գինը կհաշվի մենեջերը։',
     },
     create: {
       title: 'Նոր հայտ',
@@ -78,6 +79,7 @@ const copy = {
       size: 'Չափսեր',
       cut: 'Կտրում',
       pierces: 'Ծակումներ',
+      openOutlines: 'Չփակված եզրագծեր',
       weight: 'Քաշ',
       notMeasured: 'Գծագիրը չհաջողվեց չափել։ Գինը կհաշվի մենեջերը։',
       unit: 'հատը',
@@ -209,6 +211,7 @@ const copy = {
       material: 'Выберите материал и толщину из списка, чтобы увидеть цену.',
       service: 'Сварку, вальцовку и резку труб оценивает менеджер.',
       bends: 'Укажите количество гибов.',
+      open: 'В чертеже есть незамкнутый контур, поэтому цена не считается автоматически. Проверьте чертёж или цену рассчитает менеджер.',
     },
     create: {
       title: 'Новая заявка',
@@ -243,6 +246,7 @@ const copy = {
       size: 'Размеры',
       cut: 'Рез',
       pierces: 'Врезки',
+      openOutlines: 'Незамкнутые контуры',
       weight: 'Вес',
       notMeasured: 'Чертёж не удалось измерить. Цену рассчитает менеджер.',
       unit: 'за шт.',
@@ -375,6 +379,7 @@ const copy = {
         'Pick the material and thickness from the list to see the price.',
       service: 'Welding, rolling and tube cutting are priced by a manager.',
       bends: 'Enter the number of bends.',
+      open: 'The drawing has an outline that does not close, so it is not priced instantly. Check the drawing, or a manager will price it.',
     },
     create: {
       title: 'New request',
@@ -409,6 +414,7 @@ const copy = {
       size: 'Size',
       cut: 'Cut',
       pierces: 'Pierces',
+      openOutlines: 'Open outlines',
       weight: 'Weight',
       notMeasured:
         'The drawing could not be measured. A manager will price it.',
@@ -545,8 +551,11 @@ export function statusTone(status) {
 export function reasonsText(reasons, locale) {
   const t = quoteCopy(locale).reasons
   const list = Array.isArray(reasons) ? reasons : []
-  // "disabled" already says the manager prices everything, and a file without a
-  // flat drawing is never priced instantly, so nothing else is worth asking for.
+  // An outline that does not close is the one thing the customer can fix in the
+  // drawing, so it is said even when the manager prices everything. "disabled"
+  // already says the manager prices everything, and a file without a flat
+  // drawing is never priced instantly, so nothing else is worth asking for.
+  if (list.includes('open')) return [t.open]
   if (list.includes('disabled')) return [t.disabled]
   if (list.includes('drawing')) return [t.drawing]
   return list.map((reason) => t[reason]).filter(Boolean)

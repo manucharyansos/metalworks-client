@@ -7,7 +7,7 @@
     <header
       class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90"
     >
-      <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
+      <div class="flex w-full items-center gap-3 px-3 py-3 sm:px-6 lg:px-8">
         <nuxt-link
           :to="localePath('/customer')"
           class="min-w-0 max-w-[16rem] flex-1 sm:flex-none"
@@ -46,7 +46,7 @@
         </div>
       </div>
       <nav
-        class="flex gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2 dark:border-slate-800 md:hidden"
+        class="flex gap-1 overflow-x-auto border-t border-slate-100 px-3 py-2 dark:border-slate-800 sm:px-6 md:hidden"
         :aria-label="t.nav.requests"
       >
         <nuxt-link

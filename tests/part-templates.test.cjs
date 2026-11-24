@@ -60,6 +60,7 @@ function assertMeasures(template, part, label) {
   near(m.heightMm, part.height, 0.1, `${label} height`)
   assert.equal(m.pierces, 1 + part.holes.length, `${label} pierces`)
   assert.equal(m.bends, template.bends || 0, `${label} bends`)
+  assert.equal(m.openContours, 0, `${label} closed outlines`)
   assert.ok(m.areaMm2 > 0, `${label} area`)
   // Holes stay inside the outline: the outline alone spans the whole part.
   const outline = measure({ outline: part.outline, holes: [], bends: [] })

@@ -100,6 +100,15 @@ test('reasons for a manager price read in the interface language', () => {
   assert.deepEqual(reasonsText(['drawing', 'material'], 'hy'), [
     quoteCopy('hy').reasons.drawing,
   ])
+  // An outline that does not close is the customer's to fix, even with the
+  // price list switched off.
+  assert.deepEqual(reasonsText(['disabled', 'open', 'material'], 'en'), [
+    quoteCopy('en').reasons.open,
+  ])
+  for (const locale of ['hy', 'ru', 'en']) {
+    assert.ok(quoteCopy(locale).reasons.open, `${locale} open reason`)
+    assert.ok(quoteCopy(locale).create.openOutlines, `${locale} open label`)
+  }
   assert.equal(serviceName({ value: 'dld', name: 'Կռում' }, 'en'), 'Bending')
   assert.equal(
     serviceName({ value: 'WORK_X', name: 'Assembly' }, 'en'),

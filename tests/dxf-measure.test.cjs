@@ -85,6 +85,7 @@ test('loose lines join into one outline and bend lines are not cut', () => {
   near(m.cutLengthMm, 300, 0.01, 'cut')
   assert.equal(m.pierces, 1)
   assert.equal(m.bends, 1)
+  assert.equal(m.openContours, 0)
   near(m.areaMm2, 5000, 0.01, 'area')
 })
 
@@ -141,6 +142,44 @@ test('blocks are placed and scaled and inches become millimetres', () => {
   )
   near(inch.cutLengthMm, 4 * 25.4, 0.01, 'inch cut')
   near(inch.areaMm2, 25.4 * 25.4, 0.1, 'inch area')
+})
+
+test('outlines that do not close are counted', () => {
+  // Three sides of a frame, a loose line and a closed hole: two open outlines.
+  const m = measureDxf(
+    dxf([
+      line(0, 0, 100, 0),
+      line(100, 0, 100, 50),
+      line(100, 50, 0, 50),
+      line(0, 70, 100, 70),
+      circle(50, 25, 5),
+    ])
+  )
+  assert.equal(m.openContours, 2)
+  assert.equal(m.pierces, 3)
+
+  // Two squares that touch at a corner are closed, though four ends meet there.
+  const square = (x, y) => [
+    line(x, y, x + 10, y),
+    line(x + 10, y, x + 10, y + 10),
+    line(x + 10, y + 10, x, y + 10),
+    line(x, y + 10, x, y),
+  ]
+  assert.equal(
+    measureDxf(dxf([...square(0, 0), ...square(10, 10)])).openContours,
+    0
+  )
+
+  // A gap wider than the join tolerance leaves an outline open.
+  const gap = measureDxf(
+    dxf([
+      line(0, 0, 100, 0),
+      line(100, 0, 100, 50),
+      line(100, 50, 0, 50),
+      line(0, 50, 0, 0.2),
+    ])
+  )
+  assert.equal(gap.openContours, 1)
 })
 
 test('an R12 polyline keeps its bulges and a bend line stays a bend', () => {

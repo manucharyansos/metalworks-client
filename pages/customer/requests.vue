@@ -1,5 +1,8 @@
 <template>
-  <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6" data-customer-requests>
+  <main
+    class="w-full min-w-0 px-3 py-6 sm:px-6 lg:px-8 lg:py-8"
+    data-customer-requests
+  >
     <section class="mb-6 flex flex-wrap items-end justify-between gap-3">
       <h1
         class="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl"

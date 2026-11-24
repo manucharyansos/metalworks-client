@@ -250,6 +250,13 @@
                         item.metrics.bends
                       }}</template
                     >
+                    <span
+                      v-if="item.metrics.open_contours"
+                      class="mt-0.5 block font-bold text-amber-700 dark:text-amber-300"
+                      data-quote-open
+                      >{{ c.openOutlines }}:
+                      {{ item.metrics.open_contours }}</span
+                    >
                   </template>
                 </td>
                 <td class="whitespace-nowrap py-3 pr-3 text-right font-bold">

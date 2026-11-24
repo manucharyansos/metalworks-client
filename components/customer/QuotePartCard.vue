@@ -79,6 +79,14 @@
         <dt>{{ t.pierces }}</dt>
         <dd>{{ metrics.pierces }}</dd>
       </div>
+      <div
+        v-if="metrics.open_contours"
+        class="part-metrics__open"
+        data-quote-part-open
+      >
+        <dt>{{ t.openOutlines }}</dt>
+        <dd>{{ metrics.open_contours }}</dd>
+      </div>
       <div v-if="item.pricing && item.pricing.weight_kg">
         <dt>{{ t.weight }}</dt>
         <dd>{{ item.pricing.weight_kg.toFixed(2) }} kg</dd>
@@ -518,6 +526,10 @@ export default {
 }
 .part-metrics dd {
   @apply mt-0.5 font-bold text-slate-900 dark:text-white;
+}
+.part-metrics .part-metrics__open dt,
+.part-metrics .part-metrics__open dd {
+  @apply text-amber-700 dark:text-amber-300;
 }
 .part-note {
   @apply mt-3 rounded-xl bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-200;
