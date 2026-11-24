@@ -402,19 +402,30 @@ function netArea(loops) {
   const shapes = loops
     .map((points) => {
       let area = 0
+      const box = [Infinity, Infinity, -Infinity, -Infinity]
       for (let i = 0; i < points.length; i++) {
         const [x1, y1] = points[i]
         const [x2, y2] = points[(i + 1) % points.length]
         area += x1 * y2 - x2 * y1
+        if (x1 < box[0]) box[0] = x1
+        if (y1 < box[1]) box[1] = y1
+        if (x1 > box[2]) box[2] = x1
+        if (y1 > box[3]) box[3] = y1
       }
-      return { points, area: Math.abs(area) / 2 }
+      return { points, box, area: Math.abs(area) / 2 }
     })
     .sort((a, b) => b.area - a.area)
   let total = 0
   shapes.forEach((shape, i) => {
     let depth = 0
     const [x, y] = shape.points[0]
-    for (let j = 0; j < i; j++) if (inside(x, y, shapes[j].points)) depth++
+    for (let j = 0; j < i; j++) {
+      // Only a contour whose box holds the point can hold it: a sheet with
+      // thousands of holes stays quick.
+      const [x0, y0, x1, y1] = shapes[j].box
+      if (x < x0 || x > x1 || y < y0 || y > y1) continue
+      if (inside(x, y, shapes[j].points)) depth++
+    }
     total += depth % 2 === 0 ? shape.area : -shape.area
   })
   return Math.round(Math.max(0, total) * 10) / 10

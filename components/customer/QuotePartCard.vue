@@ -450,8 +450,12 @@ export default {
     },
     pickMaterial() {
       this.custom = this.materialChoice === 'other'
+      // A thickness already given (a template part's, or the previous
+      // material's) stays when the new material has it.
+      const wanted = Number(this.form.thickness) || Number(this.item.thickness)
+      const same = this.thicknesses.find((t) => Number(t.thickness) === wanted)
       const only = this.thicknesses.length === 1 ? this.thicknesses[0].id : null
-      this.form.pricing_thickness_id = this.custom ? null : only
+      this.form.pricing_thickness_id = this.custom ? null : same?.id ?? only
       this.changed()
     },
     chosen(id) {

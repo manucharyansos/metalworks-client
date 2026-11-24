@@ -87,6 +87,58 @@
           <span class="mt-1 block text-xs text-slate-400">{{ t.privacy }}</span>
         </label>
 
+        <section class="template-offer" data-quote-templates>
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0 max-w-xl">
+              <h2 class="text-base font-black text-slate-950 dark:text-white">
+                {{ tb.noDrawing }}
+              </h2>
+              <p
+                class="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300"
+              >
+                {{ tb.noDrawingLead }}
+              </p>
+            </div>
+            <div class="flex min-w-0 flex-wrap gap-2">
+              <button
+                type="button"
+                class="work-button"
+                data-variant="open"
+                data-quote-templates-open
+                @click="openBuilder('')"
+              >
+                {{ tb.open }} · {{ templateCount }}
+              </button>
+              <button
+                type="button"
+                class="work-button"
+                data-quote-sketch
+                @click="$refs.files.click()"
+              >
+                {{ tb.sketch }}
+              </button>
+            </div>
+          </div>
+          <ul class="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6">
+            <li v-for="item in featured" :key="item.id">
+              <button
+                type="button"
+                class="template-tile"
+                :data-quote-template="item.id"
+                @click="openBuilder(item.id)"
+              >
+                <span class="block h-12">
+                  <PartShape :part="item.part" class="h-full w-full" />
+                </span>
+                <span
+                  class="mt-2 line-clamp-2 min-h-[2rem] text-[11px] font-semibold leading-4 text-slate-600 dark:text-slate-300"
+                  >{{ item.name }}</span
+                >
+              </button>
+            </li>
+          </ul>
+        </section>
+
         <ul v-if="uploads.length" class="space-y-2" aria-live="polite">
           <li
             v-for="row in uploads"
@@ -312,18 +364,51 @@
       :source-url="fileUrl(preview)"
       @close="preview = null"
     />
+
+    <PartTemplateBuilder
+      v-if="builder.open"
+      :start="builder.start"
+      :workshops="options.workshops || []"
+      :materials="(options.pricing && options.pricing.materials) || []"
+      @add="fromTemplate"
+      @close="builder = { open: false, start: '' }"
+    />
   </main>
 </template>
 
 <script>
 import QuotePartCard from '@/components/customer/QuotePartCard.vue'
+import PartShape from '@/components/customer/PartShape.vue'
+import PartTemplateBuilder from '@/components/customer/PartTemplateBuilder.vue'
 import FilePreviewModal from '@/components/File/FilePreviewModal.vue'
 import { apiErrorMessage } from '@/utils/task-workflow'
 import { formatMoney, quoteCopy } from '@/utils/quote-copy'
+import {
+  TEMPLATES,
+  buildPart,
+  defaults,
+  templateById,
+} from '@/utils/part-templates'
+import { templateCopy } from '@/utils/part-template-copy'
+
+// Shown on the page as a way into the template builder.
+const FEATURED = [
+  'rect-plate',
+  'round-flange',
+  'bent-l',
+  'base-plate',
+  'gear',
+  'washer',
+]
 
 export default {
   name: 'CustomerQuotePage',
-  components: { QuotePartCard, FilePreviewModal },
+  components: {
+    QuotePartCard,
+    PartShape,
+    PartTemplateBuilder,
+    FilePreviewModal,
+  },
   layout: 'customer',
   middleware: ['role-guard'],
   meta: { role: 'authenticatedUser' },
@@ -350,11 +435,28 @@ export default {
       sending: false,
       sendError: '',
       sendForm: { title: '', note: '', desired_date: '', phone: '' },
+      builder: { open: false, start: '' },
     }
   },
   computed: {
     t() {
       return quoteCopy(this.$i18n?.locale).create
+    },
+    tb() {
+      return templateCopy(this.$i18n?.locale)
+    },
+    templateCount() {
+      return this.tb.count(TEMPLATES.length)
+    },
+    featured() {
+      return FEATURED.map((id) => {
+        const template = templateById(id)
+        return {
+          id,
+          name: this.tb.templates[id][0],
+          part: Object.freeze(buildPart(template, defaults(template))),
+        }
+      })
     },
     items() {
       return this.draft?.items || []
@@ -413,8 +515,16 @@ export default {
       this.dragging = false
       this.upload([...(event.dataTransfer?.files || [])])
     },
+    openBuilder(id) {
+      this.builder = { open: true, start: id || '' }
+    },
+    // A part drawn from a template goes up like any DXF, with its own fields.
+    fromTemplate({ file, fields }) {
+      this.builder = { open: false, start: '' }
+      this.upload([file], fields, true)
+    },
     // One file at a time keeps the order and the server's draft consistent.
-    async upload(files) {
+    async upload(files, fields = {}, fromTemplate = false) {
       const room = Math.max(
         0,
         (this.options.max_items || 20) - this.items.length
@@ -435,6 +545,12 @@ export default {
         this.uploads.push(upload)
         const body = new FormData()
         body.append('file', file)
+        for (const [key, value] of Object.entries(fields)) {
+          if (Array.isArray(value))
+            value.forEach((entry) => body.append(`${key}[]`, entry))
+          else if (value !== null && value !== undefined && value !== '')
+            body.append(key, value)
+        }
         try {
           const data = await this.$axios.$post(
             '/api/customer/quotes/draft/items',
@@ -442,6 +558,7 @@ export default {
           )
           this.draft = data.draft
           this.uploads = this.uploads.filter((u) => u !== upload)
+          if (fromTemplate) this.showAdded(data.item_id)
         } catch (error) {
           upload.error = `${this.t.uploadFailed(file.name)} ${apiErrorMessage(
             error,
@@ -449,6 +566,14 @@ export default {
           )}`.trim()
         }
       }
+    },
+    showAdded(id) {
+      this.$notify({ group: 'workspace', type: 'success', text: this.tb.added })
+      this.$nextTick(() =>
+        document
+          .querySelector(`[data-quote-part="${Number(id)}"]`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      )
     },
     dismiss(upload) {
       this.uploads = this.uploads.filter((u) => u !== upload)
@@ -550,6 +675,12 @@ export default {
 }
 .drop-zone--over {
   @apply border-blue-500 bg-blue-50 dark:bg-blue-950/30;
+}
+.template-offer {
+  @apply rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900;
+}
+.template-tile {
+  @apply block w-full rounded-2xl border border-slate-200 bg-slate-50 p-2.5 text-center transition hover:-translate-y-0.5 hover:border-blue-400 hover:bg-white hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 dark:border-slate-800 dark:bg-slate-950/40 dark:hover:border-blue-500;
 }
 .send-control {
   @apply mt-2 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 font-normal text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white;
