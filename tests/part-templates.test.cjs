@@ -70,7 +70,8 @@ function assertMeasures(template, part, label) {
 }
 
 test('every template is valid at its defaults and its DXF measures as drawn', () => {
-  assert.equal(TEMPLATES.length, 22)
+  assert.equal(TEMPLATES.length, 23)
+  assert.equal(TEMPLATES[0].id, 'blank', 'the blank sheet comes first')
   assert.equal(new Set(TEMPLATES.map((t) => t.id)).size, TEMPLATES.length)
   for (const template of TEMPLATES) {
     const values = defaults(template)
@@ -117,6 +118,43 @@ test('a U channel unfolds into three straight parts and two bends', () => {
   const part = buildPart(template, defaults(template))
   near(part.width, 2 * (40 - 6) + (80 - 12) + 2 * allowance(3), 0.001, 'flat')
   assert.equal(measure(part).bends, 2)
+})
+
+test('a bend at any angle unfolds with its own setback and allowance', () => {
+  // 135° between the flanges: the sheet turns 45°.
+  const turn = Math.PI / 4
+  const setback = Math.tan(turn / 2) * (3 + 3)
+  const bent = (135 * 0 + turn) * (3 + 0.4 * 3)
+  const angle = templateById('bent-l')
+  const part = buildPart(angle, { ...defaults(angle), angle: 135 })
+  near(part.width, 80 + 60 - 2 * setback + bent, 0.001, 'flat at 135°')
+  assert.equal(part.fold.bends.length, 1)
+  near(part.fold.bends[0].turn, turn, 1e-9, 'turn')
+  near(part.fold.bends[0].allowance, bent, 1e-9, 'allowance')
+  near(part.fold.bends[0].x, part.bends[0].x1, 1e-9, 'fold at the bend line')
+  assert.equal(part.fold.thickness, 3)
+
+  // A sharp bend needs longer flanges: at 30° the setback eats a short one.
+  assert.equal(
+    problem(angle, { ...defaults(angle), angle: 30, legB: 25 }).key,
+    'bendShort'
+  )
+  assert.deepEqual(problem(angle, { ...defaults(angle), angle: 20 }), {
+    key: 'range',
+    param: 'angle',
+    min: 30,
+    max: 170,
+  })
+
+  const channel = templateById('bent-u')
+  const flared = buildPart(channel, { ...defaults(channel), angle: 120 })
+  assert.equal(flared.fold.bends.length, 2)
+  assert.equal(measure(flared).bends, 2)
+  assert.equal(
+    buildPart(templateById('rect-plate'), defaults(templateById('rect-plate')))
+      .fold,
+    null
+  )
 })
 
 test('flanges, gears and rounded shapes keep their arcs', () => {
@@ -267,6 +305,7 @@ test('the part goes to the request with a readable name and note', () => {
   const bent = buildPart(angle, defaults(angle))
   const enNote = partNote(templateCopy('en'), angle, defaults(angle), bent)
   assert.match(enNote, /Flange A \(outside\): 80 mm/)
+  assert.match(enNote, /Angle between flanges: 90°,/)
   assert.match(enNote, /Flat pattern: 134\.6 × 50 mm\.$/)
 
   const flange = templateById('round-flange')

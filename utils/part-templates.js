@@ -14,6 +14,8 @@ const K_FACTOR = 0.4
 export const SHEET = { length: 3000, width: 1500 }
 // Dimensions that are counts, not millimetres.
 export const COUNTS = ['bolts', 'holes', 'teeth', 'sides', 'points']
+// Dimensions in degrees.
+export const ANGLES = ['angle']
 // Every key problem() can return; the copy has a text for each.
 export const PROBLEMS = [
   'range',
@@ -113,8 +115,20 @@ function boltCircle(cx, cy, pcd, count, d, start = Math.PI / 2) {
   })
 }
 
-const bendAllowance = (thickness) =>
-  (Math.PI / 2) * (thickness + K_FACTOR * thickness)
+// One bend with `angle` degrees between the flanges (90 is a right angle): how
+// far it turns, the allowance along the neutral axis and the setback from the
+// outside corner the flange lengths are measured to.
+function bendGeometry(thickness, angle = 90) {
+  const turn = ((180 - angle) * Math.PI) / 180
+  const radius = thickness
+  return {
+    turn,
+    radius,
+    ba: turn * (radius + K_FACTOR * thickness),
+    // Rounded so a right angle gives exactly twice the thickness.
+    setback: Math.round(Math.tan(turn / 2) * (radius + thickness) * 1e9) / 1e9,
+  }
+}
 
 // Involute spur gear: tip, flanks, root, one tooth after another, counter-clockwise.
 function gear(cx, cy, module, teeth) {
@@ -156,6 +170,21 @@ function gear(cx, cy, module, teeth) {
 // Each template: dimensions with limits, a check for what limits cannot say,
 // and the geometry. Shapes are centred or start at the origin, in mm.
 export const TEMPLATES = [
+  {
+    // An empty sheet to start from: patterns, paint and the rest go on it.
+    id: 'blank',
+    category: 'plates',
+    params: [
+      ['width', 400, 10, 3000],
+      ['height', 300, 10, 1500],
+      ['radius', 0, 0, 500],
+    ],
+    check: () => null,
+    build: (p) => ({
+      outline: roundedRect(0, 0, p.width, p.height, p.radius),
+      holes: [],
+    }),
+  },
   {
     id: 'rect-plate',
     category: 'plates',
@@ -545,6 +574,7 @@ export const TEMPLATES = [
       ['legB', 60, 10, 1500],
       ['width', 50, 10, 2000],
       ['thickness', 3, 0.5, 20],
+      ['angle', 90, 30, 170],
       ['holeD', 8, 0, 200],
     ],
     check: (p) => {
@@ -570,6 +600,7 @@ export const TEMPLATES = [
           : [],
         bends: [line(x, 0, x, p.width)],
         flat: flat.length,
+        fold: fold(p, [{ x, turn: flat.turn, allowance: flat.ba }]),
       }
     },
   },
@@ -582,6 +613,7 @@ export const TEMPLATES = [
       ['side', 40, 10, 1500],
       ['width', 50, 10, 2000],
       ['thickness', 3, 0.5, 20],
+      ['angle', 90, 30, 170],
       ['holeD', 0, 0, 200],
     ],
     check: (p) => {
@@ -601,6 +633,10 @@ export const TEMPLATES = [
         holes: p.holeD ? [circle(flat.length / 2, p.width / 2, p.holeD)] : [],
         bends: [line(x1, 0, x1, p.width), line(x2, 0, x2, p.width)],
         flat: flat.length,
+        fold: fold(p, [
+          { x: x1, turn: flat.turn, allowance: flat.ba },
+          { x: x2, turn: flat.turn, allowance: flat.ba },
+        ]),
       }
     },
   },
@@ -762,17 +798,23 @@ function linkHoles(p) {
 }
 
 function bentL(p) {
-  const ba = bendAllowance(p.thickness)
-  const a = p.legA - 2 * p.thickness
-  const b = p.legB - 2 * p.thickness
-  return { a, b, ba, length: a + ba + b }
+  const g = bendGeometry(p.thickness, p.angle)
+  const a = p.legA - g.setback
+  const b = p.legB - g.setback
+  return { a, b, ba: g.ba, turn: g.turn, length: a + g.ba + b }
 }
 
 function bentU(p) {
-  const ba = bendAllowance(p.thickness)
-  const s = p.side - 2 * p.thickness
-  const c = p.base - 4 * p.thickness
-  return { s, c, ba, length: s + ba + c + ba + s }
+  const g = bendGeometry(p.thickness, p.angle)
+  const s = p.side - g.setback
+  const c = p.base - 2 * g.setback
+  return { s, c, ba: g.ba, turn: g.turn, length: s + g.ba + c + g.ba + s }
+}
+
+// How the flat part folds, for the 3D view: each bend's centre line (x), turn
+// (radians, upwards) and allowance, with the thickness and inner radius.
+function fold(p, bends) {
+  return { thickness: p.thickness, radius: p.thickness, k: K_FACTOR, bends }
 }
 
 export function templateById(id) {
@@ -839,7 +881,46 @@ export function buildPart(template, values) {
     width: bounds.maxX - bounds.minX,
     height: bounds.maxY - bounds.minY,
     flat: part.flat || null,
+    fold: part.fold
+      ? {
+          ...part.fold,
+          bends: part.fold.bends.map((b) => ({ ...b, x: b.x - bounds.minX })),
+        }
+      : null,
   }
+}
+
+// A shape as plain points, arcs sampled: for fitting patterns and for 3D.
+export function samplePolygon(shape, steps = 16) {
+  if (shape.type === 'circle') {
+    const n = Math.max(16, steps * 2)
+    return Array.from({ length: n }, (_, i) => [
+      shape.cx + shape.r * Math.cos((TAU * i) / n),
+      shape.cy + shape.r * Math.sin((TAU * i) / n),
+    ])
+  }
+  const out = []
+  const pts = shape.points
+  for (let i = 0; i < pts.length; i++) {
+    const [x1, y1, b] = pts[i]
+    if (!b) {
+      out.push([x1, y1])
+      continue
+    }
+    const [x2, y2] = pts[(i + 1) % pts.length]
+    const share = Math.abs(4 * Math.atan(b)) / Math.PI
+    out.push(
+      ...arcPoints(
+        x1,
+        y1,
+        x2,
+        y2,
+        b,
+        Math.max(2, Math.ceil(steps * share))
+      ).slice(0, -1)
+    )
+  }
+  return out
 }
 
 function box(shapes) {

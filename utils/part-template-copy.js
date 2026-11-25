@@ -2,7 +2,7 @@
 // and the helpers that turn a configured template into a request part: its
 // file name and the note the engineer reads. Imports only part-templates, so
 // tests load this file directly.
-import { COUNTS } from '@/utils/part-templates'
+import { ANGLES, COUNTS } from '@/utils/part-templates'
 
 const copy = {
   hy: {
@@ -18,8 +18,8 @@ const copy = {
     preview: 'Նախադիտում',
     flat: 'Հարթ բացվածք',
     profile: 'Ծռված տեսք',
-    bentNote: (t) =>
-      `Բացվածքը հաշվարկված է ${t} մմ հաստության և 90° ծռումների համար։ Նյութ ընտրելիս ընտրեք նույն հաստությունը։ Ինժեները կստուգի բացվածքը արտադրությունից առաջ։`,
+    bentNote: (t, angle) =>
+      `Բացվածքը հաշվարկված է ${t} մմ հաստության և թևերի միջև ${angle}° անկյան համար։ Նյութ ընտրելիս ընտրեք նույն հաստությունը։ Ինժեները կստուգի բացվածքը արտադրությունից առաջ։`,
     metrics: {
       size: 'Չափսեր',
       cut: 'Կտրում',
@@ -48,6 +48,7 @@ const copy = {
       shapes: 'Ձևեր',
     },
     templates: {
+      blank: ['Դատարկ թիթեղ', 'Սկսեք զրոյից՝ ընտրեք չափերը և ավելացրեք ուզոռ'],
       'rect-plate': [
         'Ուղղանկյուն թիթեղ',
         'Անկյուններում 4 անցք, ըստ ցանկության՝ կլորացված անկյուններ',
@@ -103,6 +104,7 @@ const copy = {
       chamfer: 'Անկյունների կտրվածք',
       leg: 'Թևի լայնություն',
       thickness: 'Մետաղի հաստություն',
+      angle: 'Անկյուն թևերի միջև',
       base: 'Հիմք (արտաքին)',
       side: 'Կողեր (արտաքին)',
       module: 'Մոդուլ',
@@ -184,8 +186,8 @@ const copy = {
     preview: 'Предпросмотр',
     flat: 'Развёртка',
     profile: 'Вид после гибки',
-    bentNote: (t) =>
-      `Развёртка рассчитана на толщину ${t} мм и гибы 90°. Выберите материал той же толщины. Инженер проверит развёртку перед производством.`,
+    bentNote: (t, angle) =>
+      `Развёртка рассчитана на толщину ${t} мм и угол ${angle}° между полками. Выберите материал той же толщины. Инженер проверит развёртку перед производством.`,
     metrics: {
       size: 'Размеры',
       cut: 'Резка',
@@ -214,6 +216,7 @@ const copy = {
       shapes: 'Фигуры',
     },
     templates: {
+      blank: ['Пустой лист', 'Начните с нуля: задайте размеры и добавьте узор'],
       'rect-plate': [
         'Прямоугольная пластина',
         '4 отверстия по углам, скругление углов по желанию',
@@ -275,6 +278,7 @@ const copy = {
       chamfer: 'Срез углов',
       leg: 'Ширина полки',
       thickness: 'Толщина металла',
+      angle: 'Угол между полками',
       base: 'Основание (снаружи)',
       side: 'Боковые полки (снаружи)',
       module: 'Модуль',
@@ -355,8 +359,8 @@ const copy = {
     preview: 'Preview',
     flat: 'Flat pattern',
     profile: 'Bent view',
-    bentNote: (t) =>
-      `The flat pattern assumes ${t} mm thickness and 90° bends. Choose a material of the same thickness. An engineer checks the flat pattern before production.`,
+    bentNote: (t, angle) =>
+      `The flat pattern assumes ${t} mm thickness and ${angle}° between the flanges. Choose a material of the same thickness. An engineer checks the flat pattern before production.`,
     metrics: {
       size: 'Size',
       cut: 'Cut',
@@ -386,6 +390,10 @@ const copy = {
       shapes: 'Shapes',
     },
     templates: {
+      blank: [
+        'Blank sheet',
+        'Start from scratch: set the size and add a pattern',
+      ],
       'rect-plate': [
         'Rectangular plate',
         '4 corner holes, optional rounded corners',
@@ -441,6 +449,7 @@ const copy = {
       chamfer: 'Corner chamfer',
       leg: 'Leg width',
       thickness: 'Material thickness',
+      angle: 'Angle between flanges',
       base: 'Base (outside)',
       side: 'Sides (outside)',
       module: 'Module',
@@ -539,7 +548,11 @@ export function partNote(t, template, values, part) {
     const label = paramLabel(t, template, key)
     if (!value && t.zeros[key]) return `${label}${t.sep}${t.zeros[key]}`
     return `${label}${t.sep}${
-      COUNTS.includes(key) ? Math.round(value) : `${mm(value)} ${t.mm}`
+      COUNTS.includes(key)
+        ? Math.round(value)
+        : ANGLES.includes(key)
+        ? `${Math.round(value)}°`
+        : `${mm(value)} ${t.mm}`
     }`
   })
   if (part.flat)

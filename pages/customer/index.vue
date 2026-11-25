@@ -370,6 +370,8 @@
       :start="builder.start"
       :workshops="options.workshops || []"
       :materials="(options.pricing && options.pricing.materials) || []"
+      :initial-material="builderMaterial"
+      @material="builderMaterial = $event"
       @add="fromTemplate"
       @close="builder = { open: false, start: '' }"
     />
@@ -393,12 +395,12 @@ import { templateCopy } from '@/utils/part-template-copy'
 
 // Shown on the page as a way into the template builder.
 const FEATURED = [
+  'blank',
   'rect-plate',
   'round-flange',
   'bent-l',
   'base-plate',
   'gear',
-  'washer',
 ]
 
 export default {
@@ -436,6 +438,8 @@ export default {
       sendError: '',
       sendForm: { title: '', note: '', desired_date: '', phone: '' },
       builder: { open: false, start: '' },
+      // The material last chosen in the builder, offered again next time.
+      builderMaterial: null,
     }
   },
   computed: {
