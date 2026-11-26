@@ -37,7 +37,7 @@ jobs:
         run: npm audit --omit=dev --audit-level=critical
 
       - name: Build production client
-        run: npm run test:regression && npm run build
+        run: npm run build
 
       - name: Generate deploy-ready /work bundle
         run: npm run generate:server
@@ -83,6 +83,9 @@ jobs:
           include-hidden-files: true
           retention-days: 7
           path: dist/
+
+      - name: Run client regression tests
+        run: npm run test:regression
 
   node24-compatibility:
     name: Node 24 compatibility probe
