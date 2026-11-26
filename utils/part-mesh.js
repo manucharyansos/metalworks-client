@@ -81,7 +81,7 @@ function across(points, at) {
  * opens upwards. Flat parts lie on the XZ plane, thickness upwards.
  */
 export function partModel(part, thickness, material) {
-  const t = Math.max(0.5, Number(part.fold?.thickness || thickness) || 2)
+  const t = Math.max(0.1, Number(part.fold?.thickness || thickness) || 2)
   const group = new THREE.Group()
   const fold = part.fold?.bends?.length ? part.fold : null
   if (!fold) {

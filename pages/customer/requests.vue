@@ -269,17 +269,18 @@
       </p>
     </div>
 
-    <FilePreviewModal
+    <QuoteAssemblyPreview
       v-if="preview && selected"
       :file="preview"
-      :source-url="`/api/customer/quotes/${selected.id}/items/${preview.id}/file`"
+      :items="selected.items"
+      :base="`/api/customer/quotes/${selected.id}`"
       @close="preview = null"
     />
   </main>
 </template>
 
 <script>
-import FilePreviewModal from '@/components/File/FilePreviewModal.vue'
+import QuoteAssemblyPreview from '@/components/customer/QuoteAssemblyPreview.vue'
 import { apiErrorMessage } from '@/utils/task-workflow'
 import {
   formatMoney,
@@ -290,7 +291,7 @@ import {
 
 export default {
   name: 'CustomerRequestsPage',
-  components: { FilePreviewModal },
+  components: { QuoteAssemblyPreview },
   layout: 'customer',
   middleware: ['role-guard'],
   meta: { role: 'authenticatedUser' },

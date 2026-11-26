@@ -371,3 +371,21 @@ test('joints follow their parts when the order changes or one goes', () => {
     free
   )
 })
+
+test('saved assembly exports every placed detail as STEP in millimetres', async () => {
+  const { placedParts, assemblyStep } = load('utils/assembly-geometry.js')
+  const parts = placedParts(
+    [1, 2].map(thickness => ({ part: sheet(40, 20), thickness })),
+    [],
+    'row'
+  )
+  const cad = await require('occt-import-js')()
+  const result = cad.ReadStepFile(Buffer.from(assemblyStep(parts)), null)
+  assert.equal(result.success, true)
+  assert.equal(result.meshes.length, 2)
+  const bounds = result.meshes.map(mesh => {
+    const xs = mesh.attributes.position.array.filter((_, i) => i % 3 === 0)
+    return [Math.min(...xs), Math.max(...xs)]
+  })
+  assert.deepEqual(bounds, [[0, 40], [60, 100]])
+})

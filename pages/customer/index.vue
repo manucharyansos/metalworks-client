@@ -358,16 +358,19 @@
       </form>
     </div>
 
-    <FilePreviewModal
+    <QuoteAssemblyPreview
       v-if="preview && draft"
       :file="preview"
-      :source-url="fileUrl(preview)"
+      :items="draft.items"
+      :base="`/api/customer/quotes/${draft.id}`"
       @close="preview = null"
     />
 
     <PartTemplateBuilder
       v-if="builder.open"
       :start="builder.start"
+      :saving-assembly="savingAssembly"
+      :assembly-error="assemblyError"
       :workshops="options.workshops || []"
       :materials="(options.pricing && options.pricing.materials) || []"
       :catalog="options.catalog || []"
@@ -384,7 +387,7 @@
 import QuotePartCard from '@/components/customer/QuotePartCard.vue'
 import PartShape from '@/components/customer/PartShape.vue'
 import PartTemplateBuilder from '@/components/customer/PartTemplateBuilder.vue'
-import FilePreviewModal from '@/components/File/FilePreviewModal.vue'
+import QuoteAssemblyPreview from '@/components/customer/QuoteAssemblyPreview.vue'
 import { apiErrorMessage } from '@/utils/task-workflow'
 import { formatMoney, quoteCopy } from '@/utils/quote-copy'
 import {
@@ -412,7 +415,7 @@ export default {
     QuotePartCard,
     PartShape,
     PartTemplateBuilder,
-    FilePreviewModal,
+    QuoteAssemblyPreview,
   },
   layout: 'customer',
   middleware: ['role-guard'],
@@ -440,6 +443,9 @@ export default {
       sending: false,
       sendError: '',
       sendForm: { title: '', note: '', desired_date: '', phone: '' },
+      savingAssembly: false,
+      assemblyError: '',
+      assemblyAttempt: null,
       builder: { open: false, start: '' },
       // The material last chosen in the builder, offered again next time.
       builderMaterial: null,
@@ -523,6 +529,8 @@ export default {
       this.upload([...(event.dataTransfer?.files || [])])
     },
     openBuilder(id) {
+      this.assemblyError = ''
+      this.assemblyAttempt = null
       this.builder = { open: true, start: id || '' }
     },
     // A part drawn from a template goes up like any DXF, with its own fields.
@@ -530,18 +538,29 @@ export default {
       this.builder = { open: false, start: '' }
       this.upload([file], fields, true)
     },
-    // An assembly goes up part by part, in its order, each with its own note.
     async fromAssembly(list) {
-      this.builder = { open: false, start: '' }
-      const before = this.items.length
-      for (const { file, fields } of list) await this.upload([file], fields)
-      const added = this.items.length - before
-      if (added > 0)
-        this.$notify({
-          group: 'workspace',
-          type: 'success',
-          text: moreCopy(this.$i18n?.locale).assembly.added(added),
-        })
+      if (this.savingAssembly) return
+      this.savingAssembly = true
+      this.assemblyError = ''
+      try {
+        const parts = JSON.stringify(list.map(({ fields, geometry }) => ({ fields, geometry })))
+        if (this.assemblyAttempt?.parts !== parts)
+          this.assemblyAttempt = { parts, key: crypto.randomUUID() }
+        const body = new FormData()
+        body.append('key', this.assemblyAttempt.key)
+        body.append('parts', parts)
+        list.forEach(({ file }, i) => body.append(`files[${i}]`, file))
+        const data = await this.$axios.$post('/api/customer/quotes/draft/assemblies', body)
+        this.draft = data.draft
+        this.builder = { open: false, start: '' }
+        this.assemblyAttempt = null
+        this.$notify({ group: 'workspace', type: 'success',
+          text: moreCopy(this.$i18n?.locale).assembly.added(list.length) })
+      } catch (error) {
+        this.assemblyError = apiErrorMessage(error, this.t.saveFailed)
+      } finally {
+        this.savingAssembly = false
+      }
     },
     // One file at a time keeps the order and the server's draft consistent.
     async upload(files, fields = {}, fromTemplate = false) {
