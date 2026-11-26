@@ -15,7 +15,7 @@ export const ASSEMBLY_MODES = ['edge', 'free', 'row']
 // offset moves along it: as the drawing's axes, to the right on the front
 // and back edges and backwards on the side ones.
 export function partEdges(box, thickness) {
-  const y = box.min.y + Math.max(0.5, Number(thickness) || 1) / 2
+  const y = box.min.y + Math.max(0.1, Number(thickness) || 1) / 2
   const [x0, x1, front, back] = [box.min.x, box.max.x, box.max.z, box.min.z]
   const normal = new THREE.Vector3(0, 1, 0)
   const right = new THREE.Vector3(1, 0, 0)

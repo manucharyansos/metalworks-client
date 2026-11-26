@@ -459,12 +459,13 @@
       </p>
     </div>
 
-    <FilePreviewModal
+    <QuoteAssemblyPreview
       v-if="preview && selected"
       :file="preview"
-      :source-url="fileUrl(preview)"
+      :items="selected.items"
+      :base="`/api/quote-requests/${selected.id}`"
       show-download
-      @download="download(preview)"
+      @download="download($event)"
       @close="preview = null"
     />
     <notifications />
@@ -472,7 +473,7 @@
 </template>
 
 <script>
-import FilePreviewModal from '@/components/File/FilePreviewModal.vue'
+import QuoteAssemblyPreview from '@/components/customer/QuoteAssemblyPreview.vue'
 import { apiErrorMessage } from '@/utils/task-workflow'
 import {
   formatMoney,
@@ -493,7 +494,7 @@ const FILTERS = [
 
 export default {
   name: 'QuoteInbox',
-  components: { FilePreviewModal },
+  components: { QuoteAssemblyPreview },
   data() {
     return {
       loading: false,

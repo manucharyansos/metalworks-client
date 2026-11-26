@@ -31,15 +31,17 @@
         </button>
       </header>
       <div class="min-h-0 overflow-y-auto p-4 sm:p-5">
-        <FilePreview
-          :file="file"
-          :customer-file="customerFile"
-          :source-url="sourceUrl"
-          :order-id="orderId"
-          :show-download="showDownload"
-          @close="$emit('close')"
-          @download="$emit('download', $event)"
-        />
+        <slot>
+          <FilePreview
+            :file="file"
+            :customer-file="customerFile"
+            :source-url="sourceUrl"
+            :order-id="orderId"
+            :show-download="showDownload"
+            @close="$emit('close')"
+            @download="$emit('download', $event)"
+          />
+        </slot>
       </div>
     </section>
   </div>

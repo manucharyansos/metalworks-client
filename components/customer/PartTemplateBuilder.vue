@@ -1,10 +1,11 @@
 <template>
   <div
     class="work-modal-backdrop fixed inset-0 z-[1000]"
-    @click.self="$emit('close')"
+    @click.self="!savingAssembly && $emit('close')"
   >
     <section
       ref="dialog"
+      :inert="savingAssembly || null"
       class="work-modal flex w-full max-w-6xl flex-col focus:outline-none"
       role="dialog"
       aria-modal="true"
@@ -628,6 +629,7 @@
         v-else-if="step === 'assembly'"
         class="work-modal__footer flex flex-wrap items-center justify-end gap-2"
       >
+        <p v-if="assemblyError" role="alert" class="w-full text-sm text-red-600">{{ assemblyError }}</p>
         <button
           type="button"
           class="work-button"
@@ -668,7 +670,7 @@
           {{ editing >= 0 ? m.assembly.save : m.assembly.add }}
         </button>
         <button
-          v-if="editing < 0"
+          v-if="editing < 0 && !assembly.length"
           type="button"
           class="work-button"
           data-variant="primary"
@@ -711,6 +713,7 @@ import {
 import { MAX_3D_HOLES, arrayCount, layPatterns } from '@/utils/part-patterns'
 import { applyBends, newBend } from '@/utils/part-bends'
 import { largestSheet, materialChoices } from '@/utils/part-materials'
+import { placedParts } from '@/utils/assembly-geometry'
 import { dropPlacement, newJoint, swapPlacements } from '@/utils/part-assembly'
 import { RAL_COLORS, ralCode, ralColor, ralName } from '@/utils/ral-colors'
 import { builderCopy } from '@/utils/part-builder-copy'
@@ -745,6 +748,8 @@ export default {
   },
   props: {
     // A template to open after the material instead of the gallery.
+    savingAssembly: Boolean,
+    assemblyError: { type: String, default: '' },
     start: { type: String, default: '' },
     workshops: { type: Array, default: () => [] },
     // The price list's materials, and the company's Materials section.
@@ -1327,6 +1332,7 @@ export default {
           1000000,
           Math.max(1, Math.round(Number(this.quantity) || 1))
         ),
+        bends: part.fold?.bends?.length ?? part.bends.length,
         note: this.note(part),
       }
       if (this.custom || !this.thicknessChoice?.pricingId) {
@@ -1507,7 +1513,8 @@ export default {
           ]
         return { file: this.fileOf(item.upload), fields }
       })
-      this.$emit('add-many', list)
+      const geometry = placedParts(this.assembly.map(item => item.view), this.placements, this.assemblyMode)
+      this.$emit('add-many', list.map((item, i) => ({ ...item, geometry: geometry[i] })))
     },
     mm(value) {
       return mm(value)
