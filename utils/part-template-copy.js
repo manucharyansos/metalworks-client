@@ -28,7 +28,7 @@ const copy = {
       area: 'Մակերես',
     },
     add: 'Ավելացնել հայտին',
-    added: 'Դետալն ավելացվեց հայտին։ Ընտրեք նյութը՝ գինը տեսնելու համար։',
+    added: 'Դետալն ավելացվեց հայտին։',
     noDrawing: 'Գծագիր չունե՞ք',
     noDrawingLead:
       'Ընտրեք պատրաստի ձևանմուշ և մուտքագրեք չափերը, կամ վերբեռնեք ձեռքով արված էսքիզի լուսանկարը՝ չափերով, և ինժեները կգծի այն։',
@@ -196,7 +196,7 @@ const copy = {
       area: 'Площадь',
     },
     add: 'Добавить в заявку',
-    added: 'Деталь добавлена в заявку. Выберите материал, чтобы увидеть цену.',
+    added: 'Деталь добавлена в заявку.',
     noDrawing: 'Нет чертежа?',
     noDrawingLead:
       'Выберите готовый шаблон и введите размеры или загрузите фото эскиза от руки с размерами — инженер начертит его.',
@@ -369,8 +369,7 @@ const copy = {
       area: 'Area',
     },
     add: 'Add to request',
-    added:
-      'The part was added to your request. Choose a material to see the price.',
+    added: 'The part was added to your request.',
     noDrawing: 'No drawing?',
     noDrawingLead:
       'Pick a ready-made template and enter the dimensions, or upload a photo of a hand sketch with dimensions and an engineer will draw it.',

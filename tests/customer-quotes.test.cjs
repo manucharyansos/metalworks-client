@@ -100,6 +100,13 @@ test('reasons for a manager price read in the interface language', () => {
   assert.deepEqual(reasonsText(['drawing', 'material'], 'hy'), [
     quoteCopy('hy').reasons.drawing,
   ])
+  // A material the customer wrote in is priced by a manager: say so rather
+  // than ask them to pick one from the list.
+  assert.deepEqual(reasonsText(['material'], 'hy', { typed: true }), [
+    quoteCopy('hy').reasons.typed,
+  ])
+  for (const locale of ['hy', 'ru', 'en'])
+    assert.ok(quoteCopy(locale).reasons.typed, `${locale} typed material`)
   // An outline that does not close is the customer's to fix, even with the
   // price list switched off.
   assert.deepEqual(reasonsText(['disabled', 'open', 'material'], 'en'), [

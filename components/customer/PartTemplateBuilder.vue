@@ -54,6 +54,15 @@
         </div>
         <div class="flex shrink-0 items-center gap-2">
           <button
+            v-if="assembly.length && step !== 'assembly'"
+            type="button"
+            class="material-chip border-amber-300 text-amber-800 dark:border-amber-700 dark:text-amber-200"
+            data-part-assembly-chip
+            @click="openAssembly"
+          >
+            {{ m.assembly.chip(assembly.length) }}
+          </button>
+          <button
             v-if="step !== 'material' && materialReady"
             type="button"
             class="material-chip"
@@ -83,46 +92,58 @@
             {{ b.material.lead }}
           </p>
           <ul
-            v-if="materials.length"
+            v-if="choices.length"
             class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
           >
             <li
-              v-for="item in materials"
-              :key="item.id"
+              v-for="item in choices"
+              :key="item.key"
               class="material-card"
-              :class="{ 'material-card--on': materialId === String(item.id) }"
-              :data-part-material-id="item.id"
+              :class="{ 'material-card--on': materialKey === item.key }"
+              :data-part-material-id="item.key"
             >
               <p class="text-sm font-bold text-slate-900 dark:text-white">
                 {{ item.name }}
               </p>
+              <p
+                v-if="item.group"
+                class="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400"
+              >
+                {{ item.group }}
+              </p>
               <div class="mt-3 flex flex-wrap gap-2">
                 <button
                   v-for="choice in item.thicknesses"
-                  :key="choice.id"
+                  :key="choice.key"
                   type="button"
                   class="builder-chip"
                   :class="{
                     'builder-chip--on':
-                      materialId === String(item.id) &&
-                      Number(thicknessId) === Number(choice.id),
+                      materialKey === item.key && thicknessKey === choice.key,
                   }"
+                  :title="sheetText(choice)"
                   :data-part-thickness="choice.thickness"
                   @click="chooseThickness(item, choice)"
                 >
                   {{ mm(choice.thickness) }} {{ t.mm }}
                 </button>
               </div>
+              <p
+                v-if="materialKey === item.key && thicknessChoice"
+                class="mt-2 text-[11px] text-slate-500 dark:text-slate-400"
+              >
+                {{ sheetText(thicknessChoice) }}
+              </p>
             </li>
             <li
               class="material-card"
-              :class="{ 'material-card--on': materialId === 'other' }"
+              :class="{ 'material-card--on': materialKey === 'other' }"
             >
               <button
                 type="button"
                 class="block w-full text-left"
                 data-part-material-other
-                @click="materialId = 'other'"
+                @click="materialKey = 'other'"
               >
                 <span
                   class="block text-sm font-bold text-slate-900 dark:text-white"
@@ -236,6 +257,33 @@
           </p>
         </div>
 
+        <PartAssemblyStep
+          v-else-if="step === 'assembly'"
+          :items="assembly"
+          :placements="placements"
+          :mode="assemblyMode"
+          :tool="assemblyTool"
+          :selected="assemblySelected"
+          :name="assemblyName"
+          :weld="weld"
+          :weld-available="Boolean(workshop('WELD'))"
+          :a="m.assembly"
+          :hint="b.view.hint"
+          :unavailable="b.view.unavailable"
+          :too-many="b.view.tooMany(max3d)"
+          @update:mode="assemblyMode = $event"
+          @update:tool="assemblyTool = $event"
+          @update:name="assemblyName = $event"
+          @update:weld="weld = $event"
+          @select="assemblySelected = $event"
+          @place="placeItem"
+          @move="moveItem"
+          @edit="editItem"
+          @remove="removeItem"
+          @unjoin="unjoin"
+          @joint="setJoint"
+        />
+
         <div
           v-else-if="template"
           class="grid gap-6 lg:grid-cols-[21rem_minmax(0,1fr)]"
@@ -312,147 +360,32 @@
               <small class="builder-hint">{{ b.bend.lead }}</small>
             </section>
 
-            <section class="space-y-3" data-part-patterns>
-              <p class="builder-legend">{{ b.patterns.title }}</p>
-              <p class="builder-hint">{{ b.patterns.lead }}</p>
-              <div v-if="patterns.length" class="flex flex-wrap gap-2">
-                <button
-                  v-for="(pattern, index) in patterns"
-                  :key="index"
-                  type="button"
-                  class="builder-chip"
-                  :class="{ 'builder-chip--on': selected === index }"
-                  :data-part-pattern-chip="index"
-                  @click="selected = index"
-                >
-                  {{ index + 1 }}. {{ b.patterns.kinds[pattern.kind] }} ·
-                  {{ b.patterns.count(cellCount(index)) }}
-                </button>
-              </div>
-              <button
-                type="button"
-                class="work-button w-full"
-                data-variant="open"
-                :aria-expanded="picking ? 'true' : 'false'"
-                data-part-pattern-add
-                @click="picking = !picking"
-              >
-                + {{ b.patterns.add }}
-              </button>
-              <ul v-if="picking" class="grid grid-cols-3 gap-2">
-                <li v-for="kind in kinds" :key="kind.id">
-                  <button
-                    type="button"
-                    class="pattern-kind"
-                    :data-part-pattern-kind="kind.id"
-                    @click="addPattern(kind.id)"
-                  >
-                    <span class="block h-10">
-                      <PartShape
-                        :part="kindThumbs[kind.id]"
-                        class="h-full w-full"
-                      />
-                    </span>
-                    <span
-                      class="mt-1 block text-[11px] font-semibold leading-4"
-                      >{{ b.patterns.kinds[kind.id] }}</span
-                    >
-                  </button>
-                </li>
-              </ul>
-              <div
-                v-if="current"
-                class="space-y-3 rounded-2xl border border-amber-200 bg-amber-50/50 p-3 dark:border-amber-900/60 dark:bg-amber-950/10"
-                data-part-pattern-editor
-              >
-                <label class="builder-field">
-                  <span class="builder-label">{{ b.patterns.kind }}</span>
-                  <select
-                    v-model="current.kind"
-                    class="builder-select"
-                    data-pattern-field="kind"
-                  >
-                    <option
-                      v-for="kind in kinds"
-                      :key="kind.id"
-                      :value="kind.id"
-                    >
-                      {{ b.patterns.kinds[kind.id] }}
-                    </option>
-                  </select>
-                </label>
-                <div>
-                  <span class="builder-label">{{ b.patterns.area }}</span>
-                  <div class="flex gap-2">
-                    <button
-                      v-for="shape in ['rect', 'circle']"
-                      :key="shape"
-                      type="button"
-                      class="builder-chip"
-                      :class="{ 'builder-chip--on': current.shape === shape }"
-                      :data-pattern-shape="shape"
-                      @click="current.shape = shape"
-                    >
-                      {{ b.patterns[shape] }}
-                    </button>
-                  </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                  <label
-                    v-for="field in patternFields"
-                    :key="field.key"
-                    class="builder-field"
-                  >
-                    <span class="builder-label">{{ field.label }}</span>
-                    <span class="builder-input">
-                      <input
-                        v-model.number="current[field.key]"
-                        type="number"
-                        :step="field.step"
-                        inputmode="decimal"
-                        :data-pattern-field="field.key"
-                      />
-                      <em>{{ field.unit }}</em>
-                    </span>
-                  </label>
-                </div>
-                <div class="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    class="work-button"
-                    data-pattern-turn="-15"
-                    @click="turn(-15)"
-                  >
-                    ↺ 15°
-                  </button>
-                  <button
-                    type="button"
-                    class="work-button"
-                    data-pattern-turn="15"
-                    @click="turn(15)"
-                  >
-                    ↻ 15°
-                  </button>
-                  <button
-                    type="button"
-                    class="work-button"
-                    data-pattern-center
-                    @click="centre"
-                  >
-                    {{ b.patterns.center }}
-                  </button>
-                  <button
-                    type="button"
-                    class="work-button ml-auto"
-                    data-variant="danger"
-                    data-pattern-remove
-                    @click="removePattern(selected)"
-                  >
-                    {{ b.patterns.remove }}
-                  </button>
-                </div>
-              </div>
-            </section>
+            <PartBendEditor
+              v-else
+              :bends="bends"
+              :part="part"
+              :issue="bendIssue"
+              :t="t"
+              :m="m"
+              @add="addBend"
+              @remove="removeBend"
+              @axis="setAxis"
+            />
+
+            <PartPatternEditor
+              :patterns="patterns"
+              :selected="selected"
+              :counts="laid ? laid.counts : []"
+              :wanted="laid ? laid.wanted : []"
+              :part="bentPart"
+              :thickness="thickness"
+              :t="t"
+              :b="b"
+              :m="m"
+              @select="selected = $event"
+              @add="addPattern"
+              @remove="removePattern"
+            />
 
             <section v-if="powder" class="space-y-3" data-part-paint>
               <p class="builder-legend">{{ b.paint.title }}</p>
@@ -548,7 +481,7 @@
           >
             <div class="flex flex-wrap items-center justify-between gap-2">
               <p class="builder-legend">
-                {{ template.bends ? t.flat : t.preview }}
+                {{ finalPart && finalPart.fold ? t.flat : t.preview }}
               </p>
               <div class="view-tabs" role="tablist">
                 <button
@@ -589,6 +522,7 @@
                 :thickness="thickness"
                 :paint="paintHex"
                 :metal="metal"
+                :stages="m.stages"
                 :hint="b.view.hint"
                 :unavailable="b.view.unavailable"
                 :too-many="b.view.tooMany(max3d)"
@@ -691,6 +625,29 @@
         </button>
       </footer>
       <footer
+        v-else-if="step === 'assembly'"
+        class="work-modal__footer flex flex-wrap items-center justify-end gap-2"
+      >
+        <button
+          type="button"
+          class="work-button"
+          data-assembly-more
+          @click="morePart"
+        >
+          + {{ m.assembly.more }}
+        </button>
+        <button
+          type="button"
+          class="work-button"
+          data-variant="primary"
+          :disabled="!assembly.length"
+          data-assembly-send
+          @click="sendAssembly"
+        >
+          {{ m.assembly.send }}
+        </button>
+      </footer>
+      <footer
         v-else-if="step === 'config'"
         class="work-modal__footer flex flex-wrap items-center justify-end gap-2"
       >
@@ -701,6 +658,17 @@
           </button>
         </span>
         <button
+          type="button"
+          class="work-button"
+          data-variant="open"
+          :disabled="Boolean(blocking) || !finalPart || !materialReady"
+          data-part-to-assembly
+          @click="editing >= 0 ? saveInAssembly() : addToAssembly()"
+        >
+          {{ editing >= 0 ? m.assembly.save : m.assembly.add }}
+        </button>
+        <button
+          v-if="editing < 0"
           type="button"
           class="work-button"
           data-variant="primary"
@@ -718,6 +686,9 @@
 <script>
 import PartShape from '@/components/customer/PartShape.vue'
 import PartPreview3D from '@/components/customer/PartPreview3D.vue'
+import PartPatternEditor from '@/components/customer/PartPatternEditor.vue'
+import PartBendEditor from '@/components/customer/PartBendEditor.vue'
+import PartAssemblyStep from '@/components/customer/PartAssemblyStep.vue'
 import { measureDxf } from '@/utils/dxf-measure'
 import {
   ANGLES,
@@ -737,14 +708,13 @@ import {
   problemText,
   templateCopy,
 } from '@/utils/part-template-copy'
-import {
-  MAX_3D_HOLES,
-  PATTERNS,
-  layPatterns,
-  newPattern,
-} from '@/utils/part-patterns'
+import { MAX_3D_HOLES, arrayCount, layPatterns } from '@/utils/part-patterns'
+import { applyBends, newBend } from '@/utils/part-bends'
+import { largestSheet, materialChoices } from '@/utils/part-materials'
+import { dropPlacement, newJoint, swapPlacements } from '@/utils/part-assembly'
 import { RAL_COLORS, ralCode, ralColor, ralName } from '@/utils/ral-colors'
 import { builderCopy } from '@/utils/part-builder-copy'
+import { moreCopy } from '@/utils/part-builder-more'
 
 const CATEGORIES = [
   'all',
@@ -756,21 +726,30 @@ const CATEGORIES = [
   'shapes',
 ]
 const STEPS = { module: 0.5, thickness: 0.5 }
-// Set by the material step, not typed with the other dimensions.
+// Set by the material step or the bend section, not typed with the other dimensions.
 const SHOWN_APART = ['thickness', ...ANGLES]
 // A phone keyboard would cover the preview, so fields take focus on wide screens only.
 const wide = () =>
   typeof window !== 'undefined' &&
   Boolean(window.matchMedia?.('(min-width: 1024px)').matches)
+const copyOf = (value) => JSON.parse(JSON.stringify(value))
 
 export default {
   name: 'PartTemplateBuilder',
-  components: { PartShape, PartPreview3D },
+  components: {
+    PartShape,
+    PartPreview3D,
+    PartPatternEditor,
+    PartBendEditor,
+    PartAssemblyStep,
+  },
   props: {
     // A template to open after the material instead of the gallery.
     start: { type: String, default: '' },
     workshops: { type: Array, default: () => [] },
+    // The price list's materials, and the company's Materials section.
     materials: { type: Array, default: () => [] },
+    catalog: { type: Array, default: () => [] },
     // The material chosen the last time the builder was open.
     initialMaterial: { type: Object, default: null },
   },
@@ -778,8 +757,8 @@ export default {
     const last = this.initialMaterial || {}
     return {
       step: 'material',
-      materialId: last.materialId || '',
-      thicknessId: last.thicknessId || null,
+      materialKey: last.materialKey || '',
+      thicknessKey: last.thicknessKey || '',
       customMaterial: last.customMaterial || '',
       customThickness: last.customThickness || '',
       category: 'all',
@@ -791,12 +770,21 @@ export default {
       metrics: null,
       patterns: [],
       selected: -1,
-      picking: false,
+      bends: [],
       paint: false,
       ral: '9005',
       customRal: '',
       primer: false,
       view: 'flat',
+      // Parts gathered for an assembly, how each sits, and the one being edited.
+      assembly: [],
+      placements: [],
+      assemblyMode: 'edge',
+      assemblyTool: 'translate',
+      assemblySelected: 0,
+      assemblyName: '',
+      weld: false,
+      editing: -1,
     }
   },
   computed: {
@@ -806,8 +794,12 @@ export default {
     b() {
       return builderCopy(this.$i18n?.locale)
     },
+    m() {
+      return moreCopy(this.$i18n?.locale)
+    },
     title() {
       if (this.step === 'material') return this.b.material.title
+      if (this.step === 'assembly') return this.m.assembly.title
       if (this.step === 'config' && this.template)
         return this.name(this.template)
       return this.t.title
@@ -815,29 +807,31 @@ export default {
     categories() {
       return CATEGORIES
     },
-    kinds() {
-      return PATTERNS
-    },
     ralColors() {
       return RAL_COLORS
     },
     max3d() {
       return MAX_3D_HOLES
     },
+    choices() {
+      return materialChoices(this.catalog, this.materials)
+    },
     custom() {
-      return this.materialId === 'other' || !this.materials.length
+      return this.materialKey === 'other' || !this.choices.length
     },
     chosenMaterial() {
+      return this.choices.find((m) => m.key === this.materialKey) || null
+    },
+    thicknessChoice() {
       return (
-        this.materials.find((m) => String(m.id) === this.materialId) || null
+        (this.chosenMaterial?.thicknesses || []).find(
+          (t) => t.key === this.thicknessKey
+        ) || null
       )
     },
     thickness() {
       if (this.custom) return Number(this.customThickness) || 0
-      const choice = (this.chosenMaterial?.thicknesses || []).find(
-        (item) => Number(item.id) === Number(this.thicknessId)
-      )
-      return choice ? Number(choice.thickness) : 0
+      return this.thicknessChoice ? this.thicknessChoice.thickness : 0
     },
     materialName() {
       return this.custom
@@ -849,6 +843,10 @@ export default {
     },
     materialLabel() {
       return `${this.materialName} · ${mm(this.thickness)} ${this.t.mm}`
+    },
+    // The largest sheet the chosen material is stocked in, if known.
+    sheet() {
+      return this.custom ? null : largestSheet(this.thicknessChoice)
     },
     // How the bare metal looks in 3D.
     metal() {
@@ -867,33 +865,6 @@ export default {
           TEMPLATES.map((item) => [
             item.id,
             Object.freeze(buildPart(item, defaults(item))),
-          ])
-        )
-      )
-    },
-    // Each pattern kind on a small sheet, for the picker.
-    kindThumbs() {
-      const sheet = templateById('blank')
-      const base = buildPart(sheet, { width: 60, height: 40, radius: 0 })
-      return Object.freeze(
-        Object.fromEntries(
-          PATTERNS.map((kind) => [
-            kind.id,
-            Object.freeze(
-              layPatterns(base, [
-                {
-                  kind: kind.id,
-                  shape: 'rect',
-                  cx: 30,
-                  cy: 20,
-                  width: 56,
-                  height: 36,
-                  angle: 0,
-                  size: 9,
-                  gap: 2.5,
-                },
-              ]).part
-            ),
           ])
         )
       )
@@ -946,53 +917,68 @@ export default {
     issueText() {
       return problemText(this.t, this.template, this.issue)
     },
+    // Bends added by hand: any part that is not a bent template takes them.
+    bentResult() {
+      if (!this.part) return { part: null, issue: null }
+      if (this.template?.bends || !this.bends.length)
+        return { part: this.part, issue: null }
+      return Object.freeze(applyBends(this.part, this.bends, this.thickness))
+    },
+    bentPart() {
+      return this.bentResult.part
+    },
+    bendIssue() {
+      return this.bentResult.issue
+    },
     // The part with its patterns cut in.
     laid() {
-      if (!this.part) return null
+      if (!this.bentPart) return null
       return Object.freeze(
-        layPatterns(this.part, this.patterns, this.thickness)
+        layPatterns(this.bentPart, this.patterns, this.thickness)
       )
     },
     finalPart() {
-      return this.laid ? this.laid.part : this.part
+      return this.laid ? this.laid.part : this.bentPart
+    },
+    // A part larger than the sheet its material comes in.
+    sheetIssue() {
+      const part = this.finalPart
+      const sheet = this.sheet
+      if (!part || !sheet) return null
+      const [long, short] = [
+        Math.max(part.width, part.height),
+        Math.min(part.width, part.height),
+      ]
+      return long > sheet.length + 1e-6 || short > sheet.width + 1e-6
+        ? { key: 'sheet', ...sheet }
+        : null
     },
     patternIssue() {
       return this.laid?.issues[0] || null
     },
     blocking() {
-      return this.issue || this.patternIssue
+      return (
+        this.issue || this.sheetIssue || this.bendIssue || this.patternIssue
+      )
     },
     blockingText() {
       if (this.issue) return this.issueText
+      if (this.sheetIssue)
+        return this.m.sheetSize(
+          mm(this.sheetIssue.length),
+          mm(this.sheetIssue.width)
+        )
+      if (this.bendIssue) {
+        const key = this.bendIssue.key
+        const text = this.m.bends.problems[key] || this.t.problems[key] || key
+        return `${this.m.bends.title} ${this.bendIssue.index + 1}: ${text}`
+      }
       const issue = this.patternIssue
       if (!issue) return ''
       if (issue.key === 'tooManyHoles') return this.t.problems.tooManyHoles
       const text = this.b.patterns.problems[issue.key]
       const prefix = this.patterns.length > 1 ? `${issue.index + 1}. ` : ''
       return prefix + (typeof text === 'function' ? text(mm(issue.min)) : text)
-    },
-    current() {
-      return this.patterns[this.selected] || null
-    },
-    patternFields() {
-      const p = this.b.patterns
-      const round = this.current?.shape === 'circle'
-      return [
-        {
-          key: 'width',
-          label: round ? p.diameter : p.width,
-          unit: this.t.mm,
-          step: 'any',
-        },
-        ...(round
-          ? []
-          : [{ key: 'height', label: p.height, unit: this.t.mm, step: 'any' }]),
-        { key: 'size', label: p.size, unit: this.t.mm, step: 0.5 },
-        { key: 'gap', label: p.gap, unit: this.t.mm, step: 0.5 },
-        { key: 'angle', label: p.angle, unit: '°', step: 1 },
-        { key: 'cx', label: p.cx, unit: this.t.mm, step: 'any' },
-        { key: 'cy', label: p.cy, unit: this.t.mm, step: 'any' },
-      ]
     },
     paintEntry() {
       return ralColor(this.customRal.trim() || this.ral)
@@ -1016,7 +1002,7 @@ export default {
         : ''
       return name ? `${this.paintCode} · ${name}` : this.paintCode
     },
-    // A side view of a bent part at its angle, with its outside dimensions.
+    // A side view of a bent template at its angle, with its outside dimensions.
     profile() {
       if (!this.template?.bends || !this.part) return null
       const v = this.values
@@ -1138,18 +1124,25 @@ export default {
     ralName(colour) {
       return ralName(colour, this.$i18n?.locale)
     },
+    sheetText(choice) {
+      const sheet = largestSheet(choice)
+      return sheet ? this.m.sheet(mm(sheet.width), mm(sheet.length)) : ''
+    },
     chooseThickness(material, choice) {
-      this.materialId = String(material.id)
-      this.thicknessId = choice.id
+      this.materialKey = material.key
+      this.thicknessKey = choice.key
+    },
+    materialChoice() {
+      return {
+        materialKey: this.materialKey,
+        thicknessKey: this.thicknessKey,
+        customMaterial: this.customMaterial,
+        customThickness: this.customThickness,
+      }
     },
     materialDone() {
       if (!this.materialReady) return
-      this.$emit('material', {
-        materialId: this.materialId,
-        thicknessId: this.thicknessId,
-        customMaterial: this.customMaterial,
-        customThickness: this.customThickness,
-      })
+      this.$emit('material', this.materialChoice())
       if (this.template) {
         this.step = 'config'
         return
@@ -1163,20 +1156,23 @@ export default {
     },
     back() {
       if (this.step === 'config') {
-        this.step = 'gallery'
+        this.step = this.editing >= 0 ? 'assembly' : 'gallery'
         this.template = null
+        this.editing = -1
         this.$nextTick(() => this.focus(this.$refs.search))
-      } else this.step = 'material'
+      } else if (this.step === 'assembly') this.step = 'gallery'
+      else this.step = 'material'
     },
     pick(item) {
       this.template = item
       this.step = 'config'
+      this.editing = -1
       this.part = null
       this.metrics = null
       this.quantity = 1
       this.patterns = []
+      this.bends = []
       this.selected = -1
-      this.picking = false
       const values = { ...defaults(item) }
       if ('thickness' in values && this.thickness > 0)
         values.thickness = this.thickness
@@ -1216,14 +1212,9 @@ export default {
         }
       }, 150)
     },
-    cellCount(index) {
-      return this.laid?.counts[index] || 0
-    },
-    addPattern(kind) {
-      if (!this.part) return
-      this.patterns.push(newPattern(this.part, kind, this.thickness))
+    addPattern(pattern) {
+      this.patterns.push(pattern)
       this.selected = this.patterns.length - 1
-      this.picking = false
     },
     removePattern(index) {
       this.patterns.splice(index, 1)
@@ -1242,28 +1233,56 @@ export default {
       if (pattern)
         pattern.angle = (((Math.round(angle) % 360) + 540) % 360) - 180
     },
-    turn(step) {
-      if (this.current)
-        this.rotatePattern({
-          index: this.selected,
-          angle: (Number(this.current.angle) || 0) + step,
-        })
+    addBend() {
+      if (!this.part) return
+      const axis = this.bends[0]?.axis === 'y' ? 'y' : 'x'
+      this.bends.push(newBend(this.part, this.bends, axis))
     },
-    centre() {
-      if (!this.current || !this.part) return
-      this.current.cx = Math.round(this.part.width * 5) / 10
-      this.current.cy = Math.round(this.part.height * 5) / 10
+    removeBend(index) {
+      this.bends.splice(index, 1)
+    },
+    // All bend lines run the same way; a new direction starts them over evenly.
+    setAxis(axis) {
+      if (!this.part) return
+      const count = this.bends.length
+      const length = axis === 'y' ? this.part.height : this.part.width
+      this.bends.forEach((bend, i) => {
+        bend.axis = axis
+        bend.at = Math.round((length * (i + 1)) / (count + 1))
+      })
     },
     pickRal(code) {
       this.ral = code
       this.customRal = ''
     },
-    // What the engineer reads: the template's dimensions, then each pattern.
+    // What the engineer reads: the dimensions, the material, then each pattern and bend.
     note(part) {
       const lines = [partNote(this.t, this.template, this.values, part)]
+      if (this.materialName) {
+        const sheet = this.sheet
+        lines.push(
+          `${this.b.material.name}${this.t.sep}${this.materialLabel}${
+            sheet ? `, ${this.m.sheet(mm(sheet.width), mm(sheet.length))}` : ''
+          }.`
+        )
+      }
       this.patterns.forEach((pattern, index) => {
-        const count = this.cellCount(index)
+        const count = this.laid?.counts[index] || 0
         if (!count) return
+        if (pattern.mode === 'array') {
+          lines.push(
+            this.m.note(index + 1, this.m.elements[pattern.kind], {
+              w: mm(pattern.w),
+              h: mm(pattern.h),
+              count: `${count}/${arrayCount(pattern)}`,
+              layout: this.m.layouts[pattern.layout] || '',
+              cx: mm(pattern.cx),
+              cy: mm(pattern.cy),
+              angle: Math.round(Number(pattern.angle) || 0),
+            })
+          )
+          return
+        }
         const round = pattern.shape === 'circle'
         lines.push(
           this.b.patterns.note(index + 1, this.b.patterns.kinds[pattern.kind], {
@@ -1279,6 +1298,17 @@ export default {
           })
         )
       })
+      if (!this.template.bends)
+        this.bends.forEach((bend, index) =>
+          lines.push(
+            this.m.bends.note(index + 1, {
+              axis: this.m.bends[bend.axis === 'y' ? 'y' : 'x'],
+              at: mm(bend.at),
+              angle: Math.round(Number(bend.angle) || 0),
+              up: bend.up !== false,
+            })
+          )
+        )
       return lines.join(' ').slice(0, 2000)
     },
     workshop(code) {
@@ -1289,16 +1319,9 @@ export default {
             .toUpperCase() === code
       )?.id
     },
-    add() {
+    // The DXF of the part as it stands, and the fields it goes up with.
+    upload() {
       const part = this.finalPart
-      if (this.blocking || !part || !this.materialReady) return
-      const file = new File(
-        [toDxf(part)],
-        partFileName(this.t, this.template, part),
-        {
-          type: 'application/dxf',
-        }
-      )
       const fields = {
         quantity: Math.min(
           1000000,
@@ -1306,14 +1329,15 @@ export default {
         ),
         note: this.note(part),
       }
-      if (this.custom) {
+      if (this.custom || !this.thicknessChoice?.pricingId) {
         fields.material = this.materialName
         fields.thickness = this.thickness
-      } else fields.pricing_thickness_id = Number(this.thicknessId)
+      } else
+        fields.pricing_thickness_id = Number(this.thicknessChoice.pricingId)
       // Cut on the sheet laser; bent parts are bent and painted ones powder coated too.
       const ids = [
         this.workshop('DXF'),
-        this.template.bends ? this.workshop('DLD') : null,
+        part.bends.length ? this.workshop('DLD') : null,
         this.paint && this.powder ? this.powder.id : null,
       ].filter(Boolean)
       if (ids.length) fields.workshop_ids = ids
@@ -1321,7 +1345,169 @@ export default {
         fields.paint_ral = this.paintCode
         fields.primer_required = this.primer ? 1 : 0
       }
-      this.$emit('add', { file, fields })
+      return {
+        dxf: toDxf(part),
+        name: partFileName(this.t, this.template, part),
+        fields,
+      }
+    },
+    fileOf({ dxf, name }) {
+      return new File([dxf], name, { type: 'application/dxf' })
+    },
+    ready() {
+      return !this.blocking && this.finalPart && this.materialReady
+    },
+    add() {
+      if (!this.ready()) return
+      const upload = this.upload()
+      this.$emit('add', { file: this.fileOf(upload), fields: upload.fields })
+    },
+    // The part as it is now, to keep in an assembly and to edit again later.
+    snapshot() {
+      const part = this.finalPart
+      return {
+        key: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        name: `${this.name(this.template)} ${mm(part.width)}×${mm(
+          part.height
+        )}`,
+        quantity: Math.max(1, Math.round(Number(this.quantity) || 1)),
+        config: {
+          templateId: this.template.id,
+          values: { ...this.values },
+          patterns: copyOf(this.patterns),
+          bends: copyOf(this.bends),
+          paint: this.paint,
+          ral: this.ral,
+          customRal: this.customRal,
+          primer: this.primer,
+          quantity: this.quantity,
+          material: this.materialChoice(),
+        },
+        view: Object.freeze({
+          part,
+          thickness: this.thickness,
+          paint: this.paintHex,
+          metal: this.metal,
+        }),
+        upload: this.upload(),
+      }
+    },
+    addToAssembly() {
+      if (!this.ready()) return
+      this.assembly.push(this.snapshot())
+      this.placements.push(
+        this.assembly.length === 1
+          ? { type: 'root' }
+          : newJoint(this.placements)
+      )
+      this.assemblySelected = this.assembly.length - 1
+      this.template = null
+      this.step = 'assembly'
+    },
+    saveInAssembly() {
+      if (!this.ready() || this.editing < 0) return
+      this.$set(this.assembly, this.editing, this.snapshot())
+      this.assemblySelected = this.editing
+      this.editing = -1
+      this.template = null
+      this.step = 'assembly'
+    },
+    openAssembly() {
+      this.editing = -1
+      this.step = 'assembly'
+    },
+    morePart() {
+      this.editing = -1
+      this.template = null
+      this.step = 'gallery'
+    },
+    editItem(index) {
+      const item = this.assembly[index]
+      if (!item) return
+      const c = item.config
+      Object.assign(this, c.material)
+      this.template = templateById(c.templateId)
+      this.values = { ...c.values }
+      this.patterns = copyOf(c.patterns)
+      this.bends = copyOf(c.bends)
+      Object.assign(this, {
+        paint: c.paint,
+        ral: c.ral,
+        customRal: c.customRal,
+        primer: c.primer,
+        quantity: c.quantity,
+      })
+      this.selected = -1
+      this.part = null
+      this.refresh()
+      this.editing = index
+      this.step = 'config'
+    },
+    // Swaps two parts and keeps every joint pointing at the same parts.
+    moveItem(index, direction) {
+      const other = index + direction
+      if (other < 0 || other >= this.assembly.length) return
+      const list = [...this.assembly]
+      ;[list[index], list[other]] = [list[other], list[index]]
+      this.assembly = list
+      this.placements = swapPlacements(this.placements, index, other)
+      this.assemblySelected = other
+    },
+    removeItem(index) {
+      this.assembly.splice(index, 1)
+      this.placements = dropPlacement(this.placements, index)
+      this.assemblySelected = Math.max(
+        0,
+        Math.min(this.assemblySelected, this.assembly.length - 1)
+      )
+    },
+    // Dragged in free mode: the part stays where it was left.
+    placeItem({ index, matrix }) {
+      if (index > 0 || this.assemblyMode === 'free')
+        this.$set(this.placements, index, { type: 'free', matrix })
+    },
+    setJoint(index, changes) {
+      const placement = this.placements[index]
+      if (placement?.type === 'joint')
+        this.$set(this.placements, index, { ...placement, ...changes })
+    },
+    unjoin(index) {
+      this.$set(this.placements, index, newJoint(this.placements))
+    },
+    // Every part of the assembly goes up with a note of where it belongs.
+    sendAssembly() {
+      if (!this.assembly.length) return
+      const a = this.m.assembly
+      const name = this.assemblyName.trim() || a.defaultName
+      const total = this.assembly.length
+      const weld = this.weld && total > 1 ? this.workshop('WELD') : null
+      const list = this.assembly.map((item, i) => {
+        const placement = this.placements[i] || {}
+        const lines = [a.note(name, i + 1, total)]
+        if (this.assemblyMode !== 'row' && i > 0) {
+          if (placement.type === 'joint')
+            lines.push(
+              a.joint(
+                i + 1,
+                placement.parent + 1,
+                a.edges[placement.parentEdge],
+                a.edges[placement.edge],
+                Math.round(Number(placement.angle) || 0),
+                Math.round(Number(placement.offset) || 0)
+              )
+            )
+          else if (placement.type === 'free') lines.push(a.free(i + 1))
+        }
+        if (weld) lines.push(a.welded)
+        const fields = { ...item.upload.fields }
+        fields.note = [...lines, fields.note].join(' ').slice(0, 2000)
+        if (weld)
+          fields.workshop_ids = [
+            ...new Set([...(fields.workshop_ids || []), weld]),
+          ]
+        return { file: this.fileOf(item.upload), fields }
+      })
+      this.$emit('add-many', list)
     },
     mm(value) {
       return mm(value)
@@ -1335,7 +1521,8 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+/* Shared by the builder and its parts (patterns, bends, assembly). */
 .builder-back {
   @apply inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800;
 }
@@ -1354,9 +1541,7 @@ export default {
 .builder-chip--on {
   @apply border-blue-600 bg-blue-600 text-white hover:border-blue-700 dark:border-blue-500 dark:bg-blue-600 dark:text-white;
 }
-.builder-search {
-  @apply block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white;
-}
+.builder-search,
 .builder-select {
   @apply block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white;
 }
@@ -1425,5 +1610,14 @@ export default {
 }
 .builder-metrics dd {
   @apply mt-0.5 font-bold text-slate-900 dark:text-white;
+}
+.assembly-item {
+  @apply cursor-pointer rounded-2xl border border-slate-200 bg-white p-3 transition hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900;
+}
+.assembly-item--on {
+  @apply border-blue-500 ring-2 ring-blue-500/20;
+}
+.assembly-action {
+  @apply rounded-lg border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800;
 }
 </style>

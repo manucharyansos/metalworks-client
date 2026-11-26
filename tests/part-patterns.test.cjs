@@ -60,6 +60,11 @@ const bounds = (shapes) => {
   ]
 }
 const cellsOf = (laid, base) => laid.part.holes.slice(base.holes.length)
+const near = (actual, expected, delta, label) =>
+  assert.ok(
+    Math.abs(actual - expected) <= delta,
+    `${label}: ${actual} is not within ${delta} of ${expected}`
+  )
 
 test('every pattern kind fills a blank sheet with whole, closed cells', () => {
   const base = sheet()
@@ -238,8 +243,74 @@ test('impossible patterns are named instead of drawn', () => {
   assert.deepEqual(layPatterns(base, [], 3), {
     part: base,
     counts: [],
+    wanted: [],
     issues: [],
   })
+})
+
+test('a single element repeats in a row, a grid or a ring', () => {
+  const base = sheet(600, 400)
+  const { ELEMENTS, newElement, arrayCount } = load('utils/part-patterns.js')
+  for (const kind of ELEMENTS) {
+    const one = newElement(base, kind, 3)
+    const laid = layPatterns(base, [one], 3)
+    assert.deepEqual([laid.counts[0], laid.wanted[0]], [1, 1], kind)
+    assert.deepEqual(laid.issues, [], kind)
+    const m = measureDxf(toDxf(laid.part))
+    assert.equal(m.pierces, 2, `${kind} pierces`)
+    assert.equal(m.openContours, 0, `${kind} closed`)
+  }
+  const star = newElement(base, 'star', 3)
+  const row = layPatterns(base, [{ ...star, count: 5, dx: 100 }], 3)
+  assert.deepEqual([row.counts[0], row.wanted[0]], [5, 5])
+  const grid = { ...star, layout: 'grid', rows: 3, cols: 4, dx: 110, dy: 110 }
+  assert.equal(arrayCount(grid), 12)
+  assert.equal(layPatterns(base, [grid], 3).counts[0], 12)
+  const ring = { ...star, layout: 'circle', count: 8, ring: 140, w: 40, h: 40 }
+  const round = layPatterns(base, [ring], 3)
+  assert.equal(round.counts[0], 8)
+  // Every star of the ring sits 140 mm from the centre.
+  for (const shape of cellsOf(round, base)) {
+    const pts = points(shape)
+    const cx = pts.reduce((s, p) => s + p[0], 0) / pts.length
+    const cy = pts.reduce((s, p) => s + p[1], 0) / pts.length
+    assert.ok(Math.abs(Math.hypot(cx - 300, cy - 200) - 140) < 3)
+  }
+  // Too many for the sheet: the ones that do not fit are left out, and said so.
+  const crowded = layPatterns(base, [{ ...star, count: 12, dx: 100 }], 3)
+  assert.ok(crowded.counts[0] < crowded.wanted[0])
+  assert.equal(crowded.wanted[0], 12)
+})
+
+test('elements stretch, round their corners and turn', () => {
+  const base = sheet(400, 300)
+  const { newElement } = load('utils/part-patterns.js')
+  const oval = { ...newElement(base, 'circle', 2), w: 120, h: 40 }
+  const [minX, minY, maxX, maxY] = bounds(
+    cellsOf(layPatterns(base, [oval], 2), base)
+  )
+  assert.ok(
+    Math.abs(maxX - minX - 120) < 0.5 && Math.abs(maxY - minY - 40) < 0.5
+  )
+  const card = { ...newElement(base, 'rect', 2), w: 100, h: 60, radius: 10 }
+  const rounded = measureDxf(toDxf(layPatterns(base, [card], 2).part))
+  near(
+    rounded.cutLengthMm - 1400,
+    2 * (100 + 60) - 8 * 10 + 2 * Math.PI * 10,
+    0.5,
+    'rounded rectangle'
+  )
+  const turned = { ...card, radius: 0, spin: 90 }
+  const [tx0, ty0, tx1, ty1] = bounds(
+    cellsOf(layPatterns(base, [turned], 2), base)
+  )
+  assert.ok(Math.abs(tx1 - tx0 - 60) < 0.5 && Math.abs(ty1 - ty0 - 100) < 0.5)
+  const slot = { ...newElement(base, 'slot', 2), w: 20, h: 80 }
+  const upright = bounds(cellsOf(layPatterns(base, [slot], 2), base))
+  assert.ok(
+    Math.abs(upright[3] - upright[1] - 80) < 0.5,
+    'a tall slot stands up'
+  )
 })
 
 test('a new pattern sits in the middle and its area turns with it', () => {

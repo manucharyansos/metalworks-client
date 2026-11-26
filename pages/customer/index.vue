@@ -370,9 +370,11 @@
       :start="builder.start"
       :workshops="options.workshops || []"
       :materials="(options.pricing && options.pricing.materials) || []"
+      :catalog="options.catalog || []"
       :initial-material="builderMaterial"
       @material="builderMaterial = $event"
       @add="fromTemplate"
+      @add-many="fromAssembly"
       @close="builder = { open: false, start: '' }"
     />
   </main>
@@ -392,6 +394,7 @@ import {
   templateById,
 } from '@/utils/part-templates'
 import { templateCopy } from '@/utils/part-template-copy'
+import { moreCopy } from '@/utils/part-builder-more'
 
 // Shown on the page as a way into the template builder.
 const FEATURED = [
@@ -526,6 +529,19 @@ export default {
     fromTemplate({ file, fields }) {
       this.builder = { open: false, start: '' }
       this.upload([file], fields, true)
+    },
+    // An assembly goes up part by part, in its order, each with its own note.
+    async fromAssembly(list) {
+      this.builder = { open: false, start: '' }
+      const before = this.items.length
+      for (const { file, fields } of list) await this.upload([file], fields)
+      const added = this.items.length - before
+      if (added > 0)
+        this.$notify({
+          group: 'workspace',
+          type: 'success',
+          text: moreCopy(this.$i18n?.locale).assembly.added(added),
+        })
     },
     // One file at a time keeps the order and the server's draft consistent.
     async upload(files, fields = {}, fromTemplate = false) {

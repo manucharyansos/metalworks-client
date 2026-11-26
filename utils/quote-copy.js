@@ -41,6 +41,8 @@ const copy = {
       drawing:
         'Ավտոմատ գինը հաշվվում է DXF գծագրով։ Այս ֆայլի գինը կհաշվի մենեջերը։',
       material: 'Ընտրեք նյութն ու հաստությունը ցանկից՝ գինը տեսնելու համար։',
+      typed:
+        'Ցանկում չեղած նյութի գինը կհաշվի մենեջերը։ Եթե նյութը ցանկում կա, ընտրեք այն՝ գինն անմիջապես տեսնելու համար։',
       service: 'Զոդումը, վալցումը և խողովակների կտրումը գնահատում է մենեջերը։',
       bends: 'Նշեք ծռումների քանակը։',
       open: 'Գծագրում կա չփակված եզրագիծ, ուստի ավտոմատ գին չի հաշվվում։ Ստուգեք գծագիրը, կամ գինը կհաշվի մենեջերը։',
@@ -209,6 +211,8 @@ const copy = {
       drawing:
         'Автоматическая цена считается по чертежу DXF. Цену этого файла рассчитает менеджер.',
       material: 'Выберите материал и толщину из списка, чтобы увидеть цену.',
+      typed:
+        'Цену материала не из списка рассчитает менеджер. Если материал есть в списке, выберите его, чтобы сразу увидеть цену.',
       service: 'Сварку, вальцовку и резку труб оценивает менеджер.',
       bends: 'Укажите количество гибов.',
       open: 'В чертеже есть незамкнутый контур, поэтому цена не считается автоматически. Проверьте чертёж или цену рассчитает менеджер.',
@@ -377,6 +381,8 @@ const copy = {
         'Instant prices come from DXF drawings. A manager will price this file.',
       material:
         'Pick the material and thickness from the list to see the price.',
+      typed:
+        'A manager will price a material that is not in the list. If it is in the list, pick it there to see the price straight away.',
       service: 'Welding, rolling and tube cutting are priced by a manager.',
       bends: 'Enter the number of bends.',
       open: 'The drawing has an outline that does not close, so it is not priced instantly. Check the drawing, or a manager will price it.',
@@ -548,7 +554,9 @@ export function statusTone(status) {
 }
 
 // One line per reason; a draft can be waiting on more than one thing.
-export function reasonsText(reasons, locale) {
+// `typed`: the customer wrote in a material of their own rather than picking
+// one from the price list, so a manager prices it.
+export function reasonsText(reasons, locale, { typed = false } = {}) {
   const t = quoteCopy(locale).reasons
   const list = Array.isArray(reasons) ? reasons : []
   // An outline that does not close is the one thing the customer can fix in the
@@ -558,7 +566,9 @@ export function reasonsText(reasons, locale) {
   if (list.includes('open')) return [t.open]
   if (list.includes('disabled')) return [t.disabled]
   if (list.includes('drawing')) return [t.drawing]
-  return list.map((reason) => t[reason]).filter(Boolean)
+  return list
+    .map((reason) => (reason === 'material' && typed ? t.typed : t[reason]))
+    .filter(Boolean)
 }
 
 // Only the fields a customer edits; the server works out the rest.

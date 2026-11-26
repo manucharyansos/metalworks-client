@@ -1,9 +1,10 @@
 // Patterns a customer lays over a part: decorative or ventilation cut-outs that
-// fill a rectangle or a circle with whole cells only. Every cell keeps a bridge
-// of metal from the outline, the holes, the bends and the other patterns, and
-// the pattern can be moved and turned. Imports only part-templates, so tests
-// load this file directly.
-import { samplePolygon } from '@/utils/part-templates'
+// fill a rectangle or a circle with whole cells only, or single elements set
+// one by one and repeated in a row, a grid or a ring. Every cell keeps a
+// bridge of metal from the outline, the holes, the bends and the other
+// patterns, and a pattern can be moved, turned and stretched. Imports only
+// part-templates, so tests load this file directly.
+import { roundedRect, samplePolygon } from '@/utils/part-templates'
 
 const SQRT3 = Math.sqrt(3)
 const TAU = Math.PI * 2
@@ -23,6 +24,20 @@ export const PATTERNS = [
   { id: 'crosses', layout: 'square' },
   { id: 'stars', layout: 'hex' },
 ]
+
+// Single elements: placed once, then repeated as many times as asked.
+export const ELEMENTS = [
+  'circle',
+  'rect',
+  'slot',
+  'hexagon',
+  'triangle',
+  'diamond',
+  'star',
+  'cross',
+  'heart',
+]
+export const ARRAY_LAYOUTS = ['line', 'grid', 'circle']
 
 export function patternById(id) {
   return PATTERNS.find((p) => p.id === id) || PATTERNS[0]
@@ -184,6 +199,7 @@ export function newPattern(part, kind = 'circles', thickness = 0) {
 // rectangle, or the centre and radius of its circle.
 export function patternRegion(pattern) {
   const p = numbers(pattern)
+  if (p.mode === 'array') return arrayRegion(pattern, p)
   if (p.shape === 'circle')
     return { circle: { cx: p.cx, cy: p.cy, r: p.width / 2 } }
   const turn = (p.angle * Math.PI) / 180
@@ -203,13 +219,56 @@ export function patternRegion(pattern) {
   }
 }
 
+// The box around an array's elements, turned with it.
+function arrayRegion(pattern, p) {
+  const shapes = arrayCells({ ...pattern, cx: 0, cy: 0, angle: 0 }) || []
+  if (!shapes.length) return { circle: { cx: p.cx, cy: p.cy, r: 0 } }
+  const points = shapes.flatMap((shape) => samplePolygon(shape, 6))
+  const [minX, minY, maxX, maxY] = bounds(points)
+  const turn = (p.angle * Math.PI) / 180
+  const place = ([u, v]) => [
+    p.cx + u * Math.cos(turn) - v * Math.sin(turn),
+    p.cy + u * Math.sin(turn) + v * Math.cos(turn),
+  ]
+  return {
+    corners: [
+      [minX, minY],
+      [maxX, minY],
+      [maxX, maxY],
+      [minX, maxY],
+    ].map(place),
+  }
+}
+
+const NUMBERS = [
+  'cx',
+  'cy',
+  'width',
+  'height',
+  'angle',
+  'size',
+  'gap',
+  'w',
+  'h',
+  'spin',
+  'radius',
+  'count',
+  'rows',
+  'cols',
+  'dx',
+  'dy',
+  'ring',
+]
+
 function numbers(pattern) {
   const p = {}
-  for (const key of ['cx', 'cy', 'width', 'height', 'angle', 'size', 'gap'])
-    p[key] = Number(pattern[key]) || 0
+  for (const key of NUMBERS) p[key] = Number(pattern[key]) || 0
   return {
     ...p,
     kind: pattern.kind,
+    mode: pattern.mode === 'array' ? 'array' : 'fill',
+    layout: ARRAY_LAYOUTS.includes(pattern.layout) ? pattern.layout : 'line',
+    follow: pattern.follow !== false,
     shape: pattern.shape === 'circle' ? 'circle' : 'rect',
   }
 }
@@ -258,6 +317,164 @@ function cells(pattern) {
     }
   }
   return out
+}
+
+// One element, w wide and h high (a rectangle's corners rounded by r), as a
+// circle or polygon points [x, y, bulge] around (0, 0).
+function element(kind, w, h, r = 0) {
+  const [hw, hh] = [w / 2, h / 2]
+  switch (kind) {
+    case 'circle':
+      if (Math.abs(w - h) < 1e-9) return { circle: hw }
+      return { points: ring(48, 1, 0).map(([x, y]) => [x * hw, y * hh]) }
+    case 'rect':
+      return { points: roundedRect(-hw, -hh, w, h, Math.max(0, r)).points }
+    case 'slot': {
+      // Round at both ends of its longer side.
+      if (w >= h) {
+        const half = hw - hh
+        if (half <= 1e-9) return { circle: hh }
+        return {
+          points: [
+            [-half, -hh, 0],
+            [half, -hh, 1],
+            [half, hh, 0],
+            [-half, hh, 1],
+          ],
+        }
+      }
+      const half = hh - hw
+      return {
+        points: [
+          [hw, -half, 0],
+          [hw, half, 1],
+          [-hw, half, 0],
+          [-hw, -half, 1],
+        ],
+      }
+    }
+    case 'heart': {
+      const points = []
+      for (let i = 0; i < 48; i++) {
+        const t = (TAU * i) / 48
+        const x = 16 * Math.sin(t) ** 3
+        const y =
+          13 * Math.cos(t) -
+          5 * Math.cos(2 * t) -
+          2 * Math.cos(3 * t) -
+          Math.cos(4 * t)
+        points.push([(x / 34) * w, ((y + 2.5) / 31) * h])
+      }
+      return { points: points.reverse() }
+    }
+    default: {
+      const kinds = {
+        hexagon: 'hexagons',
+        triangle: 'triangles',
+        diamond: 'diamonds',
+        star: 'stars',
+        cross: 'crosses',
+      }
+      const unit = cell(kinds[kind] || 'squares', 1)
+      return {
+        points: unit.points.map(([x, y]) => [
+          (x * w) / unit.w,
+          (y * h) / unit.h,
+        ]),
+      }
+    }
+  }
+}
+
+// The centres of an array's elements around (0, 0), and how much each turns.
+function arraySpots(p) {
+  if (p.layout === 'grid') {
+    const rows = Math.max(1, Math.round(p.rows))
+    const cols = Math.max(1, Math.round(p.cols))
+    const out = []
+    for (let i = 0; i < rows; i++)
+      for (let j = 0; j < cols; j++)
+        out.push([(j - (cols - 1) / 2) * p.dx, (i - (rows - 1) / 2) * p.dy, 0])
+    return out
+  }
+  const n = Math.max(1, Math.round(p.count))
+  if (p.layout === 'circle' && n > 1) {
+    return Array.from({ length: n }, (_, i) => {
+      const a = Math.PI / 2 + (TAU * i) / n
+      return [
+        p.ring * Math.cos(a),
+        p.ring * Math.sin(a),
+        p.follow ? a - Math.PI / 2 : 0,
+      ]
+    })
+  }
+  return Array.from({ length: n }, (_, i) => [(i - (n - 1) / 2) * p.dx, 0, 0])
+}
+
+// How many elements an array asks for.
+export function arrayCount(pattern) {
+  const p = numbers(pattern)
+  if (p.layout === 'grid')
+    return Math.max(1, Math.round(p.rows)) * Math.max(1, Math.round(p.cols))
+  return Math.max(1, Math.round(p.count))
+}
+
+function arrayCells(pattern) {
+  const p = numbers(pattern)
+  if (p.w <= 0 || p.h <= 0) return []
+  if (arrayCount(pattern) > MAX_CELLS * 4) return null
+  const shape = element(p.kind, p.w, p.h, p.radius)
+  const turn = (p.angle * Math.PI) / 180
+  const spin = (p.spin * Math.PI) / 180
+  const rotate = (x, y, a) => [
+    x * Math.cos(a) - y * Math.sin(a),
+    x * Math.sin(a) + y * Math.cos(a),
+  ]
+  return arraySpots(p).map(([u, v, extra]) => {
+    const place = (x, y) => {
+      const [ex, ey] = rotate(x, y, spin + extra)
+      const [ax, ay] = rotate(ex + u, ey + v, turn)
+      return [p.cx + ax, p.cy + ay]
+    }
+    if (shape.circle) {
+      const [x, y] = place(0, 0)
+      return { type: 'circle', cx: x, cy: y, r: shape.circle }
+    }
+    return {
+      type: 'poly',
+      points: shape.points.map(([x, y, b = 0]) => [...place(x, y), b]),
+    }
+  })
+}
+
+// A new single element in the middle of the part, to be repeated as needed.
+export function newElement(part, kind = 'circle', thickness = 0) {
+  const span = Math.min(part.width, part.height)
+  const size = Math.min(
+    80,
+    Math.max(minCell(thickness) + 2, Math.round(span / 5))
+  )
+  const tall = kind === 'slot' ? Math.round(size / 3) : size
+  return {
+    mode: 'array',
+    kind,
+    cx: Math.round(part.width / 2),
+    cy: Math.round(part.height / 2),
+    angle: 0,
+    w: size,
+    h: Math.max(minCell(thickness) + 1, tall),
+    spin: 0,
+    radius: 0,
+    layout: 'line',
+    count: 1,
+    rows: 2,
+    cols: 3,
+    dx: Math.round(size * 1.6),
+    dy: Math.round(size * 1.6),
+    ring: Math.round(span * 0.3),
+    follow: true,
+    gap: Math.ceil(Math.max(3, minBridge(thickness))),
+  }
 }
 
 // Segments and areas a cell must keep clear of, found through a coarse grid.
@@ -424,42 +641,61 @@ function segmentDistance(ax, ay, bx, by, cx, cy, dx, dy) {
  */
 export function layPatterns(part, patterns, thickness = 0) {
   const list = patterns || []
-  if (!list.length) return { part, counts: [], issues: [] }
+  if (!list.length) return { part, counts: [], wanted: [], issues: [] }
   const outline = samplePolygon(part.outline, 24)
   const scale = Math.max(
     4,
-    ...list.map((p) => Number(p.size) + Number(p.gap) || 0)
+    ...list.map(
+      (p) =>
+        (p.mode === 'array'
+          ? Math.max(Number(p.w), Number(p.h))
+          : Number(p.size)) + Number(p.gap) || 0
+    )
   )
   const obstacles = new Obstacles(scale)
   obstacles.add(outline, false)
   for (const hole of part.holes) obstacles.add(samplePolygon(hole, 24), true)
   // The bend zone and a thickness either side stay whole, or the bend tears.
   const keep = Number(thickness) || part.fold?.thickness || 0
+  // Level bend lines (axis y) cross the part sideways.
+  const level = part.fold?.axis === 'y'
   for (const bend of part.fold?.bends || []) {
-    const x0 = bend.x - bend.allowance / 2 - keep
-    const x1 = bend.x + bend.allowance / 2 + keep
+    const a0 = bend.x - bend.allowance / 2 - keep
+    const a1 = bend.x + bend.allowance / 2 + keep
     obstacles.add(
-      [
-        [x0, -1],
-        [x1, -1],
-        [x1, part.height + 1],
-        [x0, part.height + 1],
-      ],
+      level
+        ? [
+            [-1, a0],
+            [part.width + 1, a0],
+            [part.width + 1, a1],
+            [-1, a1],
+          ]
+        : [
+            [a0, -1],
+            [a1, -1],
+            [a1, part.height + 1],
+            [a0, part.height + 1],
+          ],
       true
     )
   }
   const holes = []
   const counts = []
+  const wanted = []
   const issues = []
   list.forEach((pattern, index) => {
     const p = numbers(pattern)
     const margin = Math.max(p.gap, minBridge(thickness))
-    if (p.size < minCell(thickness))
+    const smallest = p.mode === 'array' ? Math.min(p.w, p.h) : p.size
+    if (smallest < minCell(thickness))
       issues.push({ index, key: 'patternSmall', min: minCell(thickness) })
     else if (p.gap < minBridge(thickness))
       issues.push({ index, key: 'patternBridge', min: minBridge(thickness) })
     const kept = []
-    const laid = cells(pattern)
+    const laid = p.mode === 'array' ? arrayCells(pattern) : cells(pattern)
+    wanted.push(
+      p.mode === 'array' ? arrayCount(pattern) : laid ? laid.length : 0
+    )
     if (laid === null) {
       counts.push(0)
       issues.push({ index, key: 'tooManyHoles' })
@@ -480,5 +716,10 @@ export function layPatterns(part, patterns, thickness = 0) {
   })
   if (part.holes.length + holes.length > MAX_CELLS)
     issues.push({ key: 'tooManyHoles' })
-  return { part: { ...part, holes: [...part.holes, ...holes] }, counts, issues }
+  return {
+    part: { ...part, holes: [...part.holes, ...holes] },
+    counts,
+    wanted,
+    issues,
+  }
 }

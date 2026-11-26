@@ -404,7 +404,11 @@ export default {
       return this.item.pricing?.breaks || []
     },
     reasons() {
-      return reasonsText(this.item.pricing?.reasons, this.locale)
+      return reasonsText(this.item.pricing?.reasons, this.locale, {
+        typed:
+          !this.item.pricing_thickness_id &&
+          String(this.item.material || '').trim() !== '',
+      })
     },
     extension() {
       return String(this.item.original_name || '')

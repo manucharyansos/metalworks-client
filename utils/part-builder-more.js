@@ -1,0 +1,322 @@
+// Texts of the builder's second set of tools: single pattern elements and how
+// they repeat, bends on any part, the steps shown in 3D and assemblies of
+// several parts. No imports: tests load this file directly.
+
+const copy = {
+  hy: {
+    sheet: (w, l) => `թերթ ${w} × ${l} մմ`,
+    sheetSize: (l, w) =>
+      `Դետալը չի տեղավորվում ընտրված թերթի վրա (${l} × ${w} մմ)։`,
+    single: 'Մեկ էլեմենտ',
+    fill: 'Լցոնել տարածքը',
+    elements: {
+      circle: 'Շրջան',
+      rect: 'Ուղղանկյուն',
+      slot: 'Ակոս',
+      hexagon: 'Վեցանկյուն',
+      triangle: 'Եռանկյուն',
+      diamond: 'Շեղանկյուն',
+      star: 'Աստղ',
+      cross: 'Խաչ',
+      heart: 'Սիրտ',
+    },
+    layouts: { line: 'Շարքով', grid: 'Ցանցով', circle: 'Շրջանով' },
+    array: {
+      w: 'Լայնություն',
+      h: 'Բարձրություն',
+      spin: 'Էլեմենտի պտույտ',
+      radius: 'Անկյունների շառավիղ',
+      count: 'Քանակ',
+      rows: 'Տողեր',
+      cols: 'Սյուներ',
+      dx: 'Քայլ X',
+      dy: 'Քայլ Y',
+      ring: 'Շրջանի շառավիղ',
+      follow: 'Պտտել շրջանի հետ',
+      angle: 'Ամբողջի պտույտ',
+      fitted: (kept, wanted) => `${kept}/${wanted}`,
+    },
+    note: (n, kind, d) =>
+      `Էլեմենտ ${n}՝ ${kind} ${d.w} × ${d.h} մմ, ${d.count} հատ (${d.layout}), կենտրոն (${d.cx}; ${d.cy}) մմ, պտույտ ${d.angle}°։`,
+    bends: {
+      title: 'Կռում',
+      lead: 'Ավելացրեք կռման գծեր․ դետալը կծալվի դրանց երկայնքով։',
+      add: 'Ավելացնել կռում',
+      axis: 'Գծերի ուղղություն',
+      x: 'Ուղղահայաց',
+      y: 'Հորիզոնական',
+      at: (axis) => (axis === 'y' ? 'Ներքևից, մմ' : 'Ձախից, մմ'),
+      angle: 'Անկյուն թևերի միջև',
+      up: 'Վերև',
+      down: 'Ներքև',
+      remove: 'Հեռացնել',
+      problems: {
+        bendAngle: 'Կռման անկյունը պետք է լինի 30°-ից 170°։',
+        bendEdge:
+          'Կռման գիծը շատ մոտ է եզրին․ թևը պետք է լինի առնվազն երկու հաստություն։',
+        bendClose:
+          'Երկու կռում շատ մոտ են իրար․ դրանց միջև պետք է մնա առնվազն երկու հաստություն։',
+      },
+      note: (n, d) =>
+        `Կռում ${n}՝ ${d.axis} գիծ ${d.at} մմ վրա, ${d.angle}°, ${
+          d.up ? 'դեպի վեր' : 'դեպի վար'
+        }։`,
+    },
+    stages: { cut: 'Կտրած', bent: 'Կռած', painted: 'Ներկած' },
+    assembly: {
+      title: 'Հավաք',
+      chip: (n) => `Հավաք · ${n}`,
+      lead: 'Հավաքեք մի քանի դետալ․ միացրեք եզրերով, դասավորեք ազատ 3D-ում կամ տեսեք կողք կողքի՝ հերթականությամբ։',
+      add: 'Ավելացնել հավաքին',
+      save: 'Պահել հավաքում',
+      more: 'Ավելացնել դետալ',
+      send: 'Ավելացնել հավաքը հայտին',
+      name: 'Հավաքի անվանում',
+      namePlaceholder: 'Օր.՝ Արկղ 400 × 300',
+      parts: 'Դետալներ',
+      empty:
+        'Հավաքը դեռ դատարկ է․ կարգավորեք դետալը և սեղմեք «Ավելացնել հավաքին»։',
+      modes: { edge: 'Եզրով միացնել', free: 'Ազատ 3D', row: 'Կողք կողքի' },
+      tools: { translate: 'Տեղաշարժել', rotate: 'Պտտել' },
+      freeHint: 'Ընտրեք դետալը 3D-ում և քաշեք սլաքներով կամ օղակներով։',
+      rowHint: 'Դետալները ցույց են տրված ձեր նշած հերթականությամբ։',
+      parent: 'Միանում է',
+      parentEdge: 'Նրա եզրը',
+      edge: 'Իր եզրը',
+      angle: 'Անկյուն',
+      offset: 'Շեղում եզրով, մմ',
+      flip: 'Շրջել',
+      unjoin: 'Վերադարձնել եզրին',
+      edges: { bottom: 'ներքևի', right: 'աջ', top: 'վերևի', left: 'ձախ' },
+      part: (n) => `Դետալ ${n}`,
+      up: 'Վեր',
+      down: 'Վար',
+      edit: 'Խմբագրել',
+      remove: 'Հեռացնել',
+      weld: 'Զոդել հավաքը',
+      added: (n) => `Հավաքի ${n} դետալն ավելացվեց հայտին։`,
+      note: (name, i, n) => `Հավաք «${name}», դետալ ${i}/${n}։`,
+      joint: (i, parent, parentEdge, edge, angle, offset) =>
+        `Դետալ ${i}-ը միանում է դետալ ${parent}-ի ${parentEdge} եզրին իր ${edge} եզրով, ${angle}° անկյամբ${
+          offset ? `, ${offset} մմ շեղումով` : ''
+        }։`,
+      free: (i) => `Դետալ ${i}-ը տեղադրված է ազատ (տես 3D)։`,
+      welded: 'Հավաքը զոդվում է։',
+      defaultName: 'Հավաք',
+    },
+  },
+  ru: {
+    sheet: (w, l) => `лист ${w} × ${l} мм`,
+    sheetSize: (l, w) =>
+      `Деталь не помещается на выбранный лист (${l} × ${w} мм).`,
+    single: 'Один элемент',
+    fill: 'Заполнить область',
+    elements: {
+      circle: 'Круг',
+      rect: 'Прямоугольник',
+      slot: 'Паз',
+      hexagon: 'Шестиугольник',
+      triangle: 'Треугольник',
+      diamond: 'Ромб',
+      star: 'Звезда',
+      cross: 'Крест',
+      heart: 'Сердце',
+    },
+    layouts: { line: 'В ряд', grid: 'Сеткой', circle: 'По кругу' },
+    array: {
+      w: 'Ширина',
+      h: 'Высота',
+      spin: 'Поворот элемента',
+      radius: 'Радиус углов',
+      count: 'Количество',
+      rows: 'Ряды',
+      cols: 'Столбцы',
+      dx: 'Шаг X',
+      dy: 'Шаг Y',
+      ring: 'Радиус круга',
+      follow: 'Поворачивать по кругу',
+      angle: 'Поворот всего',
+      fitted: (kept, wanted) => `${kept}/${wanted}`,
+    },
+    note: (n, kind, d) =>
+      `Элемент ${n}: ${kind} ${d.w} × ${d.h} мм, ${d.count} шт. (${d.layout}), центр (${d.cx}; ${d.cy}) мм, поворот ${d.angle}°.`,
+    bends: {
+      title: 'Гибка',
+      lead: 'Добавьте линии гиба: деталь согнётся по ним.',
+      add: 'Добавить гиб',
+      axis: 'Направление линий',
+      x: 'Вертикальные',
+      y: 'Горизонтальные',
+      at: (axis) => (axis === 'y' ? 'От низа, мм' : 'От левого края, мм'),
+      angle: 'Угол между полками',
+      up: 'Вверх',
+      down: 'Вниз',
+      remove: 'Удалить',
+      problems: {
+        bendAngle: 'Угол гиба должен быть от 30° до 170°.',
+        bendEdge:
+          'Линия гиба слишком близко к краю: полка должна быть не меньше двух толщин.',
+        bendClose:
+          'Два гиба слишком близко: между ними нужно не меньше двух толщин.',
+      },
+      note: (n, d) =>
+        `Гиб ${n}: ${d.axis} линия на ${d.at} мм, ${d.angle}°, ${
+          d.up ? 'вверх' : 'вниз'
+        }.`,
+    },
+    stages: { cut: 'Вырезано', bent: 'Согнуто', painted: 'Покрашено' },
+    assembly: {
+      title: 'Сборка',
+      chip: (n) => `Сборка · ${n}`,
+      lead: 'Соберите несколько деталей: соедините их кромками, расставьте свободно в 3D или посмотрите рядом по порядку.',
+      add: 'Добавить в сборку',
+      save: 'Сохранить в сборке',
+      more: 'Добавить деталь',
+      send: 'Добавить сборку в заявку',
+      name: 'Название сборки',
+      namePlaceholder: 'Напр.: Ящик 400 × 300',
+      parts: 'Детали',
+      empty:
+        'Сборка пока пуста: настройте деталь и нажмите «Добавить в сборку».',
+      modes: { edge: 'По кромкам', free: 'Свободно в 3D', row: 'Рядом' },
+      tools: { translate: 'Сдвинуть', rotate: 'Повернуть' },
+      freeHint: 'Выберите деталь в 3D и тяните стрелки или кольца.',
+      rowHint: 'Детали показаны в заданном порядке.',
+      parent: 'Крепится к',
+      parentEdge: 'Её кромка',
+      edge: 'Своя кромка',
+      angle: 'Угол',
+      offset: 'Сдвиг вдоль кромки, мм',
+      flip: 'Перевернуть',
+      unjoin: 'Вернуть к кромке',
+      edges: {
+        bottom: 'нижней',
+        right: 'правой',
+        top: 'верхней',
+        left: 'левой',
+      },
+      part: (n) => `Деталь ${n}`,
+      up: 'Выше',
+      down: 'Ниже',
+      edit: 'Изменить',
+      remove: 'Удалить',
+      weld: 'Сварить сборку',
+      added: (n) => `${n} деталей сборки добавлено в заявку.`,
+      note: (name, i, n) => `Сборка «${name}», деталь ${i}/${n}.`,
+      joint: (i, parent, parentEdge, edge, angle, offset) =>
+        `Деталь ${i} крепится к ${parentEdge} кромке детали ${parent} своей ${edge} кромкой под углом ${angle}°${
+          offset ? `, со сдвигом ${offset} мм` : ''
+        }.`,
+      free: (i) => `Деталь ${i} расставлена свободно (см. 3D).`,
+      welded: 'Сборка сваривается.',
+      defaultName: 'Сборка',
+    },
+  },
+  en: {
+    sheet: (w, l) => `sheet ${w} × ${l} mm`,
+    sheetSize: (l, w) =>
+      `The part does not fit on the chosen sheet (${l} × ${w} mm).`,
+    single: 'One element',
+    fill: 'Fill an area',
+    elements: {
+      circle: 'Circle',
+      rect: 'Rectangle',
+      slot: 'Slot',
+      hexagon: 'Hexagon',
+      triangle: 'Triangle',
+      diamond: 'Diamond',
+      star: 'Star',
+      cross: 'Cross',
+      heart: 'Heart',
+    },
+    layouts: { line: 'In a row', grid: 'In a grid', circle: 'In a ring' },
+    array: {
+      w: 'Width',
+      h: 'Height',
+      spin: 'Element rotation',
+      radius: 'Corner radius',
+      count: 'Count',
+      rows: 'Rows',
+      cols: 'Columns',
+      dx: 'Step X',
+      dy: 'Step Y',
+      ring: 'Ring radius',
+      follow: 'Turn with the ring',
+      angle: 'Rotate all',
+      fitted: (kept, wanted) => `${kept}/${wanted}`,
+    },
+    note: (n, kind, d) =>
+      `Element ${n}: ${kind} ${d.w} × ${d.h} mm, ${d.count} pcs (${d.layout}), centre (${d.cx}; ${d.cy}) mm, rotation ${d.angle}°.`,
+    bends: {
+      title: 'Bending',
+      lead: 'Add bend lines: the part folds along them.',
+      add: 'Add a bend',
+      axis: 'Lines run',
+      x: 'Upright',
+      y: 'Level',
+      at: (axis) =>
+        axis === 'y' ? 'From the bottom, mm' : 'From the left, mm',
+      angle: 'Angle between flanges',
+      up: 'Up',
+      down: 'Down',
+      remove: 'Remove',
+      problems: {
+        bendAngle: 'The bend angle must be from 30° to 170°.',
+        bendEdge:
+          'The bend line is too close to the edge: a flange needs at least two thicknesses.',
+        bendClose:
+          'Two bends are too close: leave at least two thicknesses between them.',
+      },
+      note: (n, d) =>
+        `Bend ${n}: ${d.axis} line at ${d.at} mm, ${d.angle}°, ${
+          d.up ? 'up' : 'down'
+        }.`,
+    },
+    stages: { cut: 'Cut', bent: 'Bent', painted: 'Painted' },
+    assembly: {
+      title: 'Assembly',
+      chip: (n) => `Assembly · ${n}`,
+      lead: 'Put several parts together: join them by their edges, place them freely in 3D or see them side by side in order.',
+      add: 'Add to assembly',
+      save: 'Save in assembly',
+      more: 'Add a part',
+      send: 'Add the assembly to the request',
+      name: 'Assembly name',
+      namePlaceholder: 'E.g. Box 400 × 300',
+      parts: 'Parts',
+      empty:
+        'The assembly is empty: set up a part and press "Add to assembly".',
+      modes: { edge: 'Join by edges', free: 'Free in 3D', row: 'Side by side' },
+      tools: { translate: 'Move', rotate: 'Turn' },
+      freeHint: 'Pick a part in 3D and drag its arrows or rings.',
+      rowHint: 'The parts are shown in the order given.',
+      parent: 'Joins',
+      parentEdge: 'Its edge',
+      edge: 'Own edge',
+      angle: 'Angle',
+      offset: 'Slide along the edge, mm',
+      flip: 'Flip',
+      unjoin: 'Back to the edge',
+      edges: { bottom: 'bottom', right: 'right', top: 'top', left: 'left' },
+      part: (n) => `Part ${n}`,
+      up: 'Up',
+      down: 'Down',
+      edit: 'Edit',
+      remove: 'Remove',
+      weld: 'Weld the assembly',
+      added: (n) => `${n} parts of the assembly were added to your request.`,
+      note: (name, i, n) => `Assembly "${name}", part ${i}/${n}.`,
+      joint: (i, parent, parentEdge, edge, angle, offset) =>
+        `Part ${i} joins the ${parentEdge} edge of part ${parent} with its ${edge} edge at ${angle}°${
+          offset ? `, slid ${offset} mm` : ''
+        }.`,
+      free: (i) => `Part ${i} is placed freely (see 3D).`,
+      welded: 'The assembly is welded.',
+      defaultName: 'Assembly',
+    },
+  },
+}
+
+export function moreCopy(locale) {
+  return copy[String(locale || 'hy').split('-')[0]] || copy.hy
+}

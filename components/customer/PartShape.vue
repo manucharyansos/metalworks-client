@@ -147,16 +147,24 @@ export default {
     handle() {
       const pattern = this.patterns[this.selected]
       if (!pattern) return null
-      const cx = Number(pattern.cx) || 0
-      const cy = Number(pattern.cy) || 0
       const turn = ((Number(pattern.angle) || 0) * Math.PI) / 180
-      const reach =
-        (pattern.shape === 'circle'
-          ? Number(pattern.width)
-          : Number(pattern.height)) / 2
+      const up = [-Math.sin(turn), Math.cos(turn)]
       const off = this.scale * 0.06
-      const at = (d) => [cx - d * Math.sin(turn), cy + d * Math.cos(turn)]
-      return { from: at(reach), at: at(reach + off), r: this.scale * 0.018 }
+      // From the middle of the area's top side (or the top of its circle), straight up.
+      const region = patternRegion(pattern)
+      let from
+      if (region.circle) {
+        const { cx, cy, r } = region.circle
+        from = [cx + up[0] * r, cy + up[1] * r]
+      } else {
+        const [, , c, d] = region.corners
+        from = [(c[0] + d[0]) / 2, (c[1] + d[1]) / 2]
+      }
+      return {
+        from,
+        at: [from[0] + up[0] * off, from[1] + up[1] * off],
+        r: this.scale * 0.018,
+      }
     },
     view() {
       const { width: w, height: h } = this.part

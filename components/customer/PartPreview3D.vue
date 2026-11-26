@@ -5,6 +5,29 @@
     data-part-3d
   >
     <canvas ref="canvas" class="block h-full w-full touch-none" />
+    <div
+      v-if="!message && stageList.length > 1"
+      class="absolute left-2 top-2 inline-flex rounded-xl bg-white/85 p-0.5 shadow-sm backdrop-blur dark:bg-slate-900/80"
+      role="tablist"
+    >
+      <button
+        v-for="item in stageList"
+        :key="item"
+        type="button"
+        role="tab"
+        class="rounded-lg px-2.5 py-1 text-[11px] font-semibold transition"
+        :class="
+          stage === item
+            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+            : 'text-slate-600 dark:text-slate-300'
+        "
+        :aria-selected="stage === item ? 'true' : 'false'"
+        :data-part-stage="item"
+        @click="go(item)"
+      >
+        {{ stages[item] }}
+      </button>
+    </div>
     <p
       v-if="message"
       class="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-slate-500 dark:text-slate-400"
@@ -25,15 +48,8 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
-import { samplePolygon } from '@/utils/part-templates'
 import { MAX_3D_HOLES } from '@/utils/part-patterns'
-
-// Unpainted metals: colour, how metallic and how rough the surface looks.
-const METALS = {
-  steel: { color: 0x8c949c, metalness: 0.7, roughness: 0.42 },
-  stainless: { color: 0xc5cad0, metalness: 0.85, roughness: 0.28 },
-  aluminium: { color: 0xd3d7db, metalness: 0.75, roughness: 0.35 },
-}
+import { partModel, surface } from '@/utils/part-mesh'
 
 export default {
   name: 'PartPreview3D',
@@ -47,8 +63,22 @@ export default {
     hint: { type: String, default: '' },
     unavailable: { type: String, default: '' },
     tooMany: { type: String, default: '' },
+    // Names of the steps the part goes through: cut, bent, painted.
+    stages: {
+      type: Object,
+      default: () => ({ cut: 'Cut', bent: 'Bent', painted: 'Painted' }),
+    },
   },
-  data: () => ({ message: '' }),
+  data: () => ({ message: '', stage: '' }),
+  computed: {
+    stageList() {
+      return [
+        'cut',
+        this.part.fold?.bends?.length ? 'bent' : null,
+        this.paint ? 'painted' : null,
+      ].filter(Boolean)
+    },
+  },
   watch: {
     part() {
       this.schedule()
@@ -57,18 +87,20 @@ export default {
       this.schedule()
     },
     paint() {
-      this.colour()
+      this.settle()
     },
     metal() {
       this.colour()
     },
   },
   mounted() {
+    this.stage = this.stageList[this.stageList.length - 1]
     this.setup()
     this.schedule()
   },
   beforeDestroy() {
     clearTimeout(this.timer)
+    cancelAnimationFrame(this.frame)
     const g = this.gl
     if (!g) return
     g.observer?.disconnect()
@@ -120,7 +152,8 @@ export default {
         controls,
         material,
         environment,
-        group: null,
+        model: null,
+        share: 1,
       }
       const observer = new ResizeObserver(() => this.resize())
       observer.observe(this.$refs.box)
@@ -147,32 +180,56 @@ export default {
       const g = this.gl
       if (g) g.renderer.render(g.scene, g.camera)
     },
+    // Paint shows only once the part is painted; before that it is bare metal.
     colour() {
       const g = this.gl
       if (!g) return
-      const look = this.paint
-        ? {
-            color: new THREE.Color(this.paint),
-            metalness: 0.15,
-            roughness: 0.55,
-          }
-        : { ...(METALS[this.metal] || METALS.steel) }
-      g.material.color = new THREE.Color(look.color)
-      g.material.metalness = look.metalness
-      g.material.roughness = look.roughness
-      g.material.needsUpdate = true
+      surface(g.material, {
+        paint: this.stage === 'painted' ? this.paint : '',
+        metal: this.metal,
+      })
       this.render()
+    },
+    // Paint switched on or off: show the part at its last step.
+    settle() {
+      this.stage = this.stageList[this.stageList.length - 1]
+      this.colour()
+      this.animate(this.stage === 'cut' ? 0 : 1)
+    },
+    go(stage) {
+      this.stage = stage
+      this.colour()
+      this.animate(stage === 'cut' ? 0 : 1)
+    },
+    // Folds or unfolds the part over a moment.
+    animate(target) {
+      const g = this.gl
+      if (!g?.model) return
+      cancelAnimationFrame(this.frame)
+      const from = g.share
+      if (Math.abs(from - target) < 1e-6) return
+      const started = performance.now()
+      const step = (now) => {
+        const k = Math.min(1, (now - started) / 700)
+        const eased = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2
+        g.share = from + (target - from) * eased
+        g.model.pose(g.share)
+        this.render()
+        if (k < 1) this.frame = requestAnimationFrame(step)
+      }
+      this.frame = requestAnimationFrame(step)
     },
     clear() {
       const g = this.gl
-      if (!g?.group) return
-      g.group.traverse((node) => node.geometry?.dispose())
-      g.scene.remove(g.group)
-      g.group = null
+      if (!g?.model) return
+      g.scene.remove(g.model.group)
+      g.model.dispose()
+      g.model = null
     },
     build() {
       const g = this.gl
       if (!g) return
+      cancelAnimationFrame(this.frame)
       this.clear()
       if (this.part.holes.length > MAX_3D_HOLES) {
         this.message = this.tooMany
@@ -180,151 +237,35 @@ export default {
         return
       }
       this.message = ''
-      const t = Math.max(
-        0.5,
-        Number(this.part.fold?.thickness || this.thickness) || 2
-      )
-      const group = new THREE.Group()
-      const folding = this.part.fold?.bends?.length
-        ? folded(this.part, t)
-        : null
-      const geometries = folding ? folding.geometries : [flat(this.part, t)]
-      for (const geometry of geometries)
-        group.add(new THREE.Mesh(geometry, g.material))
-      // A bent part stands on its middle panel: the base of a channel, the
-      // second flange of an angle, so it opens upwards.
-      if (folding) group.rotation.z = -folding.level
-      group.updateMatrixWorld(true)
-      // Centred on the origin, then the camera looks at it from the front, a little above.
-      const bounds = new THREE.Box3().setFromObject(group)
+      if (!this.stageList.includes(this.stage))
+        this.stage = this.stageList[this.stageList.length - 1]
+      const model = partModel(this.part, this.thickness, g.material)
+      g.model = model
+      g.scene.add(model.group)
+      // The camera takes in the part flat and bent, so folding stays in view.
+      const bounds = new THREE.Box3()
+      model.pose(0)
+      bounds.union(new THREE.Box3().setFromObject(model.group))
+      model.pose(1)
+      bounds.union(new THREE.Box3().setFromObject(model.group))
+      g.share = this.stage === 'cut' ? 0 : 1
+      model.pose(g.share)
       const centre = bounds.getCenter(new THREE.Vector3())
-      group.position.sub(centre)
-      g.scene.add(group)
-      g.group = group
       const size = bounds.getSize(new THREE.Vector3()).length() || 1
       g.camera.near = size / 100
       g.camera.far = size * 100
       g.camera.position
-        .set(0.45, 0.85, 1)
-        .normalize()
-        .multiplyScalar(size * 1.2)
+        .copy(centre)
+        .add(
+          new THREE.Vector3(0.45, 0.85, 1)
+            .normalize()
+            .multiplyScalar(size * 1.2)
+        )
       g.camera.updateProjectionMatrix()
-      g.controls.target.set(0, 0, 0)
+      g.controls.target.copy(centre)
       g.controls.update()
-      this.render()
+      this.colour()
     },
   },
-}
-
-function shape(points) {
-  const s = new THREE.Shape()
-  points.forEach(([x, y], i) => (i ? s.lineTo(x, y) : s.moveTo(x, y)))
-  s.closePath()
-  return s
-}
-
-function path(points) {
-  const p = new THREE.Path()
-  points.forEach(([x, y], i) => (i ? p.lineTo(x, y) : p.moveTo(x, y)))
-  p.closePath()
-  return p
-}
-
-// A flat part: the outline with its holes, as thick as the sheet, lying flat.
-function flat(part, t) {
-  const s = shape(samplePolygon(part.outline, 24))
-  for (const hole of part.holes) s.holes.push(path(samplePolygon(hole, 10)))
-  const geometry = new THREE.ExtrudeGeometry(s, {
-    depth: t,
-    bevelEnabled: false,
-  })
-  geometry.rotateX(-Math.PI / 2)
-  return geometry
-}
-
-// A bent part: flat panels between the bends, each bend a curved strip, the
-// profile walked from one end with every bend turning upwards.
-function folded(part, t) {
-  const { radius = t, bends } = part.fold
-  const width = part.height
-  const zones = [...bends].sort((a, b) => a.x - b.x)
-  const holes = part.holes.map((hole) => samplePolygon(hole, 10))
-  const out = []
-  const headings = []
-  let at = new THREE.Vector2(0, 0)
-  let heading = 0
-  let from = 0
-  const panel = (u, v) => {
-    const length = v - u
-    if (length <= 1e-6) return
-    const s = shape([
-      [0, 0],
-      [length, 0],
-      [length, width],
-      [0, width],
-    ])
-    for (const points of holes) {
-      if (points.every(([x]) => x >= u - 1e-6 && x <= v + 1e-6))
-        s.holes.push(path(points.map(([x, y]) => [x - u, y])))
-    }
-    const geometry = new THREE.ExtrudeGeometry(s, {
-      depth: t,
-      bevelEnabled: false,
-    })
-    const d = new THREE.Vector3(Math.cos(heading), Math.sin(heading), 0)
-    const n = new THREE.Vector3(-Math.sin(heading), Math.cos(heading), 0)
-    // Along the profile, across the width (into the screen) and through the thickness.
-    const matrix = new THREE.Matrix4().makeBasis(
-      d,
-      new THREE.Vector3(0, 0, -1),
-      n
-    )
-    matrix.setPosition(at.x - (n.x * t) / 2, at.y - (n.y * t) / 2, 0)
-    geometry.applyMatrix4(matrix)
-    out.push(geometry)
-    headings.push(heading)
-    at = at.clone().add(new THREE.Vector2(d.x * length, d.y * length))
-  }
-  for (const bend of zones) {
-    panel(from, bend.x - bend.allowance / 2)
-    const middle = radius + t / 2
-    const centre = at
-      .clone()
-      .add(
-        new THREE.Vector2(
-          -Math.sin(heading) * middle,
-          Math.cos(heading) * middle
-        )
-      )
-    const a0 = heading - Math.PI / 2
-    const a1 = a0 + bend.turn
-    const s = new THREE.Shape()
-    s.moveTo(
-      centre.x + (radius + t) * Math.cos(a0),
-      centre.y + (radius + t) * Math.sin(a0)
-    )
-    s.absarc(centre.x, centre.y, radius + t, a0, a1, false)
-    s.lineTo(centre.x + radius * Math.cos(a1), centre.y + radius * Math.sin(a1))
-    s.absarc(centre.x, centre.y, radius, a1, a0, true)
-    s.closePath()
-    const geometry = new THREE.ExtrudeGeometry(s, {
-      depth: width,
-      bevelEnabled: false,
-      curveSegments: 24,
-    })
-    geometry.translate(0, 0, -width)
-    out.push(geometry)
-    at = new THREE.Vector2(
-      centre.x + middle * Math.cos(a1),
-      centre.y + middle * Math.sin(a1)
-    )
-    heading += bend.turn
-    from = bend.x + bend.allowance / 2
-  }
-  panel(from, part.width)
-  return {
-    geometries: out,
-    level: headings[Math.floor(headings.length / 2)] || 0,
-  }
 }
 </script>
