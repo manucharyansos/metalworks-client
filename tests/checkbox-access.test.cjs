@@ -160,3 +160,16 @@ test('an older API keeps its pending list usable and reports that all-status sup
   assert.equal(vm.listError, '')
   assert.equal(vm.requestTypes[2].count, null)
 })
+
+test('company access keeps current membership selected while its separate assignment editor owns the fields', async () => {
+  const options = await component('components/users/CompanyMembershipModal.vue')
+  const vm = vmFor(options, {
+    currentCompanyId: 1, companies: [{ id: 1 }, { id: 2 }],
+    currentAssignmentsEditedSeparately: true,
+    rows: [{ company_id: 1, enabled: true }, { company_id: 2, enabled: true }],
+  })
+  assert.deepEqual(vm.selectedCompanyIds, [1, 2])
+  assert.deepEqual(vm.selectedCompanies.map(company => company.id), [2])
+  vm.currentAssignmentsEditedSeparately = false
+  assert.equal(vm.selectedCompanies.length, 2)
+})

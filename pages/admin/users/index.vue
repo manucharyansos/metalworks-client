@@ -137,7 +137,7 @@
     </div>
 
     <StaffAssignmentsModal v-if="assignmentTarget" :user="assignmentTarget" @close="assignmentTarget = null" @saved="refreshUsers" />
-    <CompanyMembershipModal v-if="accessTarget" :user="accessTarget" @close="accessTarget = null" @saved="refreshUsers" />
+    <CompanyMembershipModal v-if="accessTarget" :current-assignments-edited-separately="canEditAssignments(accessTarget)" :user="accessTarget" @close="accessTarget = null" @saved="refreshUsers" />
     <UserPermissionsModal
       :show="showPermissionModal"
       :user="selectedUser"

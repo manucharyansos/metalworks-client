@@ -33,14 +33,15 @@ import { assignmentRows, assignmentError, assignmentCopy, newCompanyAssignments 
 
 export default {
   components: { StaffAssignmentsEditor, CheckboxSelect },
-  props: { accessType: { type: String, default: '' }, user: { type: Object, required: true }, sourceCompanyId: { type: [Number, String], default: null } },
+  props: { currentAssignmentsEditedSeparately: Boolean, accessType: { type: String, default: '' }, user: { type: Object, required: true }, sourceCompanyId: { type: [Number, String], default: null } },
   data() { return { companies: [], unmanagedCompanies: [], roles: [], rows: [], originals: [], targetType: 'employee', currentCompanyId: null, loading: true, loadError: '', saveError: '', errors: {}, busy: false, sequence: 0, returnFocus: null, previousOverflow: '' } },
   computed: {
     copy() { return membershipCopy(this.$i18n?.locale) },
     userId() { return this.user.user_id || this.user.user?.id || this.user.id },
     isClient() { return this.accessType === 'customer' || this.targetType === 'client' },
     selectedCompanyIds() { return this.rows.filter(row => row.enabled).map(row => row.company_id) },
-    selectedCompanies() { return this.companies.filter(company => this.row(company.id).enabled) },
+    selectedCompanies() { return this.companies.filter(company => this.row(company.id).enabled &&
+      !(this.currentAssignmentsEditedSeparately && !this.isClient && String(company.id) === String(this.currentCompanyId))) },
     companyOptions() { return [...this.companies.map(company => ({ id: company.id, label: company.name, disabled: Boolean(company.selection_locked || company.read_only), note: company.read_only ? (this.isClient ? this.copy.protectedEmployee : this.copy.protected) : String(company.id) === String(this.currentCompanyId) ? this.copy.current : '' })), ...this.unmanagedCompanies.map(company => ({ id: company.id, label: company.name, disabled: true, note: this.copy.notManaged }))] },
     changes() { const rows = changedCompanyAccess(this.rows, this.originals); return this.isClient ? rows.map(row => ({ company_id: row.company_id, enabled: row.enabled })) : rows },
   },
